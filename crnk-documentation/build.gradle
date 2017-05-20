@@ -1,8 +1,11 @@
 apply plugin: 'org.asciidoctor.convert'
 
 asciidoctor {
-	backends = ['html5']
+	backends = ['html5', 'pdf']
 	attributes 'source-highlighter': 'coderay'
+	sources {
+		include 'crnk_documentation.adoc'
+	}
 }
 
 tasks.assemble.dependsOn 'asciidoctor'
