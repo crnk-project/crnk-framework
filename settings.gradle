@@ -30,15 +30,13 @@ gradle.beforeProject { Project project ->
 	project.with {
 		buildscript {
 			repositories {
-				maven() {
-					url 'http://adnexus.adnovum.ch:8081/nexus/content/groups/adnovumpublic'
+				maven{
+					url('https://plugins.gradle.org/m2')
 				}
 			}
 		}
 		repositories {
-			maven() {
-				url 'http://adnexus.adnovum.ch:8081/nexus/content/groups/adnovumpublic'
-			}
+			mavenCentral()
 		}
 		version = BUILD_VERSION
 		group = GROUP_ID

@@ -240,7 +240,7 @@ public class IncludeLookupSetter {
 					List<Resource> targets = setupRelation(sourceResource, relationshipField, targetEntity, queryAdapter, resourceMap, entityMap);
 					loadedTargets.addAll(targets);
 				} else {
-					Nullable<Object> emptyData = Nullable.of(Iterable.class.isAssignableFrom(relationshipField.getType()) ? Collections.emptyList() : null);
+					Nullable<Object> emptyData = (Nullable)Nullable.of(Iterable.class.isAssignableFrom(relationshipField.getType()) ? Collections.emptyList() : null);
 					Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());
 					relationship.setData(emptyData);
 				}
