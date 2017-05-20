@@ -1,0 +1,143 @@
+body {
+	/* Messages */
+	.ui-messages {
+		padding: $headerPadding;
+
+		ul {
+			display: inline-block;
+			margin-left: 0;
+		}
+
+		&.ui-messages-info {
+			background-color: #2196F3;
+			border-color: #2196F3;
+			color: #ffffff;
+		}
+
+		&.ui-messages-warn {
+			background-color: #ffc107;
+			border-color: #ffc107;
+			color: #ffffff;
+		}
+
+		&.ui-messages-error {
+			background-color: #e62a10;
+			border-color: #e62a10;
+			color: #ffffff;
+		}
+
+		&.ui-messages-fatal {
+			background-color: #212121;
+			border-color: #212121;
+			color: #ffffff;
+		}
+
+		&.ui-messages-success {
+			background-color: #8BC34A;
+			border-color: #8BC34A;
+			color: #ffffff;
+		}
+
+		.ui-messages-close {
+			text-decoration: none;
+			color: #fff;
+			right: .25em;
+		}
+	}
+
+	.ui-messages .ui-messages-icon {
+		background: none;
+		color: #fff;
+		margin-top: -2px;
+
+		&.fa-info-circle {
+			@include material-icon("info");
+			font-size: 1.75em;
+		}
+
+		&.fa-warning {
+			@include material-icon("warning");
+			font-size: 1.75em;
+		}
+
+		&.fa-close {
+			@include material-icon("error_outline");
+			font-size: 1.75em;
+		}
+
+		&.fa-check {
+			@include material-icon("check_circle");
+			font-size: 1.75em;
+		}
+	}
+
+	.ui-growl {
+		top: 90px;
+
+		> .ui-growl-item-container {
+			opacity: 1;
+
+			&.ui-growl-message-info {
+				background-color: #2196F3;
+			}
+
+			&.ui-growl-message-warn {
+				background-color: #ffc107;
+			}
+
+			&.ui-growl-message-error {
+				background-color: #e62a10;
+			}
+
+			&.ui-growl-message-fatal {
+				background-color: #212121;
+			}
+
+			&.ui-growl-message-success {
+				background-color: #8BC34A;
+			}
+
+			&.ui-shadow {
+				@include overlay-content-shadow();
+			}
+		}
+
+		.ui-growl-item {
+			.ui-growl-image {
+				background: none;
+				color: #ffffff;
+				font-size: 36px;
+
+				&.fa-info-circle {
+					@include material-icon("info");
+					font-size: 1.75em;
+				}
+
+				&.fa-warning {
+					@include material-icon("warning");
+					font-size: 1.75em;
+				}
+
+				&.fa-close {
+					@include material-icon("error_outline");
+					font-size: 1.75em;
+				}
+
+				&.fa-check {
+					@include material-icon("check_circle");
+					font-size: 1.75em;
+				}
+			}
+
+			.ui-growl-message {
+				color: #ffffff;
+			}
+
+			.ui-growl-icon-close {
+				@include material-icon("close");
+				font-size: 24px;
+				color: #ffffff;
+			}
+		}
+	}
+}

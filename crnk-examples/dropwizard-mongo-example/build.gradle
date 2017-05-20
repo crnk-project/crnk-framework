@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':crnk-rs')
+	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.0.0'
+	compile(group: 'com.hubspot.dropwizard', name: 'dropwizard-guice', version: '0.8.4.0') {
+		exclude(module: 'dropwizard-core')
+		exclude(module: 'dropwizard-jackson')
+		exclude(module: 'dropwizard-jersey')
+		exclude(module: 'dropwizard-jetty')
+		exclude(module: 'dropwizard-lifecycle')
+		exclude(module: 'dropwizard-servlets')
+	}
+	compile group: 'org.mongodb.morphia', name: 'morphia', version: '0.111'
+	compile group: 'io.dropwizard', name: 'dropwizard-validation', version: '1.0.0'
+	compile group: 'org.mongodb', name: 'mongo-java-driver', version: '2.13.0'
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.2'
+}

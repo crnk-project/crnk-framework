@@ -1,0 +1,20 @@
+mongo:
+  host:     localhost
+  port:     27017
+  db:       crnk
+  user:
+  password:
+
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 8080
+
+logging:
+  level: ALL
+
+  appenders:
+    - type: console

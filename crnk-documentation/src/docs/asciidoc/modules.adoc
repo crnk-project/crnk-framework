@@ -1,0 +1,253 @@
+
+# Modules
+
+## JPA Module
+
+The JPA module allows to automatically expose JPA entities as JSON API repositories. No implementation
+or Crnk-specific annotations are necessary.
+
+The feature set includes:
+
+- expose JPA entities to JSON API endpoints
+- expose JPA relations as JSON API endpoints
+- decide which entities to expose as endpoints
+- sorting, filtering, paging, inclusion of related resources
+- JPA filter API to modify the issued queries
+- JPA Criteria API and QueryDSL support
+- DTO mapping support
+- support for computed attributes behaving like regular, persisted attributes.
+
+
+### JPA Setup
+
+To use the module, add a dependency to `io.crnk:crnk-jpa` and register the `JpaModule`
+to Crnk. For example in the case of JAX-RS:
+
+[source]
+----
+	TransactionRunner transactionRunner = ...;
+	JpaModule jpaModule = JpaModule.newServerModule(entityManagerFactory, entityManager, transactionRunner);
+	jpaModule.setRepositoryFactory(new ValidatedJpaRepositoryFactory());
+
+	CrnkFeature feature = new CrnkFeature(...);
+	feature.addModule(jpaModule);
+----
+
+
+The JPA modules by default looks up the entityManagerFactory and obtains a list
+of registered JPA entities. For each entity a instance of `JpaEntityRepository`
+is registered to Crnk using the module API. Accordingly, every relation
+is registered as `JpaRelationshipRepository`. `JpaModule.setRepositoryFactory`
+allows to provide a factory to change or customized the used repositories.
+To manually select the entities exposed to Crnk use `JpaModule.addEntityClass(...)`
+and `JpaModule.removeEntityClass(...)`. If no `entityManagerFactory` is provided
+to newServerModule, then the registartion of entities is omitted and can be done
+manually.
+
+The transactionRunner needs to be implemented by the application to hook into the
+transaction processing of the used environment (Spring, JEE, etc.). This might be
+as simple as a Spring bean implementing `TransactionRunner` and adding a
+`@Transactional` annotation. The JPA module makes sure that every call to a
+repository happens within such a transaction boundary.
+
+To setup a Crnk client with the JPA module use:
+
+
+[source]
+----
+	client = new CrnkClient(getBaseUri().toString());
+
+	JpaModule module = JpaModule.newClientModule();
+	setupModule(module, false);
+	client.addModule(module);
+----
+
+Have a look at https://github.com/crnk-project/crnk-framework/blob/develop/crnk-jpa/src/test/java/io/crnk/jpa/JpaQuerySpecEndToEndTest.java within the `crnk-jpa`
+test cases to see how everything is used together with `crnk-client`.
+The JPA modules further has a number of more advanced customization options that
+are discussed in the subsequent sections.
+
+
+### Criteria API and QueryDSL
+
+The JPA module can work with two different query APIs, the default Criteria API
+and QueryDSL. `JpaModule.setQueryFactory` allows
+to choose between those two implementation. There is the `JpaCriteriaQueryFactory`
+and the `QuerydslQueryFactory`. By default the Criteria API is used.
+QueryDSL sits on top of JPQL and has to advantage of being easier to use.
+
+
+### Customizing the JPA repository
+
+The setup page outlined the `JpaRepositoryFactory` that can be used to hook a custom JPA repository
+implementations into the JPA module. The JPA module further provides a more
+lightweight filter API to perform various changes to JPA repository requests:
+
+`JpaModule.addFilter(new MyRepositoryFilter())`
+
+A filter looks like:
+
+[source]
+----
+	public class MyRepositoryFilter extends JpaRepositoryFilterBase {
+
+		boolean accept(Class<?> resourceType){...}
+
+		<T, I extends Serializable> JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository){...}
+
+		QuerySpec filterQuerySpec(Object repository, QuerySpec querySpec){...}
+
+		...
+	}
+----
+
+
+The various filter methods allow a wide variety of customizations or also to replace the passed object in question.
+
+
+### DTO Mapping
+
+Mapping to DTO objects is supported with `JpaModule.registerMappedEntityClass(...)`.
+A mapper then can be provided that translates the Entity to a DTO class.
+Such a mapper might be implemented manually or generated (mostly) automatically
+with tools like MapStruct. If two mapped entities are registered, there
+respective mapped relationships will be automatically registered as well.
+
+The mechanism is not limited to simple mappings, but can also introduce computed
+attributes like in the example depicted here:
+
+[source]
+----
+	JpaModule module = JpaModule.newServerModule(emFactory, em, transactionRunner);
+				module.setQueryFactory(QuerydslQueryFactory.newInstance());
+	QuerydslExpressionFactory<QTestEntity> basicComputedValueFactory = new QuerydslExpressionFactory<QTestEntity>() {
+
+		@Override
+		public Expression<String> getExpression(QTestEntity parent, JPAQuery<?> jpaQuery) {
+			return parent.stringValue.upper();
+		}
+	};
+
+	QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) module.getQueryFactory();
+	queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_UPPER_STRING_VALUE,
+		 String.class, basicComputedValueFactory);
+	module.addMappedEntityClass(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager));
+----
+
+and
+
+[source]
+----
+	public class TestDTOMapper implements JpaMapper<TestEntity, TestDTO> {
+
+		@Override
+		public TestDTO map(Tuple tuple) {
+			TestDTO dto = new TestDTO();
+			TestEntity entity = tuple.get(0, TestEntity.class);
+			dto.setId(entity.getId());
+			dto.setStringValue(entity.getStringValue());
+			dto.setComputedUpperStringValue(tuple.get("computedUpperStringValue", String.class));
+			...
+			return dto;
+		}
+
+		...
+
+	}
+----
+
+Some of the regular entity attributes are mapped to the DTO. But there is also a
+`computedUpperStringValue` attribute that is computed with an expression.
+The expression can be written with the Criteria API or QueryDSL depending
+on which query backend is in use.
+
+Computed attributes are indistinguishable from regular, persisted entity attributes.
+They can be used for selection, sorting and filtering. Both `JpaCriteriaQueryFactory`
+and `QuerydslQueryFactory` provide a `registerComputedAttribute` method to
+register an expression factory to create such computed attributes. The registration requires
+the target entity and a name. To make the computed attribute available
+to consumers, the mapper class has access to it trough the provided
+tuple class. Have a look at https://github.com/crnk-project/crnk-framework/blob/develop/crnk-jpa/src/test/java/io/crnk/jpa/mapping/DtoMappingTest.java to see everything in use.
+
+There is currently not yet any support for renaming of attribute. If attributes
+are renamed on DTOs, the incoming QuerySpec has to be modified accordingly to
+match again the entity attribute naming.
+
+
+
+## JSR 303 Validation Module
+
+A `ValidationModule` provided by `io.crnk:crnk-validation` implements
+exception mappers for 'javax.validation.ValidationException' and 'javax.validation.ConstraintViolationException'.
+Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON API errors.
+A JSON API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
+display the validation errors next to the corresponding input fields.
+
+
+## Tracing with Zipkin/Brave
+
+A `BraveModule` provided by `io.crnk:crnk-brave` provides integration into
+Zipkin/Brave to implement tracing for your repositories.  The module is applicable to
+both a Crnk client or server.
+
+The Crnk client can make use of either HttpClient or OkHttp to issue HTTP requests.
+Accordingly, a matching brave integration must be added to the classpath:
+
+* `io.zipkin.brave:brave-okhttp`
+* `io.zipkin.brave:brave-apache-http-interceptors`
+
+The `BraveModule` then takes care of the integration and will create a client span
+for each request.
+
+On the server-side, `BraveModule` creates a local span for each accessed repository.
+Every request triggers one or more repository accesses (depending on whether
+relations are included). Note however that `BraveModule` does not setup tracing
+for incoming requests. That is the purpose of the JAX-RS/servlet integration of Brave.
+
+
+## Security Module
+
+This is an experimental module that intercepts all repository requests and performs Role-based access
+control. Have a look at the `SecurityModule` and the related `SecurityConfig` class.
+A setup can looks as follows:
+
+
+[source]
+----
+	Builder builder = SecurityConfig.builder();
+	builder.permitRole("allRole", ResourcePermission.ALL);
+	builder.permitRole("getRole", ResourcePermission.GET);
+	builder.permitRole("patchRole", ResourcePermission.PATCH);
+	builder.permitRole("postRole", ResourcePermission.POST);
+	builder.permitRole("deleteRole", ResourcePermission.DELETE);
+	builder.permitRole("taskRole", Task.class, ResourcePermission.ALL);
+	builder.permitRole("taskReadRole", Task.class, ResourcePermission.GET);
+	builder.permitRole("projectRole", Project.class, ResourcePermission.ALL);
+	builder.permitAll(ResourcePermission.GET);
+	builder.permitAll(Project.class, ResourcePermission.POST);
+	securityModule = SecurityModule.newServerModule(builder.build());
+----
+
+The security module further properly serializes javax.security
+authorization and authentication exceptions. As such it is also recommended to be
+used by CrnkClient.
+
+
+## Meta Module
+
+This is a (very) experimental module that exposes the internal workings of Crnk as JSON API repositories.
+It lets you browse the set of available resources, their types, their attributes, etc. For example,
+Crnk UI make use of the meta module to implement auto-completing of input fields.
+A setup can look as follows:
+
+[source]
+----
+		MetaModule metaModule = MetaModule.create();
+		metaModule.addMetaProvider(new ResourceMetaProvider());
+----
+
+To learn more about the set of available resources, have a look at the `MetaElement` class and all its subclasses,
+most notably `MetaResource` and `MetaResourceRepository`.
+
+
+

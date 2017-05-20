@@ -1,0 +1,457 @@
+
+# Repositories
+
+The modelled resources must be complemented by a corresponding
+repository implementation. This is achieved by implementing
+one of those two repository interfaces:
+
+  * ResourceRepositoryV2 for a resource
+  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for resource relationships
+
+
+
+## ResourceRepositoryV2
+
+Base repository which is used to operate on resources.
+Each resource should have a corresponding repository implementation.
+It consist of five basic methods which provide a CRUD for a resource and two parameters: the first is a type of a resource and the second is a type of the resource’s identifier.
+
+The methods are as follows:
+
+* `findOne(ID id, QuerySpec querySpec)`
+  Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown.
+  It should return an entity with associated relationships.
+
+* `findAll(QuerySpec querySpec)`
+  Search for all of the resources. An instance of QuerySpec can be used if necessary.
+  If no resources can be found an empty Iterable or null must be returned.
+  It should return entities with associated relationships.
+
+* `findAll(Iterable<ID>ids, QuerySpec querySpec)`
+  Search for resources constrained by a list of identifiers. An instance of QuerySpec can be used if necessary.
+  If no resources can be found an empty Iterable or null must be returned.
+  It should return entities with associated relationships.
+
+* `save(S entity)`
+  Saves a resource. It should not save relating relationships. A Returning resource must include assigned identifier created for the instance of resource.
+  This method should be able to both create a new resource and update existing one.
+
+* `delete(ID id)`
+  Removes a resource identified by id parameter.
+
+The ResourceRepositoryBase is a base class that takes care of some boiler-plate, like implementing findOne with findAll. An
+implementation can then look as simple as:
+
+[source]
+----
+	public class ProjectRepository extends ResourceRepositoryBase<Project, String> {
+
+		private Map<Long, Project> projects = new HashMap<>();
+
+		public ProjectRepository() {
+			super(Project.class);
+			save(new Project(1L, "Project A"));
+			save(new Project(2L, "Project B"));
+			save(new Project(3L, "Project C"));
+		}
+
+		@Override
+		public synchronized void delete(String id) {
+			projects.remove(id);
+		}
+
+		@Override
+		public synchronized <S extends Project> S save(S project) {
+			projects.put(project.getId(), project);
+			return project;
+		}
+
+		@Override
+		public synchronized ResourceList<Project> findAll(QuerySpec querySpec) {
+			return querySpec.apply(projects.values());
+		}
+	}
+----
+
+
+## RelationshipRepositoryV2
+
+Each relationship defined in Crnk (annotation @JsonApiToOne and @JsonApiToMany) must have a relationship repository defined.
+
+Base unidirectional repository responsible for operations on relations.
+All of the methods in this interface have fieldName field as their last parameter to solve the problem of many relationships between the same resources.
+
+* `setRelation(T source, D_ID targetId, String fieldName)`
+  Sets a resource defined by targetId to a field fieldName in an instance source. If no value is to be set, null value is passed.
+
+* `setRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
+  Sets resources defined by targetIds to a field fieldName in an instance source. This is a all-or-nothing operation, that is no partial relationship updates are passed. If no values are to be set, empty Iterable is passed.
+
+* `addRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
+  Adds relationships to a list of relationships.
+
+* `removeRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
+  Removes relationships from a list of relationships.
+
+* `findOneTarget(T_ID sourceId, String fieldName, QuerySpec querySpec)`
+  Finds one field's value defined by fieldName in a source defined by sourceId.
+
+* `findManyTargets(T_ID sourceId, String fieldName, QuerySpec querySpec)`
+  Finds an Iterable of field's values defined by fieldName in a source defined by sourceId .
+
+
+This interface must be implemented to let Crnk work correctly, some of the requests are processed using only this kind of repository.
+As it can be seen above, there are two kinds of methods: for multiple and single relationships and it is possible to implement only one type of methods, e.g. singular methods.
+Nevertheless, it should be avoided because of potential future problems when adding new fields of other sizes.
+
+In many cases, relationship operations can be mapped back to resource repository operations. Making the need
+for a custom relationship repository implementation redundant. A findManyTargets request might can be
+served by filtering the target repository. Or a relationship can be set by invoking the save operation
+on either the source or target resource repository (usually you want to save on the single-valued side).
+The ResourceRepositoryBase is a base class that takes care of exactly this. A repository
+implementation then looks as simple as:
+
+
+[source]
+----
+	public class ProjectToTaskRepository extends RelationshipRepositoryBase<Project, Long, Task, Long> {
+
+		public ScheduleToTaskRepository() {
+			super(Project.class, Task.class);
+		}
+	}
+----
+
+For this to work, relations must be set up bidirectionally with the `opposite` attribute:
+
+[source]
+----
+	@JsonApiResource(type = "tasks")
+	public class Task {
+
+		@JsonApiToOne(opposite = "tasks")
+		@JsonApiIncludeByDefault
+		private Project project;
+
+	    ...
+	}
+----
+
+
+## BulkRelationshipRepositoryV2
+
+BulkRelationshipRepositoryV2 extends RelationshipRepositoryV2 and provides an additional
+`findTargets` method. It allows to fetch a relation for multiple resources at once.
+It is recommended to make use of this implementation if a relationship is loaded frequently
+(either by a eager declaration or trough the `include` parameter) and it is costly to
+fetch that relation. RelationshipRepositoryBase provides a default implementation where
+`findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
+
+
+
+
+## ResourceList
+
+ResourceRepositoryV2 and RelationshipRepositoryV2 return lists of type ResourceList. The ResourceList can carry, next
+to the actual resources, also meta and links information:
+
+* `getLinks()`
+	Gets the links information attached to this lists.
+
+* `getMeta()`
+	Gets the meta information attached to this lists.
+
+* `getLinks(Class<L> linksClass)`
+	Gets the links information of the given type attached to this lists. If the given type is not found, null is returned.
+
+* `getMeta(Class<M> metaClass)`
+	Gets the meta information of the given type attached to this lists. If the given type is not found, null is returned.
+
+There is a default implementation named DefaultResourceList. To gain type-safety, improved readability and crnk-client support,
+application may provide a custom implementation extending ResourceListBase:
+
+[source]
+----
+	class ScheduleList extends ResourceListBase<Schedule, ScheduleListMeta, ScheduleListLinks> {
+
+	}
+
+	class ScheduleListLinks implements LinksInformation {
+
+		public String name = "value";
+
+		...
+	}
+
+	class ScheduleListMeta implements MetaInformation {
+
+		public String name = "value";
+
+		...
+	}
+----
+
+This implementation can then be added to a repository interface declaration
+and used by both servers and clients:
+
+[source]
+----
+	public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+
+		@Override
+		public ScheduleList findAll(QuerySpec querySpec);
+
+	}
+----
+
+
+
+
+## Query parameters with QuerySpec
+
+Crnk passes JSON API query parameters to repositories trough a QuerySpec parameter. It holds
+request parameters like sorting and filtering specified by JSON API. The subsequent
+sections will provide a number of example.
+
+NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
+are provided as different applications are likely to be in need of different semantics and
+implementations. For this reason `crnk-engine` makes use of `QueryAdapter` and allows implementations other than
+QuerySpec (like the legacy `QueryParams`).
+
+
+### Filtering
+
+Resource filtering can be achieved by providing parameters which start with `filter`.
+The format for filters: `filter[ResourceType][property|operator]([property|operator])* = "value"`
+
+* `GET /tasks/?filter[name]=Super task`
+* `GET /tasks/?filter[name][EQ]=Super task`
+* `GET /tasks/?filter[tasks][name]=Super task`
+* `GET /tasks/?filter[tasks][name]=Super task&filter[tasks][dueDate]=2015-10-01`
+
+QuerySpec uses the `EQ` operator if no operator was provided. Custom operators can be registered
+with `DefaultQuerySpecDeserializer.addSupportedOperator(..)`. The default operator can be
+overridden by setting `DefaultQuerySpecDeserializer.setDefaultOperator(...)`.
+
+
+### Sorting
+
+Sorting information for the resources can be achieved by providing `sort` parameter.
+
+* `GET /tasks/?sort=name,-shortName`
+* `GET /tasks/?sort[projects]=name,-shortName&include=projects`
+
+
+
+### Pagination
+
+Pagination for the repositories can be achieved by providing `page` parameter.
+The format for pagination: `page[offset|limit] = "value", where value is an integer`
+
+Example:
+
+* `GET /tasks/?page[offset]=0&page[limit]=10`
+
+
+Note that JSON API specifies first, previous, next and last links (see http://jsonapi.org/format/#fetching-pagination).
+Crnk provides support to compute those pagination links. For this two work, a repository
+has to return meta and links information implementing PagedMetaInformation resp. PagedLinksInformation.
+With PagedMetaInformation the repository can let Crnk know about the total number of (potentially filtered)
+resources. Crnk then fills in PagedLinksInformation with the corresponding links.
+
+
+
+### Sparse Fieldsets
+
+Information about fields to include in the response can be achieved by providing `fields` parameter.
+
+* `GET /tasks/?fields=name`
+* `GET /tasks/?fields[projects]=name,description&include=projects`
+
+
+
+### Inclusion of Related Resources
+
+Information about relationships to include in the response can be achieved by providing `include` parameter.
+The format for fields: `include[ResourceType] = "property(.property)*"`
+
+Examples:
+
+* `GET /tasks/?include[tasks]=project`
+* `GET /tasks/1/?include[tasks]=project`
+* `GET /tasks/?include[tasks]=author`
+* `GET /tasks/?include[tasks][]=author&include[tasks][]=comments`
+* `GET /tasks/?include[projects]=task&include[tasks]=comments`
+* `GET /tasks/?include[projects]=task&include=comments` (QuerySpec example)
+
+
+### API
+
+The QuerySpec API looks like (further setters available as well):
+
+[source]
+----
+	public class QuerySpec {
+		public <T> List<T> apply(Iterable<T> resources){...}
+
+		public Long getLimit() {...}
+
+		public long getOffset() {...}
+
+		public List<FilterSpec> getFilters() {...}
+
+		public List<SortSpec> getSort() {...}
+
+		public List<IncludeFieldSpec> getIncludedFields() {...}
+
+		public List<IncludeRelationSpec> getIncludedRelations() {...}
+
+		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
+
+		...
+	}
+----
+
+Note that single QuerySpec holds the parameters for a single resource type and,
+in more complex scenarios, request can lead to multiple QuerySpec instances
+(namely when related resources are also filtered, sorted, etc). A repository
+is invoked with the QuerySpec for the requested root type. If related resources are
+included in the request, their QuerySpecs can be obtained by calling `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
+
+`FilterSpec` holds a value of type object. Since URL parameters are passed as String,
+they get converted to the proper types by the `DefaultQuerySpecDeserializer`. The
+type is determined based on the type of the filtered attribute.
+
+QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
+on any `java.util.Collection`. It is useful for testing and on smaller datasets to keep
+the implementation of a repository as simple as possible. It returns a ResourceList
+that carries a PagedMetaInformation that lets Crnk automatically compute pagination links.
+
+
+
+### DefaultQuerySpecDeserializer
+
+Crnk make use of `DefaultQuerySpecDeserializer` to map URL parameters to a QuerySpec instance.
+This instance is accessible from the various integrations, such as from the `CrnkFeature`. It
+provides a number of customization options:
+
+* `setDefaultLimit(Long)`
+	Sets the page limit if none is specified by the request.
+
+* `setMaxPageLimit(Long)`
+	Sets the maximum page limit allowed to be requested.
+
+* `setIgnoreUnknownAttributes(boolean)`
+	DefaultQuerySpecDeserializer validates all passed parameters against the domain model and fails
+	if one of the attributes is unknown. This flag allows to disable that check in case the should be necessary.
+
+Note that appropriate page limits are vital to protect against denial-of-service attacks when working
+with large data sets!
+
+`DefaultQuerySpecDeserializer` implements `QuerySpecDeserializer` and you may also provide your own
+implementation to further customize its behavior. The various integrations like `CrnkFeature` will
+allow to replace the implementation.
+
+
+
+## Error Handling
+
+Processing errors in Crnk can be handled by throwing an exception and providing
+a corresponding exception mapper which defines mapping to a proper JSON API error response.
+
+
+### Throwing an exception...
+
+Here is an example of throwing an Exception in the code:
+
+[source]
+----
+  if (somethingWentWrong()) {
+    throw new SampleException("errorId", "Oops! Something went wrong.")
+  }
+----
+
+Sample exception is nothing more than a simple runtime exception:
+
+[source]
+----
+  public class SampleException extends RuntimeException {
+
+    private final String id;
+    private final String title;
+
+    public ExampleException(String id, String title) {
+      this.id = id;
+      this.title = title;
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    public String getTitle() {
+      return title;
+    }
+  }
+----
+
+### ...and mapping it to JSON API response
+
+Class responsible for mapping the exception should:
+
+* be annotated with ExceptionMapperProvider
+* implement JsonApiExceptionMapper interface
+
+Sample exception mapper:
+
+[source]
+----
+  @ExceptionMapperProvider
+  public class SampleExceptionMapper implements JsonApiExceptionMapper<SampleException> {
+    @Override
+    public ErrorResponse toErrorResponse(SampleException exception) {
+      return ErrorResponse.builder()
+        .setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500)
+        .setSingleErrorData(ErrorData.builder()
+          .setTitle(exception.getTitle())
+          .setId(exception.getId())
+          .build())
+        .build();
+    }
+  }
+----
+
+Exception mapper classes will be scanned for and registered during application startup.
+They should be located in your resource search package. If crnk-cdi or crnk-spring
+is used, the annotation is not necessary and it will instead be picked up through the
+dependency mechanisms.
+
+An exception should be mapped to an ErrorResponse object.
+It consists of an HTTP status and ErrorData (which is consistent with JSON API error structure).
+
+Note that the exception mapper is reponsible for providing the logging of exceptions with the
+appropriate log levels. Also have a look at the subsequent section about the validation module that takes
+care of JSR-303 bean validation exception mapping.
+
+
+## Meta Information
+
+NOTE: With ResourceList and @JsonApiMetaInformation meta information can be returned directly. A MetaRepository implementation is no longer necessary.
+
+There is a special interface which can be added to resource repositories to provide meta information: `io.crnk.core.repository.MetaRepository`.
+It contains a single method `MetaInformation getMetaInformation(Iterable<T> resources)` which return meta information object that implements the marker `interface io.crnk.response.MetaInformation`.
+
+If you want to add meta information along with the responses, all repositories (those that implement `ResourceRepository` and `RelationshipRepository`) must implement `MetaRepository`.
+
+When using annotated versions of repositories, a method that returns a `MetaInformation` object should be annotated with `JsonApiMeta` and the first parameter of the method must be a list of resources.
+
+## Links Information
+
+NOTE: With ResourceList and @JsonApiLinksInformation links information can be returned directly. A LinksRepository implementation is usually not necessary.
+
+There is a special interface which can be added to resource repositories to provide links information: `io.crnk.core.repository.LinksRepository`.
+It contains a single method `LinksInformation getLinksInformation(Iterable<T> resources)` which return links information object that implements the marker `interface io.crnk.response.LinksInformation`.
+
+If you want to add meta information along with the responses, all repositories (those that implement `ResourceRepository` and `RelationshipRepository`), must implement `LinksRepository`.
+
+When using annotated versions of repositories, a method that returns a `LinksInformation` object should be annotated with `JsonApiLinks` and the first parameter of the method has to be a list of resources.

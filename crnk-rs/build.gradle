@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+dependencies {
+
+	compile project(':crnk-core')
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.7'
+	compileOnly group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
+	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+	compileOnly group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
+
+	testCompile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
+	testCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+	testCompile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
+	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
+	testCompile group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
+	testCompile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.17'
+	testCompile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.17'
+	testCompile group: 'org.glassfish.hk2', name: 'hk2-api', version: '2.4.0-b10'
+	testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
+	testCompile(group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-jetty', version: '2.17') {
+		exclude(module: 'javax.servlet-api')
+	}
+}

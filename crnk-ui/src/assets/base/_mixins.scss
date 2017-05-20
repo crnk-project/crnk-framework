@@ -1,0 +1,157 @@
+@mixin border-radius($val) {
+	-moz-border-radius: $val;
+	-webkit-border-radius: $val;
+	border-radius: $val;
+}
+
+@mixin border-radius-right($val) {
+	-moz-border-radius-topright: $val;
+	-webkit-border-top-right-radius: $val;
+	border-top-right-radius: $val;
+	-moz-border-radius-bottomright: $val;
+	-webkit-border-bottom-right-radius: $val;
+	border-bottom-right-radius: $val;
+}
+
+@mixin border-radius-left($val) {
+	-moz-border-radius-topleft: $val;
+	-webkit-border-top-left-radius: $val;
+	border-top-left-radius: $val;
+	-moz-border-radius-bottomleft: $val;
+	-webkit-border-bottom-left-radius: $val;
+	border-bottom-left-radius: $val;
+}
+
+@mixin border-radius-top($val) {
+	-moz-border-radius-topleft: $val;
+	-webkit-border-top-left-radius: $val;
+	border-top-left-radius: $val;
+	-moz-border-radius-topright: $val;
+	-webkit-border-top-right-radius: $val;
+	border-top-right-radius: $val;
+}
+
+@mixin border-radius-bottom($val) {
+	-moz-border-radius-bottomleft: $val;
+	-webkit-border-bottom-left-radius: $val;
+	border-bottom-left-radius: $val;
+	-moz-border-radius-bottomright: $val;
+	-webkit-border-bottom-right-radius: $val;
+	border-bottom-right-radius: $val;
+}
+
+@mixin gradient($deg, $color1, $color2) {
+	background: -moz-linear-gradient($deg, $color1 0%, $color2 100%); /* ff3.6+ */
+	background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, $color1), color-stop(100%, $color2)); /* safari4+,chrome */
+	background: -webkit-linear-gradient($deg, $color1 0%, $color2 100%); /* safari5.1+,chrome10+ */
+	background: -o-linear-gradient($deg, $color1 0%, $color2 100%); /* opera 11.10+ */
+	background: -ms-linear-gradient($deg, $color1 0%, $color2 100%); /* ie10+ */
+	background: linear-gradient($deg, $color1 0%, $color2 100%); /* w3c */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$color1}', endColorstr='#{$color2}', GradientType=1); /* ie6-9 */
+}
+
+@mixin transition($transition...) {
+	-moz-transition: $transition;
+	-o-transition: $transition;
+	-webkit-transition: $transition;
+	transition: $transition;
+}
+
+@mixin content-shadow() {
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .12);
+	-webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .12);
+	-moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .12)
+}
+
+@mixin overlay-content-shadow() {
+	-webkit-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+	-moz-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+@mixin overlay-input-shadow() {
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+@mixin no-shadow() {
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+}
+
+@mixin hover-element {
+	background-color: $hoverBgColor;
+	color: $hoverTextColor;
+}
+
+@mixin hover-element-primary {
+	background-color: $primaryLightColor;
+	color: $hoverTextColor;
+}
+
+@mixin opacity($opacity) {
+	opacity: $opacity;
+	$opacity-ie: $opacity * 100;
+	filter: alpha(opacity=$opacity-ie);
+}
+
+@mixin icon-override($icon) {
+	&:before {
+		content: $icon;
+	}
+}
+
+@mixin material-icon($icon) {
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 1.5em; /* Preferred icon size */
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	line-height: 1;
+	text-transform: none;
+	letter-spacing: normal;
+	word-wrap: normal;
+	white-space: nowrap;
+	direction: ltr;
+	text-indent: 0;
+
+	/* Support for all WebKit browsers. */
+	-webkit-font-smoothing: antialiased;
+	/* Support for Safari and Chrome. */
+	text-rendering: optimizeLegibility;
+
+	/* Support for Firefox. */
+	-moz-osx-font-smoothing: grayscale;
+
+	/* Support for IE. */
+	font-feature-settings: 'liga';
+
+	&:before {
+		content: $icon;
+	}
+}
+
+@mixin rotate($deg) {
+	-webkit-transform: rotate($deg);
+	-moz-transform: rotate($deg);
+	-o-transform: rotate($deg);
+	-ms-transform: rotate($deg);
+	transform: rotate($deg);
+}
+
+@mixin scale($deg) {
+	-webkit-transform: scale($deg);
+	-moz-transform: scale($deg);
+	-o-transform: scale($deg);
+	-ms-transform: scale($deg);
+	transform: scale($deg);
+}
+
+@mixin rippleitem() {
+	position: relative;
+	overflow: hidden;
+}

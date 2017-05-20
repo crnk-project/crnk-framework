@@ -1,0 +1,37 @@
+# Release Notes
+
+## v3.0
+
+- a new, more powerful JsonApiRelation annotation easing the declarations of relationships.
+- QueryParams and Repository annotations have been deprecated (but resource annotations not!) and moved to a legacy package. Interface-based repositories and QuerySpec are the recommended APIs.
+- major cleanup release with more test cases.
+- some few package changes to non-internal classes and interfaces.
+- serialization layer has been completely rewritten and is more robust/easier to understand.
+- a new DocumentFilter has been introduced that allows to modify incoming requests and responses.
+- many classes considered to be non-public have been moved to internal packages.
+- a rewritten servlet integratino for Crnk based on CrnkBoot.
+
+Features deprecated with this 3.0 releases remain support for quite some time to come. As such
+*Crnk 3.0 remains backwards compatible with 2.x*. Some small migrations steps are necessary:
+
+- fix package imports
+- Replace all usages of QuerySpec<Xy>Repository with <Xy>RepositoryV2.
+
+In the medium/long-term make sure to avoid and drop the usage of any deprecated legacy API (contained in the io.crnk.legacy packages):
+
+- make use of interface instead of annotation-based repositories.
+- make use of QuerySpec instead of QueryParams. You can perform this step gradually. Once that is completed, you can also to the next step.
+- move away from DefaultQueryParamsParser in favor of DefaultQuerySpecDeserializer. Note that this step can only be done once
+  all the QueryParams-based repositories have been migrated to QuerySpec. This will make your repositories fully JSON-API compliant
+  (``sort`` parameter now adheres to the official specification, see below for examples).
+- (recommendation) Avoid the use of ``CrnkProperties.RESOURCE_SEARCH_PACKAGE`` and rely on a proper dependency management setup instead. Crnk
+  comes out-of-the-box with a CDI and Spring integration, both implementing the ``ServiceDiscovery`` interface.
+- make use of ``JsonApiRelation`` instead of ``JsonApiToMany``, ``JsonApiToOne``, ``JsonApiLookupIncludeAutomatically`` and ``JsonApiIncludeByDefault``.
+
+3.1 (soon)
+##
+
+- an experimental security module.
+- a very experimental meta module.
+- crnk-ui
+

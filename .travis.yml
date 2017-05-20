@@ -1,0 +1,36 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+env:
+  - TRAVIS_NODE_VERSION="6.10.0"
+
+sudo: required
+dist: trusty
+
+before_install:
+- curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+- sudo apt-get install -qq nodejs
+- sudo apt-get install build-essential
+- rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) 
+- source ~/.nvm/nvm.sh
+- nvm install 6.10.0
+- nvm use 6.10.0
+- npm --version
+- node --version
+- sudo npm install -g @angular/cli@latest
+
+script: mvn clean install -Pui
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/ef8645d0a8959f3f49c2
+    on_success: change
+    on_failure: always
+    on_start: false
+env:
+  global:
+  - secure: Q0AmjxrPpFTdsAwqbiwweQexDiIc5Nqq8MqnFvSHMZ2uDuubLmyWJ8fmLNrQu1Ph23g9cnmkHX8OFU9lE55IGQzmOMcN5k/iFlXXwtCvT7Iiv6GNquDtgPWWDAdkNmY5WPF5QUH4xw5sumD0G9UoaByq/d/TMYAr/j7LrhO6RJfV4nk/5XF8PXIRCQwMhlJvZE0KdQeEm8Q/KuB8J4pilQ6ZoNH1yzc28JTs7isxedCweKr4ZHorm2bpT4xK8B6he0BwZXQqghJys+zTOY778D1/rKnffKMSA88OkYlmDyKXPju30r84iVoMYRjfWxaHE3cef6Hqhxw6b+plUqKH4EHt8nLwiqmFRLAlw/4Qf610fnQujGwL1Www68AI8W6pwsLkOtYL5IBivxtqx6g1k8t9qy+hd17dqy/E8bnk3xZ6SqhC9gghZZtXnnZUkQLcYE0uYinLKN19VD84mYFQTeERWjqKhN4HAsawE9k8zH1AqHqcDJvhbHaklpQryu/43/y6fHCyBsA541GghRujIf200HjTYvEjkHLSVvnaiu05/Pj8e7WpBFS0H+Z3bRj724C0FpGHFx8exzbdAwhy/bgDnuMn1hQMO44HoldKCkvHopGa3r9nLTPn9T3BpE5JysE9amxBmh47WlRplvIwP1e0wgcFObmIhFNoJbeljUA=
+  - secure: HDAaT4hx/r01MoihfDKUDbEQG1dfoGdhjxO5RBjE7871WRV4cv8rk7u22Le/H/PhCMHKDFjELnpz9kZKGwqjtHonVLC8smJNNkKUg6q9Uit6mwsqS6S+dPhB6V5hjqHskROHReHyfMM9if25L/p2mKWWhTQIdsdzDxJSHcDEKlIWWPlCBRWYimu3i4cn/EvwUAwSe2Zw5OleBzCbGtRAlAuXpHO+7yHJuCtNw1mClSgCTvSptef4FYVVXgbcPu4gvvX94lOgvHuZ0rgOlBCX+s8dBWVTD3x+J1VzCqoWjWsl21B5ADQHXRiQNkE4tnSKPhjwRo8rZyobFOMCxMz8Esvi3mXMVw+OAzIj2LnwIWNTd33mS2OF4sc4VFYGYpz1VdHnx7gPfUOnBhz8tCMThwQYYHpx0bTE8x0LdtRLV5zGKLs2XzR/CSqZuiI7PoOVXUvUjvYMG86OlYDxF3gtmOJybSI9qynU88kJAFpDFj/ldecAiLVYZqLd3qL1L0wa8oVHgogsLHUTGmud+P8URg6GYTIwbvomp8drpVzYyn5FNTSugBvZQxPzkCyCzXgFdQvrS9EyrbZibu44S8TjOjg507Zuo9+tjM6ouYOZsbkffvYle3WS/RjtDS3ROi0MTWVN4/7IZCG9I6R9UuKukEsPmJ/+YZcgS8HFa7YeCSI=

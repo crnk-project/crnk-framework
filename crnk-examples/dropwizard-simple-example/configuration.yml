@@ -1,0 +1,16 @@
+crnk:
+  searchPackage: io.crnkple.dropwizard.simple.domain
+
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 8080
+
+logging:
+  level: INFO
+
+  appenders:
+    - type: console

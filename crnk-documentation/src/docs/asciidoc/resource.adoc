@@ -1,0 +1,148 @@
+
+# Resource
+
+A resource as defined by JSON API holds the actual data. `crnk-engine` is agnostic to how such resources are actually
+implemented (see the architecture and modueles chapters). This chapter gives information of the most common way using
+annotations provided by `crnk-core`.
+
+
+## JsonApiResource
+
+It is the most important annotation which defines a resource. It requires type parameter to be defined that is used to form a URLs and type field in passed JSONs. According to JSON API standard, the name defined in type can be either plural or singular
+
+The example below shows a sample class which contains a definition of a resource.
+
+[source]
+----
+  @JsonApiResource(type = "tasks")
+  public class Task {
+    // fields, getters and setters
+  }
+----
+
+
+## JsonApiId
+
+Defines a field which will be used as an identifier of a resource.
+Each resource requires this annotation to be present on a field which type implements `Serializable` or is of primitive type.
+
+The example below shows a sample class which contains a definition of a field which contains an identifier.
+
+[source]
+----
+  @JsonApiResource(type = "tasks")
+  public class Task {
+    @JsonApiId
+    private Long id;
+
+    // fields, getters and setters
+  }
+----
+
+
+## JsonApiRelation
+
+Indicates an association to either a single value or collection of resources. The type of such fields
+must be a valid resource.
+
+The example below shows a sample class which contains this kind of relationship.
+
+
+[source]
+----
+  @JsonApiResource(type = "tasks")
+  public class Task {
+
+    // ID field
+
+    @JsonApiRelation(lookUp=LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,serialize=SerializeType.ONLY_ID)
+    private Project project;
+
+    // fields, getters and setters
+  }
+----
+
+
+The optional `serialize` parameter specifies how the association should be serialized when making a request.
+There are two things to consider. Whether related resources should be added to the `include` section of the
+response document. And whether the id of related resources should be serialized along with the resource
+in the corresponding `relationships.[name].data` section. Either `LAZY`, `ONLY_ID` or `EAGER` can be specified:
+
+- `LAZY` only serializes the ID and does the inclusion if explicitly requested by the `include` URL parameter. This is the default.
+- `ONLY_ID` always serializes the ID, but does only to an inclusion  if explicitly requested by the `include` URL parameter.
+- `EAGER` always both serializes the ID and does an inclusion.
+
+There are two possibilities of how related resources are fetched. Either the requested repository directly
+returns related resources with the returned resources. Or Crnk can take-over that
+work by doing nested calls to the corresponding `RelationshipRepositoryV2` implementations. The behavior
+is controlled by the optional `lookUp` parameter. There are three options:
+
+- 'NONE' makes the requested repository responsible for returning related resources. This is the default.
+- 'AUTOMATICALLY_WHEN_NULL' will let Crnk lookup related resources if not already done by the requested repository.
+- 'AUTOMATICALLY_ALWAYS' will force Crnk to always lookup related resource regardless whether it is already done by the requested repository.
+
+
+
+## JsonApiMetaInformation
+
+Field or getter annotated with `JsonApiMetaInformation` are marked to carry a `MetaInformation` implementation.
+See http://jsonapi.org/format/#document-meta for more information about meta data. Example:
+
+[source]
+----
+	@JsonApiResource(type = "projects")
+	public class Project {
+
+		...
+
+		@JsonApiMetaInformation
+		private ProjectMeta meta;
+
+		public static class ProjectMeta implements MetaInformation {
+
+			private String value;
+
+			public String getValue() {
+				return value;
+			}
+
+			public void setValue(String value) {
+				this.value = value;
+			}
+		}
+	}
+----
+
+
+
+## JsonApiLinksInformation
+
+Field or getter annotated with `JsonApiLinksInformation` are marked to carry a `LinksInformation` implementation.
+See http://jsonapi.org/format/#document-links for more information about linking. Example:
+
+
+[source]
+----
+	@JsonApiResource(type = "projects")
+	public class Project {
+
+		...
+
+		@JsonApiLinksInformation
+		private ProjectLinks links;
+
+		public static class ProjectLinks implements MetaInformation {
+
+			private String value;
+
+			public String getValue() {
+				return value;
+			}
+
+			public void setValue(String value) {
+				this.value = value;
+			}
+		}
+	}
+----
+

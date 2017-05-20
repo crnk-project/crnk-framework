@@ -1,0 +1,64 @@
+
+# Module Development
+
+Crnk has a module API that allows to extend the core functionality by third-party contributions.
+The mentioned JPA module in the next section is an example for that. The API is similar in spirit
+to the one of the `https://github.com/FasterXML/jackson`. The main interface is `Module` with
+a default implementation provided by `SimpleModule`. A module has access to a `ModuleContext`
+that allows to register all kinds of extensions like new `ResourceInformationBuilder`,
+`ResourceLookup`, `Filter`, `ExceptionMapper` and Jackson modules. It also gives access to the
+`ResourceRegistry` holding information about all the repositories registered to crnk.
+The `JpaModule` in `crnk-jpa` provides a good, more advanced example of using the
+module API.
+
+
+
+## Request Filtering
+
+Crnk provides three different, complementing mechanisms to hook into the request processing.
+
+The `DocumentFilter` interface allows to intercept incoming requests and do
+any kind of validation, changes, monitoring, transaction handling, etc. `DocumentFilter` can be
+hooked into Crnk by setting up a module and registering the filter to the
+`ModuleContext`. Not that for every request, this interface is called exactly once.
+
+A request may span multiple repository accesses. To intercept the actual repository requests,
+implement the `RepositoryFilter` interface. `RepositoryFilter` has a number of methods
+that allow two intercept the repository request at different stages. Like `Filter` it can be
+hooked into Crnk by setting up a module and registering the filter to the
+`ModuleContext`.
+
+Similar to `RepositoryFilter` it is possible to decorate a repository with another repository
+implementing the same Crnk repository interfaces. The decorated repository instead of
+the actual repository will get called and it is up to the decorated repository of how to proceed
+with the request, usually by calling the actual repository. `RepositoryDecoratorFactory`
+can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factory gets
+notified about every repository registration and is then free do decorate it or not.
+
+
+## Integrate third-party data stores
+
+The core of Crnk is quite flexible when it comes to implementing repositories. As such, it is
+not mandatory to make use of the Crnk annotations and conventions. Instead, it is also
+(likely) possible to integrate an existing data store setup like JPA, JDBC, ElasticSearch, etc.
+into Crnk. For this purpose a module can provide custom implementations of
+`ResourceInformationBuilder` and `RepositoryInformationBuilder` trough
+`ModuleContext.addResourceInformationBuilder` and `ModuleContext.addRepositoryInformationBuilder`.
+For example, the JpaModule of  `crnk-jpa` makes use of that to read JPA instead of Crnk annotations.
+Such a module can then register additional (usually dynamic) repositories with
+`ModuleContext.addRepository`.
+
+
+## Implement a custom discovery mechanism
+
+Crnk comes with out-of-the-box support for Spring and CDI. Both of them implement
+`ServiceDiscovery`. You may provide your own implementation which can be hooked into the
+various Crnk integrations, like the CrnkFeature. Modules have access to that
+`ServiceDiscover` trough the `ModuleContext`.
+
+
+## Let a module hook into the Crnk HTTP client implementation
+
+Modules for the Crnk client can additionally implement `HttpAdapterAware`. It gives
+the module access to the underlying HTTP client implementation and allows abitrary
+customizations of it. Have a look at the Crnk client documentation for more information.

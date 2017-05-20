@@ -1,0 +1,62 @@
+{
+	"project": {
+		"version": "3.0.0-SNAPSHOT",
+		"name": "crnk-ui"
+	},
+	"apps": [
+		{
+			"root": "src",
+			"outDir": "dist",
+			"assets": [
+				"assets",
+				"favicon.ico"
+			],
+			"index": "index.html",
+			"main": "main.ts",
+			"test": "test.ts",
+			"tsconfig": "tsconfig.json",
+			"prefix": "app",
+			"mobile": false,
+			"styles": [
+				"../node_modules/primeng/resources/primeng.min.css",
+				"assets/theme-crnk.scss",
+				"assets/layout-crnk.scss"
+			],
+			"scripts": [
+			],
+			"environmentSource": "environments/environment.ts",
+			"environments": {
+				"dev": "environments/environment.ts",
+				"prod": "environments/environment.prod.ts"
+			}
+		}
+	],
+	"addons": [],
+	"packages": [],
+	"e2e": {
+		"protractor": {
+			"config": "./protractor.conf.js"
+		}
+	},
+	"test": {
+		"karma": {
+			"config": "./karma.conf.js"
+		}
+	},
+	"defaults": {
+		"styleExt": "scss",
+		"prefixInterfaces": false,
+		"inline": {
+			"style": false,
+			"template": false
+		},
+		"spec": {
+			"class": false,
+			"component": true,
+			"directive": true,
+			"module": false,
+			"pipe": true,
+			"service": true
+		}
+	}
+}

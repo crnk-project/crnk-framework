@@ -1,0 +1,122 @@
+:basedir: ../../../..
+:clientdir: {basedir}/crnk-client
+
+
+anchor:client[]
+
+# Crnk Client
+
+There is a Crnk client for Java projects to allow
+communicating with JSON-API compliant servers. Two http client libraries are supported:
+
+* `OkHttp <http://square.github.io/okhttp>`
+  Library has been used to allow usage in both Android and server applications and services.
+
+* `Apache Http Client <https://hc.apache.org/httpcomponents-client-ga/index.html>`
+  Library widely used in the Java community.
+
+Add one of those library to the classpath and Crnk will pick it up automatically.
+
+To start using the client just create an instance of `CrnkClient` and pass the service
+URL as parameter.
+
+## Usage
+
+The client has three main methods:
+
+* `CrnkClient#getRepositoryForInterface(Class)` to obtain a resource repository stub from an existing repository interface.
+* `CrnkClient#getRepositoryForType(Class)` to obtain a generic resource repository stub from the provided resource type.
+* `CrnkClient#getRepositoryForType(Class, Class)` to obtain a generic relationship repository stub from the provided source and target resource types.
+
+The interface of the repositories is as same as defined in `Repositories`_ section.
+
+An example of the usage:
+
+[source]
+----
+  CrnkClient client = new CrnkClient("http://localhost:8080/api");
+  ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
+  List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
+----
+
+Have a look at, for example, the QuerySpecClientTest to see more examples of how it is used.
+
+
+## Type-Safety
+
+It is possible to work with `CrnkClient` in a fully type-safe manner.
+
+In a first step an interface for a repository is defined:
+
+[source]
+.ScheduleRepository.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=doc]
+----
+
+And then it can be used like:
+
+[source]
+.QuerySpecClientTest.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/QuerySpecClientTest.java[tags=interfaceAccess]
+----
+
+
+anchor:client_jaxrs[]
+
+## JAX-RS interoperability
+
+The interface stubs from the previous section can also be used to make calls to JAX-RS. For example, the
+`ScheduleRepository` can be complemented with a JAX-RS annotation:
+
+[source]
+.ScheduleRepository.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=annotation]
+----
+
+and further JAX-RS services can be added:
+
+[source]
+.ScheduleRepository.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=services]
+----
+
+To make this work a dependency to `org.glassfish.jersey.ext:jersey-proxy-client` must be added and `JerseyActionStubFactory`
+registered with `CrnkClient`:
+
+[source]
+.AbstractClientTest.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/AbstractClientTest.java[tags=jerseyStubFactory]
+----
+
+Then a client can make use the Crnk stubs and it will transparently switch between JSON-API and JAX-RS calls:
+
+[source]
+.JsonApiActionResponseTest.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/action/JsonApiActionResponseTest.java[tags=invokeService]
+----
+
+WARNING: Due to limited configurability of the Jersey Proxies it is currently not possible to reuse the same HTTP connections
+for both types of calls. We attempt to address that in the future. Be aware of this when you, for example, add further
+request headers (like security), as it has to be done in two places (unfortunately).
+
+
+
+## HTTP customization
+
+It is possible to hook into the HTTP implementation used by Crnk (OkHttp or Apache).
+Make use of `CrnkClient#getHttpAdapter()` and cast it to either
+`HttpClientAdapter` or `OkHttpAdapter`. Both implementations provide a
+`addListener` method, which in turn gives access to the native builder used to construct
+the respective HTTP client implementation. This allows to cover various use cases:
+
+- add custom request headers (security, tracing, etc.)
+- collect statistics
+- ...
+
+You may have a look at `crnk-brave` for an advanced example.

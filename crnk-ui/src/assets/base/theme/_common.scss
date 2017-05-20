@@ -1,0 +1,88 @@
+body {
+	.ui-widget,
+	.ui-widget .ui-widget {
+		font-family: "Roboto", "Helvetica Neue", sans-serif;
+		text-decoration: none;
+	}
+
+	.ui-widget-content {
+		background-color: #ffffff;
+		font-size: $contentFontSize;
+		border: 1px solid $dividerColor;
+
+		.fa {
+			color: #757575;
+		}
+	}
+
+	.ui-widget-header {
+		background-color: $primaryColor;
+		color: #ffffff;
+		font-size: $headerFontSize;
+		border: 1px solid $primaryColor;
+
+		.fa {
+			color: #ffffff;
+		}
+	}
+
+	.ui-state-default {
+
+	}
+
+	.ui-state-hover {
+
+	}
+
+	.ui-state-focus {
+
+	}
+
+	.ui-state-active, .ui-state-highlight {
+		background-color: $accentColor;
+		color: $accentTextColor;
+
+		.fa {
+			color: #ffffff;
+		}
+	}
+
+	.ui-state-disabled {
+		opacity: .35;
+		filter: Alpha(Opacity=35);
+		background-image: none;
+	}
+
+	.ui-corner-all {
+		@include border-radius($borderRadius);
+	}
+
+	.ui-corner-top {
+		@include border-radius-top($borderRadius);
+	}
+
+	.ui-corner-bottom {
+		@include border-radius-bottom($borderRadius);
+	}
+
+	.ui-corner-left {
+		@include border-radius-left($borderRadius);
+	}
+
+	.ui-corner-right {
+		@include border-radius-right($borderRadius);
+	}
+
+	.ui-widget-overlay {
+		background-color: #58575c;
+		opacity: .8;
+	}
+
+	.ui-shadow {
+
+	}
+
+	a {
+
+	}
+}

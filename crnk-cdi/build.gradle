@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':crnk-core')
+	compileOnly(group: 'javax', name: 'javaee-api', version: '7.0')
+
+	testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.7.1'
+	testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.7.1'
+	testCompile group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.7.1'
+	testCompile group: 'org.jboss.weld.se', name: 'weld-se-core', version: '2.4.0.Final'
+	testCompile(group: 'javax', name: 'javaee-api', version: '7.0')
+}
+
+// e.g. CDI expects those directories to be equal
+sourceSets {
+	main {
+		output.resourcesDir = output.classesDir
+	}
+	test {
+		output.resourcesDir = output.classesDir
+	}
+}
+jar {
+	duplicatesStrategy = 'exclude'
+}

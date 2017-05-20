@@ -1,0 +1,18 @@
+<div [ngClass]="{'layout-wrapper':true,'layout-compact':true}">
+
+
+	<div [ngClass]="{'layout-container':true,'menu-layout-overlay': true}">
+
+		<div class="topbar clearfix">
+			<div class="topbar-left">
+				<div class="topbar-title">Crnk</div>
+			</div>
+		</div>
+
+
+		<div class="layout-main">
+			<router-outlet></router-outlet>
+		</div>
+
+	</div>
+</div>

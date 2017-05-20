@@ -1,0 +1,90 @@
+package io.crnk.core.engine.document;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.resource.list.LinksContainer;
+import io.crnk.core.resource.meta.MetaContainer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Resource objects appear in a JSON API document to represent resources.
+ * <p/>
+ * http://jsonapi.org/format/#document-resource-objects
+ */
+public class Resource extends ResourceIdentifier implements MetaContainer, LinksContainer {
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, JsonNode> attributes = new HashMap<>();
+
+	@JsonInclude(Include.NON_EMPTY)
+	private Map<String, Relationship> relationships = new HashMap<>();
+
+	@JsonInclude(Include.NON_EMPTY)
+	private ObjectNode links;
+
+	@JsonInclude(Include.NON_EMPTY)
+	private ObjectNode meta;
+
+	@Override
+	public ObjectNode getLinks() {
+		return links;
+	}
+
+	@Override
+	public void setLinks(ObjectNode links) {
+		this.links = links;
+	}
+
+	@Override
+	public ObjectNode getMeta() {
+		return meta;
+	}
+
+	@Override
+	public void setMeta(ObjectNode meta) {
+		this.meta = meta;
+	}
+
+	public Map<String, JsonNode> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(Map<String, JsonNode> attributes) {
+		this.attributes = attributes;
+	}
+
+	public Map<String, Relationship> getRelationships() {
+		return relationships;
+	}
+
+	public void setRelationships(Map<String, Relationship> relationships) {
+		this.relationships = relationships;
+	}
+
+	public void setAttribute(String name, JsonNode value) {
+		attributes.put(name, value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(attributes, relationships, links, meta);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Resource))
+			return false;
+		Resource other = (Resource) obj;
+		return Objects.equals(attributes, other.attributes) && Objects.equals(relationships, other.relationships) && Objects.equals(meta, other.meta) && Objects.equals(links, other.links);
+	}
+
+	public ResourceIdentifier toIdentifier() {
+		return new ResourceIdentifier(getId(), getType());
+	}
+
+}

@@ -1,0 +1,46 @@
+include ':crnk-core'
+include ':crnk-home'
+include ':crnk-test'
+include ':crnk-rs'
+include ':crnk-client'
+include ':crnk-meta'
+include ':crnk-jpa'
+include ':crnk-validation'
+
+include ':crnk-servlet'
+include ':crnk-cdi'
+include ':crnk-spring'
+include ':crnk-brave'
+include ':crnk-security'
+
+include ':crnk-operations'
+
+include ':crnk-examples:dropwizard-mongo-example'
+include ':crnk-examples:jersey-example'
+include ':crnk-examples:dropwizard-simple-example'
+include ':crnk-examples:wildfly-example'
+include ':crnk-examples:spring-boot-simple-example'
+
+include ':crnk-ui'
+include ':crnk-documentation'
+
+gradle.startParameter.showStacktrace = org.gradle.api.logging.configuration.ShowStacktrace.ALWAYS
+
+gradle.beforeProject { Project project ->
+	project.with {
+		buildscript {
+			repositories {
+				maven() {
+					url 'http://adnexus.adnovum.ch:8081/nexus/content/groups/adnovumpublic'
+				}
+			}
+		}
+		repositories {
+			maven() {
+				url 'http://adnexus.adnovum.ch:8081/nexus/content/groups/adnovumpublic'
+			}
+		}
+		version = BUILD_VERSION
+		group = GROUP_ID
+	}
+}

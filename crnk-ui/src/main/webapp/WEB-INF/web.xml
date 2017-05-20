@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Author : AdNovum Informatik AG Version Number : $Revision: 1076 $ Date
+				of last edit : $Date: 2015-02-13 10:15:13 +0100 (Fr, 13 Feb 2015) $ -->
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
+		 xmlns="http://java.sun.com/xml/ns/javaee"
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+	<display-name>Crnk</display-name>
+
+</web-app>

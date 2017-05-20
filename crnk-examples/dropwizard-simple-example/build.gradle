@@ -1,0 +1,7 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':crnk-rs')
+
+	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.0.0'
+}

@@ -1,0 +1,21 @@
+# Architecture
+
+*Resources* and *repositories* are the main object types in use by Crnk. Those types closely reflect the
+JSON API specification. Resources hold the data; while repositories implement the access to those repositories. A
+running Crnk application has any number of those objects and those object can also be related. For this
+reason there is a further distinction for repositories between *resource repositories* and *relationship repositories*.
+
+The `crnk-engine` project provides an implementation of the JSON API specification. It processes incoming requests
+and makes the appropriate calls to repositories. A single request may make one or multiple calls to repositories. Multiple
+repository are called when the request asks for inclusions of related resoures where the main repository chooses
+to not directly handle those inclusions by itself (explained in detail in later chapters). In the background
+`crnk-engine` takes care of details like serialization, repository lookup and error handling. For this
+to work it offers a module API to customize and extend the Crnk feature set. `crnk-engine`
+does not dictate how resources and repositories are implemented. It makes use of a more abstract
+information model and adapters to forward call to a particular implementation. This allows for a lot of flexibility
+in the repository design. In many cases users will make use of annotations and interfaces provided by `crnk-core`
+which follow the specification and recommendations of JSON API. But there is also the possibility to implement
+repositories in other fasions, as it is the case, for example, in
+`crnk-jpa`.
+
+The subsequent chapters explain how to setup and use Crnk.

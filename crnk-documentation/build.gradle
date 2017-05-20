@@ -1,0 +1,8 @@
+apply plugin: 'org.asciidoctor.convert'
+
+asciidoctor {
+	backends = ['html5']
+	attributes 'source-highlighter': 'coderay'
+}
+
+tasks.assemble.dependsOn 'asciidoctor'

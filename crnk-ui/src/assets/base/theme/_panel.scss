@@ -1,0 +1,266 @@
+body {
+	.ui-panel {
+		padding: 0;
+
+		.ui-panel-titlebar {
+			border: 0 none;
+			border-bottom: 1px solid $primaryColor;
+			padding: $headerPadding;
+			@include border-radius-top($borderRadius - 1);
+			@include border-radius-bottom(0);
+
+			.ui-panel-titlebar-icon {
+				position: relative;
+				width: 1.5em;
+				height: 1.5em;
+				color: #ffffff;
+				margin: 0;
+				@include transition(background-color .3s);
+				@include border-radius(50%);
+
+				&:hover {
+					background-color: $primaryLightColor;
+				}
+			}
+		}
+
+		.ui-panel-content {
+			height: 100%;
+			box-sizing: border-box;
+			padding: $contentPadding;
+		}
+
+		.ui-panel-footer {
+			padding: $headerPadding;
+			border: 0 none;
+			border-top: 1px solid $dividerColor;
+			margin: 0;
+		}
+	}
+
+	.ui-fieldset {
+		padding: $contentPadding;
+
+		.ui-fieldset-legend {
+			padding: $headerPadding;
+			padding-left: .125em;
+			padding-right: .5em;
+			color: $primaryColor;
+
+			.ui-fieldset-toggler {
+				padding: .5em;
+				height: 2em;
+				width: 2em;
+				background-color: $primaryColor;
+				color: #ffffff;
+				font-size: 1.5em;
+				@include border-radius(50%);
+				@include transition(background-color .3s);
+				margin-right: .5em;
+				@include content-shadow();
+
+				&:hover {
+					background-color: $primaryDarkColor;
+				}
+			}
+
+			&.ui-state-focus {
+				background-color: transparent;
+			}
+		}
+	}
+
+	.ui-accordion {
+		.ui-accordion-header {
+			background-color: $primaryColor;
+			padding: 0;
+			color: #ffffff;
+			font-size: $headerFontSize;
+			@include transition(background-color .3s);
+
+			> a {
+				padding: $headerPadding;
+				padding-left: 2.5em;
+				color: #ffffff;
+			}
+
+			&.ui-state-hover {
+				background-color: $primaryDarkColor;
+			}
+
+			&.ui-state-active {
+				background-color: $accentColor;
+				color: $accentTextColor;
+				@include border-radius-bottom(0);
+
+				> a {
+					color: $accentTextColor;
+				}
+			}
+
+			.fa-caret-right {
+				margin-top: -.5em;
+				font-size: 1.5em;
+			}
+
+			.fa-caret-down {
+				margin-top: -.5em;
+				font-size: 1.5em;
+			}
+		}
+
+		.ui-accordion-content {
+			padding: $contentPadding;
+			line-height: $lineHeight;
+		}
+	}
+
+	.ui-toolbar {
+		background-color: $primaryDarkColor;
+		@include content-shadow();
+		padding: .625em;
+	}
+
+	.ui-tabview {
+		padding: 0;
+
+		.ui-tabview-nav {
+			background-color: #ffffff;
+			border: 0 none;
+			@include border-radius(0);
+
+			> li {
+				padding: 0;
+				@include transition(border-color .3s);
+
+				> a {
+					padding: $headerPadding;
+
+					&:focus {
+						outline: 0 none;
+					}
+				}
+
+				> .fa-close {
+					margin: .325em 0 0 0;
+					@include transition(color .3s);
+					color: $textSecondaryColor;
+				}
+
+				.ui-tabview-left-icon, .ui-tabview-right-icon {
+					color: $textSecondaryColor;
+					display: inline-block;
+					vertical-align: middle;
+				}
+
+				.ui-tabview-title {
+					line-height: 1.5em;
+					vertical-align: middle;
+				}
+
+				&.ui-state-default {
+					a {
+						color: $textSecondaryColor;
+					}
+				}
+
+				&.ui-state-hover {
+					background-color: #ffffff;
+				}
+
+				&.ui-state-active {
+					background-color: #ffffff;
+					border-color: $accentColor;
+					border-style: solid;
+
+					a {
+						color: $primaryColor;
+					}
+
+					> .fa-close {
+						color: $accentColor;
+					}
+				}
+
+				&.ui-tabview-outline {
+					outline: 0 none;
+					border-color: $accentLightColor;
+				}
+			}
+		}
+
+		.ui-tabview-panel {
+			padding: $contentPadding;
+		}
+
+		&.ui-tabview-top {
+			> .ui-tabview-nav {
+				padding: 0;
+				margin: 0;
+				@include border-radius-top(4px);
+				border-bottom: 1px solid $dividerColor;
+
+				> li {
+					border-style: solid;
+					border-width: 0 0 2px 0;
+				}
+			}
+		}
+
+		&.ui-tabview-bottom {
+			> .ui-tabview-nav {
+				padding: 0;
+				margin: 0;
+				@include border-radius-bottom(4px);
+				border-top: 1px solid $dividerColor;
+
+				> li {
+					border-width: 2px 0 0 0;
+				}
+			}
+		}
+
+		&.ui-tabview-left {
+			> .ui-tabview-nav {
+				padding: 0;
+				margin: 0;
+				@include border-radius-left($borderRadius + 1);
+				border-right: 1px solid $dividerColor;
+
+				> li {
+					box-sizing: border-box;
+					border-width: 0 2px 0 0;
+
+					> a {
+						width: 100%;
+						box-sizing: border-box;
+					}
+				}
+			}
+		}
+
+		&.ui-tabview-right {
+			> .ui-tabview-nav {
+				padding: 0;
+				@include border-radius-right($borderRadius + 1);
+				border-left: 1px solid $dividerColor;
+
+				> li {
+					box-sizing: border-box;
+					border-width: 0 0 0 2px;
+
+					> a {
+						width: 100%;
+						box-sizing: border-box;
+					}
+
+					&.ui-state-active {
+						> a {
+							padding-left: 0.875em;
+						}
+					}
+				}
+			}
+		}
+	}
+}

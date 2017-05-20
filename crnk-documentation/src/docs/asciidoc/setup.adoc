@@ -1,0 +1,311 @@
+
+# Setup
+
+There are two main, orthogonal aspects of Crnk that need configuration:
+
+1. The integration into a web framework like JAXRS or the Servlet API to be able to process requests.
+2. The discovery of repositories, modules, exception mappers, etc.
+
+The subsequent sections explain various possiblities resp. how to implement an own one.
+
+
+## Requirements
+
+Crnk library requires minimum Java 7 to build and run.
+
+
+
+## Integration with JAX-RS
+
+Crnk allows integration with JAX-RS environments through the usage of JAX-RS specification. JAX-RS 2.0 is
+required for this integration. Under the hood there is a @PreMatching filter which checks each request for
+JSON API processing. The Setup can look as simple as:
+
+### CrnkFeature
+
+[source]
+----
+@ApplicationPath("/")
+	public class MyApplication extends Application {
+
+		@Override
+		public Set<Object> getSingletons() {
+			CrnkFeature crnkFeature = new CrnkFeature();
+			return Collections.singleton((Object)crnkFeature);
+		}
+	}
+----
+
+`CrnkFeature` provides various accessors to customize the behavior of Crnk.
+A more advanced setup may look like:
+
+[source]
+----
+	public class MyAdvancedCrnkFeature implements Feature {
+
+		@Inject
+		private EntityManager em;
+
+		@Inject
+		private EntityManagerFactory emFactory;
+
+		...
+
+		@Override
+		public boolean configure(FeatureContext featureContext) {
+			// also map entities to JSON API resources (see further below)
+			JpaModule jpaModule = new JpaModule(emFactory, em, transactionRunner);
+			jpaModule.setRepositoryFactory(new ValidatedJpaRepositoryFactory());
+
+			// JSON API compliant URL handling with QuerySpec
+			DefaultQuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
+
+			// limit all incoming requests to 20 resources if not specified otherwise
+			querySpecDeserializer.setDefaultLimit(20L);
+
+			ServiceLocator serviceLocator = ...
+			CrnkFeature feature = new CrnkFeature(new ObjectMapper(), querySpecDeserializer, serviceLocator);
+			feature.addModule(jpaModule);
+
+			featureContext.register(feature);
+			return true;
+		}
+	}
+----
+
+Note that depending on the discovery mechanism in use (like Spring or CDI), modules like this JpaModule can be picked
+up automatically.
+
+### Exception mapping for JAX-RS services
+
+In many cases Crnk repositories are used along regular JAX-RS services. In such scenarios it can be worthwhile
+if Crnk repositories and JAX-RS services make use of the same exception handling and response format. To make
+use of the JSON API resp. Crnk exception handling in JAX-RS services, one can add the
+*JsonapiExceptionMapperBridge* to the JAX-RS application. The constructor of `JsonapiExceptionMapperBridge`
+takes `CrnkFeature` as parameter.
+
+### Return resources with JAX-RS services
+
+Similar to `JsonapiExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
+resources in JSON API format. In order to properly serialize such responses, add
+*JsonApiResponseFilter* to your JAX-RS application. The constructor of `JsonApiResponseFilter`
+takes `CrnkFeature` as parameter.
+
+
+### JAX-RS interoperability
+
+Note that it is possible to implement repositories that host both JAX-RS and JSON-API methods to complement JSON
+API repositories with non-resource based services. Have a look at the <<client_jaxrs,Crnk Client chapter>> for an example.
+
+
+## Integration with Servlet API
+
+There are two ways of integrating crnk using Servlets:
+
+* Adding an instance of ``AbstractCrnkServlet``
+* Adding an instance of ``AbstractCrnkFilter``
+
+### Integrating using a Servlet
+
+To integrate Crnk using a servlet several steps are required.
+The first one is to create a class that extends ``AbstractCrnkServlet`` and will provide required configuration for the library.
+The code below shows a sample implementation:
+
+[source]
+----
+
+  import io.crnk.invoker.CrnkInvokerBuilder;
+  import io.crnk.locator.JsonServiceLocator;
+  import io.crnk.locator.SampleJsonServiceLocator;
+
+  import javax.servlet.ServletConfig;
+  import javax.servlet.ServletException;
+
+  public class SampleCrnkServlet extends AbstractCrnkServlet {
+
+      private String resourceSearchPackage;
+
+      @Override
+      public void init(ServletConfig servletConfig) throws ServletException {
+          super.init(servletConfig);
+          resourceSearchPackage = servletConfig
+              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
+      }
+
+      @Override
+      protected CrnkInvokerBuilder createCrnkInvokerBuilder() {
+          return new CrnkInvokerBuilder()
+              .resourceSearchPackage(resourceSearchPackage)
+              .jsonServiceLocator(new SampleJsonServiceLocator());
+      }
+
+  }
+----
+
+The newly created servlet must be added to the ``web.xml`` file or to another deployment descriptor.
+The code below shows a sample ``web.xml`` file with a properly defined and configured servlet:
+
+[source]
+----
+  <web-app>
+    <servlet>
+      <servlet-name>SampleCrnkServlet</servlet-name>
+      <servlet-class>io.crnk.servlet.SampleCrnkServlet</servlet-class>
+      <init-param>
+        <param-name>crnk.config.core.resource.package</param-name>
+        <param-value>io.crnk.servlet.resource</param-value>
+      </init-param>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>SampleCrnkServlet</servlet-name>
+      <url-pattern>/api/v1/ *</url-pattern>
+    </servlet-mapping>
+  </web-app>
+----
+
+You may omit the `resourceSearchPath` depending on which discovery mechanism is in place (see below).
+
+
+### Integrating using a filter
+
+To integrate Crnk using a filter, several steps are required.
+First, create a class that extends ``AbstractCrnkFilter``, which will provide required configuration for the library.
+The code below shows a sample implementation:
+
+[source]
+----
+  import io.crnk.invoker.CrnkInvokerBuilder;
+  import io.crnk.locator.JsonServiceLocator;
+  import io.crnk.locator.SampleJsonServiceLocator;
+
+  import javax.servlet.FilterConfig;
+  import javax.servlet.ServletException;
+
+  public class SampleCrnkFilter extends AbstractCrnkFilter {
+
+      private String resourceSearchPackage;
+
+      public void init(FilterConfig filterConfig) throws ServletException {
+          super.init(filterConfig);
+          resourceSearchPackage = filterConfig
+              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
+      }
+
+      @Override
+      public void init(FilterConfig filterConfig) throws ServletException {
+          super.init(filterConfig);
+          resourceSearchPackage = filterConfig
+              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
+      }
+
+      /**
+       * NOTE: A class extending this must provide a platform specific {@link JsonServiceLocator}
+       *       instead of the (testing-purpose) {@link SampleJsonServiceLocator} below
+       *       in order to provide advanced dependency injections for the repositories.
+       */
+      @Override
+      protected CrnkInvokerBuilder createCrnkInvokerBuilder() {
+          return new CrnkInvokerBuilder()
+              .resourceSearchPackage(resourceSearchPackage)
+              .jsonServiceLocator(new SampleJsonServiceLocator());
+      }
+  }
+----
+
+The newly created filter must be added to ``web.xml`` file or other deployment descriptor.
+A code below shows a sample ``web.xml`` file with properly defined and configured filter
+
+[source]
+----
+  <web-app>
+    <filter>
+      <filter-name>SampleCrnkFilter</filter-name>
+      <filter-class>io.crnk.servlet.SampleCrnkFilter</filter-class>
+      <init-param>
+        <param-name>crnk.config.core.resource.package</param-name>
+        <param-value>io.crnk.servlet.resource</param-value>
+      </init-param>
+    </filter>
+  </web-app>
+----
+
+## Integration with Spring
+
+Crnk provides a simple Spring Boot integration using the ``@Configuration`` annotated class ``CrnkConfigV3``.
+Using this class, the only thing needed to allow Crnk process requests is parameter configuration.
+An example ``application.properties`` file is presented below.
+
+[source]
+----
+  crnk.domainName=http://localhost:8080
+  crnk.pathPrefix=/api
+----
+
+Spring integration uses crnk-servlet ``AbstractCrnkFilter`` to fetch the requests. Similar to CDI, repositories
+and modules are picked up from the Spring ApplicationContext with  ``SpringServiceDiscovery``.
+
+
+## Discovery with CDI
+
+To enable CDI support, add ``io.crnk:crnk-cdi`` to your classpath. Crnk will then pickup the
+``CdiServiceDiscovery`` implementation and use it to discover its modules and repositories. Modules, repositories,
+etc. will then be picked up if they are registered as CDI beans.
+
+
+## Discovery with Spring
+
+The Spring integration comes with a ``SpringServiceDiscovery`` that makes use of the Spring `ApplicationContext`
+to discover beans.
+
+
+## Discovery without a dependency injection framework
+
+If no dependency injection framework is used, Crnk can also discover beans on its own. For this purpose,
+the `org.reflections:reflections` library has to be added to the classpath and the
+`CrnkProperties.RESOURCE_SEARCH_PACKAGE` be defined. In JAX-RS this may look like:
+
+[source]
+----
+@ApplicationPath("/")
+	public class MyApplication extends Application {
+
+		@Override
+        public Set<Object> getSingletons() {
+            CrnkFeature crnkFeature = new CrnkFeature();
+            crnkFeature.getBoot().setServiceLocator(...);
+            return Collections.singleton((Object)crnkFeature);
+        }
+
+		@Override
+        public Map<String, Object> getProperties() {
+            Map<String, Object> map = new HashMap<>();
+            map.put(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "com.myapplication.model")
+            return map;
+        }
+	}
+----
+
+A `JsonServiceLocator` service locator can be provided to control the instatiation of object. By default the default
+constructor will be used. The `CrnkProperties.RESOURCE_SEARCH_PACKAGE` property is passed to define which package
+should be searched for beans. Multiple packages can be passed by specifying a comma separated string
+of packages i.e. com.company.service.dto,com.company.service.repository. It will pick up any public non-abstract
+class that makes use of Crnk interfaces, like repositories, exception mappers and modules.
+
+
+
+
+## Parameters
+
+Any of the integrations allows API access to customize Crnk. There are also a number of configuration flags
+provided by `CrnkProperties`:
+
+* `crnk.config.core.resource.domain`
+  Domain name as well as protocol and optionally port number used when building links objects in responses i.e. http://crnk.io.
+  The value must not end with ``/``. If the property is omitted, then they are extracted from the incoming request, which should work
+  well for most use cases.
+
+* `crnk.config.web.path.prefix`
+  Default prefix of a URL path used in two cases:
+  ** When building ``links`` objects in responses
+  ** When performing method matching
+  An example of a prefix ``/api/v1``.

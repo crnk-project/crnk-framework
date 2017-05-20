@@ -1,0 +1,195 @@
+package io.crnk.core.engine.internal.information.resource;
+
+import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Objects;
+
+public class ResourceFieldImpl implements ResourceField {
+
+	private final String jsonName;
+
+	private final String underlyingName;
+
+	private final Class<?> type;
+	private final Type genericType;
+	private final boolean lazy;
+	private String oppositeResourceType;
+	private LookupIncludeBehavior lookupIncludeBehavior;
+
+	private boolean includeByDefault;
+
+	private ResourceFieldType resourceFieldType;
+
+	private String oppositeName;
+
+	private ResourceInformation parentResourceInformation;
+
+	private ResourceFieldAccessor accessor;
+
+	private ResourceFieldAccess access;
+
+	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
+							 Type genericType, String oppositeResourceType) {
+		this(jsonName, underlyingName, resourceFieldType, type, genericType,
+				oppositeResourceType, null, true, false, LookupIncludeBehavior.NONE,
+				new ResourceFieldAccess(true, true, true, true));
+	}
+
+	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
+							 Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
+							 boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
+							 ResourceFieldAccess access) {
+		this.jsonName = jsonName;
+		this.underlyingName = underlyingName;
+		this.resourceFieldType = resourceFieldType;
+		this.includeByDefault = includeByDefault;
+		this.type = type;
+		this.genericType = genericType;
+		this.lazy = lazy;
+		this.lookupIncludeBehavior = lookupIncludeBehavior;
+		this.oppositeName = oppositeName;
+		this.oppositeResourceType = oppositeResourceType;
+		this.access = access;
+	}
+
+	public ResourceFieldType getResourceFieldType() {
+		return resourceFieldType;
+	}
+
+	/**
+	 * See also
+	 * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
+	 * }
+	 *
+	 * @return if lookup should be performed
+	 */
+	public LookupIncludeBehavior getLookupIncludeAutomatically() {
+		return lookupIncludeBehavior;
+	}
+
+	/**
+	 * @return name of opposite attribute in case of a bidirectional relation.
+	 */
+	public String getOppositeName() {
+		return oppositeName;
+	}
+
+	public String getJsonName() {
+		return jsonName;
+	}
+
+	public String getUnderlyingName() {
+		return underlyingName;
+	}
+
+	public String getOppositeResourceType() {
+		PreconditionUtil.assertEquals("not an association", ResourceFieldType.RELATIONSHIP, resourceFieldType);
+		PreconditionUtil.assertNotNull("resourceType must not be null", oppositeResourceType);
+		return oppositeResourceType;
+	}
+
+	public Class<?> getType() {
+		return type;
+	}
+
+	public Type getGenericType() {
+		return genericType;
+	}
+
+	/**
+	 * Returns a flag which indicate if a field should not be serialized
+	 * automatically.
+	 *
+	 * @return true if a field is lazy
+	 */
+	public boolean isLazy() {
+		return lazy;
+	}
+
+	public boolean getIncludeByDefault() {
+		return includeByDefault;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ResourceFieldImpl that = (ResourceFieldImpl) o;
+		return Objects.equals(jsonName, that.jsonName) && Objects.equals(underlyingName, that.underlyingName) && Objects
+				.equals(type, that.type) && Objects.equals(lookupIncludeBehavior, that.lookupIncludeBehavior)
+				&& Objects.equals(includeByDefault, that.includeByDefault) && Objects.equals(genericType, that.genericType)
+				&& Objects.equals(lazy, that.lazy)
+				&& Objects.equals(access, that.access);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(jsonName, underlyingName, type, genericType, lazy, includeByDefault, lookupIncludeBehavior);
+	}
+
+	/**
+	 * Returns the non-collection type. Matches {@link #getType()} for
+	 * non-collections. Returns the type argument in case of a collection type.
+	 *
+	 * @return Ask Remmo
+	 */
+	public Class<?> getElementType() {
+		if (Iterable.class.isAssignableFrom(type)) {
+			return (Class<?>) ((ParameterizedType) getGenericType()).getActualTypeArguments()[0];
+		} else {
+			return type;
+		}
+	}
+
+	public ResourceInformation getParentResourceInformation() {
+		return parentResourceInformation;
+	}
+
+	@Override
+	public ResourceFieldAccessor getAccessor() {
+		if (accessor == null) {
+			throw new IllegalStateException("field not properly initialized");
+		}
+		return accessor;
+	}
+
+	public void setAccessor(ResourceFieldAccessor accessor) {
+		// TODO to be eliminated by a builder pattern soon
+		this.accessor = accessor;
+	}
+
+	public void setResourceInformation(ResourceInformation resourceInformation) {
+		if (this.accessor == null) {
+			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
+		}
+		this.parentResourceInformation = resourceInformation;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[jsonName=").append(jsonName);
+		if (parentResourceInformation != null && parentResourceInformation.getResourceType() != null) {
+			sb.append(",resourceType=").append(parentResourceInformation);
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
+	public boolean isCollection() {
+		return Iterable.class.isAssignableFrom(getType());
+	}
+
+	@Override
+	public ResourceFieldAccess getAccess() {
+		return access;
+	}
+}

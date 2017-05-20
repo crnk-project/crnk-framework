@@ -1,0 +1,22 @@
+// handles loading of version properties
+// NOTE: needs to happen in buildscript section before setting up the gralde classpath
+
+// load global properties
+Properties versionsProperties = new Properties()
+def versionsFile = project.file("versions.properties")
+versionsFile.withInputStream { versionsProperties.load(it) }
+
+// load local overrides for development:
+// introduce 0.0.0.0-SNAPSHOT dependencies in a multi-project setup to
+// ensure local artifact usage. Gives full control of those dependencies
+// and updates compared to artifacts built and fetched from remote build
+// servers/repositories.
+def localFile = project.file("local.properties")
+if (localFile.exists()) {
+	localFile.withInputStream { versionsProperties.load(it) }
+}
+
+// make properties available in build.gradle
+allprojects {
+	project.ext.versions = versionsProperties
+}

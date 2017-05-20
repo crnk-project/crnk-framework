@@ -1,0 +1,16 @@
+apply plugin: 'war'
+
+dependencies {
+
+	compile project(':crnk-rs')
+	compile project(':crnk-cdi')
+	providedCompile(group: 'javax.enterprise', name: 'cdi-api', version: '1.2') {
+		exclude(module: 'jsr250-api')
+		exclude(module: 'javax.el-api')
+		exclude(module: 'javax.interceptor-api')
+	}
+	providedCompile group: 'org.jboss.spec.javax.annotation', name: 'jboss-annotations-api_1.2_spec', version: '1.0.0.Final'
+	providedCompile group: 'org.jboss.spec.javax.ws.rs', name: 'jboss-jaxrs-api_2.0_spec', version: '1.0.0.Final'
+	providedCompile group: 'org.jboss.resteasy', name: 'resteasy-jackson2-provider', version: '3.0.11.Final'
+	providedCompile group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.0.11.Final'
+}

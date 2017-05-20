@@ -1,0 +1,40 @@
+import com.moowork.gradle.node.npm.NpmTask
+
+apply plugin: 'com.moowork.node'
+
+ext {
+	NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production', '--no-progress']
+}
+
+node {
+	version = '6.9.1'
+	download = true
+}
+
+task npmRunBuild(type: NpmTask) {
+	dependsOn npmInstall
+
+	npmCommand = ['run', 'build']
+	args = ['--', '--base-href', './'] + NG_BUILD_ARGS
+	inputs.dir 'src'
+	inputs.files 'angular-cli.json', 'package.json'
+	outputs.dir 'build/npm'
+}
+
+
+tasks.assemble.dependsOn 'npmRunBuild'
+
+task war(type: War) {
+	group = 'Build'
+	description = 'Generates a war archive.'
+	dependsOn 'npmRunBuild'
+
+	from { 'build/npm' }
+	webInf { from 'src/WEB-INF' }
+}
+tasks.assemble.dependsOn 'war'
+
+clean {
+	delete 'build/npm'
+}
+

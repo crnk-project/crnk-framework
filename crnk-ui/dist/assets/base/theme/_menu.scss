@@ -1,0 +1,365 @@
+body {
+	.ui-breadcrumb {
+		padding: $inputHeaderPadding;
+
+		ul {
+			li {
+				a {
+					color: #ffffff;
+					font-size: $inputHeaderFontSize;
+				}
+			}
+		}
+	}
+
+	.ui-steps {
+		position: relative;
+
+		.ui-steps-item {
+			background-color: transparent;
+
+			&.ui-state-disabled {
+				@include opacity(1);
+			}
+
+			.ui-menuitem-link {
+				display: inline-block;
+				text-align: left;
+				background-color: #ffffff;
+				overflow: hidden;
+
+				.ui-steps-number {
+					display: inline-block;
+					background-color: $grayBgColor;
+					@include border-radius(50%);
+					padding: .25em .75em;
+					font-size: 1em;
+					color: #ffffff;
+				}
+
+				.ui-steps-title {
+					display: inline;
+					margin-left: .625em;
+					color: $textSecondaryColor;
+				}
+			}
+
+			&.ui-state-highlight {
+				.ui-steps-number {
+					background-color: $accentColor;
+				}
+
+				.ui-steps-title {
+					font-weight: 700;
+					color: $textColor;
+				}
+			}
+
+			&:last-child {
+				.ui-menuitem-link {
+					display: block;
+				}
+			}
+		}
+
+		&:before {
+			content: ' ';
+			border: 1px solid $dividerColor;
+			width: 90%;
+			top: 45%;
+			left: 0;
+			display: block;
+			position: absolute;
+		}
+	}
+
+	.ui-menu {
+		padding: .5em 0;
+
+		.ui-shadow, &.ui-shadow {
+			@include overlay-input-shadow();
+		}
+
+		.ui-menu-list {
+			padding: 0;
+			margin: 0;
+
+			li {
+				&.ui-widget-header {
+					margin: 0 0 1px 0;
+					@include border-radius(0);
+					border: 0 none;
+					width: 100%;
+					box-sizing: border-box;
+					padding: .625em 1em;
+
+					h3 {
+						display: block;
+						float: none;
+						font-size: $fontSize;
+						padding: 0;
+						font-weight: 400;
+					}
+				}
+
+				&.ui-menuitem {
+					margin: 0;
+					@include border-radius(0);
+
+					&.ui-state-hover {
+						@include hover-element();
+					}
+
+					.ui-menuitem-link {
+						border: 0 none;
+						padding: .625em 1em;
+						width: 100%;
+						min-height: 2.75em;
+						box-sizing: border-box;
+						color: $textColor;
+						line-height: 1.5em;
+						@include border-radius(0);
+						position: relative;
+
+						&.ui-state-hover {
+							@include hover-element();
+						}
+
+						.ui-menuitem-icon {
+							margin-right: .417em;
+							display: inline-block;
+							vertical-align: middle;
+							float: none;
+							color: $textSecondaryColor;
+						}
+
+						.ui-menuitem-text {
+							display: inline-block;
+							vertical-align: middle;
+							float: none;
+						}
+					}
+				}
+			}
+
+			.ui-separator {
+				height: 1px;
+				background-color: $dividerColor;
+				width: 100%;
+				box-sizing: border-box;
+			}
+		}
+
+		&.ui-menu-toggleable {
+			.ui-menu-list {
+				li {
+					&.ui-widget-header {
+						padding-left: 2.250em;
+
+						.fa {
+							color: #ffffff;
+
+							&.fa-triangle-1-s {
+								margin-top: -.75em;
+							}
+
+							&.fa-triangle-1-e {
+								margin-top: -.75em;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		&.ui-tieredmenu {
+			.ui-menu-child {
+				padding: .5em 0;
+			}
+		}
+
+		&.ui-menubar {
+			padding: 0;
+
+			.ui-menubar-root-list {
+				> .ui-menuitem {
+					> .ui-menuitem-link {
+						.ui-menuitem-icon {
+							margin-right: 0;
+						}
+					}
+				}
+			}
+
+			.ui-menu-child {
+				padding: .5em 0;
+			}
+
+			.ui-menubar-options {
+				padding: .625em 1em;
+			}
+		}
+
+		&.ui-slidemenu {
+
+			.ui-menu-parent {
+				.ui-menu-child {
+					padding: 0;
+					@include no-shadow();
+				}
+			}
+
+			.ui-slidemenu-backward {
+				width: 100%;
+				box-sizing: border-box;
+				@include border-radius(0);
+			}
+		}
+	}
+
+	.ui-tabmenu {
+		padding: 0;
+
+		.ui-tabmenu-nav {
+			padding: 0;
+			background-color: #ffffff;
+			border: 0 none;
+			@include border-radius(0);
+
+			> .ui-tabmenuitem {
+				top: auto;
+				margin: 0 .25em 0 0;
+				padding: 0;
+				border-style: solid;
+				border-width: 0 0 2px 0;
+				@include transition(border-color .3s);
+
+				> a {
+					padding: $headerPadding;
+
+					&:focus {
+						outline: 0 none;
+					}
+
+					.ui-menuitem-icon, .ui-menuitem-text {
+						float: none;
+						display: inline-block;
+						vertical-align: middle;
+					}
+
+					.ui-menuitem-icon {
+						font-weight: 1em;
+						margin-right: .5em;
+					}
+				}
+
+				&.ui-state-default {
+					a {
+						color: $textSecondaryColor;
+
+						.fa {
+							color: $textSecondaryColor;
+						}
+					}
+				}
+
+				&.ui-state-hover {
+					background-color: #ffffff;
+				}
+
+				&.ui-state-active {
+					background-color: #ffffff;
+					border-color: $accentColor;
+					border-style: solid;
+
+					a {
+						color: $primaryColor;
+
+						.fa {
+							color: $primaryColor;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.ui-panelmenu {
+		.ui-panelmenu-header {
+			background-color: $primaryColor;
+			margin-bottom: 1px;
+
+			a {
+				padding: .625em 1em;
+				color: #ffffff;
+				font-size: $fontSize;
+			}
+
+			.fa {
+				color: #ffffff;
+			}
+
+			&.ui-state-active {
+				background-color: $accentColor;
+				@include border-radius-bottom(0);
+				a, .fa {
+					color: $accentTextColor;
+				}
+			}
+		}
+
+		.ui-panelmenu-content {
+			padding: 0;
+
+			.ui-menuitem {
+				margin: 0;
+
+				.ui-menuitem-link {
+					border: 0 none;
+					padding: .625em 1em;;
+					width: 100%;
+					min-height: 2.750em;
+					box-sizing: border-box;
+					color: $textColor;
+					line-height: 1.5em;
+					@include border-radius(0);
+					position: relative;
+
+					&.ui-state-hover {
+						@include hover-element();
+					}
+
+					.ui-menuitem-text {
+						display: inline-block;
+						vertical-align: middle;
+						float: none;
+					}
+
+					.fa {
+						position: static;
+						display: inline-block;
+						vertical-align: middle;
+					}
+				}
+			}
+		}
+
+		.ui-menu-parent .ui-menu-list {
+			margin-left: 28px;
+		}
+	}
+}
+
+@media (max-width: 640px) {
+	body {
+		.ui-steps {
+			.ui-steps-item {
+				.ui-menuitem-link {
+					.ui-steps-title {
+						display: none;
+					}
+				}
+			}
+		}
+	}
+}
