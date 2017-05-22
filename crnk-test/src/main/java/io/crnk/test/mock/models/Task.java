@@ -1,13 +1,20 @@
 package io.crnk.test.mock.models;
 
-import io.crnk.core.resource.annotations.*;
-import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.meta.MetaInformation;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 
 @JsonApiResource(type = "tasks")
 public class Task {
@@ -36,12 +43,35 @@ public class Task {
 	private List<Project> includedProjects;
 
 	@JsonApiMetaInformation
-	private MetaInformation metaInformation;
+	private TaskMeta metaInformation;
 
 	@JsonApiLinksInformation
-	private LinksInformation linksInformation;
+	private TaskLinks linksInformation;
+
+	public static class TaskLinks implements LinksInformation {
+
+		public String value = "test";
+
+	}
+
+	public static class TaskMeta implements MetaInformation {
+
+		public String value = "test";
+
+	}
+
 
 	private List<Task> otherTasks;
+
+	private TaskStatus status;
+
+	public TaskStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TaskStatus status) {
+		this.status = status;
+	}
 
 	public List<Task> getOtherTasks() {
 		return otherTasks;
@@ -122,20 +152,20 @@ public class Task {
 		this.includedProjects = includedProjects;
 	}
 
-	public MetaInformation getMetaInformation() {
+	public TaskMeta getMetaInformation() {
 		return metaInformation;
 	}
 
-	public Task setMetaInformation(MetaInformation metaInformation) {
+	public Task setMetaInformation(TaskMeta metaInformation) {
 		this.metaInformation = metaInformation;
 		return this;
 	}
 
-	public LinksInformation getLinksInformation() {
+	public TaskLinks getLinksInformation() {
 		return linksInformation;
 	}
 
-	public Task setLinksInformation(LinksInformation linksInformation) {
+	public Task setLinksInformation(TaskLinks linksInformation) {
 		this.linksInformation = linksInformation;
 		return this;
 	}

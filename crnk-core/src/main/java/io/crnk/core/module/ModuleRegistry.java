@@ -1,5 +1,13 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -7,7 +15,11 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.repository.*;
+import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
@@ -22,7 +34,11 @@ import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryAware;
+import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
@@ -39,8 +55,6 @@ import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-
-import java.util.*;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -240,7 +254,8 @@ public class ModuleRegistry {
 					ResourceRepositoryInformation info = (ResourceRepositoryInformation) repositoryInformation;
 					repositoryImplementations.put(info, repository);
 					repositoryMap.add(info.getResourceInformation().getResourceClass(), repositoryInformation);
-				} else {
+				}
+				else {
 					RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) repositoryInformation;
 					repositoryImplementations.put(info, repository);
 					repositoryMap.add(info.getSourceResourceInformation().getResourceClass(), repositoryInformation);
@@ -258,7 +273,8 @@ public class ModuleRegistry {
 					resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
 					Object repository = repositoryImplementations.get(resourceRepositoryInformation);
 					resourceEntry = setupResourceRepository(resourceRepositoryInformation, repository);
-				} else {
+				}
+				else {
 					RelationshipRepositoryInformation relationshipRepositoryInformation =
 							(RelationshipRepositoryInformation) repositoryInformation;
 					Object repository = repositoryImplementations.get(repositoryInformation);
@@ -285,7 +301,7 @@ public class ModuleRegistry {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private ResourceEntry setupResourceRepository(ResourceRepositoryInformation resourceRepositoryInformation,
-												  Object repository) {
+			Object repository) {
 		final Object decoratedRepository = decorateRepository(repository);
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
 
@@ -297,7 +313,8 @@ public class ModuleRegistry {
 
 		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
 			return new AnnotatedResourceEntry(this, repositoryInstanceBuilder);
-		} else {
+		}
+		else {
 			return new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		}
 	}
@@ -310,7 +327,8 @@ public class ModuleRegistry {
 			Decorator decorator = null;
 			if (decoratedRepository instanceof RelationshipRepositoryV2) {
 				decorator = repositoryDecorator.decorateRepository((RelationshipRepositoryV2) decoratedRepository);
-			} else if (decoratedRepository instanceof ResourceRepositoryV2) {
+			}
+			else if (decoratedRepository instanceof ResourceRepositoryV2) {
 				decorator = repositoryDecorator.decorateRepository((ResourceRepositoryV2) decoratedRepository);
 			}
 			if (decorator != null) {
@@ -326,7 +344,7 @@ public class ModuleRegistry {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void setupRelationship(List<ResponseRelationshipEntry> relationshipEntries,
-								   final RelationshipRepositoryInformation relationshipRepositoryInformation, final Object relRepository) {
+			final RelationshipRepositoryInformation relationshipRepositoryInformation, final Object relRepository) {
 
 		final Object decoratedRepository = decorateRepository(relRepository);
 		RepositoryInstanceBuilder<Object> relationshipInstanceBuilder = new RepositoryInstanceBuilder<Object>(null, null) {
@@ -344,7 +362,8 @@ public class ModuleRegistry {
 
 		if (ClassUtils.getAnnotation(relRepository.getClass(), JsonApiRelationshipRepository.class).isPresent()) {
 			relationshipEntries.add(new AnnotatedRelationshipEntryBuilder(this, relationshipInstanceBuilder));
-		} else {
+		}
+		else {
 			ResponseRelationshipEntry relationshipEntry = new DirectResponseRelationshipEntry(relationshipInstanceBuilder) {
 
 				@Override
@@ -386,6 +405,15 @@ public class ModuleRegistry {
 
 	public List<Module> getModules() {
 		return modules;
+	}
+
+	public <T extends Module> io.crnk.core.utils.Optional<T> getModule(Class<T> clazz) {
+		for (Module module : modules) {
+			if (clazz.isInstance(module)) {
+				return io.crnk.core.utils.Optional.of((T)module);
+			}
+		}
+		return io.crnk.core.utils.Optional.empty();
 	}
 
 	public TypeParser getTypeParser() {
