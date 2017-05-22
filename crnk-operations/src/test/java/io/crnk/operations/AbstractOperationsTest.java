@@ -1,5 +1,17 @@
 package io.crnk.operations;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -27,18 +39,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractOperationsTest extends JerseyTest {
 
@@ -132,7 +132,7 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 
 			@Override
 			public Object call() throws Exception {
-				EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
+				EntityManager em = context.getBean(io.crnk.operations.EntityManagerProducer.class).getEntityManager();
 				clear(em);
 				return null;
 			}
@@ -154,10 +154,10 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 		public TestApplication() {
 			Assert.assertNull(context);
 
-			context = new AnnotationConfigApplicationContext(OperationsTestConfig.class);
+			context = new AnnotationConfigApplicationContext(io.crnk.operations.OperationsTestConfig.class);
 			context.start();
 			EntityManagerFactory emFactory = context.getBean(EntityManagerFactory.class);
-			EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
+			EntityManager em = context.getBean(io.crnk.operations.EntityManagerProducer.class).getEntityManager();
 			SpringServiceDiscovery serviceDiscovery = context.getBean(SpringServiceDiscovery.class);
 			SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
 
@@ -177,8 +177,11 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 				}
 			}
 
-			OperationsModule operationsModule = new OperationsModule();
+			OperationsModule operationsModule = OperationsModule.create();
+
+			// tag::transaction[]
 			operationsModule.addFilter(new TransactionOperationFilter());
+			// end::transaction[]
 
 			feature.addModule(jpaModule);
 			feature.addModule(operationsModule);

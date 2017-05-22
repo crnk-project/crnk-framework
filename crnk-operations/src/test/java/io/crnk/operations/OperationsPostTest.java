@@ -1,5 +1,9 @@
 package io.crnk.operations;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.UUID;
+
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -12,15 +16,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
-
-public class OperationsPostTest extends AbstractOperationsTest {
+public class OperationsPostTest extends io.crnk.operations.AbstractOperationsTest {
 
 	protected ResourceRepositoryV2<MovieEntity, UUID> movieRepo;
 
-	private OperationsClient operationsClient;
 
 	@Before
 	@Override
@@ -28,7 +27,7 @@ public class OperationsPostTest extends AbstractOperationsTest {
 		super.setUp();
 
 		movieRepo = client.getRepositoryForType(MovieEntity.class);
-		operationsClient = new OperationsClient(client);
+
 	}
 
 	@Test
@@ -40,11 +39,14 @@ public class OperationsPostTest extends AbstractOperationsTest {
 		MovieEntity movie = newMovie("test");
 		movie.setDirectors(new HashSet<>(Arrays.asList(person1, person2)));
 
+		// tag::client[]
+		OperationsClient operationsClient = new OperationsClient(client);
 		OperationsCall call = operationsClient.createCall();
 		call.add(HttpMethod.POST, movie);
 		call.add(HttpMethod.POST, person1);
 		call.add(HttpMethod.POST, person2);
 		call.execute();
+		// end::client[]
 
 
 		QuerySpec querySpec = new QuerySpec(PersonEntity.class);

@@ -24,7 +24,7 @@ public class HomeModule implements Module {
 
 	}
 
-	public static HomeModule newInstance() {
+	public static HomeModule create() {
 		return new HomeModule();
 	}
 

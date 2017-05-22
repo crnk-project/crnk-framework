@@ -4,9 +4,9 @@
 
 anchor:client[]
 
-# Crnk Client
+# Client
 
-There is a Crnk client for Java projects to allow
+There is a client implementation for Java and Android projects to allow
 communicating with JSON-API compliant servers. Two http client libraries are supported:
 
 * `OkHttp <http://square.github.io/okhttp>`
@@ -51,7 +51,7 @@ In a first step an interface for a repository is defined:
 [source]
 .ScheduleRepository.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=doc]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/repository/ScheduleRepository.java[tags=doc]
 ----
 
 And then it can be used like:
@@ -73,7 +73,7 @@ The interface stubs from the previous section can also be used to make calls to 
 [source]
 .ScheduleRepository.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=annotation]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/repository/ScheduleRepository.java[tags=annotation]
 ----
 
 and further JAX-RS services can be added:
@@ -81,7 +81,7 @@ and further JAX-RS services can be added:
 [source]
 .ScheduleRepository.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/mock/repository/ScheduleRepository.java[tags=services]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/repository/ScheduleRepository.java[tags=services]
 ----
 
 To make this work a dependency to `org.glassfish.jersey.ext:jersey-proxy-client` must be added and `JerseyActionStubFactory`

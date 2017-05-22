@@ -54,7 +54,7 @@ public class ModuleConfig {
 	 */
 	@Bean
 	public HomeModule homeModule() {
-		return HomeModule.newInstance();
+		return HomeModule.create();
 	}
 
 	/**

@@ -1,3 +1,4 @@
+:basedir: ../../../..
 
 # Modules
 
@@ -235,7 +236,7 @@ used by CrnkClient.
 
 ## Meta Module
 
-This is a (very) experimental module that exposes the internal workings of Crnk as JSON API repositories.
+This is a module that exposes the internal workings of Crnk as JSON API repositories.
 It lets you browse the set of available resources, their types, their attributes, etc. For example,
 Crnk UI make use of the meta module to implement auto-completing of input fields.
 A setup can look as follows:
@@ -246,8 +247,79 @@ A setup can look as follows:
 		metaModule.addMetaProvider(new ResourceMetaProvider());
 ----
 
-To learn more about the set of available resources, have a look at the `MetaElement` class and all its subclasses,
-most notably `MetaResource` and `MetaResourceRepository`.
+To learn more about the set of available resources, have a look at the `MetaElement` class and all its subclasses. Some of the
+most important classes are:
 
 
+[cols="15,15,70"]
+|===
+| Path              		| Implementation            | Description
+| `/meta/element`			| `MetaElement` 			| Base class implemented by any meta element.
+| `/meta/type`				| `MetaType` 				| Base class implemented by any meta type element.
+| `/meta/primitiveType`		| `MetaPrimitiveType` 		| Represents primitive types like Strings and Integers.
+| `/meta/arrayType`			| `MetaArrayType` 			| Represents an array type.
+| `/meta/listType`			| `MetaListType` 			| Represents an list type.
+| `/meta/setType`			| `MetaSetType` 			| Represents an set type.
+| `/meta/mapType`			| `MetaMapType` 			| Represents an map type.
+| `/meta/dataObject`		| `MetaDataObject`   		| Base type for any object holding data, like
+																			 JPA entities or JSON API resources.
+| `/meta/attribute`			| `MetaAttribute` 			| Represents an attribute of a `MetaDataObject`.
+| `/meta/resource`		 	| `MetaResource`   			| JSON API resource representation extending `MetaDataObject`.
+| `/meta/resourceRepository`| `MetaResourceRepository` 	| JSON API repository representation holding resources.
+|===
+
+
+
+
+## Home Module
+
+The `HomeModule` provides an implementation for https://tools.ietf.org/html/draft-nottingham-json-home-06[JSON Home]. It allows
+you to obtain a list of available repositories when accessing the parent page of your repositories (typically `/api`).
+
+
+[source]
+----
+		HomeModule metaModule = HomeModule.create();
+		...
+----
+
+The module is currently in an incubator stage.
+
+
+
+
+## Operations Module
+
+By its nature RESTful applications are limited to the insertion, update and deletion of single resources. As such, developers
+have to design resources accordingly while having to consider aspects like transaction handling and atomicity. It is not
+uncommon to combine multiple data objects on the server-side and expose it as single resource to clients. It is a simple
+approach, but can also mean quite a substantial overhead when having to implement potentially redudant repositories.
+Furthermore, things like validation handling, relationships and supporting complex object graphs can get tricky when a single
+resource starts holding complex object graphs again. For this reasons the `OperationsModule` provides support for
+http://jsonpatch.com/[jsonpatch.com]. It allows to send multiple insertions, updates and deletions with a single request
+and provides the results for each such executed operation.
+
+
+[source]
+----
+		OperationsModule operationsModule = OperationsModule.create();
+		...
+----
+
+Further filters can be applied to intercept incoming requests. Typically applications will make use of that to start a new
+transaction spanning all requests. This looks as follows:
+
+[source]
+.AbstractOperationsTest.java
+----
+include::../../../../crnk-operations/src/test/java/io/crnk/operations/AbstractOperationsTest.java[tags=transaction]
+----
+
+There is further an operations client implementation that works along the regular JSON API client implementation:
+
+[source]
+.OperationsPostTest.java
+----
+include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
+----
 
