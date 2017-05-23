@@ -38,6 +38,7 @@ gradle.beforeProject { Project project ->
 		apply plugin: 'maven'
 
 		def docs = project.name == 'crnk-documentation'
+		def ui = project.name == 'crnk-ui'
 		def examples = project.name.contains('example')
 
 		if (docs) {
@@ -53,6 +54,7 @@ gradle.beforeProject { Project project ->
 		}
 
 		if (!docs && !examples) {
+			// https://about.sonarqube.com/get-started/
 			apply plugin: "org.sonarqube"
 		}
 
@@ -63,7 +65,7 @@ gradle.beforeProject { Project project ->
 		System.out.println(System.env.NEXUS_DEPLOY_USER);
 		System.err.println(System.env.NEXUS_DEPLOY_USER);
 
-		if(System.env.NEXUS_DEPLOY_USER){
+		if (System.env.NEXUS_DEPLOY_USER) {
 			publishing {
 				repositories {
 					maven {
@@ -86,8 +88,10 @@ gradle.beforeProject { Project project ->
 						mavenJava(MavenPublication) {
 							from components.java
 
-							artifact sourceJar {
-								classifier "sources"
+							if (!ui) {
+								artifact sourceJar {
+									classifier "sources"
+								}
 							}
 						}
 					}
