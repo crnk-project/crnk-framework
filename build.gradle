@@ -12,6 +12,7 @@ buildscript {
 		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 		classpath 'org.ajoberstar:gradle-git-publish:0.2.1'
+		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 	}
 }
 
@@ -36,7 +37,10 @@ gradle.beforeProject { Project project ->
 	project.with {
 		apply plugin: 'maven'
 
-		if (project.name != 'crnk-documentation') {
+		def docs = project.name == 'crnk-documentation'
+		def examples = project.name.contains('example')
+
+		if (docs) {
 			apply plugin: 'java'
 			sourceCompatibility = 1.7
 			targetCompatibility = 1.7
@@ -48,7 +52,16 @@ gradle.beforeProject { Project project ->
 			}
 		}
 
+		if (!docs && !examples) {
+			apply plugin: "org.sonarqube"
+		}
+
 		apply plugin: 'maven-publish'
+
+		System.out.println("hi!!!!!!!!!!")
+		System.err.println("hi!!!!!!!!!!")
+		System.out.println(System.env.NEXUS_DEPLOY_USER);
+		System.err.println(System.env.NEXUS_DEPLOY_USER);
 
 		if(System.env.NEXUS_DEPLOY_USER){
 			publishing {
@@ -64,7 +77,7 @@ gradle.beforeProject { Project project ->
 					}
 				}
 
-				if (project.name != 'crnk-documentation' && !project.name.contains('example')) {
+				if (!docs && !examples) {
 					task sourceJar(type: Jar) {
 						from sourceSets.main.allJava
 					}
@@ -84,3 +97,4 @@ gradle.beforeProject { Project project ->
 
 	}
 }
+
