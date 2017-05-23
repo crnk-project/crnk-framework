@@ -27,9 +27,14 @@ include ':crnk-documentation'
 
 gradle.startParameter.showStacktrace = org.gradle.api.logging.configuration.ShowStacktrace.ALWAYS
 
-
 gradle.beforeProject { Project project ->
 	project.with {
+
+		// get password from environment if available
+		if(System.env['signing.password']){
+			ext['signing.password'] = System.env['signing.password']
+		}
+
 		buildscript {
 			repositories {
 				maven {

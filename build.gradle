@@ -83,6 +83,12 @@ gradle.beforeProject { Project project ->
 				}
 
 				if (!docs && !examples) {
+
+					apply plugin: 'signing'
+					signing {
+						sign configurations.archives
+					}
+
 					publications {
 						mavenJava(MavenPublication) {
 							from components.java
