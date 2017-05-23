@@ -31,8 +31,8 @@ gradle.beforeProject { Project project ->
 	project.with {
 
 		// get password from environment if available
-		if(System.env['signing.password']){
-			ext['signing.password'] = System.env['signing.password']
+		if(System.env['SIGNING_PASSWORD']){
+			ext['signing.password'] = System.env['SIGNING_PASSWORD']
 		}
 
 		buildscript {
