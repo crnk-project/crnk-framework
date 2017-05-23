@@ -1,16 +1,17 @@
 package io.crnk.security;
 
+import java.util.List;
+
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Task;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.List;
-
 public class SecurityConfigTest {
 
 	@Test
 	public void test() {
+		// tag::docs[]
 		Builder builder = SecurityConfig.builder();
 		builder.permitAll(ResourcePermission.GET);
 		builder.permitAll(Task.class, ResourcePermission.DELETE);
@@ -19,6 +20,7 @@ public class SecurityConfigTest {
 		builder.permitRole("someRole", Task.class, ResourcePermission.DELETE);
 		builder.permitRole("someRole", "projects", ResourcePermission.PATCH);
 		SecurityConfig config = builder.build();
+		// end::docs[]
 
 		List<SecurityRule> rules = config.getRules();
 		Assert.assertEquals(6, rules.size());

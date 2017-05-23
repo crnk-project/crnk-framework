@@ -1,6 +1,8 @@
+
 # Generation
 
-NOTE: this feature is still experimental, feedback and contributions welcomed
+NOTE: this feature is still in incurbation, feedback and contributions welcomed. In particular further frameworks like
+Spring must be supported.
 
 Crnk allows the generation of Typescript stubs for type-safe, client-side web development. Contributions for other
 languages like iOS would be very welcomed.
@@ -12,58 +14,10 @@ information, links information, data objects, list types and enumeration types. 
 <a href="https://github.com/abdulhaq-e/ngrx-json-api">ngrx-json-api</a> library. Support for other libraries/formats
 would be fairly straightforward to add, contributions welcomed. A generated resource looks like:
 
+
 [source]
 ----
-
-
-import {MetaAttribute, QMetaAttribute} from "./meta.attribute";
-import {MetaInterface, QMetaInterface} from "./meta.interface";
-import {MetaKey, QMetaKey} from "./meta.key";
-import {MetaType} from "./meta.type";
-import {BeanPath} from "../binding/expression";
-import {
-	QTypedManyResourceRelationship,
-	QTypedOneResourceRelationship,
-	TypedManyResourceRelationship,
-	TypedOneResourceRelationship
-} from "../binding/jsonapi";
-import {ResourceRelationship, StoreResource} from "ngrx-json-api";
-
-export module Project {
-	export interface Relationships extends MetaType.Relationships {
-		[key: string]: ResourceRelationship;
-		interfaces?: TypedManyResourceRelationship<MetaInterface>;
-		subTypes?: TypedManyResourceRelationship<Project>;
-		declaredKeys?: TypedManyResourceRelationship<MetaKey>;
-		declaredAttributes?: TypedManyResourceRelationship<MetaAttribute>;
-		attributes?: TypedManyResourceRelationship<MetaAttribute>;
-		superType?: TypedOneResourceRelationship<Project>;
-		primaryKey?: TypedOneResourceRelationship<MetaKey>;
-	}
-	export interface Attributes extends MetaType.Attributes {
-	}
-}
-export interface Project extends MetaType, StoreResource {
-	relationships?: Project.Relationships;
-	attributes?: Project.Attributes;
-}
-export class QProject extends BeanPath<Project> {
-	relationships: QProject.QRelationships = new QProject.QRelationships(this, 'relationships');
-	attributes: QProject.QAttributes = new QProject.QAttributes(this, 'attributes');
-}
-export module QProject {
-	export class QRelationships extends BeanPath<Project.Relationships> {
-		interfaces: QTypedManyResourceRelationship<QMetaInterface,MetaInterface> = new QTypedManyResourceRelationship<QMetaInterface,MetaInterface>(this, 'interfaces', new QMetaInterface(null, 'data'));
-		subTypes: QTypedManyResourceRelationship<QProject,Project> = new QTypedManyResourceRelationship<QProject,Project>(this, 'subTypes', new QProject(null, 'data'));
-		declaredKeys: QTypedManyResourceRelationship<QMetaKey,MetaKey> = new QTypedManyResourceRelationship<QMetaKey,MetaKey>(this, 'declaredKeys', new QMetaKey(null, 'data'));
-		declaredAttributes: QTypedManyResourceRelationship<QMetaAttribute,MetaAttribute> = new QTypedManyResourceRelationship<QMetaAttribute,MetaAttribute>(this, 'declaredAttributes', new QMetaAttribute(null, 'data'));
-		attributes: QTypedManyResourceRelationship<QMetaAttribute,MetaAttribute> = new QTypedManyResourceRelationship<QMetaAttribute,MetaAttribute>(this, 'attributes', new QMetaAttribute(null, 'data'));
-		superType: QTypedOneResourceRelationship<QProject,Project> = new QTypedOneResourceRelationship<QProject,Project>(this, 'superType', new QProject(null, 'data'));
-		primaryKey: QTypedOneResourceRelationship<QMetaKey,MetaKey> = new QTypedOneResourceRelationship<QMetaKey,MetaKey>(this, 'primaryKey', new QMetaKey(null, 'data'));
-	}
-	export class QAttributes extends BeanPath<Project.Attributes> {
-	}
-}
+include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_without_expressions.ts[]
 ----
 
 
@@ -91,12 +45,14 @@ typescriptGen.npmPackageName = '@crnk/typescript-demo'
 Two configurations are necessary:
 
 - `npmPackageName` to use for publishing.
-- a mapping of meta (package) ids to npm packages. Only resources are generated that are whose package matches the chosen `npmPackageName`.
+- a mapping of meta (package) ids to npm packages. Only resources are generated whose package matches the chosen `npmPackageName`.
   All other resources are imported as external NPM dependency.
 
 katharsis-meta is used to get a meta model of the underlying resources (or a any other type of object like JPA entities).
 Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
 the class name. But for more advanced use cases those may or can differ.
 
-TODO publishing to a npm repository is not yet setup.
+TODO show publishing setup into NPM repository
+
+
 

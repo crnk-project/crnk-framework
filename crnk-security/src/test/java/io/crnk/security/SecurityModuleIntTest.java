@@ -1,5 +1,12 @@
 package io.crnk.security;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
@@ -16,7 +23,12 @@ import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
 import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
-import okhttp3.*;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -30,13 +42,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 public class SecurityModuleIntTest extends JerseyTest {
 
@@ -270,6 +275,7 @@ public class SecurityModuleIntTest extends JerseyTest {
 		public TestApplication() {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, Project.class.getPackage().getName());
 
+			// tag::setup[]
 			Builder builder = SecurityConfig.builder();
 			builder.permitRole("allRole", ResourcePermission.ALL);
 			builder.permitRole("getRole", ResourcePermission.GET);
@@ -285,6 +291,7 @@ public class SecurityModuleIntTest extends JerseyTest {
 
 			CrnkFeature feature = new CrnkFeature();
 			feature.addModule(module);
+			// end::setup[]
 			register(feature);
 		}
 	}

@@ -208,26 +208,17 @@ for incoming requests. That is the purpose of the JAX-RS/servlet integration of 
 
 ## Security Module
 
-This is an experimental module that intercepts all repository requests and performs Role-based access
+This is an incurbation module that intercepts all repository requests and performs Role-based access
 control. Have a look at the `SecurityModule` and the related `SecurityConfig` class.
 A setup can looks as follows:
 
 
 [source]
+.SecurityModuleIntTest.java
 ----
-	Builder builder = SecurityConfig.builder();
-	builder.permitRole("allRole", ResourcePermission.ALL);
-	builder.permitRole("getRole", ResourcePermission.GET);
-	builder.permitRole("patchRole", ResourcePermission.PATCH);
-	builder.permitRole("postRole", ResourcePermission.POST);
-	builder.permitRole("deleteRole", ResourcePermission.DELETE);
-	builder.permitRole("taskRole", Task.class, ResourcePermission.ALL);
-	builder.permitRole("taskReadRole", Task.class, ResourcePermission.GET);
-	builder.permitRole("projectRole", Project.class, ResourcePermission.ALL);
-	builder.permitAll(ResourcePermission.GET);
-	builder.permitAll(Project.class, ResourcePermission.POST);
-	securityModule = SecurityModule.newServerModule(builder.build());
+include::../../../../crnk-security/src/test/java/io/crnk/security/SecurityModuleIntTest.java[tags=setup]
 ----
+
 
 The security module further properly serializes javax.security
 authorization and authentication exceptions. As such it is also recommended to be
@@ -295,9 +286,15 @@ have to design resources accordingly while having to consider aspects like trans
 uncommon to combine multiple data objects on the server-side and expose it as single resource to clients. It is a simple
 approach, but can also mean quite a substantial overhead when having to implement potentially redudant repositories.
 Furthermore, things like validation handling, relationships and supporting complex object graphs can get tricky when a single
-resource starts holding complex object graphs again. For this reasons the `OperationsModule` provides support for
-http://jsonpatch.com/[jsonpatch.com]. It allows to send multiple insertions, updates and deletions with a single request
-and provides the results for each such executed operation.
+resource starts holding complex object graphs again.
+
+For all the before mentioned reason support for http://jsonpatch.com/[jsonpatch.com] is provided. It allows to send multiple
+insertions, updates and deletions with a single request and provides the results for each such executed operation.
+Note that numerous attempts and discussions have taken place and are still ongoing to establish a common JSON API standard,
+but that does not seem to make much progress. With  http://jsonpatch.com/[jsonpatch.com] there is already an estabilished
+standard that fits well for many use cases.
+
+The implementation is provided as `OperationsModule` and the setup looks like:
 
 
 [source]
@@ -323,3 +320,10 @@ There is further an operations client implementation that works along the regula
 include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
 ----
 
+The current limitations of the implementation are:
+
+- So far does not support bulk `GET` operations.
+- Does so far not support bulk update of relationships.
+
+With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
+The limitations are expected to be addressed at some point as well, contributions welcomed.

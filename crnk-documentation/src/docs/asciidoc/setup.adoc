@@ -107,39 +107,15 @@ There are two ways of integrating crnk using Servlets:
 
 ### Integrating using a Servlet
 
-To integrate Crnk using a servlet several steps are required.
-The first one is to create a class that extends ``AbstractCrnkServlet`` and will provide required configuration for the library.
-The code below shows a sample implementation:
+There is a `CrnkServlet` implementation allowing to integrate Crnk into a Servlet environment.
+It can be configured with all the parameters outlined in the subsequent sections. Many times
+application will desire to do more advanced customizations, in this case one can
+extends `CrnkServlet` and get access to `CrnkBoot`. The code below shows a sample implementation:
 
 [source]
+.SampleCrnkServlet.java
 ----
-
-  import io.crnk.invoker.CrnkInvokerBuilder;
-  import io.crnk.locator.JsonServiceLocator;
-  import io.crnk.locator.SampleJsonServiceLocator;
-
-  import javax.servlet.ServletConfig;
-  import javax.servlet.ServletException;
-
-  public class SampleCrnkServlet extends AbstractCrnkServlet {
-
-      private String resourceSearchPackage;
-
-      @Override
-      public void init(ServletConfig servletConfig) throws ServletException {
-          super.init(servletConfig);
-          resourceSearchPackage = servletConfig
-              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
-      }
-
-      @Override
-      protected CrnkInvokerBuilder createCrnkInvokerBuilder() {
-          return new CrnkInvokerBuilder()
-              .resourceSearchPackage(resourceSearchPackage)
-              .jsonServiceLocator(new SampleJsonServiceLocator());
-      }
-
-  }
+include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/SampleCrnkServlet.java[tags=docs]
 ----
 
 The newly created servlet must be added to the ``web.xml`` file or to another deployment descriptor.
@@ -168,48 +144,12 @@ You may omit the `resourceSearchPath` depending on which discovery mechanism is 
 
 ### Integrating using a filter
 
-To integrate Crnk using a filter, several steps are required.
-First, create a class that extends ``AbstractCrnkFilter``, which will provide required configuration for the library.
-The code below shows a sample implementation:
+Integrating Crnk as a Servlet filter works in a very similar fashion as for servlets:
 
 [source]
+.SampleCrnkFilter.java
 ----
-  import io.crnk.invoker.CrnkInvokerBuilder;
-  import io.crnk.locator.JsonServiceLocator;
-  import io.crnk.locator.SampleJsonServiceLocator;
-
-  import javax.servlet.FilterConfig;
-  import javax.servlet.ServletException;
-
-  public class SampleCrnkFilter extends AbstractCrnkFilter {
-
-      private String resourceSearchPackage;
-
-      public void init(FilterConfig filterConfig) throws ServletException {
-          super.init(filterConfig);
-          resourceSearchPackage = filterConfig
-              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
-      }
-
-      @Override
-      public void init(FilterConfig filterConfig) throws ServletException {
-          super.init(filterConfig);
-          resourceSearchPackage = filterConfig
-              .getInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE);
-      }
-
-      /**
-       * NOTE: A class extending this must provide a platform specific {@link JsonServiceLocator}
-       *       instead of the (testing-purpose) {@link SampleJsonServiceLocator} below
-       *       in order to provide advanced dependency injections for the repositories.
-       */
-      @Override
-      protected CrnkInvokerBuilder createCrnkInvokerBuilder() {
-          return new CrnkInvokerBuilder()
-              .resourceSearchPackage(resourceSearchPackage)
-              .jsonServiceLocator(new SampleJsonServiceLocator());
-      }
-  }
+include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/SampleCrnkFilter.java[tags=docs]
 ----
 
 The newly created filter must be added to ``web.xml`` file or other deployment descriptor.
@@ -291,7 +231,32 @@ should be searched for beans. Multiple packages can be passed by specifying a co
 of packages i.e. com.company.service.dto,com.company.service.repository. It will pick up any public non-abstract
 class that makes use of Crnk interfaces, like repositories, exception mappers and modules.
 
+## No Discovery
 
+It is also possible to make use of no discovery mechanism at all. In this case it is still possible to add repositories
+and other features through modules. Have a look at the various module related chapters.
+
+
+## CrnkBoot
+
+`CrnkBoot` is a class shared among all the different integrations that takes care of setting up and starting
+Crnk. Every integration will provide access to it, which in turn allows for virtually any kind of customization.
+
+Some possiblities:
+
+- `getObjectMapper` allows access to the used Jackson instance.
+- `addModule` allows to add a module.
+- `setServiceDiscovery` sets a custom service discovery mechanism.
+- `setPropertiesProvider` allows to set how properties are resolved.
+- `getQuerySpecDeserializer` and `setQuerySpecDeserializer` allows to reconfigure how parameters are parsed.
+   Note that in some areas JSON API only provides reocmmendations and Crnk follows those recommendations
+   by default. So depending on your use cases, you may want to configure or implement some aspects differently.
+- `setMaxPageLimit` allows to set the maximum number of allowed resources that can be fetched with a request
+   by limiting pagination.
+- `setDefaultPageLimit` allows to set a default page limit if none is specified by the request. *Highly
+   recommended* to be used as people frequently browse repositories on there own with a web browser and
+   fail to provide pagination. As a result, your entire database may get downloaded and may bring down
+   your servers depending on the datasize.
 
 
 ## Parameters
