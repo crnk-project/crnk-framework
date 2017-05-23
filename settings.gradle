@@ -27,11 +27,12 @@ include ':crnk-documentation'
 
 gradle.startParameter.showStacktrace = org.gradle.api.logging.configuration.ShowStacktrace.ALWAYS
 
+
 gradle.beforeProject { Project project ->
 	project.with {
 		buildscript {
 			repositories {
-				maven{
+				maven {
 					url('https://plugins.gradle.org/m2')
 				}
 			}
@@ -39,7 +40,7 @@ gradle.beforeProject { Project project ->
 		repositories {
 			mavenCentral()
 		}
-		version = BUILD_VERSION
-		group = GROUP_ID
+		version = rootProject.version
+		group = rootProject.group
 	}
 }

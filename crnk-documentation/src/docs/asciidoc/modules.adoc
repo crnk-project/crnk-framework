@@ -219,10 +219,14 @@ A setup can looks as follows:
 include::../../../../crnk-security/src/test/java/io/crnk/security/SecurityModuleIntTest.java[tags=setup]
 ----
 
-
 The security module further properly serializes javax.security
 authorization and authentication exceptions. As such it is also recommended to be
 used by CrnkClient.
+
+NOTE: Planned future extensions:
+- secure `QuerySpec` parameters
+- remove unauthorized relationship links
+- show only authorized repository in `HomeModule`.
 
 
 ## Meta Module

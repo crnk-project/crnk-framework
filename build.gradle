@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 // tag::versions[]
 buildscript {
 	dependencies {
@@ -9,24 +11,31 @@ buildscript {
 		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
 		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
+		classpath 'org.ajoberstar:gradle-git-publish:0.2.1'
 	}
 }
-
 
 wrapper {
 	gradleVersion = '3.5'
 }
 
-
-allprojects {
-	apply plugin: 'maven'
-	group = 'io.crnk'
-	version = '3.0.1-SNAPSHOT'
+ext {
+	timestampedVersion = true
 }
 
+SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
+if (ext.timestampedVersion) {
+	version = BUILD_VERSION_PREFIX + "." + format.format(new Date())
+}
+else {
+	version = '0.0.0-SNAPSHOT'
+}
+group = GROUP_ID
 
 gradle.beforeProject { Project project ->
 	project.with {
+		apply plugin: 'maven'
+
 		if (project.name != 'crnk-documentation') {
 			apply plugin: 'java'
 			sourceCompatibility = 1.7
@@ -38,5 +47,40 @@ gradle.beforeProject { Project project ->
 				testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 			}
 		}
+
+		apply plugin: 'maven-publish'
+
+		if(System.env.NEXUS_DEPLOY_USER){
+			publishing {
+				repositories {
+					maven {
+						name "nexus"
+						url NEXUS_DEPLOY_URL
+
+						credentials {
+							username System.env.NEXUS_DEPLOY_USER
+							password System.env.NEXUS_DEPLOY_PASS
+						}
+					}
+				}
+
+				if (project.name != 'crnk-documentation' && !project.name.contains('example')) {
+					task sourceJar(type: Jar) {
+						from sourceSets.main.allJava
+					}
+
+					publications {
+						mavenJava(MavenPublication) {
+							from components.java
+
+							artifact sourceJar {
+								classifier "sources"
+							}
+						}
+					}
+				}
+			}
+		}
+
 	}
 }

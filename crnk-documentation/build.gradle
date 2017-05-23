@@ -1,11 +1,38 @@
 apply plugin: 'org.asciidoctor.convert'
 
+apply plugin: 'org.ajoberstar.git-publish'
+
 asciidoctor {
 	backends = ['html5', 'pdf']
 	attributes 'source-highlighter': 'coderay'
 	sources {
-		include 'crnk_documentation.adoc'
+		include 'index.adoc'
 	}
 }
 
 tasks.assemble.dependsOn 'asciidoctor'
+
+
+// see https://github.com/ajoberstar/gradle-git-publish
+gitPublish {
+	repoUri = 'git@github.com:crnk-project/crnk-web.git'
+	branch = 'master'
+	repoDir = file("$buildDir/asciidoc/")
+
+	contents {
+		into('documentation')
+		from 'html5'
+		from 'pdf'
+	}
+
+	preserve {
+		include '**'
+		exclude 'documentation/**'
+	}
+
+	// message used when committing changes
+	commitMessage = 'Publishing a new documentation'
+}
+
+// TODO plugin broken
+// tasks.publish.dependsOn 'gitPublishPush'
