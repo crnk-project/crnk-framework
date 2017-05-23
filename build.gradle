@@ -33,6 +33,14 @@ else {
 }
 group = GROUP_ID
 
+if (JavaVersion.current().isJava8Compatible()) {
+	allprojects {
+		tasks.withType(Javadoc) {
+			options.addStringOption('Xdoclint:none', '-quiet')
+		}
+	}
+}
+
 gradle.beforeProject { Project project ->
 	project.with {
 		apply plugin: 'maven'
@@ -60,11 +68,6 @@ gradle.beforeProject { Project project ->
 
 		apply plugin: 'maven-publish'
 
-		System.out.println("hi!!!!!!!!!!")
-		System.err.println("hi!!!!!!!!!!")
-		System.out.println(System.env.NEXUS_DEPLOY_USER);
-		System.err.println(System.env.NEXUS_DEPLOY_USER);
-
 		if (System.env.NEXUS_DEPLOY_USER) {
 			publishing {
 				repositories {
@@ -86,10 +89,48 @@ gradle.beforeProject { Project project ->
 
 							task sourceJar(type: Jar) {
 								from sourceSets.main.allJava
+								classifier = 'javadoc'
+							}
+
+							task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+								from javadoc.destinationDir
+								classifier = 'javadoc'
 							}
 
 							artifact sourceJar {
 								classifier "sources"
+							}
+
+							artifact packageJavadoc {
+								classifier "javadoc"
+							}
+
+							pom.withXml {
+								asNode().appendNode('description', 'JSON API framework for Java')
+								asNode().appendNode('url', 'http://www.crnk.io')
+								asNode().appendNode('name', project.name)
+
+								def licenses = asNode().appendNode('licenses')
+								def license = licenses.appendNode('license')
+								license.appendNode('name', 'Apache License 2.0')
+								license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.html')
+
+								def issueManagement = asNode().appendNode('issueManagement')
+								issueManagement.appendNode('system', 'GitHub')
+								issueManagement.appendNode('url', 'https://github.com/crnk-project/crml-framework/issues')
+
+								def scm = asNode().appendNode('scm')
+								scm.appendNode('url', 'https://github.com/crnk-project/crnk-framework')
+								scm.appendNode('connection', 'scm:git:git://github.com/crnk-project/crnk-framework.git')
+								scm.appendNode('developerConnection', 'scm:git:git@github.com:crnk-project/crnk-framework.git')
+
+								def developers = asNode().appendNode('developers')
+								def developer = developers.appendNode('developer')
+								developer.appendNode('id', 'crnk')
+								developer.appendNode('email', 'info@crnk.io')
+
+
+
 							}
 						}
 					}
