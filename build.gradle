@@ -41,7 +41,7 @@ gradle.beforeProject { Project project ->
 		def ui = project.name == 'crnk-ui'
 		def examples = project.name.contains('example')
 
-		if (docs) {
+		if (!docs) {
 			apply plugin: 'java'
 			sourceCompatibility = 1.7
 			targetCompatibility = 1.7
@@ -80,18 +80,16 @@ gradle.beforeProject { Project project ->
 				}
 
 				if (!docs && !examples) {
-					task sourceJar(type: Jar) {
-						from sourceSets.main.allJava
-					}
-
 					publications {
 						mavenJava(MavenPublication) {
 							from components.java
 
-							if (!ui) {
-								artifact sourceJar {
-									classifier "sources"
-								}
+							task sourceJar(type: Jar) {
+								from sourceSets.main.allJava
+							}
+
+							artifact sourceJar {
+								classifier "sources"
 							}
 						}
 					}
