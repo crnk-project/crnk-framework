@@ -33,7 +33,6 @@ public class RegistryEntry {
 
 	private final List<ResponseRelationshipEntry> relationshipEntries;
 
-	@Deprecated
 	private RegistryEntry parentRegistryEntry = null;
 
 	private ModuleRegistry moduleRegistry;
@@ -120,8 +119,6 @@ public class RegistryEntry {
 	}
 
 	/**
-	 * To be used only by ResourceRegistryBuilder
-	 *
 	 * @param parentRegistryEntry parent resource
 	 */
 	@Deprecated
@@ -137,12 +134,12 @@ public class RegistryEntry {
 	 * @return true if the parameter is a parent
 	 */
 	public boolean isParent(RegistryEntry registryEntry) {
-		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
-		while (parentRegistryEntry != null) {
-			if (parentRegistryEntry.equals(registryEntry)) {
+		RegistryEntry entry = getParentRegistryEntry();
+		while (entry != null) {
+			if (entry.equals(registryEntry)) {
 				return true;
 			}
-			parentRegistryEntry = parentRegistryEntry.getParentRegistryEntry();
+			entry = entry.getParentRegistryEntry();
 		}
 		return false;
 	}

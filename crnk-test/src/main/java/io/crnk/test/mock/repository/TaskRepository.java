@@ -4,6 +4,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.legacy.repository.annotations.*;
 import io.crnk.test.mock.TestException;
+import io.crnk.test.mock.UnknownException;
 import io.crnk.test.mock.models.Task;
 
 import java.util.LinkedList;
@@ -29,6 +30,9 @@ public class TaskRepository {
 
 		if (entity.getId() == 10000) {
 			throw new TestException("msg");
+		}
+		if (entity.getId() == 10001) {
+			throw new UnknownException("msg");
 		}
 
 		return entity;

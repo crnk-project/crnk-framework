@@ -68,7 +68,7 @@ public class ExceptionMapperRegistryTest {
 	@Test
 	public void shouldFindDirectExceptionMapperFromError() throws Exception {
 		ErrorResponse response = ErrorResponse.builder().setStatus(HttpStatus.BAD_REQUEST_400).build();
-		Optional<ExceptionMapper<?>> mapper = exceptionMapperRegistry.findMapperFor(response);
+		Optional<ExceptionMapper<?>> mapper = (Optional)exceptionMapperRegistry.findMapperFor(response);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 		Throwable throwable = mapper.get().fromErrorResponse(response);
@@ -81,7 +81,7 @@ public class ExceptionMapperRegistryTest {
 		// subtype should be choosen.
 		ErrorData errorData = ErrorData.builder().setId("someId").build();
 		ErrorResponse response = ErrorResponse.builder().setStatus(HttpStatus.BAD_REQUEST_400).setSingleErrorData(errorData).build();
-		Optional<ExceptionMapper<?>> mapper = exceptionMapperRegistry.findMapperFor(response);
+		Optional<ExceptionMapper<?>> mapper = (Optional)exceptionMapperRegistry.findMapperFor(response);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(SomeIllegalStateExceptionMapper.class);
 		Throwable throwable = mapper.get().fromErrorResponse(response);
@@ -92,7 +92,7 @@ public class ExceptionMapperRegistryTest {
 	public void shouldNotFindDescendantExceptionMapperFromError() throws Exception {
 		ErrorData errorData = ErrorData.builder().setId("someOtherId").build();
 		ErrorResponse response = ErrorResponse.builder().setStatus(HttpStatus.BAD_REQUEST_400).setSingleErrorData(errorData).build();
-		Optional<ExceptionMapper<?>> mapper = exceptionMapperRegistry.findMapperFor(response);
+		Optional<ExceptionMapper<?>> mapper = (Optional)exceptionMapperRegistry.findMapperFor(response);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 	}

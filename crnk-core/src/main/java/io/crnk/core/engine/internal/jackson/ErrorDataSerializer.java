@@ -69,6 +69,7 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 		gen.writeEndObject();
 	}
 
+	@Override
 	public Class<ErrorData> handledType() {
 		return ErrorData.class;
 	}

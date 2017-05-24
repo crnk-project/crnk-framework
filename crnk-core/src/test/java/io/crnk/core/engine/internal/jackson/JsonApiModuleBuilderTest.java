@@ -16,7 +16,7 @@ public class JsonApiModuleBuilderTest {
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
 
 		// WHEN
-		SimpleModule result = sut.build(resourceRegistry, false);
+		SimpleModule result = sut.build();
 
 		// THEN
 		assertThat(result).isNotNull();

@@ -34,9 +34,9 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.buildPath("tasks/1/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -50,7 +50,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -64,7 +64,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -77,8 +77,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onGivenRequestFieldResourceGetShouldHandleIt() throws Exception {
 		// GIVEN
 
-		JsonPath jsonPath = pathBuilder.buildPath("/tasks/1/project");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/tasks/1/project");
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, new QueryParamsAdapter(new QueryParams()), null, null);
@@ -91,8 +91,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onGivenRequestFieldResourcesGetShouldHandleIt() throws Exception {
 		// GIVEN
 
-		JsonPath jsonPath = pathBuilder.buildPath("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry), null, null);
@@ -135,8 +135,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		addParams(params, "include[projects]", "includedTask");
 		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
 		QueryAdapter queryAdapter = new QueryParamsAdapter(projectInfo, queryParams, moduleRegistry);
-		JsonPath jsonPath = pathBuilder.buildPath("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
+		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		Response response = sut.handle(jsonPath, queryAdapter, null, null);
 

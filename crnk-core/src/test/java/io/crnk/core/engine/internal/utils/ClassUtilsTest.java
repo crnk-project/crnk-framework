@@ -7,6 +7,7 @@ import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -17,6 +18,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class ClassUtilsTest {
+
+	@Test
+	public void stringMustExist() {
+		Assert.assertTrue(ClassUtils.existsClass(String.class.getName()));
+	}
+
+	@Test
+	public void unknownClassMustNotExist() {
+		Assert.assertFalse(ClassUtils.existsClass("does.not.exist"));
+	}
 
 	@Test
 	public void rawTypeFromParameterizedType() throws Exception {

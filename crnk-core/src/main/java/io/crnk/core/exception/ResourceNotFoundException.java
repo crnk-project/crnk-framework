@@ -6,7 +6,7 @@ import io.crnk.core.engine.http.HttpStatus;
 /**
  * Thrown when resource for a type cannot be found.
  */
-public final class ResourceNotFoundException extends CrnkMappableException {
+public final class ResourceNotFoundException extends CrnkMappableException {// NOSONAR ignore deep class hierarchy
 
 	public ResourceNotFoundException(String message) {
 		super(HttpStatus.NOT_FOUND_404, ErrorData.builder().setTitle(message).setDetail(message)

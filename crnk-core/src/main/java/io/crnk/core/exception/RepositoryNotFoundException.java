@@ -3,7 +3,7 @@ package io.crnk.core.exception;
 /**
  * Thrown when repository definition for a resource cannot be found in specified package.
  */
-public final class RepositoryNotFoundException extends CrnkMatchingException {
+public final class RepositoryNotFoundException extends CrnkMatchingException {// NOSONAR ignore deep class hierarchy
 	public RepositoryNotFoundException(Class clazz) {
 		super("Repository for a resource not found: " + clazz.getCanonicalName());
 	}

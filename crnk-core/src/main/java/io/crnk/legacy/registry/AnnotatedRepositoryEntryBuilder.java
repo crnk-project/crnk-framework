@@ -41,7 +41,7 @@ public class AnnotatedRepositoryEntryBuilder implements RepositoryEntryBuilder {
 		if (repositoryClasses.isEmpty()) {
 			return null;
 		} else {
-			return new AnnotatedResourceEntry<>(moduleRegistry, new RepositoryInstanceBuilder<>(jsonServiceLocator, repositoryClasses.get(0)));
+			return new AnnotatedResourceEntry(new RepositoryInstanceBuilder<>(jsonServiceLocator, repositoryClasses.get(0)));
 		}
 	}
 

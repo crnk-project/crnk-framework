@@ -31,15 +31,15 @@ public class JsonApiUrlBuilder {
 		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
 		return buildUrl(resourceInformation, id, queryParams, null);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
 		return buildUrl(resourceInformation, id, querySpec, null);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter, String relationshipName) {
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
 		} else {
@@ -47,15 +47,15 @@ public class JsonApiUrlBuilder {
 		}
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
 		return buildUrlInternal(resourceInformation, id, querySpec, relationshipName);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
 		return buildUrlInternal(resourceInformation, id, queryParams, relationshipName);
 	}
 
-	private <T> String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
+	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
 		String url = resourceRegistry.getResourceUrl(resourceInformation);
 		if (!url.endsWith("/")) {
 			url += "/";

@@ -8,6 +8,9 @@ public class StringUtils {
 
 	public static final String EMPTY = "";
 
+	private StringUtils(){
+	}
+
 	public static String join(String delimiter, Iterable<String> stringsIterable) {
 		List<String> strings = new LinkedList<>();
 		Iterator<String> iterator = stringsIterable.iterator();

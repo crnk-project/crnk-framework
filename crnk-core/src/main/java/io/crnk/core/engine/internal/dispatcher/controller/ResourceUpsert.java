@@ -100,7 +100,7 @@ public abstract class ResourceUpsert extends BaseController {
 				if (canModifyField(resourceInformation, attributeName, field)) {
 					resourceAttributesBridge.setProperty(objectMapper, instance, entry.getValue(), entry.getKey());
 				} else {
-					handleImmutableField(resourceInformation, entry.getKey());
+					handleImmutableField(entry.getKey());
 				}
 			}
 
@@ -161,11 +161,11 @@ public abstract class ResourceUpsert extends BaseController {
 			relationshipRepository.setRelations(savedResource, castedRelationIds,
 					relationshipField, queryAdapter);
 		} else {
-			handleImmutableField(resourceInformation, property.getKey());
+			handleImmutableField(property.getKey());
 		}
 	}
 
-	private void handleImmutableField(ResourceInformation resourceInformation, String fieldName) {
+	private void handleImmutableField(String fieldName) {
 		String strBehavior = propertiesProvider.getProperty(CrnkProperties.RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR);
 		ResourceFieldImmutableWriteBehavior behavior = strBehavior != null ? ResourceFieldImmutableWriteBehavior.valueOf(strBehavior) : ResourceFieldImmutableWriteBehavior.IGNORE;
 		if (behavior == ResourceFieldImmutableWriteBehavior.IGNORE) {
@@ -293,11 +293,8 @@ public abstract class ResourceUpsert extends BaseController {
 				idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
-				first = false;
 				Serializable castedRelationshipId = typeParser.parse(resourceId.getId(), idFieldType);
-
 				Object relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
-
 				relationships.add(relationObject);
 			}
 			PropertyUtils.setProperty(newResource, relationshipField.getUnderlyingName(), relationships);

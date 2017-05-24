@@ -2,7 +2,6 @@ package io.crnk.legacy.internal;
 
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.RepositoryMethodException;
-import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.legacy.queryParams.QueryParams;
 
@@ -13,11 +12,8 @@ public class ParametersFactory {
 
 	private final RepositoryMethodParameterProvider parameterProvider;
 
-	private ModuleRegistry moduleRegistry;
-
-	public ParametersFactory(ModuleRegistry moduleRegistry, RepositoryMethodParameterProvider parameterProvider) {
+	public ParametersFactory(RepositoryMethodParameterProvider parameterProvider) {
 		this.parameterProvider = parameterProvider;
-		this.moduleRegistry = moduleRegistry;
 	}
 
 	/**

@@ -171,7 +171,7 @@ public class CrnkBoot {
 		moduleRegistry.init(objectMapper);
 
 		JsonApiModuleBuilder jsonApiModuleBuilder = new JsonApiModuleBuilder();
-		objectMapper.registerModule(jsonApiModuleBuilder.build(resourceRegistry, false));
+		objectMapper.registerModule(jsonApiModuleBuilder.build());
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
 

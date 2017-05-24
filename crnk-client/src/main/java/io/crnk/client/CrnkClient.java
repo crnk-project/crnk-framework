@@ -1,11 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -39,8 +33,10 @@ import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceEntry;
@@ -48,7 +44,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ResourceLookup;
@@ -57,6 +53,12 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -88,7 +90,7 @@ public class CrnkClient {
 	private ClientDocumentMapper documentMapper;
 
 	public CrnkClient(String serviceUrl) {
-		this(new ConstantServiceUrlProvider(normalize(serviceUrl)));
+		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)));
 	}
 
 	public CrnkClient(ServiceUrlProvider serviceUrlProvider) {
@@ -106,28 +108,11 @@ public class CrnkClient {
 
 		// consider use of crnk module in the future
 		JsonApiModuleBuilder moduleBuilder = new JsonApiModuleBuilder();
-		SimpleModule jsonApiModule = moduleBuilder.build(resourceRegistry, true);
+		SimpleModule jsonApiModule = moduleBuilder.build();
 		objectMapper.registerModule(jsonApiModule);
 
 		documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, null);
 		setProxyFactory(new BasicProxyFactory());
-	}
-
-	private static boolean existsClass(String className) {
-		try {
-			Class.forName(className);
-			return true;
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
-
-	private static String normalize(String serviceUrl) {
-		if (serviceUrl.endsWith("/")) {
-			return serviceUrl.substring(0, serviceUrl.length() - 1);
-		} else {
-			return serviceUrl;
-		}
 	}
 
 	public void setProxyFactory(ClientProxyFactory proxyFactory) {
@@ -151,10 +136,10 @@ public class CrnkClient {
 	}
 
 	private HttpAdapter detectHttpAdapter() {
-		if (existsClass(OK_HTTP_CLIENT_DETECTION_CLASS)) {
+		if (ClassUtils.existsClass(OK_HTTP_CLIENT_DETECTION_CLASS)) {
 			return OkHttpAdapter.newInstance();
 		}
-		if (existsClass(APACHE_HTTP_CLIENT_DETECTION_CLASS)) {
+		if (ClassUtils.existsClass(APACHE_HTTP_CLIENT_DETECTION_CLASS)) {
 			return HttpClientAdapter.newInstance();
 		}
 		throw new IllegalStateException("no httpAdapter can be initialized, add okhttp3 (com.squareup.okhttp3:okhttp) or apache http client (org.apache.httpcomponents:httpclient) to the classpath");
@@ -486,7 +471,7 @@ public class CrnkClient {
 			if (entry == null) {
 				ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
 				if (!informationBuilder.accept(clazz)) {
-					throw new RepositoryNotFoundException(clazz.getName() + " not recognized as resource class, consider adding "
+					throw new InvalidResourceException(clazz.getName() + " not recognized as resource class, consider adding "
 							+ "@JsonApiResource annotation");
 				}
 				entry = allocateRepository(clazz, true);

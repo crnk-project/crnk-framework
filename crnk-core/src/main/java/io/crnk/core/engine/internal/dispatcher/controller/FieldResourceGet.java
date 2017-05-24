@@ -23,8 +23,8 @@ import java.io.Serializable;
 
 public class FieldResourceGet extends ResourceIncludeField {
 
-	public FieldResourceGet(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
-		super(resourceRegistry, objectMapper, typeParser, documentMapper);
+	public FieldResourceGet(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+		super(resourceRegistry, typeParser, documentMapper);
 	}
 
 	@Override
@@ -37,12 +37,12 @@ public class FieldResourceGet extends ResourceIncludeField {
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
 			parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getResourceName();
 		PathIds resourceIds = jsonPath.getIds();
+		String resourceName = jsonPath.getResourceName();
+		String elementName = jsonPath.getElementName();
 
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
-		String elementName = jsonPath.getElementName();
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
 		if (relationshipField == null) {
 			throw new ResourceFieldNotFoundException(elementName);

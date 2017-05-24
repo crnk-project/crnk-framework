@@ -76,7 +76,7 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 	@Bean
 	public Filter springBootSampleCrnkFilter(CrnkBoot boot) {
 		JsonApiModuleBuilder jsonApiModuleBuilder = new JsonApiModuleBuilder();
-		SimpleModule parameterNamesModule = jsonApiModuleBuilder.build(boot.getResourceRegistry(), false);
+		SimpleModule parameterNamesModule = jsonApiModuleBuilder.build();
 
 		objectMapper.registerModule(parameterNamesModule);
 

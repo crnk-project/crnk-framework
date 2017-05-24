@@ -24,13 +24,11 @@ import java.util.List;
 public class ResourceAttributesBridge<T> {
 
 	private final List<ResourceField> staticFields;
-	private final Class<T> resourceClass;
 	private Method jsonAnyGetter;
 	private Method jsonAnySetter;
 
 	public ResourceAttributesBridge(List<ResourceField> staticFields, Class<T> resourceClass) {
 		this.staticFields = staticFields;
-		this.resourceClass = resourceClass;
 
 		initializeGetterAndSetter(resourceClass);
 	}

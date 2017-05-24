@@ -10,6 +10,8 @@ import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformatio
 
 /**
  * Register the Crnk core feature set as module.
+ *
+ * @deprecated obsoleted by CrnkBoot
  */
 @Deprecated
 public class CoreModule extends SimpleModule {

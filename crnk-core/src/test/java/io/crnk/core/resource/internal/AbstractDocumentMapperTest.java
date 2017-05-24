@@ -45,7 +45,7 @@ public abstract class AbstractDocumentMapperTest {
 				new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build(resourceRegistry, false));
+		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 
 		mapper = new DocumentMapper(resourceRegistry, objectMapper, getPropertiesProvider());
 	}

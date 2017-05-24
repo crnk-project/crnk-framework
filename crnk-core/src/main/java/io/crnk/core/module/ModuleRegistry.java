@@ -250,7 +250,7 @@ public class ModuleRegistry {
 			if (repositoryInformation instanceof ResourceRepositoryInformation) {
 				resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
 				Object repository = resourceMapping.get(resourceRepositoryInformation);
-				resourceEntry = setupResourceRepository(resourceRepositoryInformation, repository);
+				resourceEntry = setupResourceRepository(repository);
 			}
 			else {
 				RelationshipRepositoryInformation relationshipRepositoryInformation =
@@ -309,8 +309,7 @@ public class ModuleRegistry {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private ResourceEntry setupResourceRepository(ResourceRepositoryInformation resourceRepositoryInformation,
-			Object repository) {
+	private ResourceEntry setupResourceRepository(Object repository) {
 		final Object decoratedRepository = decorateRepository(repository);
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
 
@@ -321,7 +320,7 @@ public class ModuleRegistry {
 		};
 
 		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
-			return new AnnotatedResourceEntry(this, repositoryInstanceBuilder);
+			return new AnnotatedResourceEntry(repositoryInstanceBuilder);
 		}
 		else {
 			return new DirectResponseResourceEntry(repositoryInstanceBuilder);

@@ -43,7 +43,7 @@ public class DocumentSerializerTest {
 		ResourceRegistry resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build(resourceRegistry, false));
+		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		reader = objectMapper.reader().forType(Document.class);

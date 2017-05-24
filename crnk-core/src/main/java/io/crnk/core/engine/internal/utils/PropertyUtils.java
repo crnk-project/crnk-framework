@@ -291,7 +291,7 @@ public class PropertyUtils {
 			}
 		} else {
 			Method getter = findGetter(bean.getClass(), fieldName);
-			checkGetterNotNull(getter, bean, fieldName);
+			checkGetterNotNull(getter, bean.getClass(), fieldName);
 			String getterFieldName = ClassUtils.getGetterFieldName(getter);
 			Method setter = getSetter(bean, getterFieldName, getter.getReturnType());
 			setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));

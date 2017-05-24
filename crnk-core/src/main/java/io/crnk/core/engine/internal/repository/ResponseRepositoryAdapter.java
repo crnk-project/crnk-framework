@@ -132,7 +132,7 @@ public abstract class ResponseRepositoryAdapter {
 		if (resources instanceof ResourceList) {
 			ResourceList<?> resourceList = (ResourceList<?>) resources;
 			boolean createLinksInformation = resourceList instanceof DefaultResourceList;
-			LinksInformation newLinksInfo = enrichLinksInformation(resourceList.getLinks(), resources, requestSpec, createLinksInformation);
+			LinksInformation newLinksInfo = enrichLinksInformation(resourceList.getLinks(), resources, requestSpec);
 			if (createLinksInformation) {
 				((DefaultResourceList) resources).setLinks(newLinksInfo);
 			}
@@ -149,15 +149,11 @@ public abstract class ResponseRepositoryAdapter {
 		} else if (repository instanceof LinksRepository) {
 			linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}
-		boolean createLinksInformation = true; // backward compatibility,
 		// everything deprecated anyway
-		return enrichLinksInformation(linksInformation, resources, requestSpec, createLinksInformation);
+		return enrichLinksInformation(linksInformation, resources, requestSpec);
 	}
 
-	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources, RepositoryRequestSpec requestSpec, boolean createLinksInformation) {
-		// TOOD QueryParamsAdapter currently not supported
-		// QueryParamsAdapter.duplicate and the other paging mechanism next to
-		// offset/limit need to be implemented
+	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
 		if (queryAdapter instanceof QuerySpecAdapter && (queryAdapter.getOffset() != 0 || queryAdapter.getLimit() != null)) {
@@ -238,7 +234,7 @@ public abstract class ResponseRepositoryAdapter {
 		}
 	}
 
-	private <T> String toUrl(QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+	private String toUrl(QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
 		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(moduleRegistry.getResourceRegistry());
 		Object relationshipSourceId = requestSpec.getId();
 		ResourceField relationshipField = requestSpec.getRelationshipField();

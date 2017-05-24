@@ -18,7 +18,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 import java.io.Serializable;
 import java.util.List;
 
-public class ResourceRepositoryStubImpl<T, I extends Serializable> extends AbstractStub implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
+public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
 
 	private ResourceInformation resourceInformation;
 

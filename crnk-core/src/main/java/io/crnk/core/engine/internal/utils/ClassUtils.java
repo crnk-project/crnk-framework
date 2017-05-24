@@ -25,6 +25,15 @@ public class ClassUtils {
 	private ClassUtils() {
 	}
 
+	public static boolean existsClass(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Returns a list of class fields. Supports inheritance and doesn't return synthetic fields.
 	 *
@@ -200,13 +209,11 @@ public class ClassUtils {
 
 	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap, LinkedList<Method> results) {
 		for (Method method : currentClass.getDeclaredMethods()) {
-			if (!method.isSynthetic()) {
-				if (isGetter(method)) {
-					Method v = resultMap.get(method.getName());
-					if (v == null) {
-						resultMap.put(method.getName(), method);
-						results.add(method);
-					}
+			if (!method.isSynthetic() && isGetter(method)) {
+				Method v = resultMap.get(method.getName());
+				if (v == null) {
+					resultMap.put(method.getName(), method);
+					results.add(method);
 				}
 			}
 		}
@@ -226,12 +233,10 @@ public class ClassUtils {
 		Class<?> currentClass = beanClass;
 		while (currentClass != null && currentClass != Object.class) {
 			for (Method method : currentClass.getDeclaredMethods()) {
-				if (!method.isSynthetic()) {
-					if (isSetter(method)) {
-						Method v = result.get(method.getName());
-						if (v == null) {
-							result.put(method.getName(), method);
-						}
+				if (!method.isSynthetic() && isSetter(method)) {
+					Method v = result.get(method.getName());
+					if (v == null) {
+						result.put(method.getName(), method);
 					}
 				}
 			}
@@ -249,19 +254,15 @@ public class ClassUtils {
 	 * @return annotated method or null
 	 */
 	public static Method findMethodWith(Class<?> searchClass, Class<? extends Annotation> annotationClass) {
-		Method foundMethod = null;
-		methodFinder:
 		while (searchClass != null && searchClass != Object.class) {
 			for (Method method : searchClass.getDeclaredMethods()) {
 				if (method.isAnnotationPresent(annotationClass)) {
-					foundMethod = method;
-					break methodFinder;
+					return method;
 				}
 			}
 			searchClass = searchClass.getSuperclass();
 		}
-
-		return foundMethod;
+		return null;
 	}
 
 	/**

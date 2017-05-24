@@ -10,6 +10,7 @@ public class PathIdsTest {
 	public void equalsContract() {
 		EqualsVerifier.forClass(PathIds.class)
 				.usingGetClass()
+				.suppress(Warning.NULL_FIELDS)
 				.suppress(Warning.NONFINAL_FIELDS)
 				.verify();
 	}

@@ -10,7 +10,7 @@ import java.util.List;
  * to let Crnk compute pagination links. Note that in case of the use of LinksInformation,
  * PagedLinksInformation must be implemented. Otherwise a default implementation is used.
  *
- * @Deprecated It is recommended to to implement {@link PagedMetaInformation} instead and use in combination with {@link ResourceList}.
+ * @deprecated It is recommended to to implement {@link PagedMetaInformation} instead and use in combination with {@link ResourceList}.
  */
 @Deprecated
 public class PagedResultList<T> extends WrappedList<T> {

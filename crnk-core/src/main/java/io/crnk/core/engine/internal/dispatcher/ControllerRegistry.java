@@ -45,6 +45,6 @@ public class ControllerRegistry {
 				return controller;
 			}
 		}
-		throw new MethodNotFoundException(PathBuilder.buildPath(jsonPath), requestType);
+		throw new MethodNotFoundException(PathBuilder.build(jsonPath), requestType);
 	}
 }

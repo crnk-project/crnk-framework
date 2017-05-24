@@ -48,7 +48,7 @@ public class PathBuilder {
 	 * @param jsonPath JsonPath structure to be parsed
 	 * @return String representing structure provided in the input
 	 */
-	public static String buildPath(JsonPath jsonPath) {
+	public static String build(JsonPath jsonPath) {
 		List<String> urlParts = new LinkedList<>();
 
 		JsonPath currentJsonPath = jsonPath;
@@ -75,23 +75,6 @@ public class PathBuilder {
 
 	private static String mergeIds(PathIds ids) {
 		return StringUtils.join(PathIds.ID_SEPARATOR, ids.getIds());
-	}
-
-	/**
-	 * Parses path provided by the application. The path provided cannot contain neither hostname nor protocol. It
-	 * can start or end with slash e.g. <i>/tasks/1/</i> or <i>tasks/1</i>.
-	 *
-	 * @param path Path to be parsed
-	 * @return doubly-linked list which represents path given at the input
-	 * @deprecated use build
-	 */
-	public JsonPath buildPath(String path) {
-		JsonPath jsonPath = build(path);
-		if (jsonPath != null) {
-			return jsonPath;
-		} else {
-			throw new RepositoryNotFoundException(path);
-		}
 	}
 
 	/**

@@ -87,7 +87,7 @@ public class ResourceMapper {
 		}
 	}
 
-	protected boolean isIgnored(ResourceField field) {
+	protected boolean isIgnored(ResourceField field) { // NOSONAR signature is ok since protected
 		return false;
 	}
 
@@ -107,12 +107,14 @@ public class ResourceMapper {
 	}
 
 	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
-		ObjectNode relationshipLinks = objectMapper.createObjectNode();
-		relationshipLinks.put(SELF_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, false));
-		relationshipLinks.put(RELATED_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, true));
+		{ // NOSONAR signature is ok since protected
+			ObjectNode relationshipLinks = objectMapper.createObjectNode();
+			relationshipLinks.put(SELF_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, false));
+			relationshipLinks.put(RELATED_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, true));
 
-		Relationship relationship = new Relationship();
-		relationship.setLinks(relationshipLinks);
-		resource.getRelationships().put(field.getJsonName(), relationship);
+			Relationship relationship = new Relationship();
+			relationship.setLinks(relationshipLinks);
+			resource.getRelationships().put(field.getJsonName(), relationship);
+		}
 	}
 }

@@ -30,7 +30,7 @@ public class AnnotatedResourceRepositoryAdapterTest {
 	public void setUp() throws Exception {
 		queryParams = new QueryParams();
 		queryAdapter = new QueryParamsAdapter(queryParams);
-		parameterProvider = new ParametersFactory(new ModuleRegistry(), new NewInstanceRepositoryMethodParameterProvider());
+		parameterProvider = new ParametersFactory(new NewInstanceRepositoryMethodParameterProvider());
 	}
 
 	@Test(expected = RepositoryAnnotationNotFoundException.class)

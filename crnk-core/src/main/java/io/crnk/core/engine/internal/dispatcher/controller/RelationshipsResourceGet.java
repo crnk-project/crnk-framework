@@ -24,8 +24,8 @@ import java.io.Serializable;
 
 public class RelationshipsResourceGet extends ResourceIncludeField {
 
-	public RelationshipsResourceGet(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
-		super(resourceRegistry, objectMapper, typeParser, documentMapper);
+	public RelationshipsResourceGet(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+		super(resourceRegistry, typeParser, documentMapper);
 	}
 
 	@Override

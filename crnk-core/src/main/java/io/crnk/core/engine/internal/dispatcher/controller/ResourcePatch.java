@@ -67,10 +67,6 @@ public class ResourcePatch extends ResourceUpsert {
 		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.PATCH, resourceEndpointName, endpointRegistryEntry, bodyRegistryEntry);
 
-		Class<?> type = bodyRegistryEntry
-				.getResourceInformation()
-				.getIdField()
-				.getType();
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);

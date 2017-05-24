@@ -1,6 +1,6 @@
 package io.crnk.legacy.queryParams;
 
-/*
+/**
 * @deprecated make use of QuerySpec
 */
 @Deprecated

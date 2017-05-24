@@ -11,13 +11,14 @@ public class FilterParams {
 		this.params = params;
 	}
 
-	public Map<String, Set<String>> getParams() {
-		return params;
-	}
-
 	@Override
 	public int hashCode() {
 		return params != null ? params.hashCode() : 0;
+	}
+
+
+	public Map<String, Set<String>> getParams() {
+		return params;
 	}
 
 	@Override

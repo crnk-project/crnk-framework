@@ -12,6 +12,9 @@ import static java.util.Collections.singletonList;
  */
 public final class DefaultStringParsers {
 
+	private DefaultStringParsers(){
+	}
+
 	public static Map<Class, StringParser> get() {
 		Map<Class, StringParser> parsers = new HashMap();
 

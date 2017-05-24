@@ -7,7 +7,7 @@ import io.crnk.legacy.repository.annotations.*;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-public class AnnotatedRelationshipRepositoryAdapter<T, T_ID extends Serializable, D, D_ID extends Serializable>
+public class AnnotatedRelationshipRepositoryAdapter<T, T_ID extends Serializable, D, D_ID extends Serializable> // NOSONAR to be removed
 		extends AnnotatedRepositoryAdapter<T> {
 
 	private Method setRelationMethod;

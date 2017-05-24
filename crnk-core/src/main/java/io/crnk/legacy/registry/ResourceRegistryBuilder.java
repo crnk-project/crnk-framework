@@ -23,6 +23,8 @@ import java.util.Set;
 
 /**
  * Builder responsible for building an instance of ResourceRegistry.
+ *
+ * @deprecated make use of {@link io.crnk.core.boot.CrnkBoot}
  */
 @Deprecated
 public class ResourceRegistryBuilder {

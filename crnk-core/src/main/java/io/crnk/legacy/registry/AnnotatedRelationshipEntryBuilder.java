@@ -41,7 +41,7 @@ public class AnnotatedRelationshipEntryBuilder implements ResponseRelationshipEn
 
 	public AnnotatedRelationshipRepositoryAdapter build(RepositoryMethodParameterProvider parameterProvider) {
 		return new AnnotatedRelationshipRepositoryAdapter<>(repositoryInstanceBuilder.buildRepository(),
-				new ParametersFactory(moduleRegistry, parameterProvider));
+				new ParametersFactory(parameterProvider));
 	}
 
 	@Override

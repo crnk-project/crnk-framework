@@ -1,14 +1,11 @@
-package io.crnk.core;
-
-import java.io.IOException;
+package io.crnk.home;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.crnk.core.boot.CrnkBookt;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.dispatcher.HttpRequestProcessorImpl;
-import io.crnk.core.module.discovery.ConstantServiceUrlProvider;
+import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.home.HomeModule;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,15 +13,16 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+
 public class HomeModuleTest {
 
-
-	private CrnkBookt boot;
+	private CrnkBoot boot;
 
 	@Before
 	public void setup() {
-		boot = new CrnkBookt();
-		boot.addModule(HomeModule.newInstance());
+		boot = new CrnkBoot();
+		boot.addModule(HomeModule.create());
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
 				()));
@@ -58,7 +56,7 @@ public class HomeModuleTest {
 
 		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
 		String expectedContentType = anyRequest ? HomeModule.JSON_CONTENT_TYPE : HomeModule.JSON_HOME_CONTENT_TYPE;
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponseHeader("Content-Type", "application/json");
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponseHeader("Content-Type", expectedContentType);
 		Assert.assertEquals(200, (int) statusCaptor.getValue());
 
 		String json = new String(responseCaptor.getValue());

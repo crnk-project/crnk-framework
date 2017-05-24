@@ -3,7 +3,7 @@ package io.crnk.core.exception;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.http.HttpStatus;
 
-public class BadRequestException extends CrnkMappableException {
+public class BadRequestException extends CrnkMappableException { // NOSONAR ignore deep class hierarchy
 
 	private static final String TITLE = "BAD_REQUEST";
 

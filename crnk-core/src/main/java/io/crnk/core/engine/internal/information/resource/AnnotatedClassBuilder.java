@@ -20,6 +20,9 @@ public class AnnotatedClassBuilder {
 	private static final String CONSTRUCT_METHOD_NAME = "construct";
 	private static final String CANNOT_FIND_PROPER_METHOD = "Couldn't find proper AnnotatedClass#construct method";
 
+	private AnnotatedClassBuilder(){
+	}
+
 	public static AnnotatedClass build(Class<?> declaringClass, SerializationConfig serializationConfig) {
 
 		for (Method method : AnnotatedClass.class.getMethods()) {

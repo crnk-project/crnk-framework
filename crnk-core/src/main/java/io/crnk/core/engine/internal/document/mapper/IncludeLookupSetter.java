@@ -295,17 +295,6 @@ public class IncludeLookupSetter {
 		return ids;
 	}
 
-	private Class<?> getClassFromField(ResourceField relationshipField) {
-		Class<?> resourceClass;
-		if (Iterable.class.isAssignableFrom(relationshipField.getType())) {
-			ParameterizedType stringListType = (ParameterizedType) relationshipField.getGenericType();
-			resourceClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-		} else {
-			resourceClass = relationshipField.getType();
-		}
-		return resourceClass;
-	}
-
 	/**
 	 * Cache resource/field pairs already populated to avoid loops
 	 */

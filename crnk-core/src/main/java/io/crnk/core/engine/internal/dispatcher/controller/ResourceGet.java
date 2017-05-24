@@ -22,8 +22,8 @@ import java.io.Serializable;
 
 public class ResourceGet extends ResourceIncludeField {
 
-	public ResourceGet(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
-		super(resourceRegistry, objectMapper, typeParser, documentMapper);
+	public ResourceGet(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+		super(resourceRegistry, typeParser, documentMapper);
 	}
 
 	/**

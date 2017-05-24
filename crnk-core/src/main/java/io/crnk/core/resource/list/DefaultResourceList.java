@@ -80,7 +80,7 @@ public class DefaultResourceList<T> extends WrappedList<T> implements ResourceLi
 	}
 
 	/**
-	 * @Deprecated Make use of getLinks.
+	 * @deprecated Make use of getLinks.
 	 */
 	@Deprecated
 	public LinksInformation getLinksInformation() {
@@ -88,7 +88,7 @@ public class DefaultResourceList<T> extends WrappedList<T> implements ResourceLi
 	}
 
 	/**
-	 * @Deprecated Make use of getMeta.
+	 * @deprecated Make use of getMeta.
 	 */
 	@Deprecated
 	public MetaInformation getMetaInformation() {
@@ -96,7 +96,7 @@ public class DefaultResourceList<T> extends WrappedList<T> implements ResourceLi
 	}
 
 	/**
-	 * @Deprecated Make use of getLinks.
+	 * @deprecated Make use of getLinks.
 	 */
 	@Deprecated
 	public <L extends LinksInformation> L getLinksInformation(Class<L> linksClass) {
@@ -104,7 +104,7 @@ public class DefaultResourceList<T> extends WrappedList<T> implements ResourceLi
 	}
 
 	/**
-	 * @Deprecated Make use of getMeta.
+	 * @deprecated Make use of getMeta.
 	 */
 	@Deprecated
 	public <M extends MetaInformation> M getMetaInformation(Class<M> metaClass) {

@@ -3,6 +3,7 @@ package io.crnk.client.internal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
+import io.crnk.client.TransportException;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
@@ -18,15 +19,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class AbstractStub {
+public class ClientStubBase {
 
 	public static final String CONTENT_TYPE = "application/vnd.api+json";
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStub.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClientStubBase.class);
 	protected CrnkClient client;
 
 	protected JsonApiUrlBuilder urlBuilder;
 
-	public AbstractStub(CrnkClient client, JsonApiUrlBuilder urlBuilder) {
+	public ClientStubBase(CrnkClient client, JsonApiUrlBuilder urlBuilder) {
 		this.client = client;
 		this.urlBuilder = urlBuilder;
 	}
@@ -71,7 +72,7 @@ public class AbstractStub {
 			}
 			return null;
 		} catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new TransportException(e);
 		}
 	}
 
@@ -92,7 +93,7 @@ public class AbstractStub {
 		}
 
 		ExceptionMapperRegistry exceptionMapperRegistry = client.getExceptionMapperRegistry();
-		Optional<ExceptionMapper<?>> mapper = exceptionMapperRegistry.findMapperFor(errorResponse);
+		Optional<ExceptionMapper<?>> mapper = (Optional) exceptionMapperRegistry.findMapperFor(errorResponse);
 		if (mapper.isPresent()) {
 			Throwable throwable = mapper.get().fromErrorResponse(errorResponse);
 			if (throwable instanceof RuntimeException) {

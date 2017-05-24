@@ -126,16 +126,42 @@ public class ErrorDataBuilder {
 	}
 
 	public ErrorData build() {
-		ErrorData data = new ErrorData();
-		data.id = id;
-		data.aboutLink = aboutLink;
-		data.status = status;
-		data.code = code;
-		data.title = title;
-		data.detail = detail;
-		data.sourcePointer = sourcePointer;
-		data.sourceParameter = sourcePointer;
-		data.meta = meta;
-		return data;
+		return new ErrorData(this);
+	}
+
+	protected String getId() {
+		return id;
+	}
+
+	protected String getAboutLink() {
+		return aboutLink;
+	}
+
+	protected String getStatus() {
+		return status;
+	}
+
+	protected String getCode() {
+		return code;
+	}
+
+	protected String getTitle() {
+		return title;
+	}
+
+	protected String getDetail() {
+		return detail;
+	}
+
+	protected String getSourcePointer() {
+		return sourcePointer;
+	}
+
+	protected String getSourceParameter() {
+		return sourceParameter;
+	}
+
+	protected Map<String, Object> getMeta() {
+		return meta;
 	}
 }

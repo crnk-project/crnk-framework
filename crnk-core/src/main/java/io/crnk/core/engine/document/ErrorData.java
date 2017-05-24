@@ -10,35 +10,35 @@ public class ErrorData implements Serializable {
 	/**
 	 * A unique identifier for this particular occurrence of the problem.
 	 */
-	protected String id;
+	private final String id;
 
 	/**
 	 * A link that leads to further details about this particular occurrence of the problem.
 	 * <p>
 	 * Wrapped in "links" object.
 	 */
-	protected String aboutLink;
+	private final  String aboutLink;
 
 	/**
 	 * The HTTP status code applicable to this problem, expressed as a string value.
 	 */
-	protected String status;
+	private final  String status;
 
 	/**
 	 * An application-specific error code, expressed as a string value.
 	 */
-	protected String code;
+	private final  String code;
 
 	/**
 	 * A short, human-readable summary of the problem.
 	 * It SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization.
 	 */
-	protected String title;
+	private final  String title;
 
 	/**
 	 * A human-readable explanation specific to this occurrence of the problem.
 	 */
-	protected String detail;
+	private final  String detail;
 
 	/**
 	 * A JSON Pointer [RFC6901] to the associated entity in the request resource
@@ -46,19 +46,19 @@ public class ErrorData implements Serializable {
 	 * <p>
 	 * Wrapped in "source" object.
 	 */
-	protected String sourcePointer;
+	private final  String sourcePointer;
 
 	/**
 	 * A string indicating which query parameter caused the error.
 	 * <p>
 	 * Wrapped in "source" object.
 	 */
-	protected String sourceParameter;
+	private final  String sourceParameter;
 
 	/**
 	 * A meta object containing non-standard meta-information about the error.
 	 */
-	protected Map<String, Object> meta;
+	private final  Map<String, Object> meta;
 
 	/**
 	 * @deprecated  make use of {@link ErrorDataBuilder}
@@ -77,7 +77,16 @@ public class ErrorData implements Serializable {
 		this.meta = meta == null ? null : Collections.unmodifiableMap(meta);
 	}
 
-	protected ErrorData(){
+	protected ErrorData(ErrorDataBuilder builder){
+		id = builder.getId();
+		aboutLink = builder.getAboutLink();
+		status = builder.getStatus();
+		code = builder.getCode();
+		title = builder.getTitle();
+		detail = builder.getDetail();
+		sourcePointer = builder.getSourcePointer();
+		sourceParameter = builder.getSourceParameter();
+		meta = builder.getMeta();
 	}
 
 	public static ErrorDataBuilder builder() {

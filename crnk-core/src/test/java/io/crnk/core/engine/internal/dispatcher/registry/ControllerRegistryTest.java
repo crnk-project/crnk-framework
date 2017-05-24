@@ -41,7 +41,7 @@ public class ControllerRegistryTest {
 	public void onUnsupportedRequestRegisterShouldThrowError() {
 		// GIVEN
 		PathBuilder pathBuilder = new PathBuilder(resourceRegistry);
-		JsonPath jsonPath = pathBuilder.buildPath("/tasks/");
+		JsonPath jsonPath = pathBuilder.build("/tasks/");
 		String requestType = "PATCH";
 		ControllerRegistry sut = new ControllerRegistry(null);
 

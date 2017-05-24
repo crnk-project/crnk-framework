@@ -5,6 +5,9 @@ import java.lang.reflect.Type;
 
 public class Generics {
 
+	private Generics(){
+	}
+
 	public static Class<?> getResourceClass(Type genericType, Class baseClass) {
 		if (Iterable.class.isAssignableFrom(baseClass)) {
 			if (genericType instanceof ParameterizedType) {
@@ -13,10 +16,10 @@ public class Generics {
 				if (fieldArgTypes.length == 1 && fieldArgTypes[0] instanceof Class<?>) {
 					return (Class) fieldArgTypes[0];
 				} else {
-					throw new RuntimeException("Wrong type: " + aType);
+					throw new IllegalArgumentException("Wrong type: " + aType);
 				}
 			} else {
-				throw new RuntimeException("The relationship must be parametrized (cannot be wildcard or array): "
+				throw new IllegalArgumentException("The relationship must be parametrized (cannot be wildcard or array): "
 						+ genericType);
 			}
 		}

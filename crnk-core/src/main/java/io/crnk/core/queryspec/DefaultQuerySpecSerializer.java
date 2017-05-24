@@ -17,7 +17,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 	}
 
 	private static void put(Map<String, Set<String>> map, String key, String value) {
-		map.put(key, new HashSet<String>(Arrays.asList(value)));
+		map.put(key, new HashSet<>(Arrays.asList(value)));
 	}
 
 	private static String toKey(List<String> attributePath) {
@@ -127,7 +127,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	public void serializePagination(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	public void serializePagination(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) { // NOSONAR signature is ok
 		if (querySpec.getOffset() != 0) {
 			put(map, "page[offset]", Long.toString(querySpec.getOffset()));
 		}

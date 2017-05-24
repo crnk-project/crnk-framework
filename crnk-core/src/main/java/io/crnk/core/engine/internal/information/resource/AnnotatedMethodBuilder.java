@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.information.resource;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotationMap;
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext;
 import io.crnk.core.exception.InternalException;
 
 import java.lang.reflect.Constructor;
@@ -35,7 +36,7 @@ public class AnnotatedMethodBuilder {
 			throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		Class<?> firstParameterType = constructor.getParameterTypes()[0];
 		if (firstParameterType == AnnotatedClass.class ||
-				"TypeResolutionContext".equals(firstParameterType.getSimpleName())) {
+				TypeResolutionContext.class.equals(firstParameterType)) {
 			return (AnnotatedMethod) constructor.newInstance(annotatedClass, method, annotationMap, paramAnnotations);
 		} else {
 			throw new InternalException(CANNOT_FIND_PROPER_CONSTRUCTOR);

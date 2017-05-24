@@ -2,7 +2,7 @@ package io.crnk.client.http.apache;
 
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
-import io.crnk.client.internal.AbstractStub;
+import io.crnk.client.internal.ClientStubBase;
 import io.crnk.core.engine.http.HttpMethod;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
@@ -16,7 +16,7 @@ public class HttpClientRequest implements HttpAdapterRequest {
 
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF8");
 
-	private static final ContentType CONTENT_TYPE = ContentType.create(AbstractStub.CONTENT_TYPE, CHARSET_UTF8);
+	private static final ContentType CONTENT_TYPE = ContentType.create(ClientStubBase.CONTENT_TYPE, CHARSET_UTF8);
 
 	private HttpRequestBase requestBase;
 

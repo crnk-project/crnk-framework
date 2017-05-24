@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -14,7 +13,7 @@ public abstract class ResourceIncludeField extends BaseController {
 
 	protected DocumentMapper documentMapper;
 
-	public ResourceIncludeField(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
+	public ResourceIncludeField(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
 		this.resourceRegistry = resourceRegistry;
 		this.typeParser = typeParser;
 		this.documentMapper = documentMapper;
