@@ -20,8 +20,11 @@ wrapper {
 	gradleVersion = '3.5'
 }
 
+// note that a production build creates javadoc, sources jars and signatures undesired during development
+// for performance reasons
+def isProductionBuild = System.env.NEXUS_DEPLOY_USER != null
 ext {
-	timestampedVersion = true
+	timestampedVersion = isProductionBuild
 }
 
 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
@@ -68,80 +71,92 @@ gradle.beforeProject { Project project ->
 
 		apply plugin: 'maven-publish'
 
-		if (System.env.NEXUS_DEPLOY_USER) {
-			publishing {
-				repositories {
-					maven {
-						name "nexus"
-						url NEXUS_DEPLOY_URL
 
-						credentials {
-							username System.env.NEXUS_DEPLOY_USER
-							password System.env.NEXUS_DEPLOY_PASS
-						}
-					}
+		if (!docs && !examples) {
+
+			apply plugin: 'signing'
+
+
+			task sourcesJar(type: Jar) {
+				from sourceSets.main.allSource
+				classifier = 'sources'
+			}
+
+			task javadocJar(type: Jar, dependsOn: 'javadoc') {
+				from javadoc.destinationDir
+				classifier = 'javadoc'
+			}
+
+			artifacts {
+				archives jar
+				archives javadocJar
+				archives sourcesJar
+			}
+
+			signing {
+				required {
+					gradle.taskGraph.hasTask("uploadArchives")
 				}
+				sign configurations.archives
+			}
 
-				if (!docs && !examples) {
+			uploadArchives {
+				repositories {
+					mavenDeployer {
+						beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-					apply plugin: 'signing'
-					signing {
-						sign configurations.archives
-					}
+						if(!System.env.NEXUS_DEPLOY_PASS){
+							throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
+						}
 
-					publications {
-						mavenJava(MavenPublication) {
-							from components.java
+						repository(url: NEXUS_DEPLOY_URL){
+							authentication (
+								userName: System.env.NEXUS_DEPLOY_USER,
+								password: System.env.NEXUS_DEPLOY_PASS
+							)
 
-							task sourceJar(type: Jar) {
-								from sourceSets.main.allJava
-								classifier = 'javadoc'
+							// that plugin does not make use of global proxy settings :-(
+							def proxyHost = System.getProperty("https.proxyHost")
+							def proxyPort = System.getProperty("https.proxyPort")
+							if(proxyHost && proxyPort){
+								proxy(host: proxyHost, port: Integer.parseInt(proxyPort), type: 'http')
 							}
+						}
 
-							task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
-								from javadoc.destinationDir
-								classifier = 'javadoc'
+						pom.project {
+							name project.name
+							description 'JSON API framework for Java'
+							url 'http://www.crnk.io'
+							scm {
+								url 'https://github.com/crnk-project/crnk-framework'
+								connection 'scm:git:git://github.com/crnk-project/crnk-framework.git'
+								developerConnection 'scm:git:git@github.com:crnk-project/crnk-framework.git'
 							}
-
-							artifact sourceJar {
-								classifier "sources"
+							licenses {
+								license {
+									name 'The Apache Software License, Version 2.0'
+									url 'http://www.apache.org/licenses/LICENSE-2.0.html'
+									distribution 'repo'
+								}
 							}
-
-							artifact packageJavadoc {
-								classifier "javadoc"
+							issueManagement {
+								system 'GitHub'
+								url 'https://github.com/crnk-project/crml-framework/issues'
 							}
-
-							pom.withXml {
-								asNode().appendNode('description', 'JSON API framework for Java')
-								asNode().appendNode('url', 'http://www.crnk.io')
-								asNode().appendNode('name', project.name)
-
-								def licenses = asNode().appendNode('licenses')
-								def license = licenses.appendNode('license')
-								license.appendNode('name', 'Apache License 2.0')
-								license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.html')
-
-								def issueManagement = asNode().appendNode('issueManagement')
-								issueManagement.appendNode('system', 'GitHub')
-								issueManagement.appendNode('url', 'https://github.com/crnk-project/crml-framework/issues')
-
-								def scm = asNode().appendNode('scm')
-								scm.appendNode('url', 'https://github.com/crnk-project/crnk-framework')
-								scm.appendNode('connection', 'scm:git:git://github.com/crnk-project/crnk-framework.git')
-								scm.appendNode('developerConnection', 'scm:git:git@github.com:crnk-project/crnk-framework.git')
-
-								def developers = asNode().appendNode('developers')
-								def developer = developers.appendNode('developer')
-								developer.appendNode('id', 'crnk')
-								developer.appendNode('email', 'info@crnk.io')
-
-
-
+							developers {
+								developer {
+									id 'crnk.io'
+									name 'crnk.io'
+									email 'info@crnk.io'
+								}
 							}
 						}
 					}
 				}
 			}
+
+			tasks.publish.dependsOn(tasks.uploadArchives)
+
 		}
 
 	}
