@@ -1,5 +1,7 @@
 package io.crnk.core;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBookt;
 import io.crnk.core.engine.http.HttpRequestContextBase;
@@ -13,8 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class HomeModuleTest {
 
@@ -32,7 +32,18 @@ public class HomeModuleTest {
 	}
 
 	@Test
-	public void test() throws IOException {
+	public void testWithAnyRequest() throws IOException {
+		test(true);
+	}
+
+
+	@Test
+	public void testWithHomeRequest() throws IOException {
+		test(false);
+	}
+
+
+	private void test(boolean anyRequest) throws IOException {
 		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
 		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
 
@@ -40,12 +51,14 @@ public class HomeModuleTest {
 
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(anyRequest ? "*" : HomeModule.JSON_HOME_CONTENT_TYPE);
 
 		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 
 		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
+		String expectedContentType = anyRequest ? HomeModule.JSON_CONTENT_TYPE : HomeModule.JSON_HOME_CONTENT_TYPE;
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponseHeader("Content-Type", "application/json");
 		Assert.assertEquals(200, (int) statusCaptor.getValue());
 
 		String json = new String(responseCaptor.getValue());
