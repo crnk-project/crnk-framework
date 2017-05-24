@@ -1,5 +1,13 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -13,9 +21,6 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -325,7 +330,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		if (typeSep != -1) {
 			String parameterNameSuffix = parameterName.substring(typeSep);
 			if (!parameterNameSuffix.startsWith("[") || !parameterNameSuffix.endsWith("]")) {
-				throw new ParametersDeserializationException("failed to parse parameter " + parameterName);
+				throw new ParametersDeserializationException("expected not [ resp. ] in parameter " +
+						parameterName);
 			}
 			elements.addAll(Arrays.asList(parameterNameSuffix.substring(1, parameterNameSuffix.length() - 1).split("\\]\\[")));
 		}

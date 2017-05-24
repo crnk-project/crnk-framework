@@ -1,5 +1,16 @@
 package io.crnk.core.engine.information.resource;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
@@ -9,44 +20,48 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import java.io.Serializable;
-import java.util.*;
-
 /**
  * Holds information about the type of the resource.
  */
 public class ResourceInformation {
 
 	private final Class<?> resourceClass;
+
 	/**
 	 * Found field of the id. Each resource has to contain a field marked by
 	 * JsonApiId annotation.
 	 */
 	private final ResourceField idField;
+
 	/**
 	 * A set of resource's attribute fields.
 	 */
 	private final ResourceAttributesBridge attributeFields;
+
 	/**
 	 * A set of fields that contains non-standard Java types (List, Set, custom
 	 * classes, ...).
 	 */
 	private final List<ResourceField> relationshipFields;
+
 	/**
 	 * An underlying field's name which contains meta information about for a
 	 * resource
 	 */
 	private final ResourceField metaField;
+
 	/**
 	 * An underlying field's name which contain links information about for a
 	 * resource
 	 */
 	private final ResourceField linksField;
+
 	/**
 	 * Type name of the resource. Corresponds to {@link JsonApiResource.type}
 	 * for annotated resources.
 	 */
 	private String resourceType;
+
 	/**
 	 * Creates a new instance of the given resource.
 	 */
@@ -63,12 +78,14 @@ public class ResourceInformation {
 
 	private List<ResourceField> fields;
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType, List<ResourceField> fields) {
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+			List<ResourceField> fields) {
 		this(parser, resourceClass, resourceType, superResourceType, null, fields);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType, ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -94,7 +111,8 @@ public class ResourceInformation {
 				resourceField.setResourceInformation(this);
 				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
 			}
-		} else {
+		}
+		else {
 			this.relationshipFields = Collections.emptyList();
 			this.attributeFields = new ResourceAttributesBridge(Collections.emptyList(), resourceClass);
 			this.metaField = null;
@@ -116,7 +134,8 @@ public class ResourceInformation {
 
 		if (metaFields.isEmpty()) {
 			return null;
-		} else if (metaFields.size() > 1) {
+		}
+		else if (metaFields.size() > 1) {
 			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
 		}
 		return metaFields.get(0);
@@ -132,7 +151,8 @@ public class ResourceInformation {
 
 		if (linksFields.isEmpty()) {
 			return null;
-		} else if (linksFields.size() > 1) {
+		}
+		else if (linksFields.size() > 1) {
 			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
 		}
 		return linksFields.get(0);
@@ -146,8 +166,8 @@ public class ResourceInformation {
 		return superResourceType;
 	}
 
-	public ResourceInstanceBuilder<?> getInstanceBuilder() {
-		return instanceBuilder;
+	public <T> ResourceInstanceBuilder<T> getInstanceBuilder() {
+		return (ResourceInstanceBuilder<T>) instanceBuilder;
 	}
 
 	public Class<?> getResourceClass() {
@@ -172,12 +192,14 @@ public class ResourceInformation {
 
 	public ResourceField findRelationshipFieldByName(String name) {
 		ResourceField resourceField = fieldByJsonName.get(name);
-		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField : null;
+		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField
+				: null;
 	}
 
 	public ResourceField findAttributeFieldByName(String name) {
 		ResourceField resourceField = fieldByJsonName.get(name);
-		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.ATTRIBUTE ? resourceField : null;
+		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.ATTRIBUTE ? resourceField
+				: null;
 	}
 
 	public ResourceField getMetaField() {
@@ -211,13 +233,17 @@ public class ResourceInformation {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects.equals(idField, that.idField) && Objects.equals(attributeFields, that.attributeFields)
-				&& Objects.equals(relationshipFields, that.relationshipFields) && Objects.equals(metaField, that.metaField) && Objects.equals(linksField, that.linksField);
+		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects
+				.equals(idField, that.idField) && Objects.equals(attributeFields, that.attributeFields)
+				&& Objects.equals(relationshipFields, that.relationshipFields) && Objects.equals(metaField, that.metaField)
+				&& Objects.equals(linksField, that.linksField);
 	}
 
 	@Override
@@ -232,8 +258,9 @@ public class ResourceInformation {
 	 * @return stringified id
 	 */
 	public String toIdString(Object id) {
-		if (id == null)
+		if (id == null) {
 			return null;
+		}
 		return id.toString();
 	}
 
@@ -250,7 +277,6 @@ public class ResourceInformation {
 	}
 
 	/**
-	 * @param resource
 	 * @return id of the resource
 	 */
 	public Object getId(Object resource) {
@@ -261,9 +287,8 @@ public class ResourceInformation {
 		idField.getAccessor().setValue(resource, id);
 	}
 
-	@Deprecated // Temporary method until proper versioning/locking/timestamping
-	// is implemented, used by JPA module
 	public void verify(Object resource, Document requestDocument) {
+		// nothing to do
 	}
 
 	public List<ResourceField> getFields() {

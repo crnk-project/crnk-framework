@@ -1,10 +1,34 @@
 package io.crnk.jpa.internal;
 
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
+import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder.AnnotatedResourceField;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
@@ -22,15 +46,11 @@ import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.information.MetaAwareInformation;
-import io.crnk.meta.model.*;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaType;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -268,9 +288,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		}
 
 		@Override
-		@Deprecated // Temporary method until proper
-		// versioning/locking/timestamping is implemented
 		public void verify(Object entity, Document requestDocument) {
+			// TODO consider implementing proper versioning/locking/timestamping mechanism
 			checkOptimisticLocking(entity, requestDocument.getSingleData().get());
 		}
 

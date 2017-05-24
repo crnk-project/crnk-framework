@@ -1,13 +1,13 @@
 package io.crnk.client.http.okhttp;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
-
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class OkHttpAdapter implements HttpAdapter {
 
@@ -35,27 +35,25 @@ public class OkHttpAdapter implements HttpAdapter {
 		return impl;
 	}
 
-	private void initImpl() {
-		synchronized (this) {
-			if (impl == null) {
-				Builder builder = new OkHttpClient.Builder();
+	private synchronized void initImpl() {
+		if (impl == null) {
+			Builder builder = new OkHttpClient.Builder();
 
-				if (networkTimeout != null) {
-					builder.readTimeout(networkTimeout, TimeUnit.MILLISECONDS);
-				}
-
-				for (OkHttpAdapterListener listener : listeners) {
-					listener.onBuild(builder);
-				}
-				impl = builder.build();
+			if (networkTimeout != null) {
+				builder.readTimeout(networkTimeout, TimeUnit.MILLISECONDS);
 			}
+
+			for (OkHttpAdapterListener listener : listeners) {
+				listener.onBuild(builder);
+			}
+			impl = builder.build();
 		}
 	}
 
 	@Override
 	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		OkHttpClient impl = getImplementation();
-		return new OkHttpRequest(impl, url, method, requestBody);
+		OkHttpClient implementation = getImplementation();
+		return new OkHttpRequest(implementation, url, method, requestBody);
 	}
 
 	@Override

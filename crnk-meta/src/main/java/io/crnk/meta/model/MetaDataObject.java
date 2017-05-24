@@ -1,14 +1,21 @@
 package io.crnk.meta.model;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Modifier;
-import java.util.*;
 
 @JsonApiResource(type = "meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
@@ -70,13 +77,6 @@ public abstract class MetaDataObject extends MetaType {
 	@SuppressWarnings("unchecked")
 	private void clearSubtypeCache() {
 		subTypesCache = new List[4];
-	}
-
-	private void clearCache() {
-		clearSubtypeCache();
-		attributes = null;
-		declaredAttributes = null;
-		attrMap = null;
 	}
 
 	public List<? extends MetaAttribute> getAttributes() {

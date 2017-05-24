@@ -1,10 +1,21 @@
 package io.crnk.core.engine.internal.dispatcher.controller.collection;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.internal.dispatcher.controller.*;
+import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
@@ -16,13 +27,6 @@ import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollectionGetTest extends BaseControllerTest {
 
@@ -176,7 +180,6 @@ public class CollectionGetTest extends BaseControllerTest {
 		data = response.getDocument().getSingleData().get();
 		assertThat(data.getType()).isEqualTo("tasks");
 		Relationship relationship = data.getRelationships().get("includedProjects");
-		assertThat(relationship);
 		assertThat(relationship.getCollectionData()).isNotNull();
 		assertThat(relationship.getCollectionData().get().size()).isEqualTo(1);
 		assertThat(relationship.getCollectionData().get().get(0).getId()).isEqualTo(projectId.toString());

@@ -8,6 +8,6 @@ public enum RestrictedResourceNames {
 	 * It is an url relationship indicator
 	 * See <a href="http://jsonapi.org/format/#fetching-relationships">Fetching Relationships</a>
 	 */
-	links,
+	links, // NOSONAR will be removed in the future
 
 }

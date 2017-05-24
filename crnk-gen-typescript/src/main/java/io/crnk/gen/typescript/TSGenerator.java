@@ -125,7 +125,7 @@ public class TSGenerator {
 
 		@Override
 		public String getDirectory(MetaElement meta) {
-			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf("."));
+			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			String prefix = idPath;
 			while (true) {
 				String npmName = config.getNpmPackageMapping().get(prefix);
@@ -143,7 +143,7 @@ public class TSGenerator {
 
 		@Override
 		public String getNpmPackage(MetaElement meta) {
-			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf("."));
+			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			String prefix = idPath;
 			while (true) {
 				String npmName = config.getNpmPackageMapping().get(prefix);

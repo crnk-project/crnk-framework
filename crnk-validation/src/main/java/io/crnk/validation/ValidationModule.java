@@ -6,11 +6,18 @@ import io.crnk.validation.internal.ValidationExceptionMapper;
 
 public class ValidationModule implements Module {
 
-	@Deprecated
-	public ValidationModule() {
+	private ValidationModule() {
 	}
 
+	/**
+	 * @deprecated make use of {{@link #create()}}
+	 */
+	@Deprecated
 	public static final ValidationModule newInstance() {
+		return new ValidationModule();
+	}
+
+	public static final ValidationModule create() {
 		return new ValidationModule();
 	}
 

@@ -1,10 +1,10 @@
-package io.crnk.rs.internal.parameterProvider.provider;
+package io.crnk.rs.internal.parameter.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.io.IOException;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HeaderParamProvider implements RequestContextParameterProvider {
 
@@ -14,14 +14,17 @@ public class HeaderParamProvider implements RequestContextParameterProvider {
 		String value = requestContext.getHeaderString(parameter.getAnnotation(HeaderParam.class).value());
 		if (value == null) {
 			return null;
-		} else {
+		}
+		else {
 			if (String.class.isAssignableFrom(parameter.getType())) {
 				returnValue = value;
-			} else {
+			}
+			else {
 				try {
 					returnValue = objectMapper.readValue(value, parameter.getType());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				}
+				catch (IOException e) {
+					throw new IllegalStateException(e);
 				}
 			}
 		}

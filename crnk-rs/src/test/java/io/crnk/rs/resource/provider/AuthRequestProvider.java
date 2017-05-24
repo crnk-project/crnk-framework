@@ -1,8 +1,8 @@
 package io.crnk.rs.resource.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.rs.internal.parameterProvider.provider.Parameter;
-import io.crnk.rs.internal.parameterProvider.provider.RequestContextParameterProvider;
+import io.crnk.rs.internal.parameter.provider.Parameter;
+import io.crnk.rs.internal.parameter.provider.RequestContextParameterProvider;
 
 import javax.ws.rs.container.ContainerRequestContext;
 

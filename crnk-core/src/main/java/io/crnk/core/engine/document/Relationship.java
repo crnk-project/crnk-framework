@@ -1,5 +1,10 @@
 package io.crnk.core.engine.document;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -11,11 +16,6 @@ import io.crnk.core.engine.internal.jackson.RelationshipDataDeserializer;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class Relationship implements MetaContainer, LinksContainer {
 
@@ -39,16 +39,6 @@ public class Relationship implements MetaContainer, LinksContainer {
 
 	public Relationship(List<ResourceIdentifier> resourceIds) {
 		this.data = Nullable.of((Object) resourceIds);
-	}
-
-	@Override
-	public ObjectNode getLinks() {
-		return links;
-	}
-
-	@Override
-	public void setLinks(ObjectNode links) {
-		this.links = links;
 	}
 
 	@Override
@@ -86,6 +76,16 @@ public class Relationship implements MetaContainer, LinksContainer {
 		}
 
 		this.data = data;
+	}
+
+	@Override
+	public ObjectNode getLinks() {
+		return links;
+	}
+
+	@Override
+	public void setLinks(ObjectNode links) {
+		this.links = links;
 	}
 
 	@JsonIgnore

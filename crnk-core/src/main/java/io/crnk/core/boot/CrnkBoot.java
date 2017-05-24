@@ -1,5 +1,7 @@
 package io.crnk.core.boot;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -46,8 +48,6 @@ import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
-
-import java.util.List;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -279,7 +279,6 @@ public class CrnkBoot {
 	}
 
 	private void addModules() {
-		ServiceDiscovery serviceDiscovery = moduleRegistry.getServiceDiscovery();
 		List<Module> modules = serviceDiscovery.getInstancesByType(Module.class);
 		for (Module module : modules) {
 			moduleRegistry.addModule(module);

@@ -1,21 +1,49 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
@@ -166,7 +194,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(), resourceClass, resourceType, superResourceType, instanceBuilder, (List) resourceFields);
-		if (!allowNonResourceBaseClass & information.getIdField() == null) {
+		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}
 		return information;

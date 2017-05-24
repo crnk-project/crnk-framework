@@ -1,5 +1,10 @@
 package io.crnk.core.engine.document;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -11,11 +16,6 @@ import io.crnk.core.engine.internal.jackson.NullableSerializer;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class Document implements MetaContainer, LinksContainer {
 
@@ -37,16 +37,6 @@ public class Document implements MetaContainer, LinksContainer {
 	private List<ErrorData> errors;
 
 	@Override
-	public ObjectNode getLinks() {
-		return links;
-	}
-
-	@Override
-	public void setLinks(ObjectNode links) {
-		this.links = links;
-	}
-
-	@Override
 	public ObjectNode getMeta() {
 		return meta;
 	}
@@ -65,6 +55,16 @@ public class Document implements MetaContainer, LinksContainer {
 			throw new NullPointerException("make use of Nullable instead of null");
 		}
 		this.data = data;
+	}
+
+	@Override
+	public ObjectNode getLinks() {
+		return links;
+	}
+
+	@Override
+	public void setLinks(ObjectNode links) {
+		this.links = links;
 	}
 
 	public List<Resource> getIncluded() {
@@ -100,11 +100,13 @@ public class Document implements MetaContainer, LinksContainer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Document))
+		if (!(obj instanceof Document)) {
 			return false;
+		}
 		Document other = (Document) obj;
 		return Objects.equals(data, other.data) && Objects.equals(errors, other.errors) // NOSONAR
-				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta) && Objects.equals(links, other.links);
+				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta) && Objects
+				.equals(links, other.links);
 	}
 
 	@JsonIgnore

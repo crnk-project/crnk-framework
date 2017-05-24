@@ -1,5 +1,19 @@
 package io.crnk.validation.internal;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ElementKind;
+import javax.validation.Path.Node;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.error.ErrorResponse;
@@ -14,15 +28,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module.ModuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ElementKind;
-import javax.validation.Path.Node;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.*;
 
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
@@ -47,7 +52,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		// Hibernate implementation
 		// TODO investigate other implementation next to
 		// hibernate, JSR 303 v1.1 not sufficient
-		if (propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL)
+		if (propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL) // NOSONAR class may not be available
 				|| propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL)) { // NOSONAR
 			try {
 				Method parentMethod = propertyNode.getClass().getMethod("getParent");

@@ -1,11 +1,11 @@
 package io.crnk.core.engine.internal.exception;
 
+import java.util.Set;
+
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.utils.Optional;
-
-import java.util.Set;
 
 public final class ExceptionMapperRegistry {
 
@@ -36,7 +36,7 @@ public final class ExceptionMapperRegistry {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public Optional<ExceptionMapper<?>> findMapperFor(ErrorResponse errorResponse) {
+	public <E extends Throwable> Optional<ExceptionMapper<E>> findMapperFor(ErrorResponse errorResponse) {
 		int currentDepth = -1;
 		ExceptionMapper closestExceptionMapper = null;
 

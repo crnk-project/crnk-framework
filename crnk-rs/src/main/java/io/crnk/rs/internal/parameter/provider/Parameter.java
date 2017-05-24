@@ -1,4 +1,4 @@
-package io.crnk.rs.internal.parameterProvider.provider;
+package io.crnk.rs.internal.parameter.provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

@@ -5,5 +5,5 @@ package io.crnk.legacy.queryParams;
 */
 @Deprecated
 public enum RestrictedPaginationKeys {
-	offset, limit, number, size
+	offset, limit, number, size // NOSONAR already deprecated
 }

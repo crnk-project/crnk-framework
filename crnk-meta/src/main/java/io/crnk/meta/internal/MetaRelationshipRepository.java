@@ -1,5 +1,7 @@
 package io.crnk.meta.internal;
 
+import java.util.Collection;
+
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -8,17 +10,16 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
-import java.util.Collection;
-
 public class MetaRelationshipRepository implements RelationshipRepositoryV2<MetaElement, String, MetaElement, String> {
 
 	private MetaLookup lookup;
 
 	private Class<? extends MetaElement> sourceResourceClass;
+
 	private Class<? extends MetaElement> targetResourceClass;
 
 	public MetaRelationshipRepository(MetaLookup lookup, Class<? extends MetaElement> sourceClass,
-									  Class<? extends MetaElement> targetClass) {
+			Class<? extends MetaElement> targetClass) {
 		this.lookup = lookup;
 		this.sourceResourceClass = sourceClass;
 		this.targetResourceClass = targetClass;
@@ -80,32 +81,4 @@ public class MetaRelationshipRepository implements RelationshipRepositoryV2<Meta
 	public void removeRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
 		throw new UnsupportedOperationException("repository is read-only");
 	}
-
-	//	@SuppressWarnings("unchecked")
-	//	public T findOne(String id, QuerySpec querySpec) {
-	//		MetaElement metaElement = lookup.getMetaById().get(id);
-	//		Class<T> resourceClass = this.getResourceClass();
-	//		if (metaElement != null && resourceClass.isInstance(metaElement)) {
-	//			return (T) metaElement;
-	//		}
-	//		throw new ResourceNotFoundException(id);
-	//	}
-	//
-	//	@Override
-	//	public ResourceList<T> findAll(QuerySpec querySpec) {
-	//		Collection<T> values = filterByType(lookup.getMetaById().values());
-	//		return querySpec.apply(values);
-	//	}
-	//
-	//	@SuppressWarnings("unchecked")
-	//	private Collection<T> filterByType(Collection<MetaElement> values) {
-	//		Collection<T> results = new ArrayList<>();
-	//		Class<T> resourceClass = this.getResourceClass();
-	//		for (MetaElement element : values) {
-	//			if (resourceClass.isInstance(element)) {
-	//				results.add((T) element);
-	//			}
-	//		}
-	//		return results;
-	//	}
 }

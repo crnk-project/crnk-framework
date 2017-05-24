@@ -15,8 +15,8 @@ import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.internal.JaxrsModule;
-import io.crnk.rs.internal.parameterProvider.RequestContextParameterProviderRegistry;
-import io.crnk.rs.internal.parameterProvider.RequestContextParameterProviderRegistryBuilder;
+import io.crnk.rs.internal.parameter.RequestContextParameterProviderRegistry;
+import io.crnk.rs.internal.parameter.RequestContextParameterProviderRegistryBuilder;
 
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.RuntimeType;

@@ -1,16 +1,21 @@
 package io.crnk.jpa.internal.query;
 
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
-import io.crnk.jpa.query.AnyTypeObject;
-import io.crnk.meta.model.*;
-
-import javax.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import javax.persistence.criteria.JoinType;
+
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
+import io.crnk.jpa.query.AnyTypeObject;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaAttributeFinder;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaType;
 
 public final class QueryFilterBuilder<P, F> {
 
@@ -20,7 +25,7 @@ public final class QueryFilterBuilder<P, F> {
 
 	private JpaQueryBackend<F, ?, P, ?> backend;
 
-	protected QueryFilterBuilder(final ComputedAttributeRegistryImpl virtualAttrs, JpaQueryBackend<F, ?, P, ?> backend,
+	protected QueryFilterBuilder(JpaQueryBackend<F, ?, P, ?> backend,
 								 MetaAttributeFinder attributeFinder) {
 		this.backend = backend;
 		this.attributeFinder = attributeFinder;

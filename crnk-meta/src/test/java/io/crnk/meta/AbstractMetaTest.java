@@ -7,7 +7,7 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.rs.internal.JaxrsModule;
 import org.junit.Before;
 
-public class AbstractMetaTest {
+public abstract class AbstractMetaTest {
 
 	protected CrnkBoot boot;
 

@@ -1,11 +1,11 @@
-package io.crnk.rs.internal.parameterProvider.provider;
+package io.crnk.rs.internal.parameter.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.io.IOException;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
-import java.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CookieParamProvider implements RequestContextParameterProvider {
 
@@ -25,7 +25,7 @@ public class CookieParamProvider implements RequestContextParameterProvider {
 				try {
 					returnValue = objectMapper.readValue(cookie.getValue(), parameter.getType());
 				} catch (IOException e) {
-					throw new RuntimeException(e);
+					throw new IllegalStateException(e);
 				}
 			}
 		}

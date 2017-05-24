@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +29,6 @@ import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
 
-import java.util.*;
-
 public class DocumentMapperUtil {
 
 	private ResourceRegistry resourceRegistry;
@@ -42,28 +47,33 @@ public class DocumentMapperUtil {
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
 		} else {
-			Set<String> includedFieldNames = includedFields.getParams();
-
-			if (relation) {
-				// for relations consider both "include" and "fields"
-				TypedParams<IncludedRelationsParams> includedRelationsSet = queryAdapter.getIncludedRelations();
-				IncludedRelationsParams includedRelations = includedRelationsSet != null ? includedRelationsSet.getParams().get(resourceInformation.getResourceType()) : null;
-				if (includedRelations != null) {
-					includedFieldNames = new HashSet<>(includedFieldNames);
-					for (Inclusion include : includedRelations.getParams()) {
-						includedFieldNames.add(include.getPath());
-					}
-				}
-			}
-
-			List<ResourceField> results = new ArrayList<>();
-			for (ResourceField field : fields) {
-				if (includedFieldNames.contains(field.getJsonName())) {
-					results.add(field);
-				}
-			}
-			return results;
+			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
 		}
+	}
+
+	private static List<ResourceField> computeRequestedFields(IncludedFieldsParams includedFields, boolean relation,
+			QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
+		Set<String> includedFieldNames = includedFields.getParams();
+
+		if (relation) {
+			// for relations consider both "include" and "fields"
+			TypedParams<IncludedRelationsParams> includedRelationsSet = queryAdapter.getIncludedRelations();
+			IncludedRelationsParams includedRelations = includedRelationsSet != null ? includedRelationsSet.getParams().get(resourceInformation.getResourceType()) : null;
+			if (includedRelations != null) {
+				includedFieldNames = new HashSet<>(includedFieldNames);
+				for (Inclusion include : includedRelations.getParams()) {
+					includedFieldNames.add(include.getPath());
+				}
+			}
+		}
+
+		List<ResourceField> results = new ArrayList<>();
+		for (ResourceField field : fields) {
+			if (includedFieldNames.contains(field.getJsonName())) {
+				results.add(field);
+			}
+		}
+		return results;
 	}
 
 	protected static boolean noResourceIncludedFieldsSpecified(IncludedFieldsParams typeIncludedFields) {

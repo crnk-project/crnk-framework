@@ -1,8 +1,16 @@
 package io.crnk.operations.internal;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 
-public class Graph {
+public class GraphUtils {
+
+	private GraphUtils(){
+	}
 
 	public static List<Node> sort(Collection<Node> nodes) {
 		//result <- Empty list that will contain the sorted elements
@@ -101,7 +109,7 @@ public class Graph {
 		@Override
 		public boolean equals(Object obj) {
 			Edge e = (Edge) obj;
-			return e.from == from && e.to == to;
+			return e != null && e.from == from && e.to == to;
 		}
 	}
 }

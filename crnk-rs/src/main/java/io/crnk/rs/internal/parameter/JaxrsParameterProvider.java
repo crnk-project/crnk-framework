@@ -1,18 +1,18 @@
-package io.crnk.rs.internal.parameterProvider;
+package io.crnk.rs.internal.parameter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.utils.Optional;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.parameterProvider.provider.Parameter;
-import io.crnk.rs.internal.parameterProvider.provider.RequestContextParameterProvider;
-
+import java.lang.reflect.Method;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.SecurityContext;
-import java.lang.reflect.Method;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.utils.Optional;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+import io.crnk.rs.internal.parameter.provider.Parameter;
+import io.crnk.rs.internal.parameter.provider.RequestContextParameterProvider;
 
 /**
  * <p>
@@ -33,13 +33,13 @@ import java.lang.reflect.Method;
  * {@link CookieParam}, an instance of {@link ObjectMapper} is used to map the value to the desired type.
  * </p>
  */
-public class JaxRsParameterProvider implements RepositoryMethodParameterProvider {
+public class JaxrsParameterProvider implements RepositoryMethodParameterProvider {
 
 	private final ObjectMapper objectMapper;
 	private final ContainerRequestContext requestContext;
 	private final RequestContextParameterProviderRegistry parameterProviderRegistry;
 
-	public JaxRsParameterProvider(ObjectMapper objectMapper, ContainerRequestContext requestContext, RequestContextParameterProviderRegistry parameterProviderRegistry) {
+	public JaxrsParameterProvider(ObjectMapper objectMapper, ContainerRequestContext requestContext, RequestContextParameterProviderRegistry parameterProviderRegistry) {
 		this.objectMapper = objectMapper;
 		this.requestContext = requestContext;
 		this.parameterProviderRegistry = parameterProviderRegistry;

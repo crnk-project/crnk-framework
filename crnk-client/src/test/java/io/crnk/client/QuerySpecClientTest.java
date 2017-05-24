@@ -1,5 +1,10 @@
 package io.crnk.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
@@ -24,11 +29,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class QuerySpecClientTest extends AbstractClientTest {
 
@@ -420,7 +420,7 @@ public class QuerySpecClientTest extends AbstractClientTest {
 		Assert.assertEquals(1, relProjects.size());
 		Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
 
-		// FIXME HTTP DELETE method with payload not supported? at least in
+		// TODO HTTP DELETE method with payload not supported? at least in
 		// Jersey
 		// relRepo.removeRelations(task, Arrays.asList(project1.getId()),
 		// "projects");

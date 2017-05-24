@@ -1,5 +1,6 @@
 package io.crnk.client;
 
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -10,12 +11,12 @@ import org.junit.Test;
 
 public class ExceptionTest extends AbstractClientTest {
 
-	protected ResourceRepositoryStub<Task, Long> taskRepo;
+	protected ResourceRepositoryV2<Task, Long> taskRepo;
 
 	@Before
 	public void setup() {
 		super.setup();
-		taskRepo = client.getQueryParamsRepository(Task.class);
+		taskRepo = client.getRepositoryForType(Task.class);
 	}
 
 	@Test
@@ -33,7 +34,7 @@ public class ExceptionTest extends AbstractClientTest {
 
 	@Test
 	public void repoWithProxyAndInterface() {
-		ScheduleRepository repo = client.getResourceRepository(ScheduleRepository.class);
+		ScheduleRepository repo = client.getRepositoryForInterface(ScheduleRepository.class);
 
 		Schedule schedule = new Schedule();
 		schedule.setId(10000L);

@@ -1,5 +1,8 @@
 package io.crnk.spring.boot.autoconfigure;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
@@ -19,9 +22,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' JPA module.
@@ -71,6 +71,8 @@ public class CrnkJpaAutoConfiguration {
 				case QUERYDSL:
 					module.setQueryFactory(QuerydslQueryFactory.newInstance());
 					break;
+				default:
+					throw new IllegalStateException("unknown query factory");
 			}
 		}
 		return module;

@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.utils.Optional;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,6 +9,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import io.crnk.core.exception.ResourceException;
+import io.crnk.core.utils.Optional;
 
 /**
  * Provides reflection methods for parsing information about a class.
@@ -191,21 +191,25 @@ public class ClassUtils {
 
 		Class<?> currentClass = beanClass;
 		while (currentClass != null && currentClass != Object.class) {
-			for (Method method : currentClass.getDeclaredMethods()) {
-				if (!method.isSynthetic()) {
-					if (isGetter(method)) {
-						Method v = resultMap.get(method.getName());
-						if (v == null) {
-							resultMap.put(method.getName(), method);
-							results.add(method);
-						}
-					}
-				}
-			}
+			getDeclaredClassGetters(currentClass, resultMap, results);
 			currentClass = currentClass.getSuperclass();
 		}
 
 		return results;
+	}
+
+	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap, LinkedList<Method> results) {
+		for (Method method : currentClass.getDeclaredMethods()) {
+			if (!method.isSynthetic()) {
+				if (isGetter(method)) {
+					Method v = resultMap.get(method.getName());
+					if (v == null) {
+						resultMap.put(method.getName(), method);
+						results.add(method);
+					}
+				}
+			}
+		}
 	}
 
 	/**

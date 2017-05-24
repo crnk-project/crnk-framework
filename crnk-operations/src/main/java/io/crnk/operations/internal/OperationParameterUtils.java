@@ -8,6 +8,9 @@ import java.util.Set;
 
 public class OperationParameterUtils {
 
+	private OperationParameterUtils() {
+	}
+
 
 	public static String parsePath(String url) {
 		int sep = url.indexOf('?');
@@ -22,7 +25,7 @@ public class OperationParameterUtils {
 			String[] pairs = query.split("&");
 			for (String pair : pairs) {
 				try {
-					int idx = pair.indexOf("=");
+					int idx = pair.indexOf('=');
 					String name = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
 					String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
 
@@ -32,7 +35,8 @@ public class OperationParameterUtils {
 						parameters.put(name, values);
 					}
 					values.add(value);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
 			}

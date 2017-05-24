@@ -1,5 +1,7 @@
 package io.crnk.spring.boot.v3;
 
+import javax.servlet.Filter;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.core.boot.CrnkBoot;
@@ -12,15 +14,12 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.internal.SpringServiceDiscovery;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.servlet.Filter;
 
 /**
  * Current crnk configuration with JSON API compliance, QuerySpec and module support.
@@ -95,7 +94,7 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 }

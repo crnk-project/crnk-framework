@@ -6,7 +6,7 @@ import io.crnk.core.exception.CrnkMappableException;
 /**
  * General client exception if no custom mapper is found.
  */
-public class ClientException extends CrnkMappableException {
+public class ClientException extends CrnkMappableException { // NOSONAR ignore large exception hierarchy
 
 	private static final long serialVersionUID = 7455315058615968760L;
 

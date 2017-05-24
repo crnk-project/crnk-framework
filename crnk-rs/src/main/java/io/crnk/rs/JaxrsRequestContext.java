@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.parameterProvider.JaxRsParameterProvider;
+import io.crnk.rs.internal.parameter.JaxrsParameterProvider;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;
@@ -46,7 +46,7 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 
 		ObjectMapper objectMapper = feature.getBoot().getObjectMapper();
 		requestParameterProvider =
-				new JaxRsParameterProvider(objectMapper, requestContext, feature.getParameterProviderRegistry());
+				new JaxrsParameterProvider(objectMapper, requestContext, feature.getParameterProviderRegistry());
 	}
 
 	@Override

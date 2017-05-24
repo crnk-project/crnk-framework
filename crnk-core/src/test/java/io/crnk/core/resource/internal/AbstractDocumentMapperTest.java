@@ -24,20 +24,25 @@ import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.After;
 import org.junit.Before;
 
-public class AbstractDocumentMapperTest {
+public abstract class AbstractDocumentMapperTest {
 
 	protected DocumentMapper mapper;
+
 	protected ResourceRegistry resourceRegistry;
+
 	protected ObjectMapper objectMapper;
 
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
 
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
+		ResourceInformationBuilder resourceInformationBuilder =
+				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		ResourceRegistryBuilder registryBuilder = new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
-		resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		ResourceRegistryBuilder registryBuilder =
+				new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
+		resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry,
+				new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JsonApiModuleBuilder().build(resourceRegistry, false));

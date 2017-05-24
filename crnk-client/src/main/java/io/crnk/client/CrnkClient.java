@@ -1,5 +1,11 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -49,15 +55,8 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -210,7 +209,6 @@ public class CrnkClient {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, boolean allocateRelated) {
 		ResourceInformationBuilder resourceInformationBuilder = moduleRegistry.getResourceInformationBuilder();
-		DefaultResourceInformationBuilderContext context = new DefaultResourceInformationBuilderContext(resourceInformationBuilder, moduleRegistry.getTypeParser());
 
 		ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
 		final ResourceRepositoryStub<T, I> repositoryStub = new ResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
@@ -235,14 +233,14 @@ public class CrnkClient {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private <T> void allocateRepositoryRelations(RegistryEntry registryEntry, boolean allocateRelated, List<ResponseRelationshipEntry> relationshipEntries) {
+	private void allocateRepositoryRelations(RegistryEntry registryEntry, boolean allocateRelated, List<ResponseRelationshipEntry> relationshipEntries) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
 		for (ResourceField relationshipField : relationshipFields) {
 			final Class<?> targetClass = relationshipField.getElementType();
 			Class<?> resourceClass = resourceInformation.getResourceClass();
 
-			final RelationshipRepositoryStubImpl relationshipRepositoryStub = new RelationshipRepositoryStubImpl(this, resourceClass, targetClass, resourceInformation, urlBuilder, registryEntry);
+			final RelationshipRepositoryStubImpl relationshipRepositoryStub = new RelationshipRepositoryStubImpl(this, resourceClass, targetClass, resourceInformation, urlBuilder);
 			RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder = new RepositoryInstanceBuilder<RelationshipRepository>(null, null) {
 
 				@Override

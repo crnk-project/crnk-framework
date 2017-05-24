@@ -1,5 +1,12 @@
 package io.crnk.rs;
 
+import java.io.IOException;
+import java.util.Arrays;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.Response;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -13,14 +20,6 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.utils.Nullable;
 import io.crnk.rs.type.JsonApiMediaType;
-
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Uses the Crnk {@link DocumentMapper} to create a JSON API response for
@@ -62,7 +61,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 
 			ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
 			try {
-				UriInfo uriInfo = requestContext.getUriInfo();
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					HttpRequestContext context = new HttpRequestContextBaseAdapter(new JaxrsRequestContext(requestContext,
 							feature));
@@ -75,7 +73,8 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, null));
 				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 
-			} finally {
+			}
+			finally {
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					((HttpRequestContextProvider) serviceUrlProvider).onRequestFinished();
 				}
@@ -97,16 +96,4 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 		boolean resourceList = ResourceListBase.class.isAssignableFrom(response.getClass());
 		return singleResource || resourceList;
 	}
-
-	/**
-	 * Checks the response's media type.
-	 *
-	 * @param responseContext the response context
-	 * @return {@code true}, if media type is application/vnd.api+json,<br />
-	 * {@code false}, otherwise
-	 */
-	private boolean isMediaTypeJsonApi(ContainerResponseContext responseContext) {
-		return JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
-	}
-
 }

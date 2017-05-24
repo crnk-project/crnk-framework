@@ -1,4 +1,4 @@
-package io.crnk.rs.internal.parameterProvider.provider;
+package io.crnk.rs.internal.parameter.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

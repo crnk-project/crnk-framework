@@ -1,11 +1,5 @@
 package io.crnk.meta.internal;
 
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.provider.MetaProviderBase;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -13,9 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> extends MetaProviderBase {
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.provider.MetaProviderBase;
 
-	private static final ResourceFieldNameTransformer NAME_TRANSFORMER = new ResourceFieldNameTransformer();
+public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> extends MetaProviderBase {
 
 	protected void createAttributes(T meta) {
 		Class<?> implClass = meta.getImplementationClass();

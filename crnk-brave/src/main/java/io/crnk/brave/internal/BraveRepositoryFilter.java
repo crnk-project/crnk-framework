@@ -1,5 +1,10 @@
 package io.crnk.brave.internal;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.LocalTracer;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
@@ -9,18 +14,12 @@ import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Performs a local trace for each repository call. Keep in mind that a single HTTP request
@@ -147,11 +146,6 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 			pathBuilder.append("/");
 		}
 		return pathBuilder.toString();
-	}
-
-	private String getResourceType(Class<?> resourceClass) {
-		RegistryEntry resourceEntry = moduleContext.getResourceRegistry().findEntry(resourceClass);
-		return resourceEntry.getResourceInformation().getResourceType();
 	}
 
 	private int getResultCount(JsonApiResponse result) {

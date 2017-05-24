@@ -1,17 +1,17 @@
 package io.crnk.jpa.internal.query;
 
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.query.ComputedAttributeRegistry;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaType;
-
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class ComputedAttributeRegistryImpl implements ComputedAttributeRegistry {
 
@@ -74,19 +74,15 @@ public class ComputedAttributeRegistryImpl implements ComputedAttributeRegistry 
 
 		private String name;
 
-		public MetaComputedAttribute getAttribute() {
+		public synchronized MetaComputedAttribute getAttribute() {
 			if (attr == null) {
-				synchronized (this) {
-					if (attr == null) {
-						MetaLookup metaLookup = context.getMetaLookup();
-						MetaDataObject targetMeta = metaLookup.getMeta(targetClass, MetaJpaDataObject.class).asDataObject();
-						MetaType attrType = metaLookup.getMeta(type).asType();
-						attr = new MetaComputedAttribute();
-						attr.setParent(targetMeta, false);
-						attr.setName(name);
-						attr.setType(attrType);
-					}
-				}
+				MetaLookup metaLookup = context.getMetaLookup();
+				MetaDataObject targetMeta = metaLookup.getMeta(targetClass, MetaJpaDataObject.class).asDataObject();
+				MetaType attrType = metaLookup.getMeta(type).asType();
+				attr = new MetaComputedAttribute();
+				attr.setParent(targetMeta, false);
+				attr.setName(name);
+				attr.setType(attrType);
 			}
 			return attr;
 		}

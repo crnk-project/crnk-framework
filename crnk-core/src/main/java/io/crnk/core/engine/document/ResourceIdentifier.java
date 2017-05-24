@@ -25,12 +25,12 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 		if (data instanceof Iterable) {
 			List<ResourceIdentifier> result = new ArrayList<>();
 			for (ResourceIdentifier id : (Iterable<ResourceIdentifier>) data) {
-				result.add(id.clone());
+				result.add(id.duplicate());
 			}
 			return result;
 		} else {
 			ResourceIdentifier id = (ResourceIdentifier) data;
-			return id.clone();
+			return id.duplicate();
 		}
 	}
 
@@ -50,8 +50,7 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 		this.type = type;
 	}
 
-	@Override
-	public ResourceIdentifier clone() {
+	public ResourceIdentifier duplicate() {
 		return new ResourceIdentifier(id, type);
 	}
 

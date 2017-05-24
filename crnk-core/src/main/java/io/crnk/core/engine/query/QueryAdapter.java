@@ -32,7 +32,7 @@ public interface QueryAdapter {
 	void setOffset(long offset);
 
 	/**
-	 * @return clone of this instance
+	 * @return duplicate of this instance
 	 */
 	QueryAdapter duplicate();
 

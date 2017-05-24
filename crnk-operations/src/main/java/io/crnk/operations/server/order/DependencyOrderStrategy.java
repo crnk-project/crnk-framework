@@ -5,7 +5,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.operations.Operation;
-import io.crnk.operations.internal.Graph;
+import io.crnk.operations.internal.GraphUtils;
 
 import java.util.*;
 
@@ -17,8 +17,8 @@ public class DependencyOrderStrategy implements OperationOrderStrategy {
 
 	@Override
 	public List<OrderedOperation> order(List<Operation> operations) {
-		Map<String, Graph.Node> nodeMap = new HashMap<>();
-		List<Graph.Node> nodeList = new ArrayList<>();
+		Map<String, GraphUtils.Node> nodeMap = new HashMap<>();
+		List<GraphUtils.Node> nodeList = new ArrayList<>();
 		for (int i = 0; i < operations.size(); i++) {
 			Operation operation = operations.get(i);
 			String key = toKey(operation.getValue());
@@ -27,22 +27,22 @@ public class DependencyOrderStrategy implements OperationOrderStrategy {
 						operation.getValue().getType() + " id=" + operation.getValue().getId());
 			}
 
-			Graph.Node node = new Graph.Node(key, new OrderedOperation(operation, i));
+			GraphUtils.Node node = new GraphUtils.Node(key, new OrderedOperation(operation, i));
 			nodeMap.put(key, node);
 			nodeList.add(node);
 		}
 
 		buildDependencyGraph(operations, nodeMap);
 
-		List<Graph.Node> sortedNodes = Graph.sort(nodeList);
+		List<GraphUtils.Node> sortedNodes = GraphUtils.sort(nodeList);
 		List<OrderedOperation> dependencySortedOperations = new ArrayList<>();
-		for (Graph.Node node : sortedNodes) {
+		for (GraphUtils.Node node : sortedNodes) {
 			dependencySortedOperations.add((OrderedOperation) node.getValue());
 		}
 		return moveDeletionsToEnd(dependencySortedOperations);
 	}
 
-	private void buildDependencyGraph(List<Operation> operations, Map<String, Graph.Node> nodes) {
+	private void buildDependencyGraph(List<Operation> operations, Map<String, GraphUtils.Node> nodes) {
 		for (Operation operation : operations) {
 			Resource resource = operation.getValue();
 			for (Relationship relationship : resource.getRelationships().values()) {
@@ -81,12 +81,12 @@ public class DependencyOrderStrategy implements OperationOrderStrategy {
 		return sortedOperations;
 	}
 
-	private void checkDependency(Map<String, Graph.Node> nodes, Operation operation, ResourceIdentifier
+	private void checkDependency(Map<String, GraphUtils.Node> nodes, Operation operation, ResourceIdentifier
 			dependencyId) {
 		String dependencyKey = toKey(dependencyId);
-		Graph.Node node = nodes.get(toKey(operation.getValue()));
+		GraphUtils.Node node = nodes.get(toKey(operation.getValue()));
 		if (nodes.containsKey(dependencyKey)) {
-			Graph.Node dependentNode = nodes.get(dependencyKey);
+			GraphUtils.Node dependentNode = nodes.get(dependencyKey);
 			Operation dependentOperation = ((OrderedOperation) dependentNode.getValue()).getOperation();
 			if (HttpMethod.POST.name().equalsIgnoreCase(dependentOperation.getOp())) {
 				dependentNode.addEdge(node);

@@ -1,5 +1,8 @@
 package io.crnk.client.http.apache;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
@@ -7,9 +10,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class HttpClientAdapter implements HttpAdapter {
 
@@ -37,29 +37,27 @@ public class HttpClientAdapter implements HttpAdapter {
 		return impl;
 	}
 
-	private void initImpl() {
-		synchronized (this) {
-			if (impl == null) {
-				HttpClientBuilder builder = HttpClients.custom();
+	private synchronized void initImpl() {
+		if (impl == null) {
+			HttpClientBuilder builder = HttpClients.custom();
 
-				if (receiveTimeout != null) {
-					RequestConfig.Builder requestBuilder = RequestConfig.custom();
-					requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
-					builder.setDefaultRequestConfig(requestBuilder.build());
-				}
-
-				for (HttpClientAdapterListener listener : listeners) {
-					listener.onBuild(builder);
-				}
-				impl = builder.build();
+			if (receiveTimeout != null) {
+				RequestConfig.Builder requestBuilder = RequestConfig.custom();
+				requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
+				builder.setDefaultRequestConfig(requestBuilder.build());
 			}
+
+			for (HttpClientAdapterListener listener : listeners) {
+				listener.onBuild(builder);
+			}
+			impl = builder.build();
 		}
 	}
 
 	@Override
 	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		CloseableHttpClient impl = getImplementation();
-		return new HttpClientRequest(impl, url, method, requestBody);
+		CloseableHttpClient implementation = getImplementation();
+		return new HttpClientRequest(implementation, url, method, requestBody);
 	}
 
 	@Override

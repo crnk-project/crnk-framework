@@ -126,6 +126,16 @@ public class ErrorDataBuilder {
 	}
 
 	public ErrorData build() {
-		return new ErrorData(id, aboutLink, status, code, title, detail, sourcePointer, sourceParameter, meta);
+		ErrorData data = new ErrorData();
+		data.id = id;
+		data.aboutLink = aboutLink;
+		data.status = status;
+		data.code = code;
+		data.title = title;
+		data.detail = detail;
+		data.sourcePointer = sourcePointer;
+		data.sourceParameter = sourcePointer;
+		data.meta = meta;
+		return data;
 	}
 }

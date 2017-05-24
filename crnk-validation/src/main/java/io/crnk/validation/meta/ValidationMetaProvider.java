@@ -1,10 +1,10 @@
 package io.crnk.validation.meta;
 
+import javax.validation.constraints.NotNull;
+
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaProviderBase;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Provides an integration into crnk-meta. Currently features:
@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
  */
 public class ValidationMetaProvider extends MetaProviderBase {
 
+	@Override
 	public void onInitialized(MetaElement element) {
 		if (element instanceof MetaAttribute) {
 			MetaAttribute attr = (MetaAttribute) element;

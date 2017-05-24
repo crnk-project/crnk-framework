@@ -1,9 +1,17 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.exception.RepositoryMethodException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
-import java.lang.reflect.*;
-import java.util.*;
+import io.crnk.core.exception.RepositoryMethodException;
 
 /**
  * <p>
@@ -199,12 +207,16 @@ public class PropertyUtils {
 			}
 		} else {
 			Method getter = findGetter(bean.getClass(), fieldName);
-			if (getter == null) {
-				String message = String
-						.format("Cannot find an getter for %s.%s", bean.getClass().getCanonicalName(), fieldName);
-				throw new PropertyException(message, bean.getClass(), fieldName);
-			}
+			checkGetterNotNull(getter, bean.getClass(), fieldName);
 			return getter.invoke(bean);
+		}
+	}
+
+	private void checkGetterNotNull(Method getter, Class<?> bean, String fieldName) {
+		if (getter == null) {
+			String message = String
+					.format("Cannot find an getter for %s.%s", bean.getClass().getCanonicalName(), fieldName);
+			throw new PropertyException(message, bean.getClass(), fieldName);
 		}
 	}
 
@@ -216,11 +228,7 @@ public class PropertyUtils {
 			return foundField.getType();
 		} else {
 			Method getter = findGetter(beanClass, fieldName);
-			if (getter == null) {
-				String message = String
-						.format("Cannot find an getter for %s.%s", beanClass.getCanonicalName(), fieldName);
-				throw new PropertyException(message, beanClass, fieldName);
-			}
+			checkGetterNotNull(getter, beanClass, fieldName);
 			return getter.getReturnType();
 		}
 	}
@@ -233,11 +241,7 @@ public class PropertyUtils {
 			return foundField.getGenericType();
 		} else {
 			Method getter = findGetter(beanClass, fieldName);
-			if (getter == null) {
-				String message = String
-						.format("Cannot find an getter for %s.%s", beanClass.getCanonicalName(), fieldName);
-				throw new PropertyException(message, beanClass, fieldName);
-			}
+			checkGetterNotNull(getter, beanClass, fieldName);
 			return getter.getGenericReturnType();
 		}
 	}
@@ -287,10 +291,7 @@ public class PropertyUtils {
 			}
 		} else {
 			Method getter = findGetter(bean.getClass(), fieldName);
-			if (getter == null) {
-				String message = String.format("Cannot find a getter for %s.%s", bean.getClass().getCanonicalName(), fieldName);
-				throw new PropertyException(message, bean.getClass(), fieldName);
-			}
+			checkGetterNotNull(getter, bean, fieldName);
 			String getterFieldName = ClassUtils.getGetterFieldName(getter);
 			Method setter = getSetter(bean, getterFieldName, getter.getReturnType());
 			setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));

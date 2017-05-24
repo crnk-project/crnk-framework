@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.rs.internal.parameterProvider.JaxRsParameterProvider;
-import io.crnk.rs.internal.parameterProvider.RequestContextParameterProviderRegistry;
-import io.crnk.rs.internal.parameterProvider.RequestContextParameterProviderRegistryBuilder;
+import io.crnk.rs.internal.parameter.JaxrsParameterProvider;
+import io.crnk.rs.internal.parameter.RequestContextParameterProviderRegistry;
+import io.crnk.rs.internal.parameter.RequestContextParameterProviderRegistryBuilder;
 import io.crnk.rs.resource.provider.AuthRequest;
 import io.crnk.rs.resource.provider.Foo;
 import org.junit.Before;
@@ -49,14 +49,14 @@ public class JaxRsParameterProviderTest {
 	@Mock
 	private MultivaluedMap<String, String> queryParams;
 
-	private JaxRsParameterProvider sut;
+	private JaxrsParameterProvider sut;
 
 	private Method testMethod;
 
 	@Before
 	public void setUp() throws Exception {
 		RequestContextParameterProviderRegistry parameterProviderRegistry = buildParameterProviderRegistry(getServiceDiscovery());
-		sut = new JaxRsParameterProvider(objectMapper, requestContext, parameterProviderRegistry);
+		sut = new JaxrsParameterProvider(objectMapper, requestContext, parameterProviderRegistry);
 
 		for (Method method : TestClass.class.getDeclaredMethods()) {
 			if ("testMethod".equals(method.getName())) {
