@@ -14,13 +14,13 @@ import java.util.Set;
 public interface QueryParamsParserContext {
 
 	/**
-	 * Returns the set of parameter values that match the given query parameter
+	 * Returns the set of legacy values that match the given query legacy
 	 * name of the current request.
 	 */
 	Set<String> getParameterValue(String parameterName);
 
 	/**
-	 * Returns the set of query parameter names associated to the current
+	 * Returns the set of query legacy names associated to the current
 	 * request.
 	 */
 	Iterable<String> getParameterNames();

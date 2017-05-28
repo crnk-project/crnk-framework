@@ -111,6 +111,7 @@ public class OperationsCall {
 	}
 
 	public <T> T getResponseObject(int index, Class<T> clazz) {
+		checkResponsesAvailable();
 		OperationResponse response = responses.get(index);
 		return fromResource(response, clazz);
 	}

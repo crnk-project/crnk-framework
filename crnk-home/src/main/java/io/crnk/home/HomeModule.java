@@ -1,16 +1,17 @@
 package io.crnk.home;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
+
+import java.io.IOException;
 
 /**
  * Displays a list of available resources in the root directory.
@@ -31,12 +32,17 @@ public class HomeModule implements Module {
 	}
 
 	public static boolean isHomeRequest(HttpRequestContext requestContext) {
-		boolean isRoot = requestContext.getPath().isEmpty() || requestContext.getPath().equals("/");
+		boolean isRoot = UrlUtils.removeTrailingSlash(requestContext.getPath()).isEmpty();
+		if (!isRoot) {
+			return false;
+		}
+
 		boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-		boolean acceptsAny = requestContext
-				.acceptsAny();
-		boolean isGet = requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString());
-		return isRoot && isGet && (acceptsHome || acceptsAny);
+		boolean acceptsAny = requestContext.acceptsAny();
+		if (!(acceptsHome || acceptsAny)) {
+			return false;
+		}
+		return requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString());
 	}
 
 	@Override
@@ -68,9 +74,9 @@ public class HomeModule implements Module {
 
 					String json = objectMapper.writeValueAsString(node);
 					boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-					if(acceptsHome) {
+					if (acceptsHome) {
 						requestContext.setContentType(JSON_HOME_CONTENT_TYPE);
-					}else{
+					} else {
 						requestContext.setContentType(JSON_CONTENT_TYPE);
 					}
 					requestContext.setResponse(200, json);

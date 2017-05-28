@@ -73,6 +73,13 @@ gradle.beforeProject { Project project ->
 			jacoco {
 				toolVersion = "0.7.6.201602180812"
 			}
+
+
+			sonarqube {
+				properties {
+					property 'sonar.coverage.exclusions', "**/legacy/**" }
+			}
+
 		}
 
 		apply plugin: 'maven-publish'

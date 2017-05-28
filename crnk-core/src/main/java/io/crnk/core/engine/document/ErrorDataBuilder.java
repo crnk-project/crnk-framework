@@ -94,11 +94,11 @@ public class ErrorDataBuilder {
 	}
 
 	/**
-	 * A string indicating which query parameter caused the error.
+	 * A string indicating which query legacy caused the error.
 	 * <p>
 	 * Wrapped in "source" object.
 	 *
-	 * @param sourceParameter source parameter
+	 * @param sourceParameter source legacy
 	 * @return builder instance
 	 */
 	public ErrorDataBuilder setSourceParameter(String sourceParameter) {

@@ -19,7 +19,7 @@ public @interface JsonApiRelation {
 	/**
 	 * (Optional) Defines whether the data associated to the relationship should be serialized when making a request.
 	 * <p>
-	 * LAZY (Default) - is serialize the relationship when requested with an include query parameter.
+	 * LAZY (Default) - is serialize the relationship when requested with an include query legacy.
 	 * <p>
 	 * ONLY_ID - is only serialize the ids in the resources relationship section but not the included section.
 	 * <p>
@@ -34,7 +34,7 @@ public @interface JsonApiRelation {
 	 * NONE (Default) - do not automatically call this fields relationship findManyTargets or findOneTarget.
 	 * <p>
 	 * AUTOMATICALLY_WHEN_NULL - automatically perform a relationship findManyTargets or findOneTarget when this field's value
-	 * is null and it is either A. requested in an include query parameter B. SerializeType.ONLY_ID or SerializeType.EAGER
+	 * is null and it is either A. requested in an include query legacy B. SerializeType.ONLY_ID or SerializeType.EAGER
 	 * is present.
 	 * <p>
 	 * AUTOMATICALLY_ALWAYS - always automatically call a relationship's findManyTargets or findOneTarget and overwrite this field.

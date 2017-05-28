@@ -1,4 +1,4 @@
-package io.crnk.rs.internal.parameter;
+package io.crnk.rs.internal.legacy;
 
 import java.lang.reflect.Method;
 import javax.ws.rs.CookieParam;
@@ -11,12 +11,12 @@ import javax.ws.rs.core.SecurityContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.parameter.provider.Parameter;
-import io.crnk.rs.internal.parameter.provider.RequestContextParameterProvider;
+import io.crnk.rs.internal.legacy.provider.Parameter;
+import io.crnk.rs.internal.legacy.provider.RequestContextParameterProvider;
 
 /**
  * <p>
- * An implementation of parameter provider for JAX-RS integration based on a registry of RequestContextParameterProvider
+ * An implementation of legacy provider for JAX-RS integration based on a registry of RequestContextParameterProvider
  * provided by an instance of RequestContextParameterProviderRegistry.
  * By default, the registry supports the following parameters:
  * </p>

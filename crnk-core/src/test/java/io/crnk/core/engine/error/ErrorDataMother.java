@@ -17,7 +17,7 @@ public class ErrorDataMother {
 	public static final String STATUS = "status";
 	public static final String TITLE = "title";
 	public static final String POINTER = "pointer";
-	public static final String PARAMETER = "parameter";
+	public static final String PARAMETER = "legacy";
 	public static final Map<String, Object> META = new HashMap<>();
 
 	public static final String META_KEY = "key";

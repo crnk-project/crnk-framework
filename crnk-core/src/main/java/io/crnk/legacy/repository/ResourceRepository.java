@@ -56,7 +56,7 @@ public interface ResourceRepository<T, ID extends Serializable> extends Reposito
 	<S extends T> S save(S entity);
 
 	/**
-	 * Removes a document identified by id parameter.
+	 * Removes a document identified by id legacy.
 	 *
 	 * @param id identified of the document to be removed
 	 */

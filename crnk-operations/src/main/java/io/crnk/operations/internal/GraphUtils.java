@@ -1,15 +1,12 @@
 package io.crnk.operations.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import io.crnk.core.engine.internal.utils.CompareUtils;
+
+import java.util.*;
 
 public class GraphUtils {
 
-	private GraphUtils(){
+	private GraphUtils() {
 	}
 
 	public static List<Node> sort(Collection<Node> nodes) {
@@ -90,6 +87,16 @@ public class GraphUtils {
 		}
 
 		@Override
+		public int hashCode() {
+			return name.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj != null && obj.getClass() == Node.class && ((Node) obj).name.equals(name);
+		}
+
+		@Override
 		public String toString() {
 			return name;
 		}
@@ -106,10 +113,17 @@ public class GraphUtils {
 			this.to = to;
 		}
 
+		public int hashCode() {
+			return from.hashCode() | to.hashCode();
+		}
+
 		@Override
 		public boolean equals(Object obj) {
-			Edge e = (Edge) obj;
-			return e != null && e.from == from && e.to == to;
+			if (obj != null && obj.getClass() == Edge.class) {
+				Edge e = (Edge) obj;
+				return CompareUtils.isEquals(e.from, from) && CompareUtils.isEquals(e.to, to);
+			}
+			return false;
 		}
 	}
 }

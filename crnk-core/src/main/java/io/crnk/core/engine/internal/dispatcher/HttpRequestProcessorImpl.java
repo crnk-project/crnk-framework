@@ -92,7 +92,7 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 	 *
 	 * @param path              built represents the URI sent in the request
 	 * @param method            type of the request e.g. POST, GET, PATCH
-	 * @param parameterProvider repository method parameter provider
+	 * @param parameterProvider repository method legacy provider
 	 * @param requestBody       deserialized body of the client request
 	 * @return the response form the Crnk
 	 */

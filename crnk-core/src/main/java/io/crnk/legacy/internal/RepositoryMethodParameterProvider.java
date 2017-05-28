@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
  *  }
  * </pre>
  * This method has {@link io.crnk.legacy.repository.annotations.JsonApiFindOne} annotation which require the first
- * parameter to be a document identifier to be found. However, it is not the only parameter that can be defined.
+ * legacy to be a document identifier to be found. However, it is not the only legacy that can be defined.
  * It's possible to pass additional, web framework dependant objects associated with a request. When using JAX-RS
  * integration, it's possible to pass <b>javax.ws.rs.core.SecurityContext</b>. To allow doing that, JAX-RS adapter
  * has implemented {@link RepositoryMethodParameterProvider} to pass several framework classes to the document method.
@@ -34,12 +34,12 @@ import java.lang.reflect.Method;
 public interface RepositoryMethodParameterProvider {
 
 	/**
-	 * Return an instance of a custom parameter.
+	 * Return an instance of a custom legacy.
 	 *
-	 * @param method         document method which contain the parameter
-	 * @param parameterIndex index of the parameter in the method parameters
-	 * @param <T>            Type of a parameter
-	 * @return parameter value or null if not found
+	 * @param method         document method which contain the legacy
+	 * @param parameterIndex index of the legacy in the method parameters
+	 * @param <T>            Type of a legacy
+	 * @return legacy value or null if not found
 	 */
 	<T> T provide(Method method, int parameterIndex);
 }

@@ -1,11 +1,39 @@
 package io.crnk.security;
 
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 
 
 public class ResourcePermissionTest {
+
+	@Test
+	public void testEquals() throws NoSuchFieldException {
+		EqualsVerifier.forClass(ResourceIdentifier.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+
+		Assert.assertEquals(ResourcePermission.ALL, ResourcePermission.ALL);
+		Assert.assertEquals(ResourcePermission.DELETE, ResourcePermission.DELETE);
+		Assert.assertEquals(ResourcePermission.GET, ResourcePermission.GET);
+		Assert.assertEquals(ResourcePermission.POST, ResourcePermission.POST);
+		Assert.assertNotEquals(ResourcePermission.DELETE, ResourcePermission.ALL);
+		Assert.assertNotEquals(ResourcePermission.DELETE, ResourcePermission.GET);
+		Assert.assertNotEquals(ResourcePermission.DELETE, ResourcePermission.PATCH);
+		Assert.assertNotEquals(ResourcePermission.DELETE, ResourcePermission.POST);
+		Assert.assertNotEquals(ResourcePermission.DELETE, "not a resource permission");
+	}
+
+	@Test
+	public void testHashCode() throws NoSuchFieldException {
+		Assert.assertEquals(ResourcePermission.ALL.hashCode(), ResourcePermission.ALL.hashCode());
+		Assert.assertNotEquals(ResourcePermission.DELETE.hashCode(), ResourcePermission.ALL.hashCode());
+		Assert.assertNotEquals(ResourcePermission.GET.hashCode(), ResourcePermission.ALL.hashCode());
+		Assert.assertNotEquals(ResourcePermission.POST.hashCode(), ResourcePermission.PATCH.hashCode());
+		Assert.assertNotEquals(ResourcePermission.POST.hashCode(), ResourcePermission.GET.hashCode());
+	}
+
 
 	@Test
 	public void xor() {

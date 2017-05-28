@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.parameter.JaxrsParameterProvider;
+import io.crnk.rs.internal.legacy.JaxrsParameterProvider;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedMap;

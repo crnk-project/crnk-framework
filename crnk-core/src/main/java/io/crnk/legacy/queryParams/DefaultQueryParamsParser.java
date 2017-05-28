@@ -52,7 +52,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 		}
 
 		if (matchList.isEmpty()) {
-			throw new ParametersDeserializationException("Malformed filter parameter: " + entryKey);
+			throw new ParametersDeserializationException("Malformed filter legacy: " + entryKey);
 		}
 
 		return matchList;
@@ -61,7 +61,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 	/**
 	 * <strong>Important!</strong> Crnk implementation differs form JSON API
 	 * <a href="http://jsonapi.org/format/#fetching-filtering">definition of filtering</a>
-	 * in order to fit standard query parameter serializing strategy and maximize effective processing of data.
+	 * in order to fit standard query legacy serializing strategy and maximize effective processing of data.
 	 * <p>
 	 * Filter params can be send with following format (Crnk does not specify or implement any operators): <br>
 	 * <strong>filter[ResourceType][property|operator]([property|operator])* = "value"</strong><br>
@@ -113,7 +113,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 	/**
 	 * <strong>Important!</strong> Crnk implementation differs form JSON API
 	 * <a href="http://jsonapi.org/format/#fetching-sorting">definition of sorting</a>
-	 * in order to fit standard query parameter serializing strategy and maximize effective processing of data.
+	 * in order to fit standard query legacy serializing strategy and maximize effective processing of data.
 	 * <p>
 	 * Sort params can be send with following format: <br>
 	 * <strong>sort[ResourceType][property]([property])* = "asc|desc"</strong>
@@ -192,7 +192,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 			List<String> propertyList = buildPropertyListFromEntry(entry, groupingKey);
 
 			if (propertyList.size() > 1) {
-				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'group' parameter " +
+				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'group' legacy " +
 						"(1) eg. group[tasks][name] <-- #2 level and more are not allowed");
 			}
 
@@ -222,7 +222,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 	/**
 	 * <strong>Important!</strong> Crnk implementation differs form JSON API
 	 * <a href="http://jsonapi.org/format/#fetching-sparse-fieldsets">definition of sparse field set</a>
-	 * in order to fit standard query parameter serializing strategy and maximize effective processing of data.
+	 * in order to fit standard query legacy serializing strategy and maximize effective processing of data.
 	 * <p>
 	 * Sparse field set params can be send with following format: <br>
 	 * <strong>fields[ResourceType] = "property(.property)*"</strong><br>
@@ -248,7 +248,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 
 			if (propertyList.size() > 1) {
 				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'fields' " +
-						"parameter (1) eg. fields[tasks][name] <-- #2 level and more are not allowed");
+						"legacy (1) eg. fields[tasks][name] <-- #2 level and more are not allowed");
 			}
 
 			String resourceType = propertyList.get(0);
@@ -277,7 +277,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 	/**
 	 * <strong>Important!</strong> Crnk implementation differs form JSON API
 	 * <a href="http://jsonapi.org/format/#fetching-includes">definition of includes</a>
-	 * in order to fit standard query parameter serializing strategy and maximize effective processing of data.
+	 * in order to fit standard query legacy serializing strategy and maximize effective processing of data.
 	 * <p>
 	 * Included field set params can be send with following format: <br>
 	 * <strong>include[ResourceType] = "property(.property)*"</strong><br>
@@ -303,7 +303,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 
 			if (propertyList.size() > 1) {
 				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'include' " +
-						"parameter (1)");
+						"legacy (1)");
 			}
 
 			String resourceType = propertyList.get(0);
@@ -356,7 +356,7 @@ public class DefaultQueryParamsParser implements QueryParamsParser {
 			List<String> propertyList = buildPropertyListFromEntry(entry, RestrictedQueryParamsMembers.page.name());
 
 			if (propertyList.size() > 1) {
-				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'page' parameter " +
+				throw new ParametersDeserializationException("Exceeded maximum level of nesting of 'page' legacy " +
 						"(1) eg. page[offset][minimal] <-- #2 level and more are not allowed");
 			}
 

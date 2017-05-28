@@ -13,12 +13,12 @@ package io.crnk.core.resource.annotations;
 public enum SerializeType {
 	/**
 	 * Defines that relationship repository(s) are lazily serialized by default, meaning
-	 * when explicitly requested by the ``include`` URL parameter.
+	 * when explicitly requested by the ``include`` URL legacy.
 	 */
 	LAZY,
 	/**
 	 * Defines that only relationship repository(s) id(s) are serialized.
-	 * An inclusion can be requested with the the ``include`` URL parameter.
+	 * An inclusion can be requested with the the ``include`` URL legacy.
 	 */
 	ONLY_ID,
 	/**

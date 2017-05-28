@@ -1,4 +1,4 @@
-package io.crnk.rs.internal.parameter.provider;
+package io.crnk.rs.internal.legacy.provider;
 
 import java.io.IOException;
 import javax.ws.rs.HeaderParam;

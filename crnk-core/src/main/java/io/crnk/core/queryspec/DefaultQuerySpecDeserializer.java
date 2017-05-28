@@ -215,7 +215,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		} else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
 			Long limit = parameter.getLongValue();
 			if (getMaxPageLimit() != null && limit != null && limit > getMaxPageLimit()) {
-				String error = String.format("%s parameter value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER, limit, getMaxPageLimit());
+				String error = String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER, limit, getMaxPageLimit());
 				throw new BadRequestException(error);
 			}
 			querySpec.setLimit(limit);
@@ -330,7 +330,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		if (typeSep != -1) {
 			String parameterNameSuffix = parameterName.substring(typeSep);
 			if (!parameterNameSuffix.startsWith("[") || !parameterNameSuffix.endsWith("]")) {
-				throw new ParametersDeserializationException("expected not [ resp. ] in parameter " +
+				throw new ParametersDeserializationException("expected not [ resp. ] in legacy " +
 						parameterName);
 			}
 			elements.addAll(Arrays.asList(parameterNameSuffix.substring(1, parameterNameSuffix.length() - 1).split("\\]\\[")));
@@ -343,10 +343,10 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		parseFilterOperator(param, elements);
 
 		if (elements.isEmpty()) {
-			throw new ParametersDeserializationException("failed to parse parameter " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException("failed to parse legacy " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() > 2) {
-			throw new ParametersDeserializationException("failed to parse parameter " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException("failed to parse legacy " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
@@ -401,7 +401,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	private ResourceInformation getResourceInformation(String resourceType, String parameterName) {
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceType);
 		if (registryEntry == null) {
-			throw new ParametersDeserializationException("failed to parse parameter " + parameterName + ", resourceType=" + resourceType + " not found");
+			throw new ParametersDeserializationException("failed to parse legacy " + parameterName + ", resourceType=" + resourceType + " not found");
 		}
 		return registryEntry.getResourceInformation();
 	}

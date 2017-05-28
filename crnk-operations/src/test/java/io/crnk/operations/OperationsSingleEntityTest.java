@@ -28,6 +28,7 @@ public class OperationsSingleEntityTest extends AbstractOperationsTest {
 		operationsClient = new OperationsClient(client);
 	}
 
+
 	@Test
 	public void testSingleEntityCrud() {
 		MovieEntity movie = newMovie("test");

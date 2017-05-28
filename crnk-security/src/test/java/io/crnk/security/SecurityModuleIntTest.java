@@ -260,7 +260,7 @@ public class SecurityModuleIntTest extends JerseyTest {
 		}
 
 		@Override
-		public Request authenticate(Route route, Response response) throws IOException { // NOSONAR this is a lambda, parameter cannot be removed!
+		public Request authenticate(Route route, Response response) throws IOException { // NOSONAR this is a lambda, legacy cannot be removed!
 			if (responseCount(response) >= 3) {
 				return null; // If we've failed 3 times, give up.
 			}

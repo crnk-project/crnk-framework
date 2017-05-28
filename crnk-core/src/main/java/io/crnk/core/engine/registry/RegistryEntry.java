@@ -127,11 +127,11 @@ public class RegistryEntry {
 	}
 
 	/**
-	 * Check the parameter is a parent of <b>this</b> {@link RegistryEntry}
+	 * Check the legacy is a parent of <b>this</b> {@link RegistryEntry}
 	 * instance
 	 *
 	 * @param registryEntry parent to check
-	 * @return true if the parameter is a parent
+	 * @return true if the legacy is a parent
 	 */
 	public boolean isParent(RegistryEntry registryEntry) {
 		RegistryEntry entry = getParentRegistryEntry();

@@ -19,10 +19,13 @@ public class HomeModuleTest {
 
 	private CrnkBoot boot;
 
+	private HomeModule module;
+
 	@Before
 	public void setup() {
+		this.module = Mockito.spy(HomeModule.create());
 		boot = new CrnkBoot();
-		boot.addModule(HomeModule.create());
+		boot.addModule(module);
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
 				()));
@@ -30,18 +33,24 @@ public class HomeModuleTest {
 	}
 
 	@Test
+	public void moduleName() {
+		HomeModule module = boot.getModuleRegistry().getModule(HomeModule.class).get();
+		Assert.assertEquals("home", module.getModuleName());
+	}
+
+	@Test
 	public void testWithAnyRequest() throws IOException {
-		test(true);
+		testHomeJsonReturned(true);
 	}
 
 
 	@Test
 	public void testWithHomeRequest() throws IOException {
-		test(false);
+		testHomeJsonReturned(false);
 	}
 
 
-	private void test(boolean anyRequest) throws IOException {
+	private void testHomeJsonReturned(boolean anyRequest) throws IOException {
 		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
 		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
 
@@ -65,6 +74,34 @@ public class HomeModuleTest {
 		JsonNode resourcesNode = response.get("resources");
 		JsonNode usersNode = resourcesNode.get("tag:tasks");
 		Assert.assertEquals("/tasks/", usersNode.get("href").asText());
+	}
+
+	@Test
+	public void testNonRootRequestNotTouchedForDifferentUrl() throws IOException {
+		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
+
+		// create json api request
+		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/doesNotExists");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+
+		// execute
+		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		requestDispatcher.process(requestContextBase);
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
+	}
+
+	@Test
+	public void testNonRootRequestNotTouchedForDifferentContentType() throws IOException {
+		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
+
+		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("application/doesNotExists");
+
+		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		requestDispatcher.process(requestContextBase);
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
 	}
 
 

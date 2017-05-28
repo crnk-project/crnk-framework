@@ -1,5 +1,6 @@
 package io.crnk.operations.server;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.operations.OperationResponse;
@@ -14,9 +15,7 @@ public class TransactionOperationFilter implements OperationFilter {
 	public List<OperationResponse> filter(final OperationFilterContext context, final OperationFilterChain chain) {
 		ServiceDiscovery serviceDiscovery = context.getServiceDiscovery();
 		List<TransactionRunner> transactionRunners = serviceDiscovery.getInstancesByType(TransactionRunner.class);
-		if (transactionRunners.size() != 1) {
-			throw new IllegalStateException("expected single transaction runner, got " + transactionRunners);
-		}
+		PreconditionUtil.assertEquals("expected single transaction runner", 1, transactionRunners.size());
 		TransactionRunner transactionRunner = transactionRunners.get(0);
 		return transactionRunner.doInTransaction(new Callable<List<OperationResponse>>() {
 			@Override

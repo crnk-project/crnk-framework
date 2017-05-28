@@ -1,6 +1,6 @@
 package io.crnk.legacy.registry;
 
-import io.crnk.core.engine.internal.utils.Predicate1;
+import io.crnk.core.engine.internal.utils.Predicate;
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.module.ModuleRegistry;
@@ -30,7 +30,7 @@ public class AnnotatedRepositoryEntryBuilder implements RepositoryEntryBuilder {
 
 	@Override
 	public ResourceEntry buildResourceRepository(ResourceLookup lookup, final Class<?> resourceClass) {
-		Predicate1<Class<?>> classPredicate = new Predicate1<Class<?>>() {
+		Predicate<Class<?>> classPredicate = new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				return resourceClass.equals(clazz.getAnnotation(JsonApiResourceRepository.class).value());
@@ -47,7 +47,7 @@ public class AnnotatedRepositoryEntryBuilder implements RepositoryEntryBuilder {
 
 	@Override
 	public List<ResponseRelationshipEntry> buildRelationshipRepositories(ResourceLookup lookup, final Class<?> resourceClass) {
-		Predicate1<Class<?>> classPredicate = new Predicate1<Class<?>>() {
+		Predicate<Class<?>> classPredicate = new Predicate<Class<?>>() {
 			@Override
 			public boolean test(Class<?> clazz) {
 				JsonApiRelationshipRepository annotation = clazz.getAnnotation(JsonApiRelationshipRepository.class);
@@ -64,7 +64,7 @@ public class AnnotatedRepositoryEntryBuilder implements RepositoryEntryBuilder {
 		return relationshipEntries;
 	}
 
-	private List<Class<?>> findRepositoryClasses(ResourceLookup lookup, Predicate1<Class<?>> classPredicate, Class<? extends Annotation> annotation) {
+	private List<Class<?>> findRepositoryClasses(ResourceLookup lookup, Predicate<Class<?>> classPredicate, Class<? extends Annotation> annotation) {
 		List<Class<?>> repositoryClasses = new LinkedList<>();
 
 		for (Class<?> clazz : lookup.getResourceRepositoryClasses()) {

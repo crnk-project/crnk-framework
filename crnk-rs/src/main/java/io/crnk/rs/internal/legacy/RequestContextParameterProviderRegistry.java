@@ -1,8 +1,8 @@
-package io.crnk.rs.internal.parameter;
+package io.crnk.rs.internal.legacy;
 
 import io.crnk.core.utils.Optional;
-import io.crnk.rs.internal.parameter.provider.Parameter;
-import io.crnk.rs.internal.parameter.provider.RequestContextParameterProvider;
+import io.crnk.rs.internal.legacy.provider.Parameter;
+import io.crnk.rs.internal.legacy.provider.RequestContextParameterProvider;
 
 import java.util.Collection;
 import java.util.Set;

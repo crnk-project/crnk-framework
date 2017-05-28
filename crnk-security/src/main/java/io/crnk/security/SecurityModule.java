@@ -4,6 +4,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.utils.Supplier;
 import io.crnk.security.internal.SecurityFilter;
@@ -96,7 +97,7 @@ public class SecurityModule implements InitializingModule {
 
 	@Override
 	public String getModuleName() {
-		return "Security";
+		return "security";
 	}
 
 	@Override
@@ -168,18 +169,16 @@ public class SecurityModule implements InitializingModule {
 		}
 		Map<String, ResourcePermission> map = permissions.get(resourceType);
 		ResourcePermission missingPermission = permission;
-		if (map == null) {
-			LOGGER.warn("no permissions declared for ", resourceType);
-			return missingPermission.isEmpty();
-		}
-		for (Entry<String, ResourcePermission> entry : map.entrySet()) {
-			String role = entry.getKey();
-			ResourcePermission intersection = entry.getValue().and(permission);
-			boolean hasMorePermissions = !intersection.isEmpty();
-			if (hasMorePermissions && isUserInRole(role)) {
-				missingPermission = updateMissingPermissions(missingPermission, intersection);
-				if (missingPermission.isEmpty()) {
-					break;
+		if (map != null) {
+			for (Entry<String, ResourcePermission> entry : map.entrySet()) {
+				String role = entry.getKey();
+				ResourcePermission intersection = entry.getValue().and(permission);
+				boolean hasMorePermissions = !intersection.isEmpty();
+				if (hasMorePermissions && isUserInRole(role)) {
+					missingPermission = updateMissingPermissions(missingPermission, intersection);
+					if (missingPermission.isEmpty()) {
+						break;
+					}
 				}
 			}
 		}
@@ -208,13 +207,12 @@ public class SecurityModule implements InitializingModule {
 		}
 		Map<String, ResourcePermission> map = permissions.get(resourceType);
 		ResourcePermission result = ResourcePermission.EMPTY;
-		if (map == null) {
-			return result;
-		}
-		for (Entry<String, ResourcePermission> entry : map.entrySet()) {
-			String role = entry.getKey();
-			if (isUserInRole(role)) {
-				result = result.or(entry.getValue());
+		if (map != null) {
+			for (Entry<String, ResourcePermission> entry : map.entrySet()) {
+				String role = entry.getKey();
+				if (isUserInRole(role)) {
+					result = result.or(entry.getValue());
+				}
 			}
 		}
 		return result;
@@ -239,6 +237,9 @@ public class SecurityModule implements InitializingModule {
 	private <T> String toType(Class<T> resourceClass) {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntryForClass(resourceClass);
+		if (entry == null) {
+			throw new ResourceNotFoundException("resource type not found: " + resourceClass.getName());
+		}
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		return resourceInformation.getResourceType();
 	}

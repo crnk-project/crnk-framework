@@ -1,7 +1,7 @@
-package io.crnk.rs.internal.parameter;
+package io.crnk.rs.internal.legacy;
 
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.rs.internal.parameter.provider.*;
+import io.crnk.rs.internal.legacy.provider.*;
 
 import java.util.HashSet;
 import java.util.Set;

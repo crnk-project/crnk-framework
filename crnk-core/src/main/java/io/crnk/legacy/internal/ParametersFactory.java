@@ -45,7 +45,7 @@ public class ParametersFactory {
 		int parametersLength = method.getParameterTypes().length;
 		if (firstParameters.length > 0 && parametersLength < 1) {
 			throw new RepositoryMethodException(
-					String.format("Method with %s annotation should have at least one parameter.", annotationType));
+					String.format("Method with %s annotation should have at least one legacy.", annotationType));
 		}
 		int parametersToResolve = parametersLength - firstParameters.length;
 		Object[] additionalParameters = new Object[parametersToResolve];
@@ -88,7 +88,7 @@ public class ParametersFactory {
 		int parametersLength = method.getParameterTypes().length;
 		if (firstParameters.length > 0 && parametersLength < 1) {
 			throw new RepositoryMethodException(
-					String.format("Method with %s annotation should have at least one parameter.", annotationType));
+					String.format("Method with %s annotation should have at least one legacy.", annotationType));
 		}
 		int parametersToResolve = parametersLength - firstParameters.length;
 		Object[] additionalParameters = new Object[parametersToResolve];

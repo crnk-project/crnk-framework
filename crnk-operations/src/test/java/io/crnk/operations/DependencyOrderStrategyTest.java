@@ -32,6 +32,12 @@ public class DependencyOrderStrategyTest {
 		Assert.assertEquals(1, results.size());
 	}
 
+	@Test(expected = UnsupportedOperationException.class)
+	public void testCannotOrderDuplicateObjects() {
+		Operation operation = createOperation("movie", "test", HttpMethod.POST);
+		toOperations(strategy.order(Arrays.asList(operation, operation)));
+	}
+
 	@Test
 	public void testTwoIndependentResource() {
 		Operation op1 = createOperation("movie", "test1", HttpMethod.POST);
@@ -63,10 +69,22 @@ public class DependencyOrderStrategyTest {
 	}
 
 	@Test
-	public void testFirstPostDependsOnSecondPost() {
+	public void testFirstPostDependsOneOnSecondPost() {
 		Operation op1 = createOperation("movie", "test1", HttpMethod.POST);
 		Operation op2 = createOperation("person", "test2", HttpMethod.POST);
-		addDependency(op1, op2, "directors");
+		addOneDependency(op1, op2, "directors");
+
+		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
+		Assert.assertEquals(2, results.size());
+		Assert.assertEquals(op2, results.get(0));
+		Assert.assertEquals(op1, results.get(1));
+	}
+
+	@Test
+	public void testFirstPostDependsManyOnSecondPost() {
+		Operation op1 = createOperation("movie", "test1", HttpMethod.POST);
+		Operation op2 = createOperation("person", "test2", HttpMethod.POST);
+		addManyDependency(op1, op2, "directors");
 
 		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
 		Assert.assertEquals(2, results.size());
@@ -79,8 +97,8 @@ public class DependencyOrderStrategyTest {
 	public void testCyclicPost() {
 		Operation op1 = createOperation("movie", "test1", HttpMethod.POST);
 		Operation op2 = createOperation("person", "test2", HttpMethod.POST);
-		addDependency(op1, op2, "directors");
-		addDependency(op2, op1, "directors");
+		addManyDependency(op1, op2, "directors");
+		addManyDependency(op2, op1, "directors");
 
 		strategy.order(Arrays.asList(op1, op2));
 	}
@@ -89,7 +107,7 @@ public class DependencyOrderStrategyTest {
 	public void testSecondPostDependsOnFirstPost() {
 		Operation op1 = createOperation("movie", "test1", HttpMethod.POST);
 		Operation op2 = createOperation("person", "test2", HttpMethod.POST);
-		addDependency(op2, op1, "writers");
+		addManyDependency(op2, op1, "writers");
 
 		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
 		Assert.assertEquals(2, results.size());
@@ -101,7 +119,7 @@ public class DependencyOrderStrategyTest {
 	public void testSecondPatchDependsOnFirstPatch() {
 		Operation op1 = createOperation("movie", "test1", HttpMethod.PATCH);
 		Operation op2 = createOperation("person", "test2", HttpMethod.PATCH);
-		addDependency(op2, op1, "writers");
+		addManyDependency(op2, op1, "writers");
 
 		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
 		Assert.assertEquals(2, results.size());
@@ -111,14 +129,39 @@ public class DependencyOrderStrategyTest {
 
 	@Test
 	public void testFirstPatchDependsOnSecondPatch() {
-		Operation op1 = createOperation("movie", "test1", HttpMethod.PATCH);
-		Operation op2 = createOperation("person", "test2", HttpMethod.PATCH);
-		addDependency(op1, op2, "writers");
+		Operation op1 = createOperation("movie", "e", HttpMethod.PATCH);
+		Operation op2 = createOperation("person", "f", HttpMethod.PATCH);
+		addManyDependency(op1, op2, "writers");
 
 		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
 		Assert.assertEquals(2, results.size());
 		Assert.assertEquals(op1, results.get(0));
 		Assert.assertEquals(op2, results.get(1));
+	}
+
+
+	@Test
+	public void testFirstUninitalizedDependencyIsIngored() {
+		Operation op1 = createOperation("movie", "c", HttpMethod.POST);
+		Operation op2 = createOperation("person", "d", HttpMethod.POST);
+		addUnitializedDependency(op1, "writers");
+
+		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
+		Assert.assertEquals(2, results.size());
+		Assert.assertEquals(op2, results.get(1));
+		Assert.assertEquals(op1, results.get(0));
+	}
+
+	@Test
+	public void testSecondUninitalizedDependencyIsIngored() {
+		Operation op1 = createOperation("movie", "a", HttpMethod.POST);
+		Operation op2 = createOperation("person", "b", HttpMethod.POST);
+		addUnitializedDependency(op2, "writers");
+
+		List<Operation> results = toOperations(strategy.order(Arrays.asList(op1, op2)));
+		Assert.assertEquals(2, results.size());
+		Assert.assertEquals(op2, results.get(1));
+		Assert.assertEquals(op1, results.get(0));
 	}
 
 	private List<Operation> toOperations(List<OrderedOperation> orderedOperations) {
@@ -145,7 +188,7 @@ public class DependencyOrderStrategyTest {
 		return operation;
 	}
 
-	private void addDependency(Operation op1, Operation op2, String relationshipName) {
+	private void addManyDependency(Operation op1, Operation op2, String relationshipName) {
 		Resource resource1 = op1.getValue();
 		Resource resource2 = op2.getValue();
 
@@ -158,5 +201,29 @@ public class DependencyOrderStrategyTest {
 
 		ResourceIdentifier resourceId = new ResourceIdentifier(resource2.getId(), resource2.getType());
 		relationship.getCollectionData().get().add(resourceId);
+	}
+
+	private void addOneDependency(Operation op1, Operation op2, String relationshipName) {
+		Resource resource1 = op1.getValue();
+		Resource resource2 = op2.getValue();
+
+		Relationship relationship = resource1.getRelationships().get(relationshipName);
+		if (relationship == null) {
+			relationship = new Relationship();
+			resource1.getRelationships().put(relationshipName, relationship);
+		}
+
+		ResourceIdentifier resourceId = new ResourceIdentifier(resource2.getId(), resource2.getType());
+		relationship.setData(Nullable.of((Object) resourceId));
+	}
+
+	private void addUnitializedDependency(Operation op, String relationshipName) {
+		Resource resource1 = op.getValue();
+		Relationship relationship = resource1.getRelationships().get(relationshipName);
+		if (relationship == null) {
+			relationship = new Relationship();
+			resource1.getRelationships().put(relationshipName, relationship);
+		}
+		relationship.setData(Nullable.empty());
 	}
 }

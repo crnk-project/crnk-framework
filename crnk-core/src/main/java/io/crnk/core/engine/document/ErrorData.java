@@ -49,7 +49,7 @@ public class ErrorData implements Serializable {
 	private final  String sourcePointer;
 
 	/**
-	 * A string indicating which query parameter caused the error.
+	 * A string indicating which query legacy caused the error.
 	 * <p>
 	 * Wrapped in "source" object.
 	 */
