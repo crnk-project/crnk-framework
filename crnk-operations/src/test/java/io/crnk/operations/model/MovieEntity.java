@@ -1,10 +1,10 @@
 package io.crnk.operations.model;
 
+import java.util.Set;
+import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import java.util.Set;
-import java.util.UUID;
 
 
 @Entity
@@ -31,13 +31,4 @@ public class MovieEntity extends MovieInfo {
 	public void setDirectors(Set<PersonEntity> directors) {
 		this.directors = directors;
 	}
-
-	/*
-	public Set<PersonEntity> getWriters() {
-		return writers;
-	}
-
-	public void setWriters(Set<PersonEntity> writers) {
-		this.writers = writers;
-	}*/
 }

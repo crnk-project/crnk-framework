@@ -1,5 +1,10 @@
 package io.crnk.operations.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
@@ -17,11 +22,6 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class OperationsCall {
 
@@ -47,7 +47,6 @@ public class OperationsCall {
 		}
 
 		QueuedOperation queuedOperation = new QueuedOperation();
-		queuedOperation.resourceClass = resource.getClass();
 		queuedOperation.operation = operation;
 		queuedOperations.add(queuedOperation);
 	}
@@ -125,8 +124,6 @@ public class OperationsCall {
 	private class QueuedOperation {
 
 		private Operation operation;
-
-		private Class<?> resourceClass;
 
 	}
 }

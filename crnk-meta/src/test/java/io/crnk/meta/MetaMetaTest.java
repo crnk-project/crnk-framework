@@ -2,13 +2,12 @@ package io.crnk.meta;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.TestModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +20,7 @@ public class MetaMetaTest {
 	public void setup() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.meta.mock.model", new SampleJsonServiceLocator()));
+		boot.addModule(new TestModule());
 		MetaModule module = MetaModule.create();
 		module.addMetaProvider(new ResourceMetaProvider());
 		boot.addModule(module);

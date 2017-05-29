@@ -64,21 +64,25 @@ public class MetaRelationshipRepository implements RelationshipRepositoryV2<Meta
 
 	@Override
 	public void setRelation(MetaElement source, String targetId, String fieldName) {
-		throw new UnsupportedOperationException("repository is read-only");
+		throw newReadOnlyException();
 	}
 
 	@Override
 	public void setRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
-		throw new UnsupportedOperationException("repository is read-only");
+		throw newReadOnlyException();
 	}
 
 	@Override
 	public void addRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
-		throw new UnsupportedOperationException("repository is read-only");
+		throw newReadOnlyException();
 	}
 
 	@Override
 	public void removeRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
-		throw new UnsupportedOperationException("repository is read-only");
+		throw newReadOnlyException();
+	}
+
+	private UnsupportedOperationException newReadOnlyException() {
+		return new UnsupportedOperationException("read-only");
 	}
 }

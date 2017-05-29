@@ -8,14 +8,20 @@ public class StringUtils {
 
 	public static final String EMPTY = "";
 
-	private StringUtils(){
+	private StringUtils() {
 	}
 
-	public static String join(String delimiter, Iterable<String> stringsIterable) {
+	public static String join(String delimiter, Iterable<?> stringsIterable) {
 		List<String> strings = new LinkedList<>();
-		Iterator<String> iterator = stringsIterable.iterator();
+		Iterator<?> iterator = stringsIterable.iterator();
 		while (iterator.hasNext()) {
-			strings.add(iterator.next());
+			Object obj = iterator.next();
+			if (obj == null) {
+				strings.add(null);
+			}
+			else {
+				strings.add(obj.toString());
+			}
 		}
 
 		StringBuilder ab = new StringBuilder();

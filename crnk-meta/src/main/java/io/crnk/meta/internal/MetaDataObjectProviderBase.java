@@ -36,6 +36,14 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> exten
 			MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(name));
 			attribute.setReadMethod(getterMethod);
 			attribute.setWriteMethod(setterMethod);
+
+			attribute.setSortable(true);
+			attribute.setFilterable(true);
+			if (setterMethod != null) {
+				attribute.setInsertable(true);
+				attribute.setUpdatable(true);
+			}
+
 			initAttribute(attribute);
 		}
 	}

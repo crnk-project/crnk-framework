@@ -1,15 +1,6 @@
 package io.crnk.rs.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.boot.CrnkProperties;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.rs.CrnkFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
-import org.glassfish.jersey.test.spi.TestContainerFactory;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.client.Entity;
@@ -17,7 +8,13 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.rs.CrnkFeature;
+import io.crnk.test.mock.TestModule;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
+import org.glassfish.jersey.test.spi.TestContainerFactory;
+import org.junit.Test;
 
 public class ControllerWithoutPrefixTest extends ControllerTest {
 
@@ -62,13 +59,15 @@ public class ControllerWithoutPrefixTest extends ControllerTest {
 
 	@ApplicationPath("/")
 	private static class TestApplication extends ResourceConfig {
+
 		public TestApplication() {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
 			property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://test.local");
 			register(SampleControllerWithoutPrefix.class);
 			register(SampleOverlayingController.class);
-			register(new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()), new SampleJsonServiceLocator()));
 
+			CrnkFeature feature = new CrnkFeature();
+			feature.addModule(new TestModule());
+			register(feature);
 		}
 	}
 }

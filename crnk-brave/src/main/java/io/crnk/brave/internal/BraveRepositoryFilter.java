@@ -1,9 +1,6 @@
 package io.crnk.brave.internal;
 
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.LocalTracer;
@@ -11,14 +8,8 @@ import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterBase;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 
 /**
@@ -30,13 +21,16 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 	public static final String STRING_EXCEPTION = "EXCEPTION";
 
 	public static final String STRING_OK = "OK";
+
 	public static final String QUERY_RESULTS = "crnk.results";
-	private static final String STATUS_CODE_ANNOTATION = "crnk.status";
+
+	public static final String STATUS_CODE_ANNOTATION = "crnk.status";
+
 	private static final String QUERY_ANNOTATION = "crnk.query";
 
-	private static final String COMPONENT_NAME = "crnk";
+	protected static final String COMPONENT_NAME = "crnk";
 
-	private static final Object COMPONENT_NAME_SEPARATOR = ":";
+	protected static final Object COMPONENT_NAME_SEPARATOR = ":";
 
 	private Brave brave;
 
@@ -54,8 +48,8 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 		LocalTracer localTracer = brave.localTracer();
 		RepositoryRequestSpec request = context.getRequest();
 
-		String componentName = getComponentName(request);
-		String query = getQuery(request);
+		String componentName = BraveUtil.getComponentName(request);
+		String query = BraveUtil.getQuery(request, moduleContext.getResourceRegistry());
 
 		localTracer.startNewSpan(COMPONENT_NAME, componentName);
 
@@ -64,10 +58,12 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 		try {
 			result = chain.doFilter(context);
 			return result;
-		} catch (RuntimeException e) {
+		}
+		catch (RuntimeException e) {
 			exception = e;
 			throw e;
-		} finally {
+		}
+		finally {
 			boolean resultError = result != null && result.getErrors() != null && result.getErrors().iterator().hasNext();
 			boolean failed = exception != null || resultError;
 			long duration = (System.nanoTime() - s) / 1000;
@@ -91,61 +87,6 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 			int numResults = getResultCount(result);
 			localTracer.submitBinaryAnnotation(QUERY_RESULTS, Integer.toString(numResults));
 		}
-	}
-
-	private String getQuery(RepositoryRequestSpec request) {
-		QueryAdapter queryAdapter = request.getQueryAdapter();
-		StringBuilder builder = new StringBuilder();
-		builder.append("?");
-		if (queryAdapter instanceof QuerySpecAdapter) {
-			QuerySpec querySpec = request.getQuerySpec(queryAdapter.getResourceInformation());
-			DefaultQuerySpecSerializer serializer = new DefaultQuerySpecSerializer(moduleContext.getResourceRegistry());
-			Map<String, Set<String>> parameters = serializer.serialize(querySpec);
-			for (Map.Entry<String, Set<String>> entry : parameters.entrySet()) {
-				if (builder.length() > 1) {
-					builder.append("&");
-				}
-				builder.append(entry.getKey());
-				builder.append("=");
-				builder.append(StringUtils.join(",", entry.getValue()));
-			}
-			return builder.toString();
-		}
-		return null;
-	}
-
-	private String getComponentName(RepositoryRequestSpec request) {
-		ResourceField relationshipField = request.getRelationshipField();
-		StringBuilder pathBuilder = new StringBuilder();
-		String method = request.getMethod().toString();
-		pathBuilder.append(COMPONENT_NAME);
-		pathBuilder.append(COMPONENT_NAME_SEPARATOR);
-		pathBuilder.append(method);
-		pathBuilder.append(COMPONENT_NAME_SEPARATOR);
-		pathBuilder.append("/");
-
-		if (relationshipField == null) {
-			pathBuilder.append(request.getQueryAdapter().getResourceInformation().getResourceType());
-		} else {
-			pathBuilder.append(relationshipField.getParentResourceInformation().getResourceType());
-		}
-		pathBuilder.append("/");
-
-		Iterable<Object> ids = request.getIds();
-		if (ids != null) {
-			Iterator<Object> iterator = ids.iterator();
-			pathBuilder.append(iterator.next());
-			while (iterator.hasNext()) {
-				pathBuilder.append(",");
-				pathBuilder.append(iterator.next());
-			}
-			pathBuilder.append("/");
-		}
-		if (relationshipField != null) {
-			pathBuilder.append(relationshipField.getJsonName());
-			pathBuilder.append("/");
-		}
-		return pathBuilder.toString();
 	}
 
 	private int getResultCount(JsonApiResponse result) {

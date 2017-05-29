@@ -1,14 +1,14 @@
 package io.crnk.core.engine.internal.dispatcher;
 
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
+
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
@@ -70,7 +70,8 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
 			byte[] bytes = text.getBytes(charSet);
 			this.base.setResponse(statusCode, bytes);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -78,6 +79,17 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	@Override
 	public boolean acceptsAny() {
 		return accepts("*") || accepts("*/*");
+	}
+
+	@Override
+	public <T> T unwrap(Class<T> type) {
+		if (type.isInstance(this)) {
+			return (T) this;
+		}
+		if (type.isInstance(base)) {
+			return (T) base;
+		}
+		return null;
 	}
 
 	protected boolean isCompatible(String accept, String contentType) {

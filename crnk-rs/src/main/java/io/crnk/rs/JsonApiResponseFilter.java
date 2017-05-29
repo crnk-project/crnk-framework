@@ -16,7 +16,6 @@ import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.utils.Nullable;
 import io.crnk.rs.type.JsonApiMediaType;
@@ -49,7 +48,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setStatus(Response.Status.OK.getStatusCode());
 				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 			}
-
 			return;
 		}
 
@@ -92,7 +90,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 * <code>false</code>, otherwise
 	 */
 	private boolean isResourceResponse(Object response) {
-		boolean singleResource = response.getClass().getAnnotation(JsonApiResource.class) != null;
+		boolean singleResource = feature.getBoot().getResourceRegistry().hasEntry(response.getClass());
 		boolean resourceList = ResourceListBase.class.isAssignableFrom(response.getClass());
 		return singleResource || resourceList;
 	}

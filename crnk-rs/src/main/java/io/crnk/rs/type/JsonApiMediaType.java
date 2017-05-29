@@ -6,7 +6,7 @@ public final class JsonApiMediaType {
 
 
 	private JsonApiMediaType() {
-		throw new InstantiationError("This class should not be instantiated");
+		// private since only a util
 	}
 
 	/**

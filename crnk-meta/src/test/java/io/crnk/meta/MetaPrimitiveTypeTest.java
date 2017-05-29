@@ -1,10 +1,10 @@
-package io.crnk.jpa.meta;
-
-import io.crnk.meta.model.MetaPrimitiveType;
-import org.junit.Test;
+package io.crnk.meta;
 
 import java.io.Serializable;
 import java.util.UUID;
+
+import io.crnk.meta.model.MetaPrimitiveType;
+import org.junit.Test;
 
 public class MetaPrimitiveTypeTest {
 

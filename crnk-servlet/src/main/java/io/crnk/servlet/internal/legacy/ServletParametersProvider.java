@@ -1,11 +1,11 @@
-package io.crnk.servlet.internal;
+package io.crnk.servlet.internal.legacy;
 
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
+import java.lang.reflect.Method;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
+
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class ServletParametersProvider implements RepositoryMethodParameterProvider {
 

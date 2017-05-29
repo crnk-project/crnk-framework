@@ -16,7 +16,8 @@ public abstract class AbstractMetaTest {
 		boot = new CrnkBoot();
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.meta.mock.model", new SampleJsonServiceLocator()));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock.repository", new SampleJsonServiceLocator
+				()));
 		configure();
 		boot.boot();
 	}

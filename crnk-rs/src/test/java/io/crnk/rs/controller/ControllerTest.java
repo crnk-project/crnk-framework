@@ -1,20 +1,40 @@
 package io.crnk.rs.controller;
 
-import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
-import io.crnk.rs.resource.exception.ExampleException;
-import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Assert;
-import org.junit.Test;
-
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-
 import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import javax.ws.rs.core.Response;
+
+import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.test.mock.TestExceptionMapper;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.repository.TaskRepository;
+import org.glassfish.jersey.test.JerseyTest;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 public abstract class ControllerTest extends JerseyTest {
+
+	@Before
+	public void setup() {
+		TaskRepository repo = new TaskRepository();
+
+		Task task = new Task();
+		task.setName("test value");
+		task.setId(1L);
+		repo.save(task);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		super.tearDown();
+		TaskRepository.clear();
+	}
+
 
 	@Test
 	public void onSimpleCollectionGetShouldReturnCollectionOfResources() {
@@ -46,7 +66,7 @@ public abstract class ControllerTest extends JerseyTest {
 	public void onCollectionRequestWithParamsGetShouldReturnCollection() {
 		// WHEN
 		String taskResourceResponse = target(getPrefixForPath() + "tasks")
-				.queryParam("filter[name]", "John")
+				.queryParam("filter[tasks][name]", "John")
 				.request(APPLICATION_JSON_API_TYPE)
 				.get(String.class);
 
@@ -57,17 +77,16 @@ public abstract class ControllerTest extends JerseyTest {
 	@Test
 	public void shouldReturnErrorResponseWhenMappedExceptionThrown() throws IOException {
 
-		//Getting task of id = 5, simulates error and is throwing an exception we want to check.
-		Response errorResponse = target(getPrefixForPath() + "tasks/5")
+		//Getting task of id = 10000, simulates error and is throwing an exception we want to check.
+		Response errorResponse = target(getPrefixForPath() + "tasks/10000")
 				.request(APPLICATION_JSON_API_TYPE)
 				.get();
 
-		assertThat(errorResponse.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR_500);
+		assertThat(errorResponse.getStatus()).isEqualTo(TestExceptionMapper.HTTP_ERROR_CODE);
 		String errorBody = errorResponse.readEntity(String.class);
 		assertThatJson(errorBody)
-				.node("errors").isPresent()
-				.node("errors[0].id").isStringEqualTo(ExampleException.ERROR_ID);
-		assertThatJson(errorBody).node("errors[0].title").isStringEqualTo(ExampleException.ERROR_TITLE);
+				.node("errors").isPresent();
+
 	}
 
 	@Test

@@ -32,6 +32,7 @@ import io.crnk.operations.server.TransactionOperationFilter;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 import io.crnk.spring.jpa.SpringTransactionRunner;
+import io.crnk.validation.ValidationModule;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -45,6 +46,8 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 	protected CrnkClient client;
 
 	protected AnnotationConfigApplicationContext context;
+
+	protected OperationsModule operationsModule;
 
 	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
 		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
@@ -151,6 +154,7 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 	@ApplicationPath("/")
 	private class TestApplication extends ResourceConfig {
 
+
 		public TestApplication() {
 			Assert.assertNull(context);
 
@@ -177,7 +181,7 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 				}
 			}
 
-			OperationsModule operationsModule = OperationsModule.create();
+			operationsModule = OperationsModule.create();
 
 			// tag::transaction[]
 			operationsModule.addFilter(new TransactionOperationFilter());
@@ -185,6 +189,7 @@ public abstract class AbstractOperationsTest extends JerseyTest {
 
 			feature.addModule(jpaModule);
 			feature.addModule(operationsModule);
+			feature.addModule(ValidationModule.create());
 			register(feature);
 		}
 	}

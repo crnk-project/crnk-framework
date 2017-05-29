@@ -17,6 +17,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -92,7 +93,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 		for (int i = 0; i < responses.length; i++) {
 			if (responses[i] == null) {
 				OperationResponse operationResponse = new OperationResponse();
-				operationResponse.setStatus(412); // TODO proper clode?
+				operationResponse.setStatus(HttpStatus.PRECONDITION_FAILED_412);
 				responses[i] = operationResponse;
 			}
 		}

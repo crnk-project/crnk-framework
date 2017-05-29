@@ -1,20 +1,25 @@
 package io.crnk.rs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.legacy.JaxrsParameterProvider;
-
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.utils.Nullable;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+import io.crnk.rs.internal.legacy.JaxrsParameterProvider;
 
 public class JaxrsRequestContext implements HttpRequestContextBase {
 
@@ -76,12 +81,7 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 
 	@Override
 	public String getBaseUrl() {
-		String url = requestContext.getUriInfo().getBaseUri().toString();
-		if (url.endsWith("/")) {
-			return url.substring(0, url.length() - 1);
-		} else {
-			return url;
-		}
+		return UrlUtils.removeTrailingSlash(requestContext.getUriInfo().getBaseUri().toString());
 	}
 
 	@Override
@@ -148,7 +148,8 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 		String webPathPrefix = feature.getWebPathPrefix();
 		if (webPathPrefix != null && basePath.startsWith(webPathPrefix)) {
 			return basePath.substring(webPathPrefix.length());
-		} else {
+		}
+		else {
 			return basePath;
 		}
 	}

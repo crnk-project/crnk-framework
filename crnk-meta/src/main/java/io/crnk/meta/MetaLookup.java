@@ -1,20 +1,36 @@
 package io.crnk.meta;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaLiteral;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaProvider;
 import io.crnk.meta.provider.MetaProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaLookup {
 
@@ -259,7 +275,8 @@ public class MetaLookup {
 
 			MetaType elementType = getMeta(elementClass, metaClass).asType();
 			MetaArrayType arrayType = new MetaArrayType();
-			arrayType.setName(elementType.getName() + "[]");
+			arrayType.setName(elementType.getName() + "$Array");
+			arrayType.setId(elementType.getId() + "$Array");
 			arrayType.setImplementationType(type);
 			arrayType.setElementType(elementType);
 			return arrayType;

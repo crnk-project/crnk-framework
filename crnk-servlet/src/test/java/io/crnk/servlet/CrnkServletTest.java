@@ -16,6 +16,23 @@
  */
 package io.crnk.servlet;
 
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonNodePresent;
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -24,6 +41,7 @@ import io.crnk.servlet.resource.model.Node;
 import io.crnk.servlet.resource.model.NodeComment;
 import io.crnk.servlet.resource.repository.NodeRepository;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,18 +50,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonNodePresent;
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
-import static org.junit.Assert.*;
 
 public class CrnkServletTest {
 
@@ -56,14 +62,18 @@ public class CrnkServletTest {
 	private static final String PROJECT1_RELATIONSHIP_LINKS =
 			"{\"self\":\"http://localhost:8080/api/tasks/1/relationships/project\","
 					+ "\"related\":\"http://localhost:8080/api/tasks/1/project\"}";
+
 	private static final String RESOURCE_SEARCH_PACKAGE = "io.crnk.servlet.resource";
+
 	private static final String RESOURCE_DEFAULT_DOMAIN = "http://localhost:8080/api";
+
 	private static Logger log = LoggerFactory.getLogger(CrnkServletTest.class);
+
 	private ServletContext servletContext;
 
 	private ServletConfig servletConfig;
 
-	private HttpServlet servlet;
+	private CrnkServlet servlet;
 
 	private NodeRepository nodeRepository;
 
@@ -87,6 +97,11 @@ public class CrnkServletTest {
 	public void after() throws Exception {
 		servlet.destroy();
 		nodeRepository.clearRepo();
+	}
+
+	@Test
+	public void testGetBoot() {
+		Assert.assertNotNull(servlet.getBoot());
 	}
 
 	@Test

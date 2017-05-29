@@ -9,10 +9,12 @@ import io.crnk.core.repository.response.JsonApiResponse;
 
 public class TestExceptionMapper implements ExceptionMapper<TestException> {
 
+	public static final int HTTP_ERROR_CODE = 499;
+
 	@Override
 	public ErrorResponse toErrorResponse(TestException cve) {
 		ErrorData error = ErrorData.builder().setDetail(cve.getMessage()).build();
-		return ErrorResponse.builder().setStatus(499).setSingleErrorData(error).build();
+		return ErrorResponse.builder().setStatus(HTTP_ERROR_CODE).setSingleErrorData(error).build();
 	}
 
 	@Override
@@ -29,6 +31,6 @@ public class TestExceptionMapper implements ExceptionMapper<TestException> {
 
 	@Override
 	public boolean accepts(ErrorResponse errorResponse) {
-		return errorResponse.getHttpStatus() == 499;
+		return errorResponse.getHttpStatus() == HTTP_ERROR_CODE;
 	}
 }

@@ -1,5 +1,13 @@
 package io.crnk.meta.model;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -8,14 +16,6 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 
 @JsonApiResource(type = "meta/attribute")
 public class MetaAttribute extends MetaElement {
@@ -102,9 +102,7 @@ public class MetaAttribute extends MetaElement {
 
 	public Method getReadMethod() {
 		this.initAccessors();
-		if (readMethod == null) {
-			throw new IllegalStateException();
-		}
+		PreconditionUtil.assertNotNull("no getter available", readMethod);
 		return readMethod;
 	}
 

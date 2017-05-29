@@ -1,5 +1,13 @@
 package io.crnk.brave;
 
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Brave.Builder;
 import com.github.kristofa.brave.InheritableServerClientAndLocalSpanState;
@@ -29,14 +37,6 @@ import zipkin.BinaryAnnotation;
 import zipkin.Span;
 import zipkin.reporter.Reporter;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 public abstract class AbstractBraveModuleTest extends JerseyTest {
 
 	protected CrnkClient client;
@@ -61,7 +61,8 @@ public abstract class AbstractBraveModuleTest extends JerseyTest {
 	public static Object getValue(BinaryAnnotation annotation) {
 		try {
 			return new String(annotation.value, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -126,7 +127,8 @@ public abstract class AbstractBraveModuleTest extends JerseyTest {
 		task.setId(13L);
 		try {
 			taskRepo.create(task);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			// ok
 		}
 

@@ -1,17 +1,17 @@
 package io.crnk.meta;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.meta.mock.model.Schedule;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.MetaProviderBase;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.models.Schedule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.lang.reflect.Type;
 
 /**
  * e.g. an entity can be both a resource and a entity.
@@ -33,9 +33,9 @@ public class TestMultipleMetaForSameType extends AbstractMetaTest {
 		lookup.addProvider(new DummyMetaProvider());
 
 		// this will triger to avoid reading the JSON API annotations and treat it as a dummy POJO
-		lookup.putIdMapping("io.crnk.meta.mock.model", MetaDummyDataObject.class, "app.dummy");
+		lookup.putIdMapping("io.crnk.test.mock.models", MetaDummyDataObject.class, "app.dummy");
 
-		lookup.putIdMapping("io.crnk.meta.mock.model", MetaResource.class, "app.resource");
+		lookup.putIdMapping("io.crnk.test.mock.models", MetaResource.class, "app.resource");
 		lookup.initialize();
 	}
 

@@ -1,5 +1,7 @@
 package io.crnk.operations.model;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
@@ -8,9 +10,6 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.Duration;
 
 
 @MappedSuperclass
@@ -21,7 +20,7 @@ public abstract class MovieInfo implements Serializable {
 
 	private String imdbId;
 
-	@Column(length = 500)
+	@Column(length = 500, nullable = false)
 	private String title;
 
 	private int year;
@@ -43,8 +42,6 @@ public abstract class MovieInfo implements Serializable {
 
 	@Lob
 	private String fullPlot;
-
-	private Duration runtime;
 
 	private String awards;
 
@@ -128,14 +125,6 @@ public abstract class MovieInfo implements Serializable {
 
 	public void setFullPlot(String fullPlot) {
 		this.fullPlot = fullPlot;
-	}
-
-	public Duration getRuntime() {
-		return runtime;
-	}
-
-	public void setRuntime(Duration runtime) {
-		this.runtime = runtime;
 	}
 
 	public String getAwards() {

@@ -1,4 +1,4 @@
-package io.crnk.jpa.meta;
+package io.crnk.meta;
 
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;

@@ -13,7 +13,8 @@ public class ServletSecurityProvider implements SecurityProvider {
 
 	@Override
 	public boolean isUserInRole(String role) {
-		ServletRequestContext request = (ServletRequestContext) contextProvider.getRequestContext();
+		ServletRequestContext request = contextProvider.getRequestContext().unwrap
+				(ServletRequestContext.class);
 		return request.getRequest().isUserInRole(role);
 	}
 

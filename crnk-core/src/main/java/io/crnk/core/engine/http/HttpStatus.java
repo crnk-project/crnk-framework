@@ -2,6 +2,7 @@ package io.crnk.core.engine.http;
 
 public class HttpStatus {
 
+
 	private HttpStatus() {
 	}
 
@@ -21,6 +22,8 @@ public class HttpStatus {
 
 	public static final int CONFLICT_409 = 409;
 
+	public static final int PRECONDITION_FAILED_412 = 412;
+
 	public static final int UNSUPPORTED_MEDIA_TYPE_415 = 415;
 
 	public static final int UNPROCESSABLE_ENTITY_422 = 422;
@@ -34,6 +37,7 @@ public class HttpStatus {
 	public static final int SERVICE_UNAVAILABLE_503 = 503;
 
 	public static final int GATEWAY_TIMEOUT_504 = 504;
+
 
 	public static final int HTTP_VERSION_NOT_SUPPORTED_505 = 505;
 }

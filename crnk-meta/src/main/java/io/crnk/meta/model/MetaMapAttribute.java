@@ -22,11 +22,6 @@ public class MetaMapAttribute extends MetaAttribute {
 	}
 
 	@Override
-	public MetaDataObject getParent() {
-		return super.getParent();
-	}
-
-	@Override
 	public MetaType getType() {
 		return mapType;
 	}

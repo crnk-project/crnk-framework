@@ -70,11 +70,13 @@ public class BraveModule implements Module, HttpAdapterAware {
 		if (adapter instanceof OkHttpAdapter) {
 			OkHttpAdapter okHttpAdapter = (OkHttpAdapter) adapter;
 			okHttpAdapter.addListener(new OkHttpBraveIntegration(brave));
-		} else if (adapter instanceof HttpClientAdapter) {
+		}
+		else if (adapter instanceof HttpClientAdapter) {
 			HttpClientAdapter okHttpAdapter = (HttpClientAdapter) adapter;
 			okHttpAdapter.addListener(new HttpClientBraveIntegration(brave, spanNameProvider));
-		} else {
-			throw new IllegalStateException(adapter.getClass() + " not supported yet");
+		}
+		else {
+			throw new IllegalArgumentException(adapter.getClass() + " not supported yet");
 		}
 	}
 

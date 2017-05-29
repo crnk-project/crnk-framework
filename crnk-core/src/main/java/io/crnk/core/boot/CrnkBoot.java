@@ -19,6 +19,7 @@ import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -74,7 +75,7 @@ public class CrnkBoot {
 
 	private HttpRequestProcessorImpl requestDispatcher;
 
-	private PropertiesProvider propertiesProvider;
+	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
 	private ResourceFieldNameTransformer resourceFieldNameTransformer;
 
@@ -199,7 +200,8 @@ public class CrnkBoot {
 		QueryAdapterBuilder queryAdapterBuilder;
 		if (queryParamsBuilder != null) {
 			queryAdapterBuilder = new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		}
 
@@ -261,19 +263,23 @@ public class CrnkBoot {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, resRepository.getClass());
 			Class resourceClass = typeArgs[0];
 			module.addRepository(resourceClass, resRepository);
-		} else if (repository instanceof RelationshipRepository) {
+		}
+		else if (repository instanceof RelationshipRepository) {
 			RelationshipRepository relRepository = (RelationshipRepository) repository;
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, relRepository.getClass());
 			Class sourceResourceClass = typeArgs[0];
 			Class targetResourceClass = typeArgs[2];
 			module.addRepository(sourceResourceClass, targetResourceClass, relRepository);
-		} else if (repository instanceof ResourceRepositoryV2) {
+		}
+		else if (repository instanceof ResourceRepositoryV2) {
 			ResourceRepositoryV2<?, ?> resRepository = (ResourceRepositoryV2<?, ?>) repository;
 			module.addRepository(resRepository.getResourceClass(), resRepository);
-		} else if (repository instanceof RelationshipRepositoryV2) {
+		}
+		else if (repository instanceof RelationshipRepositoryV2) {
 			RelationshipRepositoryV2<?, ?, ?, ?> relRepository = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
 			module.addRepository(relRepository.getSourceResourceClass(), relRepository.getTargetResourceClass(), relRepository);
-		} else {
+		}
+		else {
 			throw new IllegalStateException(repository.toString());
 		}
 	}
@@ -292,7 +298,8 @@ public class CrnkBoot {
 			if (resourceDefaultDomain != null) {
 				String serviceUrl = buildServiceUrl(resourceDefaultDomain, webPathPrefix);
 				serviceUrlProvider = new ConstantServiceUrlProvider(serviceUrl);
-			} else {
+			}
+			else {
 				// serviceUrl is obtained from incoming request context
 				serviceUrlProvider = defaultServiceUrlProvider;
 			}
@@ -406,5 +413,9 @@ public class CrnkBoot {
 
 	public boolean isNullDataResponseEnabled() {
 		return Boolean.parseBoolean(getProperty(CrnkProperties.NULL_DATA_RESPONSE_ENABLED));
+	}
+
+	public ServiceUrlProvider getServiceUrlProvider() {
+		return serviceUrlProvider;
 	}
 }

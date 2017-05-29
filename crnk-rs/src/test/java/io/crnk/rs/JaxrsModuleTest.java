@@ -1,5 +1,16 @@
 package io.crnk.rs;
 
+import java.util.Map;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.SecurityContext;
+
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
@@ -8,22 +19,19 @@ import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import io.crnk.rs.internal.JaxrsModule;
 import io.crnk.rs.internal.JaxrsModule.JaxrsResourceRepositoryInformationBuilder;
-import io.crnk.rs.resource.model.Task;
+import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Map;
-
-public class JaxRsModuleTest {
+public class JaxrsModuleTest {
 
 	private JaxrsResourceRepositoryInformationBuilder builder;
 
@@ -35,7 +43,8 @@ public class JaxRsModuleTest {
 		builder = new JaxrsResourceRepositoryInformationBuilder();
 		final ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(
 				new ResourceFieldNameTransformer());
-		resourceInformationBuilder.init(new DefaultResourceInformationBuilderContext(resourceInformationBuilder, moduleRegistry.getTypeParser()));
+		resourceInformationBuilder
+				.init(new DefaultResourceInformationBuilderContext(resourceInformationBuilder, moduleRegistry.getTypeParser()));
 		context = new RepositoryInformationBuilderContext() {
 
 			@Override
@@ -58,8 +67,26 @@ public class JaxRsModuleTest {
 	}
 
 	@Test
+	public void checkSecurityProviderRegistered() {
+		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+		JaxrsModule module = new JaxrsModule(securityContext);
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(module);
+		boot.boot();
+
+		SecurityProvider securityProvider = boot.getModuleRegistry().getSecurityProvider();
+		Assert.assertNotNull(securityProvider);
+
+		Mockito.when(securityContext.isUserInRole("admin")).thenReturn(true);
+
+		Assert.assertTrue(securityProvider.isUserInRole("admin"));
+		Assert.assertFalse(securityProvider.isUserInRole("other"));
+	}
+
+	@Test
 	public void testActionDetection() {
-		ResourceRepositoryInformation information = (ResourceRepositoryInformation) builder.build(ScheduleRepository.class,
+		ResourceRepositoryInformation information = (ResourceRepositoryInformation) builder.build(TaskRepository.class,
 				context);
 		Map<String, RepositoryAction> actions = information.getActions();
 		Assert.assertEquals(5, actions.size());
@@ -105,7 +132,7 @@ public class JaxRsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface ScheduleRepository extends ResourceRepositoryV2<Task, Long> {
+	public interface TaskRepository extends ResourceRepositoryV2<Task, Long> {
 
 		@GET
 		@Path("repositoryAction")

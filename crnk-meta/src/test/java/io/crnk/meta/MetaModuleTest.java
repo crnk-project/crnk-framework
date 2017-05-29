@@ -1,19 +1,23 @@
 package io.crnk.meta;
 
-import io.crnk.client.internal.proxy.ObjectProxy;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.core.resource.list.ResourceList;
-import io.crnk.meta.model.*;
-import io.crnk.meta.model.resource.MetaResource;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+
+import io.crnk.client.internal.proxy.ObjectProxy;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.resource.MetaResource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class MetaModuleTest extends AbstractMetaJerseyTest {
 
@@ -44,6 +48,7 @@ public class MetaModuleTest extends AbstractMetaJerseyTest {
 						elem.getId().startsWith("app.resources.") || elem.getId().startsWith("io.crnk.meta.")
 								|| elem.getId().startsWith("io.crnk.core.repository.")
 								|| elem.getId().startsWith("io.crnk.core.resource.")
+								|| elem.getId().startsWith("base.")
 								|| elem.getId().startsWith("io.crnk.jpa."));
 			}
 		}
