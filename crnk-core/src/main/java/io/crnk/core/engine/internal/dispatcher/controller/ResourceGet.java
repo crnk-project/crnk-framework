@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;

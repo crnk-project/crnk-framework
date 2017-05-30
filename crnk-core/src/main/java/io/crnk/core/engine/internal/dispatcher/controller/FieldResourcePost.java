@@ -20,10 +20,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
@@ -53,20 +50,12 @@ public class FieldResourcePost extends ResourceUpsert {
 
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-						   RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceEndpointName = jsonPath.getResourceName();
-		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry endpointRegistryEntry = resourceRegistry.getEntry(resourceEndpointName);
+						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		if (endpointRegistryEntry == null) {
-			throw new ResourceNotFoundException(resourceEndpointName);
-		}
-		if (requestBody == null) {
-			throw new RequestBodyNotFoundException(HttpMethod.POST, resourceEndpointName);
-		}
-		if (requestBody.isMultiple()) {
-			throw new RequestBodyException(HttpMethod.POST, resourceEndpointName, "Multiple data in body");
-		}
+
+		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
+		PathIds resourceIds = jsonPath.getIds();
 
 		Serializable castedResourceId = getResourceId(resourceIds, endpointRegistryEntry);
 		ResourceField relationshipField = endpointRegistryEntry.getResourceInformation()
@@ -82,12 +71,11 @@ public class FieldResourcePost extends ResourceUpsert {
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.findEntry(relationshipFieldClass);
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 
-		Resource dataBody = (Resource) requestBody.getData().get();
-		Object resource = buildNewResource(relationshipRegistryEntry, dataBody, relationshipResourceType);
-		setAttributes(dataBody, resource, relationshipRegistryEntry.getResourceInformation());
+		Object resource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
+		setAttributes(resourceBody, resource, relationshipRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);
 		Document savedResourceResponse = documentMapper.toDocument(resourceRepository.create(resource, queryAdapter), queryAdapter, parameterProvider);
-		saveRelations(queryAdapter, extractResource(savedResourceResponse), relationshipRegistryEntry, dataBody, parameterProvider);
+		saveRelations(queryAdapter, extractResource(savedResourceResponse), relationshipRegistryEntry, resourceBody, parameterProvider);
 
 		Serializable resourceId = relationshipRegistryEntry.getResourceInformation().parseIdString(savedResourceResponse.getSingleData().get().getId());
 

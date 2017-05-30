@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -38,7 +37,7 @@ public class FieldResourceGet extends ResourceIncludeField {
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
 			parameterProvider, Document requestBody) {
 		PathIds resourceIds = jsonPath.getIds();
-		String resourceName = jsonPath.getResourceName();
+		String resourceName = jsonPath.getResourceType();
 		String elementName = jsonPath.getElementName();
 
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);

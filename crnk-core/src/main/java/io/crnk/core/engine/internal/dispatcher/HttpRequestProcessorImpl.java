@@ -126,12 +126,12 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 
 	private ResourceInformation getRequestedResource(JsonPath jsonPath) {
 		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
-		RegistryEntry registryEntry = resourceRegistry.getEntry(jsonPath.getResourceName());
+		RegistryEntry registryEntry = resourceRegistry.getEntry(jsonPath.getResourceType());
 		if (registryEntry == null) {
-			throw new RepositoryNotFoundException(jsonPath.getResourceName());
+			throw new RepositoryNotFoundException(jsonPath.getResourceType());
 		}
 		String elementName = jsonPath.getElementName();
-		if (elementName != null && !elementName.equals(jsonPath.getResourceName())) {
+		if (elementName != null && !elementName.equals(jsonPath.getResourceType())) {
 			ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
 			if (relationshipField == null) {
 				throw new ResourceFieldNotFoundException(elementName);

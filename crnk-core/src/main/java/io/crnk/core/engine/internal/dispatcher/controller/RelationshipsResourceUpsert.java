@@ -83,7 +83,7 @@ public abstract class RelationshipsResourceUpsert extends BaseController {
 	@Override
 	public final Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
 								 RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getResourceName();
+		String resourceName = jsonPath.getResourceType();
 		PathIds resourceIds = jsonPath.getIds();
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
 

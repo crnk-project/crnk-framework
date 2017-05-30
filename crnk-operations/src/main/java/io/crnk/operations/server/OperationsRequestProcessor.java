@@ -82,7 +82,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 				JsonPath jsonPath = (new PathBuilder(resourceRegistry)).build(path);
 
 				Resource resource = new Resource();
-				resource.setType(jsonPath.getResourceName());
+				resource.setType(jsonPath.getResourceType());
 				resource.setId(jsonPath.getIds().getIds().get(0));
 				operation.setValue(resource);
 			}

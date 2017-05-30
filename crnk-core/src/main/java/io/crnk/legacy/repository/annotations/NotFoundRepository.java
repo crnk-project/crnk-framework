@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.repository;
+package io.crnk.legacy.repository.annotations;
 
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.queryParams.QueryParams;

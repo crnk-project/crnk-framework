@@ -1,23 +1,17 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
+import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -28,12 +22,14 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.exception.*;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
 
 public abstract class ResourceUpsert extends BaseController {
 
@@ -52,6 +48,44 @@ public abstract class ResourceUpsert extends BaseController {
 		this.objectMapper = objectMapper;
 		this.documentMapper = documentMapper;
 	}
+
+	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
+		String resourceType = path.getResourceType();
+		RegistryEntry endpointRegistryEntry = getRegistryEntry(path);
+
+		if (requestDocument == null) {
+			throw new RequestBodyNotFoundException(method, resourceType);
+		}
+		if (requestDocument.getData() instanceof Collection) {
+			throw new RequestBodyException(method, resourceType, "Multiple data in body");
+		}
+
+		Resource resourceBody = (Resource) requestDocument.getData().get();
+		if (resourceBody == null) {
+			throw new RequestBodyException(method, resourceType, "No data field in the body.");
+		}
+		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
+		if (bodyRegistryEntry == null) {
+			throw new RepositoryNotFoundException(resourceBody.getType());
+		}
+
+		if(path.getElementName() == null) {
+			// TODO add relationship type validation as well
+			verifyTypes(method, resourceType, endpointRegistryEntry, bodyRegistryEntry);
+		}
+
+		return resourceBody;
+	}
+
+	protected RegistryEntry getRegistryEntry(JsonPath jsonPath) {
+		String resourceType = jsonPath.getResourceType();
+		RegistryEntry endpointRegistryEntry = resourceRegistry.getEntry(resourceType);
+		if (endpointRegistryEntry == null) {
+			throw new ResourceNotFoundException(resourceType);
+		}
+		return endpointRegistryEntry;
+	}
+
 
 	private static boolean allTypesTheSame(Iterable<ResourceIdentifier> linkages) {
 		String type = linkages.iterator()

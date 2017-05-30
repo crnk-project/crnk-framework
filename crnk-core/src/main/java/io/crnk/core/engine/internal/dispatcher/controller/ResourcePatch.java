@@ -17,7 +17,8 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.ResourceException;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
@@ -42,31 +43,13 @@ public class ResourcePatch extends ResourceUpsert {
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
 						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		String resourceEndpointName = jsonPath.getResourceName();
-		RegistryEntry endpointRegistryEntry = resourceRegistry.getEntry(resourceEndpointName);
-		if (endpointRegistryEntry == null) {
-			throw new ResourceNotFoundException(resourceEndpointName);
-		}
-		if (requestDocument == null) {
-			throw new RequestBodyNotFoundException(HttpMethod.PATCH, resourceEndpointName);
-		}
-		if (requestDocument.getData() instanceof Collection) {
-			throw new RequestBodyException(HttpMethod.PATCH, resourceEndpointName, "Multiple data in body");
-		}
+		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
+		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 
 		String idString = jsonPath.getIds().getIds().get(0);
 
-		Resource resourceBody = (Resource) requestDocument.getData().get();
-		if (resourceBody == null) {
-			throw new RequestBodyException(HttpMethod.POST, resourceEndpointName, "No data field in the body.");
-		}
-		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
-		if (bodyRegistryEntry == null) {
-			throw new RepositoryNotFoundException(resourceBody.getType());
-		}
 		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
-		verifyTypes(HttpMethod.PATCH, resourceEndpointName, endpointRegistryEntry, bodyRegistryEntry);
-
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
@@ -120,6 +103,7 @@ public class ResourcePatch extends ResourceUpsert {
 
 		return new Response(responseDocument, 200);
 	}
+
 
 	private <K, V> Map<K, V> emptyIfNull(Map<K, V> value) {
 		return (Map<K, V>) (value != null ? value : Collections.emptyMap());

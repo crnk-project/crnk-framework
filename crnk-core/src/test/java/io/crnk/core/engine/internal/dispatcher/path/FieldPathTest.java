@@ -20,7 +20,7 @@ public class FieldPathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testParentName = sut.getResourceName();
+		String testParentName = sut.getResourceType();
 
 		// THEN
 		assertThat(isCollection).isTrue();
@@ -38,7 +38,7 @@ public class FieldPathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testParentName = sut.getResourceName();
+		String testParentName = sut.getResourceType();
 
 		// THEN
 		assertThat(isCollection).isFalse();
@@ -56,7 +56,7 @@ public class FieldPathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testParentName = sut.getResourceName();
+		String testParentName = sut.getResourceType();
 
 		// THEN
 		assertThat(isCollection).isTrue();

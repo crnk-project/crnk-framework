@@ -18,7 +18,7 @@ public class ActionPath extends JsonPath {
 	}
 
 	@Override
-	public String getResourceName() {
+	public String getResourceType() {
 		throw new UnsupportedOperationException();
 	}
 }
