@@ -140,9 +140,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.typeParser = ctx.getTypeParser();
 	}
 
+	protected QuerySpec createQuerySpec(Class<?> resourceClass) {
+		return new QuerySpec(resourceClass);
+	}
+
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
-		QuerySpec rootQuerySpec = new QuerySpec(resourceInformation.getResourceClass());
+		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation.getResourceClass());
 		setupDefaults(rootQuerySpec);
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
