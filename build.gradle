@@ -105,9 +105,9 @@ gradle.beforeProject { Project project ->
 					mavenDeployer {
 						beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-						if(!System.env.NEXUS_DEPLOY_PASS){
-							throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
-						}
+						// if(!System.env.NEXUS_DEPLOY_PASS){
+						//	throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
+						// }
 
 						repository(url: NEXUS_DEPLOY_URL){
 							authentication (
