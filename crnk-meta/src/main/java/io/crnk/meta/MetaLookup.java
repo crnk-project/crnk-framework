@@ -117,10 +117,12 @@ public class MetaLookup {
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
-		} else if (type instanceof ParameterizedType) {
+		}
+		else if (type instanceof ParameterizedType) {
 			ParameterizedType paramType = (ParameterizedType) type;
 			return getRawType(paramType.getRawType());
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("unable to obtain raw type for " + type);
 		}
 	}
@@ -270,7 +272,8 @@ public class MetaLookup {
 				primitiveType.setId(id);
 			}
 			return primitiveType;
-		} else if (clazz.isArray()) {
+		}
+		else if (clazz.isArray()) {
 			Class<?> elementClass = ((Class<?>) type).getComponentType();
 
 			MetaType elementType = getMeta(elementClass, metaClass).asType();
@@ -298,7 +301,7 @@ public class MetaLookup {
 			return Long.class;
 		}
 		if (clazz == float.class) {
-			return float.class;
+			return Float.class;
 		}
 		if (clazz == double.class) {
 			return Double.class;
@@ -319,7 +322,7 @@ public class MetaLookup {
 	}
 
 	private MetaElement allocateMetaFromParamerizedType(ParameterizedType paramType,
-														Class<? extends MetaElement> elementMetaClass) {
+			Class<? extends MetaElement> elementMetaClass) {
 		if (paramType.getRawType() instanceof Class && Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 			PreconditionUtil.assertEquals("expected 2 type arguments", 2, paramType.getActualTypeArguments().length);
 			MetaType keyType = getMeta(paramType.getActualTypeArguments()[0]).asType();
@@ -331,7 +334,8 @@ public class MetaLookup {
 			if (primitiveKey || !primitiveValue) {
 				mapMeta.setName(valueType.getName() + "$MappedBy$" + keyType.getName());
 				mapMeta.setId(valueType.getId() + "$MappedBy$" + keyType.getName());
-			} else {
+			}
+			else {
 				mapMeta.setName(keyType.getName() + "$Map$" + valueType.getName());
 				mapMeta.setId(keyType.getId() + "$Map$" + valueType.getName());
 			}
@@ -340,16 +344,18 @@ public class MetaLookup {
 			mapMeta.setKeyType(keyType);
 			mapMeta.setElementType(valueType);
 			return mapMeta;
-		} else if (paramType.getRawType() instanceof Class
+		}
+		else if (paramType.getRawType() instanceof Class
 				&& Collection.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 			return allocateMetaFromCollectionType(paramType, elementMetaClass);
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException("unknown type " + paramType);
 		}
 	}
 
 	private MetaElement allocateMetaFromCollectionType(ParameterizedType paramType,
-													   Class<? extends MetaElement> elementMetaClass) {
+			Class<? extends MetaElement> elementMetaClass) {
 		PreconditionUtil.assertEquals("expected single type argument", 1, paramType.getActualTypeArguments().length);
 		MetaType elementType = getMeta(paramType.getActualTypeArguments()[0], elementMetaClass).asType();
 
@@ -362,15 +368,15 @@ public class MetaLookup {
 			metaSet.setImplementationType(paramType);
 			metaSet.setElementType(elementType);
 			return metaSet;
-		} else if (isList) {
+		}
+		else {
+			PreconditionUtil.assertTrue("expected a list type", isList);
 			MetaListType metaList = new MetaListType();
 			metaList.setId(elementType.getId() + "$List");
 			metaList.setName(elementType.getName() + "$List");
 			metaList.setImplementationType(paramType);
 			metaList.setElementType(elementType);
 			return metaList;
-		} else {
-			throw new IllegalStateException("expected list or set type: " + paramType.toString());
 		}
 	}
 
@@ -383,8 +389,9 @@ public class MetaLookup {
 			return true;
 		}
 
-		if (clazz.isPrimitive() || primitiveTypes.contains(clazz))
+		if (clazz.isPrimitive() || primitiveTypes.contains(clazz)) {
 			return true;
+		}
 
 		for (Class<?> primitiveType : primitiveTypes) {
 			if (primitiveType.isAssignableFrom(clazz)) {
@@ -429,7 +436,8 @@ public class MetaLookup {
 					List<MetaElement> existingElements = typeElementsMap.getList(typeElement.getImplementationType());
 					for (MetaElement existingElement : existingElements) {
 						if (existingElement.getId().equals(element.getId())) {
-							throw new IllegalStateException(element.getId() + " already available: " + existingElement + " vs " + element);
+							throw new IllegalStateException(
+									element.getId() + " already available: " + existingElement + " vs " + element);
 						}
 					}
 				}
@@ -504,7 +512,8 @@ public class MetaLookup {
 					initialize(element);
 				}
 			}
-		} finally {
+		}
+		finally {
 			LOGGER.debug("added");
 			adding = false;
 		}
@@ -545,7 +554,8 @@ public class MetaLookup {
 	private String toIdMappingKey(String packageName, Class<? extends MetaElement> type) {
 		if (type != null) {
 			return packageName + "#" + type.getName();
-		} else {
+		}
+		else {
 			return packageName;
 		}
 	}

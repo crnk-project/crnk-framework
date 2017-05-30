@@ -82,9 +82,6 @@ public class DocumentMapperUtil {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> List<T> toList(Object entity) {
-		if (entity == null) {
-			return null;
-		}
 		if (entity instanceof List) {
 			return (List) entity;
 		} else if (entity instanceof Iterable) {

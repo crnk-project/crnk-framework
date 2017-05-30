@@ -1,4 +1,6 @@
-package io.crnk.spring.boot;
+package io.crnk.spring.security;
+
+import java.util.Iterator;
 
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
@@ -6,8 +8,6 @@ import io.crnk.spring.internal.AccessDeniedExceptionMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.access.AccessDeniedException;
-
-import java.util.Iterator;
 
 public class SpringSecurityExceptionMapperTest {
 

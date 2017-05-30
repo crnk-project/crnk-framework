@@ -343,10 +343,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		parseFilterOperator(param, elements);
 
 		if (elements.isEmpty()) {
-			throw new ParametersDeserializationException("failed to parse legacy " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected "
+					+ "([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() > 2) {
-			throw new ParametersDeserializationException("failed to parse legacy " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
@@ -401,7 +402,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	private ResourceInformation getResourceInformation(String resourceType, String parameterName) {
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceType);
 		if (registryEntry == null) {
-			throw new ParametersDeserializationException("failed to parse legacy " + parameterName + ", resourceType=" + resourceType + " not found");
+			throw new ParametersDeserializationException("failed to parse parameter " + parameterName + ", resourceType=" +
+					resourceType + " not found");
 		}
 		return registryEntry.getResourceInformation();
 	}

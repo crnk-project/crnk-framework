@@ -76,6 +76,8 @@ public class ResourceInformation {
 
 	private Map<String, ResourceField> fieldByJsonName = new HashMap<>();
 
+	private Map<String, ResourceField> fieldByUnderlyingName = new HashMap<>();
+
 	private List<ResourceField> fields;
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
@@ -110,6 +112,7 @@ public class ResourceInformation {
 			for (ResourceField resourceField : fields) {
 				resourceField.setResourceInformation(this);
 				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
+				fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
 			}
 		}
 		else {
@@ -190,6 +193,10 @@ public class ResourceInformation {
 		return fieldByJsonName.get(name);
 	}
 
+	public ResourceField findFieldByUnderlyingName(String name) {
+		return fieldByUnderlyingName.get(name);
+	}
+
 	public ResourceField findRelationshipFieldByName(String name) {
 		ResourceField resourceField = fieldByJsonName.get(name);
 		return resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? resourceField
@@ -240,15 +247,12 @@ public class ResourceInformation {
 			return false;
 		}
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects
-				.equals(idField, that.idField) && Objects.equals(attributeFields, that.attributeFields)
-				&& Objects.equals(relationshipFields, that.relationshipFields) && Objects.equals(metaField, that.metaField)
-				&& Objects.equals(linksField, that.linksField);
+		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(resourceClass, resourceType, idField, attributeFields, relationshipFields, metaField, linksField);
+		return Objects.hash(resourceClass, resourceType);
 	}
 
 	/**

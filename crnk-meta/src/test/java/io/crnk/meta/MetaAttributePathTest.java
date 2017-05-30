@@ -1,6 +1,7 @@
 package io.crnk.meta;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
@@ -27,6 +28,47 @@ public class MetaAttributePathTest {
 		path = new MetaAttributePath(Arrays.asList(attr1, attr2));
 	}
 
+
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidConstructorArgumentsThrowsException() {
+		new MetaAttributePath((MetaAttribute[]) null);
+	}
+
+
+	@Test
+	public void concat() {
+		MetaAttribute attr3 = Mockito.mock(MetaAttribute.class);
+		Mockito.when(attr3.getName()).thenReturn("c");
+		Assert.assertEquals("a.b.c", path.concat(attr3).toString());
+	}
+
+
+	@Test
+	public void toStringForEmptyPath() {
+		Assert.assertEquals("", MetaAttributePath.EMPTY_PATH.toString());
+	}
+
+	@Test
+	public void toStringForSingleAttributePath() {
+		MetaAttribute attr3 = Mockito.mock(MetaAttribute.class);
+		Mockito.when(attr3.getName()).thenReturn("c");
+		path = new MetaAttributePath(Arrays.asList(attr3));
+		Assert.assertEquals("c", path.toString());
+	}
+
+
+	@Test
+	public void testHashCode() {
+		MetaAttribute attr3 = Mockito.mock(MetaAttribute.class);
+		Mockito.when(attr3.getName()).thenReturn("c");
+		MetaAttributePath path2 = new MetaAttributePath(Arrays.asList(attr3));
+		MetaAttributePath path3 = new MetaAttributePath(Arrays.asList(attr3));
+
+		Assert.assertNotEquals(path2.hashCode(), path.hashCode());
+		Assert.assertEquals(path2.hashCode(), path3.hashCode());
+	}
+
+
 	@Test
 	public void length() {
 		Assert.assertEquals(2, path.length());
@@ -36,6 +78,23 @@ public class MetaAttributePathTest {
 	public void getLast() {
 		Assert.assertEquals(attr2, path.getLast());
 	}
+
+
+	@Test
+	public void iterator() {
+		Iterator<MetaAttribute> iterator = path.iterator();
+		Assert.assertTrue(iterator.hasNext());
+		Assert.assertEquals("a", iterator.next().getName());
+		Assert.assertEquals("b", iterator.next().getName());
+		Assert.assertFalse(iterator.hasNext());
+	}
+
+
+	@Test
+	public void getLastForEmptyPath() {
+		Assert.assertNull(MetaAttributePath.EMPTY_PATH.getLast());
+	}
+
 
 	@Test
 	public void getElement() {
@@ -47,6 +106,13 @@ public class MetaAttributePathTest {
 	@Test
 	public void subPath() {
 		MetaAttributePath subPath = path.subPath(1);
+		Assert.assertEquals(1, subPath.length());
+		Assert.assertEquals(attr2, subPath.getElement(0));
+	}
+
+	@Test
+	public void subRangePath() {
+		MetaAttributePath subPath = path.subPath(1, 2);
 		Assert.assertEquals(1, subPath.length());
 		Assert.assertEquals(attr2, subPath.getElement(0));
 	}

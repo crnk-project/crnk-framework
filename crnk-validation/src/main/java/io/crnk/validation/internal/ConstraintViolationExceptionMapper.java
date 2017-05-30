@@ -32,14 +32,23 @@ import org.slf4j.LoggerFactory;
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
 	protected static final String META_RESOURCE_ID = "resourceId";
+
 	protected static final String META_RESOURCE_TYPE = "resourceType";
+
 	protected static final String META_TYPE_KEY = "type";
+
 	protected static final String META_TYPE_VALUE = "ConstraintViolation";
+
 	protected static final String META_MESSAGE_TEMPLATE = "messageTemplate";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintViolationExceptionMapper.class);
+
 	private static final String HIBERNATE_PROPERTY_NODE_IMPL = "org.hibernate.validator.path.PropertyNode";
+
 	private static final Object HIBERNATE_PROPERTY_NODE_ENGINE_IMPL = "org.hibernate.validator.internal.engine.path.NodeImpl";
+
 	private static final String DEFAULT_PRIMARY_KEY_NAME = "id";
+
 	private ModuleContext context;
 
 	public ConstraintViolationExceptionMapper(ModuleContext context) {
@@ -52,21 +61,27 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		// Hibernate implementation
 		// TODO investigate other implementation next to
 		// hibernate, JSR 303 v1.1 not sufficient
-		if (propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL) // NOSONAR class may not be available
-				|| propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL)) { // NOSONAR
+
+		boolean hibernateNodeImpl =
+				propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL); // NOSONAR class / may not be available
+		boolean hiberanteNodeImpl2 = propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL); // NOSONAR;
+		if (hibernateNodeImpl || hiberanteNodeImpl2) {
 			try {
 				Method parentMethod = propertyNode.getClass().getMethod("getParent");
 				Method valueMethod = propertyNode.getClass().getMethod("getValue");
 				Object parentNode = parentMethod.invoke(propertyNode);
 				if (parentNode != null) {
 					return valueMethod.invoke(parentNode);
-				} else {
+				}
+				else {
 					return valueMethod.invoke(propertyNode);
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new UnsupportedOperationException(e);
 			}
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException(
 					"cannot convert violations for java.util.Set elements, consider using Hibernate validator");
 		}
@@ -83,10 +98,12 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 			try {
 				Method valueMethod = propertyNode.getClass().getMethod("getValue");
 				return valueMethod.invoke(propertyNode);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new UnsupportedOperationException(e);
 			}
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException(
 					"cannot convert violations for java.util.Set elements, consider using Hibernate validator");
 		}
@@ -264,9 +281,11 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 			Object next;
 			if (node.getKind() == ElementKind.PROPERTY) {
 				next = PropertyUtils.getProperty(nodeObject, node.getName());
-			} else if (node.getKind() == ElementKind.BEAN) {
+			}
+			else if (node.getKind() == ElementKind.BEAN) {
 				next = nodeObject;
-			} else {
+			}
+			else {
 				throw new UnsupportedOperationException("unknown node: " + node);
 			}
 
@@ -275,10 +294,12 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				if (!isResource(nodeObject.getClass()) || isPrimaryKey(nodeObject.getClass(), node.getName())) {
 					// continue along attributes path or primary key on root
 					appendSourcePointer(node.getName());
-				} else if (isAssociation(nodeObject.getClass(), node.getName())) {
+				}
+				else if (isAssociation(nodeObject.getClass(), node.getName())) {
 					appendSourcePointer("data/relationships/");
 					appendSourcePointer(node.getName());
-				} else {
+				}
+				else {
 
 					appendSourcePointer("data/attributes/");
 					appendSourcePointer(node.getName());
@@ -294,11 +315,13 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				appendSeparator();
 				appendSourcePointer(index);
 				return ((List<?>) element).get(index);
-			} else if (key != null) {
+			}
+			else if (key != null) {
 				appendSeparator();
 				appendSourcePointer(key);
 				return ((Map<?, ?>) element).get(key);
-			} else if (element instanceof Set && getValue(node) != null) {
+			}
+			else if (element instanceof Set && getValue(node) != null) {
 				Object elementEntry = getValue(node);
 
 				// since sets get translated to arrays, we do the same here
@@ -343,7 +366,8 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				ResourceField idField = resourceInformation.getIdField();
 				return idField.getUnderlyingName().equals(name);
-			} else {
+			}
+			else {
 				return DEFAULT_PRIMARY_KEY_NAME.equals(name);
 			}
 		}
@@ -355,7 +379,8 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				ResourceField relationshipField = resourceInformation.findRelationshipFieldByName(name);
 				return relationshipField != null;
-			} else {
+			}
+			else {
 				return false;
 			}
 		}

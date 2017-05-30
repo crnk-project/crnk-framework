@@ -51,7 +51,7 @@ public class SpringTransactionRunner implements TransactionRunner {
 
 	class RollbackOnlyException extends RuntimeException {
 
-		private Object result;
+		private transient Object result;
 
 		public RollbackOnlyException(Object result) {
 			this.result = result;

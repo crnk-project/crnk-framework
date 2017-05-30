@@ -11,12 +11,10 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.internal.impldep.org.junit.Assert;
 import org.gradle.testfixtures.ProjectBuilder;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-@Ignore // FIXME
 public class GenerateTypescriptTaskTest {
 
 	@Rule
@@ -42,7 +40,7 @@ public class GenerateTypescriptTaskTest {
 
 		outputDir = testProjectDir.getRoot();
 
-		outputDir = new File("c:/projects/temp");
+		//	outputDir = new File("c:/projects/temp");
 
 		Project project = ProjectBuilder.builder().withProjectDir(outputDir).build();
 

@@ -8,6 +8,8 @@ import net.jodah.typetools.TypeResolver;
 
 public class DirectResponseRelationshipEntry implements ResponseRelationshipEntry {
 
+	private static final int TARGET_TYPE_GENERIC_PARAMETER_IDX = 2;
+
 	private RepositoryInstanceBuilder<RelationshipRepository> repositoryInstanceBuilder;
 
 	public DirectResponseRelationshipEntry(RepositoryInstanceBuilder repositoryInstanceBuilder) {
@@ -17,12 +19,13 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 	@Override
 	public Class<?> getTargetAffiliation() {
 		Class<?> repoClass = repositoryInstanceBuilder.getRepositoryClass();
-		Class<?> repoInterface = RelationshipRepositoryV2.class.isAssignableFrom(repoClass) ? RelationshipRepositoryV2.class : RelationshipRepository.class;
+		Class<?> repoInterface = RelationshipRepositoryV2.class.isAssignableFrom(repoClass) ? RelationshipRepositoryV2.class
+				: RelationshipRepository.class;
 
 		Class<?>[] typeArgs = TypeResolver
 				.resolveRawArguments(repoInterface, repoClass);
 
-		return typeArgs[RelationshipRepository.TARGET_TYPE_GENERIC_PARAMETER_IDX];
+		return typeArgs[TARGET_TYPE_GENERIC_PARAMETER_IDX];
 	}
 
 	public Object getRepositoryInstanceBuilder() {

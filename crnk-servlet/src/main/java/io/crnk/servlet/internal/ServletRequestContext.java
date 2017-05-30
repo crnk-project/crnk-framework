@@ -16,7 +16,6 @@
  */
 package io.crnk.servlet.internal;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -122,16 +121,10 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	@Override
 	public byte[] getRequestBody() throws IOException {
 		if (!requestBody.isPresent()) {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[16384];
+
 			InputStream is = request.getInputStream();
 			if (is != null) {
-				while ((nRead = is.read(data, 0, data.length)) != -1) {
-					buffer.write(data, 0, nRead);
-				}
-				buffer.flush();
-				requestBody = Nullable.of(buffer.toByteArray());
+				requestBody = Nullable.of(io.crnk.core.engine.internal.utils.IOUtils.readFully(is));
 			}
 			else {
 				requestBody = Nullable.nullValue();

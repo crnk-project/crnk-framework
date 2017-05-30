@@ -1,5 +1,14 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
@@ -12,7 +21,6 @@ import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.Generics;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -26,10 +34,6 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
 
 public abstract class ResourceUpsert extends BaseController {
 
@@ -282,14 +286,10 @@ public abstract class ResourceUpsert extends BaseController {
 			String propertyName = property.getKey();
 			ResourceField relationshipField = registryEntry.getResourceInformation()
 					.findRelationshipFieldByName(propertyName);
-			Class<?> relationshipFieldClass = Generics.getResourceClass(relationshipField.getGenericType(),
-					relationshipField.getType());
 			Class idFieldType = null;
 			List relationships = new LinkedList<>();
-			boolean first = true;
-
 			for (ResourceIdentifier resourceId : relationship.getCollectionData().get()) {
-				RegistryEntry entry = resourceRegistry.findEntry(resourceId.getType(), relationshipFieldClass);
+				RegistryEntry entry = resourceRegistry.getEntry(resourceId.getType());
 				idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
@@ -317,8 +317,7 @@ public abstract class ResourceUpsert extends BaseController {
 
 			Object relationObject;
 			if (relationshipId != null) {
-				RegistryEntry entry = resourceRegistry.findEntry(relationshipId.getType(),
-						relationshipFieldByName.getType());
+				RegistryEntry entry = resourceRegistry.getEntry(relationshipId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();

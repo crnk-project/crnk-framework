@@ -182,7 +182,7 @@ public class TSWriter implements TSVisitor {
 	@Override
 	public void visit(TSArrayType element) {
 		builder.append("Array<");
-		element.accept(this);
+		element.getElementType().accept(this);
 		builder.append(">");
 	}
 

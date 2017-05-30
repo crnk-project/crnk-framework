@@ -7,7 +7,7 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.utils.Optional;
 
-public final class ExceptionMapperRegistry {
+public class ExceptionMapperRegistry {
 
 	private final Set<ExceptionMapperType> exceptionMappers;
 
@@ -61,8 +61,9 @@ public final class ExceptionMapperRegistry {
 	int getDistanceBetweenExceptions(Class<?> clazz, Class<?> mapperTypeClazz) {
 		int distance = 0;
 		Class<?> superClazz = clazz;
-		if (!mapperTypeClazz.isAssignableFrom(clazz))
+		if (!mapperTypeClazz.isAssignableFrom(clazz)) {
 			return Integer.MAX_VALUE;
+		}
 
 		while (superClazz != mapperTypeClazz) {
 			superClazz = superClazz.getSuperclass();

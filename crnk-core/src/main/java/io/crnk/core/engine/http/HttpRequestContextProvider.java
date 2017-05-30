@@ -15,7 +15,7 @@ public class HttpRequestContextProvider implements ServiceUrlProvider {
 	public String getUrl() {
 		HttpRequestContext request = threadLocal.get();
 		if (request == null) {
-			throw new IllegalStateException("uriInfo not available, make sure to call onRequestStarted in advance");
+			throw new IllegalStateException("HttpRequestContext not available, make sure to call onRequestStarted in advance");
 		}
 		return request.getBaseUrl();
 	}

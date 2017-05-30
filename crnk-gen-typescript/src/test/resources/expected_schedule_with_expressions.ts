@@ -1,5 +1,5 @@
 import {QTask, Task} from './task'
-import {BeanPath, QTypedManyResourceRelationship, QTypedOneResourceRelationship, StringExpression} from '@crnk/binding'
+import {BeanPath, BooleanExpression, QTypedManyResourceRelationship, QTypedOneResourceRelationship, StringExpression} from '@crnk/binding'
 import {ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api'
 
 export module Schedule{
@@ -12,6 +12,7 @@ export module Schedule{
 	}
 	export interface Attributes{
 		name?: string;
+		delayed?: boolean;
 	}
 }
 export interface Schedule extends StoreResource{
@@ -31,5 +32,6 @@ export module QSchedule{
 	}
 	export class QAttributes extends BeanPath<Schedule.Attributes>{
 		name: StringExpression = this.createString('name');
+		delayed: BooleanExpression = this.createBoolean('delayed');
 	}
 }

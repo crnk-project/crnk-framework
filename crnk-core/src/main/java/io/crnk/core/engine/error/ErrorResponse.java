@@ -1,5 +1,11 @@
 package io.crnk.core.engine.error;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -7,19 +13,15 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 public final class ErrorResponse {
 
 	public static final String ERRORS = "errors";
 
-	private final Iterable<ErrorData> data;
+	private final Collection<ErrorData> data;
+
 	private final int httpStatus;
 
-	public ErrorResponse(Iterable<ErrorData> data, int httpStatus) {
+	public ErrorResponse(Collection<ErrorData> data, int httpStatus) {
 		this.data = data;
 		this.httpStatus = httpStatus;
 	}
@@ -28,7 +30,7 @@ public final class ErrorResponse {
 		return new ErrorResponseBuilder();
 	}
 
-	public Iterable<ErrorData> getErrors() {
+	public Collection<ErrorData> getErrors() {
 		if (data == null) {
 			return Collections.emptyList();
 		}

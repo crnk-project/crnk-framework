@@ -1,13 +1,14 @@
 package io.crnk.core.engine.internal.dispatcher;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class HttpRequestContextBaseAdapter implements HttpRequestContext {
@@ -45,11 +46,13 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	}
 
 	@Override
-	public void setResponse(int statusCode, String text) throws IOException {
+	public void setResponse(final int statusCode, final String text) throws IOException {
 		hasResponse = true;
-		try {
-			String charSet = HttpHeaders.DEFAULT_CHARSET;
 
+		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				String charSet = HttpHeaders.DEFAULT_CHARSET;
 
 				/*
 				TODO
@@ -68,12 +71,11 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 					}
 				}*/
 
-			byte[] bytes = text.getBytes(charSet);
-			this.base.setResponse(statusCode, bytes);
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException(e);
-		}
+				byte[] bytes = text.getBytes(charSet);
+				base.setResponse(statusCode, bytes);
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -152,6 +154,6 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
 	@Override
 	public String getResponseHeader(String name) {
-		return base.getRequestHeader(name);
+		return base.getResponseHeader(name);
 	}
 }

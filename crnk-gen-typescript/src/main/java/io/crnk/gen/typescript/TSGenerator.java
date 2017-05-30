@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
@@ -40,13 +43,14 @@ public class TSGenerator {
 		this.config = config;
 
 		transformations = new ArrayList<>();
-		for (String className : config.getMetaTransformationClassNames()) {
-			try {
-				transformations.add((TSMetaTransformation) getClass().getClassLoader().loadClass(className).newInstance());
-			}
-			catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				throw new IllegalArgumentException("failed to load transformation implementation " + className, e);
-			}
+		for (final String className : config.getMetaTransformationClassNames()) {
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					transformations.add((TSMetaTransformation) getClass().getClassLoader().loadClass(className).newInstance());
+					return null;
+				}
+			}, "failed to load transformation implementation {}", className);
 		}
 	}
 
@@ -57,9 +61,7 @@ public class TSGenerator {
 	}
 
 	private void write() {
-		if (config.getNpmPackageName() == null) {
-			throw new IllegalStateException("no typescriptGen.npmPackageName configured");
-		}
+		PreconditionUtil.assertNotNull("no typescriptGen.npmPackageName configured", config.getNpmPackageName());
 
 		for (TSSource fileSource : sources) {
 			TSWriter writer = new TSWriter(config.getCodeStyle());

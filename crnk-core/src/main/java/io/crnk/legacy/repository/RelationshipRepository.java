@@ -1,9 +1,9 @@
 package io.crnk.legacy.repository;
 
+import java.io.Serializable;
+
 import io.crnk.core.repository.Repository;
 import io.crnk.legacy.queryParams.QueryParams;
-
-import java.io.Serializable;
 
 /**
  * <p>
@@ -36,8 +36,6 @@ import java.io.Serializable;
  */
 @Deprecated
 public interface RelationshipRepository<T, T_ID extends Serializable, D, D_ID extends Serializable> extends Repository {
-
-	int TARGET_TYPE_GENERIC_PARAMETER_IDX = 2;
 
 	/**
 	 * Set a relation defined by a field. targetId legacy can be either in a form of an object or null value,

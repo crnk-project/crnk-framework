@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.jackson.DocumentDataDeserializer;
 import io.crnk.core.engine.internal.jackson.NullableSerializer;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
@@ -36,24 +37,13 @@ public class Document implements MetaContainer, LinksContainer {
 	@JsonInclude(Include.NON_EMPTY)
 	private List<ErrorData> errors;
 
-	@Override
-	public ObjectNode getMeta() {
-		return meta;
-	}
-
-	@Override
-	public void setMeta(ObjectNode meta) {
-		this.meta = meta;
-	}
 
 	public Nullable<Object> getData() {
 		return data;
 	}
 
 	public void setData(Nullable<Object> data) {
-		if (data == null) {
-			throw new NullPointerException("make use of Nullable instead of null");
-		}
+		PreconditionUtil.assertNotNull("make use of Nullable instead of null", data);
 		this.data = data;
 	}
 
@@ -73,6 +63,16 @@ public class Document implements MetaContainer, LinksContainer {
 
 	public void setIncluded(List<Resource> includes) {
 		this.included = includes;
+	}
+
+	@Override
+	public ObjectNode getMeta() {
+		return meta;
+	}
+
+	@Override
+	public void setMeta(ObjectNode meta) {
+		this.meta = meta;
 	}
 
 	public List<ErrorData> getErrors() {
@@ -100,7 +100,7 @@ public class Document implements MetaContainer, LinksContainer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Document)) {
+		if (obj == null || obj.getClass() != Document.class) {
 			return false;
 		}
 		Document other = (Document) obj;

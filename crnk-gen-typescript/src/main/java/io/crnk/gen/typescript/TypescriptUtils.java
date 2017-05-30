@@ -32,8 +32,10 @@ public class TypescriptUtils {
 	 */
 	public static TSInterfaceType getNestedInterface(TSType type, String name, boolean create) {
 		TSModule module = getNestedTypeContainer(type, create);
-		if (module == null) {
+		if (module == null && !create) {
 			return null;
+		}else if(module == null){
+			throw new IllegalStateException("cannot setup interface as no parent container is available");
 		}
 
 		for (TSElement element : module.getElements()) {
@@ -59,6 +61,9 @@ public class TypescriptUtils {
 	 */
 	public static TSModule getNestedTypeContainer(TSType type, boolean create) {
 		TSContainerElement parent = (TSContainerElement) type.getParent();
+		if(parent == null){
+			return null;
+		}
 		int insertionIndex = parent.getElements().indexOf(type);
 		return getModule(parent, type.getName(), insertionIndex, create);
 	}

@@ -58,7 +58,7 @@ public class ErrorData implements Serializable {
 	/**
 	 * A meta object containing non-standard meta-information about the error.
 	 */
-	private final  Map<String, Object> meta;
+	private final  Map<String, Object> meta; // NOSONAR this is not transient
 
 	/**
 	 * @deprecated  make use of {@link ErrorDataBuilder}

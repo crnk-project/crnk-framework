@@ -1,4 +1,4 @@
-package io.crnk.spring;
+package io.crnk.spring.internal.legacy;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

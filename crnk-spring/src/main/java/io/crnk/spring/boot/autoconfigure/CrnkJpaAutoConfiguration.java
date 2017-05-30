@@ -35,10 +35,11 @@ import org.springframework.context.annotation.Import;
  * This configuration class will activate <em>after</em> the Hibernate auto-configuration.
  */
 @Configuration
-@ConditionalOnBean({EntityManager.class, EntityManagerFactory.class})
-@ConditionalOnClass(JpaModule.class)
+
 @ConditionalOnProperty(prefix = "crnk.jpa", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnClass(JpaModule.class)
 @ConditionalOnMissingBean(JpaModule.class)
+
 @EnableConfigurationProperties({CrnkJpaProperties.class, CrnkSpringBootProperties.class})
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @AutoConfigureBefore

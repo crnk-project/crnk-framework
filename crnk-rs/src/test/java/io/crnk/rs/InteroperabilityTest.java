@@ -7,6 +7,7 @@ import io.crnk.client.CrnkClient;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
@@ -35,6 +36,8 @@ import org.mockito.Mockito;
 public class InteroperabilityTest extends JerseyTest {
 
 	private static DocumentFilter filter;
+
+	private static CrnkFeature feature;
 
 	private ScheduleRepository scheduleRepository;
 
@@ -72,7 +75,7 @@ public class InteroperabilityTest extends JerseyTest {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
 			register(SampleControllerWithPrefix.class);
 
-			CrnkFeature feature = new CrnkFeature();
+			feature = new CrnkFeature();
 			feature.addModule(new TestModule());
 			register(feature);
 
@@ -154,6 +157,18 @@ public class InteroperabilityTest extends JerseyTest {
 		DocumentFilterContext actionContext = contexts.getAllValues().get(0);
 		Assert.assertEquals("GET", actionContext.getMethod());
 		Assert.assertTrue(actionContext.getJsonPath() instanceof ActionPath);
+	}
+
+	@Test
+	public void testUnknownExceptionsGetMappedToInternalServerException() {
+		JsonapiExceptionMapperBridge bridge = new JsonapiExceptionMapperBridge(feature);
+		javax.ws.rs.core.Response response = bridge.toResponse(new CustomException());
+		Assert.assertEquals(500, response.getStatus());
+		Assert.assertTrue(response.getEntity() instanceof Document);
+	}
+
+	class CustomException extends RuntimeException {
+
 	}
 
 	@Test

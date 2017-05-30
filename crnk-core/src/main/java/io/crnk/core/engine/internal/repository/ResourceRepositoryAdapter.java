@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
@@ -11,8 +13,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.repository.ResourceRepository;
-
-import java.io.Serializable;
 
 /**
  * A repository adapter for resource repository
@@ -131,8 +131,6 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 					} else {
 						resource = ((ResourceRepositoryV2) resourceRepository).save(entity);
 					}
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
-					resource = ((ResourceRepositoryV2) resourceRepository).save(entity);
 				} else {
 					resource = ((ResourceRepository) resourceRepository).save(entity);
 				}

@@ -5,10 +5,13 @@ package io.crnk.core.engine.information.resource;
  */
 public class ResourceFieldAccess {
 
-	private boolean postable;
-	private boolean patchable;
-	private boolean sortable;
-	private boolean filterable;
+	private final boolean postable;
+
+	private final boolean patchable;
+
+	private final boolean sortable;
+
+	private final boolean filterable;
 
 	public ResourceFieldAccess(boolean postable, boolean patchable, boolean sortable, boolean filterable) {
 		this.postable = postable;
@@ -58,12 +61,15 @@ public class ResourceFieldAccess {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ResourceFieldAccess other = (ResourceFieldAccess) obj;
-		return patchable == other.patchable && postable != other.postable && sortable != other.sortable && filterable != other.filterable;
+		return patchable == other.patchable && postable == other.postable && sortable == other.sortable && filterable == other
+				.filterable;
 	}
 
 }

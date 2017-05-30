@@ -8,6 +8,13 @@ import io.crnk.spring.internal.AccessDeniedExceptionMapper;
  */
 public class SpringSecurityModule implements Module {
 
+	private SpringSecurityModule() {
+	}
+
+	public static SpringSecurityModule create() {
+		return new SpringSecurityModule();
+	}
+
 	@Override
 	public String getModuleName() {
 		return "springSecurity";

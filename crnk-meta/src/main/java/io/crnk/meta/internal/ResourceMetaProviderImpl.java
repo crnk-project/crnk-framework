@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -19,6 +20,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -141,8 +143,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 	}
 
 	private MetaResourceRepository discoverRepository(ResourceRepositoryInformation repositoryInformation,
-													  MetaResource metaResource, ResourceRepositoryAdapter<?, Serializable> resourceRepository,
-													  MetaProviderContext context) {
+			MetaResource metaResource, ResourceRepositoryAdapter<?, Serializable> resourceRepository,
+			MetaProviderContext context) {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);
@@ -164,30 +166,33 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		return meta;
 	}
 
-	private void setListInformationTypes(Object repository, MetaProviderContext context, MetaResourceRepository meta) {
+	private void setListInformationTypes(final Object repository, final MetaProviderContext context,
+			final MetaResourceRepository meta) {
+		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 
-		try {
-			Method findMethod = repository.getClass().getMethod("findAll", QuerySpec.class);
-			Class<?> listType = findMethod.getReturnType();
+			@Override
+			public Object call() throws Exception {
+				Method findMethod = repository.getClass().getMethod("findAll", QuerySpec.class);
+				Class<?> listType = findMethod.getReturnType();
 
-			if (ResourceListBase.class.equals(listType.getSuperclass())
-					&& listType.getGenericSuperclass() instanceof ParameterizedType) {
-				ParameterizedType genericSuperclass = (ParameterizedType) listType.getGenericSuperclass();
+				if (ResourceListBase.class.equals(listType.getSuperclass())
+						&& listType.getGenericSuperclass() instanceof ParameterizedType) {
+					ParameterizedType genericSuperclass = (ParameterizedType) listType.getGenericSuperclass();
 
-				Class<?> metaType = ClassUtils.getRawType(genericSuperclass.getActualTypeArguments()[1]);
-				Class<?> linksType = ClassUtils.getRawType(genericSuperclass.getActualTypeArguments()[2]);
-				if (!metaType.equals(MetaInformation.class)) {
-					MetaDataObject listMetaType = context.getLookup().getMeta(metaType, MetaJsonObject.class);
-					meta.setListMetaType(listMetaType);
+					Class<?> metaType = ClassUtils.getRawType(genericSuperclass.getActualTypeArguments()[1]);
+					Class<?> linksType = ClassUtils.getRawType(genericSuperclass.getActualTypeArguments()[2]);
+					if (!metaType.equals(MetaInformation.class)) {
+						MetaDataObject listMetaType = context.getLookup().getMeta(metaType, MetaJsonObject.class);
+						meta.setListMetaType(listMetaType);
+					}
+					if (!linksType.equals(LinksInformation.class)) {
+						MetaDataObject listLinksType = context.getLookup().getMeta(linksType, MetaJsonObject.class);
+						meta.setListLinksType(listLinksType);
+					}
 				}
-				if (!linksType.equals(LinksInformation.class)) {
-					MetaDataObject listLinksType = context.getLookup().getMeta(linksType, MetaJsonObject.class);
-					meta.setListLinksType(listLinksType);
-				}
+				return null;
 			}
-		} catch (SecurityException | NoSuchMethodException e) {
-			throw new IllegalStateException(e);
-		}
+		});
 	}
 
 	@Override
@@ -242,11 +247,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			MetaResourceBase parent = (MetaResourceBase) attr.getParent();
 
 			ResourceInformation information = getResourceInformation(parent.getImplementationClass(), true);
-			ResourceField field = information.findFieldByName(attr.getName());
-			if (field == null) {
-				throw new IllegalStateException("field not found for" + attr.getId());
-			}
-
+			ResourceField field = information.findFieldByUnderlyingName(attr.getName());
+			PreconditionUtil.assertNotNull(attr.getName(), field);
 			Type implementationType = field.getGenericType();
 			MetaElement metaType = context.getLookup().getMeta(implementationType, MetaJsonObject.class);
 			attr.setType(metaType.asType());

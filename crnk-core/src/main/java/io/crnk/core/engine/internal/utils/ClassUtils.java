@@ -18,9 +18,9 @@ import io.crnk.core.utils.Optional;
  */
 public class ClassUtils {
 
-	public static String PREFIX_GETTER_IS = "is";
+	public static final String PREFIX_GETTER_IS = "is";
 
-	public static String PREFIX_GETTER_GET = "get";
+	public static final String PREFIX_GETTER_GET = "get";
 
 	private ClassUtils() {
 	}
@@ -112,10 +112,7 @@ public class ClassUtils {
 				continue;
 			}
 			String methodGetterName = getGetterFieldName(method);
-			if (StringUtils.isBlank(methodGetterName)) {
-				continue;
-			}
-			if (methodGetterName.equals(fieldName)) {
+			if (fieldName.equals(methodGetterName)) {
 				return method;
 			}
 		}

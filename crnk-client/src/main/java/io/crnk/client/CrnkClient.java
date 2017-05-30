@@ -1,5 +1,11 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -53,12 +59,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -466,8 +466,8 @@ public class CrnkClient {
 		}
 
 		@Override
-		protected synchronized RegistryEntry getEntry(Class<?> clazz, boolean allowNull) {
-			RegistryEntry entry = resources.get(clazz);
+		protected synchronized RegistryEntry findEntry(Class<?> clazz, boolean allowNull) {
+			RegistryEntry entry = getEntry(clazz);
 			if (entry == null) {
 				ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
 				if (!informationBuilder.accept(clazz)) {
@@ -480,7 +480,7 @@ public class CrnkClient {
 		}
 
 		public boolean isInitialized(Class<?> clazz) {
-			return super.getEntry(clazz, true) != null;
+			return super.findEntry(clazz, true) != null;
 		}
 	}
 }

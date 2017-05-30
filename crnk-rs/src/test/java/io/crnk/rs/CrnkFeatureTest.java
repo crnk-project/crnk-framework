@@ -41,4 +41,10 @@ public class CrnkFeatureTest {
 		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) feature.getBoot().getQuerySpecDeserializer();
 		Assert.assertEquals(12L, deserializer.getDefaultLimit().longValue());
 	}
+
+	@Test
+	public void getQuerySpecDeserializer() {
+		CrnkFeature feature = new CrnkFeature();
+		Assert.assertNotNull(feature.getQuerySpecDeserializer());
+	}
 }
