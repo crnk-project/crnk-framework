@@ -1,11 +1,5 @@
 package io.crnk.example.springboot.simple;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.InheritableServerClientAndLocalSpanState;
 import com.twitter.zipkin.gen.Endpoint;
@@ -22,8 +16,6 @@ import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
-import io.crnk.ui.UIModule;
-import io.crnk.ui.UIModuleConfig;
 import io.crnk.validation.ValidationModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zipkin.reporter.Reporter;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
 
 @Configuration
 public class ModuleConfig {
@@ -61,16 +59,6 @@ public class ModuleConfig {
 		return HomeModule.create();
 	}
 
-
-	/**
-	 * Provides a user interface to browse the repositories under /browse/
-	 *
-	 * @return module
-	 */
-	@Bean
-	public UIModule uiModule() {
-		return UIModule.create(new UIModuleConfig());
-	}
 
 	/**
 	 * Makes meta data of all repositories available as repositories.
