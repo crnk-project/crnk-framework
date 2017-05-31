@@ -12,7 +12,7 @@ import static java.util.Collections.singletonList;
  */
 public final class DefaultStringParsers {
 
-	private DefaultStringParsers(){
+	private DefaultStringParsers() {
 	}
 
 	public static Map<Class, StringParser> get() {
@@ -70,7 +70,7 @@ public final class DefaultStringParsers {
 			@Override
 			public Character parse(String input) {
 				if (input.length() != 1) {
-					throwException(Character.class, input);
+					throw newException(Character.class, input);
 				}
 				return input.charAt(0);
 			}
@@ -83,10 +83,8 @@ public final class DefaultStringParsers {
 					return true;
 				} else if ("false".equals(inputNormalized) || "f".equals(inputNormalized)) {
 					return false;
-				} else {
-					throwException(Boolean.class, input);
 				}
-				return false;
+				throw newException(Boolean.class, input);
 			}
 		});
 		addType(parsers, Collections.singletonList(UUID.class), new StringParser<UUID>() {
@@ -109,7 +107,7 @@ public final class DefaultStringParsers {
 		}
 	}
 
-	private static void throwException(Class clazz, String input) {
-		throw new IllegalArgumentException(String.format("String cannot be casted to %s: %s", clazz, input));
+	private static ParserException newException(Class clazz, String input) {
+		return new ParserException(String.format("String cannot be casted to %s: %s", clazz, input));
 	}
 }

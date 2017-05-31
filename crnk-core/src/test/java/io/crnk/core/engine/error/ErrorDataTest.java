@@ -1,7 +1,5 @@
 package io.crnk.core.engine.error;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
@@ -9,6 +7,8 @@ import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class ErrorDataTest {
 
@@ -39,4 +39,18 @@ public class ErrorDataTest {
 
 		Assert.assertEquals(errorData, copy);
 	}
+
+	@Test
+	public void testToString() {
+		ErrorDataBuilder builder = new ErrorDataBuilder();
+		builder.setTitle("title");
+		builder.setCode("code");
+		builder.setStatus("status");
+		builder.setDetail("detail");
+		builder.setSourcePointer("sourcePointer");
+		builder.setSourceParameter("sourceParameter");
+		String actual = builder.build().toString();
+		Assert.assertEquals("ErrorData{id='null', aboutLink='null', status='status', code='code', title='title', detail='detail', sourcePointer='sourcePointer', sourceParameter='sourceParameter', meta=null}", actual);
+	}
+
 }

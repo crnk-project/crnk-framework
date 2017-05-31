@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.LinksRepositoryV2;
@@ -16,7 +17,6 @@ import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.core.resource.list.PagedResultList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
@@ -157,38 +157,30 @@ public abstract class ResponseRepositoryAdapter {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
 		if (queryAdapter instanceof QuerySpecAdapter && (queryAdapter.getOffset() != 0 || queryAdapter.getLimit() != null)) {
-			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter, requestSpec, true);
+			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter, requestSpec);
 		}
 		return enrichedLinksInformation;
 	}
 
-	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources, QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec, boolean createLinksInformation) {
-
-		if (linksInformation == null && createLinksInformation || linksInformation instanceof PagedLinksInformation) {
+	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources, QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+		if (linksInformation == null) {
+			// use default implementation if no link information
+			// provided by resource
+			linksInformation = new DefaultPagedLinksInformation();
+		}
+		if (linksInformation instanceof PagedLinksInformation) {
 			Long totalCount = getTotalCount(resources);
-			if (totalCount != null) {
-				PagedLinksInformation pagedLinksInformation = (PagedLinksInformation) linksInformation;
-
-				if (pagedLinksInformation == null) {
-					// use default implementation if no link information
-					// provided by resource
-					pagedLinksInformation = new DefaultPagedLinksInformation();
-				}
-
+			PagedLinksInformation pagedLinksInformation = (PagedLinksInformation) linksInformation;
+			if (totalCount != null && !hasPageLinks(pagedLinksInformation)) {
 				// only enrich if not already set
-				if (!hasPageLinks(pagedLinksInformation)) {
-					doEnrichPageLinksInformation(pagedLinksInformation, totalCount, queryAdapter, requestSpec);
-				}
-				return pagedLinksInformation;
+				doEnrichPageLinksInformation(pagedLinksInformation, totalCount, queryAdapter, requestSpec);
 			}
 		}
 		return linksInformation;
 	}
 
 	private Long getTotalCount(Iterable<?> resources) {
-		if (resources instanceof PagedResultList) {
-			return ((PagedResultList<?>) resources).getTotalCount();
-		} else if (resources instanceof ResourceList) {
+		if (resources instanceof ResourceList) {
 			ResourceList<?> list = (ResourceList<?>) resources;
 			PagedMetaInformation pagedMeta = list.getMeta(PagedMetaInformation.class);
 			if (pagedMeta != null) {
@@ -208,7 +200,7 @@ public abstract class ResponseRepositoryAdapter {
 
 		long currentPage = offset / pageSize;
 		if (currentPage * pageSize != offset) {
-			throw new IllegalArgumentException("offset " + offset + " is not a multiple of limit " + pageSize);
+			throw new BadRequestException("offset " + offset + " is not a multiple of limit " + pageSize);
 		}
 		long totalPages = (total + pageSize - 1) / pageSize;
 
@@ -238,6 +230,7 @@ public abstract class ResponseRepositoryAdapter {
 		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(moduleRegistry.getResourceRegistry());
 		Object relationshipSourceId = requestSpec.getId();
 		ResourceField relationshipField = requestSpec.getRelationshipField();
+
 		ResourceInformation rootInfo;
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();

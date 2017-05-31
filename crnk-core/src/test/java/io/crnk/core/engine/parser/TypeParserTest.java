@@ -1,6 +1,10 @@
 package io.crnk.core.engine.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -9,11 +13,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
-import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeParserTest {
 
@@ -27,6 +27,21 @@ public class TypeParserTest {
 		String result = sut.parse("String", String.class);
 		assertThat(result).isExactlyInstanceOf(String.class);
 		assertThat(result).isEqualTo("String");
+	}
+
+	@Test(expected = ParserException.class)
+	public void onInvalidCharacterThrowException() throws Exception {
+		sut.parse("NOT a single character", Character.class);
+	}
+
+	@Test(expected = ParserException.class)
+	public void onInvalidBooleanThrowException() throws Exception {
+		sut.parse("NOT a boolean", Character.class);
+	}
+
+	@Test
+	public void onBooleanFReturnFalse() throws Exception {
+		Assert.assertFalse(sut.parse("f", Boolean.class));
 	}
 
 	@Test
@@ -52,7 +67,7 @@ public class TypeParserTest {
 	@Test
 	public void onLongCharacterShouldThrowException() throws Exception {
 		// THEN
-		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expect(ParserException.class);
 
 		// WHEN
 		sut.parse("ab", Character.class);
@@ -101,7 +116,7 @@ public class TypeParserTest {
 	@Test
 	public void onBadBooleanShouldThrowException() throws Exception {
 		// THEN
-		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expect(ParserException.class);
 
 		// WHEN
 		sut.parse("ab", Boolean.class);
@@ -223,7 +238,6 @@ public class TypeParserTest {
 	public void hasUtilsHavePrivateConstructor() {
 		CoreClassTestUtils.assertPrivateConstructor(DefaultStringParsers.class);
 	}
-
 
 	@Test
 	public void onUnknownClassShouldThrowException() throws Exception {

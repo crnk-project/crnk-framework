@@ -80,6 +80,24 @@ public class DocumentSerializerTest {
 	}
 
 	@Test
+	public void testNullData() throws IOException {
+		Document doc = new Document();
+		doc.setData(Nullable.nullValue());
+
+		String json = writer.writeValueAsString(doc);
+
+		StringBuilder expected = new StringBuilder();
+		expected.append("{");
+		expected.append("\"data\" : null");
+		expected.append("}");
+
+		assertThatJson(json).describedAs(expected.toString());
+
+		Document readDoc = reader.readValue(json);
+		Assert.assertEquals(doc, readDoc);
+	}
+
+	@Test
 	public void testInformation() throws IOException {
 		Document doc = new Document();
 		doc.setMeta((ObjectNode) objectMapper.readTree("{\"metaName\" : \"metaValue\"}"));

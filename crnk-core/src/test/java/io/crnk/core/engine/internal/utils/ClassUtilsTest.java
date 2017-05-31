@@ -1,12 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.exception.ResourceException;
@@ -19,10 +12,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
 public class ClassUtilsTest {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
+	@Test
+	public void hasPrivateConstructor() {
+		CoreClassTestUtils.assertPrivateConstructor(ClassUtils.class);
+	}
 
 	@Test
 	public void onGenericClassShouldReturnFirstParameter() throws Exception {

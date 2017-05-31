@@ -48,6 +48,14 @@ public class ResourceFieldAccess {
 		return filterable;
 	}
 
+	public ResourceFieldAccess and(ResourceFieldAccess other) {
+		boolean postable = isPostable() && other.isPostable();
+		boolean patchable = isPatchable() && other.isPatchable();
+		boolean sortable = isSortable() && other.isSortable();
+		boolean filterable = isFilterable() && other.isFilterable();
+		return new ResourceFieldAccess(postable, patchable, sortable, filterable);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

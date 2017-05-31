@@ -1,8 +1,5 @@
 package io.crnk.core.engine.document;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.utils.Nullable;
@@ -10,6 +7,9 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class RelationshipTest {
 
@@ -37,6 +37,20 @@ public class RelationshipTest {
 		Relationship relationship = new Relationship();
 		relationship.setData(Nullable.nullValue());
 		checkSerialize(relationship);
+	}
+
+	@Test
+	public void getCollectionDataReturnsListForSingleElement() throws IOException {
+		Relationship relationship = new Relationship();
+		ResourceIdentifier id = new ResourceIdentifier("a", "b");
+		relationship.setData(Nullable.of((Object) id));
+		Assert.assertEquals(Arrays.asList(id), relationship.getCollectionData().get());
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void setInvalidDataThrowsException() throws IOException {
+		Relationship relationship = new Relationship();
+		relationship.setData(Nullable.of((Object) "not a ResourceIdentifier"));
 	}
 
 

@@ -125,6 +125,27 @@ public class InMemoryEvaluatorTest {
 	}
 
 	@Test
+	public void testNonTotalSort() {
+		tasks.clear();
+		for (long i = 0; i < 5; i++) {
+			Task task = new Task();
+			task.setId(i);
+			if (i < 3) {
+				task.setName("test" + i);
+			}
+			tasks.add(task);
+		}
+
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
+		List<Task> results = spec.apply(tasks);
+		Assert.assertEquals(5, results.size());
+		Assert.assertEquals(0L, results.get(2).getId().longValue());
+		Assert.assertEquals(1L, results.get(3).getId().longValue());
+		Assert.assertEquals(2L, results.get(4).getId().longValue());
+	}
+
+	@Test
 	public void testSortDesc() {
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.addSort(new SortSpec(Arrays.asList("name"), Direction.DESC));

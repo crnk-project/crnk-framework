@@ -1,9 +1,6 @@
 package io.crnk.meta;
 
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaMapAttribute;
-import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +18,7 @@ public class MetaMapAttributeTest {
 
 	@Before
 	public void setup() {
-		String keyString = "test";
+		String keyString = "13";
 		mapAttr = Mockito.mock(MetaAttribute.class);
 		mapType = Mockito.mock(MetaMapType.class);
 		impl = new MetaMapAttribute(mapType, mapAttr, keyString);
@@ -33,6 +30,53 @@ public class MetaMapAttributeTest {
 	public void testGetters() {
 		Assert.assertEquals(mapAttr, impl.getMapAttribute());
 		Assert.assertEquals(parent, impl.getParent());
+		Assert.assertEquals(mapType, impl.getType());
+	}
+
+	@Test
+	public void getKey() {
+		MetaType keyType = Mockito.mock(MetaType.class);
+		Mockito.when(keyType.getImplementationClass()).thenReturn((Class) Integer.class);
+		Mockito.when(mapType.getKeyType()).thenReturn(keyType);
+
+		Assert.assertEquals(Integer.valueOf(13), impl.getKey());
+	}
+
+	@Test
+	public void checkForwardIsLazy() {
+		impl.isLazy();
+		Mockito.verify(mapAttr, Mockito.times(1)).isLazy();
+	}
+
+	@Test
+	public void checkForwardIsDerived() {
+		impl.isDerived();
+		Mockito.verify(mapAttr, Mockito.times(1)).isDerived();
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void checkGetAnnotationsNotSupported() {
+		impl.getAnnotations();
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void checkGetAnnotationNotSupported() {
+		impl.getAnnotation(null);
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void checkSetOppositeAttributeNotSupported() {
+		impl.setOppositeAttribute(null);
+	}
+
+
+	@Test
+	public void checkForwardIsAssociation() {
+		impl.isAssociation();
+		Mockito.verify(mapAttr, Mockito.times(1)).isAssociation();
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

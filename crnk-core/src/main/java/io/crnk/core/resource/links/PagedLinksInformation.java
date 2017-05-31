@@ -1,11 +1,9 @@
 package io.crnk.core.resource.links;
 
-import io.crnk.core.resource.list.PagedResultList;
 
 /**
  * Interface declaration for any LinksInformation object holding
- * paging information. This interface must be implemented if a
- * repository returns a {@link PagedResultList}. {@link DefaultPagedLinksInformation}
+ * paging information. {@link DefaultPagedLinksInformation}
  * provides a default implementation.
  */
 public interface PagedLinksInformation extends LinksInformation {

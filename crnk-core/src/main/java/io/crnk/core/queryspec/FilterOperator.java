@@ -32,7 +32,7 @@ public abstract class FilterOperator {
 
 		@Override
 		public boolean matches(Object value1, Object value2) {
-			if (value1 == null) {
+			if (value2 == null) {
 				return false;
 			}
 			String text = value1.toString();
@@ -109,7 +109,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1 != null && c1.compareTo(c2) < 0;
+			return c1.compareTo(c2) < 0;
 		}
 
 	};
@@ -124,7 +124,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1 != null && c1.compareTo(c2) <= 0;
+			return c1.compareTo(c2) <= 0;
 		}
 
 	};
@@ -139,7 +139,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1 != null && c1.compareTo(c2) > 0;
+			return c1.compareTo(c2) > 0;
 		}
 	};
 
@@ -153,7 +153,7 @@ public abstract class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1 != null && c1.compareTo(c2) >= 0;
+			return c1.compareTo(c2) >= 0;
 		}
 	};
 
@@ -168,7 +168,7 @@ public abstract class FilterOperator {
 		}
 	};
 
-	private String id;
+	private final String id;
 
 	protected FilterOperator(String id) {
 		this.id = id;
@@ -188,9 +188,9 @@ public abstract class FilterOperator {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof FilterOperator) {
+		if (obj != null && obj instanceof FilterOperator) {
 			FilterOperator other = (FilterOperator) obj;
-			return id.equals(other.id);
+			return CompareUtils.isEquals(id, other.id);
 		}
 		return false;
 	}

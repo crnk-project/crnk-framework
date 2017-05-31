@@ -14,19 +14,15 @@ public class PreconditionUtil {
 	 * <code>expected</code> and <code>actual</code> are <code>null</code>, they
 	 * are considered equal.
 	 *
-	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
+	 * @param message  the identifying message for the {@link AssertionError} (
+	 *                 <code>null</code> okay)
 	 * @param expected expected value
-	 * @param actual actual value
+	 * @param actual   actual value
 	 */
 	public static void assertEquals(String message, Object expected, Object actual) {
-		if(!CompareUtils.isEquals(expected, actual)){
+		if (!CompareUtils.isEquals(expected, actual)) {
 			fail(format(message, expected, actual));
 		}
-	}
-
-	private static boolean isEquals(Object expected, Object actual) {
-		return expected.equals(actual);
 	}
 
 	static String format(String message, Object expected, Object actual) {
@@ -43,7 +39,7 @@ public class PreconditionUtil {
 	 * Fails a test with the given message.
 	 *
 	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
+	 *                <code>null</code> okay)
 	 * @see AssertionError
 	 */
 	public static void fail(String message) {
@@ -55,8 +51,8 @@ public class PreconditionUtil {
 	 * thrown with the given message.
 	 *
 	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
-	 * @param object Object to check or <code>null</code>
+	 *                <code>null</code> okay)
+	 * @param object  Object to check or <code>null</code>
 	 */
 	public static void assertNotNull(String message, Object object) {
 		assertTrue(message, object != null);
@@ -66,8 +62,8 @@ public class PreconditionUtil {
 	 * Asserts that a condition is true. If it isn't it throws an
 	 * {@link AssertionError} with the given message.
 	 *
-	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
+	 * @param message   the identifying message for the {@link AssertionError} (
+	 *                  <code>null</code> okay)
 	 * @param condition condition to be checked
 	 */
 	public static void assertTrue(String message, boolean condition) {
@@ -80,8 +76,8 @@ public class PreconditionUtil {
 	 * Asserts that a condition is false. If it isn't it throws an
 	 * {@link AssertionError} with the given message.
 	 *
-	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
+	 * @param message   the identifying message for the {@link AssertionError} (
+	 *                  <code>null</code> okay)
 	 * @param condition condition to be checked
 	 */
 	public static void assertFalse(String message, boolean condition) {
@@ -93,8 +89,8 @@ public class PreconditionUtil {
 	 * is thrown with the given message.
 	 *
 	 * @param message the identifying message for the {@link AssertionError} (
-	 * <code>null</code> okay)
-	 * @param object Object to check or <code>null</code>
+	 *                <code>null</code> okay)
+	 * @param object  Object to check or <code>null</code>
 	 */
 	public static void assertNull(String message, Object object) {
 		assertTrue(message, object == null);

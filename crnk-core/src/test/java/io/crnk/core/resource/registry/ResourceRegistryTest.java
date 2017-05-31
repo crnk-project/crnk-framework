@@ -1,15 +1,12 @@
 package io.crnk.core.resource.registry;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.exception.ResourceNotFoundInitializationException;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -18,6 +15,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 public class ResourceRegistryTest {
 
@@ -89,11 +89,11 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onNonExistingClassShouldThrowException() {
-		expectedException.expect(ResourceNotFoundInitializationException.class);
+		expectedException.expect(RepositoryNotFoundException.class);
 		resourceRegistry.findEntry(Long.class);
 	}
 
-	@Test(expected = ResourceNotFoundInitializationException.class)
+	@Test(expected = RepositoryNotFoundException.class)
 	public void onNonExistingClassShouldReturnNull() {
 		resourceRegistry.findEntry(Long.class);
 	}
@@ -135,7 +135,7 @@ public class ResourceRegistryTest {
 		assertThat(clazz).isEqualTo(Task.class);
 	}
 
-	@Test(expected = ResourceNotFoundInitializationException.class)
+	@Test(expected = RepositoryNotFoundException.class)
 	public void onResourceClassReturnNoInstanceClass() {
 		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
 

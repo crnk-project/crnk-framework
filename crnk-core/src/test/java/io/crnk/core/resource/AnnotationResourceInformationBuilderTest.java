@@ -224,6 +224,24 @@ public class AnnotationResourceInformationBuilderTest {
 	}
 
 	@Test
+	public void shouldIgnoreTransientAttributes() throws Exception {
+		ResourceInformation resourceInformation = resourceInformationBuilder.build(IgnoredTransientAttributeResource.class);
+		Assert.assertNull(resourceInformation.findFieldByName("attribute"));
+	}
+
+	@Test
+	public void shouldIgnoreStaticAttributes() throws Exception {
+		ResourceInformation resourceInformation = resourceInformationBuilder.build(IgnoredStaticAttributeResource.class);
+		Assert.assertNull(resourceInformation.findFieldByName("attribute"));
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void checkWriteOnlyAttributesCurrentlyNotSupported() throws Exception {
+		resourceInformationBuilder.build(WriteOnlyAttributeResource.class);
+	}
+
+
+	@Test
 	public void shouldContainLinksInformationField() throws Exception {
 		expectedException.expect(MultipleJsonApiMetaInformationException.class);
 
@@ -331,6 +349,21 @@ public class AnnotationResourceInformationBuilderTest {
 
 		private String getAccessorField() {
 			return null;
+		}
+	}
+
+	@JsonApiResource(type = "accessorGetter")
+	private static class WriteOnlyAttributeResource {
+
+		@JsonApiId
+		public Long id;
+
+		@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+		private String attribute;
+
+
+		public void setAttribute(String attribute) {
+			this.attribute = attribute;
 		}
 	}
 

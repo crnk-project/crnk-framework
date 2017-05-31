@@ -7,14 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -68,15 +61,6 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		return context.accept(rawType) ? context.getResourceType(rawType) : null;
 	}
 
-	private static boolean hasDiscardedField(ResourceFieldWrapper fieldWrapper, List<ResourceFieldWrapper> resourceClassFields) {
-		for (ResourceFieldWrapper resourceFieldWrapper : resourceClassFields) {
-			if (fieldWrapper.getResourceField().getUnderlyingName().equals(resourceFieldWrapper.getResourceField().getUnderlyingName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private static AnnotatedResourceField mergeAnnotations(AnnotatedResourceField fromField, AnnotatedResourceField fromMethod, ResourceInformationBuilderContext context) {
 		List<Annotation> annotations = new ArrayList<>(fromField.getAnnotations());
 		annotations.addAll(fromMethod.getAnnotations());
@@ -84,11 +68,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		Class<?> fieldType = mergeFieldType(fromField, fromMethod);
 		Type fieldGenericType = mergeGenericType(fromField, fromMethod);
 		String oppositeResourceType = fromField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? getResourceType(fieldGenericType, context) : null;
-		boolean postable = fromField.getAccess().isPostable() && fromMethod.getAccess().isPostable();
-		boolean patchable = fromField.getAccess().isPatchable() && fromMethod.getAccess().isPatchable();
-		boolean sortable = fromField.getAccess().isSortable() && fromMethod.getAccess().isSortable();
-		boolean filterable = fromField.getAccess().isFilterable() && fromMethod.getAccess().isFilterable();
-		ResourceFieldAccess mergedAccess = new ResourceFieldAccess(postable, patchable, sortable, filterable);
+
+		ResourceFieldAccess mergedAccess = fromField.getAccess().and(fromMethod.getAccess());
 		return new AnnotatedResourceField(fromField.getJsonName(), fromField.getUnderlyingName(), fieldType, fieldGenericType, oppositeResourceType, annotations, mergedAccess);
 	}
 
@@ -271,10 +252,14 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		Map<String, Integer> resourceFieldPositions = new HashMap<>();
 		List<AnnotatedResourceField> resourceFields = new ArrayList<>();
 
+		HashSet<String> discardedFieldNames = new HashSet<>();
+
 		for (ResourceFieldWrapper fieldWrapper : resourceClassFields) {
 			if (!fieldWrapper.isDiscarded()) {
 				resourceFieldPositions.put(fieldWrapper.getResourceField().getUnderlyingName(), resourceFields.size());
 				resourceFields.add(fieldWrapper.getResourceField());
+			}else{
+				discardedFieldNames.add(fieldWrapper.getResourceField().getUnderlyingName());
 			}
 		}
 
@@ -285,7 +270,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 				if (resourceFieldPositions.containsKey(originalName)) {
 					int pos = resourceFieldPositions.get(originalName);
 					resourceFields.set(pos, mergeAnnotations(resourceFields.get(pos), field, context));
-				} else if (!hasDiscardedField(fieldWrapper, resourceClassFields)) {
+				} else if (!discardedFieldNames.contains(fieldWrapper.getResourceField().getUnderlyingName())) {
 					resourceFieldPositions.put(originalName, resourceFields.size());
 					resourceFields.add(field);
 				}

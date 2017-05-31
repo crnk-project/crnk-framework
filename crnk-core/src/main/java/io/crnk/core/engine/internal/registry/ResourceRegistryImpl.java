@@ -12,6 +12,7 @@ import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundInitializationException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
@@ -88,7 +89,7 @@ public class ResourceRegistryImpl implements ResourceRegistry {
 			return null;
 		}
 		else if (!resourceClazz.isPresent()) {
-			throw new ResourceNotFoundInitializationException(clazz.getCanonicalName());
+			throw new RepositoryNotFoundException(clazz.getCanonicalName());
 		}
 		return resourcesByClass.get(resourceClazz.get());
 	}
