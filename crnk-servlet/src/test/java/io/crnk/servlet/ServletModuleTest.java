@@ -4,7 +4,7 @@ import javax.servlet.ServletContext;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.servlet.internal.ServletRequestContext;

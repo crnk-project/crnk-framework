@@ -1,5 +1,13 @@
 package io.crnk.core.resource.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -21,16 +29,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 @RunWith(MockitoJUnitRunner.class)
-public class IncludeLookupSetterTest extends AbstractDocumentMapperTest {
+public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 
 	private HierarchicalTask h;
 	private HierarchicalTask h0;

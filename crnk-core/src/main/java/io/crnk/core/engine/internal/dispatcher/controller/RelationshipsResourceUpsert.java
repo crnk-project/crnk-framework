@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.Collections;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -9,30 +12,23 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.Generics;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.io.Serializable;
-import java.util.Collections;
+public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
-public abstract class RelationshipsResourceUpsert extends BaseController {
-
-	final TypeParser typeParser;
-	private final ResourceRegistry resourceRegistry;
-
-	RelationshipsResourceUpsert(ResourceRegistry resourceRegistry, TypeParser typeParser) {
-		this.resourceRegistry = resourceRegistry;
-		this.typeParser = typeParser;
+	RelationshipsResourceUpsert(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+		super(resourceRegistry, typeParser, documentMapper);
 	}
 
 	/**
@@ -72,9 +68,7 @@ public abstract class RelationshipsResourceUpsert extends BaseController {
 
 	@Override
 	public final boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		if (jsonPath == null) {
-			throw new IllegalArgumentException();
-		}
+		PreconditionUtil.assertNotNull("jsonPath cannot be null", jsonPath);
 		return !jsonPath.isCollection()
 				&& RelationshipsPath.class.equals(jsonPath.getClass())
 				&& method().name().equals(requestType);
@@ -85,14 +79,9 @@ public abstract class RelationshipsResourceUpsert extends BaseController {
 								 RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
 		String resourceName = jsonPath.getResourceType();
 		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
+		RegistryEntry registryEntry = getRegistryEntry(resourceName);
 
-		if (registryEntry == null) {
-			throw new ResourceNotFoundException(resourceName);
-		}
-		if (requestBody == null) {
-			throw new RequestBodyNotFoundException(HttpMethod.POST, resourceName);
-		}
+		assertRequestDocument(requestBody, HttpMethod.POST, resourceName);
 
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(jsonPath
@@ -105,7 +94,7 @@ public abstract class RelationshipsResourceUpsert extends BaseController {
 		Object resource = extractResource(resourceRepository.findOne(castedResourceId, queryAdapter));
 
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
-		Class<?> relationshipFieldClass = Generics
+		Class<?> relationshipFieldClass = ClassUtils
 				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
 		@SuppressWarnings("unchecked") Class<? extends Serializable> relationshipIdType = (Class<? extends Serializable>) resourceRegistry
 				.findEntry(relationshipFieldClass).getResourceInformation().getIdField().getType();

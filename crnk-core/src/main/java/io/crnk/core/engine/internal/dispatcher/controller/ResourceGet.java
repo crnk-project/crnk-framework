@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -12,12 +14,9 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.Serializable;
 
 public class ResourceGet extends ResourceIncludeField {
 
@@ -43,12 +42,10 @@ public class ResourceGet extends ResourceIncludeField {
 	 */
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getElementName();
+		String resourceType = jsonPath.getElementName();
 		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
-		if (registryEntry == null) {
-			throw new ResourceNotFoundException(resourceName);
-		}
+		RegistryEntry registryEntry = getRegistryEntry(resourceType);
+
 		String id = resourceIds.getIds().get(0);
 
 		@SuppressWarnings("unchecked")
@@ -66,5 +63,4 @@ public class ResourceGet extends ResourceIncludeField {
 
 		return new Response(responseDocument, 200);
 	}
-
 }

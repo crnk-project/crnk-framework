@@ -1,5 +1,15 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -20,11 +30,6 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceGetTest extends BaseControllerTest {
 
@@ -59,6 +64,19 @@ public class ResourceGetTest extends BaseControllerTest {
 
 		// THEN
 		Assert.assertEquals(result, true);
+	}
+
+	@Test
+	public void onMethodMismatchShouldDenyIt() {
+		// GIVEN
+		JsonPath jsonPath = pathBuilder.build("/tasks/2");
+		ResourceGet sut = new ResourceGet(resourceRegistry, typeParser, documentMapper);
+
+		// WHEN
+		boolean result = sut.isAcceptable(jsonPath, "POST");
+
+		// THEN
+		Assert.assertEquals(result, false);
 	}
 
 	@Test

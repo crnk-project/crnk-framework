@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExceptionMapperRegistryTest {
 
-	//Reused in RequestDispatcherTest
+	//Reused in HttpRequestProcessorImplTest
 	public static final ExceptionMapperRegistry exceptionMapperRegistry = new ExceptionMapperRegistry(exceptionMapperTypeSet());
 
 	private static Set<ExceptionMapperType> exceptionMapperTypeSet() {

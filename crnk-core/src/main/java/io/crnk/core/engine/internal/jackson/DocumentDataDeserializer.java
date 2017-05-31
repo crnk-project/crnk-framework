@@ -1,15 +1,16 @@
 package io.crnk.core.engine.internal.jackson;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.utils.Nullable;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>> {
 
@@ -19,12 +20,14 @@ public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>>
 		if (currentToken == JsonToken.START_ARRAY) {
 			Resource[] resources = jp.readValueAs(Resource[].class);
 			return Nullable.of((Object) Arrays.asList(resources));
-		} else if (currentToken == JsonToken.VALUE_NULL) {
+		}
+		else if (currentToken == JsonToken.VALUE_NULL) {
 			return Nullable.nullValue();
-		} else if (currentToken == JsonToken.START_OBJECT) {
+		}
+		else {
+			PreconditionUtil.assertEquals("parsing failed", currentToken, JsonToken.START_OBJECT);
 			return Nullable.of((Object) jp.readValueAs(Resource.class));
 		}
-		throw new IllegalStateException(currentToken.toString());
 	}
 
 	@Override

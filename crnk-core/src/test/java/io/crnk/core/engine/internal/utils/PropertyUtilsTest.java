@@ -1,14 +1,19 @@
 package io.crnk.core.engine.internal.utils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.lang.reflect.ParameterizedType;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class PropertyUtilsTest {
 
@@ -138,6 +143,30 @@ public class PropertyUtilsTest {
 
 		// THEN
 		assertThat(result).isEqualTo(String.class);
+	}
+
+	@Test
+	public void getPropertyClassShouldThrowExceptionForInvalidField() throws Exception {
+		try {
+			PropertyUtils.getPropertyClass(Bean.class, "doesNotExist");
+			Assert.fail();
+		}
+		catch (PropertyException e) {
+			Assert.assertEquals("doesNotExist", e.getField());
+			Assert.assertEquals(Bean.class, e.getResourceClass());
+		}
+	}
+
+	@Test
+	public void getPropertyTypeShouldThrowExceptionForInvalidField() throws Exception {
+		try {
+			PropertyUtils.getPropertyType(Bean.class, "doesNotExist");
+			Assert.fail();
+		}
+		catch (PropertyException e) {
+			Assert.assertEquals("doesNotExist", e.getField());
+			Assert.assertEquals(Bean.class, e.getResourceClass());
+		}
 	}
 
 	@Test
@@ -485,10 +514,15 @@ public class PropertyUtilsTest {
 	public static class Bean {
 
 		public String publicProperty;
+
 		private boolean booleanWithGetPrefix;
+
 		private String privatePropertyWithMutators;
+
 		private boolean booleanPrimitivePropertyWithMutators;
+
 		private Boolean booleanPropertyWithMutators;
+
 		private Set<String> setProperty;
 
 		public boolean getBooleanWithGetPrefix() {

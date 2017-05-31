@@ -1,9 +1,9 @@
-package io.crnk.core.utils;
-
-import org.junit.Assert;
+package io.crnk.core.engine.internal.utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+
+import org.junit.Assert;
 
 public class CoreClassTestUtils {
 

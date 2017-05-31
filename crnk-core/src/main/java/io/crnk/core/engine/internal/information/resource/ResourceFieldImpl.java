@@ -160,9 +160,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	@Override
 	public ResourceFieldAccessor getAccessor() {
-		if (accessor == null) {
-			throw new IllegalStateException("field not properly initialized");
-		}
+		PreconditionUtil.assertNotNull("field not properly initialized", accessor);
 		return accessor;
 	}
 

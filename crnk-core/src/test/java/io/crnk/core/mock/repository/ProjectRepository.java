@@ -1,17 +1,22 @@
 package io.crnk.core.mock.repository;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.repository.ResourceRepository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class ProjectRepository implements ResourceRepository<Project, Long> {
 
 	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
+
+	/**
+	 * That particular ID will be mapped to a fancy project to simulated inheritance
+	 */
+	public static final long FANCY_PROJECT_ID = 101001;
 
 	public static void clear() {
 		THREAD_LOCAL_REPOSITORY.clear();
@@ -19,7 +24,9 @@ public class ProjectRepository implements ResourceRepository<Project, Long> {
 
 	@Override
 	public <S extends Project> S save(S entity) {
-		entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+		if (entity.getId() == null) {
+			entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+		}
 		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
 		return entity;

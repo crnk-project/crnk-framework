@@ -6,7 +6,7 @@ package io.crnk.core.exception;
  * <p>
  * Exceptions of this kind should be logged and the request processing should be continued.
  */
-public abstract class CrnkMatchingException extends CrnkException {
+public class CrnkMatchingException extends CrnkException {
 
 	protected CrnkMatchingException(String message) {
 		super(message);

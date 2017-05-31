@@ -1,5 +1,9 @@
 package io.crnk.core.module;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
@@ -16,35 +20,49 @@ import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator.De
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIllegalStateExceptionMapper;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.models.*;
-import io.crnk.core.mock.repository.*;
+import io.crnk.core.mock.models.ComplexPojo;
+import io.crnk.core.mock.models.Document;
+import io.crnk.core.mock.models.FancyProject;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.Thing;
+import io.crnk.core.mock.models.User;
+import io.crnk.core.mock.repository.DocumentRepository;
+import io.crnk.core.mock.repository.PojoRepository;
+import io.crnk.core.mock.repository.ProjectRepository;
+import io.crnk.core.mock.repository.ResourceWithoutRepositoryToProjectRepository;
+import io.crnk.core.mock.repository.ScheduleRepository;
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.mock.repository.TaskToProjectRepository;
+import io.crnk.core.mock.repository.TaskWithLookupRepository;
+import io.crnk.core.mock.repository.UserRepository;
+import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-public class ModuleTest {
+public class ModuleRegistryTest {
 
 	private ResourceRegistry resourceRegistry;
 
@@ -85,6 +103,12 @@ public class ModuleTest {
 	}
 
 	@Test
+	public void getModuleContext() {
+		Assert.assertNotNull(moduleRegistry.getContext());
+		Assert.assertNotNull(moduleRegistry.getContext().getObjectMapper());
+	}
+
+	@Test
 	public void repositoryInformationBuilderAccept() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 		Assert.assertFalse(builder.accept("no resource"));
@@ -99,7 +123,8 @@ public class ModuleTest {
 	public void buildResourceRepositoryInformationFromClass() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 
-		ResourceRepositoryInformation info = (ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
+		ResourceRepositoryInformation info =
+				(ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
 		Assert.assertEquals(TaskRepository.class, info.getRepositoryClass());
 		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
@@ -109,7 +134,8 @@ public class ModuleTest {
 	public void buildResourceRepositoryInformationFromInstance() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 
-		ResourceRepositoryInformation info = (ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
+		ResourceRepositoryInformation info =
+				(ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
 		Assert.assertEquals(TaskRepository.class, info.getRepositoryClass());
 		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
@@ -119,7 +145,8 @@ public class ModuleTest {
 	public void buildRelationshipRepositoryInformationFromClass() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 
-		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
+		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
+				.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
 		Assert.assertEquals(TaskToProjectRepository.class, info.getRepositoryClass());
 		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
 		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
@@ -129,7 +156,8 @@ public class ModuleTest {
 	public void buildRelationshipRepositoryInformationFromInstance() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 
-		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
+		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
+				.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
 		Assert.assertEquals(TaskToProjectRepository.class, info.getRepositoryClass());
 		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
 		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
@@ -155,6 +183,20 @@ public class ModuleTest {
 		moduleRegistry = new ModuleRegistry();
 		moduleRegistry.getResourceRegistry();
 	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testDuplicateInitialization() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		moduleRegistry.init(objectMapper);
+	}
+
+	@Test
+	public void checkGetModule() {
+		Module notRegisteredModule = Mockito.mock(Module.class);
+		Assert.assertNotNull(moduleRegistry.getModule(TestModule.class).get());
+		Assert.assertFalse(moduleRegistry.getModule(notRegisteredModule.getClass()).isPresent());
+	}
+
 
 	@Test
 	public void testExceptionMappers() {
@@ -231,11 +273,13 @@ public class ModuleTest {
 		try {
 			informationBuilder.build(Object.class);
 			Assert.fail();
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (UnsupportedOperationException e) {
 			// ok
 		}
 
-		DefaultResourceInformationBuilderContext context = new DefaultResourceInformationBuilderContext(informationBuilder, moduleRegistry.getTypeParser());
+		DefaultResourceInformationBuilderContext context =
+				new DefaultResourceInformationBuilderContext(informationBuilder, moduleRegistry.getTypeParser());
 
 		ResourceInformation userInfo = informationBuilder.build(User.class);
 		Assert.assertEquals("id", userInfo.getIdField().getUnderlyingName());
@@ -273,9 +317,16 @@ public class ModuleTest {
 	}
 
 	@Test
+	public void checkCombinedResourceInformationBuilderGetResurceType() {
+		Class<?> noResourceClass = String.class;
+		Assert.assertNull(moduleRegistry.getResourceInformationBuilder().getResourceType(noResourceClass));
+		Assert.assertNotNull(moduleRegistry.getResourceInformationBuilder().getResourceType(Task.class));
+	}
+
+	@Test
 	public void testDecorators() throws Exception {
 		List<RepositoryDecoratorFactory> decorators = moduleRegistry.getRepositoryDecoratorFactories();
-		Assert.assertEquals(1, decorators.size());
+		Assert.assertEquals(2, decorators.size());
 
 		RegistryEntry entry = this.resourceRegistry.findEntry(Schedule.class);
 		Object resourceRepository = entry.getResourceRepository(null).getResourceRepository();
@@ -369,6 +420,7 @@ public class ModuleTest {
 			});
 
 			context.addRepositoryDecoratorFactory(new TestRepositoryDecorator());
+			context.addRepositoryDecoratorFactory(new RepositoryDecoratorFactoryBase());
 			context.addFilter(new TestFilter());
 			context.addRepository(new ScheduleRepositoryImpl());
 			context.addRepository(TestResource2.class, new TestRepository2());

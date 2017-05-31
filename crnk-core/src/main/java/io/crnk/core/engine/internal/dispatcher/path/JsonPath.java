@@ -2,6 +2,8 @@ package io.crnk.core.engine.internal.dispatcher.path;
 
 import java.util.Objects;
 
+import io.crnk.core.engine.internal.utils.CompareUtils;
+
 /**
  * Represent a JSON API path sent to the server. Each resource or field defined in the path is represented by one
  * derived class of JsonPath object.
@@ -26,10 +28,6 @@ public abstract class JsonPath {
 	 */
 	JsonPath parentResource;
 
-	/**
-	 * Entry closer to path's end
-	 */
-	private JsonPath childResource;
 
 	public JsonPath(String elementName) {
 		this(elementName, null);
@@ -82,14 +80,6 @@ public abstract class JsonPath {
 		this.parentResource = parentResource;
 	}
 
-	public JsonPath getChildResource() {
-		return childResource;
-	}
-
-	public void setChildResource(JsonPath childResource) {
-		this.childResource = childResource;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -99,9 +89,9 @@ public abstract class JsonPath {
 			return false;
 		}
 		JsonPath jsonPath = (JsonPath) o;
-		return Objects.equals(elementName, jsonPath.elementName) &&
-				Objects.equals(ids, jsonPath.ids) &&
-				Objects.equals(parentResource, jsonPath.parentResource);
+		return CompareUtils.isEquals(elementName, jsonPath.elementName) &&
+				CompareUtils.isEquals(ids, jsonPath.ids) &&
+				CompareUtils.isEquals(parentResource, jsonPath.parentResource);
 	}
 
 	@Override

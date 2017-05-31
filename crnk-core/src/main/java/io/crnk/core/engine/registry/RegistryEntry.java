@@ -2,8 +2,8 @@ package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
-import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;

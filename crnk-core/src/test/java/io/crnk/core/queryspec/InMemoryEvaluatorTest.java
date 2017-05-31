@@ -1,5 +1,9 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.list.ResourceList;
@@ -7,10 +11,6 @@ import io.crnk.core.resource.meta.PagedMetaInformation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class InMemoryEvaluatorTest {
 
@@ -79,6 +79,31 @@ public class InMemoryEvaluatorTest {
 		Assert.assertEquals(5, results.size());
 		Assert.assertEquals("test0", results.get(0).getName());
 	}
+
+	@Test
+	public void testSortNull() {
+		tasks.clear();
+		for (long i = 0; i < 5; i++) {
+			Task task = new Task();
+			task.setId(i);
+			if (i < 3) {
+				task.setName("test" + i);
+			}
+			tasks.add(task);
+		}
+
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
+		spec.addSort(new SortSpec(Arrays.asList("id"), Direction.ASC));
+		List<Task> results = spec.apply(tasks);
+		Assert.assertEquals(5, results.size());
+		Assert.assertEquals(3L, results.get(0).getId().longValue());
+		Assert.assertEquals(4L, results.get(1).getId().longValue());
+		Assert.assertEquals(0L, results.get(2).getId().longValue());
+		Assert.assertEquals(1L, results.get(3).getId().longValue());
+		Assert.assertEquals(2L, results.get(4).getId().longValue());
+	}
+
 
 	@Test
 	public void testMultiColumnSort() {

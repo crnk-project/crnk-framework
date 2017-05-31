@@ -1,7 +1,7 @@
 package io.crnk.core.module;
 
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.internal.exception.DefaultExceptionMapperLookup;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.module.discovery.DefaultResourceLookup;

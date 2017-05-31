@@ -1,6 +1,6 @@
 package io.crnk.legacy.registry;
 
-import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.repository.annotations.NotFoundRepository;
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;

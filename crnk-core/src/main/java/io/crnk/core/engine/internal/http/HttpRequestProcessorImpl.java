@@ -1,4 +1,9 @@
-package io.crnk.core.engine.internal.dispatcher;
+package io.crnk.core.engine.internal.http;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -12,16 +17,17 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
@@ -30,11 +36,6 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs
@@ -71,9 +72,7 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 			}
 
 			List<HttpRequestProcessor> processors = moduleRegistry.getHttpRequestProcessors();
-			if (processors.isEmpty()) {
-				throw new IllegalStateException("no processors available");
-			}
+			PreconditionUtil.assertFalse("no processors available", processors.isEmpty());
 			for (HttpRequestProcessor processor : processors) {
 				processor.process(requestContext);
 				if (requestContext.hasResponse()) {
@@ -127,9 +126,7 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 	private ResourceInformation getRequestedResource(JsonPath jsonPath) {
 		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
 		RegistryEntry registryEntry = resourceRegistry.getEntry(jsonPath.getResourceType());
-		if (registryEntry == null) {
-			throw new RepositoryNotFoundException(jsonPath.getResourceType());
-		}
+		PreconditionUtil.assertNotNull("repository not found, that should have been catched earlier", registryEntry);
 		String elementName = jsonPath.getElementName();
 		if (elementName != null && !elementName.equals(jsonPath.getResourceType())) {
 			ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);

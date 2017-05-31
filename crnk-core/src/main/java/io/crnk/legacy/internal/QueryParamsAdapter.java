@@ -17,6 +17,7 @@ public class QueryParamsAdapter implements QueryAdapter {
 	private ResourceInformation resourceInformation;
 
 	private ResourceRegistry resourceRegistry;
+
 	private ModuleRegistry moduleRegistry;
 
 	public QueryParamsAdapter(ResourceInformation resourceInformation, QueryParams queryParams, ModuleRegistry
@@ -33,11 +34,6 @@ public class QueryParamsAdapter implements QueryAdapter {
 
 	public QueryParams getQueryParams() {
 		return queryParams;
-	}
-
-	@Override
-	public boolean hasIncludedRelations() {
-		return queryParams.getIncludedRelations() != null && !queryParams.getIncludedRelations().getParams().isEmpty();
 	}
 
 	@Override

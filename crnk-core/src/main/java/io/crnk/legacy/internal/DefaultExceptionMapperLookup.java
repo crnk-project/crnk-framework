@@ -1,14 +1,15 @@
-package io.crnk.core.engine.internal.exception;
-
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.legacy.queryParams.errorhandling.ExceptionMapperProvider;
-import org.reflections.Reflections;
+package io.crnk.legacy.internal;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.legacy.queryParams.errorhandling.ExceptionMapperProvider;
+import org.reflections.Reflections;
 
 /**
  * Exception mapper lookup which scans the classpath for exception mappers which

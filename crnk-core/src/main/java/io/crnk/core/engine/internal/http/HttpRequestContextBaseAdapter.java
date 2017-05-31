@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.dispatcher;
+package io.crnk.core.engine.internal.http;
 
 import java.io.IOException;
 import java.util.Map;

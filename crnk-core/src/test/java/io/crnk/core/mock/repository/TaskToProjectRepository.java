@@ -1,20 +1,23 @@
 package io.crnk.core.mock.repository;
 
-import io.crnk.core.mock.models.Project;
-import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.util.Relation;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class TaskToProjectRepository extends AbstractRelationShipRepository<Task> implements RelationshipRepository<Task, Long, Project, Long> {
+import io.crnk.core.mock.models.FancyProject;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.repository.util.Relation;
+import io.crnk.legacy.queryParams.QueryParams;
+import io.crnk.legacy.repository.RelationshipRepository;
+
+public class TaskToProjectRepository extends AbstractRelationShipRepository<Task>
+		implements RelationshipRepository<Task, Long, Project, Long> {
 
 	private final static ConcurrentMap<Relation<Task>, Integer> STATIC_REPOSITORY = new ConcurrentHashMap<>();
+
 
 	public static void clear() {
 		STATIC_REPOSITORY.clear();
@@ -52,6 +55,9 @@ public class TaskToProjectRepository extends AbstractRelationShipRepository<Task
 			if (relation.getSource().getId().equals(sourceId) &&
 					relation.getFieldName().equals(fieldName)) {
 				Project project = new Project();
+				if (relation.getTargetId().equals(ProjectRepository.FANCY_PROJECT_ID)) {
+					project = new FancyProject();
+				}
 				project.setId((Long) relation.getTargetId());
 				return project;
 			}
@@ -65,6 +71,9 @@ public class TaskToProjectRepository extends AbstractRelationShipRepository<Task
 		for (Relation<Task> relation : getRepo().keySet()) {
 			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Project project = new Project();
+				if (relation.getTargetId().equals(ProjectRepository.FANCY_PROJECT_ID)) {
+					project = new FancyProject();
+				}
 				project.setId((Long) relation.getTargetId());
 				projects.add(project);
 			}

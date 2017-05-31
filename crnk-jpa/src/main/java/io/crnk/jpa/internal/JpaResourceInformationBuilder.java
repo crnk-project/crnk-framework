@@ -72,11 +72,14 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		for (Annotation annotation : annotations) {
 			if (annotation instanceof ElementCollection) {
 				return ((ElementCollection) annotation).fetch() == FetchType.LAZY;
-			} else if (annotation instanceof ManyToOne) {
+			}
+			else if (annotation instanceof ManyToOne) {
 				return ((ManyToOne) annotation).fetch() == FetchType.LAZY;
-			} else if (annotation instanceof OneToMany) {
+			}
+			else if (annotation instanceof OneToMany) {
 				return ((OneToMany) annotation).fetch() == FetchType.LAZY;
-			} else if (annotation instanceof ManyToMany) {
+			}
+			else if (annotation instanceof ManyToMany) {
 				return ((ManyToMany) annotation).fetch() == FetchType.LAZY;
 			}
 		}
@@ -87,7 +90,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		for (Annotation annotation : annotations) {
 			if (annotation instanceof OneToMany) {
 				return StringUtils.emptyToNull(((OneToMany) annotation).mappedBy());
-			} else if (annotation instanceof ManyToMany) {
+			}
+			else if (annotation instanceof ManyToMany) {
 				return StringUtils.emptyToNull(((ManyToMany) annotation).mappedBy());
 			}
 		}
@@ -107,7 +111,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 			MetaEntity metaEntity = (MetaEntity) meta;
 			MetaKey primaryKey = metaEntity.getPrimaryKey();
 			return primaryKey != null && primaryKey.getElements().size() == 1;
-		} else {
+		}
+		else {
 			// note that DTOs cannot be handled here
 			return meta instanceof MetaJpaDataObject;
 		}
@@ -207,7 +212,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		if (getter != null) {
 			type = getter.getReturnType();
 			genericType = getter.getGenericReturnType();
-		} else if (field != null) {
+		}
+		else if (field != null) {
 			type = field.getType();
 			genericType = field.getGenericType();
 		}
@@ -228,7 +234,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		boolean metaInfo = attr.getAnnotation(JsonApiMetaInformation.class) != null;
 		boolean association = isAssociation(meta, attr);
 		ResourceFieldType resourceFieldType = ResourceFieldType.get(id, linksInfo, metaInfo, association);
-		String oppositeResourceType = association ? AnnotationResourceInformationBuilder.getResourceType(genericType, context) : null;
+		String oppositeResourceType =
+				association ? AnnotationResourceInformationBuilder.getResourceType(genericType, context) : null;
 
 		boolean hasSetter = AnnotationResourceInformationBuilder.hasSetter(meta.getImplementationClass(), attr.getName());
 
@@ -280,8 +287,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		private Set<String> ignoredFields;
 
 		public JpaResourceInformation(TypeParser typeParser, MetaDataObject meta, Class<?> resourceClass,
-									  String resourceType, String superResourceType, // NOSONAR
-									  ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Set<String> ignoredFields) {
+				String resourceType, String superResourceType, // NOSONAR
+				ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Set<String> ignoredFields) {
 			super(typeParser, resourceClass, resourceType, superResourceType, instanceBuilder, fields);
 			this.jpaMeta = meta;
 			this.ignoredFields = ignoredFields;
@@ -301,9 +308,10 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 					Object requestVersion = context.getTypeParser().parse(versionNode.asText(),
 							(Class) versionAttr.getType().getImplementationClass());
 					Object currentVersion = versionAttr.getValue(entity);
-					if (!currentVersion.equals(requestVersion))
+					if (!currentVersion.equals(requestVersion)) {
 						throw new OptimisticLockException(
 								resource.getId() + " changed from version " + requestVersion + " to " + currentVersion);
+					}
 				}
 			}
 		}
@@ -328,7 +336,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			} else {
+			}
+			else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}
@@ -357,13 +366,6 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		@Override
 		public String toIdString(Object id) {
 			return jpaMeta.getPrimaryKey().toKeyString(id);
-		}
-
-		@Override
-		public Set<String> getNotAttributeFields() {
-			Set<String> notAttributeFields = super.getNotAttributeFields();
-			notAttributeFields.addAll(ignoredFields);
-			return notAttributeFields;
 		}
 
 		@Override

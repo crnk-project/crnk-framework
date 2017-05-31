@@ -60,14 +60,14 @@ public class ResourceInformation {
 	 * Type name of the resource. Corresponds to {@link JsonApiResource.type}
 	 * for annotated resources.
 	 */
-	private String resourceType;
+	private final String resourceType;
 
 	/**
 	 * Creates a new instance of the given resource.
 	 */
 	private ResourceInstanceBuilder<?> instanceBuilder;
 
-	private TypeParser parser;
+	private final TypeParser parser;
 
 	/**
 	 * Resource type of the super type.
@@ -215,27 +215,6 @@ public class ResourceInformation {
 
 	public ResourceField getLinksField() {
 		return linksField;
-	}
-
-	/**
-	 * Returns a set of field names which are not basic fields (resource
-	 * attributes)
-	 *
-	 * @return not basic attribute names
-	 */
-	public Set<String> getNotAttributeFields() {
-		Set<String> notAttributeFields = new HashSet<>();
-		for (ResourceField relationshipField : relationshipFields) {
-			notAttributeFields.add(relationshipField.getJsonName());
-		}
-		notAttributeFields.add(idField.getJsonName());
-		if (metaField != null) {
-			notAttributeFields.add(metaField.getUnderlyingName());
-		}
-		if (linksField != null) {
-			notAttributeFields.add(linksField.getUnderlyingName());
-		}
-		return notAttributeFields;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.registry;
+package io.crnk.legacy.internal;
 
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;

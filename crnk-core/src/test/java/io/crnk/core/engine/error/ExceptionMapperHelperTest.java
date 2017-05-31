@@ -1,11 +1,16 @@
 package io.crnk.core.engine.error;
 
 import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ExceptionMapperHelperTest {
 
+	@Test
+	public void hasPrivateConstructor() {
+		CoreClassTestUtils.assertPrivateConstructor(ExceptionMapperHelper.class);
+	}
 
 	@Test
 	public void test() {

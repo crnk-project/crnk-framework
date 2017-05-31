@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -9,7 +11,7 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.Generics;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -17,8 +19,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.Serializable;
 
 public class FieldResourceGet extends ResourceIncludeField {
 
@@ -47,9 +47,11 @@ public class FieldResourceGet extends ResourceIncludeField {
 			throw new ResourceFieldNotFoundException(elementName);
 		}
 
+		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 
-		Class<?> relationshipFieldClass = Generics.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
+		Class<?> relationshipFieldClass = ClassUtils
+				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
 				.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);

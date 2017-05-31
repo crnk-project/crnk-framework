@@ -1,5 +1,10 @@
 package io.crnk.core.queryspec.repository;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
@@ -8,17 +13,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQuerySpecDeserializerTestBase {
 
 	@Before
 	public void setup() {
 		super.setup();
 		deserializer.setEnforceDotPathSeparator(true);
+		Assert.assertTrue(deserializer.getEnforceDotPathSeparator());
 	}
 
 	@Test(expected = ParametersDeserializationException.class)

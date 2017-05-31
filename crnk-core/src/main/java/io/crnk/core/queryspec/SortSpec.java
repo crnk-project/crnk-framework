@@ -1,20 +1,20 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.StringUtils;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class SortSpec extends AbstractPathSpec implements Serializable {
 
 	private static final long serialVersionUID = -3547744992729509448L;
 
-	private Direction direction;
+	private final Direction direction;
 
 	public SortSpec(List<String> path, Direction direction) {
 		super(path);
-		if (path == null || path.isEmpty() || direction == null)
-			throw new IllegalArgumentException("Parameters may not be empty");
+		PreconditionUtil.assertFalse("Parameters may not be empty", path == null || path.isEmpty() || direction == null);
 		this.direction = direction;
 	}
 
@@ -44,12 +44,12 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		SortSpec other = (SortSpec) obj;
 		return direction == other.direction;
 	}

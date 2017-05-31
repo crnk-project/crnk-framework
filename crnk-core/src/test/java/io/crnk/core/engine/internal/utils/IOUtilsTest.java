@@ -1,6 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.utils.CoreClassTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

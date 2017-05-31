@@ -1,9 +1,13 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
-
-import java.util.*;
 
 public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpec> {
 
@@ -31,11 +35,17 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 
 	public FilterSpec(List<String> attributePath, FilterOperator operator, Object value) {
 		super(attributePath);
-		this.attributePath = attributePath;
 		this.operator = operator;
 		this.value = value;
 		assertOperator();
 		assertNotExpressions();
+	}
+
+	private FilterSpec(List<String> attributePath, FilterOperator operator, Object value, List<FilterSpec> expressions) {
+		super(attributePath);
+		this.operator = operator;
+		this.value = value;
+		this.expressions = expressions;
 	}
 
 	public static FilterSpec and(Collection<FilterSpec> conditions) {
@@ -222,13 +232,9 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	 * @return normalized FilterSpec
 	 */
 	public FilterSpec normalize() {
-		FilterSpec copy = new FilterSpec();
-		copy.attributePath = attributePath;
-		copy.operator = operator;
-		copy.value = value;
-		if (expressions != null) {
-			copy.expressions = cloneExpressions(expressions, true);
-		}
+		List<FilterSpec>  clonedExpressions = expressions != null ? cloneExpressions(expressions, true) : null;
+
+		FilterSpec copy = new FilterSpec(attributePath, operator, value, clonedExpressions);
 		return copy;
 	}
 

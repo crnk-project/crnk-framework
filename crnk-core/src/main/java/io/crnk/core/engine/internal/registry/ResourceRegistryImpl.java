@@ -93,26 +93,6 @@ public class ResourceRegistryImpl implements ResourceRegistry {
 		return resourcesByClass.get(resourceClazz.get());
 	}
 
-	/**
-	 * Returns a JSON API resource type used by Crnk. If a class cannot be
-	 * found, <i>null</i> is returned. The value is fetched from
-	 * {@link ResourceInformation#getResourceType()} attribute.
-	 *
-	 * @param clazz resource class
-	 * @return resource type or null
-	 */
-	public String getResourceType(Class<?> clazz) {
-		RegistryEntry entry = findEntry(clazz, true);
-		if (entry == null) {
-			return null;
-		}
-		ResourceInformation resourceInformation = entry.getResourceInformation();
-		if (resourceInformation == null) {
-			return null;
-		}
-		return resourceInformation.getResourceType();
-	}
-
 	public Optional<Class<?>> getResourceClass(Object resource) {
 		return getResourceClass(resource.getClass());
 	}

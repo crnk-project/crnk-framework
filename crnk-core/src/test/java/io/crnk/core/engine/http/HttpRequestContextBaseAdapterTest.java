@@ -2,7 +2,7 @@ package io.crnk.core.engine.http;
 
 import java.io.IOException;
 
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,5 +113,12 @@ public class HttpRequestContextBaseAdapterTest {
 	public void setResponseHeader() throws IOException {
 		adapter.setResponseHeader("a", "b");
 		Mockito.verify(base, Mockito.times(1)).setResponseHeader(Mockito.eq("a"), Mockito.eq("b"));
+	}
+
+	@Test
+	public void unwrap() throws IOException {
+		Assert.assertSame(adapter, adapter.unwrap(HttpRequestContextBaseAdapter.class));
+		Assert.assertSame(base, adapter.unwrap(base.getClass()));
+		Assert.assertNull(adapter.unwrap(String.class));
 	}
 }

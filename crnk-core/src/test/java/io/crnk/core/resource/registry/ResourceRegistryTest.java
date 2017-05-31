@@ -1,5 +1,8 @@
 package io.crnk.core.resource.registry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
@@ -10,13 +13,11 @@ import io.crnk.core.exception.ResourceNotFoundInitializationException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 public class ResourceRegistryTest {
 
@@ -43,7 +44,8 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
-		return new RegistryEntry(new ResourceRepositoryInformationImpl(null, path, new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null)), null, null);
+		return new RegistryEntry(new ResourceRepositoryInformationImpl(null, path,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null)), null, null);
 	}
 
 	@Test
@@ -75,6 +77,15 @@ public class ResourceRegistryTest {
 		RegistryEntry entry = resourceRegistry.getEntry("nonExistingType");
 		assertThat(entry).isNull();
 	}
+
+
+	@Test
+	public void checkHasEntry() {
+		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		Assert.assertTrue(resourceRegistry.hasEntry(Task.class));
+		Assert.assertFalse(resourceRegistry.hasEntry(String.class));
+	}
+
 
 	@Test
 	public void onNonExistingClassShouldThrowException() {
@@ -153,6 +164,7 @@ public class ResourceRegistryTest {
 	}
 
 	public static class Task$Proxy extends Task {
+
 	}
 
 }

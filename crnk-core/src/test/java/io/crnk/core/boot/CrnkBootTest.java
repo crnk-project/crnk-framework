@@ -1,13 +1,15 @@
-package io.crnk.core.internal.boot;
+package io.crnk.core.boot;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
@@ -19,6 +21,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
@@ -27,17 +30,13 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 public class CrnkBootTest {
 
@@ -60,12 +59,41 @@ public class CrnkBootTest {
 		Assert.assertSame(mapper, boot.getObjectMapper());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void checkCannotBootTwice() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.boot();
+		boot.boot();
+	}
+
+	@Test
+	public void checkCanBootOnce() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.boot();
+	}
+
+
 	@Test
 	public void setServiceDiscovery() {
 		CrnkBoot boot = new CrnkBoot();
 		ServiceDiscovery serviceDiscovery = Mockito.mock(ServiceDiscovery.class);
 		boot.setServiceDiscovery(serviceDiscovery);
 		Assert.assertSame(serviceDiscovery, boot.getServiceDiscovery());
+	}
+
+	@Test
+	public void setServiceLocator() {
+		JsonServiceLocator locator = Mockito.mock(JsonServiceLocator.class);
+		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
+		Mockito.when(propertiesProvider.getProperty(Mockito.eq(CrnkProperties.RESOURCE_SEARCH_PACKAGE))).thenReturn("a.b.c");
+		CrnkBoot boot = new CrnkBoot();
+		boot.setPropertiesProvider(propertiesProvider);
+		boot.setServiceLocator(locator);
+		boot.setServiceDiscoveryFactory(Mockito.mock(ServiceDiscoveryFactory.class));
+		boot.boot();
+
+		ReflectionsServiceDiscovery serviceDiscovery = (ReflectionsServiceDiscovery) boot.getServiceDiscovery();
+		Assert.assertSame(locator, serviceDiscovery.getLocator());
 	}
 
 	@Test
@@ -76,6 +104,14 @@ public class CrnkBootTest {
 		boot.boot();
 		Mockito.verify(serviceDiscoveryFactory, Mockito.times(1)).getInstance();
 		Assert.assertNotNull(boot.getServiceDiscovery());
+	}
+
+	@Test
+	public void setInvalidRepository() {
+		SimpleModule module = new SimpleModule("test");
+		module.addRepository("not a repository");
+		CrnkBoot boot = new CrnkBoot();
+		boot.boot();
 	}
 
 	@Test
@@ -154,7 +190,9 @@ public class CrnkBootTest {
 		ServiceUrlProvider serviceUrlProvider = Mockito.mock(ServiceUrlProvider.class);
 		boot.setDefaultServiceUrlProvider(serviceUrlProvider);
 		boot.boot();
+		Assert.assertEquals(serviceUrlProvider, boot.getDefaultServiceUrlProvider());
 		Assert.assertEquals(serviceUrlProvider, boot.getResourceRegistry().getServiceUrlProvider());
+		Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
 	}
 
 	@Test
@@ -203,17 +241,6 @@ public class CrnkBootTest {
 		ResourceFieldNameTransformer resourceFieldNameTransformer = new ResourceFieldNameTransformer(
 				objectMapper.getSerializationConfig());
 
-		final Properties properties = new Properties();
-		properties.put(CrnkProperties.RESOURCE_SEARCH_PACKAGE, ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE);
-		PropertiesProvider propertiesProvider = new PropertiesProvider() {
-
-			@Override
-			public String getProperty(String key) {
-				return (String) properties.get(key);
-			}
-		};
-
-		boot.setServiceLocator(new SampleJsonServiceLocator());
 		boot.setDefaultServiceUrlProvider(new ServiceUrlProvider() {
 
 			@Override
@@ -221,8 +248,8 @@ public class CrnkBootTest {
 				return "http://127.0.0.1";
 			}
 		});
-		boot.setPropertiesProvider(propertiesProvider);
 		boot.setResourceFieldNameTransformer(resourceFieldNameTransformer);
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
 		boot.addModule(new SimpleModule("test"));
 		boot.boot();
 

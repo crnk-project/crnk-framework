@@ -11,7 +11,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;

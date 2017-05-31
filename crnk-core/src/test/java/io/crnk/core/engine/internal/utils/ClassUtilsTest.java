@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.utils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.exception.ResourceException;
@@ -8,16 +15,41 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.junit.rules.ExpectedException;
 
 public class ClassUtilsTest {
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
+	@Test
+	public void onGenericClassShouldReturnFirstParameter() throws Exception {
+		// WHEN
+		Class<?> clazz = ClassUtils
+				.getResourceClass(SampleGenericClass.class.getDeclaredField("strings").getGenericType(), List.class);
+
+		// THEN
+		assertThat(clazz).isEqualTo(String.class);
+	}
+
+	@Test
+	public void onGenericWildcardClassShouldThrowException() throws Exception {
+		// THEN
+		expectedException.expect(RuntimeException.class);
+
+		// WHEN
+		ClassUtils.getResourceClass(SampleGenericClass.class.getDeclaredField("stringsWildcard").getGenericType(),
+				List.class);
+	}
+
+	private static class SampleGenericClass {
+
+		private List<String> strings;
+
+		private List<? extends String> stringsWildcard;
+	}
 
 	@Test
 	public void stringMustExist() {

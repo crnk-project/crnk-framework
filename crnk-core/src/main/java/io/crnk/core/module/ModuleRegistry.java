@@ -27,8 +27,8 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
-import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -206,23 +206,22 @@ public class ModuleRegistry {
 	 * @param objectMapper object mapper
 	 */
 	public void init(ObjectMapper objectMapper) {
-		if (!initialized) {
-			this.initialized = true;
-			this.objectMapper = objectMapper;
-			this.objectMapper.registerModules(getJacksonModules());
+		PreconditionUtil.assertFalse("already initialized", initialized);
+		this.initialized = true;
+		this.objectMapper = objectMapper;
+		this.objectMapper.registerModules(getJacksonModules());
 
-			applyRepositoryRegistration(resourceRegistry);
+		applyRepositoryRegistration(resourceRegistry);
 
-			for (Module module : modules) {
-				if (module instanceof InitializingModule) {
-					((InitializingModule) module).init();
-				}
+		for (Module module : modules) {
+			if (module instanceof InitializingModule) {
+				((InitializingModule) module).init();
 			}
-
-			ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
-			ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
-			exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 		}
+
+		ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
+		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
+		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -433,9 +432,7 @@ public class ModuleRegistry {
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {
-		if (exceptionMapperRegistry == null) {
-			throw new IllegalStateException();
-		}
+		PreconditionUtil.assertNotNull("exceptionMapperRegistry not set", exceptionMapperRegistry);
 		return exceptionMapperRegistry;
 	}
 

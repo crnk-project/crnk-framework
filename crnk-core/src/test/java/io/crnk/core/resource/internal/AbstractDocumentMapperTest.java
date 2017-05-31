@@ -36,6 +36,14 @@ public abstract class AbstractDocumentMapperTest {
 	public void setup() {
 		MockRepositoryUtil.clear();
 
+		// TODO
+
+		//CrnkBoot boot = new CrnkBoot();
+		//boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		//boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		//boot.boot();
+
+
 		ResourceInformationBuilder resourceInformationBuilder =
 				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
 		ModuleRegistry moduleRegistry = new ModuleRegistry();

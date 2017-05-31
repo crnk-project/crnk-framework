@@ -29,12 +29,14 @@ public class IncludeLookupUtil {
 
 	private ResourceRegistry resourceRegistry;
 
+
 	private IncludeBehavior includeBehavior;
 
 	public IncludeLookupUtil(ResourceRegistry resourceRegistry, IncludeBehavior includeBehavior) {
 		this.resourceRegistry = resourceRegistry;
 		this.includeBehavior = includeBehavior;
 	}
+
 
 	public static LookupIncludeBehavior getDefaultLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
 		if (propertiesProvider == null) {
@@ -46,17 +48,14 @@ public class IncludeLookupUtil {
 		String includeAutomaticallyOverwriteString =
 				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
 		boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-		if (includeAutomatically) {
-			if (includeAutomaticallyOverwrite) {
-				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			}
-			else {
-				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
-			}
+
+		if (includeAutomaticallyOverwrite) {
+			return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
 		}
-		else {
-			return LookupIncludeBehavior.NONE;
+		else if (includeAutomatically) {
+			return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 		}
+		return LookupIncludeBehavior.NONE;
 	}
 
 	public static IncludeBehavior getIncludeBehavior(PropertiesProvider propertiesProvider) {

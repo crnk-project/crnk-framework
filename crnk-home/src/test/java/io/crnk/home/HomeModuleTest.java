@@ -3,7 +3,7 @@ package io.crnk.home;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;

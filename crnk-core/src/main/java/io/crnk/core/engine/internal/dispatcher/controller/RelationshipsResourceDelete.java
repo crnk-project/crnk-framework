@@ -1,5 +1,9 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -8,14 +12,10 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-
 public class RelationshipsResourceDelete extends RelationshipsResourceUpsert {
 
 	public RelationshipsResourceDelete(ResourceRegistry resourceRegistry, TypeParser typeParser) {
-		super(resourceRegistry, typeParser);
+		super(resourceRegistry, typeParser, null);
 	}
 
 	@Override

@@ -1,9 +1,17 @@
 package io.crnk.core.module.discovery;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.locator.JsonServiceLocator;
+import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.repository.ResourceRepository;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -12,18 +20,15 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 
 	private Reflections reflections;
 
 	private JsonServiceLocator locator;
+
+	public ReflectionsServiceDiscovery(String resourceSearchPackages) {
+		this(resourceSearchPackages, new SampleJsonServiceLocator());
+	}
 
 	public ReflectionsServiceDiscovery(String resourceSearchPackages, JsonServiceLocator locator) {
 		this.locator = locator;
@@ -47,6 +52,10 @@ public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 
 		builder = builder.setScanners(new SubTypesScanner(false), new TypeAnnotationsScanner());
 		reflections = new Reflections(builder);
+	}
+
+	public JsonServiceLocator getLocator(){
+		return locator;
 	}
 
 	private static boolean isValid(Class<?> type) {

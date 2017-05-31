@@ -6,7 +6,7 @@ package io.crnk.core.exception;
 public class CrnkInitializationException extends RuntimeException {
 
 	protected CrnkInitializationException(String message) {
-		super(message);
+		this(message, null);
 	}
 
 	protected CrnkInitializationException(String message, Exception e) {

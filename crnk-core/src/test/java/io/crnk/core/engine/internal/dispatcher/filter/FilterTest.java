@@ -8,7 +8,7 @@ import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;

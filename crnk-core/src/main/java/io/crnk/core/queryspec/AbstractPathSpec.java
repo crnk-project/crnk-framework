@@ -4,9 +4,10 @@ import java.util.List;
 
 public class AbstractPathSpec {
 
-	protected List<String> attributePath;
+	protected final List<String> attributePath;
 
 	protected AbstractPathSpec() {
+		this.attributePath = null;
 	}
 
 	protected AbstractPathSpec(List<String> attributePath) {

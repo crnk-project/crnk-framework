@@ -7,7 +7,7 @@ import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ResponseEqualsContractTest {
+public class ResponseTest {
 
 	@Test
 	public void testHashCodeEquals() {
@@ -26,5 +26,19 @@ public class ResponseEqualsContractTest {
 		Assert.assertFalse(c1.equals(c3));
 		Assert.assertFalse(c2.equals(c3));
 		Assert.assertFalse(c2.equals("otherType"));
+	}
+
+
+	@Test
+	public void testGetterSetter() {
+		Document document = new Document();
+		Response response = new Response(document, 201);
+
+		response.setDocument(document);
+		Assert.assertSame(document, response.getDocument());
+
+		response.setHttpStatus(23);
+		Assert.assertSame(23, response.getHttpStatus());
+
 	}
 }

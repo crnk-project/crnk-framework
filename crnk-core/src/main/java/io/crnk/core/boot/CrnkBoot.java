@@ -10,7 +10,7 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
@@ -92,6 +92,7 @@ public class CrnkBoot {
 	}
 
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {
+		checkNotConfiguredYet();
 		this.serviceDiscoveryFactory = factory;
 	}
 
@@ -100,6 +101,7 @@ public class CrnkBoot {
 	 * When invoked, overwrites previous QueryParamsBuilders and {@link QuerySpecDeserializer}s.
 	 */
 	public void setQueryParamsBuilds(QueryParamsBuilder queryParamsBuilder) {
+		checkNotConfiguredYet();
 		PreconditionUtil.assertNotNull("A query params builder must be provided, but is null", queryParamsBuilder);
 		this.queryParamsBuilder = queryParamsBuilder;
 		this.querySpecDeserializer = null;
@@ -112,6 +114,7 @@ public class CrnkBoot {
 	 * @param serviceLocator Ask Remmo
 	 */
 	public void setServiceLocator(JsonServiceLocator serviceLocator) {
+		checkNotConfiguredYet();
 		this.serviceLocator = serviceLocator;
 	}
 
@@ -122,6 +125,7 @@ public class CrnkBoot {
 	 * @param module Ask Remmo
 	 */
 	public void addModule(Module module) {
+		checkNotConfiguredYet();
 		moduleRegistry.addModule(module);
 	}
 
@@ -146,6 +150,7 @@ public class CrnkBoot {
 	 * Performs the setup.
 	 */
 	public void boot() {
+		checkNotConfiguredYet();
 		configured = true;
 
 		setupServiceUrlProvider();
@@ -293,7 +298,7 @@ public class CrnkBoot {
 
 	private void setupServiceUrlProvider() {
 		if (serviceUrlProvider == null) {
-			String resourceDefaultDomain = getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN);
+			String resourceDefaultDomain = propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN);
 			String webPathPrefix = getWebPathPrefix();
 			if (resourceDefaultDomain != null) {
 				String serviceUrl = buildServiceUrl(resourceDefaultDomain, webPathPrefix);
@@ -305,13 +310,6 @@ public class CrnkBoot {
 			}
 		}
 		PreconditionUtil.assertNotNull("expected serviceUrlProvider", serviceUrlProvider);
-	}
-
-	private String getProperty(String key) {
-		if (propertiesProvider != null) {
-			return propertiesProvider.getProperty(key);
-		}
-		return null;
 	}
 
 	public HttpRequestProcessorImpl getRequestDispatcher() {
@@ -331,15 +329,18 @@ public class CrnkBoot {
 	}
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
+		checkNotConfiguredYet();
 		PreconditionUtil.assertNull("ObjectMapper already set", this.objectMapper);
 		this.objectMapper = objectMapper;
 	}
 
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
+		checkNotConfiguredYet();
 		this.propertiesProvider = propertiesProvider;
 	}
 
 	public void setResourceFieldNameTransformer(ResourceFieldNameTransformer resourceFieldNameTransformer) {
+		checkNotConfiguredYet();
 		this.resourceFieldNameTransformer = resourceFieldNameTransformer;
 	}
 
@@ -352,7 +353,7 @@ public class CrnkBoot {
 	}
 
 	public String getWebPathPrefix() {
-		return getProperty(CrnkProperties.WEB_PATH_PREFIX);
+		return propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 	}
 
 	public ServiceDiscovery getServiceDiscovery() {
@@ -406,13 +407,14 @@ public class CrnkBoot {
 	 * When invoked, overwrites previous {@link QueryParamsBuilder}s and QuerySpecDeserializers.
 	 */
 	public void setQuerySpecDeserializer(QuerySpecDeserializer querySpecDeserializer) {
+		checkNotConfiguredYet();
 		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", querySpecDeserializer);
 		this.querySpecDeserializer = querySpecDeserializer;
 		this.queryParamsBuilder = null;
 	}
 
 	public boolean isNullDataResponseEnabled() {
-		return Boolean.parseBoolean(getProperty(CrnkProperties.NULL_DATA_RESPONSE_ENABLED));
+		return Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.NULL_DATA_RESPONSE_ENABLED));
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {

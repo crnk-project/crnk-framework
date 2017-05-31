@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -14,7 +17,7 @@ import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.Generics;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -23,9 +26,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.Serializable;
-import java.util.Collections;
 
 /**
  * Creates a new post in a similar manner as in {@link ResourcePost}, but additionally adds a relation to a field.
@@ -56,6 +56,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		PathIds resourceIds = jsonPath.getIds();
+		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 
 		Serializable castedResourceId = getResourceId(resourceIds, endpointRegistryEntry);
 		ResourceField relationshipField = endpointRegistryEntry.getResourceInformation()
@@ -65,17 +66,17 @@ public class FieldResourcePost extends ResourceUpsert {
 		}
 
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
-		Class<?> relationshipFieldClass = Generics
+		Class<?> relationshipFieldClass = ClassUtils
 				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
 
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.findEntry(relationshipFieldClass);
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 
-		Object resource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
-		setAttributes(resourceBody, resource, relationshipRegistryEntry.getResourceInformation());
+		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
+		setAttributes(resourceBody, newResource, relationshipRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);
-		Document savedResourceResponse = documentMapper.toDocument(resourceRepository.create(resource, queryAdapter), queryAdapter, parameterProvider);
-		saveRelations(queryAdapter, extractResource(savedResourceResponse), relationshipRegistryEntry, resourceBody, parameterProvider);
+		Document savedResourceResponse = documentMapper.toDocument(resourceRepository.create(newResource, queryAdapter), queryAdapter, parameterProvider);
+		setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
 
 		Serializable resourceId = relationshipRegistryEntry.getResourceInformation().parseIdString(savedResourceResponse.getSingleData().get().getId());
 

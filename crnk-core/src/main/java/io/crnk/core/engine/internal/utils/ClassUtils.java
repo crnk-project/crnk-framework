@@ -25,6 +25,27 @@ public class ClassUtils {
 	private ClassUtils() {
 	}
 
+	@Deprecated // at least current use cases should be eliminated and replace by resourceType
+	public static Class<?> getResourceClass(Type genericType, Class baseClass) {
+		if (Iterable.class.isAssignableFrom(baseClass)) {
+			if (genericType instanceof ParameterizedType) {
+				ParameterizedType aType = (ParameterizedType) genericType;
+				Type[] fieldArgTypes = aType.getActualTypeArguments();
+				if (fieldArgTypes.length == 1 && fieldArgTypes[0] instanceof Class<?>) {
+					return (Class) fieldArgTypes[0];
+				}
+				else {
+					throw new IllegalArgumentException("Wrong type: " + aType);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("The relationship must be parametrized (cannot be wildcard or array): "
+						+ genericType);
+			}
+		}
+		return baseClass;
+	}
+
 	public static boolean existsClass(String className) {
 		try {
 			Class.forName(className);

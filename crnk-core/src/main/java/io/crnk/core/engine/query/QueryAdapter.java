@@ -9,8 +9,6 @@ import io.crnk.legacy.queryParams.params.TypedParams;
 
 public interface QueryAdapter {
 
-	boolean hasIncludedRelations();
-
 	TypedParams<IncludedRelationsParams> getIncludedRelations();
 
 	TypedParams<IncludedFieldsParams> getIncludedFields();

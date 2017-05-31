@@ -89,17 +89,6 @@ public abstract class ControllerTest extends JerseyTest {
 
 	}
 
-	@Test
-	public void onNonJsonApiRequestShouldReturnOk() {
-		// WHEN
-		String response = target(getPrefixForPath() + "tasks/sample")
-				.request()
-				.get(String.class);
-
-		// THEN
-		assertThat(response).isEqualTo(SampleControllerWithoutPrefix.NON_RESOURCE_RESPONSE);
-	}
-
 	private String getPrefixForPath() {
 		String prefix = getPrefix();
 		return prefix != null ? prefix + PathBuilder.SEPARATOR : "";

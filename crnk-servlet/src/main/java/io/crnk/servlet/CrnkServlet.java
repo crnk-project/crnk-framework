@@ -27,7 +27,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.servlet.internal.ServletPropertiesProvider;

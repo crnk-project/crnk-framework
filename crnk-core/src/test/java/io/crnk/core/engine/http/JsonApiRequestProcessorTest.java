@@ -1,20 +1,18 @@
 package io.crnk.core.engine.http;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
-import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.Module;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -41,16 +39,6 @@ public class JsonApiRequestProcessorTest {
 	@Before
 	public void setup() {
 		boot = new CrnkBoot();
-
-		final Properties properties = new Properties();
-		properties.put(CrnkProperties.RESOURCE_SEARCH_PACKAGE, ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE);
-		boot.setPropertiesProvider(new PropertiesProvider() {
-
-			@Override
-			public String getProperty(String key) {
-				return (String) properties.get(key);
-			}
-		});
 		boot.addModule(new Module() {
 			@Override
 			public String getModuleName() {
@@ -63,6 +51,7 @@ public class JsonApiRequestProcessorTest {
 			}
 		});
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:8080"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		processor = new JsonApiRequestProcessor(moduleContext);

@@ -1,18 +1,17 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Builder responsible for parsing URL path.
@@ -163,11 +162,9 @@ public class PathBuilder {
 			if (actionName != null) {
 				ActionPath actionPath = new ActionPath(actionName);
 				actionPath.setParentResource(currentJsonPath);
-				currentJsonPath.setChildResource(actionPath);
 				currentJsonPath = actionPath;
 			}
 			if (previousJsonPath != null) {
-				previousJsonPath.setChildResource(currentJsonPath);
 				currentJsonPath.setParentResource(previousJsonPath);
 			}
 			previousJsonPath = currentJsonPath;

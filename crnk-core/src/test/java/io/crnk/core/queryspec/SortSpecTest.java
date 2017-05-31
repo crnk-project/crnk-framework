@@ -1,9 +1,10 @@
 package io.crnk.core.queryspec;
 
+import java.util.Arrays;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class SortSpecTest {
 
@@ -14,12 +15,12 @@ public class SortSpecTest {
 		Assert.assertEquals(Arrays.asList("name"), spec.getAttributePath());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testThrowExceptionOnNullPathArgument() {
 		new SortSpec(null, Direction.ASC);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testThrowExceptionOnNullDirArgument() {
 		new SortSpec(Arrays.asList("test"), null);
 	}
@@ -32,7 +33,17 @@ public class SortSpecTest {
 	}
 
 	@Test
+	public void testReverse() {
+		SortSpec specAsc = new SortSpec(Arrays.asList("name1"), Direction.ASC);
+		SortSpec specDesc = new SortSpec(Arrays.asList("name1"), Direction.DESC);
+		Assert.assertEquals(specDesc, specAsc.reverse());
+		Assert.assertEquals(specAsc, specDesc.reverse());
+	}
+
+	@Test
 	public void testEquals() {
+		EqualsVerifier.forClass(SortSpec.class).usingGetClass().verify();
+
 		SortSpec spec1 = new SortSpec(Arrays.asList("name1"), Direction.ASC);
 		SortSpec spec2 = new SortSpec(Arrays.asList("name1"), Direction.ASC);
 		SortSpec spec3 = new SortSpec(Arrays.asList("name2"), Direction.ASC);
