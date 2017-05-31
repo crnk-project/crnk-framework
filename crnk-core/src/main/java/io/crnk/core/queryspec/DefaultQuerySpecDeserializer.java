@@ -140,9 +140,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.typeParser = ctx.getTypeParser();
 	}
 
+	protected QuerySpec createQuerySpec(Class<?> resourceClass) {
+		return new QuerySpec(resourceClass);
+	}
+
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
-		QuerySpec rootQuerySpec = new QuerySpec(resourceInformation.getResourceClass());
+		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation.getResourceClass());
 		setupDefaults(rootQuerySpec);
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
@@ -169,7 +173,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					deserializePage(querySpec, parameter);
 					break;
 				default:
-					throw new IllegalStateException(parameter.paramType.toString());
+					deserializeUnknown(querySpec, parameter);
 			}
 
 		}
@@ -281,6 +285,10 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				querySpec.addSort(new SortSpec(attributePath, dir));
 			}
 		}
+	}
+
+	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
+		throw new IllegalStateException(parameter.paramType.toString());
 	}
 
 	private List<Parameter> parseParameters(Map<String, Set<String>> params, ResourceInformation rootResourceInformation) {
@@ -412,7 +420,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.ignoreParseExceptions = ignoreParseExceptions;
 	}
 
-	class Parameter {
+	public class Parameter {
 
 		String pageParameter;
 

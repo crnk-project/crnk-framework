@@ -399,6 +399,14 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		deserializer.deserialize(taskInformation, params);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void testUnknownProperty() throws InstantiationException, IllegalAccessException {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "group", "test");
+		deserializer.setIgnoreParseExceptions(false);
+		deserializer.deserialize(taskInformation, params);
+	}
+
 	protected void add(Map<String, Set<String>> params, String key, String value) {
 		params.put(key, new HashSet<>(Arrays.asList(value)));
 	}
