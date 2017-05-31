@@ -1,4 +1,4 @@
 #!/bin/bash
-if [ "$TRAVIS_BRANCH" == "master" ]; then
+if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then
   ./gradlew publish
 fi
