@@ -48,7 +48,7 @@ Two configurations are necessary:
 - a mapping of meta (package) ids to npm packages. Only resources are generated whose package matches the chosen `npmPackageName`.
   All other resources are imported as external NPM dependency.
 
-katharsis-meta is used to get a meta model of the underlying resources (or a any other type of object like JPA entities).
+crnk-meta is used to get a meta model of the underlying resources (or a any other type of object like JPA entities).
 Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
 the class name. But for more advanced use cases those may or can differ.
 
