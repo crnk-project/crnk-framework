@@ -1,9 +1,10 @@
 import * as _ from "lodash";
-import {Component, Injectable} from "@angular/core";
+import {Component, Injectable, Inject} from "@angular/core";
 import {TreeNode} from "primeng/primeng";
 import {Http, Response, RequestOptions, Headers} from "@angular/http";
 import {LocalStorageService} from "angular-2-local-storage";
 
+import { DOCUMENT } from '@angular/platform-browser';
 
 @Injectable()
 export class BrowseUtils {
@@ -54,7 +55,8 @@ const DEFAULT_PREFERENCES = {
 export class BrowsePreferencesService {
 
 
-	constructor(private localStorageService: LocalStorageService) {
+	constructor(private localStorageService: LocalStorageService,
+		@Inject(DOCUMENT) private document: any) {
 
 	}
 
@@ -77,6 +79,19 @@ export class BrowsePreferencesService {
 			},
 			documentDisplayType: this.localStorageService.get("documentDisplayType")
 		};
+
+		const href = this.document.location.href;
+		const suffix = "browse/#/";
+		if(href.endsWith(suffix)){
+			loaded.baseUrl = href.substring(0, href.length - suffix.length);
+		}
+
+		if(loaded.baseUrl && !loaded.baseUrl.endsWith("/")){
+			loaded.baseUrl = loaded.baseUrl + "/";
+		}
+		if(!loaded.documentDisplayType){
+			loaded.documentDisplayType = 'tree';
+		}
 
 		return Object.assign({}, DEFAULT_PREFERENCES, loaded);
 	}

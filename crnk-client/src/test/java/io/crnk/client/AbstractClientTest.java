@@ -1,4 +1,4 @@
-package io.crnk.client.http;
+package io.crnk.client;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -6,10 +6,6 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.client.CrnkClient;
-import io.crnk.client.CrnkTestFeature;
-import io.crnk.client.TestModule;
-import io.crnk.client.TestRequestFilter;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;

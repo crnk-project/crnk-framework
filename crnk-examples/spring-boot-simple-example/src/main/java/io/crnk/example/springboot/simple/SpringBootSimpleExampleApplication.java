@@ -25,7 +25,7 @@ public class SpringBootSimpleExampleApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootSimpleExampleApplication.class, args);
-		System.out.println("visit http://127.0.0.1:8080/ in your browser");
+		System.out.println("visit http://127.0.0.1:8080/ resp. http://127.0.0.1:8080/browse/ in your browser");
 	}
 
 	@RequestMapping("/resourcesInfo")

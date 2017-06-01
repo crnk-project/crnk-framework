@@ -1,6 +1,5 @@
 package io.crnk.client;
 
-import io.crnk.client.http.AbstractClientTest;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.ResourceNotFoundException;

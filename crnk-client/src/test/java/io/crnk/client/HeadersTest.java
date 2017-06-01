@@ -2,7 +2,6 @@ package io.crnk.client;
 
 import java.util.List;
 
-import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.test.mock.models.Task;

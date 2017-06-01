@@ -16,6 +16,8 @@ import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.ui.UIModule;
+import io.crnk.ui.UIModuleConfig;
 import io.crnk.validation.ValidationModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +61,15 @@ public class ModuleConfig {
 		return HomeModule.create();
 	}
 
+	/**
+	 * Provide list of repositories in root document.
+	 *
+	 * @return module
+	 */
+	@Bean
+	public UIModule uiModule() {
+		return UIModule.create(new UIModuleConfig());
+	}
 
 	/**
 	 * Makes meta data of all repositories available as repositories.

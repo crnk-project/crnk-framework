@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.exception.ResourceNotFoundException;

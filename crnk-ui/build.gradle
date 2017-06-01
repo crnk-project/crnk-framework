@@ -2,6 +2,20 @@ import com.moowork.gradle.node.npm.NpmTask
 
 apply plugin: 'com.moowork.node'
 
+apply plugin:'java'
+
+dependencies{
+	compile project(':crnk-core')
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDirs "src/main/resources", "build/npm"
+		}
+	}
+}
+
 ext {
 	NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production', '--no-progress']
 }
@@ -18,9 +32,10 @@ task npmRunBuild(type: NpmTask) {
 	args = ['--', '--base-href', './'] + NG_BUILD_ARGS
 	inputs.dir 'src'
 	inputs.files 'angular-cli.json', 'package.json'
-	outputs.dir 'build/npm'
+	outputs.dir 'build/npm/io/crnk/ui'
 }
 
+tasks.jar.dependsOn 'npmRunBuild'
 
 tasks.assemble.dependsOn 'npmRunBuild'
 
@@ -29,7 +44,7 @@ task war(type: War) {
 	description = 'Generates a war archive.'
 	dependsOn 'npmRunBuild'
 
-	from { 'build/npm' }
+	from { 'build/npm/io/crnk/ui' }
 	webInf { from 'src/WEB-INF' }
 }
 tasks.assemble.dependsOn 'war'

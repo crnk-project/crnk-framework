@@ -1,5 +1,6 @@
 package io.crnk.client.http;
 
+import io.crnk.client.AbstractClientTest;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.client.http.apache.HttpClientAdapterProvider;

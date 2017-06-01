@@ -76,7 +76,7 @@
 
 		<div style="font-size: 90%; font-family: 'Courier New'">
 			<p-treeTable [value]="filteredDocumentNodes" styleClass="tree-table-no-header"
-						 *ngIf="documentDisplayType == 'tree'">
+						 *ngIf="documentDisplayType != 'json'">
 				<p-column filter="true" field="key" header="key" [style]="{'width':'250px'}"></p-column>
 				<p-column field="value" header="value">
 					<template pTemplate let-node="rowData" type="body">
@@ -143,10 +143,10 @@
 			<div class="ui-g-12 ui-md-10">
 				{{response.status}} - {{response.statusText}}
 			</div>
-			<div class="ui-g-12 ui-md-2">
+			<div *ngIf="response.headers != null" class="ui-g-12 ui-md-2">
 				Response Headers
 			</div>
-			<div class="ui-g-12 ui-md-10">
+			<div *ngIf="response.headers != null" class="ui-g-12 ui-md-10">
 
 				<p-dataTable [value]="response.headers.keys()">
 					<p-column header="Name">
