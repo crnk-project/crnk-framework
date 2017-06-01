@@ -215,7 +215,7 @@ sections will provide a number of example.
 
 NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
 are provided as different applications are likely to be in need of different semantics and
-implementations. For this reason `crnk-engine` makes use of `QueryAdapter` and allows implementations other than
+implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
 QuerySpec (like the legacy `QueryParams`).
 
 

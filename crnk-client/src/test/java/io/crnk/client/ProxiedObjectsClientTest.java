@@ -1,6 +1,5 @@
 package io.crnk.client;
 
-import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;

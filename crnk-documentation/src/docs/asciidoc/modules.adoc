@@ -42,7 +42,7 @@ is registered as `JpaRelationshipRepository`. `JpaModule.setRepositoryFactory`
 allows to provide a factory to change or customized the used repositories.
 To manually select the entities exposed to Crnk use `JpaModule.addEntityClass(...)`
 and `JpaModule.removeEntityClass(...)`. If no `entityManagerFactory` is provided
-to newServerModule, then the registartion of entities is omitted and can be done
+to newServerModule, then the registration of entities is omitted and can be done
 manually.
 
 The transactionRunner needs to be implemented by the application to hook into the
@@ -331,3 +331,20 @@ The current limitations of the implementation are:
 
 With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
 The limitations are expected to be addressed at some point as well, contributions welcomed.
+
+
+## UI Module
+
+The UI module makes `crnk-ui` accessible trough the module system. It allows to browse and edit all the repositories
+and resources. The setup looks like:
+
+[source]
+----
+		UIModule operationsModule = UIModule.create(new UIModuleConfig());
+		...
+----
+
+By default the user interface is accessible from the `/browse/` directory next to all the repositories.
+Have a look at the Spring Boot example application to see a working example.
+
+This module is currently in incubation. Please provide feedback.

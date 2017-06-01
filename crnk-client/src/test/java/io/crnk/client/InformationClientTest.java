@@ -1,6 +1,5 @@
 package io.crnk.client;
 
-import io.crnk.client.http.AbstractClientTest;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;

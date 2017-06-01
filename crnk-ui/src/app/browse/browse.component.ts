@@ -49,14 +49,20 @@ export class BrowseComponent {
 	public parameterSuggestions: Array<string> = [];// BASE_PARAMETER_SUGGESTIONS;
 
 	constructor(private http: Http, private localStorageService: LocalStorageService, private service: BrowseService,
-				private preferencesService: BrowsePreferencesService, private utils: BrowseUtils) {
+		private preferencesService: BrowsePreferencesService, private utils: BrowseUtils) {
 
 		this.preferences = this.preferencesService.loadPreferences();
 
-
-		this.get();
-		this.updateAvailableTypes();
-		this.updateAvailableRelationships();
+		try {
+			this.get();
+			this.updateAvailableTypes();
+			this.updateAvailableRelationships();
+		}
+		catch (e) {
+			if (console) {
+				console.log(e);
+			}
+		}
 	}
 
 
@@ -135,13 +141,15 @@ export class BrowseComponent {
 	private syncDocumentJsonText() {
 		if (this.documentText == null && this.filteredDocumentNodes) {
 			this.documentText = this.documentToText(this.filteredDocumentNodes);
-		} else if (this.documentText != null && !this.filteredDocumentNodes) {
+		}
+		else if (this.documentText != null && !this.filteredDocumentNodes) {
 			try {
 				let document = JSON.parse(this.documentText);
 				this.documentNodes = this.toNodes(document);
 
 				this.search();
-			} catch (e) {
+			}
+			catch (e) {
 				this.documentDisplayType = 'text';
 				this.documentError = e.message;
 			}
@@ -157,9 +165,11 @@ export class BrowseComponent {
 		for (let node of nodes) {
 			if (node.data.type == 'array') {
 				object[node.data.key] = node.children.map(child => this.documentToJson(child.children));
-			} else if (node.data.type == 'object') {
+			}
+			else if (node.data.type == 'object') {
 				object[node.data.key] = this.documentToJson(node.children);
-			} else {
+			}
+			else {
 				object[node.data.key] = node.data.value;
 			}
 		}
@@ -177,6 +187,9 @@ export class BrowseComponent {
 	}
 
 	public set baseUrl(value: string) {
+		if(!value.endsWith("/")){
+			value = value + "/";
+		}
 		this.preferences.baseUrl = value;
 		this.preferencesService.savePreferences(this.preferences);
 		this.updateAvailableTypes();
@@ -185,7 +198,8 @@ export class BrowseComponent {
 	private updateAvailableTypes() {
 		if (_.isEmpty(this.baseUrl)) {
 			this.availableTypes = [];
-		} else {
+		}
+		else {
 			this.http.get(this.baseUrl + 'meta/resource?sort=resourceType&page[limit]=1000').subscribe(response => {
 				let data = response.json()['data'] as Array<any>;
 				this.availableTypes = data.map(it => {
@@ -202,7 +216,8 @@ export class BrowseComponent {
 	private updateAvailableRelationships() {
 		if (_.isEmpty(this.preferences.query.type)) {
 			this.availableRelationships = [];
-		} else {
+		}
+		else {
 			let includes = 'attributes.type.elementType';
 			let url = this.baseUrl + 'meta/resource?include=' + includes + '&page[limit]=1000';
 			this.http.get(url).subscribe(response => {
@@ -222,9 +237,10 @@ export class BrowseComponent {
 				}
 				this.metaAttributes = this.metaResource.relationships.attributes.data.map(it => this.service.resolveMeta(it));
 
-				let relationships = this.metaAttributes.filter(it => it.attributes.association && it.type == 'meta/resourceField').map(it => {
-					return {label: it.attributes.name, value: it.attributes.name};
-				});
+				let relationships = this.metaAttributes.filter(it => it.attributes.association && it.type == 'meta/resourceField')
+					.map(it => {
+						return {label: it.attributes.name, value: it.attributes.name};
+					});
 				let nullValue = {label: '', value: null};
 				this.availableRelationships = _.concat([nullValue], relationships);
 			}, error => {
@@ -243,8 +259,12 @@ export class BrowseComponent {
 
 		let type = this.metaResource.attributes.resourceType;
 
-		let attrs = _.join(this.metaAttributes.filter(it => !it.attributes.association).map(it => '"' + it.attributes.name + '": null'), ',\n            ');
-		let relationships = _.join(this.metaAttributes.filter(it => it.attributes.association).map(it => '"' + it.attributes.name + '": {"data": ' + (this.isCollection(it) ? '[]' : 'null') + '}'), ',\n            ');
+		let attrs = _.join(
+			this.metaAttributes.filter(it => !it.attributes.association).map(it => '"' + it.attributes.name + '": null'),
+			',\n            ');
+		let relationships = _.join(this.metaAttributes.filter(it => it.attributes.association)
+				.map(it => '"' + it.attributes.name + '": {"data": ' + (this.isCollection(it) ? '[]' : 'null') + '}'),
+			',\n            ');
 
 
 		this.documentText =
@@ -341,7 +361,8 @@ export class BrowseComponent {
 			}, response => {
 				this.handleResponse(response);
 			});
-		} else {
+		}
+		else {
 			this.documentNodes = null;
 			this.filteredDocumentNodes = null;
 		}
@@ -357,7 +378,8 @@ export class BrowseComponent {
 		this.response = response;
 		if (response.status < 300 && !_.isEmpty(response.text())) {
 			this.setDocument(response.text());
-		} else {
+		}
+		else {
 			if (this.httpMethod == 'GET') {
 				// all to otherwise continue editing
 				this.documentText = null;
@@ -412,13 +434,15 @@ export class BrowseComponent {
 
 
 		let visible =
-			visibleChildren.length > 0 || this.matchesQueryTerm(node.data.key) || !_.isEmpty(node.data.value) && this.matchesQueryTerm(node.data.value);
+			visibleChildren.length > 0 || this.matchesQueryTerm(node.data.key) ||
+			!_.isEmpty(node.data.value) && this.matchesQueryTerm(node.data.value);
 
 		if (visible) {
 			let clone = _.clone(node);
 			clone.children = visibleChildren;
 			return clone;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -453,10 +477,12 @@ export class BrowseComponent {
 						};
 						children.push(child);
 					}
-				} else if (_.isObject(value)) {
+				}
+				else if (_.isObject(value)) {
 					data.type = 'object';
 					children = this.toNodes(value);
-				} else {
+				}
+				else {
 					data.value = value;
 					data.type = 'text';
 
@@ -466,12 +492,15 @@ export class BrowseComponent {
 							type: object.type,
 							id: object.id,
 						};
-					} else if (key == 'type' && object.id) {
+					}
+					else if (key == 'type' && object.id) {
 						data.type = 'query';
 						data.query = {
 							type: object.type
 						};
-					} else if (!_.isEmpty(value) && _.isString(value) && (value.startsWith("http://") || value.startsWith("https://"))) {
+					}
+					else if (!_.isEmpty(value) && _.isString(value) &&
+						(value.startsWith("http://") || value.startsWith("https://"))) {
 
 						let query: any = {
 							type: null,
@@ -516,7 +545,8 @@ export class BrowseComponent {
 						if (query.type) {
 							data.type = 'query';
 							data.query = query;
-						} else {
+						}
+						else {
 							data.type = 'url';
 							data.urlValue = value;
 						}
@@ -559,11 +589,14 @@ export class BrowseComponent {
 	private setExpandedState(node) {
 		if (node.data.key == 'links') {
 			node.expanded = this.preferences.expand.links;
-		} else if (node.data.key == 'meta') {
+		}
+		else if (node.data.key == 'meta') {
 			node.expanded = this.preferences.expand.meta;
-		} else if (node.data.key == 'attributes') {
+		}
+		else if (node.data.key == 'attributes') {
 			node.expanded = this.preferences.expand.attributes;
-		} else if (node.data.key == 'relationships') {
+		}
+		else if (node.data.key == 'relationships') {
 			node.expanded = this.preferences.expand.relationships;
 		}
 	}
