@@ -7,9 +7,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.crnk.client.CrnkClient;
-import io.crnk.client.action.ActionStubFactory;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceListBase;
@@ -24,7 +23,7 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 	private Map<Method, Method> interfaceStubMethodMap = new HashMap<>();
 
 	public ClientStubInvocationHandler(Class<?> repositoryInterface,
-									   ResourceRepositoryV2<?, Serializable> repositoryStub, Object actionStub) {
+			ResourceRepositoryV2<?, Serializable> repositoryStub, Object actionStub) {
 		this.repositoryStub = repositoryStub;
 		this.actionStub = actionStub;
 		setupRepositoryMethods(repositoryInterface);
@@ -46,16 +45,19 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 			if (method.getDeclaringClass().isAssignableFrom(ResourceRepositoryV2.class)) {
 				// execute document method
 				return method.invoke(repositoryStub, args);
-			} else if (interfaceStubMethodMap.containsKey(method)) {
+			}
+			else if (interfaceStubMethodMap.containsKey(method)) {
 				return invokeInterfaceMethod(method, args);
-			} else if (actionStub != null) {
+			}
+			else {
+				PreconditionUtil.assertNotNull("cannot execute method, no ActionStubFactory configured with CrnkClient",
+						actionStub);
+
 				// execute action
 				return method.invoke(actionStub, args);
-			} else {
-				throw new IllegalStateException("cannot execute actions, no " + ActionStubFactory.class.getSimpleName()
-						+ " set with " + CrnkClient.class.getName());
 			}
-		} catch (InvocationTargetException e) { // NOSONAR ok this way
+		}
+		catch (InvocationTargetException e) { // NOSONAR ok this way
 			throw e.getCause();
 		}
 	}
@@ -68,9 +70,11 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 		Class<?> returnType = method.getReturnType();
 		if (result == null || returnType.isInstance(result)) {
 			return result;
-		} else if (result instanceof DefaultResourceList) {
+		}
+		else if (result instanceof DefaultResourceList) {
 			return createTypesafeList(result, returnType);
-		} else {
+		}
+		else {
 			throw new IllegalStateException("cannot cast return type " + result + " to " + returnType.getName());
 		}
 	}

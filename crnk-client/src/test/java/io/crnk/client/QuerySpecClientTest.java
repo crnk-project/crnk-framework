@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
@@ -27,7 +28,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class QuerySpecClientTest extends AbstractClientTest {
@@ -244,7 +244,8 @@ public class QuerySpecClientTest extends AbstractClientTest {
 			if (pushAlways) {
 				Assert.assertEquals("POST", methods.get(2));
 				Assert.assertEquals("/tasks/", paths.get(2));
-			} else {
+			}
+			else {
 				Assert.assertEquals("PATCH", methods.get(2));
 				Assert.assertEquals("/tasks/1/", paths.get(2));
 			}
@@ -394,7 +395,6 @@ public class QuerySpecClientTest extends AbstractClientTest {
 	}
 
 	@Test
-	@Ignore // get rid of queryparams
 	public void testAddSetRemoveRelations() {
 		Project project0 = new Project();
 		project0.setId(1L);
@@ -420,12 +420,14 @@ public class QuerySpecClientTest extends AbstractClientTest {
 		Assert.assertEquals(1, relProjects.size());
 		Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
 
+
 		// TODO HTTP DELETE method with payload not supported? at least in
 		// Jersey
-		// relRepo.removeRelations(task, Arrays.asList(project1.getId()),
-		// "projects");
-		// relProjects = relRepo.findManyTargets(task.getId(), "projects", new
-		// QuerySpec());
-		// Assert.assertEquals(0, relProjects.size());
+		/*
+		relRepo.removeRelations(task, Arrays.asList(project1.getId()),
+				"projects");
+		relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+		Assert.assertEquals(0, relProjects.size());
+		*/
 	}
 }

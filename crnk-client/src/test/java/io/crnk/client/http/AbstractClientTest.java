@@ -1,6 +1,15 @@
-package io.crnk.client;
+package io.crnk.client.http;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.CrnkClient;
+import io.crnk.client.CrnkTestFeature;
+import io.crnk.client.TestModule;
+import io.crnk.client.TestRequestFilter;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
@@ -10,17 +19,16 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.rs.JsonApiResponseFilter;
 import io.crnk.rs.JsonapiExceptionMapperBridge;
-import io.crnk.test.mock.repository.*;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.test.mock.repository.TaskRepository;
+import io.crnk.test.mock.repository.TaskToProjectRepository;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Before;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.MultivaluedMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractClientTest extends JerseyTest {
 

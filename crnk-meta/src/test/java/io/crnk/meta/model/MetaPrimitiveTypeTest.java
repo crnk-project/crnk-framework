@@ -1,9 +1,8 @@
-package io.crnk.meta;
+package io.crnk.meta.model;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-import io.crnk.meta.model.MetaPrimitiveType;
 import org.junit.Test;
 
 public class MetaPrimitiveTypeTest {
@@ -101,12 +100,15 @@ public class MetaPrimitiveTypeTest {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			TestObjectWithParse other = (TestObjectWithParse) obj;
 			return value == other.value;
 		}
@@ -125,12 +127,15 @@ public class MetaPrimitiveTypeTest {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			TestObjectWithConstructor other = (TestObjectWithConstructor) obj;
 			return value == other.value;
 		}

@@ -1,6 +1,6 @@
 package io.crnk.client.action;
 
-import io.crnk.client.AbstractClientTest;
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.CrnkTestFeature;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;

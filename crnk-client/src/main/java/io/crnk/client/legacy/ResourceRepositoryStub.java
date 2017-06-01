@@ -1,10 +1,10 @@
-package io.crnk.client;
-
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+package io.crnk.client.legacy;
 
 import java.io.Serializable;
 import java.util.List;
+
+import io.crnk.legacy.queryParams.QueryParams;
+import io.crnk.legacy.repository.ResourceRepository;
 
 /**
  * Implemented by every {@link ResourceRepository} stub.

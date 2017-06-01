@@ -27,29 +27,25 @@ public class MetaRelationshipRepository implements RelationshipRepositoryV2<Meta
 
 	@Override
 	public MetaElement findOneTarget(String sourceId, String fieldName, QuerySpec querySpec) {
-		MetaElement source = lookup.getMetaById().get(sourceId);
-		if (source == null) {
-			throw new ResourceNotFoundException(sourceId);
-		}
+		MetaElement source = getSource(sourceId);
 		Object value = PropertyUtils.getProperty(source, fieldName);
-		if (!(value instanceof MetaElement) && value != null) {
-			throw new IllegalStateException("relation " + fieldName + " is not of type MetaElement, got " + value);
-		}
 		return (MetaElement) value;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceList<MetaElement> findManyTargets(String sourceId, String fieldName, QuerySpec querySpec) {
+		MetaElement source = getSource(sourceId);
+		Object value = PropertyUtils.getProperty(source, fieldName);
+		return querySpec.apply((Collection<MetaElement>) value);
+	}
+
+	private MetaElement getSource(String sourceId) {
 		MetaElement source = lookup.getMetaById().get(sourceId);
 		if (source == null) {
 			throw new ResourceNotFoundException(sourceId);
 		}
-		Object value = PropertyUtils.getProperty(source, fieldName);
-		if (!(value instanceof Collection)) {
-			throw new IllegalStateException("relation " + fieldName + " is not a collection, got " + value);
-		}
-		return querySpec.apply((Collection<MetaElement>) value);
+		return source;
 	}
 
 	@Override

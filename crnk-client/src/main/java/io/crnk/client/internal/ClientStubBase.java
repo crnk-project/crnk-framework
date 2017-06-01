@@ -1,5 +1,7 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
@@ -10,14 +12,13 @@ import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class ClientStubBase {
 
@@ -76,10 +77,10 @@ public class ClientStubBase {
 		}
 	}
 
-	private RuntimeException handleError(HttpAdapterResponse response) throws IOException {
+	protected RuntimeException handleError(HttpAdapterResponse response) throws IOException {
 		ErrorResponse errorResponse = null;
 		String body = response.body();
-		String contentType = response.getResponseHeader("content-type");
+		String contentType = response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 		if (body.length() > 0 && CONTENT_TYPE.equalsIgnoreCase(contentType)) {
 
 			ObjectMapper objectMapper = client.getObjectMapper();

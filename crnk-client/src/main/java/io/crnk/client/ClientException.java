@@ -21,9 +21,6 @@ public class ClientException extends CrnkMappableException { // NOSONAR ignore l
 				.setTitle(TITLE)
 				.setDetail(message)
 				.setStatus(String.valueOf(code))
-				.build());
-		if (cause != null) {
-			initCause(cause);
-		}
+				.build(), cause);
 	}
 }

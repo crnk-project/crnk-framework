@@ -1,33 +1,14 @@
-package io.crnk.meta;
+package io.crnk.meta.model;
 
 import java.util.Arrays;
 
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.module.Module;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.AbstractMetaTest;
 import io.crnk.meta.model.resource.MetaJsonObject;
-import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class MetaKeyTest {
+public class MetaKeyTest extends AbstractMetaTest {
 
-	private MetaLookup lookup;
-
-	@Before
-	public void setup() {
-		Module.ModuleContext moduleContext = Mockito.mock(Module.ModuleContext.class);
-		ResourceRegistry resourceRegistry = Mockito.mock(ResourceRegistry.class);
-		Mockito.when(moduleContext.getResourceRegistry()).thenReturn(resourceRegistry);
-
-		lookup = new MetaLookup();
-		lookup.addProvider(new ResourceMetaProvider());
-		lookup.setModuleContext(moduleContext);
-		lookup.initialize();
-	}
 
 	@Test
 	public void parse() {
@@ -46,6 +27,15 @@ public class MetaKeyTest {
 		String keyString = metaKey.toKeyString(key);
 		Assert.assertEquals("test-13", keyString);
 	}
+
+
+	@Test(expected = IllegalStateException.class)
+	public void testNonUniquePrimaryKeyAttributeThrowsException() {
+		MetaKey key = new MetaKey();
+		key.setElements(Arrays.asList(new MetaAttribute(), new MetaAttribute()));
+		key.getUniqueElement();
+	}
+
 
 	public static class SomePrimaryKey {
 

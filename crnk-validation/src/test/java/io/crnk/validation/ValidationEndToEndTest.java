@@ -1,5 +1,18 @@
 package io.crnk.validation;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.validation.internal.ConstraintViolationImpl;
@@ -10,11 +23,8 @@ import io.crnk.validation.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.validation.*;
-import java.util.*;
-
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
-public class ValidationTest extends AbstractValidationTest {
+public class ValidationEndToEndTest extends AbstractValidationTest {
 
 	@Test
 	public void testPropertyNotNull() {

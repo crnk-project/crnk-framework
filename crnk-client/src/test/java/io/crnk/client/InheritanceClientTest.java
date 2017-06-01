@@ -1,5 +1,6 @@
 package io.crnk.client;
 
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.QuerySpec;

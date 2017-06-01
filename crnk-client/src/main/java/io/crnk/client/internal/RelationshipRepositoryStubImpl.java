@@ -2,16 +2,17 @@ package io.crnk.client.internal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.RelationshipRepositoryStub;
+import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
@@ -19,7 +20,8 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 
-public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase implements RelationshipRepositoryStub<T, I, D, J>, RelationshipRepositoryV2<T, I, D, J> {
+public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
+		implements RelationshipRepositoryStub<T, I, D, J>, RelationshipRepositoryV2<T, I, D, J> {
 
 	private Class<T> sourceClass;
 
@@ -27,7 +29,8 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 
 	private ResourceInformation sourceResourceInformation;
 
-	public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass, ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
+	public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass,
+			ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder);
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;
@@ -112,14 +115,14 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		doExecute(requestUrl, method, document);
 	}
 
-	private void doExecute(String requestUrl, HttpMethod method, Document document) {
-		ObjectMapper objectMapper = client.getObjectMapper();
-		String requestBodyValue;
-		try {
-			requestBodyValue = objectMapper.writeValueAsString(document);
-		} catch (JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
+	private void doExecute(String requestUrl, HttpMethod method, final Document document) {
+		final ObjectMapper objectMapper = client.getObjectMapper();
+		String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return objectMapper.writeValueAsString(document);
+			}
+		});
 		execute(requestUrl, ResponseType.NONE, method, requestBodyValue);
 	}
 

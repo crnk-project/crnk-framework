@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.mock.model.ExtendsBaseResource;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaAttribute;
@@ -174,7 +176,67 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		MetaKey primaryKey = meta.getPrimaryKey();
 		MetaAttribute idField = primaryKey.getElements().get(0);
 		Assert.assertFalse(idField.isNullable());
+
+		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
+		Assert.assertEquals(1, idField.getAnnotations().size());
 	}
+
+
+	@Test
+	public void testReadMethodAnnotations() {
+		MetaResource meta = lookup.getMeta(ReadMethodAnnotatedResource.class, MetaResource.class);
+		MetaKey primaryKey = meta.getPrimaryKey();
+		MetaAttribute idField = primaryKey.getElements().get(0);
+		Assert.assertFalse(idField.isNullable());
+
+		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
+		Assert.assertEquals(1, idField.getAnnotations().size());
+	}
+
+	@Test
+	public void testWriteMethodAnnotations() {
+		MetaResource meta = lookup.getMeta(WriteMethodAnnotatedResource.class, MetaResource.class);
+		MetaKey primaryKey = meta.getPrimaryKey();
+		MetaAttribute idField = primaryKey.getElements().get(0);
+		Assert.assertFalse(idField.isNullable());
+
+		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
+		Assert.assertEquals(2, idField.getAnnotations().size()); // nullable + jsonapiid
+	}
+
+	@JsonApiResource(type = "readMethodAnnotatedResource")
+	class ReadMethodAnnotatedResource {
+
+		private String id;
+
+		@JsonApiId
+		public String getId() {
+			return id;
+		}
+
+
+		public void setId(String id) {
+			this.id = id;
+		}
+	}
+
+
+	@JsonApiResource(type = "readMethodAnnotatedResource")
+	class WriteMethodAnnotatedResource {
+
+		private String id;
+
+		@JsonApiId
+		public String getId() {
+			return id;
+		}
+
+		@Nullable
+		public void setId(String id) {
+			this.id = id;
+		}
+	}
+
 
 	@Test
 	public void testRegularFieldNullable() {

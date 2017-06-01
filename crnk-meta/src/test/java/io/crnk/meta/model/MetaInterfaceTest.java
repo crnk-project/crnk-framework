@@ -1,6 +1,5 @@
-package io.crnk.meta;
+package io.crnk.meta.model;
 
-import io.crnk.meta.model.MetaInterface;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,10 +1,8 @@
-package io.crnk.meta;
+package io.crnk.meta.model;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaAttributePath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

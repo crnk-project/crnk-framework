@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ElementKind;
@@ -22,6 +23,8 @@ import io.crnk.core.engine.error.ExceptionMapperHelper;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -55,18 +58,19 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		this.context = context;
 	}
 
-	private static Object getValue(Node propertyNode) {
+	private static Object getValue(final Node propertyNode) {
 		// bean validation not sufficient for sets
 		// not possible to access elements, reverting to
 		// Hibernate implementation
 		// TODO investigate other implementation next to
 		// hibernate, JSR 303 v1.1 not sufficient
 
-		boolean hibernateNodeImpl =
-				propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL); // NOSONAR class / may not be available
-		boolean hiberanteNodeImpl2 = propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL); // NOSONAR;
-		if (hibernateNodeImpl || hiberanteNodeImpl2) {
-			try {
+		checkNodeImpl(propertyNode);
+
+		return ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+
+			@Override
+			public Object call() throws Exception {
 				Method parentMethod = propertyNode.getClass().getMethod("getParent");
 				Method valueMethod = propertyNode.getClass().getMethod("getValue");
 				Object parentNode = parentMethod.invoke(propertyNode);
@@ -77,36 +81,34 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 					return valueMethod.invoke(propertyNode);
 				}
 			}
-			catch (Exception e) {
-				throw new UnsupportedOperationException(e);
-			}
-		}
-		else {
-			throw new UnsupportedOperationException(
-					"cannot convert violations for java.util.Set elements, consider using Hibernate validator");
-		}
+		});
 	}
 
-	private static Object getParameterValue(Node propertyNode) {
+	private static void checkNodeImpl(Node propertyNode) {
+		boolean hibernateNodeImpl =
+				propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL); // NOSONAR class / may not be available
+		boolean hiberanteNodeImpl2 = propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL); // NOSONAR;
+
+		PreconditionUtil.assertTrue("cannot convert violations for java.util.Set elements, consider using Hibernate validator",
+				hibernateNodeImpl || hiberanteNodeImpl2);
+	}
+
+	private static Object getParameterValue(final Node propertyNode) {
 		// bean validation not sufficient for sets
 		// not possible to access elements, reverting to
 		// Hibernate implementation
 		// TODO investigate other implementation next to
 		// hibernate, JSR 303 v1.1 not sufficient
-		if (propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_IMPL)
-				|| propertyNode.getClass().getName().equals(HIBERNATE_PROPERTY_NODE_ENGINE_IMPL)) { // NOSONAR
-			try {
+		checkNodeImpl(propertyNode);
+
+		return ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+
+			@Override
+			public Object call() throws Exception {
 				Method valueMethod = propertyNode.getClass().getMethod("getValue");
 				return valueMethod.invoke(propertyNode);
 			}
-			catch (Exception e) {
-				throw new UnsupportedOperationException(e);
-			}
-		}
-		else {
-			throw new UnsupportedOperationException(
-					"cannot convert violations for java.util.Set elements, consider using Hibernate validator");
-		}
+		});
 	}
 
 	@Override
@@ -399,17 +401,6 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 
 		public Object getRootResourceType() {
 			return ConstraintViolationExceptionMapper.this.getResourceType(rootResource);
-		}
-
-		/**
-		 * Leaf resource being validated.
-		 */
-		public Object getLeafResource() {
-			return leafResource;
-		}
-
-		public Object getRootResource() {
-			return rootResource;
 		}
 	}
 }

@@ -1,13 +1,17 @@
 package io.crnk.client.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.ResourceRepositoryStub;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -15,16 +19,15 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.queryParams.QueryParams;
 
-import java.io.Serializable;
-import java.util.List;
-
-public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
+public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
+		implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
 
 	private ResourceInformation resourceInformation;
 
 	private Class<T> resourceClass;
 
-	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation, JsonApiUrlBuilder urlBuilder) {
+	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
+			JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder);
 		this.resourceClass = resourceClass;
 		this.resourceInformation = resourceInformation;
@@ -35,15 +38,15 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		response.setEntity(resource);
 
 		ClientDocumentMapper documentMapper = client.getDocumentMapper();
-		Document requestDocument = documentMapper.toDocument(response, null);
+		final Document requestDocument = documentMapper.toDocument(response, null);
 
-		ObjectMapper objectMapper = client.getObjectMapper();
-		String requestBodyValue;
-		try {
-			requestBodyValue = objectMapper.writeValueAsString(requestDocument);
-		} catch (JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
+		final ObjectMapper objectMapper = client.getObjectMapper();
+		String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return objectMapper.writeValueAsString(requestDocument);
+			}
+		});
 
 		HttpMethod method = create || client.getPushAlways() ? HttpMethod.POST : HttpMethod.PATCH;
 
@@ -91,7 +94,8 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		}
 		if (create) {
 			return null;
-		} else {
+		}
+		else {
 			ResourceField idField = resourceInformation.getIdField();
 			return idField.getAccessor().getValue(entity);
 		}

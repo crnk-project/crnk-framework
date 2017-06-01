@@ -17,7 +17,7 @@ public class OkHttpAdapter implements HttpAdapter {
 
 	private Long networkTimeout;
 
-	public static HttpAdapter newInstance() {
+	public static OkHttpAdapter newInstance() {
 		return new OkHttpAdapter();
 	}
 

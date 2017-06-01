@@ -92,7 +92,7 @@ public class MetaRelationshipRepositoryTest extends AbstractMetaTest {
 	}
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = ClassCastException.class)
 	public void findManyTargetCannotBeUsedForSingeValuesRelations() {
 		MetaResource resource = lookup.getMeta(Task.class, MetaResource.class);
 		repo.findManyTargets(resource.getId(), "primaryKey", new QuerySpec(MetaElement

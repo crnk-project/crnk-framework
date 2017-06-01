@@ -87,11 +87,6 @@ public class MetaLookup {
 			}
 
 			@Override
-			public void addAll(Collection<? extends MetaElement> elements) {
-				MetaLookup.this.addAll(elements);
-			}
-
-			@Override
 			public MetaLookup getLookup() {
 				return MetaLookup.this;
 			}
@@ -112,19 +107,6 @@ public class MetaLookup {
 			return "uuid";
 		}
 		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
-	}
-
-	public static Class<?> getRawType(Type type) {
-		if (type instanceof Class) {
-			return (Class<?>) type;
-		}
-		else if (type instanceof ParameterizedType) {
-			ParameterizedType paramType = (ParameterizedType) type;
-			return getRawType(paramType.getRawType());
-		}
-		else {
-			throw new IllegalArgumentException("unable to obtain raw type for " + type);
-		}
 	}
 
 	public void setModuleContext(ModuleContext moduleContext) {
@@ -401,13 +383,7 @@ public class MetaLookup {
 		return false;
 	}
 
-	public void addAll(Collection<? extends MetaElement> elements) {
-		for (MetaElement element : elements) {
-			add(element);
-		}
-	}
-
-	public void add(MetaElement element) {
+	protected void add(MetaElement element) {
 		PreconditionUtil.assertNotNull("no name provided", element.getName());
 		if (element instanceof MetaType) {
 			MetaType typeElement = element.asType();

@@ -1,7 +1,9 @@
 package io.crnk.meta;
 
 import java.util.Date;
+import java.util.UUID;
 
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.meta.model.MetaType;
@@ -105,10 +107,34 @@ public class MetaLookupTest {
 	}
 
 	@Test
+	public void testStringArray() {
+		MetaType meta = lookup.getArrayMeta(String[].class, MetaType.class);
+		Assert.assertEquals("base.string$Array", meta.getId());
+		Assert.assertEquals(String[].class, meta.getImplementationClass());
+	}
+
+	@Test
 	public void testPrimitiveDate() {
 		MetaType meta = lookup.getMeta(Date.class, MetaType.class);
 		Assert.assertEquals("base.date", meta.getId());
 		Assert.assertEquals(Date.class, meta.getImplementationClass());
+	}
+
+	@Test
+	public void testOffsetDateTime() throws ClassNotFoundException {
+		if (ClassUtils.existsClass("java.time.OffsetDateTime")) {
+			Class<?> offsetDateTimeClass = Class.forName("java.time.OffsetDateTime");
+			MetaType meta = lookup.getMeta(offsetDateTimeClass, MetaType.class);
+			Assert.assertEquals("base.offsetDateTime", meta.getId());
+			Assert.assertEquals(offsetDateTimeClass, meta.getImplementationClass());
+		}
+	}
+
+	@Test
+	public void testPrimitiveUUID() {
+		MetaType meta = lookup.getMeta(UUID.class, MetaType.class);
+		Assert.assertEquals("base.uuid", meta.getId());
+		Assert.assertEquals(UUID.class, meta.getImplementationClass());
 	}
 
 	@Test

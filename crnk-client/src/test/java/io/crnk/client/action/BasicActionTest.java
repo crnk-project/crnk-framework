@@ -1,7 +1,7 @@
 package io.crnk.client.action;
 
-import io.crnk.client.AbstractClientTest;
 import io.crnk.client.CrnkTestFeature;
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
@@ -29,6 +29,25 @@ public class BasicActionTest extends AbstractClientTest {
 		SLF4JBridgeHandler.install();
 		super.setup();
 		scheduleRepo = client.getRepositoryForInterface(ScheduleRepository.class);
+	}
+
+	@Test
+	public void setActionStubFactoryShouldBeProperyInitialized() {
+		ActionStubFactory actionStubFactory = Mockito.mock(ActionStubFactory.class);
+		client.setActionStubFactory(actionStubFactory);
+
+		ArgumentCaptor<ActionStubFactoryContext> contextCaptor = ArgumentCaptor.forClass(ActionStubFactoryContext.class);
+		Mockito.verify(actionStubFactory, Mockito.times(1)).init(contextCaptor.capture());
+
+		ActionStubFactoryContext context = contextCaptor.getValue();
+		Assert.assertSame(client.getHttpAdapter(), context.getHttpAdapter());
+		Assert.assertSame(client.getRegistry().getServiceUrlProvider(), context.getServiceUrlProvider());
+	}
+
+	@Test
+	public void removeActionStubFactory() {
+		client.setActionStubFactory(null);
+		Assert.assertNull(client.getActionStubFactory());
 	}
 
 	@Override

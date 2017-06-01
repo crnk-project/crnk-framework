@@ -1,5 +1,12 @@
 package io.crnk.client;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
@@ -19,12 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 public class ModuleTest extends AbstractClientTest {
 
 
@@ -35,6 +36,7 @@ public class ModuleTest extends AbstractClientTest {
 	@Before
 	public void setup() {
 		super.setup();
+		client.setHttpAdapter(new OkHttpAdapter());
 		client.addModule(testModule);
 	}
 

@@ -1,22 +1,23 @@
-package io.crnk.client.adapter;
+package io.crnk.client.http;
 
-import io.crnk.client.http.apache.HttpClientAdapter;
-import io.crnk.client.http.apache.HttpClientAdapterListener;
+import java.util.concurrent.TimeUnit;
+
+import io.crnk.client.http.okhttp.OkHttpAdapter;
+import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.concurrent.TimeUnit;
+public class OkHttpAdapterTest {
 
-public class HttpClientAdapterTest {
 
 	@Test
 	public void testCannotAddListenersAfterInitialization() {
-		HttpClientAdapter adapter = new HttpClientAdapter();
+		OkHttpAdapter adapter = new OkHttpAdapter();
 		adapter.getImplementation();
 
 		try {
-			adapter.addListener(Mockito.mock(HttpClientAdapterListener.class));
+			adapter.addListener(Mockito.mock(OkHttpAdapterListener.class));
 			Assert.fail();
 		} catch (IllegalStateException e) {
 			// ok
@@ -25,7 +26,7 @@ public class HttpClientAdapterTest {
 
 	@Test
 	public void testCannotSetTimeoutAfterInitialization() {
-		HttpClientAdapter adapter = new HttpClientAdapter();
+		OkHttpAdapter adapter = new OkHttpAdapter();
 		adapter.getImplementation();
 
 		try {

@@ -27,8 +27,6 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -44,11 +42,14 @@ import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
 import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
@@ -275,18 +276,7 @@ public class ModuleRegistry {
 			Map<RepositoryInformation, Object> resourceInformationMap) {
 
 		RepositoryInformationBuilder repositoryInformationBuilder = getRepositoryInformationBuilder();
-		RepositoryInformationBuilderContext builderContext = new RepositoryInformationBuilderContext() {
-
-			@Override
-			public ResourceInformationBuilder getResourceInformationBuilder() {
-				return ModuleRegistry.this.getResourceInformationBuilder();
-			}
-
-			@Override
-			public TypeParser getTypeParser() {
-				return typeParser;
-			}
-		};
+		RepositoryInformationBuilderContext builderContext = new DefaultRepositoryInformationBuilderContext(this);
 
 		for (Object repository : repositories) {
 			if (!(repository instanceof ResourceRepositoryDecorator)
@@ -569,25 +559,21 @@ public class ModuleRegistry {
 
 		@Override
 		public void addResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
-			checkNotInitialized();
 			aggregatedModule.addResourceInformationBuilder(resourceInformationBuilder);
 		}
 
 		@Override
 		public void addRepositoryInformationBuilder(RepositoryInformationBuilder repositoryInformationBuilder) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryInformationBuilder(repositoryInformationBuilder);
 		}
 
 		@Override
 		public void addResourceLookup(ResourceLookup resourceLookup) {
-			checkNotInitialized();
 			aggregatedModule.addResourceLookup(resourceLookup);
 		}
 
 		@Override
 		public void addJacksonModule(com.fasterxml.jackson.databind.Module module) {
-			checkNotInitialized();
 			aggregatedModule.addJacksonModule(module);
 			if (objectMapper != null) {
 				objectMapper.registerModule(module);
