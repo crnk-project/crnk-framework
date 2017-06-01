@@ -590,37 +590,31 @@ public class ModuleRegistry {
 
 		@Override
 		public void addFilter(DocumentFilter filter) {
-			checkNotInitialized();
 			aggregatedModule.addFilter(filter);
 		}
 
 		@Override
 		public void addExceptionMapperLookup(ExceptionMapperLookup exceptionMapperLookup) {
-			checkNotInitialized();
 			aggregatedModule.addExceptionMapperLookup(exceptionMapperLookup);
 		}
 
 		@Override
 		public void addExceptionMapper(ExceptionMapper<?> exceptionMapper) {
-			checkNotInitialized();
 			aggregatedModule.addExceptionMapper(exceptionMapper);
 		}
 
 		@Override
 		public void addRepository(Class<?> type, Object repository) {
-			checkNotInitialized();
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
-			checkNotInitialized();
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addSecurityProvider(SecurityProvider securityProvider) {
-			checkNotInitialized();
 			aggregatedModule.addSecurityProvider(securityProvider);
 		}
 
@@ -646,13 +640,11 @@ public class ModuleRegistry {
 
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryFilter(filter);
 		}
 
 		@Override
 		public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decoratorFactory) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryDecoratorFactory(decoratorFactory);
 		}
 

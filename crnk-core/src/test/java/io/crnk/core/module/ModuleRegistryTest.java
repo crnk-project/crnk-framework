@@ -222,11 +222,6 @@ public class ModuleRegistryTest {
 		module.addFilter(new TestFilter());
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void testContextChangeAfterAddModule() {
-		testModule.getContext().addFilter(new TestFilter());
-	}
-
 	@Test
 	public void testGetResourceRegistry() {
 		Assert.assertSame(resourceRegistry, testModule.getContext().getResourceRegistry());
