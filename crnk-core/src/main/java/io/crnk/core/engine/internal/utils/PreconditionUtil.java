@@ -20,37 +20,19 @@ public class PreconditionUtil {
 	 * @param actual   actual value
 	 */
 	public static void assertEquals(String message, Object expected, Object actual) {
-		if (expected == null && actual == null)
-			return;
-		if (expected != null && isEquals(expected, actual))
-			return;
-		failNotEquals(message, expected, actual);
-	}
-
-	private static boolean isEquals(Object expected, Object actual) {
-		return expected.equals(actual);
-	}
-
-	private static void failNotEquals(String message, Object expected, Object actual) {
-		fail(format(message, expected, actual));
+		if (!CompareUtils.isEquals(expected, actual)) {
+			fail(format(message, expected, actual));
+		}
 	}
 
 	static String format(String message, Object expected, Object actual) {
 		String formatted = "";
-		if (message != null && !message.equals(""))
+		if (message != null && !message.equals("")) {
 			formatted = message + " ";
+		}
 		String expectedString = String.valueOf(expected);
 		String actualString = String.valueOf(actual);
-		if (expectedString.equals(actualString))
-			return formatted + "expected: " + formatClassAndValue(expected, expectedString) + " but was: "
-					+ formatClassAndValue(actual, actualString);
-		else
-			return formatted + "expected:<" + expectedString + "> but was:<" + actualString + ">";
-	}
-
-	private static String formatClassAndValue(Object value, String valueString) {
-		String className = value == null ? "null" : value.getClass().getName();
-		return className + "<" + valueString + ">";
+		return formatted + "expected:<" + expectedString + "> but was:<" + actualString + ">";
 	}
 
 	/**
@@ -85,8 +67,9 @@ public class PreconditionUtil {
 	 * @param condition condition to be checked
 	 */
 	public static void assertTrue(String message, boolean condition) {
-		if (!condition)
+		if (!condition) {
 			fail(message);
+		}
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 	public static final String DETAIL = "detail";
 	public static final String SOURCE = "source";
 	public static final String POINTER = "pointer";
-	public static final String PARAMETER = "parameter";
+	public static final String PARAMETER = "legacy";
 	public static final String META = "meta";
 
 	private static void writeMeta(ErrorData errorData, JsonGenerator gen) throws IOException {
@@ -69,6 +69,7 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 		gen.writeEndObject();
 	}
 
+	@Override
 	public Class<ErrorData> handledType() {
 		return ErrorData.class;
 	}

@@ -17,15 +17,19 @@ public class OkHttpAdapter implements HttpAdapter {
 
 	private Long networkTimeout;
 
-	public static HttpAdapter newInstance() {
+	public static OkHttpAdapter newInstance() {
 		return new OkHttpAdapter();
 	}
 
 	public void addListener(OkHttpAdapterListener listener) {
+		checkNotInitialized();
+		listeners.add(listener);
+	}
+
+	private void checkNotInitialized() {
 		if (impl != null) {
 			throw new IllegalStateException("already initialized");
 		}
-		listeners.add(listener);
 	}
 
 	public OkHttpClient getImplementation() {
@@ -35,31 +39,30 @@ public class OkHttpAdapter implements HttpAdapter {
 		return impl;
 	}
 
-	private void initImpl() {
-		synchronized (this) {
-			if (impl == null) {
-				Builder builder = new OkHttpClient.Builder();
+	private synchronized void initImpl() {
+		if (impl == null) {
+			Builder builder = new OkHttpClient.Builder();
 
-				if (networkTimeout != null) {
-					builder.readTimeout(networkTimeout, TimeUnit.MILLISECONDS);
-				}
-
-				for (OkHttpAdapterListener listener : listeners) {
-					listener.onBuild(builder);
-				}
-				impl = builder.build();
+			if (networkTimeout != null) {
+				builder.readTimeout(networkTimeout, TimeUnit.MILLISECONDS);
 			}
+
+			for (OkHttpAdapterListener listener : listeners) {
+				listener.onBuild(builder);
+			}
+			impl = builder.build();
 		}
 	}
 
 	@Override
 	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		OkHttpClient impl = getImplementation();
-		return new OkHttpRequest(impl, url, method, requestBody);
+		OkHttpClient implementation = getImplementation();
+		return new OkHttpRequest(implementation, url, method, requestBody);
 	}
 
 	@Override
 	public void setReceiveTimeout(int timeout, TimeUnit unit) {
+		checkNotInitialized();
 		networkTimeout = unit.toMillis(timeout);
 	}
 }

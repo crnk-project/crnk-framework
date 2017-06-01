@@ -1,5 +1,15 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import io.crnk.client.http.AbstractClientTest;
+import io.crnk.client.legacy.RelationshipRepositoryStub;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.test.mock.models.Project;
@@ -7,11 +17,7 @@ import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.Serializable;
-import java.util.*;
 
 public class QueryParamsClientTest extends AbstractClientTest {
 
@@ -97,31 +103,6 @@ public class QueryParamsClientTest extends AbstractClientTest {
 
 		List<Task> tasks = taskRepo.findAll(new QueryParams());
 		Assert.assertEquals(0, tasks.size());
-	}
-
-	@Test
-	@Ignore // not supported by spec
-	public void testSaveOneRelation() {
-		Task task = new Task();
-		task.setId(2L);
-		task.setName("test");
-
-		Project project = new Project();
-		project.setId(1L);
-		project.setName("project");
-		project.getTasks().add(task);
-
-		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
-		addParams(params, "include[projects]", "tasks");
-		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
-
-		projectRepo.save(project);
-
-		Task savedTask = taskRepo.findOne(2L, queryParams);
-		Assert.assertEquals(task.getId(), savedTask.getId());
-		Assert.assertEquals(task.getName(), savedTask.getName());
-		Assert.assertNotNull(savedTask.getProject());
-		Assert.assertEquals(1L, savedTask.getProject().getId().longValue());
 	}
 
 	@Test

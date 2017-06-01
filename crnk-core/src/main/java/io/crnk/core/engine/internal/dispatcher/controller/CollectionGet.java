@@ -20,8 +20,8 @@ import java.io.Serializable;
 
 public class CollectionGet extends ResourceIncludeField {
 
-	public CollectionGet(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
-		super(resourceRegistry, objectMapper, typeParser, documentMapper);
+	public CollectionGet(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+		super(resourceRegistry, typeParser, documentMapper);
 	}
 
 	/**

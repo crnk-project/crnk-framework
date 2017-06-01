@@ -1,26 +1,33 @@
 package io.crnk.client;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import io.crnk.client.http.AbstractClientTest;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
+import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.models.UnknownResource;
 import okhttp3.OkHttpClient.Builder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 public class ModuleTest extends AbstractClientTest {
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
 
 	private TestOkHttpAdapterListener adapterListener = Mockito.spy(new TestOkHttpAdapterListener());
 
@@ -29,8 +36,8 @@ public class ModuleTest extends AbstractClientTest {
 	@Before
 	public void setup() {
 		super.setup();
+		client.setHttpAdapter(new OkHttpAdapter());
 		client.addModule(testModule);
-		taskRepo = client.getQuerySpecRepository(Task.class);
 	}
 
 	@Override
@@ -40,6 +47,7 @@ public class ModuleTest extends AbstractClientTest {
 
 	@Test
 	public void test() {
+		ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
 		Task task = new Task();
 		task.setId(1L);
 		task.setName("task");
@@ -51,6 +59,26 @@ public class ModuleTest extends AbstractClientTest {
 		Mockito.verify(testModule, Mockito.times(1)).setupModule(Mockito.any(ModuleContext.class));
 		Mockito.verify(testModule, Mockito.times(1)).setHttpAdapter(Mockito.eq(client.getHttpAdapter()));
 		Mockito.verify(adapterListener, Mockito.times(1)).onBuild(Mockito.any(Builder.class));
+	}
+
+	@Test
+	public void testResourceLookupInitializesRepository() {
+		Assert.assertTrue(client.getRegistry().hasEntry(Schedule.class));
+
+		// related loaded as well
+		Assert.assertTrue(client.getRegistry().hasEntry(Project.class));
+		Assert.assertTrue(client.getRegistry().hasEntry(Task.class));
+
+		// unrelated not loaded
+		Assert.assertTrue(client.getRegistry().hasEntry(UnknownResource.class));
+	}
+
+	@Test
+	public void testReconfigureHttpAdapter() {
+		OkHttpAdapter newAdapter = new OkHttpAdapter();
+		client.setHttpAdapter(newAdapter);
+
+		Mockito.verify(testModule, Mockito.times(1)).setHttpAdapter(newAdapter);
 	}
 
 	class TestOkHttpAdapterListener implements OkHttpAdapterListener {
@@ -70,14 +98,29 @@ public class ModuleTest extends AbstractClientTest {
 
 		@Override
 		public void setupModule(ModuleContext context) {
-			// nothing to do
+			context.addResourceLookup(new TestResourceLookup());
+
+
 		}
 
 		@Override
 		public void setHttpAdapter(HttpAdapter adapter) {
 			((OkHttpAdapter) adapter).addListener(adapterListener);
 		}
-
 	}
 
+	private class TestResourceLookup implements ResourceLookup {
+
+		@Override
+		public Set<Class<?>> getResourceClasses() {
+			Set<Class<?>> set = new HashSet<>();
+			set.add(Schedule.class);
+			return set;
+		}
+
+		@Override
+		public Set<Class<?>> getResourceRepositoryClasses() {
+			return Collections.emptySet();
+		}
+	}
 }

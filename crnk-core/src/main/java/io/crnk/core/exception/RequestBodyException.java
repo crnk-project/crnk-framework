@@ -4,7 +4,7 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 
-public class RequestBodyException extends CrnkMappableException {
+public class RequestBodyException extends CrnkMappableException {// NOSONAR ignore deep class hierarchy
 
 	private static final String TITLE = "Request body error";
 

@@ -1,27 +1,20 @@
 package io.crnk.legacy.registry;
 
 import io.crnk.core.engine.registry.ResourceEntry;
-import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.io.Serializable;
-
-public class AnnotatedResourceEntry<T, ID extends Serializable> implements ResourceEntry {
+public class AnnotatedResourceEntry implements ResourceEntry {
 	private final RepositoryInstanceBuilder repositoryInstanceBuilder;
 
-	@Deprecated
-	private ModuleRegistry moduleRegistry;
-
-	public AnnotatedResourceEntry(ModuleRegistry moduleRegistry, RepositoryInstanceBuilder RepositoryInstanceBuilder) {
-		this.moduleRegistry = moduleRegistry;
+	public AnnotatedResourceEntry(RepositoryInstanceBuilder RepositoryInstanceBuilder) {
 		this.repositoryInstanceBuilder = RepositoryInstanceBuilder;
 	}
 
 	public AnnotatedResourceRepositoryAdapter build(RepositoryMethodParameterProvider parameterProvider) {
 		return new AnnotatedResourceRepositoryAdapter<>(repositoryInstanceBuilder.buildRepository(),
-				new ParametersFactory(moduleRegistry, parameterProvider));
+				new ParametersFactory(parameterProvider));
 	}
 
 	@Override

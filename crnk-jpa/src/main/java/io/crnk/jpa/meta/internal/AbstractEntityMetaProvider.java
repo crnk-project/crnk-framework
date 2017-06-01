@@ -1,5 +1,21 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Version;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.internal.JpaResourceInformationBuilder;
 import io.crnk.jpa.meta.MetaEntityAttribute;
@@ -9,23 +25,14 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
 
-import javax.persistence.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> extends AbstractJpaDataObjectProvider<T> {
 
 	@Override
 	public MetaElement createElement(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
-		MetaElement superMeta = null;
-		if (superClazz.getAnnotation(Entity.class) != null || superClazz.getAnnotation(MappedSuperclass.class) != null) {
-			superMeta = context.getLookup().getMeta(superClazz, MetaJpaDataObject.class);
-		}
+		MetaElement superMeta = getSuperMeta(superClazz);
+
 		T meta = newDataObject();
 		meta.setElementType(meta);
 		meta.setName(rawClazz.getSimpleName());
@@ -41,6 +48,13 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 		return meta;
 	}
 
+	private MetaElement getSuperMeta(Class<?> superClazz) {
+		if (superClazz.getAnnotation(Entity.class) != null || superClazz.getAnnotation(MappedSuperclass.class) != null) {
+			return context.getLookup().getMeta(superClazz, MetaJpaDataObject.class);
+		}
+		return null;
+	}
+
 	private void setKey(T meta) {
 		if (meta.getPrimaryKey() == null) {
 			boolean generated = false;
@@ -53,8 +67,10 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 					boolean attrGenerated = attr.getAnnotation(GeneratedValue.class) != null;
 					if (pkElements.size() == 1) {
 						generated = attrGenerated;
-					} else if (generated != attrGenerated) {
-						throw new IllegalStateException("cannot mix generated and not-generated primary key elements for " + meta.getId());
+					}
+					else if (generated != attrGenerated) {
+						throw new IllegalStateException(
+								"cannot mix generated and not-generated primary key elements for " + meta.getId());
 					}
 				}
 			}
@@ -100,7 +116,9 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 		boolean attrGenerated = attr.getAnnotation(GeneratedValue.class) != null;
 
 		attr.setVersion(versionAnnotation != null);
-		attr.setAssociation(manyManyAnnotation != null || manyOneAnnotation != null || oneManyAnnotation != null || oneOneAnnotation != null);
+		attr.setAssociation(
+				manyManyAnnotation != null || manyOneAnnotation != null || oneManyAnnotation != null || oneOneAnnotation !=
+						null);
 
 		attr.setLazy(JpaResourceInformationBuilder.isJpaLazy(attr.getAnnotations()));
 		attr.setLob(lobAnnotation != null);
@@ -120,13 +138,16 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 		attr.setNullable(!isPrimitiveType && columnNullable);
 
 		boolean hasSetter = attr.getWriteMethod() != null;
-		attr.setInsertable(hasSetter && (columnAnnotation == null || columnAnnotation.insertable()) && !attrGenerated && versionAnnotation == null);
-		attr.setUpdatable(hasSetter && (columnAnnotation == null || columnAnnotation.updatable()) && !idAttr && versionAnnotation == null);
+		attr.setInsertable(hasSetter && (columnAnnotation == null || columnAnnotation.insertable()) && !attrGenerated
+				&& versionAnnotation == null);
+		attr.setUpdatable(
+				hasSetter && (columnAnnotation == null || columnAnnotation.updatable()) && !idAttr && versionAnnotation == null);
 
 	}
 
 
-	private boolean getCascade(ManyToMany manyManyAnnotation, ManyToOne manyOneAnnotation, OneToMany oneManyAnnotation, OneToOne oneOneAnnotation) {
+	private boolean getCascade(ManyToMany manyManyAnnotation, ManyToOne manyOneAnnotation, OneToMany oneManyAnnotation,
+			OneToOne oneOneAnnotation) {
 		if (manyManyAnnotation != null) {
 			return getCascade(manyManyAnnotation.cascade());
 		}
@@ -149,7 +170,8 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 	@Override
 	public void onInitialized(MetaElement element) {
 		super.onInitialized(element);
-		if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute && ((MetaAttribute) element).getOppositeAttribute() == null) {
+		if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute
+				&& ((MetaAttribute) element).getOppositeAttribute() == null) {
 			MetaAttribute attr = (MetaAttribute) element;
 			String mappedBy = getMappedBy(attr);
 			if (mappedBy != null) {
@@ -158,7 +180,8 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 				if (!mappedBy.contains(".")) {
 					MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
 					attr.setOppositeAttribute(oppositeAttr);
-				} else {
+				}
+				else {
 					// references within embeddables not yet supported
 				}
 			}
@@ -184,16 +207,5 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 			mappedBy = null;
 		}
 		return mappedBy;
-	}
-
-	private boolean hasJpaAnnotations(MetaAttribute attribute) {
-		List<Class<? extends Annotation>> annotationClasses = Arrays.asList(Id.class, EmbeddedId.class, Column.class, ManyToMany.class, ManyToOne.class, OneToMany.class, OneToOne.class, Version.class,
-				ElementCollection.class);
-		for (Class<? extends Annotation> annotationClass : annotationClasses) {
-			if (attribute.getAnnotation(annotationClass) != null) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

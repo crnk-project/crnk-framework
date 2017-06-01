@@ -1,5 +1,7 @@
 package io.crnk.core.engine.parser;
 
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -16,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TypeParserTest {
 
 	private final TypeParser sut = new TypeParser();
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
@@ -24,6 +27,21 @@ public class TypeParserTest {
 		String result = sut.parse("String", String.class);
 		assertThat(result).isExactlyInstanceOf(String.class);
 		assertThat(result).isEqualTo("String");
+	}
+
+	@Test(expected = ParserException.class)
+	public void onInvalidCharacterThrowException() throws Exception {
+		sut.parse("NOT a single character", Character.class);
+	}
+
+	@Test(expected = ParserException.class)
+	public void onInvalidBooleanThrowException() throws Exception {
+		sut.parse("NOT a boolean", Character.class);
+	}
+
+	@Test
+	public void onBooleanFReturnFalse() throws Exception {
+		Assert.assertFalse(sut.parse("f", Boolean.class));
 	}
 
 	@Test
@@ -49,7 +67,7 @@ public class TypeParserTest {
 	@Test
 	public void onLongCharacterShouldThrowException() throws Exception {
 		// THEN
-		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expect(ParserException.class);
 
 		// WHEN
 		sut.parse("ab", Character.class);
@@ -98,7 +116,7 @@ public class TypeParserTest {
 	@Test
 	public void onBadBooleanShouldThrowException() throws Exception {
 		// THEN
-		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expect(ParserException.class);
 
 		// WHEN
 		sut.parse("ab", Boolean.class);
@@ -216,6 +234,10 @@ public class TypeParserTest {
 		assertThat(result).isEqualTo(new SampleClass("input"));
 	}
 
+	@Test
+	public void hasUtilsHavePrivateConstructor() {
+		CoreClassTestUtils.assertPrivateConstructor(DefaultStringParsers.class);
+	}
 
 	@Test
 	public void onUnknownClassShouldThrowException() throws Exception {
@@ -224,6 +246,18 @@ public class TypeParserTest {
 
 		// WHEN
 		sut.parse("input", UnknownClass.class);
+	}
+
+	@Test
+	public void testAddParser() throws Exception {
+		sut.addParser(Boolean.class, new StringParser<Boolean>() {
+			@Override
+			public Boolean parse(String input) {
+				return true;
+			}
+		});
+
+		Assert.assertTrue(sut.parse("input", Boolean.class));
 	}
 
 	@Test
@@ -257,6 +291,7 @@ public class TypeParserTest {
 	}
 
 	public static class SampleClass implements Serializable {
+
 		private final String input;
 
 		public SampleClass(@SuppressWarnings("SameParameterValue") String input) {
@@ -265,8 +300,12 @@ public class TypeParserTest {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (!(o instanceof SampleClass)) return false;
+			if (this == o) {
+				return true;
+			}
+			if (!(o instanceof SampleClass)) {
+				return false;
+			}
 			SampleClass that = (SampleClass) o;
 			return Objects.equals(input, that.input);
 		}
@@ -312,5 +351,6 @@ public class TypeParserTest {
 	}
 
 	private static class UnknownClass implements Serializable {
+
 	}
 }

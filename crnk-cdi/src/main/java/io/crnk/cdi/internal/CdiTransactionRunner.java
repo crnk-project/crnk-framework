@@ -15,8 +15,8 @@ public class CdiTransactionRunner implements TransactionRunner {
 
 	private CdiTransactionRunnerImpl impl;
 
-	// A no args constructor is required. See #280 for details.
 	public CdiTransactionRunner() {
+		// A no args constructor is required in some CDI environments.
 	}
 
 	@Inject

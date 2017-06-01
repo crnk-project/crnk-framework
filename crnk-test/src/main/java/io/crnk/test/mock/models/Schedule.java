@@ -1,13 +1,13 @@
 package io.crnk.test.mock.models;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 @JsonApiResource(type = "schedules")
 public class Schedule {
@@ -29,13 +29,22 @@ public class Schedule {
 	@JsonApiToMany(opposite = "schedule")
 	private List<Task> tasksList = Collections.emptyList();
 
+	private boolean delayed;
+
+	public boolean isDelayed() {
+		return delayed;
+	}
+
+	public void setDelayed(boolean delayed) {
+		this.delayed = delayed;
+	}
+
 	public Long getId() {
 		return id;
 	}
 
-	public Schedule setId(Long id) {
+	public void setId(Long id) {
 		this.id = id;
-		return this;
 	}
 
 	public String getName() {

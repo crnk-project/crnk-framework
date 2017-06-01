@@ -16,24 +16,34 @@
  */
 package io.crnk.servlet;
 
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mock.web.*;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
-import static org.junit.Assert.assertNotNull;
+import org.springframework.mock.web.MockFilterChain;
+import org.springframework.mock.web.MockFilterConfig;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 
 public class CrnkFilterTest {
 
@@ -46,9 +56,13 @@ public class CrnkFilterTest {
 	private static final String PROJECT1_RELATIONSHIP_LINKS =
 			"{\"self\":\"http://localhost:8080/api/tasks/1/relationships/project\","
 					+ "\"related\":\"http://localhost:8080/api/tasks/1/project\"}";
+
 	private static final String RESOURCE_SEARCH_PACKAGE = "io.crnk.servlet.resource";
+
 	private static final String RESOURCE_DEFAULT_DOMAIN = "http://localhost:8080";
+
 	private static Logger log = LoggerFactory.getLogger(CrnkFilterTest.class);
+
 	private ServletContext servletContext;
 
 	private FilterConfig filterConfig;
@@ -72,6 +86,43 @@ public class CrnkFilterTest {
 	@After
 	public void after() throws Exception {
 		filter.destroy();
+	}
+
+	@Test
+	public void testNonHttpRequest() throws Exception {
+		FilterChain chain = Mockito.mock(FilterChain.class);
+		ServletRequest nonHttpRequest = Mockito.mock(ServletRequest.class);
+		ServletResponse nonHttpResponse = Mockito.mock(ServletResponse.class);
+		HttpServletRequest httpRequest = Mockito.mock(HttpServletRequest.class);
+		ServletResponse httpResponse = Mockito.mock(HttpServletResponse.class);
+		filter.doFilter(nonHttpRequest, nonHttpResponse, chain);
+		Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, nonHttpResponse);
+
+		filter.doFilter(nonHttpRequest, httpResponse, chain);
+		Mockito.verify(chain, Mockito.times(1)).doFilter(nonHttpRequest, httpResponse);
+
+		filter.doFilter(httpRequest, nonHttpResponse, chain);
+		Mockito.verify(chain, Mockito.times(1)).doFilter(httpRequest, nonHttpResponse);
+	}
+
+	@Test
+	public void onNonRepositoryRequestShouldPassTrough() throws Exception {
+		MockFilterChain filterChain = new MockFilterChain();
+
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.setMethod("GET");
+		request.setContextPath("");
+		request.setServletPath(null);
+		request.setPathInfo(null);
+		request.setRequestURI("/api/somethingDifferent/");
+		request.addHeader("Accept", "*/*");
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		filter.doFilter(request, response, filterChain);
+
+		// no content set yet
+		Assert.assertEquals(0, response.getContentLength());
 	}
 
 	@Test

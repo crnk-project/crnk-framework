@@ -11,6 +11,7 @@ export module Schedule{
 	}
 	export interface Attributes{
 		name?: string;
+		delayed?: boolean;
 	}
 }
 export interface Schedule extends StoreResource{

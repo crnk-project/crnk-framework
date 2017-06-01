@@ -1,14 +1,14 @@
 package io.crnk.meta.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, String> {
 
@@ -20,6 +20,7 @@ public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, Str
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public T findOne(String id, QuerySpec querySpec) {
 		MetaElement metaElement = lookup.getMetaById().get(id);
 		Class<T> resourceClass = this.getResourceClass();

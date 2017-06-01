@@ -82,33 +82,48 @@ public class TSImportProcessor implements TSSourceProcessor {
 		}
 		StringBuilder pathBuilder = new StringBuilder();
 		if (!source.getNpmPackage().equals(refSource.getNpmPackage())) {
-			pathBuilder.append(refSource.getNpmPackage());
-			if (refSource.getDirectory() != null) {
-				pathBuilder.append("/");
-				pathBuilder.append(refSource.getDirectory());
-			}
+			appendThirdPartyImport(pathBuilder, refSource);
 		}
 		else {
-			String[] srcDirs = source.getDirectory() != null ? source.getDirectory().split("\\/") : new String[0];
-			String[] refDirs = refSource.getDirectory() != null ? refSource.getDirectory().split("\\/") : new String[0];
-
-			int shared = computeSharedPrefix(srcDirs, refDirs);
-			if (shared == srcDirs.length) {
-				pathBuilder.append("./");
-			}
-			else {
-				for (int i = shared; i < srcDirs.length; i++) {
-					pathBuilder.append("../");
-				}
-			}
-
-			for (int i = shared; i < refDirs.length; i++) {
-				pathBuilder.append(refDirs[i]);
-				pathBuilder.append("/");
-			}
-			pathBuilder.append(refSource.getName());
+			appendRelativeImport(pathBuilder, refSource, source);
 		}
 		return pathBuilder.toString();
+	}
+
+	private static void appendRelativeImport(StringBuilder pathBuilder, TSSource refSource, TSSource source) {
+		String[] srcDirs = source.getDirectory() != null ? source.getDirectory().split("\\/") : new String[0];
+		String[] refDirs = refSource.getDirectory() != null ? refSource.getDirectory().split("\\/") : new String[0];
+
+		int shared = computeSharedPrefix(srcDirs, refDirs);
+		appendParentPath(pathBuilder, srcDirs, shared);
+		appendChildPath(pathBuilder, refDirs, shared);
+		pathBuilder.append(refSource.getName());
+	}
+
+	private static void appendChildPath(StringBuilder pathBuilder, String[] refDirs, int shared) {
+		for (int i = shared; i < refDirs.length; i++) {
+			pathBuilder.append(refDirs[i]);
+			pathBuilder.append("/");
+		}
+	}
+
+	private static void appendParentPath(StringBuilder pathBuilder, String[] srcDirs, int shared) {
+		if (shared == srcDirs.length) {
+			pathBuilder.append("./");
+		}
+		else {
+			for (int i = shared; i < srcDirs.length; i++) {
+				pathBuilder.append("../");
+			}
+		}
+	}
+
+	private static void appendThirdPartyImport(StringBuilder pathBuilder, TSSource refSource) {
+		pathBuilder.append(refSource.getNpmPackage());
+		if (refSource.getDirectory() != null) {
+			pathBuilder.append("/");
+			pathBuilder.append(refSource.getDirectory());
+		}
 	}
 
 	private static int computeSharedPrefix(String[] srcDirs, String[] refDirs) {

@@ -1,9 +1,13 @@
 package io.crnk.validation;
 
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.RelationshipRepositoryStub;
-import io.crnk.client.ResourceRepositoryStub;
+import io.crnk.client.legacy.RelationshipRepositoryStub;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
@@ -15,10 +19,6 @@ import io.crnk.validation.mock.repository.TaskRepository;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Before;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractValidationTest extends JerseyTest {
 

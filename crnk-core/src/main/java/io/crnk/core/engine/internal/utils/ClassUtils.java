@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.utils.Optional;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,16 +10,49 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import io.crnk.core.exception.ResourceException;
+import io.crnk.core.utils.Optional;
+
 /**
  * Provides reflection methods for parsing information about a class.
  */
 public class ClassUtils {
 
-	public static String PREFIX_GETTER_IS = "is";
+	public static final String PREFIX_GETTER_IS = "is";
 
-	public static String PREFIX_GETTER_GET = "get";
+	public static final String PREFIX_GETTER_GET = "get";
 
 	private ClassUtils() {
+	}
+
+	@Deprecated // at least current use cases should be eliminated and replace by resourceType
+	public static Class<?> getResourceClass(Type genericType, Class baseClass) {
+		if (Iterable.class.isAssignableFrom(baseClass)) {
+			if (genericType instanceof ParameterizedType) {
+				ParameterizedType aType = (ParameterizedType) genericType;
+				Type[] fieldArgTypes = aType.getActualTypeArguments();
+				if (fieldArgTypes.length == 1 && fieldArgTypes[0] instanceof Class<?>) {
+					return (Class) fieldArgTypes[0];
+				}
+				else {
+					throw new IllegalArgumentException("Wrong type: " + aType);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("The relationship must be parametrized (cannot be wildcard or array): "
+						+ genericType);
+			}
+		}
+		return baseClass;
+	}
+
+	public static boolean existsClass(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -103,10 +133,7 @@ public class ClassUtils {
 				continue;
 			}
 			String methodGetterName = getGetterFieldName(method);
-			if (StringUtils.isBlank(methodGetterName)) {
-				continue;
-			}
-			if (methodGetterName.equals(fieldName)) {
+			if (fieldName.equals(methodGetterName)) {
 				return method;
 			}
 		}
@@ -191,21 +218,23 @@ public class ClassUtils {
 
 		Class<?> currentClass = beanClass;
 		while (currentClass != null && currentClass != Object.class) {
-			for (Method method : currentClass.getDeclaredMethods()) {
-				if (!method.isSynthetic()) {
-					if (isGetter(method)) {
-						Method v = resultMap.get(method.getName());
-						if (v == null) {
-							resultMap.put(method.getName(), method);
-							results.add(method);
-						}
-					}
-				}
-			}
+			getDeclaredClassGetters(currentClass, resultMap, results);
 			currentClass = currentClass.getSuperclass();
 		}
 
 		return results;
+	}
+
+	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap, LinkedList<Method> results) {
+		for (Method method : currentClass.getDeclaredMethods()) {
+			if (!method.isSynthetic() && isGetter(method)) {
+				Method v = resultMap.get(method.getName());
+				if (v == null) {
+					resultMap.put(method.getName(), method);
+					results.add(method);
+				}
+			}
+		}
 	}
 
 	/**
@@ -222,12 +251,10 @@ public class ClassUtils {
 		Class<?> currentClass = beanClass;
 		while (currentClass != null && currentClass != Object.class) {
 			for (Method method : currentClass.getDeclaredMethods()) {
-				if (!method.isSynthetic()) {
-					if (isSetter(method)) {
-						Method v = result.get(method.getName());
-						if (v == null) {
-							result.put(method.getName(), method);
-						}
+				if (!method.isSynthetic() && isSetter(method)) {
+					Method v = result.get(method.getName());
+					if (v == null) {
+						result.put(method.getName(), method);
 					}
 				}
 			}
@@ -245,19 +272,15 @@ public class ClassUtils {
 	 * @return annotated method or null
 	 */
 	public static Method findMethodWith(Class<?> searchClass, Class<? extends Annotation> annotationClass) {
-		Method foundMethod = null;
-		methodFinder:
 		while (searchClass != null && searchClass != Object.class) {
 			for (Method method : searchClass.getDeclaredMethods()) {
 				if (method.isAnnotationPresent(annotationClass)) {
-					foundMethod = method;
-					break methodFinder;
+					return method;
 				}
 			}
 			searchClass = searchClass.getSuperclass();
 		}
-
-		return foundMethod;
+		return null;
 	}
 
 	/**

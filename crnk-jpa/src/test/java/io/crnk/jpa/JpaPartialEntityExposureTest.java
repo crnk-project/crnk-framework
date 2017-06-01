@@ -1,6 +1,6 @@
 package io.crnk.jpa;
 
-import io.crnk.client.ResourceRepositoryStub;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.jpa.internal.JpaResourceInformationBuilder;

@@ -24,10 +24,14 @@ public class HttpClientAdapter implements HttpAdapter {
 	}
 
 	public void addListener(HttpClientAdapterListener listener) {
+		checkNotInitialized();
+		listeners.add(listener);
+	}
+
+	private void checkNotInitialized() {
 		if (impl != null) {
 			throw new IllegalStateException("already initialized");
 		}
-		listeners.add(listener);
 	}
 
 	public CloseableHttpClient getImplementation() {
@@ -37,33 +41,32 @@ public class HttpClientAdapter implements HttpAdapter {
 		return impl;
 	}
 
-	private void initImpl() {
-		synchronized (this) {
-			if (impl == null) {
-				HttpClientBuilder builder = HttpClients.custom();
+	private synchronized void initImpl() {
+		if (impl == null) {
+			HttpClientBuilder builder = HttpClients.custom();
 
-				if (receiveTimeout != null) {
-					RequestConfig.Builder requestBuilder = RequestConfig.custom();
-					requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
-					builder.setDefaultRequestConfig(requestBuilder.build());
-				}
-
-				for (HttpClientAdapterListener listener : listeners) {
-					listener.onBuild(builder);
-				}
-				impl = builder.build();
+			if (receiveTimeout != null) {
+				RequestConfig.Builder requestBuilder = RequestConfig.custom();
+				requestBuilder = requestBuilder.setSocketTimeout(receiveTimeout);
+				builder.setDefaultRequestConfig(requestBuilder.build());
 			}
+
+			for (HttpClientAdapterListener listener : listeners) {
+				listener.onBuild(builder);
+			}
+			impl = builder.build();
 		}
 	}
 
 	@Override
 	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		CloseableHttpClient impl = getImplementation();
-		return new HttpClientRequest(impl, url, method, requestBody);
+		CloseableHttpClient implementation = getImplementation();
+		return new HttpClientRequest(implementation, url, method, requestBody);
 	}
 
 	@Override
 	public void setReceiveTimeout(int timeout, TimeUnit unit) {
+		checkNotInitialized();
 		receiveTimeout = (int) unit.toMillis(timeout);
 	}
 }

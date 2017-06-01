@@ -1,5 +1,14 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
@@ -12,22 +21,20 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-
 public class ResourcePatch extends ResourceUpsert {
 
-	public ResourcePatch(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper) {
+	public ResourcePatch(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
+			@SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper) {
 		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
 	}
 
@@ -40,37 +47,15 @@ public class ResourcePatch extends ResourceUpsert {
 
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		String resourceEndpointName = jsonPath.getResourceName();
-		RegistryEntry endpointRegistryEntry = resourceRegistry.getEntry(resourceEndpointName);
-		if (endpointRegistryEntry == null) {
-			throw new ResourceNotFoundException(resourceEndpointName);
-		}
-		if (requestDocument == null) {
-			throw new RequestBodyNotFoundException(HttpMethod.PATCH, resourceEndpointName);
-		}
-		if (requestDocument.getData() instanceof Collection) {
-			throw new RequestBodyException(HttpMethod.PATCH, resourceEndpointName, "Multiple data in body");
-		}
+		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		final Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
+		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 
 		String idString = jsonPath.getIds().getIds().get(0);
 
-		Resource resourceBody = (Resource) requestDocument.getData().get();
-		if (resourceBody == null) {
-			throw new RequestBodyException(HttpMethod.POST, resourceEndpointName, "No data field in the body.");
-		}
-		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
-		if (bodyRegistryEntry == null) {
-			throw new RepositoryNotFoundException(resourceBody.getType());
-		}
 		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
-		verifyTypes(HttpMethod.PATCH, resourceEndpointName, endpointRegistryEntry, bodyRegistryEntry);
-
-		Class<?> type = bodyRegistryEntry
-				.getResourceInformation()
-				.getIdField()
-				.getType();
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
@@ -79,40 +64,44 @@ public class ResourcePatch extends ResourceUpsert {
 		if (resource == null) {
 			throw new ResourceNotFoundException(jsonPath.toString());
 		}
-		Resource resourceFindData = documentMapper.toDocument(resourceFindResponse, queryAdapter, parameterProvider).getSingleData().get();
+		final Resource resourceFindData =
+				documentMapper.toDocument(resourceFindResponse, queryAdapter, parameterProvider).getSingleData().get();
 
 		resourceInformation.verify(resource, requestDocument);
 
 		// extract current attributes from findOne without any manipulation by query params (such as sparse fieldsets)
-		try {
-			String attributesFromFindOne = extractAttributesFromResourceAsJson(resourceFindData);
-			Map<String, Object> attributesToUpdate = new HashMap<>(emptyIfNull(objectMapper.readValue(attributesFromFindOne, Map.class)));
+		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				String attributesFromFindOne = extractAttributesFromResourceAsJson(resourceFindData);
+				Map<String, Object> attributesToUpdate =
+						new HashMap<>(emptyIfNull(objectMapper.readValue(attributesFromFindOne, Map.class)));
 
-			// deserialize the request JSON's attributes object into a map
-			String attributesAsJson = objectMapper.writeValueAsString(resourceBody.getAttributes());
-			Map<String, Object> attributesFromRequest = emptyIfNull(objectMapper.readValue(attributesAsJson, Map.class));
+				// deserialize the request JSON's attributes object into a map
+				String attributesAsJson = objectMapper.writeValueAsString(resourceBody.getAttributes());
+				Map<String, Object> attributesFromRequest = emptyIfNull(objectMapper.readValue(attributesAsJson, Map.class));
 
-			// remove attributes that were omitted in the request
-			Iterator<String> it = attributesToUpdate.keySet().iterator();
-			while (it.hasNext()) {
-				String key = it.next();
-				if (!attributesFromRequest.containsKey(key)) {
-					it.remove();
+				// remove attributes that were omitted in the request
+				Iterator<String> it = attributesToUpdate.keySet().iterator();
+				while (it.hasNext()) {
+					String key = it.next();
+					if (!attributesFromRequest.containsKey(key)) {
+						it.remove();
+					}
 				}
-			}
 
-			// walk the source map and apply target values from request
-			updateValues(attributesToUpdate, attributesFromRequest);
-			Map<String, JsonNode> upsertedAttributes = new HashMap<>();
-			for (Map.Entry<String, Object> entry : attributesToUpdate.entrySet()) {
-				JsonNode value = objectMapper.valueToTree(entry.getValue());
-				upsertedAttributes.put(entry.getKey(), value);
-			}
+				// walk the source map and apply target values from request
+				updateValues(attributesToUpdate, attributesFromRequest);
+				Map<String, JsonNode> upsertedAttributes = new HashMap<>();
+				for (Map.Entry<String, Object> entry : attributesToUpdate.entrySet()) {
+					JsonNode value = objectMapper.valueToTree(entry.getValue());
+					upsertedAttributes.put(entry.getKey(), value);
+				}
 
-			resourceBody.setAttributes(upsertedAttributes);
-		} catch (IOException e) {
-			throw new ResourceException("failed to merge patched attributes", e);
-		}
+				resourceBody.setAttributes(upsertedAttributes);
+				return null;
+			}
+		}, "failed to merge patched attributes");
 
 		setAttributes(resourceBody, resource, bodyRegistryEntry.getResourceInformation());
 		setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
@@ -120,10 +109,12 @@ public class ResourcePatch extends ResourceUpsert {
 		Set<String> loadedRelationshipNames = getLoadedRelationshipNames(resourceBody);
 
 		JsonApiResponse updatedResource = resourceRepository.update(resource, queryAdapter);
-		Document responseDocument = documentMapper.toDocument(updatedResource, queryAdapter, parameterProvider, loadedRelationshipNames);
+		Document responseDocument =
+				documentMapper.toDocument(updatedResource, queryAdapter, parameterProvider, loadedRelationshipNames);
 
 		return new Response(responseDocument, 200);
 	}
+
 
 	private <K, V> Map<K, V> emptyIfNull(Map<K, V> value) {
 		return (Map<K, V>) (value != null ? value : Collections.emptyMap());

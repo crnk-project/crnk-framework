@@ -2,6 +2,8 @@ package io.crnk.core.queryspec;
 
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,6 +12,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class QuerySpecTest {
+
+	@Test
+	public void testEqualContract() throws NoSuchFieldException {
+		EqualsVerifier.forClass(QuerySpec.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+	}
 
 	@Test
 	public void testBasic() {
@@ -66,6 +73,13 @@ public class QuerySpecTest {
 		Assert.assertEquals(spec, duplicate);
 		Assert.assertNotSame(spec.getQuerySpec(Task.class), duplicate.getQuerySpec(Task.class));
 		Assert.assertEquals(spec.getQuerySpec(Task.class), duplicate.getQuerySpec(Task.class));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void putRelatedSpecShouldFailIfClassMatchesRoot() {
+		QuerySpec spec = new QuerySpec(Project.class);
+		QuerySpec relatedSpec = new QuerySpec(Task.class);
+		spec.putRelatedSpec(Project.class, relatedSpec);
 	}
 
 	@Test

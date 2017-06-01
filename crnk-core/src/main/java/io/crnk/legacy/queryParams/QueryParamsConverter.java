@@ -3,7 +3,7 @@ package io.crnk.legacy.queryParams;
 import io.crnk.core.queryspec.QuerySpec;
 
 /**
- * Converts QuerySpec to QueryParams to ease parameter handling.
+ * Converts QuerySpec to QueryParams to ease legacy handling.
  *
  * @deprecated no longer needed in the future
  */

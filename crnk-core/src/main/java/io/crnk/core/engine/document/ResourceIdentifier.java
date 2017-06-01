@@ -1,7 +1,5 @@
 package io.crnk.core.engine.document;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
@@ -16,22 +14,6 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 	public ResourceIdentifier(String id, String type) {
 		this.id = id;
 		this.type = type;
-	}
-
-	public static Object fromData(Object data) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof Iterable) {
-			List<ResourceIdentifier> result = new ArrayList<>();
-			for (ResourceIdentifier id : (Iterable<ResourceIdentifier>) data) {
-				result.add(id.clone());
-			}
-			return result;
-		} else {
-			ResourceIdentifier id = (ResourceIdentifier) data;
-			return id.clone();
-		}
 	}
 
 	public String getId() {
@@ -51,19 +33,15 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 	}
 
 	@Override
-	public ResourceIdentifier clone() {
-		return new ResourceIdentifier(id, type);
-	}
-
-	@Override
 	public int hashCode() {
 		return Objects.hash(id, type);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || obj.getClass() != this.getClass())
+		if (obj == null || obj.getClass() != this.getClass()) {
 			return false;
+		}
 		ResourceIdentifier other = (ResourceIdentifier) obj;
 		return Objects.equals(id, other.id) && Objects.equals(type, other.type);
 	}

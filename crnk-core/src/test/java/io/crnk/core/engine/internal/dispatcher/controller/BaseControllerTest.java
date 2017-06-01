@@ -62,7 +62,7 @@ public abstract class BaseControllerTest {
 		pathBuilder = new PathBuilder(resourceRegistry);
 		typeParser = moduleRegistry.getTypeParser();
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build(resourceRegistry, false));
+		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 		documentMapper = new DocumentMapper(resourceRegistry, objectMapper, new EmptyPropertiesProvider());
 		UserRepository.clear();
 		ProjectRepository.clear();

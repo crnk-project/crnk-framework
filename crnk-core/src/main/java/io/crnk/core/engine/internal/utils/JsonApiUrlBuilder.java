@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.utils;
 
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -11,12 +17,6 @@ import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsSerializer;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 public class JsonApiUrlBuilder {
 
@@ -31,31 +31,34 @@ public class JsonApiUrlBuilder {
 		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
 		return buildUrl(resourceInformation, id, queryParams, null);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
 		return buildUrl(resourceInformation, id, querySpec, null);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter,
+			String relationshipName) {
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
-		} else {
+		}
+		else {
 			return buildUrl(resourceInformation, id, ((QueryParamsAdapter) queryAdapter).getQueryParams(), relationshipName);
 		}
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
 		return buildUrlInternal(resourceInformation, id, querySpec, relationshipName);
 	}
 
-	public <T> String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String
+			relationshipName) {
 		return buildUrlInternal(resourceInformation, id, queryParams, relationshipName);
 	}
 
-	private <T> String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
+	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
 		String url = resourceRegistry.getResourceUrl(resourceInformation);
 		if (!url.endsWith("/")) {
 			url += "/";
@@ -69,7 +72,8 @@ public class JsonApiUrlBuilder {
 				strIds.add(strIdElem);
 			}
 			url += StringUtils.join(",", strIds) + "/";
-		} else if (id != null) {
+		}
+		else if (id != null) {
 			String strId = resourceInformation.toIdString(id);
 			url += strId + "/";
 		}
@@ -81,7 +85,8 @@ public class JsonApiUrlBuilder {
 		if (query instanceof QuerySpec) {
 			QuerySpec querySpec = (QuerySpec) query;
 			urlBuilder.addQueryParameters(querySpecSerializer.serialize(querySpec));
-		} else if (query instanceof QueryParams) {
+		}
+		else if (query instanceof QueryParams) {
 			QueryParams queryParams = (QueryParams) query;
 			urlBuilder.addQueryParameters(queryParamsSerializer.serializeFilters(queryParams));
 			urlBuilder.addQueryParameters(queryParamsSerializer.serializeSorting(queryParams));
@@ -121,20 +126,23 @@ public class JsonApiUrlBuilder {
 			}
 		}
 
-		public void addQueryParameter(String key, String value) {
+		public void addQueryParameter(String key, final String value) {
 			if (firstParam) {
 				builder.append("?");
 				firstParam = false;
-			} else {
+			}
+			else {
 				builder.append("&");
 			}
 			builder.append(key);
 			builder.append("=");
-			try {
-				builder.append(URLEncoder.encode(value, encoding));
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException(e);
-			}
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					builder.append(URLEncoder.encode(value, encoding));
+					return null;
+				}
+			});
 		}
 
 		private void addQueryParameter(String key, Object value) {
@@ -142,7 +150,8 @@ public class JsonApiUrlBuilder {
 				for (Object element : (Collection<?>) value) {
 					addQueryParameter(key, (String) element);
 				}
-			} else {
+			}
+			else {
 				addQueryParameter(key, (String) value);
 			}
 		}

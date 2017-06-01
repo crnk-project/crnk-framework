@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
@@ -15,8 +20,9 @@ import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Pojo;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.PojoRepository;
@@ -28,11 +34,6 @@ import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourcePostTest extends BaseControllerTest {
 
@@ -92,10 +93,22 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// THEN
-		expectedException.expect(ResourceNotFoundException.class);
+		expectedException.expect(RepositoryNotFoundException.class);
 
 		// WHEN
 		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+	}
+
+	@Test
+	public void onUnknownResourceTypeShouldThrowException() throws Exception {
+		// GIVEN
+		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+
+		// THEN
+		expectedException.expect(RepositoryNotFoundException.class);
+
+		// WHEN
+		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
 	}
 
 	@Test
@@ -104,10 +117,10 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// THEN
-		expectedException.expect(RuntimeException.class);
+		expectedException.expect(RequestBodyNotFoundException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		sut.handle(new ResourcePath("tasks"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
 	}
 
 	@Test

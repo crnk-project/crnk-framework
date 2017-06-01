@@ -43,7 +43,7 @@ public class DocumentSerializerTest {
 		ResourceRegistry resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build(resourceRegistry, false));
+		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		reader = objectMapper.reader().forType(Document.class);
@@ -71,6 +71,24 @@ public class DocumentSerializerTest {
 		expected.append("    }");
 		expected.append("  }");
 		expected.append("}");
+		expected.append("}");
+
+		assertThatJson(json).describedAs(expected.toString());
+
+		Document readDoc = reader.readValue(json);
+		Assert.assertEquals(doc, readDoc);
+	}
+
+	@Test
+	public void testNullData() throws IOException {
+		Document doc = new Document();
+		doc.setData(Nullable.nullValue());
+
+		String json = writer.writeValueAsString(doc);
+
+		StringBuilder expected = new StringBuilder();
+		expected.append("{");
+		expected.append("\"data\" : null");
 		expected.append("}");
 
 		assertThatJson(json).describedAs(expected.toString());

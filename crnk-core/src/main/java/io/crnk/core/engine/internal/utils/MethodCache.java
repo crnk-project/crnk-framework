@@ -1,12 +1,12 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.utils.Optional;
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.crnk.core.utils.Optional;
+import org.apache.commons.lang3.ObjectUtils;
 
 public class MethodCache {
 
@@ -18,7 +18,8 @@ public class MethodCache {
 		if (method == null) {
 			try {
 				method = Optional.of(clazz.getMethod(name, parameters));
-			} catch (NoSuchMethodException e) { // NOSONAR
+			}
+			catch (NoSuchMethodException e) { // NOSONAR
 				method = Optional.empty();
 			}
 			cache.put(entry, method);
@@ -26,14 +27,14 @@ public class MethodCache {
 		return method;
 	}
 
-	private static class MethodCacheKey {
+	protected static class MethodCacheKey {
 
-		private Class<?> clazz;
+		private final Class<?> clazz;
 
-		private String name;
+		private final String name;
 
 		@SuppressWarnings("rawtypes")
-		private Class[] parameters;
+		private final Class[] parameters;
 
 		public MethodCacheKey(Class<?> clazz, String name, Class<?>[] parameters) {
 			this.clazz = clazz;
@@ -53,11 +54,12 @@ public class MethodCache {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof MethodCacheKey)) {
+			if (obj == null || obj.getClass() != MethodCacheKey.class) {
 				return false;
 			}
 			MethodCacheKey other = (MethodCacheKey) obj;
-			return ObjectUtils.equals(clazz, other.clazz) && ObjectUtils.equals(name, other.name) && Arrays.equals(parameters, other.parameters);
+			return ObjectUtils.equals(clazz, other.clazz) && ObjectUtils.equals(name, other.name) && Arrays
+					.equals(parameters, other.parameters);
 		}
 	}
 }

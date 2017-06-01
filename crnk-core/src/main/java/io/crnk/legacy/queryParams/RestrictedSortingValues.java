@@ -10,9 +10,9 @@ public enum RestrictedSortingValues {
 	/**
 	 * Ascending order
 	 */
-	asc,
+	asc, // NOSONAR deprecated
 	/**
 	 * Descending
 	 */
-	desc
+	desc // NOSONAR deprecated
 }

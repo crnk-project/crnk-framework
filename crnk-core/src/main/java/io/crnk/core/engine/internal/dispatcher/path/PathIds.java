@@ -36,12 +36,12 @@ public class PathIds {
 
 		PathIds pathIds = (PathIds) o;
 
-		return !(ids != null ? !ids.equals(pathIds.ids) : pathIds.ids != null);
+		return ids.equals(pathIds.ids);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return ids != null ? ids.hashCode() : 0;
+		return ids.hashCode();
 	}
 }

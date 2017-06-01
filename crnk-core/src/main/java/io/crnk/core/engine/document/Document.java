@@ -1,5 +1,10 @@
 package io.crnk.core.engine.document;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -8,14 +13,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.jackson.DocumentDataDeserializer;
 import io.crnk.core.engine.internal.jackson.NullableSerializer;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class Document implements MetaContainer, LinksContainer {
 
@@ -36,6 +37,16 @@ public class Document implements MetaContainer, LinksContainer {
 	@JsonInclude(Include.NON_EMPTY)
 	private List<ErrorData> errors;
 
+
+	public Nullable<Object> getData() {
+		return data;
+	}
+
+	public void setData(Nullable<Object> data) {
+		PreconditionUtil.assertNotNull("make use of Nullable instead of null", data);
+		this.data = data;
+	}
+
 	@Override
 	public ObjectNode getLinks() {
 		return links;
@@ -46,6 +57,14 @@ public class Document implements MetaContainer, LinksContainer {
 		this.links = links;
 	}
 
+	public List<Resource> getIncluded() {
+		return included;
+	}
+
+	public void setIncluded(List<Resource> includes) {
+		this.included = includes;
+	}
+
 	@Override
 	public ObjectNode getMeta() {
 		return meta;
@@ -54,25 +73,6 @@ public class Document implements MetaContainer, LinksContainer {
 	@Override
 	public void setMeta(ObjectNode meta) {
 		this.meta = meta;
-	}
-
-	public Nullable<Object> getData() {
-		return data;
-	}
-
-	public void setData(Nullable<Object> data) {
-		if (data == null) {
-			throw new NullPointerException("make use of Nullable instead of null");
-		}
-		this.data = data;
-	}
-
-	public List<Resource> getIncluded() {
-		return included;
-	}
-
-	public void setIncluded(List<Resource> includes) {
-		this.included = includes;
 	}
 
 	public List<ErrorData> getErrors() {
@@ -100,11 +100,13 @@ public class Document implements MetaContainer, LinksContainer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Document))
+		if (obj == null || obj.getClass() != Document.class) {
 			return false;
+		}
 		Document other = (Document) obj;
 		return Objects.equals(data, other.data) && Objects.equals(errors, other.errors) // NOSONAR
-				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta) && Objects.equals(links, other.links);
+				&& Objects.equals(included, other.included) && Objects.equals(meta, other.meta) && Objects
+				.equals(links, other.links);
 	}
 
 	@JsonIgnore

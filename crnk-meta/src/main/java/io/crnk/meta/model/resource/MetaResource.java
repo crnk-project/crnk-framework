@@ -6,7 +6,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
  * A JSON API resource.
  */
 @JsonApiResource(type = "meta/resource")
-public class MetaResource extends MetaResourceBase {
+public class MetaResource extends MetaResourceBase { // NOSONAR ignore exception hierarchy
 
 	private String resourceType;
 

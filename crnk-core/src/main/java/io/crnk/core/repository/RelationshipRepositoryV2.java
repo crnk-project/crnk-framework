@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * <p>
  * Base unidirectional repository responsible for operations on relations. All of the methods in this interface have
- * fieldName field as last parameter. It solves a problem of many relationships between the same resources.
+ * fieldName field as last legacy. It solves a problem of many relationships between the same resources.
  * <p>
  * There are two methods that are used for To-One relationships:
  * <ul>
@@ -47,7 +47,7 @@ public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extend
 	Class<D> getTargetResourceClass();
 
 	/**
-	 * Set a relation defined by a field. targetId parameter can be either in a form of an object or null value,
+	 * Set a relation defined by a field. targetId legacy can be either in a form of an object or null value,
 	 * which means that if there's a relation, it should be removed. It is used only for To-One relationship.
 	 *
 	 * @param source    instance of a source class
@@ -57,7 +57,7 @@ public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extend
 	void setRelation(T source, J targetId, String fieldName);
 
 	/**
-	 * Set a relation defined by a field. TargetIds parameter can be either in a form of an object or null value,
+	 * Set a relation defined by a field. TargetIds legacy can be either in a form of an object or null value,
 	 * which means that if there's a relation, it should be removed. It is used only for To-Many relationship.
 	 *
 	 * @param source    instance of a source class

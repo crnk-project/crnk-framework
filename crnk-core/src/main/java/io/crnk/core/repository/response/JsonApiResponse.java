@@ -10,21 +10,14 @@ import io.crnk.core.resource.meta.MetaInformation;
 public class JsonApiResponse {
 
 	private Object entity;
+
 	private MetaInformation metaInformation;
+
 	private LinksInformation linksInformation;
+
 	private Iterable<ErrorData> errors;
 
 	public JsonApiResponse() {
-	}
-
-	/**
-	 * @param jsonApiResponse Copy entity, metaInformation, linksInformation, errors from {@link JsonApiResponse}
-	 */
-	public JsonApiResponse(JsonApiResponse jsonApiResponse) {
-		this.entity = jsonApiResponse.entity;
-		this.metaInformation = jsonApiResponse.metaInformation;
-		this.linksInformation = jsonApiResponse.linksInformation;
-		this.errors = jsonApiResponse.errors;
 	}
 
 	public Object getEntity() {

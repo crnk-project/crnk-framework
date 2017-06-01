@@ -1,22 +1,23 @@
 package io.crnk.rs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.boot.CrnkProperties;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.rs.controller.SampleControllerWithPrefix;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
-import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
-import org.glassfish.jersey.test.spi.TestContainerFactory;
-import org.junit.Test;
+import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.rs.controller.SampleControllerWithPrefix;
+import io.crnk.test.mock.TestModule;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.repository.TaskRepository;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
+import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
+import org.glassfish.jersey.test.spi.TestContainerFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class UriInfoServiceUrlProviderTest extends JerseyTest {
 
@@ -29,6 +30,24 @@ public class UriInfoServiceUrlProviderTest extends JerseyTest {
 	protected Application configure() {
 		return new TestApplication();
 	}
+
+
+	@Before
+	public void setup() {
+		TaskRepository repo = new TaskRepository();
+
+		Task task = new Task();
+		task.setName("test");
+		task.setId(1L);
+		repo.save(task);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		super.tearDown();
+		TaskRepository.clear();
+	}
+
 
 	@Test
 	public void testLinkToHaveValidUrl() {
@@ -49,9 +68,10 @@ public class UriInfoServiceUrlProviderTest extends JerseyTest {
 		public TestApplication() {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
 			register(SampleControllerWithPrefix.class);
-			register(new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
-					new SampleJsonServiceLocator()));
 
+			CrnkFeature feature = new CrnkFeature();
+			feature.addModule(new TestModule());
+			register(feature);
 		}
 	}
 }

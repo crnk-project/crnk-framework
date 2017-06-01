@@ -158,7 +158,7 @@ export class BrowseService {
 				.filter(name => name.startsWith(paramValuePart))
 				.map(name => parameterStartSequence + "filter[" + name + "]");
 		} else if (paramValuePart == null) {
-			// default parameter suggestion
+			// default legacy suggestion
 			return ['filter[', 'sort', 'page[offset]', 'page[limit]', 'include', 'fields'].filter(it => it.startsWith(paramNamePart));
 		} else if (paramValuePart != null && paramNamePart == 'fields') {
 			// field suggestions

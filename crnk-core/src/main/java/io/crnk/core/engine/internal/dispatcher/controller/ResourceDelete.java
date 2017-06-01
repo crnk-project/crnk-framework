@@ -6,7 +6,6 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -18,11 +17,9 @@ import java.io.Serializable;
 public class ResourceDelete extends BaseController {
 
 	private final ResourceRegistry resourceRegistry;
-	private final TypeParser typeParser;
 
-	public ResourceDelete(ResourceRegistry resourceRegistry, TypeParser typeParser) {
+	public ResourceDelete(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
-		this.typeParser = typeParser;
 	}
 
 	/**
@@ -48,10 +45,6 @@ public class ResourceDelete extends BaseController {
 			throw new ResourceNotFoundException(resourceName);
 		}
 		for (String id : resourceIds.getIds()) {
-			@SuppressWarnings("unchecked") Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry
-					.getResourceInformation()
-					.getIdField()
-					.getType();
 			Serializable castedId = registryEntry.getResourceInformation().parseIdString(id);
 			//noinspection unchecked
 			registryEntry.getResourceRepository(parameterProvider).delete(castedId, queryAdapter);

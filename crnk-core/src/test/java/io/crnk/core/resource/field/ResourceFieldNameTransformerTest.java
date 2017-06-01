@@ -1,26 +1,38 @@
 package io.crnk.core.resource.field;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.internal.information.resource.AnnotatedClassBuilder;
+import io.crnk.core.engine.internal.information.resource.AnnotatedFieldBuilder;
+import io.crnk.core.engine.internal.information.resource.AnnotatedMethodBuilder;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ResourceFieldNameTransformerTest {
 
 	private ObjectMapper objectMapper;
+
 	private ResourceFieldNameTransformer sut;
 
 	@Before
 	public void setUp() throws Exception {
 		objectMapper = new ObjectMapper();
 		sut = new ResourceFieldNameTransformer(objectMapper.getSerializationConfig());
+	}
+
+	@Test
+	public void checkUtilConstructors() {
+		CoreClassTestUtils.assertPrivateConstructor(AnnotatedClassBuilder.class);
+		CoreClassTestUtils.assertPrivateConstructor(AnnotatedFieldBuilder.class);
+		CoreClassTestUtils.assertPrivateConstructor(AnnotatedMethodBuilder.class);
 	}
 
 	@Test
@@ -152,9 +164,12 @@ public class ResourceFieldNameTransformerTest {
 	private static class TestClass {
 
 		private String field;
+
 		private String namingStrategyTest;
+
 		@JsonProperty("customName")
 		private String fieldWithJsonProperty;
+
 		@JsonProperty
 		private String fieldWithDefaultJsonProperty;
 

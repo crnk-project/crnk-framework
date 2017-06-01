@@ -1,15 +1,32 @@
 package io.crnk.legacy.queryParams;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.legacy.queryParams.include.Inclusion;
-import io.crnk.legacy.queryParams.params.*;
-
-import java.math.BigDecimal;
-import java.util.*;
+import io.crnk.legacy.queryParams.params.FilterParams;
+import io.crnk.legacy.queryParams.params.GroupingParams;
+import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
+import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
+import io.crnk.legacy.queryParams.params.SortingParams;
+import io.crnk.legacy.queryParams.params.TypedParams;
 
 @SuppressWarnings({"deprecation"})
 public class DefaultQueryParamsConverter implements QueryParamsConverter {
@@ -49,23 +66,27 @@ public class DefaultQueryParamsConverter implements QueryParamsConverter {
 			String resourceType = getResourceType(spec.getResourceClass());
 			Map<String, Set<String>> map = new LinkedHashMap<>();
 			for (FilterSpec filter : filters) {
-				String key = joinPath(filter.getAttributePath());
-				if (filter.getOperator() != null && filter.getOperator() != FilterOperator.EQ)
-					key += "." + filter.getOperator().name();
-
-				Set<String> valueSet = new LinkedHashSet<>();
-				if (filter.getValue() instanceof Set) {
-					for (Object value : (Set<?>) filter.getValue()) {
-						valueSet.add(value.toString());
-					}
-				} else {
-					valueSet.add(filter.getValue().toString());
-				}
-				map.put(key, valueSet);
+				applyFilterSpec(map, filter);
 			}
 			decodedFiltersMap.put(resourceType, new FilterParams(map));
 		}
 		queryParams.setFilters(new TypedParams<>(Collections.unmodifiableMap(decodedFiltersMap)));
+	}
+
+	private void applyFilterSpec(Map<String, Set<String>> map, FilterSpec filter) {
+		String key = joinPath(filter.getAttributePath());
+		if (filter.getOperator() != null && filter.getOperator() != FilterOperator.EQ)
+			key += "." + filter.getOperator().name();
+
+		Set<String> valueSet = new LinkedHashSet<>();
+		if (filter.getValue() instanceof Set) {
+			for (Object value : (Set<?>) filter.getValue()) {
+				valueSet.add(value.toString());
+			}
+		} else {
+			valueSet.add(filter.getValue().toString());
+		}
+		map.put(key, valueSet);
 	}
 
 	private String joinPath(List<String> pathList) {

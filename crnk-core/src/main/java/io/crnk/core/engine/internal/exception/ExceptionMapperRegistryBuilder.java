@@ -2,6 +2,7 @@ package io.crnk.core.engine.internal.exception;
 
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import org.apache.commons.lang3.reflect.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;

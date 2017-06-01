@@ -26,7 +26,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.buildPath("tasks/1/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
 		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
@@ -71,7 +71,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		Document newTaskDocument = new Document();
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
-		JsonPath taskPath = pathBuilder.buildPath("/tasks");
+		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
@@ -88,7 +88,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		Document newProjectDocument = new Document();
 		newProjectDocument.setData(Nullable.of((Object) createProject()));
 
-		JsonPath projectPath = pathBuilder.buildPath("/tasks/" + taskId + "/project");
+		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/project");
 		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
@@ -113,7 +113,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		Document newTaskDocument = new Document();
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
-		JsonPath taskPath = pathBuilder.buildPath("/tasks");
+		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
@@ -130,7 +130,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		Document newProjectDocument = new Document();
 		newProjectDocument.setData(Nullable.of((Object) createProject()));
 
-		JsonPath projectPath = pathBuilder.buildPath("/tasks/" + taskId + "/projects");
+		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/projects");
 		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN

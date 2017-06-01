@@ -50,6 +50,7 @@ gradle.beforeProject { Project project ->
 
 		def docs = project.name == 'crnk-documentation'
 		def ui = project.name == 'crnk-ui'
+		def test = project.name == 'crnk-test'
 		def examples = project.name.contains('example')
 
 		if (!docs) {
@@ -64,15 +65,27 @@ gradle.beforeProject { Project project ->
 			}
 		}
 
-		if (!docs && !examples) {
+		if (!docs && !examples && !test) {
 			// https://about.sonarqube.com/get-started/
 			apply plugin: "org.sonarqube"
+			apply plugin: "jacoco"
+
+			jacoco {
+				toolVersion = "0.7.6.201602180812"
+			}
+
+
+			sonarqube {
+				properties {
+					property 'sonar.coverage.exclusions', "**/legacy/**" }
+			}
+
 		}
 
 		apply plugin: 'maven-publish'
 
 
-		if (!docs && !examples) {
+		if (!docs && !examples && isProductionBuild) {
 
 			apply plugin: 'signing'
 

@@ -1,12 +1,13 @@
 package io.crnk.meta.model;
 
+import java.lang.reflect.Type;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
 
 @JsonApiResource(type = "meta/type")
 public class MetaType extends MetaElement {
@@ -27,9 +28,6 @@ public class MetaType extends MetaElement {
 	}
 
 	public void setImplementationType(Type implementationType) {
-		if (implementationType == long.class) {
-			throw new IllegalArgumentException();
-		}
 		this.implementationType = implementationType;
 	}
 
@@ -54,16 +52,12 @@ public class MetaType extends MetaElement {
 	}
 
 	public MetaType getElementType() {
-		if (elementType == null) {
-			throw new IllegalStateException(getClass().getName());
-		}
+		PreconditionUtil.assertNotNull(getClass().getName(), elementType);
 		return elementType;
 	}
 
 	public void setElementType(MetaType elementType) {
-		if (elementType == null) {
-			throw new NullPointerException();
-		}
+		PreconditionUtil.assertNotNull("cannot be null", elementType);
 		this.elementType = elementType;
 	}
 }

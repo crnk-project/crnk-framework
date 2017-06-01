@@ -3,6 +3,7 @@ package io.crnk.core.resource.paging;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.QuerySpec;
@@ -92,5 +93,13 @@ public class PagedLinksInformationQuerySpecTest extends AbstractQuerySpecTest {
 		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=4&page[offset]=4", linksInformation.getLast());
 		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=4", linksInformation.getFirst());
 		Assert.assertNull(linksInformation.getNext());
+	}
+
+	@Test(expected = BadRequestException.class)
+	public void testInvalidPaging() throws InstantiationException, IllegalAccessException {
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+		querySpec.setOffset(1L);
+		querySpec.setLimit(3L);
+		adapter.findAll(querySpec).getLinksInformation();
 	}
 }

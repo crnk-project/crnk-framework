@@ -1,26 +1,24 @@
 package io.crnk.rs;
 
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.list.ResourceListBase;
-import io.crnk.core.utils.Nullable;
-import io.crnk.rs.type.JsonApiMediaType;
-
+import java.io.IOException;
+import java.util.Arrays;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.util.Arrays;
+
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.ResourceListBase;
+import io.crnk.core.utils.Nullable;
+import io.crnk.rs.type.JsonApiMediaType;
 
 /**
  * Uses the Crnk {@link DocumentMapper} to create a JSON API response for
@@ -50,7 +48,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setStatus(Response.Status.OK.getStatusCode());
 				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 			}
-
 			return;
 		}
 
@@ -62,7 +59,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 
 			ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
 			try {
-				UriInfo uriInfo = requestContext.getUriInfo();
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					HttpRequestContext context = new HttpRequestContextBaseAdapter(new JaxrsRequestContext(requestContext,
 							feature));
@@ -75,7 +71,8 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, null));
 				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 
-			} finally {
+			}
+			finally {
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					((HttpRequestContextProvider) serviceUrlProvider).onRequestFinished();
 				}
@@ -93,20 +90,8 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 * <code>false</code>, otherwise
 	 */
 	private boolean isResourceResponse(Object response) {
-		boolean singleResource = response.getClass().getAnnotation(JsonApiResource.class) != null;
+		boolean singleResource = feature.getBoot().getResourceRegistry().hasEntry(response.getClass());
 		boolean resourceList = ResourceListBase.class.isAssignableFrom(response.getClass());
 		return singleResource || resourceList;
 	}
-
-	/**
-	 * Checks the response's media type.
-	 *
-	 * @param responseContext the response context
-	 * @return {@code true}, if media type is application/vnd.api+json,<br />
-	 * {@code false}, otherwise
-	 */
-	private boolean isMediaTypeJsonApi(ContainerResponseContext responseContext) {
-		return JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
-	}
-
 }

@@ -1,14 +1,20 @@
 package io.crnk.spring;
 
+import java.io.IOException;
+import javax.annotation.Priority;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.servlet.internal.ServletRequestContext;
-
-import javax.annotation.Priority;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Priority(20)
 public class SpringCrnkFilter implements Filter {
@@ -37,14 +43,15 @@ public class SpringCrnkFilter implements Filter {
 			if (!context.checkAbort()) {
 				chain.doFilter(req, res);
 			}
-		} else {
+		}
+		else {
 			chain.doFilter(req, res);
 		}
 	}
 
 	@Override
 	public void destroy() {
-
+		// nothing to do
 	}
 }
 

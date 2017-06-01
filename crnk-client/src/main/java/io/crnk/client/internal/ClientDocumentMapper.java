@@ -1,5 +1,8 @@
 package io.crnk.client.internal;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.client.internal.proxy.ObjectProxy;
@@ -13,6 +16,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.document.mapper.ResourceMapper;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -20,9 +24,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.List;
 
 public class ClientDocumentMapper extends DocumentMapper {
 
@@ -34,7 +35,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	private TypeParser typeParser;
 
-	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider) {
+	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
+			propertiesProvider) {
 		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, true);
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();
@@ -46,14 +48,16 @@ public class ClientDocumentMapper extends DocumentMapper {
 		return new ResourceMapper(util, client, objectMapper) {
 
 			@Override
-			protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+			protected void setRelationship(Resource resource, ResourceField field, Object entity,
+					ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
 				// we also include relationship data if it is not null and not a
 				// unloaded proxy
 				boolean includeRelation = true;
 				Object relationshipValue = field.getAccessor().getValue(entity);
 				if (relationshipValue instanceof ObjectProxy) {
 					includeRelation = ((ObjectProxy) relationshipValue).isLoaded();
-				} else {
+				}
+				else {
 					// TODO for fieldSets handling in the future the lazy
 					// handling must be different
 					includeRelation = relationshipValue != null || !field.isLazy() && !field.isCollection();
@@ -63,7 +67,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 					Relationship relationship = new Relationship();
 					if (relationshipValue instanceof Collection) {
 						relationship.setData(Nullable.of((Object) util.toResourceIds((Collection<?>) relationshipValue)));
-					} else {
+					}
+					else {
 						relationship.setData(Nullable.of((Object) util.toResourceId(relationshipValue)));
 					}
 					resource.getRelationships().put(field.getJsonName(), relationship);
@@ -77,11 +82,11 @@ public class ClientDocumentMapper extends DocumentMapper {
 	}
 
 	public Object fromDocument(Document document, boolean getList) {
-		ClientResourceUpsert upsert = new ClientResourceUpsert(resourceRegistry, propertiesProvider, typeParser, objectMapper, null, proxyFactory);
+		ClientResourceUpsert upsert =
+				new ClientResourceUpsert(resourceRegistry, propertiesProvider, typeParser, objectMapper, null, proxyFactory);
 
-		if (document.getErrors() != null && !document.getErrors().isEmpty()) {
-			throw new IllegalStateException("document contains json api errors and cannot be processed");
-		}
+		PreconditionUtil.assertFalse("document contains json api errors and cannot be processed",
+				document.getErrors() != null && !document.getErrors().isEmpty());
 
 		if (!document.getData().isPresent()) {
 			return null;
@@ -110,13 +115,12 @@ public class ClientDocumentMapper extends DocumentMapper {
 				resourceList.setMeta(new JsonMetaInformation(document.getMeta(), objectMapper));
 			}
 			return resourceList;
-		} else {
+		}
+		else {
 			if (dataObjects.isEmpty()) {
 				return null;
 			}
-			if (dataObjects.size() > 1) {
-				throw new IllegalStateException("expected unique result " + dataObjects);
-			}
+			PreconditionUtil.assertFalse("expected unique result", dataObjects.size() > 1);
 			return dataObjects.get(0);
 		}
 	}

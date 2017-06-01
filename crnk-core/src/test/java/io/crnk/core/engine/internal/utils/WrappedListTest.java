@@ -10,7 +10,9 @@ public class WrappedListTest {
 
 	@Test
 	public void test() {
-		WrappedList<String> list = new WrappedList<String>(new ArrayList<String>());
+		ArrayList<String> rawList = new ArrayList<>();
+		WrappedList<String> list = new WrappedList<>(rawList);
+		Assert.assertSame(rawList, list.getWrappedList());
 		list.setWrappedList(new ArrayList<String>());
 		Assert.assertEquals(0, list.size());
 		Assert.assertEquals(list, list);

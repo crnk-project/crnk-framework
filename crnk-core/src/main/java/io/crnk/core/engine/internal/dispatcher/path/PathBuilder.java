@@ -1,18 +1,17 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Builder responsible for parsing URL path.
@@ -48,7 +47,7 @@ public class PathBuilder {
 	 * @param jsonPath JsonPath structure to be parsed
 	 * @return String representing structure provided in the input
 	 */
-	public static String buildPath(JsonPath jsonPath) {
+	public static String build(JsonPath jsonPath) {
 		List<String> urlParts = new LinkedList<>();
 
 		JsonPath currentJsonPath = jsonPath;
@@ -75,23 +74,6 @@ public class PathBuilder {
 
 	private static String mergeIds(PathIds ids) {
 		return StringUtils.join(PathIds.ID_SEPARATOR, ids.getIds());
-	}
-
-	/**
-	 * Parses path provided by the application. The path provided cannot contain neither hostname nor protocol. It
-	 * can start or end with slash e.g. <i>/tasks/1/</i> or <i>tasks/1</i>.
-	 *
-	 * @param path Path to be parsed
-	 * @return doubly-linked list which represents path given at the input
-	 * @deprecated use build
-	 */
-	public JsonPath buildPath(String path) {
-		JsonPath jsonPath = build(path);
-		if (jsonPath != null) {
-			return jsonPath;
-		} else {
-			throw new RepositoryNotFoundException(path);
-		}
 	}
 
 	/**
@@ -180,11 +162,9 @@ public class PathBuilder {
 			if (actionName != null) {
 				ActionPath actionPath = new ActionPath(actionName);
 				actionPath.setParentResource(currentJsonPath);
-				currentJsonPath.setChildResource(actionPath);
 				currentJsonPath = actionPath;
 			}
 			if (previousJsonPath != null) {
-				previousJsonPath.setChildResource(currentJsonPath);
 				currentJsonPath.setParentResource(previousJsonPath);
 			}
 			previousJsonPath = currentJsonPath;

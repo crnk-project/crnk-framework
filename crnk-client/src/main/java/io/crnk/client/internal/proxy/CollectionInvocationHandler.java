@@ -26,25 +26,22 @@ public class CollectionInvocationHandler implements InvocationHandler, ObjectPro
 	}
 
 	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (method.getDeclaringClass() == Object.class || method.getDeclaringClass() == ObjectProxy.class) {
 			return method.invoke(this, args);
 		}
 		if (collection == null) {
-			synchronized (this) {
-				if (collection == null) {
-					collection = context.getCollection(resourceClass, url);
+			collection = context.getCollection(resourceClass, url);
 
-					// convert list to set
-					if (useSet) {
-						collection = new HashSet<>(collection);
-					}
-				}
+			// convert list to set
+			if (useSet) {
+				collection = new HashSet<>(collection);
 			}
 		}
 		try {
 			return method.invoke(collection, args);
-		} catch (InvocationTargetException e) { // NO SONAR ok this way
+		}
+		catch (InvocationTargetException e) { // NO SONAR ok this way
 			throw e.getCause();
 		}
 	}

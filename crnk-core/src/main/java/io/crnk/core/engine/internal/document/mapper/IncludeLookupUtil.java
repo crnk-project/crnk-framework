@@ -1,5 +1,13 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -17,11 +25,10 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 
-import java.util.*;
-
 public class IncludeLookupUtil {
 
 	private ResourceRegistry resourceRegistry;
+
 
 	private IncludeBehavior includeBehavior;
 
@@ -30,6 +37,7 @@ public class IncludeLookupUtil {
 		this.includeBehavior = includeBehavior;
 	}
 
+
 	public static LookupIncludeBehavior getDefaultLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
 		if (propertiesProvider == null) {
 			return LookupIncludeBehavior.NONE;
@@ -37,16 +45,17 @@ public class IncludeLookupUtil {
 		// determine system property for include look up
 		String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
 		boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
-		String includeAutomaticallyOverwriteString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
+		String includeAutomaticallyOverwriteString =
+				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
 		boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-		if (includeAutomatically) {
-			if (includeAutomaticallyOverwrite)
-				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			else
-				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
-		} else {
-			return LookupIncludeBehavior.NONE;
+
+		if (includeAutomaticallyOverwrite) {
+			return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
 		}
+		else if (includeAutomatically) {
+			return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
+		}
+		return LookupIncludeBehavior.NONE;
 	}
 
 	public static IncludeBehavior getIncludeBehavior(PropertiesProvider propertiesProvider) {
@@ -83,7 +92,8 @@ public class IncludeLookupUtil {
 
 			// TODO same relationship on multiple children
 			for (ResourceField field : information.getRelationshipFields()) {
-				boolean existsOnSuperType = superInformation != null && superInformation.findRelationshipFieldByName(field.getJsonName()) != null;
+				boolean existsOnSuperType =
+						superInformation != null && superInformation.findRelationshipFieldByName(field.getJsonName()) != null;
 				if (!existsOnSuperType) {
 					fields.add(field);
 				}
@@ -129,38 +139,49 @@ public class IncludeLookupUtil {
 	}
 
 	public boolean isInclusionRequested(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
-		if (queryAdapter == null || queryAdapter.getIncludedRelations() == null || queryAdapter.getIncludedRelations().getParams() == null) {
+		if (queryAdapter == null || queryAdapter.getIncludedRelations() == null
+				|| queryAdapter.getIncludedRelations().getParams() == null) {
 			return false;
 		}
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
-			QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
-			if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
-				return contains(querySpec, toPathList(fieldPath, 0));
-			} else {
-				for (int i = fieldPath.size() - 1; i >= 0; i--) {
-					List<String> path = toPathList(fieldPath, i);
+			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
+		}
+		else {
+			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
+		}
+	}
 
-					// TODO subtyping not properly supported
-					ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
-					QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation.getResourceClass());
-					if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
-						return true;
-					}
-				}
-				return contains(querySpec, toPathList(fieldPath, 0));
-			}
-		} else {
-			Map<String, IncludedRelationsParams> params = queryAdapter.getIncludedRelations().getParams();
-
-			// we have to possibilities for inclusion: by type or dot notation
+	private boolean isInclusionRequestedForQueryspec(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
+		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
+		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
+			return contains(querySpec, toPathList(fieldPath, 0));
+		}
+		else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
-				String path = toPath(fieldPath, i);
+				List<String> path = toPathList(fieldPath, i);
+
+				// TODO subtyping not properly supported
 				ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
-				IncludedRelationsParams includedRelationsParams = params.get(rootInformation.getResourceType());
-				if (includedRelationsParams != null && contains(includedRelationsParams, path)) {
+				QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation.getResourceClass());
+				if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
 					return true;
 				}
+			}
+			return contains(querySpec, toPathList(fieldPath, 0));
+		}
+	}
+
+	private boolean isInclusionRequestedForQueryParams(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
+		Map<String, IncludedRelationsParams> params = queryAdapter.getIncludedRelations().getParams();
+
+		// we have to possibilities for inclusion: by type or dot notation
+		for (int i = fieldPath.size() - 1; i >= 0; i--) {
+			String path = toPath(fieldPath, i);
+			ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
+			IncludedRelationsParams includedRelationsParams = params.get(rootInformation.getResourceType());
+			if (includedRelationsParams != null && contains(includedRelationsParams, path)) {
+				return true;
 			}
 		}
 		return false;
@@ -186,7 +207,8 @@ public class IncludeLookupUtil {
 	}
 
 	private boolean startsWith(IncludeRelationSpec inclusion, List<String> path) {
-		return inclusion.getAttributePath().size() > path.size() && inclusion.getAttributePath().subList(0, path.size()).equals(path);
+		return inclusion.getAttributePath().size() > path.size() && inclusion.getAttributePath().subList(0, path.size())
+				.equals(path);
 	}
 
 	private String toPath(List<ResourceField> fieldPath, int offset) {

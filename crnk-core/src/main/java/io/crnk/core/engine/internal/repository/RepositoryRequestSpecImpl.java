@@ -1,25 +1,22 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.IncludeFieldSpec;
-import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
-
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Add some point maybe a more prominent api is necessary for this. But i likely
@@ -52,7 +49,8 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forSave(ModuleRegistry moduleRegistry, HttpMethod method, QueryAdapter queryAdapter, Object entity) {
+	public static RepositoryRequestSpec forSave(ModuleRegistry moduleRegistry, HttpMethod method, QueryAdapter queryAdapter,
+			Object entity) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.entity = entity;
@@ -83,7 +81,8 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forFindTarget(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, List<?> ids, ResourceField relationshipField) {
+	public static RepositoryRequestSpec forFindTarget(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, List<?> ids,
+			ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
@@ -93,7 +92,8 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		return spec;
 	}
 
-	public static RepositoryRequestSpecImpl forRelation(ModuleRegistry moduleRegistry, HttpMethod method, Object entity, QueryAdapter queryAdapter, Iterable<?> ids, ResourceField relationshipField) {
+	public static RepositoryRequestSpecImpl forRelation(ModuleRegistry moduleRegistry, HttpMethod method, Object entity,
+			QueryAdapter queryAdapter, Iterable<?> ids, ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.entity = entity;
 		spec.queryAdapter = queryAdapter;
@@ -121,8 +121,9 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QuerySpec getQuerySpec(ResourceInformation targetResourceInformation) {
-		if (queryAdapter == null)
+		if (queryAdapter == null) {
 			return null;
+		}
 		Class<?> targetResourceClass = targetResourceInformation.getResourceClass();
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
@@ -135,46 +136,11 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QueryParams getQueryParams() {
-		if (queryAdapter == null)
+		if (queryAdapter == null) {
 			return null;
-		if (!(queryAdapter instanceof QueryParamsAdapter)) {
-			QuerySpec rootQuerySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
-			return convertToQueryParams(rootQuerySpec);
-		}
-		return ((QueryParamsAdapter) queryAdapter).getQueryParams();
-	}
-
-	private QueryParams convertToQueryParams(QuerySpec rootQuerySpec) {
-		Map<String, Set<String>> map = new HashMap<>();
-		List<QuerySpec> querySpecs = new ArrayList<>();
-		querySpecs.addAll(rootQuerySpec.getRelatedSpecs().values());
-		querySpecs.add(rootQuerySpec);
-		for (QuerySpec spec : querySpecs) {
-			if (!spec.getFilters().isEmpty() || !spec.getSort().isEmpty() || spec.getLimit() != null || spec.getOffset() != 0) {
-				throw new UnsupportedOperationException(); // not
-				// implemented
-			}
-
-			String resourceType = moduleRegistry.getResourceRegistry().findEntry(spec.getResourceClass()).getResourceInformation().getResourceType();
-			if (!spec.getIncludedFields().isEmpty()) {
-				Set<String> fieldNames = new HashSet<>();
-				for (IncludeFieldSpec field : spec.getIncludedFields()) {
-					fieldNames.add(StringUtils.join(".", field.getAttributePath()));
-				}
-				map.put("fields[" + resourceType + "]", fieldNames);
-			}
-
-			if (!spec.getIncludedRelations().isEmpty()) {
-				Set<String> fieldNames = new HashSet<>();
-				for (IncludeRelationSpec field : spec.getIncludedRelations()) {
-					fieldNames.add(StringUtils.join(".", field.getAttributePath()));
-				}
-				map.put("include[" + resourceType + "]", fieldNames);
-			}
 		}
 
-		QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
-		return queryParamsBuilder.buildQueryParams(map);
+		return queryAdapter.toQueryParams();
 	}
 
 	@Override

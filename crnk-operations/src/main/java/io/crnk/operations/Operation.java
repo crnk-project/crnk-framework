@@ -1,6 +1,7 @@
 package io.crnk.operations;
 
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.internal.utils.CompareUtils;
 
 public class Operation {
 
@@ -9,6 +10,15 @@ public class Operation {
 	private String path;
 
 	private Resource value;
+
+	public Operation() {
+	}
+
+	public Operation(String op, String path, Resource value) {
+		this.op = op;
+		this.path = path;
+		this.value = value;
+	}
 
 	public String getOp() {
 		return op;
@@ -36,22 +46,11 @@ public class Operation {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
+		if (o != null && getClass() == o.getClass()) {
+			Operation operation = (Operation) o;
+			return CompareUtils.isEquals(op, operation.op) && CompareUtils.isEquals(path, operation.path) && CompareUtils.isEquals(value, operation.value);
 		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-
-		Operation operation = (Operation) o;
-
-		if (op != null ? !op.equals(operation.op) : operation.op != null) {
-			return false;
-		}
-		if (path != null ? !path.equals(operation.path) : operation.path != null) {
-			return false;
-		}
-		return value != null ? value.equals(operation.value) : operation.value == null;
+		return false;
 	}
 
 	@Override

@@ -20,29 +20,4 @@ public class DefaultResourceInstanceBuilder<T> implements ResourceInstanceBuilde
 	public T buildResource(Resource body) {
 		return ClassUtils.newInstance(resourceClass);
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((resourceClass == null) ? 0 : resourceClass.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DefaultResourceInstanceBuilder<?> other = (DefaultResourceInstanceBuilder<?>) obj;
-		if (resourceClass == null) {
-			if (other.resourceClass != null)
-				return false;
-		} else if (!resourceClass.equals(other.resourceClass))
-			return false;
-		return true;
-	}
 }

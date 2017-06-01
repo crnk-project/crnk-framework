@@ -1,20 +1,25 @@
 package io.crnk.meta.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.resource.annotations.JsonApiResource;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "meta/collectionType")
 public abstract class MetaCollectionType extends MetaType {
 
 	@JsonIgnore
 	public <T> Collection<T> newInstance() {
-		if (getImplementationClass() == Set.class)
+		if (getImplementationClass() == Set.class) {
 			return new HashSet<>();
-		if (getImplementationClass() == List.class)
-			return new ArrayList<>();
-		throw new UnsupportedOperationException(getImplementationClass().getName());
+		}
+		PreconditionUtil.assertEquals("expect Set or List type", List.class, getImplementationClass());
+		return new ArrayList<>();
 	}
 
 }

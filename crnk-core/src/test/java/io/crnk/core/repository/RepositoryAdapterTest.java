@@ -36,7 +36,7 @@ public class RepositoryAdapterTest {
 	public void setUp() throws Exception {
 		queryParams = new QueryParams();
 		queryAdapter = new QueryParamsAdapter(queryParams);
-		parameterFactory = new ParametersFactory(moduleRegistry, new NewInstanceRepositoryMethodParameterProvider());
+		parameterFactory = new ParametersFactory(new NewInstanceRepositoryMethodParameterProvider());
 	}
 
 	@Test

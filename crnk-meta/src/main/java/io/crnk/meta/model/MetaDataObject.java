@@ -1,14 +1,21 @@
 package io.crnk.meta.model;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Modifier;
-import java.util.*;
 
 @JsonApiResource(type = "meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
@@ -61,8 +68,9 @@ public abstract class MetaDataObject extends MetaType {
 	// TODO
 	public MetaAttribute getVersionAttribute() {
 		for (MetaAttribute attr : getAttributes()) {
-			if (attr.isVersion())
+			if (attr.isVersion()) {
 				return attr;
+			}
 		}
 		return null;
 	}
@@ -70,13 +78,6 @@ public abstract class MetaDataObject extends MetaType {
 	@SuppressWarnings("unchecked")
 	private void clearSubtypeCache() {
 		subTypesCache = new List[4];
-	}
-
-	private void clearCache() {
-		clearSubtypeCache();
-		attributes = null;
-		declaredAttributes = null;
-		attrMap = null;
 	}
 
 	public List<? extends MetaAttribute> getAttributes() {
@@ -119,8 +120,9 @@ public abstract class MetaDataObject extends MetaType {
 
 	public MetaAttributePath resolvePath(List<String> attrPath, MetaAttributeFinder finder) {
 		setupCache();
-		if (attrPath == null || attrPath.isEmpty())
-			throw new IllegalArgumentException("invalid attribute path '" + attrPath + "'");
+		if (attrPath == null) {
+			throw new IllegalArgumentException("attribute path must not be null");
+		}
 		LinkedList<MetaAttribute> list = new LinkedList<>();
 
 		MetaDataObject currentMdo = this;
@@ -139,7 +141,8 @@ public abstract class MetaDataObject extends MetaType {
 				i++;
 				MetaType valueType = mapType.getElementType();
 				currentMdo = nextPathElement(valueType, i, attrPath);
-			} else {
+			}
+			else {
 				list.add(pathElement);
 				currentMdo = nextPathElement(pathElement.getType(), i, attrPath);
 			}
@@ -152,7 +155,8 @@ public abstract class MetaDataObject extends MetaType {
 	private MetaDataObject nextPathElement(MetaType pathElementType, int i, List<String> pathElements) {
 		if (i == pathElements.size() - 1) {
 			return null;
-		} else {
+		}
+		else {
 			if (!(pathElementType instanceof MetaDataObject)) {
 				throw new IllegalArgumentException("failed to resolve path " + pathElements);
 			}
@@ -198,7 +202,8 @@ public abstract class MetaDataObject extends MetaType {
 		List<MetaDataObject> cached = subTypesCache[cacheIndex];
 		if (cached != null) {
 			return cached;
-		} else {
+		}
+		else {
 			ArrayList<MetaDataObject> types = computeSubTypes(transitive, self);
 			List<MetaDataObject> unmodifiableList = Collections.unmodifiableList(types);
 			subTypesCache[cacheIndex] = unmodifiableList;
@@ -209,12 +214,14 @@ public abstract class MetaDataObject extends MetaType {
 	private ArrayList<MetaDataObject> computeSubTypes(boolean transitive, boolean self) {
 		ArrayList<MetaDataObject> types = new ArrayList<>();
 
-		if (self && (!isAbstract() || !subTypes.isEmpty()))
+		if (self && (!isAbstract() || !subTypes.isEmpty())) {
 			types.add(this);
+		}
 
 		for (MetaDataObject subType : subTypes) {
-			if (!subType.isAbstract() || !subType.getSubTypes().isEmpty())
+			if (!subType.isAbstract() || !subType.getSubTypes().isEmpty()) {
 				types.add(subType);
+			}
 			if (transitive) {
 				types.addAll(subType.getSubTypes(true, false));
 			}

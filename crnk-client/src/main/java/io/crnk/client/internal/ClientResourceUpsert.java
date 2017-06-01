@@ -1,5 +1,12 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -21,15 +28,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -87,10 +86,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 		List<Object> objects = new ArrayList<>();
 		for (Resource resource : resources) {
 
-			RegistryEntry registryEntry = resourceRegistry.getEntry(resource.getType());
-			if (registryEntry == null) {
-				throw new RepositoryNotFoundException(resource.getType());
-			}
+			RegistryEntry registryEntry = getRegistryEntry(resource.getType());
 			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 
 			Object object = newResource(resourceInformation, resource);

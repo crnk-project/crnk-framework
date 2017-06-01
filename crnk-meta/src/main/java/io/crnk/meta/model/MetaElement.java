@@ -1,11 +1,15 @@
 package io.crnk.meta.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.resource.annotations.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "meta/element")
 public class MetaElement {
@@ -42,14 +46,16 @@ public class MetaElement {
 	}
 
 	public MetaType asType() {
-		if (!(this instanceof MetaType))
+		if (!(this instanceof MetaType)) {
 			throw new IllegalStateException(getName() + " not a MetaEntity");
+		}
 		return (MetaType) this;
 	}
 
 	public MetaDataObject asDataObject() {
-		if (!(this instanceof MetaDataObject))
+		if (!(this instanceof MetaDataObject)) {
 			throw new IllegalStateException(getName() + " not a MetaDataObject");
+		}
 		return (MetaDataObject) this;
 	}
 

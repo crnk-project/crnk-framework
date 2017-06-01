@@ -7,6 +7,8 @@ import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.DefaultResourceLookup;
@@ -57,9 +59,34 @@ public class DefaultQuerySpecSerializerTest {
 		check("https://127.0.0.1:1234/tasks/", null, new QuerySpec(Task.class));
 	}
 
+	@Test(expected = RepositoryNotFoundException.class)
+	public void unknownResourceShouldThrowException() throws InstantiationException, IllegalAccessException {
+		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		Class<?> notAResourceClass = String.class;
+		urlBuilder.buildUrl(entry.getResourceInformation(), null, new QuerySpec(notAResourceClass));
+	}
+
 	@Test
 	public void testFindAll() throws InstantiationException, IllegalAccessException {
 		check("http://127.0.0.1/tasks/", null, new QuerySpec(Task.class));
+	}
+
+	@Test
+	public void testFilterNonRootType() throws InstantiationException, IllegalAccessException {
+		QuerySpec projectQuerySpec = new QuerySpec(Project.class);
+		projectQuerySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"));
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.putRelatedSpec(Project.class, projectQuerySpec);
+		check("http://127.0.0.1/tasks/?filter[projects][name][EQ]=test", null, querySpec);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void testNestedFilterSpecNotYetSupported() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(FilterSpec.or(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"), new FilterSpec(Arrays.asList("name"), FilterOperator.GE, "test")));
+
+		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		urlBuilder.buildUrl(entry.getResourceInformation(), null, querySpec);
 	}
 
 	@Test
@@ -77,6 +104,30 @@ public class DefaultQuerySpecSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 		check("http://127.0.0.1/tasks/?sort[tasks]=name", null, querySpec);
+	}
+
+	@Test
+	public void testFindAllOrderMultipleFields() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
+		querySpec.addSort(new SortSpec(Arrays.asList("id"), Direction.DESC));
+		check("http://127.0.0.1/tasks/?sort[tasks]=name%2C-id", null, querySpec);
+	}
+
+	@Test
+	public void testFindAllIncludeMultipleFields() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeField(Arrays.asList("name"));
+		querySpec.includeField(Arrays.asList("id"));
+		check("http://127.0.0.1/tasks/?fields[tasks]=name%2Cid", null, querySpec);
+	}
+
+	@Test
+	public void testFindAllIncludeMultipleRelations() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeRelation(Arrays.asList("project"));
+		querySpec.includeRelation(Arrays.asList("projects"));
+		check("http://127.0.0.1/tasks/?include[tasks]=project%2Cprojects", null, querySpec);
 	}
 
 	@Test

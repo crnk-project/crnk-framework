@@ -1,8 +1,5 @@
 package io.crnk.core.engine.parser;
 
-import io.crnk.core.engine.internal.utils.MethodCache;
-import io.crnk.core.utils.Optional;
-
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +11,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.MethodCache;
+import io.crnk.core.utils.Optional;
 
 /**
  * Parses {@link String} into an instance of provided {@link Class}. It support
@@ -95,7 +97,7 @@ public class TypeParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Serializable> T parseInput(String input, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+	private <T extends Serializable> T parseInput(final String input, final Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (String.class.equals(clazz)) {
 			return (T) input;
 		} else if (parsers.containsKey(clazz)) {
@@ -113,11 +115,13 @@ public class TypeParser {
 			method = methodCache.find(clazz, "parse", CharSequence.class);
 		}
 		if (method.isPresent()) {
-			try {
-				return (T) method.get().invoke(clazz, input);
-			} catch (IllegalAccessException | IllegalArgumentException | SecurityException | InvocationTargetException e) {
-				throw new IllegalStateException(e);
-			}
+			final Optional<Method> finalMethod = method;
+			return ExceptionUtil.wrapCatchedExceptions(new Callable<T>() {
+				@Override
+				public T call() throws Exception {
+					return (T) finalMethod.get().invoke(clazz, input);
+				}
+			});
 		}
 		throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
 	}

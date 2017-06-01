@@ -1,5 +1,15 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -21,11 +31,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class ResourceGetTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "GET";
@@ -39,7 +44,7 @@ public class ResourceGetTest extends BaseControllerTest {
 	public void onGivenRequestCollectionGetShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		ResourceGet sut = new ResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		ResourceGet sut = new ResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -52,7 +57,7 @@ public class ResourceGetTest extends BaseControllerTest {
 	public void onGivenRequestResourceGetShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/2");
-		ResourceGet sut = new ResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		ResourceGet sut = new ResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -62,13 +67,26 @@ public class ResourceGetTest extends BaseControllerTest {
 	}
 
 	@Test
+	public void onMethodMismatchShouldDenyIt() {
+		// GIVEN
+		JsonPath jsonPath = pathBuilder.build("/tasks/2");
+		ResourceGet sut = new ResourceGet(resourceRegistry, typeParser, documentMapper);
+
+		// WHEN
+		boolean result = sut.isAcceptable(jsonPath, "POST");
+
+		// THEN
+		Assert.assertEquals(result, false);
+	}
+
+	@Test
 	public void onGivenRequestResourceGetShouldHandleIt() throws Exception {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
 		newTaskBody.setData(Nullable.of((Object) data));
 
-		JsonPath taskPath = pathBuilder.buildPath("/tasks");
+		JsonPath taskPath = pathBuilder.build("/tasks");
 
 		// WHEN
 		ResourcePost
@@ -79,8 +97,8 @@ public class ResourceGetTest extends BaseControllerTest {
 		assertThat(taskId).isNotNull();
 
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.buildPath("/tasks/" + taskId);
-		ResourceGet sut = new ResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
+		ResourceGet sut = new ResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, null);
@@ -92,8 +110,8 @@ public class ResourceGetTest extends BaseControllerTest {
 	@Test
 	public void onGivenRequestResourceShouldLoadAutoIncludeFields() throws Exception {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.buildPath("/task-with-lookup/1");
-		ResourceGet responseGetResp = new ResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/task-with-lookup/1");
+		ResourceGet responseGetResp = new ResourceGet(resourceRegistry, typeParser, documentMapper);
 		Map<String, Set<String>> queryParams = new HashMap<>();
 		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[task-with-lookup]", new HashSet<>(Arrays.asList("project", "projectNull", "projectOverridden", "projectOverriddenNull")));
 		QueryParams queryParamsObject = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
@@ -119,7 +137,7 @@ public class ResourceGetTest extends BaseControllerTest {
 		Resource data = createTask();
 		newTaskBody.setData(Nullable.of((Object) data));
 
-		JsonPath taskPath = pathBuilder.buildPath("/tasks");
+		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN -- adding a task
@@ -136,7 +154,7 @@ public class ResourceGetTest extends BaseControllerTest {
 		Document newProjectBody = new Document();
 		newProjectBody.setData(Nullable.of((Object) createProject()));
 
-		JsonPath projectPath = pathBuilder.buildPath("/projects");
+		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
 		Response projectResponse = resourcePost.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
@@ -156,7 +174,7 @@ public class ResourceGetTest extends BaseControllerTest {
 		data.setType("projects");
 		data.setId("2");
 
-		JsonPath savedTaskPath = pathBuilder.buildPath("/tasks/" + TASK_ID + "/relationships/project");
+		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + TASK_ID + "/relationships/project");
 		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
 
 		// WHEN -- adding a relation between task and project
@@ -169,8 +187,8 @@ public class ResourceGetTest extends BaseControllerTest {
 		assertThat(project.getId()).isEqualTo(PROJECT_ID);
 
 		// Given
-		JsonPath jsonPath = pathBuilder.buildPath("/tasks/" + TASK_ID);
-		ResourceGet responseGetResp = new ResourceGet(resourceRegistry, objectMapper, typeParser, documentMapper);
+		JsonPath jsonPath = pathBuilder.build("/tasks/" + TASK_ID);
+		ResourceGet responseGetResp = new ResourceGet(resourceRegistry, typeParser, documentMapper);
 		Map<String, Set<String>> queryParams = new HashMap<>();
 		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("[\"project\"]"));
 		QueryParams requestParams = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);

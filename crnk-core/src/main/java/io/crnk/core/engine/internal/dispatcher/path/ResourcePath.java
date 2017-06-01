@@ -20,7 +20,7 @@ public class ResourcePath extends JsonPath {
 	}
 
 	@Override
-	public String getResourceName() {
+	public String getResourceType() {
 		return elementName;
 	}
 }

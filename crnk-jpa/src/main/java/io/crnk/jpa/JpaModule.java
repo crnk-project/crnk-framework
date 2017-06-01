@@ -151,17 +151,6 @@ public class JpaModule implements Module {
 	}
 
 	/**
-	 * Creates a new JpaModule for a Crnk client.
-	 *
-	 * @param resourceSearchPackage where to find the entity classes. Has no impact anymore.
-	 * @return module
-	 */
-	@Deprecated
-	public static JpaModule newClientModule(String resourceSearchPackage) {
-		return newClientModule();
-	}
-
-	/**
 	 * Creates a new JpaModule for a Crnk server. No entities are by
 	 * default exposed as JSON API resources. Make use of
 	 * {@link #addEntityClass(Class)} andd
@@ -406,31 +395,40 @@ public class JpaModule implements Module {
 			MetaType attrType = attr.getType().getElementType();
 
 			if (attrType instanceof MetaEntity) {
-				// normal entity association
-				Class<?> attrImplClass = attrType.getImplementationClass();
-				JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
-
-				// only include relations that are exposed as repositories
-				if (attrConfig != null) {
-					RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrImplClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
-					context.addRepository(relationshipRepository);
-				}
+				setupRelationshipRepositoryForEntity(resourceClass, attrType);
 			} else if (attrType instanceof MetaResource) {
-				Class<?> attrImplClass = attrType.getImplementationClass();
-				JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
-				if (attrConfig == null || attrConfig.getMapper() == null) {
-					throw new IllegalStateException("no mapped entity for " + attrType.getName() + " reference by " + attr.getId() + " registered");
-				}
-				JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
-				Class<?> targetResourceClass = targetConfig.getResourceClass();
-
-				RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
-				context.addRepository(relationshipRepository);
+				setupRelationshipRepositoryForResource(resourceClass, attr, attrType);
 			} else {
 				throw new IllegalStateException("unable to process relation: " + attr.getId() + ", neither a entity nor a mapped entity is referenced");
 			}
 		}
 	}
+
+	private void setupRelationshipRepositoryForEntity(Class<?> resourceClass, MetaType attrType) {
+		// normal entity association
+		Class<?> attrImplClass = attrType.getImplementationClass();
+		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
+
+		// only include relations that are exposed as repositories
+		if (attrConfig != null) {
+			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrImplClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+			context.addRepository(relationshipRepository);
+		}
+	}
+
+	private void setupRelationshipRepositoryForResource(Class<?> resourceClass, MetaAttribute attr, MetaType attrType) {
+		Class<?> attrImplClass = attrType.getImplementationClass();
+		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
+		if (attrConfig == null || attrConfig.getMapper() == null) {
+			throw new IllegalStateException("no mapped entity for " + attrType.getName() + " reference by " + attr.getId() + " registered");
+		}
+		JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
+		Class<?> targetResourceClass = targetConfig.getResourceClass();
+
+		RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+		context.addRepository(relationshipRepository);
+	}
+
 
 	private boolean isValidEntity(MetaEntity metaEntity) {
 		if (metaEntity.getPrimaryKey() == null) {

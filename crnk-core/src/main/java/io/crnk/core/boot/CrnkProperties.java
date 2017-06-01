@@ -5,6 +5,9 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 
 public class CrnkProperties {
 
+	private CrnkProperties() {
+	}
+
 
 	/**
 	 * Set package to scan for resources, repositories and exception mappers.

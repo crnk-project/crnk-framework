@@ -15,11 +15,9 @@ public class JsonApiModuleBuilder {
 	/**
 	 * Creates Crnk Jackson module with all required serializers
 	 *
-	 * @param resourceRegistry initialized registry with all of the required resources
-	 * @param isClient         is crnk client
 	 * @return {@link com.fasterxml.jackson.databind.Module} with custom serializers
 	 */
-	public SimpleModule build(ResourceRegistry resourceRegistry, boolean isClient) {
+	public SimpleModule build() {
 		SimpleModule simpleModule = new SimpleModule(JSON_API_MODULE_NAME,
 				new Version(1, 0, 0, null, null, null));
 

@@ -3,7 +3,7 @@ package io.crnk.core.resource.registry;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -37,7 +37,7 @@ public class RegistryEntryTest {
 	public void onValidRelationshipClassShouldReturnRelationshipRepository() throws Exception {
 		// GIVEN
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		RegistryEntry sut = new RegistryEntry(new ResourceRepositoryInformationImpl(null, null, null), new AnnotatedResourceEntry(moduleRegistry, new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskRepository.class)),
+		RegistryEntry sut = new RegistryEntry(new ResourceRepositoryInformationImpl(null, null, null), new AnnotatedResourceEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskRepository.class)),
 				(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class))));
 
 		// WHEN

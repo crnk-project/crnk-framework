@@ -16,22 +16,22 @@
  */
 package io.crnk.servlet;
 
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.dispatcher.RequestDispatcher;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.HttpRequestContextBaseAdapter;
-import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
-import io.crnk.servlet.internal.ServletModule;
-import io.crnk.servlet.internal.ServletPropertiesProvider;
-import io.crnk.servlet.internal.ServletRequestContext;
-
+import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
+import io.crnk.servlet.internal.ServletModule;
+import io.crnk.servlet.internal.ServletPropertiesProvider;
+import io.crnk.servlet.internal.ServletRequestContext;
 
 /**
  * Abstract base servlet class to integrate with Crnk-core.
@@ -41,10 +41,10 @@ import java.io.IOException;
  */
 public class CrnkServlet extends HttpServlet {
 
-	protected CrnkBoot boot;
+	protected final transient CrnkBoot boot = new CrnkBoot();
 
+	@Override
 	public void init() throws ServletException {
-		boot = new CrnkBoot();
 		boot.setPropertiesProvider(new ServletPropertiesProvider(getServletConfig()));
 
 		HttpRequestContextProvider provider = (HttpRequestContextProvider) boot.getDefaultServiceUrlProvider();

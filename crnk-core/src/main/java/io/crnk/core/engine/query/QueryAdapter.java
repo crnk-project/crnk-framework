@@ -9,8 +9,6 @@ import io.crnk.legacy.queryParams.params.TypedParams;
 
 public interface QueryAdapter {
 
-	boolean hasIncludedRelations();
-
 	TypedParams<IncludedRelationsParams> getIncludedRelations();
 
 	TypedParams<IncludedFieldsParams> getIncludedFields();
@@ -32,7 +30,7 @@ public interface QueryAdapter {
 	void setOffset(long offset);
 
 	/**
-	 * @return clone of this instance
+	 * @return duplicate of this instance
 	 */
 	QueryAdapter duplicate();
 

@@ -14,6 +14,8 @@ import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.Tuple;
 import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
+import io.crnk.meta.MetaModule;
+import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.validation.ValidationModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,19 @@ public class ModuleConfig {
 	@Bean
 	public HomeModule homeModule() {
 		return HomeModule.create();
+	}
+
+
+	/**
+	 * Makes meta data of all repositories available as repositories.
+	 *
+	 * @return module
+	 */
+	@Bean
+	public MetaModule metaModule() {
+		MetaModule metaModule = MetaModule.create();
+		metaModule.addMetaProvider(new ResourceMetaProvider());
+		return metaModule;
 	}
 
 	/**

@@ -27,8 +27,6 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
-import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -44,11 +42,14 @@ import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
 import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
@@ -206,45 +207,76 @@ public class ModuleRegistry {
 	 * @param objectMapper object mapper
 	 */
 	public void init(ObjectMapper objectMapper) {
-		if (!initialized) {
-			this.initialized = true;
-			this.objectMapper = objectMapper;
-			this.objectMapper.registerModules(getJacksonModules());
+		PreconditionUtil.assertFalse("already initialized", initialized);
+		this.initialized = true;
+		this.objectMapper = objectMapper;
+		this.objectMapper.registerModules(getJacksonModules());
 
-			applyRepositoryRegistration(resourceRegistry);
+		applyRepositoryRegistration(resourceRegistry);
 
-			for (Module module : modules) {
-				if (module instanceof InitializingModule) {
-					((InitializingModule) module).init();
-				}
+		for (Module module : modules) {
+			if (module instanceof InitializingModule) {
+				((InitializingModule) module).init();
 			}
-
-			ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
-			ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
-			exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 		}
+
+		ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
+		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
+		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void applyRepositoryRegistration(ResourceRegistry resourceRegistry) {
 		List<Object> repositories = aggregatedModule.getRepositories();
 
+
+		MultivaluedMap<Class<?>, RepositoryInformation> classMapping = new MultivaluedMap<>();
+		Map<RepositoryInformation, Object> resourceMapping = new HashMap<>();
+		mapRepositoryRegistrations(repositories, classMapping, resourceMapping);
+
+		for (Class<?> resourceClass : classMapping.keySet()) {
+			applyRepositoryRegistrationForClass(resourceClass, classMapping, resourceMapping);
+		}
+	}
+
+	private void applyRepositoryRegistrationForClass(Class<?> resourceClass,
+			MultivaluedMap<Class<?>, RepositoryInformation> classMapping, Map<RepositoryInformation, Object> resourceMapping) {
+
+		ResourceRepositoryInformation resourceRepositoryInformation = null;
+		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
+		ResourceEntry resourceEntry = null;
+		List<RepositoryInformation> repositoryInformations = classMapping.getList(resourceClass);
+		for (RepositoryInformation repositoryInformation : repositoryInformations) {
+			if (repositoryInformation instanceof ResourceRepositoryInformation) {
+				resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
+				Object repository = resourceMapping.get(resourceRepositoryInformation);
+				resourceEntry = setupResourceRepository(repository);
+			}
+			else {
+				RelationshipRepositoryInformation relationshipRepositoryInformation =
+						(RelationshipRepositoryInformation) repositoryInformation;
+				Object repository = resourceMapping.get(repositoryInformation);
+				setupRelationship(relationshipEntries, relationshipRepositoryInformation, repository);
+			}
+		}
+
+		if (resourceRepositoryInformation == null) {
+			ResourceInformationBuilder resourceInformationBuilder = getResourceInformationBuilder();
+			ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
+			resourceRepositoryInformation =
+					new ResourceRepositoryInformationImpl(resourceClass, resourceInformation.getResourceType(),
+							resourceInformation);
+		}
+
+		RegistryEntry registryEntry = new RegistryEntry(resourceRepositoryInformation, resourceEntry, relationshipEntries);
+		resourceRegistry.addEntry(resourceClass, registryEntry);
+	}
+
+	private void mapRepositoryRegistrations(List<Object> repositories, MultivaluedMap<Class<?>, RepositoryInformation> classMap,
+			Map<RepositoryInformation, Object> resourceInformationMap) {
+
 		RepositoryInformationBuilder repositoryInformationBuilder = getRepositoryInformationBuilder();
-		RepositoryInformationBuilderContext builderContext = new RepositoryInformationBuilderContext() {
-
-			@Override
-			public ResourceInformationBuilder getResourceInformationBuilder() {
-				return ModuleRegistry.this.getResourceInformationBuilder();
-			}
-
-			@Override
-			public TypeParser getTypeParser() {
-				return typeParser;
-			}
-		};
-
-		MultivaluedMap<Class<?>, RepositoryInformation> repositoryMap = new MultivaluedMap<>();
-		Map<RepositoryInformation, Object> repositoryImplementations = new HashMap<>();
+		RepositoryInformationBuilderContext builderContext = new DefaultRepositoryInformationBuilderContext(this);
 
 		for (Object repository : repositories) {
 			if (!(repository instanceof ResourceRepositoryDecorator)
@@ -252,56 +284,21 @@ public class ModuleRegistry {
 				RepositoryInformation repositoryInformation = repositoryInformationBuilder.build(repository, builderContext);
 				if (repositoryInformation instanceof ResourceRepositoryInformation) {
 					ResourceRepositoryInformation info = (ResourceRepositoryInformation) repositoryInformation;
-					repositoryImplementations.put(info, repository);
-					repositoryMap.add(info.getResourceInformation().getResourceClass(), repositoryInformation);
+					resourceInformationMap.put(info, repository);
+					classMap.add(info.getResourceInformation().getResourceClass(), repositoryInformation);
 				}
 				else {
 					RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) repositoryInformation;
-					repositoryImplementations.put(info, repository);
-					repositoryMap.add(info.getSourceResourceInformation().getResourceClass(), repositoryInformation);
+					resourceInformationMap.put(info, repository);
+					classMap.add(info.getSourceResourceInformation().getResourceClass(), repositoryInformation);
 				}
 			}
 		}
 
-		for (Class<?> resourceClass : repositoryMap.keySet()) {
-			ResourceRepositoryInformation resourceRepositoryInformation = null;
-			List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
-			ResourceEntry resourceEntry = null;
-			List<RepositoryInformation> repositoryInformations = repositoryMap.getList(resourceClass);
-			for (RepositoryInformation repositoryInformation : repositoryInformations) {
-				if (repositoryInformation instanceof ResourceRepositoryInformation) {
-					resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
-					Object repository = repositoryImplementations.get(resourceRepositoryInformation);
-					resourceEntry = setupResourceRepository(resourceRepositoryInformation, repository);
-				}
-				else {
-					RelationshipRepositoryInformation relationshipRepositoryInformation =
-							(RelationshipRepositoryInformation) repositoryInformation;
-					Object repository = repositoryImplementations.get(repositoryInformation);
-					setupRelationship(relationshipEntries, relationshipRepositoryInformation, repository);
-				}
-			}
-
-			if (resourceRepositoryInformation == null) {
-
-				ResourceInformationBuilder resourceInformationBuilder = getResourceInformationBuilder();
-				DefaultResourceInformationBuilderContext context =
-						new DefaultResourceInformationBuilderContext(resourceInformationBuilder, typeParser);
-
-				ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
-				resourceRepositoryInformation =
-						new ResourceRepositoryInformationImpl(resourceClass, resourceInformation.getResourceType(),
-								resourceInformation);
-			}
-
-			RegistryEntry registryEntry = new RegistryEntry(resourceRepositoryInformation, resourceEntry, relationshipEntries);
-			resourceRegistry.addEntry(resourceClass, registryEntry);
-		}
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private ResourceEntry setupResourceRepository(ResourceRepositoryInformation resourceRepositoryInformation,
-			Object repository) {
+	private ResourceEntry setupResourceRepository(Object repository) {
 		final Object decoratedRepository = decorateRepository(repository);
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
 
@@ -312,7 +309,7 @@ public class ModuleRegistry {
 		};
 
 		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
-			return new AnnotatedResourceEntry(this, repositoryInstanceBuilder);
+			return new AnnotatedResourceEntry(repositoryInstanceBuilder);
 		}
 		else {
 			return new DirectResponseResourceEntry(repositoryInstanceBuilder);
@@ -410,7 +407,7 @@ public class ModuleRegistry {
 	public <T extends Module> io.crnk.core.utils.Optional<T> getModule(Class<T> clazz) {
 		for (Module module : modules) {
 			if (clazz.isInstance(module)) {
-				return io.crnk.core.utils.Optional.of((T)module);
+				return io.crnk.core.utils.Optional.of((T) module);
 			}
 		}
 		return io.crnk.core.utils.Optional.empty();
@@ -425,9 +422,7 @@ public class ModuleRegistry {
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {
-		if (exceptionMapperRegistry == null) {
-			throw new IllegalStateException();
-		}
+		PreconditionUtil.assertNotNull("exceptionMapperRegistry not set", exceptionMapperRegistry);
 		return exceptionMapperRegistry;
 	}
 
@@ -461,7 +456,7 @@ public class ModuleRegistry {
 				}
 			}
 			throw new UnsupportedOperationException(
-					"no ResourceInformationBuilder for " + resourceClass.getName() + " available");
+					"no ResourceInformationBuilder available for " + resourceClass.getName());
 		}
 
 		@Override
@@ -512,7 +507,7 @@ public class ModuleRegistry {
 				}
 			}
 			throw new UnsupportedOperationException(
-					"no RepositoryInformationBuilder for " + repository.getClass().getName() + " available");
+					"no RepositoryInformationBuilder available for " + repository.getClass().getName());
 		}
 
 		@Override
@@ -533,7 +528,7 @@ public class ModuleRegistry {
 				}
 			}
 			throw new UnsupportedOperationException(
-					"no RepositoryInformationBuilder for " + repositoryClass.getName() + " available");
+					"no RepositoryInformationBuilder available for " + repositoryClass.getName());
 		}
 	}
 
@@ -564,25 +559,21 @@ public class ModuleRegistry {
 
 		@Override
 		public void addResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
-			checkNotInitialized();
 			aggregatedModule.addResourceInformationBuilder(resourceInformationBuilder);
 		}
 
 		@Override
 		public void addRepositoryInformationBuilder(RepositoryInformationBuilder repositoryInformationBuilder) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryInformationBuilder(repositoryInformationBuilder);
 		}
 
 		@Override
 		public void addResourceLookup(ResourceLookup resourceLookup) {
-			checkNotInitialized();
 			aggregatedModule.addResourceLookup(resourceLookup);
 		}
 
 		@Override
 		public void addJacksonModule(com.fasterxml.jackson.databind.Module module) {
-			checkNotInitialized();
 			aggregatedModule.addJacksonModule(module);
 			if (objectMapper != null) {
 				objectMapper.registerModule(module);
@@ -599,37 +590,31 @@ public class ModuleRegistry {
 
 		@Override
 		public void addFilter(DocumentFilter filter) {
-			checkNotInitialized();
 			aggregatedModule.addFilter(filter);
 		}
 
 		@Override
 		public void addExceptionMapperLookup(ExceptionMapperLookup exceptionMapperLookup) {
-			checkNotInitialized();
 			aggregatedModule.addExceptionMapperLookup(exceptionMapperLookup);
 		}
 
 		@Override
 		public void addExceptionMapper(ExceptionMapper<?> exceptionMapper) {
-			checkNotInitialized();
 			aggregatedModule.addExceptionMapper(exceptionMapper);
 		}
 
 		@Override
 		public void addRepository(Class<?> type, Object repository) {
-			checkNotInitialized();
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
-			checkNotInitialized();
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addSecurityProvider(SecurityProvider securityProvider) {
-			checkNotInitialized();
 			aggregatedModule.addSecurityProvider(securityProvider);
 		}
 
@@ -655,13 +640,11 @@ public class ModuleRegistry {
 
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryFilter(filter);
 		}
 
 		@Override
 		public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decoratorFactory) {
-			checkNotInitialized();
 			aggregatedModule.addRepositoryDecoratorFactory(decoratorFactory);
 		}
 

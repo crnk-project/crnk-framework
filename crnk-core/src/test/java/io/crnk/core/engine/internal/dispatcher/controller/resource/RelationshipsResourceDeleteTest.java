@@ -37,7 +37,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
-		JsonPath jsonPath = pathBuilder.buildPath("tasks/1/relationships/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
 		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser);
 
@@ -70,7 +70,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) data));
 		data.setType("tasks");
 
-		JsonPath taskPath = pathBuilder.buildPath("/tasks");
+		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper);
 
 		// WHEN -- adding a task
@@ -88,7 +88,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data = createProject();
 		newProjectBody.setData(Nullable.of((Object) data));
 
-		JsonPath projectPath = pathBuilder.buildPath("/projects");
+		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
 		Response projectResponse = resourcePost.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectBody);
@@ -109,7 +109,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data.setType("projects");
 		data.setId(projectId.toString());
 
-		JsonPath savedTaskPath = pathBuilder.buildPath("/tasks/" + taskId + "/relationships/project");
+		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
 		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser);
 
 		// WHEN -- adding a relation between task and project
@@ -143,7 +143,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		Document newUserDocument = new Document();
 		newUserDocument.setData(Nullable.of((Object) createUser()));
 
-		JsonPath taskPath = pathBuilder.buildPath("/users");
+		JsonPath taskPath = pathBuilder.build("/users");
 		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper);
 
 		// WHEN -- adding a user
@@ -160,7 +160,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		Document newProjectDocument = new Document();
 		newProjectDocument.setData(Nullable.of((Object) createProject()));
 
-		JsonPath projectPath = pathBuilder.buildPath("/projects");
+		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
 		Response projectResponse = resourcePost.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectDocument);
@@ -178,7 +178,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		Document newProjectDocument2 = new Document();
 		newProjectDocument2.setData(Nullable.of((Object) createProject(projectId.toString())));
 
-		JsonPath savedTaskPath = pathBuilder.buildPath("/users/" + userId + "/relationships/assignedProjects");
+		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
 		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser);
 
 		// WHEN -- adding a relation between user and project

@@ -94,11 +94,11 @@ public class ErrorDataBuilder {
 	}
 
 	/**
-	 * A string indicating which query parameter caused the error.
+	 * A string indicating which query legacy caused the error.
 	 * <p>
 	 * Wrapped in "source" object.
 	 *
-	 * @param sourceParameter source parameter
+	 * @param sourceParameter source legacy
 	 * @return builder instance
 	 */
 	public ErrorDataBuilder setSourceParameter(String sourceParameter) {
@@ -126,6 +126,42 @@ public class ErrorDataBuilder {
 	}
 
 	public ErrorData build() {
-		return new ErrorData(id, aboutLink, status, code, title, detail, sourcePointer, sourceParameter, meta);
+		return new ErrorData(this);
+	}
+
+	protected String getId() {
+		return id;
+	}
+
+	protected String getAboutLink() {
+		return aboutLink;
+	}
+
+	protected String getStatus() {
+		return status;
+	}
+
+	protected String getCode() {
+		return code;
+	}
+
+	protected String getTitle() {
+		return title;
+	}
+
+	protected String getDetail() {
+		return detail;
+	}
+
+	protected String getSourcePointer() {
+		return sourcePointer;
+	}
+
+	protected String getSourceParameter() {
+		return sourceParameter;
+	}
+
+	protected Map<String, Object> getMeta() {
+		return meta;
 	}
 }

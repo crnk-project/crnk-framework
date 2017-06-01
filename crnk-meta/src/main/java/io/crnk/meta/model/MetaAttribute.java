@@ -1,21 +1,19 @@
 package io.crnk.meta.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.SerializeType;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.PropertyUtilsBean;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "meta/attribute")
 public class MetaAttribute extends MetaElement {
@@ -102,9 +100,7 @@ public class MetaAttribute extends MetaElement {
 
 	public Method getReadMethod() {
 		this.initAccessors();
-		if (readMethod == null) {
-			throw new IllegalStateException();
-		}
+		PreconditionUtil.assertNotNull("no getter available", readMethod);
 		return readMethod;
 	}
 
@@ -134,21 +130,11 @@ public class MetaAttribute extends MetaElement {
 	}
 
 	public Object getValue(Object dataObject) {
-		PropertyUtilsBean utils = BeanUtilsBean.getInstance().getPropertyUtils();
-		try {
-			return utils.getNestedProperty(dataObject, getName());
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new IllegalStateException("cannot access field " + getName() + " for " + dataObject.getClass().getName(), e);
-		}
+		return PropertyUtils.getProperty(dataObject, getName());
 	}
 
 	public void setValue(Object dataObject, Object value) {
-		PropertyUtilsBean utils = BeanUtilsBean.getInstance().getPropertyUtils();
-		try {
-			utils.setNestedProperty(dataObject, getName(), value);
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-			throw new IllegalStateException("cannot access field " + getName() + " for " + dataObject.getClass().getName(), e);
-		}
+		PropertyUtils.setProperty(dataObject, getName(), value);
 	}
 
 	public MetaAttribute getOppositeAttribute() {

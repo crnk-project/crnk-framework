@@ -91,8 +91,9 @@ public interface Module {
 		 *
 		 * @param resourceClass resource class
 		 * @param repository    resource
-		 * @deprecated
+		 * @deprecated use {@link #addRepository(Object)}
 		 */
+		@Deprecated
 		void addRepository(Class<?> resourceClass, Object repository);
 
 		/**
@@ -101,8 +102,9 @@ public interface Module {
 		 * @param sourceResourceClass source resource class
 		 * @param targetResourceClass target resource class
 		 * @param repository          resource
-		 * @deprecated
+		 * @deprecated use {@link #addRepository(Object)}
 		 */
+		@Deprecated
 		void addRepository(Class<?> sourceResourceClass, Class<?> targetResourceClass, Object repository);
 
 		/**

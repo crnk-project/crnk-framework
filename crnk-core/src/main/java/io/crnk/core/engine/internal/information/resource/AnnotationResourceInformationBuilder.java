@@ -1,21 +1,42 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
@@ -40,15 +61,6 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		return context.accept(rawType) ? context.getResourceType(rawType) : null;
 	}
 
-	private static boolean hasDiscardedField(ResourceFieldWrapper fieldWrapper, List<ResourceFieldWrapper> resourceClassFields) {
-		for (ResourceFieldWrapper resourceFieldWrapper : resourceClassFields) {
-			if (fieldWrapper.getResourceField().getUnderlyingName().equals(resourceFieldWrapper.getResourceField().getUnderlyingName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private static AnnotatedResourceField mergeAnnotations(AnnotatedResourceField fromField, AnnotatedResourceField fromMethod, ResourceInformationBuilderContext context) {
 		List<Annotation> annotations = new ArrayList<>(fromField.getAnnotations());
 		annotations.addAll(fromMethod.getAnnotations());
@@ -56,11 +68,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		Class<?> fieldType = mergeFieldType(fromField, fromMethod);
 		Type fieldGenericType = mergeGenericType(fromField, fromMethod);
 		String oppositeResourceType = fromField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP ? getResourceType(fieldGenericType, context) : null;
-		boolean postable = fromField.getAccess().isPostable() && fromMethod.getAccess().isPostable();
-		boolean patchable = fromField.getAccess().isPatchable() && fromMethod.getAccess().isPatchable();
-		boolean sortable = fromField.getAccess().isSortable() && fromMethod.getAccess().isSortable();
-		boolean filterable = fromField.getAccess().isFilterable() && fromMethod.getAccess().isFilterable();
-		ResourceFieldAccess mergedAccess = new ResourceFieldAccess(postable, patchable, sortable, filterable);
+
+		ResourceFieldAccess mergedAccess = fromField.getAccess().and(fromMethod.getAccess());
 		return new AnnotatedResourceField(fromField.getJsonName(), fromField.getUnderlyingName(), fieldType, fieldGenericType, oppositeResourceType, annotations, mergedAccess);
 	}
 
@@ -166,7 +175,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(), resourceClass, resourceType, superResourceType, instanceBuilder, (List) resourceFields);
-		if (!allowNonResourceBaseClass & information.getIdField() == null) {
+		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}
 		return information;
@@ -243,10 +252,14 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		Map<String, Integer> resourceFieldPositions = new HashMap<>();
 		List<AnnotatedResourceField> resourceFields = new ArrayList<>();
 
+		HashSet<String> discardedFieldNames = new HashSet<>();
+
 		for (ResourceFieldWrapper fieldWrapper : resourceClassFields) {
 			if (!fieldWrapper.isDiscarded()) {
 				resourceFieldPositions.put(fieldWrapper.getResourceField().getUnderlyingName(), resourceFields.size());
 				resourceFields.add(fieldWrapper.getResourceField());
+			}else{
+				discardedFieldNames.add(fieldWrapper.getResourceField().getUnderlyingName());
 			}
 		}
 
@@ -257,7 +270,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 				if (resourceFieldPositions.containsKey(originalName)) {
 					int pos = resourceFieldPositions.get(originalName);
 					resourceFields.set(pos, mergeAnnotations(resourceFields.get(pos), field, context));
-				} else if (!hasDiscardedField(fieldWrapper, resourceClassFields)) {
+				} else if (!discardedFieldNames.contains(fieldWrapper.getResourceField().getUnderlyingName())) {
 					resourceFieldPositions.put(originalName, resourceFields.size());
 					resourceFields.add(field);
 				}

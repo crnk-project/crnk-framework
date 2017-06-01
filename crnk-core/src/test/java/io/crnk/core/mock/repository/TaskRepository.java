@@ -1,14 +1,21 @@
 package io.crnk.core.mock.repository;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.annotations.*;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import io.crnk.legacy.repository.annotations.JsonApiDelete;
+import io.crnk.legacy.repository.annotations.JsonApiFindAll;
+import io.crnk.legacy.repository.annotations.JsonApiFindAllWithIds;
+import io.crnk.legacy.repository.annotations.JsonApiFindOne;
+import io.crnk.legacy.repository.annotations.JsonApiMeta;
+import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+import io.crnk.legacy.repository.annotations.JsonApiSave;
 
 @JsonApiResourceRepository(Task.class)
 public class TaskRepository {
@@ -21,6 +28,9 @@ public class TaskRepository {
 
 	@JsonApiSave
 	public <S extends Task> S save(S entity) {
+		if ("badName".equals(entity.getName())) {
+			throw new BadRequestException("badName not a valid name");
+		}
 		if (entity.getId() == null) {
 			entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
 		}

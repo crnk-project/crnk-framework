@@ -8,6 +8,7 @@ dependencies {
 	compile project(':crnk-validation')
 	compile project(':crnk-brave')
 	compile project(':crnk-home')
+	compile project(':crnk-ui')
 
 	compile 'org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE'
 	compile 'org.springframework.boot:spring-boot-starter-test:1.4.2.RELEASE'

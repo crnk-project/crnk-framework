@@ -16,18 +16,23 @@
  */
 package io.crnk.servlet.internal;
 
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.utils.Nullable;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+import io.crnk.servlet.internal.legacy.ServletParametersProvider;
 
 public class ServletRequestContext implements HttpRequestContextBase {
 
@@ -38,6 +43,8 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	private final ServletParametersProvider parameterProvider;
 
+	private final ServletContext servletContext;
+
 	private Map<String, Set<String>> parameters;
 
 	private Nullable<byte[]> requestBody = Nullable.empty();
@@ -47,8 +54,9 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	private String pathPrefix;
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-								 final HttpServletResponse response, String pathPrefix) {
+			final HttpServletResponse response, String pathPrefix) {
 		this.pathPrefix = pathPrefix;
+		this.servletContext = servletContext;
 		this.request = request;
 		this.response = response;
 		this.parameterProvider = new ServletParametersProvider(servletContext, request, response);
@@ -107,27 +115,18 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 		int sep = requestUrl.indexOf(servletPath);
 		String url = requestUrl.substring(0, sep + servletPath.length());
-		if (url.endsWith("/")) {
-			return url.substring(0, url.length() - 1);
-		} else {
-			return url;
-		}
+		return UrlUtils.removeTrailingSlash(url);
 	}
 
 	@Override
 	public byte[] getRequestBody() throws IOException {
 		if (!requestBody.isPresent()) {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[16384];
+
 			InputStream is = request.getInputStream();
 			if (is != null) {
-				while ((nRead = is.read(data, 0, data.length)) != -1) {
-					buffer.write(data, 0, nRead);
-				}
-				buffer.flush();
-				requestBody = Nullable.of(buffer.toByteArray());
-			} else {
+				requestBody = Nullable.of(io.crnk.core.engine.internal.utils.IOUtils.readFully(is));
+			}
+			else {
 				requestBody = Nullable.nullValue();
 			}
 		}
@@ -167,5 +166,9 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	public HttpServletResponse getResponse() {
 		return response;
+	}
+
+	public ServletContext getServletContext() {
+		return servletContext;
 	}
 }

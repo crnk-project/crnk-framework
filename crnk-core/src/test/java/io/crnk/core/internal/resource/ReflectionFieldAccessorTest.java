@@ -28,6 +28,17 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
+	public void onNullBeanSetShouldThrowException() throws Exception {
+		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "privatePropertyWithMutator", String.class);
+
+		// THEN
+		expectedException.expect(PropertyException.class);
+
+		// WHEN
+		accessor.setValue(null, null);
+	}
+
+	@Test
 	public void onNullFieldNameShouldThrowException() throws Exception {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);

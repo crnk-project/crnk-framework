@@ -1,8 +1,11 @@
 package io.crnk.core.module.discovery;
 
-import io.crnk.core.module.Module;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import io.crnk.core.module.Module;
 
 /**
  * Combines all {@link ResourceLookup} instances provided by the registered
@@ -14,16 +17,6 @@ public class MultiResourceLookup implements ResourceLookup {
 
 	public MultiResourceLookup(List<ResourceLookup> lookups) {
 		this.lookups = lookups;
-	}
-
-	public static ResourceLookup newInstance(ResourceLookup... lookups) {
-		List<ResourceLookup> list = new ArrayList<>();
-		for (ResourceLookup lookup : lookups) {
-			if (lookup != null) {
-				list.add(lookup);
-			}
-		}
-		return new MultiResourceLookup(list);
 	}
 
 	@Override

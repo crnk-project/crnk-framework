@@ -3,7 +3,7 @@ package io.crnk.core.engine.internal.dispatcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseController;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.internal.exception.DefaultExceptionMapperLookup;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;

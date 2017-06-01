@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Generic query parameter container
+ * Generic query legacy container
  *
- * @param <T> type of the parameter
+ * @param <T> type of the legacy
  */
 public class TypedParams<T> {
 	private Map<String, T> params = new HashMap<>();

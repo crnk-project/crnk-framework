@@ -1,15 +1,16 @@
 package io.crnk.core.engine.error;
 
-import io.crnk.core.engine.document.ErrorData;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import io.crnk.core.engine.document.ErrorData;
+
 public class ErrorResponseBuilder {
-	private Iterable<ErrorData> data;
+	private Collection<ErrorData> data;
 	private int status;
 
-	public ErrorResponseBuilder setErrorData(Iterable<ErrorData> errorObjects) {
+	public ErrorResponseBuilder setErrorData(Collection<ErrorData> errorObjects) {
 		this.data = errorObjects;
 		return this;
 	}

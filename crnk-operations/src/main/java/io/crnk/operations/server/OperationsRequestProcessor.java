@@ -1,5 +1,13 @@
 package io.crnk.operations.server;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -9,10 +17,10 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.utils.Nullable;
@@ -24,9 +32,6 @@ import io.crnk.operations.server.order.OperationOrderStrategy;
 import io.crnk.operations.server.order.OrderedOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
 
 public class OperationsRequestProcessor implements HttpRequestProcessor {
 
@@ -47,9 +52,6 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 	public void process(HttpRequestContext context) throws IOException {
 		if (context.accepts(JSONPATCH_CONTENT_TYPE)) {
 			try {
-				ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-				ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
-
 				ObjectMapper mapper = moduleContext.getObjectMapper();
 				List<Operation> operations = Arrays.asList(mapper.readValue(context.getRequestBody(), Operation[].class));
 				enrichTypeIdInformation(operations);
@@ -57,14 +59,14 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 				OperationOrderStrategy orderStrategy = operationsModule.getOrderStrategy();
 				List<OrderedOperation> orderedOperations = orderStrategy.order(operations);
 
-
 				DefaultOperationFilterChain chain = new DefaultOperationFilterChain();
 				List<OperationResponse> responses = chain.doFilter(new DefaultOperationFilterContext(orderedOperations));
 
 				String responseJson = mapper.writeValueAsString(responses);
 				context.setResponse(200, responseJson);
 				context.setContentType(JSONPATCH_CONTENT_TYPE);
-			} catch (Throwable e) {
+			}
+			catch (Exception e) {
 				LOGGER.error("failed to execute operations", e);
 				context.setResponse(500, (byte[]) null);
 			}
@@ -80,7 +82,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 				JsonPath jsonPath = (new PathBuilder(resourceRegistry)).build(path);
 
 				Resource resource = new Resource();
-				resource.setType(jsonPath.getResourceName());
+				resource.setType(jsonPath.getResourceType());
 				resource.setId(jsonPath.getIds().getIds().get(0));
 				operation.setValue(resource);
 			}
@@ -91,7 +93,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 		for (int i = 0; i < responses.length; i++) {
 			if (responses[i] == null) {
 				OperationResponse operationResponse = new OperationResponse();
-				operationResponse.setStatus(412); // TODO proper clode?
+				operationResponse.setStatus(HttpStatus.PRECONDITION_FAILED_412);
 				responses[i] = operationResponse;
 			}
 		}
@@ -212,7 +214,8 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 			List<OperationFilter> filters = operationsModule.getFilters();
 			if (filterIndex == filters.size()) {
 				return executeOperations(context.getOrderedOperations());
-			} else {
+			}
+			else {
 				OperationFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filter(context, this);

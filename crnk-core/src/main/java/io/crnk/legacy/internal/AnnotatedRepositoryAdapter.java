@@ -98,12 +98,12 @@ public abstract class AnnotatedRepositoryAdapter<T> {
 		try {
 			return (TYPE) method.invoke(implementationObject, args);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				throw (RuntimeException) e.getCause();
 			} else {
-				throw new RuntimeException(e.getCause());
+				throw new IllegalStateException(e.getCause());
 			}
 		}
 	}

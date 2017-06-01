@@ -2,6 +2,7 @@ package io.crnk.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -57,10 +58,8 @@ public class ResourcePermission {
 
 	public static ResourcePermission fromMethod(HttpMethod method) {
 		ResourcePermission permission = METHODS.get(method);
-		if (permission != null) {
-			return permission;
-		}
-		throw new IllegalArgumentException("unknown method " + method);
+		PreconditionUtil.assertNotNull("unknown method", permission);
+		return permission;
 	}
 
 	public boolean isPostAllowed() {
@@ -121,26 +120,15 @@ public class ResourcePermission {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
+		if (obj != null && obj.getClass() == ResourcePermission.class) {
+			ResourcePermission p = (ResourcePermission) obj;
+			return p.deleteAllowed == deleteAllowed &&
+					p.getAllowed == getAllowed &&
+					p.patchAllowed == patchAllowed &&
+					p.postAllowed == postAllowed;
+
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		ResourcePermission other = (ResourcePermission) obj;
-		if (deleteAllowed != other.deleteAllowed) {
-			return false;
-		}
-		if (getAllowed != other.getAllowed) {
-			return false;
-		}
-		if (patchAllowed != other.patchAllowed) {
-			return false;
-		}
-		return postAllowed == other.postAllowed;
+		return false;
 	}
 
 	@Override

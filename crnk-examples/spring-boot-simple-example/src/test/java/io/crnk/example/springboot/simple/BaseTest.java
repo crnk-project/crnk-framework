@@ -1,5 +1,12 @@
 package io.crnk.example.springboot.simple;
 
+import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.io.InputStream;
+
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ValidatableResponse;
 import io.crnk.client.CrnkClient;
@@ -12,11 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.InputStream;
-
-import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
-import static org.springframework.http.HttpStatus.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringBootSimpleExampleApplication.class)
@@ -42,7 +44,7 @@ public abstract class BaseTest {
 
 		client = new CrnkClient("http://localhost:" + port + "/api");
 		client.addModule(ValidationModule.newInstance());
-		client.addModule(JpaModule.newClientModule("io.crnk.example.springboot.simple.domain.jpa"));
+		client.addModule(JpaModule.newClientModule());
 	}
 
 	private void loadJsonApiSchema() {

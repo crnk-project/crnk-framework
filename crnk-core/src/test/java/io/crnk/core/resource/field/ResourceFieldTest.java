@@ -1,21 +1,35 @@
 package io.crnk.core.resource.field;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ResourceFieldTest {
+
+
+	@Test
+	public void testResourceIdEqualsContract() throws NoSuchFieldException {
+		EqualsVerifier.forClass(ResourceFieldImpl.class).withPrefabValues(ResourceInformation.class, Mockito.mock
+				(ResourceInformation.class), Mockito.mock(ResourceInformation.class)
+		).usingGetClass().verify();
+	}
 
 	@Test
 	public void getResourceFieldType() {
@@ -30,7 +44,9 @@ public class ResourceFieldTest {
 	public void onWithLazyFieldClassShouldReturnTrue() throws Exception {
 		// GIVEN
 		List<Annotation> annotations = Arrays.asList(WithLazyFieldClass.class.getDeclaredField("value").getAnnotations());
-		ResourceField sut = new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null, annotations, new ResourceFieldAccess(true, true, true, true));
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		// WHEN
 		boolean result = sut.isLazy();
@@ -44,7 +60,9 @@ public class ResourceFieldTest {
 	public void onWithToManyEagerFieldClassShouldReturnFalse() throws Exception {
 		// GIVEN
 		List<Annotation> annotations = Arrays.asList(WithToManyEagerFieldClass.class.getDeclaredField("value").getAnnotations());
-		ResourceField sut = new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null, annotations, new ResourceFieldAccess(true, true, true, true));
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		// WHEN
 		boolean result = sut.isLazy();
@@ -58,7 +76,9 @@ public class ResourceFieldTest {
 	public void onWithoutToManyFieldClassShouldReturnFalse() throws Exception {
 		// GIVEN
 		List<Annotation> annotations = Arrays.asList(WithoutToManyFieldClass.class.getDeclaredField("value").getAnnotations());
-		ResourceField sut = new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null, annotations, new ResourceFieldAccess(true, true, true, true));
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		// WHEN
 		boolean result = sut.isLazy();
@@ -69,10 +89,41 @@ public class ResourceFieldTest {
 	}
 
 	@Test
+	public void checkToStringWithoutParent() throws Exception {
+		List<Annotation> annotations = Arrays.asList(WithoutToManyFieldClass.class.getDeclaredField("value").getAnnotations());
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("test", "test", String.class, String.class,
+						null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
+
+		Assert.assertEquals("[jsonName=test]", sut.toString());
+	}
+
+	@Test
+	public void checkToStringWithParent() throws Exception {
+		List<Annotation> annotations = Arrays.asList(WithoutToManyFieldClass.class.getDeclaredField("value").getAnnotations());
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("test", "test", String.class, String.class,
+						null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
+
+		ResourceInformation parent = Mockito.mock(ResourceInformation.class);
+		Mockito.when(parent.getResourceType()).thenReturn("type");
+		Mockito.when(parent.toString()).thenReturn("parent");
+		Mockito.when(parent.getResourceClass()).thenReturn((Class)Task.class);
+		sut.setResourceInformation(parent);
+
+		Assert.assertEquals("[jsonName=test,resourceType=parent]", sut.toString());
+	}
+
+	@Test
 	public void onLazyRelationshipToManyAndInclusionByDefaultShouldReturnEagerFlag() throws Exception {
 		// GIVEN
-		List<Annotation> annotations = Arrays.asList(WithLazyFieldAndInclusionByDefaultClass.class.getDeclaredField("value").getAnnotations());
-		ResourceField sut = new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null, annotations, new ResourceFieldAccess(true, true, true, true));
+		List<Annotation> annotations =
+				Arrays.asList(WithLazyFieldAndInclusionByDefaultClass.class.getDeclaredField("value").getAnnotations());
+		ResourceField sut =
+				new AnnotationResourceInformationBuilder.AnnotatedResourceField("", "", String.class, String.class, null,
+						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		// WHEN
 		boolean result = sut.isLazy();
@@ -103,6 +154,7 @@ public class ResourceFieldTest {
 	}
 
 	private static class WithoutToManyFieldClass {
+
 		private String value;
 
 	}

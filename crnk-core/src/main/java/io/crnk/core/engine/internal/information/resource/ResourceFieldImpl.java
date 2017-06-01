@@ -1,12 +1,16 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import io.crnk.core.engine.information.resource.*;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
+
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -15,34 +19,38 @@ public class ResourceFieldImpl implements ResourceField {
 	private final String underlyingName;
 
 	private final Class<?> type;
+
 	private final Type genericType;
+
 	private final boolean lazy;
-	private String oppositeResourceType;
-	private LookupIncludeBehavior lookupIncludeBehavior;
 
-	private boolean includeByDefault;
+	private final String oppositeResourceType;
 
-	private ResourceFieldType resourceFieldType;
+	private final LookupIncludeBehavior lookupIncludeBehavior;
 
-	private String oppositeName;
+	private final boolean includeByDefault;
+
+	private final ResourceFieldType resourceFieldType;
+
+	private final String oppositeName;
 
 	private ResourceInformation parentResourceInformation;
 
 	private ResourceFieldAccessor accessor;
 
-	private ResourceFieldAccess access;
+	private final ResourceFieldAccess access;
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType) {
+			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, true, false, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true));
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
-							 boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
-							 ResourceFieldAccess access) {
+			Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
+			boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
+			ResourceFieldAccess access) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -123,16 +131,12 @@ public class ResourceFieldImpl implements ResourceField {
 			return false;
 		}
 		ResourceFieldImpl that = (ResourceFieldImpl) o;
-		return Objects.equals(jsonName, that.jsonName) && Objects.equals(underlyingName, that.underlyingName) && Objects
-				.equals(type, that.type) && Objects.equals(lookupIncludeBehavior, that.lookupIncludeBehavior)
-				&& Objects.equals(includeByDefault, that.includeByDefault) && Objects.equals(genericType, that.genericType)
-				&& Objects.equals(lazy, that.lazy)
-				&& Objects.equals(access, that.access);
+		return Objects.equals(jsonName, that.jsonName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(jsonName, underlyingName, type, genericType, lazy, includeByDefault, lookupIncludeBehavior);
+		return Objects.hash(jsonName);
 	}
 
 	/**
@@ -144,7 +148,8 @@ public class ResourceFieldImpl implements ResourceField {
 	public Class<?> getElementType() {
 		if (Iterable.class.isAssignableFrom(type)) {
 			return (Class<?>) ((ParameterizedType) getGenericType()).getActualTypeArguments()[0];
-		} else {
+		}
+		else {
 			return type;
 		}
 	}
@@ -155,9 +160,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	@Override
 	public ResourceFieldAccessor getAccessor() {
-		if (accessor == null) {
-			throw new IllegalStateException("field not properly initialized");
-		}
+		PreconditionUtil.assertNotNull("field not properly initialized", accessor);
 		return accessor;
 	}
 

@@ -47,27 +47,13 @@ public class ResourcePost extends ResourceUpsert {
 
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-						   RepositoryMethodParameterProvider parameterProvider, Document document) {
-		String resourceEndpointName = jsonPath.getResourceName();
-		RegistryEntry endpointRegistryEntry = resourceRegistry.getEntry(resourceEndpointName);
-		if (endpointRegistryEntry == null) {
-			throw new ResourceNotFoundException(resourceEndpointName);
-		}
-		if (document == null) {
-			throw new RequestBodyNotFoundException(HttpMethod.POST, resourceEndpointName);
-		}
-		if (document.getData() instanceof Collection) {
-			throw new RequestBodyException(HttpMethod.POST, resourceEndpointName, "Multiple data in body");
-		}
+						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		Resource resourceBody = (Resource) document.getData().get();
-		if (resourceBody == null) {
-			throw new RequestBodyException(HttpMethod.POST, resourceEndpointName, "No data field in the body.");
-		}
+		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
-		verifyTypes(HttpMethod.POST, resourceEndpointName, endpointRegistryEntry, bodyRegistryEntry);
-		Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
 
+		Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
 		setId(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
 		setAttributes(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);

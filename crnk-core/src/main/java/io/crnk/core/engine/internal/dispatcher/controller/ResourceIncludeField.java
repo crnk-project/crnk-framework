@@ -1,22 +1,40 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.RequestBodyNotFoundException;
 
-/**
- * Created by zachncst on 10/14/15.
- */
 public abstract class ResourceIncludeField extends BaseController {
+
 	protected final ResourceRegistry resourceRegistry;
+
 	protected final TypeParser typeParser;
 
 	protected DocumentMapper documentMapper;
 
-	public ResourceIncludeField(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, TypeParser typeParser, DocumentMapper documentMapper) {
+	public ResourceIncludeField(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
 		this.resourceRegistry = resourceRegistry;
 		this.typeParser = typeParser;
 		this.documentMapper = documentMapper;
 	}
+
+	protected void assertRequestDocument(Document requestDocument, HttpMethod method, String resourceType) {
+		if (requestDocument == null) {
+			throw new RequestBodyNotFoundException(method, resourceType);
+		}
+	}
+
+	protected RegistryEntry getRegistryEntry(String resourceType) {
+		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceType);
+		if (registryEntry == null) {
+			throw new RepositoryNotFoundException(resourceType);
+		}
+		return registryEntry;
+	}
+
 }

@@ -103,6 +103,16 @@ public class FilterSpecTest {
 	}
 
 	@Test
+	public void testOrTwoExprList() {
+		FilterSpec spec1 = new FilterSpec(Arrays.asList("name1"), FilterOperator.EQ, "test");
+		FilterSpec spec2 = new FilterSpec(Arrays.asList("name2"), FilterOperator.EQ, "test");
+		FilterSpec orSpec = FilterSpec.or(Arrays.asList(spec1, spec2));
+		Assert.assertTrue(orSpec.hasExpressions());
+		Assert.assertEquals(FilterOperator.OR, orSpec.getOperator());
+		Assert.assertEquals(2, orSpec.getExpression().size());
+	}
+
+	@Test
 	public void testOrOneExpr() {
 		FilterSpec spec1 = new FilterSpec(Arrays.asList("name1"), FilterOperator.EQ, "test");
 		FilterSpec orSpec = FilterSpec.or(spec1);

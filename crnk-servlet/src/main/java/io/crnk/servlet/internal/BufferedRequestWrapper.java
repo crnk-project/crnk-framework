@@ -1,11 +1,11 @@
 package io.crnk.servlet.internal;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Scanner;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
  * A class which provides a buffered payload. Inspired by
@@ -28,10 +28,6 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 
 		Scanner s = new Scanner(request.getInputStream(), "UTF-8").useDelimiter("\\A");
 		String requestBody = s.hasNext() ? s.next() : "";
-
-		if (requestBody == null || requestBody.isEmpty()) {
-			return "";
-		}
 		return requestBody;
 	}
 

@@ -1,0 +1,38 @@
+package io.crnk.meta;
+
+
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.meta.internal.MetaResourceRepositoryImpl;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import org.junit.Before;
+import org.junit.Test;
+
+public class MetaResourceRepositoryTest extends AbstractMetaTest {
+
+	private MetaResourceRepositoryImpl<MetaElement> repo;
+
+	private MetaLookup lookup;
+
+	@Before
+	public void setup() {
+		super.setup();
+
+		ResourceMetaProvider provider = new ResourceMetaProvider();
+
+		lookup = new MetaLookup();
+		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.addProvider(provider);
+		lookup.putIdMapping("io.crnk.test.mock.models", "app");
+		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
+		lookup.initialize();
+
+		repo = new MetaResourceRepositoryImpl(lookup, MetaElement.class);
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void checkThrowsNotFoundException() {
+		repo.findOne("does not exist", new QuerySpec(MetaElement.class));
+	}
+}

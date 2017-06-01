@@ -5,6 +5,7 @@ import org.junit.Test;
 
 public class FilterOperatorTest {
 
+
 	@Test(expected = UnsupportedOperationException.class)
 	public void andMatchNotSupported() {
 		FilterOperator.AND.matches(null, null);
@@ -18,6 +19,11 @@ public class FilterOperatorTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void orMatchNotSupported() {
 		FilterOperator.OR.matches(null, null);
+	}
+
+	@Test
+	public void testLEOperator() {
+		Assert.assertTrue(FilterOperator.LE.matches("a", "b"));
 	}
 
 	@Test
@@ -55,6 +61,7 @@ public class FilterOperatorTest {
 		Assert.assertTrue(FilterOperator.LIKE.matches("(", "("));
 		Assert.assertTrue(FilterOperator.LIKE.matches("+", "+"));
 		Assert.assertTrue(FilterOperator.LIKE.matches("*", "*"));
+		Assert.assertFalse(FilterOperator.LIKE.matches("*", null));
 	}
 
 
@@ -62,6 +69,7 @@ public class FilterOperatorTest {
 	public void testEquals() {
 		Assert.assertEquals(FilterOperator.AND, FilterOperator.AND);
 		Assert.assertNotEquals(FilterOperator.AND, "notAnOperator");
+		Assert.assertNotEquals(FilterOperator.AND, null);
 		Assert.assertEquals(FilterOperator.OR, FilterOperator.OR);
 		Assert.assertEquals(FilterOperator.OR, new FilterOperator("OR") {
 

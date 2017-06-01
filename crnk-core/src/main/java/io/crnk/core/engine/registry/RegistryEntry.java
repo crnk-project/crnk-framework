@@ -2,8 +2,8 @@ package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.registry.DirectResponseRelationshipEntry;
-import io.crnk.core.engine.internal.registry.DirectResponseResourceEntry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
@@ -33,7 +33,6 @@ public class RegistryEntry {
 
 	private final List<ResponseRelationshipEntry> relationshipEntries;
 
-	@Deprecated
 	private RegistryEntry parentRegistryEntry = null;
 
 	private ModuleRegistry moduleRegistry;
@@ -120,8 +119,6 @@ public class RegistryEntry {
 	}
 
 	/**
-	 * To be used only by ResourceRegistryBuilder
-	 *
 	 * @param parentRegistryEntry parent resource
 	 */
 	@Deprecated
@@ -130,19 +127,19 @@ public class RegistryEntry {
 	}
 
 	/**
-	 * Check the parameter is a parent of <b>this</b> {@link RegistryEntry}
+	 * Check the legacy is a parent of <b>this</b> {@link RegistryEntry}
 	 * instance
 	 *
 	 * @param registryEntry parent to check
-	 * @return true if the parameter is a parent
+	 * @return true if the legacy is a parent
 	 */
 	public boolean isParent(RegistryEntry registryEntry) {
-		RegistryEntry parentRegistryEntry = getParentRegistryEntry();
-		while (parentRegistryEntry != null) {
-			if (parentRegistryEntry.equals(registryEntry)) {
+		RegistryEntry entry = getParentRegistryEntry();
+		while (entry != null) {
+			if (entry.equals(registryEntry)) {
 				return true;
 			}
-			parentRegistryEntry = parentRegistryEntry.getParentRegistryEntry();
+			entry = entry.getParentRegistryEntry();
 		}
 		return false;
 	}

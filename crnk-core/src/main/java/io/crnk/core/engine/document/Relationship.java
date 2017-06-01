@@ -1,5 +1,10 @@
 package io.crnk.core.engine.document;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -8,14 +13,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.jackson.NullableSerializer;
 import io.crnk.core.engine.internal.jackson.RelationshipDataDeserializer;
+import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.list.LinksContainer;
 import io.crnk.core.resource.meta.MetaContainer;
 import io.crnk.core.utils.Nullable;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class Relationship implements MetaContainer, LinksContainer {
 
@@ -42,16 +44,6 @@ public class Relationship implements MetaContainer, LinksContainer {
 	}
 
 	@Override
-	public ObjectNode getLinks() {
-		return links;
-	}
-
-	@Override
-	public void setLinks(ObjectNode links) {
-		this.links = links;
-	}
-
-	@Override
 	public ObjectNode getMeta() {
 		return meta;
 	}
@@ -66,26 +58,36 @@ public class Relationship implements MetaContainer, LinksContainer {
 	}
 
 	public void setData(Nullable<Object> data) {
-		if (data == null) {
-			throw new NullPointerException("make use of Nullable");
-		}
+		PreconditionUtil.assertNotNull("make use of Nullable, null not allowed", data);
 		if (data.isPresent()) {
 			Object value = data.get();
 			if (value instanceof Collection) {
 				Collection<?> col = (Collection<?>) value;
 				if (!col.isEmpty()) {
 					Object object = col.iterator().next();
-					if (object instanceof Resource) {
-						throw new IllegalArgumentException();
-					}
+					PreconditionUtil.assertFalse("relationship data cannot be a Resource", object instanceof Resource);
+					PreconditionUtil.assertTrue("relationship data must be an instanceof of ResourceIdentifier", object instanceof ResourceIdentifier);
 				}
-			} else if (value != null && value instanceof Resource) {
-				throw new IllegalArgumentException();
+			}
+			else {
+				PreconditionUtil.assertTrue("value must be a ResourceIdentifier, null or collection", value == null || value
+						instanceof
+						ResourceIdentifier);
 			}
 
 		}
 
 		this.data = data;
+	}
+
+	@Override
+	public ObjectNode getLinks() {
+		return links;
+	}
+
+	@Override
+	public void setLinks(ObjectNode links) {
+		this.links = links;
 	}
 
 	@JsonIgnore
@@ -112,10 +114,11 @@ public class Relationship implements MetaContainer, LinksContainer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Relationship))
+		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
+		}
 		Relationship other = (Relationship) obj;
-		return Objects.equals(data, other.data) // NOSONAR
-				&& Objects.equals(meta, other.meta) && Objects.equals(links, other.links);
+		return CompareUtils.isEquals(data, other.data) // NOSONAR
+				&& CompareUtils.isEquals(meta, other.meta) && CompareUtils.isEquals(links, other.links);
 	}
 }

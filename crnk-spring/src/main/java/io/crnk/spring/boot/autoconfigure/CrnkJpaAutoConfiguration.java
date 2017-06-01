@@ -1,5 +1,8 @@
 package io.crnk.spring.boot.autoconfigure;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
@@ -20,9 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' JPA module.
  * <p>
@@ -35,10 +35,11 @@ import javax.persistence.EntityManagerFactory;
  * This configuration class will activate <em>after</em> the Hibernate auto-configuration.
  */
 @Configuration
-@ConditionalOnBean({EntityManager.class, EntityManagerFactory.class})
-@ConditionalOnClass(JpaModule.class)
+
 @ConditionalOnProperty(prefix = "crnk.jpa", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnClass(JpaModule.class)
 @ConditionalOnMissingBean(JpaModule.class)
+
 @EnableConfigurationProperties({CrnkJpaProperties.class, CrnkSpringBootProperties.class})
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @AutoConfigureBefore
@@ -71,6 +72,8 @@ public class CrnkJpaAutoConfiguration {
 				case QUERYDSL:
 					module.setQueryFactory(QuerydslQueryFactory.newInstance());
 					break;
+				default:
+					throw new IllegalStateException("unknown query factory");
 			}
 		}
 		return module;

@@ -1,11 +1,12 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.utils.Optional;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.lang.reflect.Method;
 import java.util.Date;
+
+import io.crnk.core.utils.Optional;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MethodCacheTest {
 
@@ -27,6 +28,11 @@ public class MethodCacheTest {
 		MethodCache cache = new MethodCache();
 		Optional<Method> method = cache.find(Date.class, "doesNotExist", String.class);
 		Assert.assertFalse(method.isPresent());
+	}
+
+	@Test
+	public void MethodCacheKeyEquals() {
+		EqualsVerifier.forClass(MethodCache.MethodCacheKey.class).usingGetClass().verify();
 	}
 
 }

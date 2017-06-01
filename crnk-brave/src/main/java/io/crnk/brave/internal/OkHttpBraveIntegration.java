@@ -19,14 +19,14 @@ public class OkHttpBraveIntegration implements OkHttpAdapterListener {
 	public void onBuild(OkHttpClient.Builder builder) {
 		BraveTracingInterceptor interceptor = buildInterceptor();
 
-		BraveExecutorService tracePropagatingExecutor = buildExecutor(builder);
+		BraveExecutorService tracePropagatingExecutor = buildExecutor();
 
 		builder.addInterceptor(interceptor);
 		builder.addNetworkInterceptor(interceptor);
 		builder.dispatcher(new Dispatcher(tracePropagatingExecutor));
 	}
 
-	protected BraveExecutorService buildExecutor(okhttp3.OkHttpClient.Builder builder) {
+	protected BraveExecutorService buildExecutor() {
 		return new BraveExecutorService(new Dispatcher().executorService(), brave.serverSpanThreadBinder());
 	}
 

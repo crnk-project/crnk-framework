@@ -32,7 +32,7 @@ public abstract class BaseController {
 	 *
 	 * @param jsonPath          Requested resource path
 	 * @param queryAdapter      QueryAdapter
-	 * @param parameterProvider repository method parameter provider
+	 * @param parameterProvider repository method legacy provider
 	 * @param requestBody       Top-level JSON object from method's body of the request passed as {@link RequestBody}
 	 * @return BaseResponseContext object
 	 */

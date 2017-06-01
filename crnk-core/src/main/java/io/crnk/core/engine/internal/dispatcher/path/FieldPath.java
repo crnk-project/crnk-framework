@@ -18,14 +18,16 @@ public class FieldPath extends JsonPath {
 	}
 
 	@Override
-	public String getResourceName() {
+	public String getResourceType() {
 		return parentResource.elementName;
 	}
 
+	@Override
 	public PathIds getIds() {
 		return parentResource.ids;
 	}
 
+	@Override
 	public void setIds(PathIds ids) {
 		throw new UnsupportedOperationException("Ids can be assigned only to ResourcePath");
 	}

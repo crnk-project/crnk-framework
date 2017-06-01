@@ -1,6 +1,6 @@
 package io.crnk.jpa;
 
-import io.crnk.client.ResourceRepositoryStub;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.jpa.model.*;
 import io.crnk.legacy.queryParams.QueryParams;

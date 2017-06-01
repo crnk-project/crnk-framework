@@ -70,7 +70,7 @@ public interface ResourceRepositoryV2<T, I extends Serializable> extends Reposit
 	<S extends T> S create(S entity);
 
 	/**
-	 * Removes a resource identified by id parameter.
+	 * Removes a resource identified by id legacy.
 	 *
 	 * @param id identified of the resource to be removed
 	 */

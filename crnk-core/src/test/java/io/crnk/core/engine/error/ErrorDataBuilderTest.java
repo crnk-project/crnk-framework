@@ -79,4 +79,14 @@ public class ErrorDataBuilderTest {
 				.build();
 		assertThat(error.getMeta()).contains(MapEntry.entry(ErrorDataMother.META_KEY, ErrorDataMother.META_VALUE));
 	}
+
+	@Test
+	public void shouldAddMeta() throws Exception {
+		ErrorData error = ErrorData.builder()
+				.addMetaField("a", "b")
+				.addMetaField("c", "d")
+				.build();
+		assertThat(error.getMeta()).contains(MapEntry.entry("a", "b"));
+		assertThat(error.getMeta()).contains(MapEntry.entry("c", "d"));
+	}
 }

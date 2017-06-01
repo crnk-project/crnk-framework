@@ -40,7 +40,7 @@ public class GenerateTypescriptTaskTest {
 
 		outputDir = testProjectDir.getRoot();
 
-		outputDir = new File("c:/projects/temp");
+		//	outputDir = new File("c:/projects/temp");
 
 		Project project = ProjectBuilder.builder().withProjectDir(outputDir).build();
 
