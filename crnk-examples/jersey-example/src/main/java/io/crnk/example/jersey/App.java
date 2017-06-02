@@ -13,8 +13,6 @@ public class App {
 	public static void main(String[] args) throws IOException {
 		final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, new JerseyApplication());
 
-		System.out.println("Press any key to close");
-		System.in.read();
-		server.shutdownNow();
+		System.out.println("\n\nopen http://localhost:8080/tasks in your browser\n\n");
 	}
 }

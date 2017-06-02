@@ -1,5 +1,9 @@
 apply plugin: 'java'
 
+apply plugin: 'application'
+
+mainClassName = "io.crnk.example.dropwizard.simple.DropwizardService"
+
 dependencies {
 	compile project(':crnk-rs')
 

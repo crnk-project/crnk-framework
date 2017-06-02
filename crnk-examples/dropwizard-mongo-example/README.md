@@ -1,10 +1,10 @@
-# dropwizard-simple-example
+# dropwizard-mongo-example
 
 In order to run this example do:
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:dropwizard-simple-example:run
+	gradlew :crnk-examples:dropwizard-mongo-example:run
 
 ## The service will be available at
  

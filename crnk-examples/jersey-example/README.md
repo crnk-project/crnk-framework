@@ -1,10 +1,13 @@
 # jersey-example
 
-## How to run with Maven
+## How to run with Gradle
 
-    $ mvn exec:java -Dexec.mainClass="io.crnk.example.jersey.App"
+   gradlew :crnk-examples:jersey-example:run
 
-## How to test with curl
+## Visit in your browser: 
 
-    $ curl -v http://localhost:8080/tasks/
-    ...
+    http://localhost:8080/tasks/
+
+
+
+
