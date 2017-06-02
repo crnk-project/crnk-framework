@@ -50,7 +50,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
 		// test meta access
 		ProjectListMeta meta = list.getMeta();
-		Assert.assertEquals(1L, meta.getTotalResourceCount().longValue());
+		Assert.assertEquals(4L, meta.getTotalResourceCount().longValue());
 
 		// test pagination links access
 		ProjectListLinks links = list.getLinks();
