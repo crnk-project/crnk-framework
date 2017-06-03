@@ -3,7 +3,7 @@
 *Resources* and *repositories* are the main object types in use by Crnk. Those types closely reflect the
 JSON API specification. Resources hold the data; while repositories implement the access to those resources. A
 running Crnk application can have any number of those repositories which may or may not be related. To establish
-such relations, there is further a distinction between *resource repositories* and *relationship repositories*.
+such relations, there is a further distinction between *resource repositories* and *relationship repositories*.
 
 The `crnk-core` project hosts a `engine` package that provides an implementation of the JSON API specification.
 It processes incoming requests and makes the appropriate calls to repositories. A single request may make one or multiple calls

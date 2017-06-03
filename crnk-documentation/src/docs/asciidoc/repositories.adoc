@@ -399,14 +399,13 @@ Sample exception is nothing more than a simple runtime exception:
 
 Class responsible for mapping the exception should:
 
-* be annotated with ExceptionMapperProvider
 * implement JsonApiExceptionMapper interface
+* available trough the used discovery mechanism or added trough a module.
 
 Sample exception mapper:
 
 [source]
 ----
-  @ExceptionMapperProvider
   public class SampleExceptionMapper implements JsonApiExceptionMapper<SampleException> {
     @Override
     public ErrorResponse toErrorResponse(SampleException exception) {
@@ -420,11 +419,6 @@ Sample exception mapper:
     }
   }
 ----
-
-Exception mapper classes will be scanned for and registered during application startup.
-They should be located in your resource search package. If crnk-cdi or crnk-spring
-is used, the annotation is not necessary and it will instead be picked up through the
-dependency mechanisms.
 
 An exception should be mapped to an ErrorResponse object.
 It consists of an HTTP status and ErrorData (which is consistent with JSON API error structure).

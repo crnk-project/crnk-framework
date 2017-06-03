@@ -54,7 +54,7 @@ Such a module can then register additional (usually dynamic) repositories with
 Crnk comes with out-of-the-box support for Spring and CDI. Both of them implement
 `ServiceDiscovery`. You may provide your own implementation which can be hooked into the
 various Crnk integrations, like the CrnkFeature. Modules have access to that
-`ServiceDiscover` trough the `ModuleContext`.
+`ServiceDiscovery` trough the `ModuleContext`.
 
 
 ## Let a module hook into the Crnk HTTP client implementation
@@ -62,3 +62,19 @@ various Crnk integrations, like the CrnkFeature. Modules have access to that
 Modules for the Crnk client can additionally implement `HttpAdapterAware`. It gives
 the module access to the underlying HTTP client implementation and allows abitrary
 customizations of it. Have a look at the Crnk client documentation for more information.
+
+## Implement a custom integration
+
+Adding a new integration has become quite simple in recent times.
+Have a look at `crnk-servlet` and `crnk-rs`. Most functionality
+necessary is already be provided by `crnk-core`. The steps include:
+
+- implement `HttpRequestContextBase`.
+- instantiate `CrnkBoot` to setup crnk.
+- get the `RequestDispatcher` from `CrnkBoot`.
+- invoke the `RequestDispatcher` for each incoming request with the implemented
+  `HttpRequestContextBase`.
+- you may want to further implement `SecurityProvider`, `TransactionRunner`
+  and `PropertiesProvider` to interface with that particular systems.
+
+

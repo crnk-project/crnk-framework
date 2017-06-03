@@ -35,7 +35,6 @@ Next to that Crnk supports many popular frameworks and APIs:
 
 :leveloffset: 1
 
-include::release_notes.adoc[]
 include::architecture.adoc[]
 include::setup.adoc[]
 include::resource.adoc[]

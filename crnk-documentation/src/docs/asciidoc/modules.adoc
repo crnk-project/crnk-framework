@@ -9,15 +9,33 @@ or Crnk-specific annotations are necessary.
 
 The feature set includes:
 
-- expose JPA entities to JSON API endpoints
-- expose JPA relations as JSON API endpoints
+- expose JPA entities to JSON API repositories
+- expose JPA relations as JSON API repositories
 - decide which entities to expose as endpoints
-- sorting, filtering, paging, inclusion of related resources
-- JPA filter API to modify the issued queries
-- JPA Criteria API and QueryDSL support
-- DTO mapping support
+- sorting, filtering, paging, inclusion of related resources.
+- all default operators of crnk are supported: `EQ`, `NEQ`, `LIKE`, `LT`, `LE`, `GT`, `GE`.
+- filter, sort and include parameters can make use of the dot notation to
+  join to related entities. For example, `sort=-project.name,project.id`,
+   `filter[project.name][NEQ]=someValue` or `include=project.tasks`.
+- support for entity inheritance by allowing sorting, filtering and inclusions
+  to refer to attributes on subtypes.
+- DTO mapping support to map entities to DTOs before sending them to clients.
+- JPA Criteria API and QueryDSL support to issue queries.
+- filter API to intercept and modify issued queries.
 - support for computed attributes behaving like regular, persisted attributes.
+- automatic transaction handling spanning requests and doing a rollback in case of an exception.
+- `OptimisticLockExceptionMapper` mapped to JSON API errors with
+  `409` status code.
+- `PersistenceException` and `RollbackException` are unwrapped
+   to the usually more interesting exceptions like
+   `ValidationException` and then translated to JSON API errors.
 
+Have a look at the Spring Boot example application which makes use of the JPA module, DTO mapping
+and computed attributes.
+
+Not yet supported are:
+
+- sparse field sets.
 
 ### JPA Setup
 
@@ -179,10 +197,36 @@ match again the entity attribute naming.
 ## JSR 303 Validation Module
 
 A `ValidationModule` provided by `io.crnk:crnk-validation` implements
-exception mappers for 'javax.validation.ValidationException' and 'javax.validation.ConstraintViolationException'.
+exception mappers for `javax.validation.ValidationException` and `javax.validation.ConstraintViolationException`.
 Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON API errors.
 A JSON API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
 display the validation errors next to the corresponding input fields.
+
+A translated exception can look like:
+
+[source]
+----
+{
+	"errors": [
+		{
+			"status": "422",
+			"code": "javax.validation.constraints.NotNull",
+			"title": "may not be null",
+			"source": {
+				"pointer": "data/attributes/name"
+			},
+			"meta": {
+				"resourceId": "1",
+				"type": "ConstraintViolation",
+				"messageTemplate": "{javax.validation.constraints.NotNull.message}",
+				"resourceType": "projects"
+			}
+		}
+	]
+}
+----
+
+Notice the `422` status code used for such errors.
 
 
 ## Tracing with Zipkin/Brave
@@ -205,6 +249,8 @@ Every request triggers one or more repository accesses (depending on whether
 relations are included). Note however that `BraveModule` does not setup tracing
 for incoming requests. That is the purpose of the JAX-RS/servlet integration of Brave.
 
+Have a look at the Spring boot example application to see the `BraveModule` in use
+together with a log reporter writing the output to console.
 
 ## Security Module
 
@@ -223,8 +269,9 @@ The security module further properly serializes javax.security
 authorization and authentication exceptions. As such it is also recommended to be
 used by CrnkClient.
 
-NOTE: Planned future extensions:
-- secure `QuerySpec` parameters
+Planned future extensions:
+
+- secure `QuerySpec` parameters to avoid illegal access to related entities.
 - remove unauthorized relationship links
 - show only authorized repository in `HomeModule`.
 
@@ -234,6 +281,16 @@ NOTE: Planned future extensions:
 This is a module that exposes the internal workings of Crnk as JSON API repositories.
 It lets you browse the set of available resources, their types, their attributes, etc. For example,
 Crnk UI make use of the meta module to implement auto-completing of input fields.
+
+NOTE: There is currently no JSON API standard for meta data. There are more
+general formats like Swagger and ALPS. At some point those might be supported as
+well (probably rather the later than the former). One
+can view them to be complementary to the `MetaModule` as the later
+is exactly tailored towards JSON API, such as the accessability as regular
+JSON API (meta) repository and data structures matching the standard. Most likely,
+any future standard implementation will built up on the information from the
+`MetaModule`.
+
 A setup can look as follows:
 
 [source]
@@ -263,6 +320,95 @@ most important classes are:
 | `/meta/resourceRepository`| `MetaResourceRepository` 	| JSON API repository representation holding resources.
 |===
 
+A `MetaResource` looks like:
+
+
+[source]
+----
+{
+    "id" : "io.crnk.example.springboot.domain.model.Project",
+    "type" : "meta/resource",
+    "attributes" : {
+      "name" : "Project",
+      "resourceType" : "projects"
+    },
+    "relationships" : {
+      "parent" : {
+        ...
+      },
+      "interfaces" : {
+        ...
+      },
+      "declaredKeys" : {
+        ...
+      },
+      "children" : {
+        ...
+      },
+      "declaredAttributes" : {
+        ...
+      },
+      "subTypes" : {
+        ...
+      },
+      "attributes" : {
+        ...
+      },
+      "superType" : {
+        ...
+      },
+      "elementType" : {
+        ...
+      },
+      "primaryKey" : {
+        ...
+      }
+    }
+  }
+----
+
+
+
+A `MetaAttribute` looks like:
+
+[source]
+----
+{
+    "id" : "io.crnk.example.springboot.domain.model.Project.name",
+    "type" : "meta/resourceField",
+    "attributes" : {
+      "filterable" : true,
+      "nullable" : true,
+      "lazy" : false,
+      "association" : false,
+      "primaryKeyAttribute" : false,
+      "sortable" : true,
+      "version" : false,
+      "insertable" : true,
+      "meta" : false,
+      "name" : "name",
+      "updatable" : true,
+      "links" : false,
+      "derived" : false,
+      "lob" : false,
+      "cascaded" : false
+    },
+    "relationships" : {
+      "parent" : {
+        ...
+      },
+      "children" : {
+        ...
+      },
+      "oppositeAttribute" : {
+        ...
+      },
+      "type" : {
+        ...
+      }
+    }
+  }
+----
 
 
 
@@ -278,8 +424,39 @@ you to obtain a list of available repositories when accessing the parent page of
 		...
 ----
 
-The module is currently in an incubator stage.
+The module is currently in an incubator stage. In the Spring Boot example
+applications it looks like:
 
+
+[source]
+----
+{
+  "resources" : {
+    "tag:schedule" : {
+      "href" : "/schedule/"
+    },
+    "tag:tasks" : {
+      "href" : "/tasks/"
+    },
+    "tag:scheduleDto" : {
+      "href" : "/scheduleDto/"
+    },
+    "tag:meta/collectionType" : {
+      "href" : "/meta/collectionType/"
+    },
+    "tag:projects" : {
+      "href" : "/projects/"
+    },
+     "tag:meta/resource" : {
+	  "href" : "/meta/resource/"
+	},
+	"tag:meta/attribute" : {
+	  "href" : "/meta/attribute/"
+	},
+	...
+  }
+}
+----
 
 
 
@@ -348,3 +525,7 @@ By default the user interface is accessible from the `/browse/` directory next t
 Have a look at the Spring Boot example application to see a working example.
 
 This module is currently in incubation. Please provide feedback.
+
+An example from the Spring Boot example application looks like:
+
+image:images/crnk_ui.png[]

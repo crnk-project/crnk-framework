@@ -9,6 +9,8 @@ languages like iOS would be very welcomed.
 
 ## Typescript
 
+NOTE: Available soon (ngrx-json-api needs to be released as well)
+
 The Typescript generator allows the generation of JSON API resources, repositories and related objects such as meta
 information, links information, data objects, list types and enumeration types. Currently the generator targets the
 <a href="https://github.com/abdulhaq-e/ngrx-json-api">ngrx-json-api</a> library. Support for other libraries/formats
