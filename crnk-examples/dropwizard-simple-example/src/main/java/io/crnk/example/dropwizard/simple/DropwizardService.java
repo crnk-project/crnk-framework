@@ -8,7 +8,9 @@ import io.dropwizard.setup.Environment;
 public class DropwizardService extends Application<DropwizardConfiguration> {
 
 	public static void main(String[] args) throws Exception {
-		new DropwizardService().run(args);
+		new DropwizardService().run("server");
+
+		System.out.println("\n\nopen http://localhost:8080/projects in your browser\n\n");
 	}
 
 	@Override

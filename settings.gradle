@@ -20,7 +20,7 @@ include ':crnk-examples:dropwizard-mongo-example'
 include ':crnk-examples:jersey-example'
 include ':crnk-examples:dropwizard-simple-example'
 include ':crnk-examples:wildfly-example'
-include ':crnk-examples:spring-boot-simple-example'
+include ':crnk-examples:spring-boot-example'
 
 include ':crnk-ui'
 include ':crnk-documentation'

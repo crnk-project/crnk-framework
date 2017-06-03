@@ -1,10 +1,10 @@
-# dropwizard-simple-example
+# spring-boot-example
 
 In order to run this example do:
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:dropwizard-simple-example:run
+	gradlew :crnk-examples:spring-boot-example:run
 
 ## The service will be available at
  
