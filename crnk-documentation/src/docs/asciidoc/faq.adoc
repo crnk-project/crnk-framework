@@ -1,0 +1,17 @@
+
+# FAQ
+
+
+[qanda]
+How to do Cors with Crnk?::
+  In most (if not all) cases Cors should be setup in the underlying
+  integration, like with the Servlet-API or as JAX-RS filter and
+  not within Crnk itself. This allows to make use of the native
+  Cors mechanisms of an integration and to share Cors handling with
+  the other parts of the application.
+
+Is Swagger supported by Crnk?::
+  Have a look at http://www.crnk.io/related/.
+
+
+

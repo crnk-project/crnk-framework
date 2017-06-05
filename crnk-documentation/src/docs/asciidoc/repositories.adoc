@@ -221,6 +221,10 @@ QuerySpec (like the legacy `QueryParams`).
 
 ### Filtering
 
+NOTE: The JSON API specification does not a mandate a specific filtering semantic. Instead
+it provides a recommendation that comes by default with Crnk. Depending on the data store
+in use, application may choose to extend or replace that default implementation.
+
 Resource filtering can be achieved by providing parameters which start with `filter`.
 The format for filters: `filter[ResourceType][property|operator]([property|operator])* = "value"`
 
@@ -229,7 +233,45 @@ The format for filters: `filter[ResourceType][property|operator]([property|opera
 * `GET /tasks/?filter[tasks][name]=Super task`
 * `GET /tasks/?filter[tasks][name]=Super task&filter[tasks][dueDate]=2015-10-01`
 
-QuerySpec uses the `EQ` operator if no operator was provided. Custom operators can be registered
+QuerySpec uses the `EQ` operator if no operator was provided.
+
+Operators are represented by the `FilterOperator` class. Crnk comes with a set of
+default filters:
+
+[cols="1,3", options="header"]
+|===
+|Name
+|Descriptor
+
+|`EQ`
+|equals operator where values match exactly.
+
+|`NEQ`
+|not equals where values do not match.
+
+|`LIKE`
+|where the value matches the specified pattern. It is usually
+ not case-sensitive and makes use of `%` as wildclard, but
+ may different depending on the underlying implementation.
+
+|`LT`
+|lower than the specified value
+
+|`LE`
+|lower than or equals the specified value
+
+|`GT`
+|greater than the specified value
+
+|`GE`
+|greater than or equals the specified value
+|===
+
+The application is free to implements its own `FilterOperator`. Next to the name
+a `matches` method can be implemented to support in-memory filtering
+with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
+to handle the various filter operators; usually by translating them
+to datastore-native query expressions. Custom operators can be registered
 with `DefaultQuerySpecDeserializer.addSupportedOperator(..)`. The default operator can be
 overridden by setting `DefaultQuerySpecDeserializer.setDefaultOperator(...)`.
 
