@@ -18,9 +18,14 @@ public class NgrxJsonApiLibrary {
 
 	public static final TSClassType TYPED_MANY_RESOURCE_RELATIONSHIP;
 
+	public static final TSInterfaceType ONE_QUERY_RESULT;
+
+	public static final TSInterfaceType MANY_QUERY_RESULT;
+
 	static {
 		TSSource ngrxJsonApiSource = new TSSource();
 		ngrxJsonApiSource.setNpmPackage("ngrx-json-api");
+		ngrxJsonApiSource.setDirectory("src/interfaces");
 
 		STORE_RESOURCE = new TSInterfaceType();
 		STORE_RESOURCE.setName("StoreResource");
@@ -46,6 +51,13 @@ public class NgrxJsonApiLibrary {
 		TYPED_MANY_RESOURCE_RELATIONSHIP.setName("TypedManyResourceRelationship");
 		TYPED_MANY_RESOURCE_RELATIONSHIP.setParent(ngrxJsonApiSource);
 
+		ONE_QUERY_RESULT = new TSInterfaceType();
+		ONE_QUERY_RESULT.setName("OneQueryResult");
+		ONE_QUERY_RESULT.setParent(ngrxJsonApiSource);
+
+		MANY_QUERY_RESULT = new TSInterfaceType();
+		MANY_QUERY_RESULT.setName("ManyQueryResult");
+		MANY_QUERY_RESULT.setParent(ngrxJsonApiSource);
 	}
 
 	private NgrxJsonApiLibrary() {

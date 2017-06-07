@@ -18,7 +18,7 @@ import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.crnk.gen.typescript.TypescriptUtils;
+import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSParameterizedType;
 import io.crnk.gen.typescript.model.TSSource;
@@ -86,7 +86,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				qField.setName(field.getName());
 				setupField(interfaceType, qField, field);
 				if (qField.getInitializer() != null) {
-					queryType.addMember(qField);
+					queryType.addDeclaredMember(qField);
 				}
 			}
 			return queryType;

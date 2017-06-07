@@ -16,11 +16,13 @@ import io.crnk.gen.typescript.model.TSEnumType;
 import io.crnk.gen.typescript.model.TSExport;
 import io.crnk.gen.typescript.model.TSExportedElement;
 import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSFunction;
 import io.crnk.gen.typescript.model.TSImport;
 import io.crnk.gen.typescript.model.TSIndexSignature;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSMember;
 import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSParameter;
 import io.crnk.gen.typescript.model.TSParameterizedType;
 import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
@@ -58,7 +60,7 @@ public class TSWriter implements TSVisitor {
 			element.getIndexSignature().accept(this);
 		}
 
-		for (TSMember member : element.getMembers()) {
+		for (TSMember member : element.getDeclaredMembers()) {
 			member.accept(this);
 		}
 		endScope();
@@ -109,7 +111,7 @@ public class TSWriter implements TSVisitor {
 			element.getIndexSignature().accept(this);
 		}
 
-		for (TSMember member : element.getMembers()) {
+		for (TSMember member : element.getDeclaredMembers()) {
 			member.accept(this);
 		}
 		endScope();
@@ -229,7 +231,7 @@ public class TSWriter implements TSVisitor {
 	}
 
 	private void startScope() {
-		builder.append("{");
+		builder.append(" {");
 		incIndentation();
 	}
 
@@ -325,5 +327,59 @@ public class TSWriter implements TSVisitor {
 	@Override
 	public void visit(TSParameterizedType parameterizedType) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void visit(TSFunction function) {
+
+		appendLine();
+		appendExported(function);
+
+		builder.append("let ");
+		builder.append(function.getName());
+		builder.append(" = function(");
+		Iterator<TSParameter> iterator = function.getParameters().iterator();
+		while (iterator.hasNext()) {
+			TSParameter parameter = iterator.next();
+
+			builder.append(parameter.getName());
+			builder.append(": ");
+			visitReference(parameter.getType());
+			if (iterator.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		builder.append(")");
+		if (function.getType() != null) {
+			builder.append(": ");
+			visitReference(function.getType());
+		}
+		startScope();
+		for (String statement : function.getStatements()) {
+			writeStatement(statement);
+		}
+		endScope();
+		builder.append(";");
+	}
+
+	private void writeStatement(String statement) {
+		String[] lines = statement.split("\\n");
+		for (String line : lines) {
+			if (line.startsWith("}")) {
+				decIndentation();
+			}
+
+			appendLine();
+			builder.append(line);
+
+			if (line.endsWith("{")) {
+				incIndentation();
+			}
+		}
+	}
+
+	@Override
+	public void visit(TSParameter parameter) {
+
 	}
 }

@@ -1,12 +1,18 @@
 package io.crnk.gen.typescript.model;
 
-public abstract class TSMember extends TSElementBase {
+public class TSParameter extends TSElementBase {
 
 	private String name;
 
 	private TSType type;
 
 	private boolean nullable;
+
+	public TSParameter(String name, TSType type, boolean nullable) {
+		this.name = name;
+		this.type = type;
+		this.nullable = nullable;
+	}
 
 	public void setName(String name) {
 		this.name = name;
@@ -39,11 +45,9 @@ public abstract class TSMember extends TSElementBase {
 		return type;
 	}
 
-	public boolean isField() {
-		return false;
+	@Override
+	public void accept(TSVisitor visitor) {
+		visitor.visit(this);
 	}
 
-	public TSField asField() {
-		throw new UnsupportedOperationException();
-	}
 }

@@ -1,27 +1,27 @@
 package io.crnk.gen.runtime.deltaspike;
 
-import java.io.File;
 import javax.inject.Singleton;
 
-import io.crnk.gen.typescript.TSGenerator;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
+import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Resolution of MetaLookup implemented as test case. There are nicer things to look at, but it is simple and serves its
+ * purpose.
+ */
 @RunWith(CdiTestRunner.class)
 @Singleton
 public class DeltaspikeTypescriptGenerator {
 
-	private static File outputDir;
-
-	private static TSGeneratorConfiguration config;
+	private static GeneratorTrigger context;
 
 	@Test
 	public void test() {
@@ -39,15 +39,10 @@ public class DeltaspikeTypescriptGenerator {
 		MetaModule metaModule = optionalModule.get();
 		MetaLookup lookup = metaModule.getLookup();
 
-		TSGenerator gen = new TSGenerator(outputDir, lookup, config);
-		gen.run();
+		context.generate(lookup);
 	}
 
-	public static void setConfig(TSGeneratorConfiguration config) {
-		DeltaspikeTypescriptGenerator.config = config;
-	}
-
-	public static void setOutputDir(File outputDir) {
-		DeltaspikeTypescriptGenerator.outputDir = outputDir;
+	public static void setContext(GeneratorTrigger context) {
+		DeltaspikeTypescriptGenerator.context = context;
 	}
 }

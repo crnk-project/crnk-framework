@@ -1,4 +1,4 @@
-package io.crnk.gen.typescript;
+package io.crnk.gen.typescript.internal;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,17 +11,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.gen.typescript.TSGeneratorConfiguration;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
 import io.crnk.gen.typescript.transform.TSMetaTransformation;
 import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
+import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.resource.MetaResource;
 
 public class TSGenerator {
 
@@ -55,12 +60,86 @@ public class TSGenerator {
 	}
 
 	public void run() {
-		build();
-		transform();
-		write();
+		writePackaging();
+		writeTypescriptConfig();
+		transformMetaToTypescript();
+		runProcessors();
+		writeSources();
 	}
 
-	private void write() {
+	private void writeTypescriptConfig() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			ObjectNode root = mapper.createObjectNode();
+			ObjectNode compilerOptions = root.putObject("compilerOptions");
+			compilerOptions.put("baseUrl", "");
+			compilerOptions.put("declaration", false);
+			compilerOptions.put("emitDecoratorMetadata", true);
+			compilerOptions.put("experimentalDecorators", true);
+			compilerOptions.put("mapRoot", "./");
+			compilerOptions.put("module", "es6");
+			compilerOptions.put("moduleResolution", "node");
+			compilerOptions.put("outDir", "../../../../npm/");
+			compilerOptions.put("sourceMap", true);
+			compilerOptions.put("target", "es5");
+			ArrayNode typeArrays = compilerOptions.putArray("typeRoots");
+			typeArrays.add("node_modules/@types");
+			ArrayNode libs = compilerOptions.putArray("lib");
+			libs.add("es6");
+			libs.add("dom");
+
+			File outputSourceDir = new File(outputDir, config.getSourceDirectoryName());
+			File file = new File(outputSourceDir, "tsconfig.json");
+			file.getParentFile().mkdirs();
+			mapper.writer().writeValue(file, root);
+		}
+		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+
+	protected void writePackaging() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+			ObjectNode packageJson = mapper.createObjectNode();
+
+			packageJson.put("name", config.getNpmPackageName());
+			packageJson.put("version", config.getNpmPackageVersion());
+			packageJson.put("description", config.getNpmDescription());
+			packageJson.put("license", config.getNpmLicense());
+			ObjectNode dependencies = packageJson.putObject("dependencies");
+			for (Map.Entry<String, String> entry : config.getNpmDependencies().entrySet()) {
+				dependencies.put(entry.getKey(), entry.getValue());
+			}
+
+			ObjectNode devDependencies = packageJson.putObject("devDependencies");
+			for (Map.Entry<String, String> entry : config.getNpmDevDependencies().entrySet()) {
+				devDependencies.put(entry.getKey(), entry.getValue());
+			}
+
+			File packageJsonFile = new File(outputDir, "package.json");
+			packageJsonFile.getParentFile().mkdirs();
+
+			ObjectNode scripts = packageJson.putObject("scripts");
+			scripts.put("build", "npm run build:js && npm run copyPackageJson && rimraf ../../../npm/node_modules");
+			scripts.put("copyPackageJson", "ncp package.json ../../../npm/package.json");
+			scripts.put("build:js", "tsc -p ./src --declaration");
+			packageJson.put("name", config.getNpmPackageName());
+			packageJson.put("version", config.getNpmPackageVersion());
+
+			mapper.writer().writeValue(packageJsonFile, packageJson);
+		}
+		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+
+	}
+
+	protected void writeSources() {
 		PreconditionUtil.assertNotNull("no typescriptGen.npmPackageName configured", config.getNpmPackageName());
 
 		for (TSSource fileSource : sources) {
@@ -73,7 +152,7 @@ public class TSGenerator {
 		}
 	}
 
-	private static void write(File file, String source) {
+	protected static void write(File file, String source) {
 		file.getParentFile().mkdirs();
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(source);
@@ -83,43 +162,53 @@ public class TSGenerator {
 		}
 	}
 
-	private File getFile(TSSource sourceFile) {
-		File dir = new File(outputDir, sourceFile.getDirectory());
+	protected File getFile(TSSource sourceFile) {
+		File srcOutputDir = outputDir;
+		if (config.getSourceDirectoryName() != null) {
+			srcOutputDir = new File(outputDir, config.getSourceDirectoryName());
+		}
+		File dir = new File(srcOutputDir, sourceFile.getDirectory());
 		return new File(dir, sourceFile.getName() + ".ts");
 	}
 
-	public void build() {
+	public void transformMetaToTypescript() {
 		Collection<MetaElement> elements = lookup.getMetaById().values();
 		for (MetaElement element : elements) {
 			if (isRoot(element)) {
-				transform(element);
+				transform(element, TSMetaTransformationOptions.EMPTY);
 			}
 		}
 	}
 
-	public void transform() {
+
+	public void runProcessors() {
 		for (TSSourceProcessor processor : config.getSourceProcessors()) {
 			sources = processor.process(sources);
 		}
 	}
 
-	private TSElement transform(MetaElement element) {
+	private TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				return transformation.transform(element, new TSMetaTransformationContextImpl());
+				return transformation.transform(element, new TSMetaTransformationContextImpl(), options);
 			}
 		}
 		throw new IllegalStateException("unexpected element: " + element);
 	}
 
-	private static boolean isRoot(MetaElement element) {
-		return element instanceof MetaResource;
+	private boolean isRoot(MetaElement element) {
+		for (TSMetaTransformation transformation : transformations) {
+			if (transformation.accepts(element)) {
+				return transformation.isRoot(element);
+			}
+		}
+		return false;
 	}
 
-	class TSMetaTransformationContextImpl implements TSMetaTransformationContext {
+	protected class TSMetaTransformationContextImpl implements TSMetaTransformationContext {
 
 		private boolean isGenerated(TSSource source) {
 			return source.getNpmPackage().equals(config.getNpmPackageName());
@@ -175,8 +264,8 @@ public class TSGenerator {
 		}
 
 		@Override
-		public TSElement transform(MetaElement metaElement) {
-			return TSGenerator.this.transform(metaElement);
+		public TSElement transform(MetaElement metaElement, TSMetaTransformationOptions options) {
+			return TSGenerator.this.transform(metaElement, options);
 		}
 
 		@Override

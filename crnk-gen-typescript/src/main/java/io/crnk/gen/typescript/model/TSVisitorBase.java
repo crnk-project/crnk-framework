@@ -36,7 +36,7 @@ public class TSVisitorBase implements TSVisitor {
 
 	@Override
 	public void visit(TSInterfaceType element) {
-		for (TSElement member : new ArrayList<>(element.getMembers())) {
+		for (TSElement member : new ArrayList<>(element.getDeclaredMembers())) {
 			member.accept(this);
 		}
 	}
@@ -82,4 +82,13 @@ public class TSVisitorBase implements TSVisitor {
 		// nothing to do
 	}
 
+	@Override
+	public void visit(TSParameter parameter) {
+		// nothing to do
+	}
+
+	@Override
+	public void visit(TSFunction function) {
+		// nothing to do
+	}
 }

@@ -14,7 +14,7 @@ public interface TSMetaTransformationContext {
 
 	void addSource(TSSource source);
 
-	TSElement transform(MetaElement metaElement);
+	TSElement transform(MetaElement metaElement, TSMetaTransformationOptions options);
 
 	MetaElement getMeta(Class<?> implClass);
 

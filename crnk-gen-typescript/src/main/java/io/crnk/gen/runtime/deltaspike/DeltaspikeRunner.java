@@ -1,9 +1,8 @@
 package io.crnk.gen.runtime.deltaspike;
 
-import java.io.File;
 import java.util.List;
 
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.runtime.GeneratorTrigger;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
@@ -14,9 +13,8 @@ import org.junit.runners.model.InitializationError;
 
 public class DeltaspikeRunner {
 
-	public void run(File outputDir, TSGeneratorConfiguration config) {
-		DeltaspikeTypescriptGenerator.setOutputDir(outputDir);
-		DeltaspikeTypescriptGenerator.setConfig(config);
+	public void run(GeneratorTrigger context) {
+		DeltaspikeTypescriptGenerator.setContext(context);
 		Runner runner;
 		try {
 			runner = new CdiTestRunner(DeltaspikeTypescriptGenerator.class);

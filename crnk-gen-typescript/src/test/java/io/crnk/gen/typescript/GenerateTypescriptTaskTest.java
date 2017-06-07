@@ -40,9 +40,10 @@ public class GenerateTypescriptTaskTest {
 
 		outputDir = testProjectDir.getRoot();
 
-		//	outputDir = new File("c:/projects/temp");
+		outputDir = new File("c:/projects/temp");
 
-		Project project = ProjectBuilder.builder().withProjectDir(outputDir).build();
+		Project project = ProjectBuilder.builder().withName("crnk-gen-typescript-test").withProjectDir(outputDir).build();
+		project.setVersion("0.0.1");
 
 		project.getPluginManager().apply(JavaPlugin.class);
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
@@ -52,24 +53,26 @@ public class GenerateTypescriptTaskTest {
 		config.setNpmPackageName("@crnk/gen-typescript-test");
 		config.getNpmPackageMapping().put("io.crnk.test.mock.models", "@crnk/gen-typescript-test");
 		config.getNpmPackageMapping().put("io.crnk.meta", "@crnk/meta");
+		config.setNpmPackageVersion("0.0.1");
 
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
 		task.runGeneration();
 
-		assertExists("build/generated/source/typescript/index.ts");
-		assertExists("build/generated/source/typescript/project.ts");
-		assertExists("build/generated/source/typescript/project.data.ts");
-		assertExists("build/generated/source/typescript/schedule.ts");
-		assertExists("build/generated/source/typescript/task.ts");
-		assertNotExists("build/generated/source/typescript/task.links.ts");
-		assertNotExists("build/generated/source/typescript/task.meta.ts");
+		assertExists("build/generated/source/typescript/package.json");
+		assertExists("build/generated/source/typescript/src/index.ts");
+		assertExists("build/generated/source/typescript/src/project.ts");
+		assertExists("build/generated/source/typescript/src/project.data.ts");
+		assertExists("build/generated/source/typescript/src/schedule.ts");
+		assertExists("build/generated/source/typescript/src/task.ts");
+		assertNotExists("build/generated/source/typescript/src/task.links.ts");
+		assertNotExists("build/generated/source/typescript/src/task.meta.ts");
 
 		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
 				"expected_schedule_without_expressions.ts";
 		String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
 		String actualSource = IOUtils
-				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/schedule.ts")), utf8);
+				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedule.ts")), utf8);
 		Assert.assertEquals(expectedSource, actualSource);
 	}
 
