@@ -30,6 +30,9 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			NpmInstallTask npmInstall = (NpmInstallTask) project.getTasks().getByName("npmInstall");
 			npmInstall.setWorkingDir(workingDir);
 			npmInstall.dependsOn(generateTask);
+			npmInstall.getInputs().file(new File(workingDir, "package.json"));
+			npmInstall.getOutputs().dir(new File(workingDir, "node_modules"));
+
 
 			// copy .npmrc file from root to working directory if available
 			final File npmrcFile = new File(project.getProjectDir(), ".npmrc");
