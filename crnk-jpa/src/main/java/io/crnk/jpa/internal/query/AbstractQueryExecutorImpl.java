@@ -1,12 +1,17 @@
 package io.crnk.jpa.internal.query;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.util.*;
 
 public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T> {
 
@@ -29,7 +34,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected Map<String, Integer> selectionBindings;
 
 	public AbstractQueryExecutorImpl(EntityManager em, MetaDataObject meta, int numAutoSelections,
-									 Map<String, Integer> selectionBindings) {
+			Map<String, Integer> selectionBindings) {
 		this.em = em;
 		this.meta = meta;
 		this.numAutoSelections = numAutoSelections;
@@ -84,6 +89,11 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	}
 
 	@Override
+	public int getLimit() {
+		return limit;
+	}
+
+	@Override
 	public JpaQueryExecutor<T> setWindow(int offset, int limit) {
 		this.offset = offset;
 		this.limit = limit;
@@ -104,7 +114,8 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 				entityList.add((T) values[0]);
 			}
 			resultList = entityList;
-		} else {
+		}
+		else {
 			resultList = (List<T>) list;
 		}
 		return resultList;
@@ -115,14 +126,18 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	@Override
 	public T getUniqueResult(boolean nullable) {
 		List<T> list = getResultList();
-		if (list.size() > 1)
+		if (list.size() > 1) {
 			throw new IllegalStateException("query does not return unique value, " + list.size() + " results returned");
-		if (!list.isEmpty())
+		}
+		if (!list.isEmpty()) {
 			return list.get(0);
-		else if (nullable)
+		}
+		else if (nullable) {
 			return null;
-		else
+		}
+		else {
 			throw new IllegalStateException("no result found");
+		}
 	}
 
 	protected List<Object> truncateTuples(List<?> list, int numToRemove) {
@@ -148,7 +163,8 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 			try {
 				// avoid compile-time dependency
 				builder = (EntityGraphBuilder) Class.forName(ENTITY_GRAPH_BUILDER_IMPL).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			}
+			catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
 			Class<T> entityClass = getEntityClass();
@@ -219,8 +235,9 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof TupleElement))
+			if (!(obj instanceof TupleElement)) {
 				return false;
+			}
 			TupleElement tuple = (TupleElement) obj;
 			return tuple.hashCode == hashCode && Arrays.equals(data, tuple.data);
 		}

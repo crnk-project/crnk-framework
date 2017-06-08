@@ -1,17 +1,19 @@
-package io.crnk.core.resource.paging;
-
-import io.crnk.core.mock.models.Task;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.core.resource.list.ResourceList;
+package io.crnk.core.resource.paging.next;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TestPagedResourceRepository implements ResourceRepositoryV2<Task, Long> {
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 
-	private static List<Task> tasks = new ArrayList<Task>();
+public class HasNextPageTestRepository implements ResourceRepositoryV2<Task, Long> {
+
+	private static List<Task> tasks = new ArrayList<>();
 
 	public static void clear() {
 		tasks.clear();
@@ -34,12 +36,18 @@ public class TestPagedResourceRepository implements ResourceRepositoryV2<Task, L
 
 	@Override
 	public ResourceList<Task> findAll(QuerySpec querySpec) {
-		return querySpec.apply(tasks);
+		DefaultResourceList<Task> list = new DefaultResourceList<>();
+		list.setMeta(new DefaultHasMoreResourcesMetaInformation());
+		querySpec.apply(tasks, list);
+		return list;
 	}
 
 	@Override
 	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
-		return querySpec.apply(tasks);
+		DefaultResourceList<Task> list = new DefaultResourceList<>();
+		list.setMeta(new DefaultHasMoreResourcesMetaInformation());
+		querySpec.apply(tasks, list);
+		return list;
 	}
 
 	@Override

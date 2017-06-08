@@ -1,7 +1,18 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.RepositoryFilterContext;
+import io.crnk.core.engine.filter.RepositoryLinksFilterChain;
+import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
+import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
+import io.crnk.core.engine.filter.RepositoryResultFilterChain;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
@@ -19,15 +30,11 @@ import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -65,7 +72,8 @@ public abstract class ResponseRepositoryAdapter {
 		boolean isCollection = result instanceof Iterable;
 		if (isCollection) {
 			resources = (Iterable<?>) result;
-		} else {
+		}
+		else {
 			resources = Collections.singletonList(result);
 		}
 		Iterable<?> filteredResult = filterResult(resources, requestSpec);
@@ -75,17 +83,20 @@ public abstract class ResponseRepositoryAdapter {
 		Object resultEntity;
 		if (isCollection) {
 			resultEntity = filteredResult;
-		} else {
+		}
+		else {
 			Iterator<?> iterator = filteredResult.iterator();
 			if (iterator.hasNext()) {
 				resultEntity = iterator.next();
 				PreconditionUtil.assertFalse("expected unique result", iterator.hasNext());
-			} else {
+			}
+			else {
 				resultEntity = null;
 			}
 		}
 
-		return new JsonApiResponse().setEntity(resultEntity).setLinksInformation(linksInformation).setMetaInformation(metaInformation);
+		return new JsonApiResponse().setEntity(resultEntity).setLinksInformation(linksInformation)
+				.setMetaInformation(metaInformation);
 	}
 
 	private MetaInformation getMetaInformation(Object repository, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
@@ -104,9 +115,12 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).metaRepositoryAvailable()) {
 				return ((AnnotatedRepositoryAdapter) repository).getMetaInformation(resources, queryAdapter);
 			}
-		} else if (repository instanceof MetaRepositoryV2) {
-			return ((MetaRepositoryV2) repository).getMetaInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
-		} else if (repository instanceof MetaRepository) {
+		}
+		else if (repository instanceof MetaRepositoryV2) {
+			return ((MetaRepositoryV2) repository)
+					.getMetaInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
+		}
+		else if (repository instanceof MetaRepository) {
 			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
 		}
 		return null;
@@ -144,25 +158,31 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).linksRepositoryAvailable()) {
 				linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 			}
-		} else if (repository instanceof LinksRepositoryV2) {
-			linksInformation = ((LinksRepositoryV2) repository).getLinksInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
-		} else if (repository instanceof LinksRepository) {
+		}
+		else if (repository instanceof LinksRepositoryV2) {
+			linksInformation = ((LinksRepositoryV2) repository)
+					.getLinksInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
+		}
+		else if (repository instanceof LinksRepository) {
 			linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}
 		// everything deprecated anyway
 		return enrichLinksInformation(linksInformation, resources, requestSpec);
 	}
 
-	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
+	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
+			RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
 		if (queryAdapter instanceof QuerySpecAdapter && (queryAdapter.getOffset() != 0 || queryAdapter.getLimit() != null)) {
-			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter, requestSpec);
+			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
+					requestSpec);
 		}
 		return enrichedLinksInformation;
 	}
 
-	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources, QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
+			QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
 		if (linksInformation == null) {
 			// use default implementation if no link information
 			// provided by resource
@@ -170,10 +190,12 @@ public abstract class ResponseRepositoryAdapter {
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
 			Long totalCount = getTotalCount(resources);
+			Boolean isNextPageAvailable = isNextPageAvailable(resources);
 			PagedLinksInformation pagedLinksInformation = (PagedLinksInformation) linksInformation;
-			if (totalCount != null && !hasPageLinks(pagedLinksInformation)) {
+			if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(pagedLinksInformation)) {
 				// only enrich if not already set
-				doEnrichPageLinksInformation(pagedLinksInformation, totalCount, queryAdapter, requestSpec);
+				boolean hasResults = resources.iterator().hasNext();
+				doEnrichPageLinksInformation(pagedLinksInformation, totalCount, isNextPageAvailable, queryAdapter, requestSpec, hasResults);
 			}
 		}
 		return linksInformation;
@@ -190,36 +212,55 @@ public abstract class ResponseRepositoryAdapter {
 		return null;
 	}
 
-	private boolean hasPageLinks(PagedLinksInformation pagedLinksInformation) {
-		return pagedLinksInformation.getFirst() != null || pagedLinksInformation.getLast() != null || pagedLinksInformation.getPrev() != null || pagedLinksInformation.getNext() != null;
+	private Boolean isNextPageAvailable(Iterable<?> resources) {
+		if (resources instanceof ResourceList) {
+			ResourceList<?> list = (ResourceList<?>) resources;
+			HasMoreResourcesMetaInformation pagedMeta = list.getMeta(HasMoreResourcesMetaInformation.class);
+			if (pagedMeta != null) {
+				return pagedMeta.getHasMoreResources();
+			}
+		}
+		return null;
 	}
 
-	private void doEnrichPageLinksInformation(PagedLinksInformation pagedLinksInformation, long total, QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+	private boolean hasPageLinks(PagedLinksInformation pagedLinksInformation) {
+		return pagedLinksInformation.getFirst() != null || pagedLinksInformation.getLast() != null
+				|| pagedLinksInformation.getPrev() != null || pagedLinksInformation.getNext() != null;
+	}
+
+	private void doEnrichPageLinksInformation(PagedLinksInformation pagedLinksInformation, Long total, Boolean
+			isNextPageAvailable, QueryAdapter queryAdapter,
+			RepositoryRequestSpec requestSpec, boolean hasResults) {
 		long pageSize = queryAdapter.getLimit().longValue();
 		long offset = queryAdapter.getOffset();
-
 		long currentPage = offset / pageSize;
 		if (currentPage * pageSize != offset) {
 			throw new BadRequestException("offset " + offset + " is not a multiple of limit " + pageSize);
 		}
-		long totalPages = (total + pageSize - 1) / pageSize;
+		if (total != null) {
+			isNextPageAvailable = offset + pageSize < total;
+		}
 
-		QueryAdapter pageSpec = queryAdapter.duplicate();
-		pageSpec.setLimit(pageSize);
+		if (queryAdapter.getOffset() > 0 || hasResults) {
+			Long totalPages = total != null ? (total + pageSize - 1) / pageSize : null;
+			QueryAdapter pageSpec = queryAdapter.duplicate();
+			pageSpec.setLimit(pageSize);
 
-		if (totalPages > 0) {
 			pageSpec.setOffset(0);
 			pagedLinksInformation.setFirst(toUrl(pageSpec, requestSpec));
 
-			pageSpec.setOffset((totalPages - 1) * pageSize);
-			pagedLinksInformation.setLast(toUrl(pageSpec, requestSpec));
+			if (totalPages != null && totalPages > 0) {
+				pageSpec.setOffset((totalPages - 1) * pageSize);
+				pagedLinksInformation.setLast(toUrl(pageSpec, requestSpec));
+			}
 
 			if (currentPage > 0) {
 				pageSpec.setOffset((currentPage - 1) * pageSize);
 				pagedLinksInformation.setPrev(toUrl(pageSpec, requestSpec));
 			}
 
-			if (currentPage < totalPages - 1) {
+
+			if (isNextPageAvailable) {
 				pageSpec.setOffset((currentPage + 1) * pageSize);
 				pagedLinksInformation.setNext(toUrl(pageSpec, requestSpec));
 			}
@@ -234,10 +275,12 @@ public abstract class ResponseRepositoryAdapter {
 		ResourceInformation rootInfo;
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();
-		} else {
+		}
+		else {
 			rootInfo = relationshipField.getParentResourceInformation();
 		}
-		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter, relationshipField != null ? relationshipField.getJsonName() : null);
+		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
+				relationshipField != null ? relationshipField.getJsonName() : null);
 	}
 
 	protected abstract ResourceInformation getResourceInformation(Object repository);
@@ -257,7 +300,8 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetMetaInformation(repository, resources, context.getRequest());
-			} else {
+			}
+			else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterMeta(context, resources, this);
@@ -280,7 +324,8 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetLinksInformation(repository, resources, context.getRequest());
-			} else {
+			}
+			else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterLinks(context, resources, this);
@@ -303,7 +348,8 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return result;
-			} else {
+			}
+			else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterResult(context, this);
@@ -320,7 +366,8 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			} else {
+			}
+			else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterRequest(context, this);
@@ -339,7 +386,8 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			} else {
+			}
+			else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterBulkRequest(context, this);

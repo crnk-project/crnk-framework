@@ -6,7 +6,10 @@ import java.util.List;
 
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import org.junit.Assert;
 import org.junit.Before;
@@ -164,6 +167,33 @@ public class InMemoryEvaluatorTest {
 		PagedMetaInformation meta = results.getMeta(PagedMetaInformation.class);
 		Assert.assertEquals(1L, meta.getTotalResourceCount().longValue());
 		Assert.assertEquals("test1", results.get(0).getName());
+	}
+
+	@Test
+	public void testNextPageMetaInformationIsTrue() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		DefaultResourceList<Task> results = new DefaultResourceList<>();
+		results.setMeta(new DefaultHasMoreResourcesMetaInformation());
+
+		spec.setLimit(2L);
+		spec.apply(tasks, results);
+		Assert.assertEquals(2, results.size());
+		HasMoreResourcesMetaInformation meta = results.getMeta(HasMoreResourcesMetaInformation.class);
+		Assert.assertTrue(meta.getHasMoreResources());
+	}
+
+
+	@Test
+	public void testNextPageMetaInformationIsFalse() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		DefaultResourceList<Task> results = new DefaultResourceList<>();
+		results.setMeta(new DefaultHasMoreResourcesMetaInformation());
+
+		spec.setLimit(5L);
+		spec.apply(tasks, results);
+		HasMoreResourcesMetaInformation meta = results.getMeta(HasMoreResourcesMetaInformation.class);
+		Assert.assertEquals(5, results.size());
+		Assert.assertFalse(meta.getHasMoreResources());
 	}
 
 	@Test

@@ -284,6 +284,7 @@ Sorting information for the resources can be achieved by providing `sort` parame
 * `GET /tasks/?sort[projects]=name,-shortName&include=projects`
 
 
+anchor:pagination[]
 
 ### Pagination
 
@@ -295,12 +296,24 @@ Example:
 * `GET /tasks/?page[offset]=0&page[limit]=10`
 
 
-Note that JSON API specifies first, previous, next and last links (see http://jsonapi.org/format/#fetching-pagination).
-Crnk provides support to compute those pagination links. For this two work, a repository
-has to return meta and links information implementing PagedMetaInformation resp. PagedLinksInformation.
-With PagedMetaInformation the repository can let Crnk know about the total number of (potentially filtered)
-resources. Crnk then fills in PagedLinksInformation with the corresponding links.
+The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
+The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
+by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
 
+There are two ways to let Crnk compute pagination links automatically:
+
+1. The repository returns meta information implementing `PagedMetaInformation`. With this interface the total
+   number of (potentially filtered) resources is passed to Crnk, which in turn allows the computation of the links.
+2. The repository returns meta information implementing `HasMoreResourcesMetaInformation`. This interface
+   only specifies whether further resources are available after the currently requested resources. This
+   lets Crnk compute all except the `last` link.
+
+Note that for both approaches the repository has to return either no links or links information implementing
+`PagedLinksInformation`. If the links are already set, then the computation will be skipped.
+
+The potential benefit of the second over the first approach is that it might be easier to just
+determine whether more resources are available rather than counting all resources.
+This is typically achieved by querying `limit + 1` resources.
 
 
 ### Sparse Fieldsets

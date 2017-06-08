@@ -1,8 +1,12 @@
 package io.crnk.jpa.internal;
 
+import java.util.List;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.JpaRepositoryConfig;
 import io.crnk.jpa.JpaRepositoryFilter;
@@ -10,8 +14,6 @@ import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.Tuple;
-
-import java.util.List;
 
 public abstract class JpaRepositoryBase<T> {
 
@@ -24,12 +26,27 @@ public abstract class JpaRepositoryBase<T> {
 		this.repositoryConfig = repositoryConfig;
 	}
 
+	protected boolean isNextFetched(QuerySpec querySpec) {
+		return querySpec.getLimit() != null && !module.isTotalResourceCountUsed()
+				&& repositoryConfig.getListMetaClass() != null
+				&& HasMoreResourcesMetaInformation.class.isAssignableFrom(repositoryConfig
+				.getListMetaClass());
+	}
+
+	protected boolean isTotalFetched(QuerySpec querySpec) {
+		return querySpec.getLimit() != null && module.isTotalResourceCountUsed()
+				&& repositoryConfig.getListMetaClass() != null
+				&& PagedMetaInformation.class.isAssignableFrom(repositoryConfig.getListMetaClass());
+	}
+
 	protected static <D> D getUnique(List<D> list, Object id) {
 		if (list.isEmpty()) {
 			throw new ResourceNotFoundException("resource not found: id=" + id);
-		} else if (list.size() == 1) {
+		}
+		else if (list.size() == 1) {
 			return list.get(0);
-		} else {
+		}
+		else {
 			throw new IllegalStateException("unique result expected");
 		}
 	}
@@ -95,8 +112,7 @@ public abstract class JpaRepositoryBase<T> {
 		return filteredResources;
 	}
 
-	protected ResourceList<T> map(List<Tuple> tuples) {
-		ResourceList<T> resources = repositoryConfig.newResultList();
+	protected ResourceList<T> fillResourceList(List<Tuple> tuples, ResourceList<T> resources) {
 		for (Tuple tuple : tuples) {
 			JpaMapper<Object, T> mapper = repositoryConfig.getMapper();
 			resources.add(mapper.map(tuple));

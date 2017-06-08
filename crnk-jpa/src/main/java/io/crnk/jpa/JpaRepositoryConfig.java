@@ -1,5 +1,10 @@
 package io.crnk.jpa;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -14,11 +19,6 @@ import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.jpa.mapping.IdentityMapper;
 import io.crnk.jpa.mapping.JpaMapper;
 import net.jodah.typetools.TypeResolver;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @param <T> document type (entity or mapped dto)
@@ -95,6 +95,14 @@ public class JpaRepositoryConfig<T> {
 		return resourceClass;
 	}
 
+	public Class<? extends MetaInformation> getListMetaClass() {
+		return listMetaClass;
+	}
+
+	public Class<? extends LinksInformation> getListLinksClass() {
+		return listLinksClass;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <E> JpaMapper<E, T> getMapper() {
 		return (JpaMapper<E, T>) mapper;
@@ -137,6 +145,10 @@ public class JpaRepositoryConfig<T> {
 	public <D, I extends Serializable, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> getRepositoryDecorator(
 			Class<D> targetResourceType) {
 		return (RelationshipRepositoryDecorator<T, I, D, J>) relationshipRepositoriesDecorators.get(targetResourceType);
+	}
+
+	protected void setListMetaClass(Class<? extends MetaInformation> listMetaClass) {
+		this.listMetaClass = listMetaClass;
 	}
 
 	public static class Builder<T> {

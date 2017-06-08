@@ -77,7 +77,8 @@ gradle.beforeProject { Project project ->
 
 			sonarqube {
 				properties {
-					property 'sonar.coverage.exclusions', "**/legacy/**" }
+					property 'sonar.coverage.exclusions', "**/legacy/**"
+				}
 			}
 
 		}
@@ -85,90 +86,102 @@ gradle.beforeProject { Project project ->
 		apply plugin: 'maven-publish'
 
 
-		if (!docs && !examples && isProductionBuild) {
+		if (!docs && !examples) {
 
-			apply plugin: 'signing'
+			if (isProductionBuild) {
+				apply plugin: 'signing'
 
 
-			task sourcesJar(type: Jar) {
-				from sourceSets.main.allSource
-				classifier = 'sources'
-			}
-
-			task javadocJar(type: Jar, dependsOn: 'javadoc') {
-				from javadoc.destinationDir
-				classifier = 'javadoc'
-			}
-
-			artifacts {
-				archives jar
-				archives javadocJar
-				archives sourcesJar
-			}
-
-			signing {
-				required {
-					gradle.taskGraph.hasTask("uploadArchives")
+				task sourcesJar(type: Jar) {
+					from sourceSets.main.allSource
+					classifier = 'sources'
 				}
-				sign configurations.archives
-			}
 
-			uploadArchives {
-				repositories {
-					mavenDeployer {
-						beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+				task javadocJar(type: Jar, dependsOn: 'javadoc') {
+					from javadoc.destinationDir
+					classifier = 'javadoc'
+				}
 
-						// if(!System.env.NEXUS_DEPLOY_PASS){
-						//	throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
-						// }
+				artifacts {
+					archives jar
+					archives javadocJar
+					archives sourcesJar
+				}
 
-						repository(url: NEXUS_DEPLOY_URL){
-							authentication (
-								userName: System.env.NEXUS_DEPLOY_USER,
-								password: System.env.NEXUS_DEPLOY_PASS
-							)
+				signing {
+					required {
+						gradle.taskGraph.hasTask("uploadArchives")
+					}
+					sign configurations.archives
+				}
 
-							// that plugin does not make use of global proxy settings :-(
-							def proxyHost = System.getProperty("https.proxyHost")
-							def proxyPort = System.getProperty("https.proxyPort")
-							if(proxyHost && proxyPort){
-								proxy(host: proxyHost, port: Integer.parseInt(proxyPort), type: 'http')
-							}
-						}
+				uploadArchives {
+					repositories {
+						mavenDeployer {
+							beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-						pom.project {
-							name project.name
-							description 'JSON API framework for Java'
-							url 'http://www.crnk.io'
-							scm {
-								url 'https://github.com/crnk-project/crnk-framework'
-								connection 'scm:git:git://github.com/crnk-project/crnk-framework.git'
-								developerConnection 'scm:git:git@github.com:crnk-project/crnk-framework.git'
-							}
-							licenses {
-								license {
-									name 'The Apache Software License, Version 2.0'
-									url 'http://www.apache.org/licenses/LICENSE-2.0.html'
-									distribution 'repo'
+							// if(!System.env.NEXUS_DEPLOY_PASS){
+							//	throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
+							// }
+
+							repository(url: NEXUS_DEPLOY_URL) {
+								authentication(
+										userName: System.env.NEXUS_DEPLOY_USER,
+										password: System.env.NEXUS_DEPLOY_PASS
+								)
+
+								// that plugin does not make use of global proxy settings :-(
+								def proxyHost = System.getProperty("https.proxyHost")
+								def proxyPort = System.getProperty("https.proxyPort")
+								if (proxyHost && proxyPort) {
+									proxy(host: proxyHost, port: Integer.parseInt(proxyPort), type: 'http')
 								}
 							}
-							issueManagement {
-								system 'GitHub'
-								url 'https://github.com/crnk-project/crml-framework/issues'
-							}
-							developers {
-								developer {
-									id 'crnk.io'
-									name 'crnk.io'
-									email 'info@crnk.io'
+
+							pom.project {
+								name project.name
+								description 'JSON API framework for Java'
+								url 'http://www.crnk.io'
+								scm {
+									url 'https://github.com/crnk-project/crnk-framework'
+									connection 'scm:git:git://github.com/crnk-project/crnk-framework.git'
+									developerConnection 'scm:git:git@github.com:crnk-project/crnk-framework.git'
+								}
+								licenses {
+									license {
+										name 'The Apache Software License, Version 2.0'
+										url 'http://www.apache.org/licenses/LICENSE-2.0.html'
+										distribution 'repo'
+									}
+								}
+								issueManagement {
+									system 'GitHub'
+									url 'https://github.com/crnk-project/crml-framework/issues'
+								}
+								developers {
+									developer {
+										id 'crnk.io'
+										name 'crnk.io'
+										email 'info@crnk.io'
+									}
 								}
 							}
 						}
 					}
 				}
-			}
 
-			tasks.publish.dependsOn(tasks.uploadArchives)
+				tasks.publish.dependsOn(tasks.uploadArchives)
+			}else{
+				apply plugin: 'maven-publish'
+
+				publishing {
+					publications {
+						mavenJava(MavenPublication) {
+							from components.java
+						}
+					}
+				}
+			}
 
 		}
 

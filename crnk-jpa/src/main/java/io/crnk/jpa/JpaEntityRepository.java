@@ -1,25 +1,30 @@
 package io.crnk.jpa;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.EntityManager;
+
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.jpa.internal.JpaRepositoryBase;
 import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.meta.MetaEntity;
-import io.crnk.jpa.query.*;
+import io.crnk.jpa.query.ComputedAttributeRegistry;
+import io.crnk.jpa.query.JpaQuery;
+import io.crnk.jpa.query.JpaQueryExecutor;
+import io.crnk.jpa.query.JpaQueryFactory;
+import io.crnk.jpa.query.Tuple;
 import io.crnk.meta.model.MetaAttribute;
-
-import javax.persistence.EntityManager;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Exposes a JPA entity as ResourceRepository.
@@ -65,24 +70,45 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 		JpaRepositoryUtils.prepareQuery(query, filteredQuerySpec, computedAttrs);
 		query = filterQuery(filteredQuerySpec, query);
 		JpaQueryExecutor<?> executor = query.buildExecutor();
+
+		boolean fetchNext = isNextFetched(filteredQuerySpec);
+		boolean fetchTotal = isTotalFetched(filteredQuerySpec);
+
 		JpaRepositoryUtils.prepareExecutor(executor, filteredQuerySpec, fetchRelations(null));
+
+		if (fetchNext) {
+			executor.setLimit(executor.getLimit() + 1);
+		}
+
 		executor = filterExecutor(filteredQuerySpec, executor);
 
 		List<Tuple> tuples = executor.getResultTuples();
-		tuples = filterTuples(filteredQuerySpec, tuples);
-		ResourceList<T> resources = map(tuples);
-		resources = filterResults(filteredQuerySpec, resources);
 
-		if (filteredQuerySpec.getLimit() != null) {
-			MetaInformation metaInfo = resources.getMeta();
-			if (metaInfo instanceof PagedMetaInformation) {
-				long totalRowCount = executor.getTotalRowCount();
-				((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+		Boolean hasNext = null;
+		if (fetchNext) {
+			hasNext = tuples.size() == querySpec.getLimit() + 1;
+			if (hasNext) {
+				tuples = tuples.subList(0, querySpec.getLimit().intValue());
 			}
+		}
+
+		tuples = filterTuples(filteredQuerySpec, tuples);
+
+		ResourceList<T> resources = repositoryConfig.newResultList();
+		MetaInformation metaInfo = resources.getMeta();
+		fillResourceList(tuples, resources);
+		resources = filterResults(filteredQuerySpec, resources);
+		if (fetchTotal) {
+			long totalRowCount = executor.getTotalRowCount();
+			((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+		}
+		if (fetchNext) {
+			((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
 		}
 
 		return resources;
 	}
+
 
 	@Override
 	public <S extends T> S create(S resource) {

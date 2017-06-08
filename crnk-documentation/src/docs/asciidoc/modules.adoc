@@ -87,6 +87,15 @@ The JPA modules further has a number of more advanced customization options that
 are discussed in the subsequent sections.
 
 
+### Pagination
+
+The JPA module implements both pagination approaches supported by Crnk.
+Setting `JpaModule.setTotalResourceCountUsed(true|false)` allows to decide whether the total
+number of resources should be counted or whether just the presence of a subsequent resource
+is checked (by querying `limit + 1` entities). By default the total resources
+are counted. Have a look at the <<pagination>> section for more information.
+
+
 ### Criteria API and QueryDSL
 
 The JPA module can work with two different query APIs, the default Criteria API
