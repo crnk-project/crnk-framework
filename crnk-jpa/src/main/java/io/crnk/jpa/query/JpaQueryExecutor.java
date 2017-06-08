@@ -26,4 +26,6 @@ public interface JpaQueryExecutor<T> {
 	Class<T> getEntityClass();
 
 	<U extends Tuple> List<U> getResultTuples();
+
+	int getLimit();
 }

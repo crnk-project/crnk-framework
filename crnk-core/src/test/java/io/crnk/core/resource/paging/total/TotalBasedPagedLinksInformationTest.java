@@ -1,4 +1,4 @@
-package io.crnk.core.resource.paging;
+package io.crnk.core.resource.paging.total;
 
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -12,22 +12,19 @@ import io.crnk.core.resource.links.PagedLinksInformation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class PagedLinksInformationQuerySpecTest extends AbstractQuerySpecTest {
+public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 	private ResourceRepositoryAdapter<Task, Long> adapter;
 
 	@Before
 	public void setup() {
-		TestPagedResourceRepository.clear();
+		TotalResourceCountTestRepository.clear();
 
 		super.setup();
 		RegistryEntry registryEntry = resourceRegistry.findEntry(Task.class);
-		TestPagedResourceRepository repo = (TestPagedResourceRepository) registryEntry.getResourceRepository(null)
+		TotalResourceCountTestRepository repo = (TotalResourceCountTestRepository) registryEntry.getResourceRepository(null)
 				.getResourceRepository();
-
-		repo = Mockito.spy(repo);
 
 		adapter = registryEntry.getResourceRepository(null);
 
@@ -56,7 +53,7 @@ public class PagedLinksInformationQuerySpecTest extends AbstractQuerySpecTest {
 
 	@Test
 	public void testPagingNoContents() throws InstantiationException, IllegalAccessException {
-		TestPagedResourceRepository.clear();
+		TotalResourceCountTestRepository.clear();
 
 		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
 		querySpec.setOffset(0L);

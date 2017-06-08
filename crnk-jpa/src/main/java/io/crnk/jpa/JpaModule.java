@@ -15,6 +15,8 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.jpa.internal.*;
 import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
 import io.crnk.jpa.mapping.JpaMapper;
@@ -107,6 +109,8 @@ public class JpaModule implements Module {
 	private List<JpaRepositoryFilter> filters = new CopyOnWriteArrayList<>();
 
 	private ResourceMetaProvider resourceMetaProvider;
+
+	private boolean totalResourceCountUsed = true;
 
 	/**
 	 * Constructor used on client side.
@@ -346,6 +350,11 @@ public class JpaModule implements Module {
 	}
 
 	private void setupRepository(JpaRepositoryConfig<?> config) {
+		if(config.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()){
+			// TODO not that nice...
+			config.setListMetaClass(DefaultHasMoreResourcesMetaInformation.class);
+		}
+
 		Class<?> resourceClass = config.getResourceClass();
 		MetaEntity metaEntity = jpaMetaLookup.getMeta(config.getEntityClass(), MetaEntity.class);
 		if (isValidEntity(metaEntity)) {
@@ -524,6 +533,22 @@ public class JpaModule implements Module {
 
 	public MetaLookup getResourceMetaLookup() {
 		return resourceMetaLookup;
+	}
+
+	public boolean isTotalResourceCountUsed() {
+		return totalResourceCountUsed;
+	}
+
+	/**
+	 * Computing the totalResourceCount can be expensive. Internally it is used to compute the last page link.
+	 * This flag allows enable (default) or disable totalResourceCount computation. If it is disabled,
+	 * limit + 1 resources are fetched and the presence of the last one determines whether a pagination next
+	 * link will be provided.
+	 *
+	 * @param totalResourceCountUsed
+	 */
+	public void setTotalResourceCountUsed(boolean totalResourceCountUsed) {
+		this.totalResourceCountUsed = totalResourceCountUsed;
 	}
 
 	/**

@@ -1,11 +1,17 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
-
-import java.util.*;
 
 /**
  * Applies the given QuerySpec to the provided list in memory. Result available
@@ -91,6 +97,10 @@ public class InMemoryEvaluator {
 			if (meta instanceof PagedMetaInformation) {
 				PagedMetaInformation pagedMeta = (PagedMetaInformation) meta;
 				pagedMeta.setTotalResourceCount(totalCount);
+			}
+			if (meta instanceof HasMoreResourcesMetaInformation) {
+				HasMoreResourcesMetaInformation pagedMeta = (HasMoreResourcesMetaInformation) meta;
+				pagedMeta.setHasMoreResources(totalCount > querySpec.getOffset() + querySpec.getLimit());
 			}
 		}
 	}

@@ -1,13 +1,19 @@
 package io.crnk.core.resource.links;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class DefaultPagedLinksInformation implements PagedLinksInformation {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String first;
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String last;
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String next;
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String prev;
 
 	@Override

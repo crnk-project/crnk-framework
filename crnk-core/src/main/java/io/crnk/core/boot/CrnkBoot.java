@@ -189,6 +189,7 @@ public class CrnkBoot {
 			objectMapper.findAndRegisterModules();
 			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		}
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {

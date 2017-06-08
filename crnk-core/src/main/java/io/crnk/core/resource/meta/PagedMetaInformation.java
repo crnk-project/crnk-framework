@@ -11,6 +11,10 @@ import io.crnk.core.resource.list.ResourceList;
  * Note that in case of the use of LinksInformation,
  * PagedLinksInformation must be implemented as well. Otherwise a default links implementation is used.
  * </p>
+ * <p>
+ * If the computation of the total resource count is deemed to expensive, you may want to consider
+ * the use of {@link HasMoreResourcesMetaInformation}.
+ * </p>
  */
 public interface PagedMetaInformation extends MetaInformation {
 
