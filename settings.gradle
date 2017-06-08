@@ -48,6 +48,9 @@ gradle.beforeProject { Project project ->
 		}
 		repositories {
 			mavenCentral()
+			maven {
+				url('https://plugins.gradle.org/m2')
+			}
 		}
 		version = rootProject.version
 		group = rootProject.group

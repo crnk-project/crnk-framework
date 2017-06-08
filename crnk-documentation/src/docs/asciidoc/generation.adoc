@@ -11,17 +11,22 @@ languages like iOS would be very welcomed.
 
 NOTE: Available soon (ngrx-json-api needs to be released as well)
 
-The Typescript generator allows the generation of JSON API resources, repositories and related objects such as meta
-information, links information, data objects, list types and enumeration types. Currently the generator targets the
-<a href="https://github.com/abdulhaq-e/ngrx-json-api">ngrx-json-api</a> library. Support for other libraries/formats
-would be fairly straightforward to add, contributions welcomed. A generated resource looks like:
+The Typescript generator allows the generation of:
 
+- interfaces for resources and related objects (like nested objects and enumeration types).
+- interfaces for result documents (i.e. resources and any linking and meta information).
+- interfaces for links information.
+- interfaces for meta information.
+- method to create an empty object instance.
+
+Currently the generator targets the <a href="https://github.com/abdulhaq-e/ngrx-json-api">ngrx-json-api</a> library.
+Support for other libraries/formats would be straightforward to add, contributions welcomed. A generated resource looks
+like:
 
 [source]
 ----
 include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_without_expressions.ts[]
 ----
-
 
 Internally the generator has to make use of the running application to gather the necessary information for generation. This
 approach not only supports the regular resources and repositories manually implemented by the application,
@@ -36,25 +41,38 @@ A setup may look like:
 buildscript {
 	dependencies {
 		classpath "io.crnk:crnk-gen-typescript:${version}"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
 	}
 }
 
-apply plugin: 'io.crnk.typescriptGen'
+node {
+	version = '6.9.1'
+	download = true
+	distBaseUrl = "${ADN_NODEJS_MIRROR_BASE_URL}/dist"
+}
 
-typescriptGen.npmPackageName = '@crnk/typescript-demo'
+apply plugin: 'crnk-gen-typescript'
+typescriptGen.npmPackageVersion = '0.0.1'
+typescriptGen.npmPackageName = '@adnovum/moap-movie-management-api'
+typescriptGen.npmPackageMapping.put('my.company.app.model', '@company/app-model')
+typescriptGen.npmDependencies.put('ngrx-json-api', '>=1.2.0');
 ----
 
-Two configurations are necessary:
-
-- `npmPackageName` to use for publishing.
-- a mapping of meta (package) ids to npm packages. Only resources are generated whose package matches the chosen `npmPackageName`.
+- the `moowork` plugin is used to to gain a `node` setup.
+- by default the package version matches the npm version.
+- `npmPackageName` is necessary to use for publishing.
+- a mapping of Java package name (resp. `MetaElement.id`) to npm packages has to be provided.
+  Only resources are generated whose package matches the chosen `npmPackageName`.
   All other resources are imported as external NPM dependency.
+- crnk-meta is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
+  Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
+  the package resp. class name. But for more advanced use cases those may differ.
+- two new tasks are available: `generateTypescript` and `compileTypescript`. The former is added as dependency
+  to `assemble`. We choose not to add a dependency from `compileTypescript` to `assemble` has a backend-only
+  develop may not need to run with every `assemble` run. Typically `compileTypescript` is either hooked
+  into the publishing or added as dependency on a frontend project contained within the same Gradle project.
 
-crnk-meta is used to get a meta model of the underlying resources (or a any other type of object like JPA entities).
-Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
-the class name. But for more advanced use cases those may or can differ.
-
-TODO show publishing setup into NPM repository
-
-
+NOTE: the generator plugin is not yet included in any example applications. It is not possible to
+include a plugin from within the same project. At some point an external example application will be
+setup to showcase the use of the plugin.
 

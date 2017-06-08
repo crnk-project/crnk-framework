@@ -1,6 +1,6 @@
 package io.crnk.gen.typescript.transform;
 
-import io.crnk.gen.typescript.TypescriptUtils;
+import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSEnumLiteral;
 import io.crnk.gen.typescript.model.TSEnumType;
@@ -16,7 +16,8 @@ public class TSMetaEnumTypeTransformation implements TSMetaTransformation {
 	}
 
 	@Override
-	public TSElement transform(MetaElement elementObj, TSMetaTransformationContext context) {
+	public TSElement transform(MetaElement elementObj, TSMetaTransformationContext context, TSMetaTransformationOptions
+			options) {
 		MetaEnumType element = (MetaEnumType) elementObj;
 
 		TSSource source = new TSSource();
@@ -38,5 +39,10 @@ public class TSMetaEnumTypeTransformation implements TSMetaTransformation {
 		context.addSource(source);
 
 		return enumType;
+	}
+
+	@Override
+	public boolean isRoot(MetaElement element) {
+		return false;
 	}
 }

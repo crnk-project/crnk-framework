@@ -34,7 +34,7 @@ public class TSWriterTest {
 		classType.setSuperType(classSuperType);
 
 		classType.accept(writer);
-		Assert.assertEquals("\nclass Child extends Base{\n}", writer.toString());
+		Assert.assertEquals("\nclass Child extends Base {\n}", writer.toString());
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class TSWriterTest {
 		classType.setIndexSignature(indexSignature);
 
 		classType.accept(writer);
-		Assert.assertEquals("\nclass Child{\n"
+		Assert.assertEquals("\nclass Child {\n"
 				+ "\t[key: string]: number;\n"
 				+ "}", writer.toString());
 	}

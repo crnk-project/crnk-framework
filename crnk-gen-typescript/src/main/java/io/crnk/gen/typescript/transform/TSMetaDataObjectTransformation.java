@@ -2,7 +2,7 @@ package io.crnk.gen.typescript.transform;
 
 import java.util.Set;
 
-import io.crnk.gen.typescript.TypescriptUtils;
+import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSContainerElement;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSField;
@@ -28,6 +28,8 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
 	private static final String RELATIONSHIPS_CLASS_NAME = "Relationships";
 
+	public static final String PRIVATE_DATA_RESOURCE_TYPE = "resourceType";
+
 
 	@Override
 	public boolean accepts(MetaElement element) {
@@ -35,16 +37,27 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	@Override
-	public TSElement transform(MetaElement element, TSMetaTransformationContext context) {
+	public TSElement transform(MetaElement element, TSMetaTransformationContext context, TSMetaTransformationOptions options) {
 		MetaDataObject metaDataObject = (MetaDataObject) element;
 
 		TSInterfaceType interfaceType = new TSInterfaceType();
 		interfaceType.setName(metaDataObject.getName());
 		interfaceType.setExported(true);
 
+		if (metaDataObject instanceof MetaResource) {
+			MetaResource metaResource = (MetaResource) metaDataObject;
+			String resourceType = metaResource.getResourceType();
+			interfaceType.setPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_RESOURCE_TYPE, resourceType);
+		}
+
 		context.putMapping(metaDataObject, interfaceType);
 
-		setupParent(context, interfaceType, metaDataObject);
+		if (options.getParent() == null) {
+			setupParent(context, interfaceType, metaDataObject);
+		}
+		else {
+			options.getParent().addElement(interfaceType);
+		}
 
 		if (generateAsResource(metaDataObject)) {
 			interfaceType.getImplementedInterfaces().add(NgrxJsonApiLibrary.STORE_RESOURCE);
@@ -52,19 +65,22 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		}
 		else {
 			if (metaDataObject.getSuperType() != null) {
-				TSInterfaceType superInterface = (TSInterfaceType) context.transform(metaDataObject.getSuperType());
+				TSInterfaceType superInterface = (TSInterfaceType) context.transform(metaDataObject.getSuperType(),
+						TSMetaTransformationOptions.EMPTY);
 				interfaceType.getImplementedInterfaces().add(superInterface);
 			}
 			for (MetaDataObject interfaceMeta : metaDataObject.getInterfaces()) {
-				TSInterfaceType implementedinterfaceType = (TSInterfaceType) context.transform(interfaceMeta);
+				TSInterfaceType implementedinterfaceType = (TSInterfaceType) context.transform(interfaceMeta,
+						TSMetaTransformationOptions.EMPTY);
 				interfaceType.getImplementedInterfaces().add(implementedinterfaceType);
 			}
+
 
 			generateAttributes(context, interfaceType, metaDataObject);
 		}
 
 		for (MetaDataObject subType : metaDataObject.getSubTypes()) {
-			context.transform(subType);
+			context.transform(subType, TSMetaTransformationOptions.EMPTY);
 		}
 
 		return interfaceType;
@@ -89,7 +105,8 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		return false;
 	}
 
-	private static void generateResourceFields(TSMetaTransformationContext context, TSInterfaceType interfaceType, MetaDataObject meta) {
+	private static void generateResourceFields(TSMetaTransformationContext context, TSInterfaceType interfaceType,
+			MetaDataObject meta) {
 		TSInterfaceType attributesType = new TSInterfaceType();
 		attributesType.setName(ATTRIBUTES_CLASS_NAME);
 		attributesType.setExported(true);
@@ -101,20 +118,22 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		relationshipsIndexSignature.setKeyType(TSPrimitiveType.STRING);
 		relationshipsIndexSignature.setValueType(NgrxJsonApiLibrary.RESOURCE_RELATIONSHIP);
 		relationshipsIndexSignature.setParent(relationshipsType);
-		relationshipsType.setIndexSignature(relationshipsIndexSignature );
+		relationshipsType.setIndexSignature(relationshipsIndexSignature);
 
 		MetaDataObject superType = meta.getSuperType();
 		if (superType != null) {
 
-			TSInterfaceType superInterface = (TSInterfaceType) context.transform(superType);
+			TSInterfaceType superInterface = (TSInterfaceType) context.transform(superType, TSMetaTransformationOptions.EMPTY);
 			interfaceType.getImplementedInterfaces().add(superInterface);
 
-			TSInterfaceType superAttributeType = TypescriptUtils.getNestedInterface(superInterface, ATTRIBUTES_CLASS_NAME, false);
+			TSInterfaceType superAttributeType = TypescriptUtils.getNestedInterface(superInterface, ATTRIBUTES_CLASS_NAME,
+					false);
 			if (superAttributeType != null) {
 				attributesType.getImplementedInterfaces().add(superAttributeType);
 			}
 
-			TSInterfaceType superRelationshipType = TypescriptUtils.getNestedInterface(superInterface, RELATIONSHIPS_CLASS_NAME, false);
+			TSInterfaceType superRelationshipType = TypescriptUtils.getNestedInterface(superInterface, RELATIONSHIPS_CLASS_NAME,
+					false);
 			if (superRelationshipType != null) {
 				relationshipsType.getImplementedInterfaces().add(superRelationshipType);
 			}
@@ -126,7 +145,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			if (primaryKey != null && primaryKey.getUniqueElement().equals(attr)) {
 				continue;
 			}
-			generateResourceField(attr, context, interfaceType, attributesType, relationshipsType );
+			generateResourceField(attr, context, interfaceType, attributesType, relationshipsType);
 		}
 
 		if (!isEmpty(relationshipsType)) {
@@ -139,7 +158,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			relationshipsField.setName("relationships");
 			relationshipsField.setType(relationshipsType);
 			relationshipsField.setNullable(true);
-			interfaceType.getMembers().add(relationshipsField);
+			interfaceType.getDeclaredMembers().add(relationshipsField);
 		}
 		if (!isEmpty(attributesType)) {
 			TSModule module = TypescriptUtils.getNestedTypeContainer(interfaceType, true);
@@ -151,13 +170,14 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			attributesField.setName("attributes");
 			attributesField.setType(attributesType);
 			attributesField.setNullable(true);
-			interfaceType.getMembers().add(attributesField);
+			interfaceType.getDeclaredMembers().add(attributesField);
 		}
 	}
 
-	private static void generateResourceField(MetaAttribute attr, TSMetaTransformationContext context, TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
+	private static void generateResourceField(MetaAttribute attr, TSMetaTransformationContext context,
+			TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
 		MetaType metaElementType = attr.getType().getElementType();
-		TSType elementType = (TSType) context.transform(metaElementType);
+		TSType elementType = (TSType) context.transform(metaElementType, TSMetaTransformationOptions.EMPTY);
 
 		TSField field = new TSField();
 		field.setName(attr.getName());
@@ -165,55 +185,59 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		field.setNullable(true);
 
 		if (attr.isAssociation()) {
-			TSType relationshipType = attr.getType().isCollection() ? NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP : NgrxJsonApiLibrary.TYPED_ONE_RESOURCE_RELATIONSHIP;
+			TSType relationshipType = attr.getType().isCollection() ? NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP
+					: NgrxJsonApiLibrary.TYPED_ONE_RESOURCE_RELATIONSHIP;
 			field.setType(new TSParameterizedType(relationshipType, elementType));
-			relationshipsType.getMembers().add(field);
+			relationshipsType.getDeclaredMembers().add(field);
 			field.setParent(relationshipsType);
 		}
 		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isMeta()) {
 			field.setName("meta");
-			interfaceType.getMembers().add(field);
+			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);
 		}
 		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isLinks()) {
 			field.setName("links");
-			interfaceType.getMembers().add(field);
+			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);
 		}
 		else {
-			attributesType.getMembers().add(field);
+			attributesType.getDeclaredMembers().add(field);
 			field.setParent(attributesType);
 		}
 	}
 
+
 	private static boolean isEmpty(TSInterfaceType type) {
-		return type.getMembers().isEmpty() && type.getImplementedInterfaces().isEmpty();
+		return type.getDeclaredMembers().isEmpty() && type.getImplementedInterfaces().isEmpty();
 	}
 
-	private static void generateAttributes(TSMetaTransformationContext context, TSInterfaceType interfaceType, MetaDataObject element) {
+	private static void generateAttributes(TSMetaTransformationContext context, TSInterfaceType interfaceType,
+			MetaDataObject element) {
 		for (MetaAttribute attr : element.getDeclaredAttributes()) {
 			MetaType elementType = attr.getType().getElementType();
 
 			TSField field = new TSField();
 			field.setName(attr.getName());
-			field.setType((TSType) context.transform(elementType));
+			field.setType((TSType) context.transform(elementType, TSMetaTransformationOptions.EMPTY));
 			field.setNullable(true);
-			interfaceType.getMembers().add(field);
+			interfaceType.getDeclaredMembers().add(field);
 		}
 	}
 
-	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType, MetaDataObject metaDataObject) {
+	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType,
+			MetaDataObject metaDataObject) {
 		TSContainerElement parent = null;
 
 		// move links and meta information to the resource itself
-		boolean isMeta = TypescriptUtils.isInstance(metaDataObject.getImplementationClass(), "io.crnk.core.resource.meta"
-				+ ".MetaInformation");
-		boolean isLinks = TypescriptUtils.isInstance(metaDataObject.getImplementationClass(), "io.crnk.core.resource.links"
-				+ ".LinksInformation");
+		boolean isMeta = TypescriptUtils.isInstance(metaDataObject.getImplementationClass(),
+				"io.crnk.core.resource.meta.MetaInformation");
+		boolean isLinks = TypescriptUtils.isInstance(metaDataObject.getImplementationClass(),
+				"io.crnk.core.resource.links.LinksInformation");
 		if ((isMeta || isLinks) && metaDataObject.getImplementationClass().getEnclosingClass() != null) {
 			MetaElement enclosingMeta = context.getMeta(metaDataObject.getImplementationClass().getEnclosingClass());
 			if (enclosingMeta instanceof MetaResource) {
-				TSType enclosingType = (TSType) context.transform(enclosingMeta);
+				TSType enclosingType = (TSType) context.transform(enclosingMeta, TSMetaTransformationOptions.EMPTY);
 				TSModule module = TypescriptUtils.getNestedTypeContainer(enclosingType, true);
 				interfaceType.setName(isLinks ? "Links" : "Meta");
 				parent = module;
@@ -230,6 +254,11 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
 		parent.getElements().add(interfaceType);
 		interfaceType.setParent(parent);
+	}
+
+	@Override
+	public boolean isRoot(MetaElement element) {
+		return false;
 	}
 
 }

@@ -13,4 +13,13 @@ public abstract class TSTypeBase extends TSElementBase implements TSType {
 		this.name = name;
 	}
 
+	@Override
+	public TSType asType() {
+		return this;
+	}
+
+	@Override
+	public TSInterfaceType asInterfaceType() {
+		throw new UnsupportedOperationException("not an interface");
+	}
 }

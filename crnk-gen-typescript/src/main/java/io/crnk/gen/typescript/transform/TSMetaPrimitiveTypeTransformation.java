@@ -54,11 +54,16 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 	}
 
 	@Override
-	public TSElement transform(MetaElement element, TSMetaTransformationContext context) {
+	public TSElement transform(MetaElement element, TSMetaTransformationContext context, TSMetaTransformationOptions options) {
 		Class<?> implClass = ((MetaPrimitiveType) element).getImplementationClass();
 		if (primitiveMapping.containsKey(implClass)) {
 			return primitiveMapping.get(implClass);
 		}
 		throw new IllegalStateException("unexpected element: " + element);
+	}
+
+	@Override
+	public boolean isRoot(MetaElement element) {
+		return false;
 	}
 }

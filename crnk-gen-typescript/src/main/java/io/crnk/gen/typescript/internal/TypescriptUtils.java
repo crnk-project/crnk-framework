@@ -1,4 +1,11 @@
-package io.crnk.gen.typescript;
+package io.crnk.gen.typescript.internal;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import io.crnk.gen.typescript.model.TSContainerElement;
 import io.crnk.gen.typescript.model.TSElement;
@@ -9,6 +16,29 @@ import io.crnk.gen.typescript.model.TSType;
 public class TypescriptUtils {
 
 	private TypescriptUtils() {
+	}
+
+	public static void copyFile(File sourceFile, File targetFile) {
+		try {
+			byte[] bytes = readFully(new FileInputStream(sourceFile));
+			FileOutputStream out = new FileOutputStream(targetFile);
+			out.write(bytes);
+			out.close();
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private static byte[] readFully(InputStream is) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		int nRead;
+		byte[] data = new byte[16384];
+		while ((nRead = is.read(data, 0, data.length)) != -1) {
+			buffer.write(data, 0, nRead);
+		}
+		buffer.flush();
+		return buffer.toByteArray();
 	}
 
 	public static boolean isInstance(Class<?> clazz, String name) {
@@ -34,7 +64,8 @@ public class TypescriptUtils {
 		TSModule module = getNestedTypeContainer(type, create);
 		if (module == null && !create) {
 			return null;
-		}else if(module == null){
+		}
+		else if (module == null) {
 			throw new IllegalStateException("cannot setup interface as no parent container is available");
 		}
 
@@ -61,7 +92,7 @@ public class TypescriptUtils {
 	 */
 	public static TSModule getNestedTypeContainer(TSType type, boolean create) {
 		TSContainerElement parent = (TSContainerElement) type.getParent();
-		if(parent == null){
+		if (parent == null) {
 			return null;
 		}
 		int insertionIndex = parent.getElements().indexOf(type);

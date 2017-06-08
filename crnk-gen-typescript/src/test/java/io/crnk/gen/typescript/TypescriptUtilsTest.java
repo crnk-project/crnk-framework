@@ -1,5 +1,6 @@
 package io.crnk.gen.typescript;
 
+import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSClassType;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSModule;

@@ -6,7 +6,7 @@ public class TSArrayType extends TSTypeBase {
 
 	public TSArrayType(TSType elementType) {
 		this.elementType = elementType;
-		setName("array<" + elementType.getName() + ">");
+		setName("Array<" + elementType.getName() + ">");
 	}
 
 	public TSType getElementType() {

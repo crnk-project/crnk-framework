@@ -16,4 +16,15 @@ public class TSField extends TSMember {
 	public void setInitializer(String initializer) {
 		this.initializer = initializer;
 	}
+
+
+	@Override
+	public boolean isField() {
+		return true;
+	}
+
+	@Override
+	public TSField asField() {
+		return this;
+	}
 }

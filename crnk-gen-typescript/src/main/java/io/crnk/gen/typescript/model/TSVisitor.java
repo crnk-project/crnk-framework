@@ -2,32 +2,36 @@ package io.crnk.gen.typescript.model;
 
 public interface TSVisitor {
 
-	public void visit(TSArrayType element);
+	void visit(TSArrayType element);
 
-	public void visit(TSEnumType element);
+	void visit(TSEnumType element);
 
-	public void visit(TSPrimitiveType element);
+	void visit(TSPrimitiveType element);
 
-	public void visit(TSMember element);
+	void visit(TSMember element);
 
-	public void visit(TSIndexSignature element);
+	void visit(TSFunction function);
 
-	public void visit(TSField element);
+	void visit(TSParameter parameter);
 
-	public void visit(TSInterfaceType element);
+	void visit(TSIndexSignature element);
 
-	public void visit(TSAny tsAny);
+	void visit(TSField element);
 
-	public void accept(TSSource file);
+	void visit(TSInterfaceType element);
 
-	public void accept(TSModule module);
+	void visit(TSAny tsAny);
 
-	public void visit(TSImport importElement);
+	void accept(TSSource file);
 
-	public void visit(TSExport exportElement);
+	void accept(TSModule module);
 
-	public void visit(TSClassType classType);
+	void visit(TSImport importElement);
 
-	public void visit(TSParameterizedType parameterizedType);
+	void visit(TSExport exportElement);
+
+	void visit(TSClassType classType);
+
+	void visit(TSParameterizedType parameterizedType);
 
 }

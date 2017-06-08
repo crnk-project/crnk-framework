@@ -7,4 +7,8 @@ public class TSInterfaceType extends TSObjectType {
 		visitor.visit(this);
 	}
 
+	@Override
+	public TSInterfaceType asInterfaceType() {
+		return this;
+	}
 }

@@ -391,7 +391,6 @@ public class CrnkClient {
 	 * @return objectMapper in use
 	 */
 	public ObjectMapper getObjectMapper() {
-		init();
 		return objectMapper;
 	}
 
@@ -407,6 +406,7 @@ public class CrnkClient {
 	 * Adds the given module.
 	 */
 	public void addModule(Module module) {
+		PreconditionUtil.assertFalse("already initialized, cannot add module", initialized);
 		if (module instanceof HttpAdapterAware) {
 			((HttpAdapterAware) module).setHttpAdapter(getHttpAdapter());
 		}
@@ -414,15 +414,12 @@ public class CrnkClient {
 	}
 
 	public HttpAdapter getHttpAdapter() {
-		this.init();
-
+		initHttpAdapter();
 		return httpAdapter;
 	}
 
 	public void setHttpAdapter(HttpAdapter httpAdapter) {
 		this.httpAdapter = httpAdapter;
-
-		init();
 
 		List<Module> modules = moduleRegistry.getModules();
 		for (Module module : modules) {

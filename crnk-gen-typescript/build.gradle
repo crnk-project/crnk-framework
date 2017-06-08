@@ -9,6 +9,8 @@ dependencies {
 	compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
 	compileOnly 'javax:javaee-api:7.0'
 
+	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
+
 	testCompile project(':crnk-core')
 	testCompile project(':crnk-meta')
 	testCompile project(':crnk-test')
@@ -36,5 +38,7 @@ sourceSets {
 jar {
 	duplicatesStrategy = 'exclude'
 }
+
+
 
 

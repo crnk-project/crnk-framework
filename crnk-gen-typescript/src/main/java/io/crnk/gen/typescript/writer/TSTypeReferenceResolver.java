@@ -47,7 +47,7 @@ public class TSTypeReferenceResolver extends TSVisitorBase {
 		if (element.getIndexSignature() != null) {
 			element.getIndexSignature().accept(this);
 		}
-		for (TSElement member : element.getMembers()) {
+		for (TSElement member : element.getDeclaredMembers()) {
 			member.accept(this);
 		}
 		for (TSInterfaceType interfaceType : element.getImplementedInterfaces()) {
