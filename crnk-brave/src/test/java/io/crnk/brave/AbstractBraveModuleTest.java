@@ -26,8 +26,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.rs.CrnkFeature;
+import io.crnk.test.JerseyTestBase;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ import zipkin.BinaryAnnotation;
 import zipkin.Span;
 import zipkin.reporter.Reporter;
 
-public abstract class AbstractBraveModuleTest extends JerseyTest {
+public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 

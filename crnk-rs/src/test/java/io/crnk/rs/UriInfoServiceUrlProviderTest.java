@@ -8,18 +8,18 @@ import javax.ws.rs.core.Application;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.rs.controller.SampleControllerWithPrefix;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.repository.TaskRepository;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class UriInfoServiceUrlProviderTest extends JerseyTest {
+public class UriInfoServiceUrlProviderTest extends JerseyTestBase {
 
 	@Override
 	protected TestContainerFactory getTestContainerFactory() {

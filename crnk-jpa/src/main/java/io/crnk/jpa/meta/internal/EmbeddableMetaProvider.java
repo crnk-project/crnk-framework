@@ -1,5 +1,10 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.Embeddable;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEmbeddable;
 import io.crnk.jpa.meta.MetaEmbeddableAttribute;
@@ -8,11 +13,6 @@ import io.crnk.jpa.query.AnyTypeObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-
-import javax.persistence.Embeddable;
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
 
 public class EmbeddableMetaProvider extends AbstractJpaDataObjectProvider<MetaEmbeddable> {
 
@@ -28,7 +28,7 @@ public class EmbeddableMetaProvider extends AbstractJpaDataObjectProvider<MetaEm
 	@Override
 	public boolean accept(Type type, Class<? extends MetaElement> metaClass) {
 		boolean hasAnnotation = ClassUtils.getRawType(type).getAnnotation(Embeddable.class) != null;
-		boolean hasType = metaClass == MetaElement.class || metaClass == MetaEmbeddable.class || metaClass == MetaJpaDataObject.class;
+		boolean hasType = metaClass == MetaEmbeddable.class || metaClass == MetaJpaDataObject.class;
 		return hasAnnotation && hasType;
 	}
 

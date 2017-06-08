@@ -24,6 +24,7 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.MetaType;
 
 public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> extends AbstractJpaDataObjectProvider<T> {
 
@@ -175,8 +176,8 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 			MetaAttribute attr = (MetaAttribute) element;
 			String mappedBy = getMappedBy(attr);
 			if (mappedBy != null) {
-
-				MetaDataObject oppositeType = attr.getType().getElementType().asDataObject();
+				MetaType attrType = attr.getType();
+				MetaDataObject oppositeType = attrType.getElementType().asDataObject();
 				if (!mappedBy.contains(".")) {
 					MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
 					attr.setOppositeAttribute(oppositeAttr);

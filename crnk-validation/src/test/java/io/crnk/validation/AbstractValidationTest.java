@@ -13,14 +13,14 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.validation.mock.models.Project;
 import io.crnk.validation.mock.models.Task;
 import io.crnk.validation.mock.repository.TaskRepository;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Before;
 
-public abstract class AbstractValidationTest extends JerseyTest {
+public abstract class AbstractValidationTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 

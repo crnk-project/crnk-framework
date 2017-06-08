@@ -229,7 +229,7 @@ public class MetaLookup {
 
 	private MetaElement allocateMetaFromClass(Type type, Class<? extends MetaElement> metaClass) {
 		Class<?> clazz = (Class<?>) type;
-		if (clazz.isEnum()) {
+		if (clazz.isEnum() && metaClass.isAssignableFrom(MetaEnumType.class)) {
 			MetaEnumType enumType = new MetaEnumType();
 			enumType.setElementType(enumType);
 			enumType.setImplementationType(type);
@@ -242,7 +242,7 @@ public class MetaLookup {
 			return enumType;
 		}
 		clazz = mapPrimitiveType(clazz);
-		if (isPrimitiveType(clazz)) {
+		if (isPrimitiveType(clazz) && metaClass.isAssignableFrom(MetaPrimitiveType.class)) {
 			String id = BASE_ID_PREFIX + firstToLower(clazz.getSimpleName());
 
 			MetaPrimitiveType primitiveType = (MetaPrimitiveType) idElementMap.get(id);
@@ -258,13 +258,15 @@ public class MetaLookup {
 		else if (clazz.isArray()) {
 			Class<?> elementClass = ((Class<?>) type).getComponentType();
 
-			MetaType elementType = getMeta(elementClass, metaClass).asType();
-			MetaArrayType arrayType = new MetaArrayType();
-			arrayType.setName(elementType.getName() + "$Array");
-			arrayType.setId(elementType.getId() + "$Array");
-			arrayType.setImplementationType(type);
-			arrayType.setElementType(elementType);
-			return arrayType;
+			MetaType elementType = (MetaType) getMeta(elementClass, metaClass, true);
+			if (elementType != null) {
+				MetaArrayType arrayType = new MetaArrayType();
+				arrayType.setName(elementType.getName() + "$Array");
+				arrayType.setId(elementType.getId() + "$Array");
+				arrayType.setImplementationType(type);
+				arrayType.setElementType(elementType);
+				return arrayType;
+			}
 		}
 		return null;
 	}
@@ -307,8 +309,13 @@ public class MetaLookup {
 			Class<? extends MetaElement> elementMetaClass) {
 		if (paramType.getRawType() instanceof Class && Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 			PreconditionUtil.assertEquals("expected 2 type arguments", 2, paramType.getActualTypeArguments().length);
+			MetaType valueType = (MetaType) getMeta(paramType.getActualTypeArguments()[1], elementMetaClass, true);
+			if (valueType == null) {
+				return null;
+			}
+
 			MetaType keyType = getMeta(paramType.getActualTypeArguments()[0]).asType();
-			MetaType valueType = getMeta(paramType.getActualTypeArguments()[1], elementMetaClass).asType();
+
 			MetaMapType mapMeta = new MetaMapType();
 
 			boolean primitiveKey = keyType instanceof MetaPrimitiveType;
@@ -332,14 +339,22 @@ public class MetaLookup {
 			return allocateMetaFromCollectionType(paramType, elementMetaClass);
 		}
 		else {
-			throw new UnsupportedOperationException("unknown type " + paramType);
+			return null;
 		}
+	}
+
+
+	public boolean exists(Type type, Class<MetaElement> metaElementClass) {
+		return this.allocateMeta(type, metaElementClass, true) != null;
 	}
 
 	private MetaElement allocateMetaFromCollectionType(ParameterizedType paramType,
 			Class<? extends MetaElement> elementMetaClass) {
 		PreconditionUtil.assertEquals("expected single type argument", 1, paramType.getActualTypeArguments().length);
-		MetaType elementType = getMeta(paramType.getActualTypeArguments()[0], elementMetaClass).asType();
+		MetaType elementType = (MetaType) getMeta(paramType.getActualTypeArguments()[0], elementMetaClass, true);
+		if (elementType == null) {
+			return null;
+		}
 
 		boolean isSet = Set.class.isAssignableFrom((Class<?>) paramType.getRawType());
 		boolean isList = List.class.isAssignableFrom((Class<?>) paramType.getRawType());
@@ -351,7 +366,7 @@ public class MetaLookup {
 			metaSet.setElementType(elementType);
 			return metaSet;
 		}
-		else {
+		if (isList) {
 			PreconditionUtil.assertTrue("expected a list type", isList);
 			MetaListType metaList = new MetaListType();
 			metaList.setId(elementType.getId() + "$List");
@@ -360,6 +375,7 @@ public class MetaLookup {
 			metaList.setElementType(elementType);
 			return metaList;
 		}
+		return null;
 	}
 
 	private boolean isPrimitiveType(Class<?> clazz) {
@@ -535,4 +551,5 @@ public class MetaLookup {
 			return packageName;
 		}
 	}
+
 }

@@ -23,6 +23,7 @@ import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
 import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
+import io.crnk.test.JerseyTestBase;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -34,7 +35,6 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.DeploymentContext;
-import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.spi.TestContainer;
 import org.glassfish.jersey.test.spi.TestContainerException;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
@@ -43,7 +43,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SecurityModuleIntTest extends JerseyTest {
+public class SecurityModuleIntTest extends JerseyTestBase {
 
 	private final InMemoryIdentityManager identityManager = new InMemoryIdentityManager();
 
@@ -104,7 +104,8 @@ public class SecurityModuleIntTest extends JerseyTest {
 						securityHandler.setHandler(handler);
 					}
 					server.setHandler(securityHandler);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
 				return container;
@@ -260,7 +261,8 @@ public class SecurityModuleIntTest extends JerseyTest {
 		}
 
 		@Override
-		public Request authenticate(Route route, Response response) throws IOException { // NOSONAR this is a lambda, legacy cannot be removed!
+		public Request authenticate(Route route, Response response)
+				throws IOException { // NOSONAR this is a lambda, legacy cannot be removed!
 			if (responseCount(response) >= 3) {
 				return null; // If we've failed 3 times, give up.
 			}

@@ -13,25 +13,17 @@ dependencies {
 
 	testCompile project(':crnk-client')
 	testCompile project(':crnk-rs')
+	testCompile project(':crnk-test')
 	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
 	testCompile group: 'com.querydsl', name: 'querydsl-core', version: '4.1.3'
 	testCompile group: 'com.querydsl', name: 'querydsl-jpa', version: '4.1.3'
-	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 	testCompile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
-	testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
 	testCompile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
-	testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.2'
 	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
 	testCompile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
 	testCompile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
 	testCompile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.2.10.Final'
 	testCompile group: 'com.h2database', name: 'h2', version: '1.4.187'
-	testCompile group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.17'
-	testCompile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.17'
-	testCompile group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-grizzly2', version: '2.17'
-	testCompile group: 'org.glassfish.jersey.test-framework', name: 'jersey-test-framework-core', version: '2.17'
-	testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
-	testCompile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.13'
 	testCompile(group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final')
 	testCompile(group: 'com.querydsl', name: 'querydsl-apt', version: '4.1.3', classifier: 'jpa')
 }

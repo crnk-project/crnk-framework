@@ -1,14 +1,14 @@
 package io.crnk.meta.internal;
 
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
 
 public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<MetaDataObject> {
 
