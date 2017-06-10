@@ -35,9 +35,7 @@ task npmRunBuild(type: NpmTask) {
 	outputs.dir 'build/npm/io/crnk/ui'
 }
 
-tasks.jar.dependsOn 'npmRunBuild'
-
-tasks.assemble.dependsOn 'npmRunBuild'
+tasks.processResources.dependsOn 'npmRunBuild'
 
 task war(type: War) {
 	group = 'Build'

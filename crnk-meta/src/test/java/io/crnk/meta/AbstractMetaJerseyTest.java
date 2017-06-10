@@ -12,14 +12,14 @@ import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Before;
 
-public abstract class AbstractMetaJerseyTest extends JerseyTest {
+public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 

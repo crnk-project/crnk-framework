@@ -250,7 +250,15 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			ResourceField field = information.findFieldByUnderlyingName(attr.getName());
 			PreconditionUtil.assertNotNull(attr.getName(), field);
 			Type implementationType = field.getGenericType();
-			MetaElement metaType = context.getLookup().getMeta(implementationType, MetaJsonObject.class);
+
+			MetaElement metaType = context.getLookup().getMeta(implementationType, MetaJsonObject.class, true);
+			if (metaType == null) {
+				metaType = context.getLookup().getMeta(implementationType);
+			}
+
+			PreconditionUtil.assertFalse("should not reference jpa objects", metaType.getClass().getSimpleName().equals("MetaEmbeddable"));
+
+
 			attr.setType(metaType.asType());
 		}
 

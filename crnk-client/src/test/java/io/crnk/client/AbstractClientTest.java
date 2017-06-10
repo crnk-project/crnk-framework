@@ -15,6 +15,7 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.rs.JsonApiResponseFilter;
 import io.crnk.rs.JsonapiExceptionMapperBridge;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
@@ -22,17 +23,17 @@ import io.crnk.test.mock.repository.TaskRepository;
 import io.crnk.test.mock.repository.TaskToProjectRepository;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Before;
 
-public abstract class AbstractClientTest extends JerseyTest {
+public abstract class AbstractClientTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
 	protected TestApplication testApplication;
 
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
+
 
 	@Before
 	public void setup() {
@@ -73,9 +74,6 @@ public abstract class AbstractClientTest extends JerseyTest {
 
 	/**
 	 * Assert the specified header name has the specified value.
-	 *
-	 * @param name
-	 * @param value
 	 */
 	protected void assertHasHeaderValue(String name, String value) {
 		MultivaluedMap<String, String> headers = getLastReceivedHeaders();
@@ -96,8 +94,6 @@ public abstract class AbstractClientTest extends JerseyTest {
 
 	/**
 	 * Return the last received headers.
-	 *
-	 * @return
 	 */
 	private MultivaluedMap<String, String> getLastReceivedHeaders() {
 		return getTestFilter().getLastReceivedHeaders();
@@ -105,8 +101,6 @@ public abstract class AbstractClientTest extends JerseyTest {
 
 	/**
 	 * Return the configured test filter.
-	 *
-	 * @return
 	 */
 	private TestRequestFilter getTestFilter() {
 		return ((CrnkTestFeature) testApplication.getFeature()).getTestFilter();
@@ -125,9 +119,12 @@ public abstract class AbstractClientTest extends JerseyTest {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.test.mock");
 
 			if (!querySpec) {
-				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()), new SampleJsonServiceLocator());
-			} else {
-				feature = new CrnkTestFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(), new SampleJsonServiceLocator());
+				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
+						new SampleJsonServiceLocator());
+			}
+			else {
+				feature = new CrnkTestFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(),
+						new SampleJsonServiceLocator());
 			}
 
 			feature.addModule(new TestModule());
