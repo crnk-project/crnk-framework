@@ -1,17 +1,22 @@
 package io.crnk.test;
 
-import java.util.Random;
-
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
+
+import java.io.IOException;
+import java.net.ServerSocket;
 
 public class JerseyTestBase extends JerseyTest {
 
 	@BeforeClass
 	public static void selectPort() {
-		Random random = new Random();
-		random.setSeed(System.nanoTime());
-		int port = 40000 + random.nextInt(10000);
-		System.setProperty("jersey.config.test.container.port", Integer.toString(port));
+		try {
+			ServerSocket s = new ServerSocket(0);
+			int port = s.getLocalPort();
+			s.close();
+			System.setProperty("jersey.config.test.container.port", Integer.toString(port));
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }
