@@ -1,46 +1,22 @@
 package io.crnk.meta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nullable;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.mock.model.ExtendsBaseResource;
-import io.crnk.meta.model.MetaArrayType;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaAttributePath;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.MetaKey;
-import io.crnk.meta.model.MetaListType;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.resource.MetaJsonObject;
-import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceAction;
+import io.crnk.meta.model.*;
+import io.crnk.meta.model.resource.*;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
-import io.crnk.meta.model.resource.MetaResourceBase;
-import io.crnk.meta.model.resource.MetaResourceField;
-import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
-import io.crnk.test.mock.models.Project;
-import io.crnk.test.mock.models.Schedule;
-import io.crnk.test.mock.models.Task;
-import io.crnk.test.mock.models.TaskStatus;
-import io.crnk.test.mock.models.TaskSubType;
+import io.crnk.test.mock.models.*;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
@@ -352,7 +328,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertTrue(keywordField.isInsertable());
 		Assert.assertTrue(keywordField.isUpdatable());
 
-		Assert.assertTrue(keywordField.getType() instanceof MetaArrayType);
+		Assert.assertEquals(MetaArrayType.class, keywordField.getType().getClass());
 		Assert.assertTrue(keywordField.getType().getElementType() instanceof MetaPrimitiveType);
 
 		Assert.assertEquals("string$Array", keywordField.getType().getName());

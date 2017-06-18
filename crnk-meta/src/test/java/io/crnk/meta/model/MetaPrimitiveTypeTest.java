@@ -1,11 +1,51 @@
 package io.crnk.meta.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.meta.AbstractMetaTest;
+import io.crnk.meta.MetaLookup;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.junit.Test;
+public class MetaPrimitiveTypeTest extends AbstractMetaTest {
 
-public class MetaPrimitiveTypeTest {
+	private MetaLookup lookup;
+
+	@Before
+	public void setup() {
+		super.setup();
+
+		lookup = new MetaLookup();
+		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.initialize();
+	}
+
+	@Test
+	public void testJson() {
+		MetaElement type = lookup.getMeta(ObjectNode.class);
+		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
+		Assert.assertEquals("base.json", type.getId());
+
+		MetaElement jsonNodeType = lookup.getMeta(JsonNode.class);
+		Assert.assertSame(type, jsonNodeType);
+	}
+
+
+	@JsonApiResource(type = "withObjectNode")
+	class ObjectNodeAttributeTestResource {
+
+		@JsonApiId
+		public String id;
+
+		public ObjectNode objectNode;
+	}
+
 
 	@Test
 	public void testString() {
