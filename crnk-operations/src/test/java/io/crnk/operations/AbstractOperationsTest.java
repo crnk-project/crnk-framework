@@ -32,16 +32,16 @@ import io.crnk.operations.server.TransactionOperationFilter;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 import io.crnk.spring.jpa.SpringTransactionRunner;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.validation.ValidationModule;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-public abstract class AbstractOperationsTest extends JerseyTest {
+public abstract class AbstractOperationsTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 

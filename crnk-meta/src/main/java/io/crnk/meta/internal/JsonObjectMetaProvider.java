@@ -1,5 +1,7 @@
 package io.crnk.meta.internal;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaDataObject;

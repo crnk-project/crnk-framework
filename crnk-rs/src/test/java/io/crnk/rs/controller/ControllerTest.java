@@ -8,16 +8,16 @@ import java.io.IOException;
 import javax.ws.rs.core.Response;
 
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.TestExceptionMapper;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.repository.TaskRepository;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class ControllerTest extends JerseyTest {
+public abstract class ControllerTest extends JerseyTestBase {
 
 	@Before
 	public void setup() {

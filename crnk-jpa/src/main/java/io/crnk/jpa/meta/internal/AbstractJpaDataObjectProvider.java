@@ -1,5 +1,14 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Map;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.internal.MetaDataObjectProviderBase;
@@ -7,14 +16,6 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaType;
-
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Map;
 
 public abstract class AbstractJpaDataObjectProvider<T extends MetaJpaDataObject> extends MetaDataObjectProviderBase<T> {
 
@@ -32,6 +33,8 @@ public abstract class AbstractJpaDataObjectProvider<T extends MetaJpaDataObject>
 
 			Class<? extends MetaType> metaClass = jpaObject ? MetaJpaDataObject.class : MetaType.class;
 			MetaType metaType = context.getLookup().getMeta(implementationType, metaClass);
+			PreconditionUtil.assertNotNull("no type available", metaType);
+
 			attr.setType(metaType);
 		}
 	}

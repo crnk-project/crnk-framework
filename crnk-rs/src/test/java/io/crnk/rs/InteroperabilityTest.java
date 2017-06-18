@@ -15,6 +15,7 @@ import io.crnk.core.engine.internal.dispatcher.path.ActionPath;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.rs.controller.SampleControllerWithPrefix;
+import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.ScheduleRepository;
@@ -22,7 +23,6 @@ import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.test.mock.repository.TaskRepository;
 import io.restassured.RestAssured;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.hamcrest.Matchers;
@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-public class InteroperabilityTest extends JerseyTest {
+public class InteroperabilityTest extends JerseyTestBase {
 
 	private static DocumentFilter filter;
 

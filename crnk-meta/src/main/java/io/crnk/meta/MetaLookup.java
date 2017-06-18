@@ -301,6 +301,7 @@ public class MetaLookup {
 														Class<? extends MetaElement> elementMetaClass) {
 		if (paramType.getRawType() instanceof Class && Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 			PreconditionUtil.assertEquals("expected 2 type arguments", 2, paramType.getActualTypeArguments().length);
+
 			MetaType keyType = (MetaType) getMeta(paramType.getActualTypeArguments()[0]);
 			MetaType valueType = (MetaType) getMeta(paramType.getActualTypeArguments()[1], elementMetaClass, true);
 			if (keyType != null && valueType != null) {
@@ -328,6 +329,11 @@ public class MetaLookup {
 		return null;
 	}
 
+
+	public boolean exists(Type type, Class<MetaElement> metaElementClass) {
+		return this.allocateMeta(type, metaElementClass, true) != null;
+	}
+
 	private MetaElement allocateMetaFromCollectionType(ParameterizedType paramType,
 													   Class<? extends MetaElement> elementMetaClass) {
 		PreconditionUtil.assertEquals("expected single type argument", 1, paramType.getActualTypeArguments().length);
@@ -345,7 +351,8 @@ public class MetaLookup {
 			metaSet.setImplementationType(paramType);
 			metaSet.setElementType(elementType);
 			return metaSet;
-		} else {
+    }
+		if (isList) {
 			PreconditionUtil.assertTrue("expected a list type", isList);
 			MetaListType metaList = new MetaListType();
 			metaList.setId(elementType.getId() + "$List");
@@ -354,6 +361,7 @@ public class MetaLookup {
 			metaList.setElementType(elementType);
 			return metaList;
 		}
+		return null;
 	}
 
 	public boolean isPrimitiveType(Class<?> clazz) {
@@ -529,4 +537,5 @@ public class MetaLookup {
 			return packageName;
 		}
 	}
+
 }
