@@ -25,9 +25,8 @@ import org.slf4j.LoggerFactory;
 
 public class JsonApiRequestProcessor implements HttpRequestProcessor {
 
-	public static final String JSONAPI_CONTENT_TYPE = "application/vnd.api+json";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonApiRequestProcessor.class);
+
 
 	private Module.ModuleContext moduleContext;
 
@@ -39,11 +38,11 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 		if (requestContext.getMethod().equalsIgnoreCase(HttpMethod.PATCH.toString()) || requestContext.getMethod()
 				.equalsIgnoreCase(HttpMethod.POST.toString())) {
 			String contentType = requestContext.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE);
-			if (contentType == null || !contentType.startsWith(JSONAPI_CONTENT_TYPE)) {
+			if (contentType == null || !contentType.startsWith(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
 				return false;
 			}
 		}
-		boolean acceptsJsonApi = requestContext.accepts(JSONAPI_CONTENT_TYPE);
+		boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		boolean acceptsAny = requestContext.acceptsAny();
 		return acceptsJsonApi || acceptsAny;
 	}
@@ -98,9 +97,8 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 			String responseBody = objectMapper.writeValueAsString(crnkResponse.getDocument());
 
 			requestContext.setResponse(crnkResponse.getHttpStatus(), responseBody);
-
-			String contentType = JSONAPI_CONTENT_TYPE;
-			requestContext.setResponseHeader("Content-Type", contentType);
+			requestContext.setResponseHeader("Content-Type", HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
 		}
 	}
+
 }

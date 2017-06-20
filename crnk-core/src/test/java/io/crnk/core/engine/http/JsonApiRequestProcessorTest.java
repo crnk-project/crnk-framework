@@ -142,8 +142,8 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
 		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 
 		processor.process(requestContext);
 
@@ -170,8 +170,8 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
 		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 
 		processor.process(requestContext);
 

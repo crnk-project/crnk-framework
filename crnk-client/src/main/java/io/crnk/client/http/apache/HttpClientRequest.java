@@ -1,22 +1,24 @@
 package io.crnk.client.http.apache;
 
+import java.io.IOException;
+
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
-import io.crnk.client.internal.ClientStubBase;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 public class HttpClientRequest implements HttpAdapterRequest {
 
-	private static final Charset CHARSET_UTF8 = Charset.forName("UTF8");
-
-	private static final ContentType CONTENT_TYPE = ContentType.create(ClientStubBase.CONTENT_TYPE, CHARSET_UTF8);
+	private static final ContentType CONTENT_TYPE = ContentType.create(HttpHeaders.JSONAPI_CONTENT_TYPE,
+			HttpHeaders.DEFAULT_CHARSET);
 
 	private HttpRequestBase requestBase;
 

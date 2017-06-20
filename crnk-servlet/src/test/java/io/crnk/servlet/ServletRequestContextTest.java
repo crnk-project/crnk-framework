@@ -4,7 +4,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.servlet.internal.ServletRequestContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class ServletRequestContextTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks/");
 		request.setRequestURI("/api/tasks/");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "*/*");
 		request.setServerName("test");
 		request.setServerPort(1234);
