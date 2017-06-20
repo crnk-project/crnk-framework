@@ -1,22 +1,39 @@
 package io.crnk.meta;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaLiteral;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaProvider;
 import io.crnk.meta.provider.MetaProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaLookup {
 
@@ -58,6 +75,8 @@ public class MetaLookup {
 		registerPrimitiveType(Date.class);
 		registerPrimitiveType(Timestamp.class);
 		registerPrimitiveType(JsonNode.class);
+		registerPrimitiveType(ObjectNode.class);
+		registerPrimitiveType(ArrayNode.class);
 		registerPrimitiveType(byte[].class);
 		registerPrimitiveType(boolean[].class);
 		registerPrimitiveType(int[].class);
@@ -92,6 +111,12 @@ public class MetaLookup {
 	private static String firstToLower(String name) {
 		if (name.equals(JsonNode.class.getSimpleName())) {
 			return "json";
+		}
+		if (name.equals(ObjectNode.class.getSimpleName())) {
+			return "json.object";
+		}
+		if (name.equals(ArrayNode.class.getSimpleName())) {
+			return "json.array";
 		}
 		if (name.equals("UUID")) {
 			return "uuid";
@@ -281,9 +306,6 @@ public class MetaLookup {
 		}
 		if (clazz == boolean.class) {
 			return boolean.class;
-		}
-		if (clazz == ObjectNode.class) {
-			return JsonNode.class;
 		}
 		return clazz;
 	}
