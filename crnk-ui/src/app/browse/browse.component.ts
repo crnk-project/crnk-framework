@@ -1,9 +1,10 @@
 import * as _ from "lodash";
-import {Component} from "@angular/core";
 import {TreeNode} from "primeng/primeng";
 import {Http, Response, RequestOptions, Headers} from "@angular/http";
 import {LocalStorageService} from "angular-2-local-storage";
 import {BrowseService, BrowseUtils, BrowsePreferencesService} from "./browse.service";
+import { DOCUMENT } from '@angular/platform-browser';
+import {Component, Inject} from "@angular/core";
 
 
 @Component({
@@ -49,7 +50,8 @@ export class BrowseComponent {
 	public parameterSuggestions: Array<string> = [];// BASE_PARAMETER_SUGGESTIONS;
 
 	constructor(private http: Http, private localStorageService: LocalStorageService, private service: BrowseService,
-		private preferencesService: BrowsePreferencesService, private utils: BrowseUtils) {
+		private preferencesService: BrowsePreferencesService, private utils: BrowseUtils,
+		@Inject(DOCUMENT) private document: any) {
 
 		this.preferences = this.preferencesService.loadPreferences();
 
@@ -187,24 +189,47 @@ export class BrowseComponent {
 	}
 
 	public set baseUrl(value: string) {
-		if(!value.endsWith("/")){
-			value = value + "/";
-		}
 		this.preferences.baseUrl = value;
 		this.preferencesService.savePreferences(this.preferences);
 		this.updateAvailableTypes();
 	}
+
+
+	public get embeddedMode(){
+		const href = this.document.location.href;
+		const suffix = "browse/#/";
+		return href.endsWith(suffix);
+	}
+
 
 	private updateAvailableTypes() {
 		if (_.isEmpty(this.baseUrl)) {
 			this.availableTypes = [];
 		}
 		else {
-			this.http.get(this.baseUrl + 'meta/resource?sort=resourceType&page[limit]=1000').subscribe(response => {
+			let url = this.baseUrl;
+			if(!url.endsWith("/")){
+				url = url + "/";
+			}
+			url = url + 'meta/resource?sort=resourceType&page[limit]=1000';
+
+			this.http.get(url).subscribe(response => {
 				let data = response.json()['data'] as Array<any>;
-				this.availableTypes = data.map(it => {
+				this.availableTypes = [];
+				this.availableTypes.push(...data.map(it => {
 					return {label: it.attributes.resourceType, value: it.attributes.resourceType};
+				}));
+				this.availableTypes.push({
+					label: null,
+					value: null
 				});
+
+				let selectedType = this.preferences.query.type;
+				if(selectedType && _.indexOf(data.map(it => it.attributes.resourceType), selectedType) == -1){
+					this.preferences.query.type = null;
+					this.preferencesService.savePreferences(this.preferences);
+				}
+
 				this.response = null;
 			}, error => {
 				this.availableTypes = [];
@@ -219,7 +244,11 @@ export class BrowseComponent {
 		}
 		else {
 			let includes = 'attributes.type.elementType';
-			let url = this.baseUrl + 'meta/resource?include=' + includes + '&page[limit]=1000';
+			let url = this.baseUrl;
+			if(!url.endsWith("/")){
+				url = url + "/";
+			}
+			url = url + 'meta/resource?include=' + includes + '&page[limit]=1000';
 			this.http.get(url).subscribe(response => {
 				let document = response.json();
 

@@ -2,7 +2,7 @@
 	<h1 x-large class="sample-content">{{type}}</h1>
 
 
-	<div class="card card-w-title">
+	<div class="card card-w-title" *ngIf="!embeddedMode">
 		<h3>Endpoint</h3>
 		<input type="string" style="width:100%" [(ngModel)]="baseUrl" pInputText placeholder="JSON API endpoint...">
 	</div>
