@@ -33,12 +33,20 @@ public class ConstraintViolationImplTest {
 		boot.boot();
 
 		errorData =
-				Mockito.spy(new ErrorDataBuilder().addMetaField(ConstraintViolationExceptionMapper.META_RESOURCE_TYPE, "tasks")
+				Mockito.spy(new ErrorDataBuilder().setDetail("testMessage").addMetaField(ConstraintViolationExceptionMapper
+								.META_RESOURCE_TYPE,
+						"tasks")
 						.setSourcePointer("name").build());
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 
 		violation = ConstraintViolationImpl.fromError(resourceRegistry, errorData);
+	}
+
+	@Test
+	public void testDetailMappedToMessage(){
+		Assert.assertEquals(errorData.getDetail(), violation.getMessage());
+		Assert.assertNotNull(errorData.getDetail());
 	}
 
 	@Test

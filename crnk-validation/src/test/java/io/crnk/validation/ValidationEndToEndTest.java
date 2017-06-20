@@ -34,12 +34,15 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("name", violation.getPropertyPath().toString());
+			Assert.assertNotNull(violation.getMessage());
+			Assert.assertTrue(violation.getMessage().contains("null"));
 			Assert.assertEquals("data/attributes/name", violation.getErrorData().getSourcePointer());
 		}
 	}
@@ -56,12 +59,18 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.Size.message}", violation.getMessageTemplate());
 			Assert.assertEquals("keywords", violation.getPropertyPath().toString());
+
+			// message depends on local
+			Assert.assertNotNull(violation.getMessage());
+			Assert.assertTrue(violation.getMessage().contains("0"));
+			Assert.assertTrue(violation.getMessage().contains("3"));
 			Assert.assertEquals("data/attributes/keywords", violation.getErrorData().getSourcePointer());
 		}
 	}
@@ -79,7 +88,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -102,12 +112,14 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataList[0].value", violation.getPropertyPath().toString());
+			Assert.assertNotNull(violation.getMessage());
 			Assert.assertEquals("data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
 		}
 	}
@@ -129,12 +141,14 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataMap[someKey].value", violation.getPropertyPath().toString());
+			Assert.assertNotNull(violation.getMessage());
 			Assert.assertEquals("data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
 		}
 	}
@@ -157,7 +171,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -171,7 +186,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			//  or use of order preserving sets
 			//			List<ProjectData> list = new ArrayList<>(project.getDataSet());
 			//			int index = list.indexOf(corrupedElement);
-			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "data/attributes/dataSet/" + index + "/value");
+			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "data/attributes/dataSet/" + index +
+			// "/value");
 		}
 	}
 
@@ -183,7 +199,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -202,7 +219,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ValidationException e) {
+		}
+		catch (ValidationException e) {
 			Assert.assertEquals("messageKey", e.getMessage());
 		}
 	}
@@ -222,7 +240,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -246,7 +265,8 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		} catch (ConstraintViolationException e) {
+		}
+		catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();

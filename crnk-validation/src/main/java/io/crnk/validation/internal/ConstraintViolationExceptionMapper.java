@@ -121,7 +121,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 			ErrorDataBuilder builder = ErrorData.builder();
 			builder = builder.addMetaField(META_TYPE_KEY, META_TYPE_VALUE);
 			builder = builder.setStatus(String.valueOf(HttpStatus.UNPROCESSABLE_ENTITY_422));
-			builder = builder.setTitle(violation.getMessage());
+			builder = builder.setDetail(violation.getMessage());
 
 			builder = builder.setCode(toCode(violation));
 			if (violation.getMessageTemplate() != null) {
