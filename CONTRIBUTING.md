@@ -25,7 +25,7 @@ So you have added a feature to a library or you have created something new. Mayb
 Join the Conversation
 =====================
 
-Crnk gives you a number of ways to discuss features, express concerns or just chat about the project with other people just like you. Feel free to chat with us on [gitter](https://gitter.im/crnk-project/crnk-framework) or if your question is strictly involving usage of crnk create new question on [StackOverflow](http://stackoverflow.com/questions/tagged/crnk)
+Crnk gives you a number of ways to discuss features, express concerns or just chat about the project with other people just like you. Feel free to chat with us on [gitter](https://gitter.im/crnk-io/Lobby) or if your question is strictly involving usage of crnk create new question on [StackOverflow](http://stackoverflow.com/questions/tagged/crnk)
 
 Other Ways to Contribute
 ======================
