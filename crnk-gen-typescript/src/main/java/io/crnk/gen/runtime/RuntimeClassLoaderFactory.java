@@ -61,6 +61,13 @@ public class RuntimeClassLoaderFactory {
 
 		@Override
 		protected synchronized URL findResource(String name) {
+			if ("logback-test.xml".equals(name)) {
+				URL logbackUrl = RuntimeClassLoaderFactory.class.getClassLoader().getResource("logback-test.xml");
+				if (logbackUrl == null) {
+					throw new IllegalStateException("logback-test.xml could not be found");
+				}
+				return logbackUrl;
+			}
 			URL sharedResourceUrl = GenerateTypescriptTask.class.getClassLoader().getResource(name);
 			if (sharedResourceUrl != null) {
 				return sharedResourceUrl;

@@ -9,6 +9,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
+import org.gradle.api.artifacts.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +27,15 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		final File workingDir = new File(project.getBuildDir(), "generated/source/typescript/");
 		compileTypescriptTask.setWorkingDir(workingDir);
 
+		Configuration compileConfiguration = project.getConfigurations().getByName("compile");
+		generateTask.getInputs().file(compileConfiguration.getFiles());
+
 		try {
 			NpmInstallTask npmInstall = (NpmInstallTask) project.getTasks().getByName("npmInstall");
 			npmInstall.setWorkingDir(workingDir);
 			npmInstall.dependsOn(generateTask);
 			npmInstall.getInputs().file(new File(workingDir, "package.json"));
 			npmInstall.getOutputs().dir(new File(workingDir, "node_modules"));
-
 
 			// copy .npmrc file from root to working directory if available
 			final File npmrcFile = new File(project.getProjectDir(), ".npmrc");
@@ -47,8 +50,9 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 				});
 			}
 			compileTypescriptTask.dependsOn(npmInstall);
-		}catch(UnknownTaskException e){
-			e.printStackTrace(); // TODO testing
+		}
+		catch (UnknownTaskException e) {
+			e.printStackTrace(); // TODO needed for testing
 		}
 		try {
 			Task processIntegrationTestResourcesTask = project.getTasks().getByName("processIntegrationTestResources");
