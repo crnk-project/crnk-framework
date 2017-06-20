@@ -84,11 +84,12 @@ export class BrowsePreferencesService {
 		const suffix = "browse/#/";
 		if(href.endsWith(suffix)){
 			loaded.baseUrl = href.substring(0, href.length - suffix.length);
+
+			if(loaded.baseUrl && !loaded.baseUrl.endsWith("/")){
+				loaded.baseUrl = loaded.baseUrl + "/";
+			}
 		}
 
-		if(loaded.baseUrl && !loaded.baseUrl.endsWith("/")){
-			loaded.baseUrl = loaded.baseUrl + "/";
-		}
 		if(!loaded.documentDisplayType){
 			loaded.documentDisplayType = 'tree';
 		}
