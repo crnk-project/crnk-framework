@@ -1,17 +1,21 @@
 package io.crnk.client.http.okhttp;
 
+import java.io.IOException;
+
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import java.io.IOException;
-
 public class OkHttpRequest implements HttpAdapterRequest {
+
+	private static final MediaType CONTENT_TYPE = MediaType.parse(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
 
 	private Builder builder;
 
@@ -21,7 +25,8 @@ public class OkHttpRequest implements HttpAdapterRequest {
 		this.client = client;
 		builder = new Request.Builder().url(url);
 
-		RequestBody requestBodyObj = requestBody != null ? RequestBody.create(null, requestBody) : null;
+
+		RequestBody requestBodyObj = requestBody != null ? RequestBody.create(CONTENT_TYPE, requestBody) : null;
 		builder.method(method.toString(), requestBodyObj);
 	}
 

@@ -13,7 +13,6 @@ import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.ResourceNotFoundException;
@@ -102,7 +101,7 @@ public class ClientStubBaseTest {
 		HttpAdapterResponse response = Mockito.mock(HttpAdapterResponse.class);
 		Mockito.when(response.body()).thenReturn(body);
 		Mockito.when(response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Mockito.when(response.code()).thenReturn(404);
 
 		RuntimeException exception = stub.handleError(response);

@@ -34,7 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.servlet.resource.model.Locale;
 import io.crnk.servlet.resource.model.Node;
@@ -112,7 +112,7 @@ public class CrnkServletTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks/");
 		request.setRequestURI("/api/tasks/");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "*/*");
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -139,7 +139,7 @@ public class CrnkServletTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks/1");
 		request.setRequestURI("/api/tasks/1");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "*/*");
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -166,7 +166,7 @@ public class CrnkServletTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks");
 		request.setRequestURI("/api/tasks");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "*/*");
 		request.addParameter("filter[name]", "John");
 		request.setQueryString(URLEncoder.encode("filter[name]", StandardCharsets.UTF_8.name()) + "=John");
@@ -195,7 +195,7 @@ public class CrnkServletTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks");
 		request.setRequestURI("/api/tasks");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "application/xml");
 		request.addParameter("filter[Task][name]", "John");
 		request.setQueryString(URLEncoder.encode("filter[Task][name]", StandardCharsets.UTF_8.name()) + "=John");
@@ -217,7 +217,7 @@ public class CrnkServletTest {
 		request.setServletPath("/api");
 		request.setPathInfo("/tasks-matching-exception");
 		request.setRequestURI("/api/matching-exception");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		request.addHeader("Accept", "*/*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
@@ -244,7 +244,7 @@ public class CrnkServletTest {
 		request.setPathInfo("/nodes/1");
 		request.setRequestURI("/api/nodes/1");
 		request.setQueryString("include[nodes]=parent");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Map<String, String> params = new HashMap<>();
 		params.put("include[nodes]", "children");
 		request.setParameters(params);
@@ -274,7 +274,7 @@ public class CrnkServletTest {
 		request.setPathInfo("/nodes/1");
 		request.setRequestURI("/api/nodes/1");
 		request.setQueryString("include[nodes]=children.nodeComments");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Map<String, String> params = new HashMap<>();
 		params.put("include[nodes]", "children.nodeComments.langLocale");
 		request.setParameters(params);
@@ -302,7 +302,7 @@ public class CrnkServletTest {
 		request.setPathInfo("/nodes");
 		request.setRequestURI("/api/nodes");
 		request.setQueryString("include[nodes]=children");
-		request.setContentType(JsonApiRequestProcessor.JSONAPI_CONTENT_TYPE);
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Map<String, String> params = new HashMap<>();
 		params.put("include[nodes]", "children");
 		request.setParameters(params);

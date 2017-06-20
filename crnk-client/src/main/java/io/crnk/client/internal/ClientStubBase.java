@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 
 public class ClientStubBase {
 
-	public static final String CONTENT_TYPE = "application/vnd.api+json";
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientStubBase.class);
+
 	protected CrnkClient client;
 
 	protected JsonApiUrlBuilder urlBuilder;
@@ -52,8 +52,11 @@ public class ClientStubBase {
 				LOGGER.debug("request body: {}", requestBody);
 			}
 
-			request.header("Content-Type", CONTENT_TYPE);
-			request.header("Accept", CONTENT_TYPE);
+			if (method == HttpMethod.POST || method == HttpMethod.PATCH) {
+				request.header("Content-Type", HttpHeaders.JSONAPI_CONTENT_TYPE + "; charset=" +
+						HttpHeaders.DEFAULT_CHARSET);
+			}
+			request.header("Accept", HttpHeaders.JSONAPI_CONTENT_TYPE);
 
 			HttpAdapterResponse response = request.execute();
 
@@ -72,7 +75,8 @@ public class ClientStubBase {
 				return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
 			}
 			return null;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new TransportException(e);
 		}
 	}
@@ -81,7 +85,7 @@ public class ClientStubBase {
 		ErrorResponse errorResponse = null;
 		String body = response.body();
 		String contentType = response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE);
-		if (body.length() > 0 && CONTENT_TYPE.equalsIgnoreCase(contentType)) {
+		if (body.length() > 0 && contentType != null && contentType.toLowerCase().contains(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
 
 			ObjectMapper objectMapper = client.getObjectMapper();
 			Document document = objectMapper.readValue(body, Document.class);
@@ -99,10 +103,12 @@ public class ClientStubBase {
 			Throwable throwable = mapper.get().fromErrorResponse(errorResponse);
 			if (throwable instanceof RuntimeException) {
 				return (RuntimeException) throwable;
-			} else {
+			}
+			else {
 				return new ClientException(response.code(), response.message(), throwable);
 			}
-		} else {
+		}
+		else {
 			return new ClientException(response.code(), response.message());
 		}
 	}
