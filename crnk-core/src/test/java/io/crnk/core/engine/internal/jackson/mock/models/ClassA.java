@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import java.util.Collections;
 import java.util.List;
 
-@JsonApiResource(type = "classAs")
+@JsonApiResource("classAs")
 public class ClassA {
 
 	@JsonApiId

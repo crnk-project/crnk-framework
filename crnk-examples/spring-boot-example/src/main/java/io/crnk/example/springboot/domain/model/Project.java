@@ -24,7 +24,7 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 public class Project {
 
 	@JsonApiId

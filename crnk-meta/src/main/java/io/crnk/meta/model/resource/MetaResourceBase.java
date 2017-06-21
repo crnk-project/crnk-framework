@@ -9,7 +9,7 @@ import java.util.List;
  * structure (attributes, relationships, etc.) as resources, but
  * are not resources by themselves. They do not carry a resourceType.
  */
-@JsonApiResource(type = "meta/resourceBase")
+@JsonApiResource("meta/resourceBase")
 public class MetaResourceBase extends MetaJsonObject {
 
 	@Override

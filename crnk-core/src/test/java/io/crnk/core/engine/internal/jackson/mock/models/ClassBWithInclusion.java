@@ -8,7 +8,7 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import java.util.Collections;
 import java.util.List;
 
-@JsonApiResource(type = "classBsWithInclusion")
+@JsonApiResource("classBsWithInclusion")
 public class ClassBWithInclusion {
 	@JsonApiId
 	private Long id;

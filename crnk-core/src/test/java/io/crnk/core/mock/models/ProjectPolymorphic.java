@@ -8,7 +8,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 import java.util.List;
 
 
-@JsonApiResource(type = "projects-polymorphic")
+@JsonApiResource("projects-polymorphic")
 public class ProjectPolymorphic {
 
 	@JsonApiId

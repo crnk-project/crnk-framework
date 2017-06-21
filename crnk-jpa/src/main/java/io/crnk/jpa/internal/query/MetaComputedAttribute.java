@@ -3,7 +3,7 @@ package io.crnk.jpa.internal.query;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaAttribute;
 
-@JsonApiResource(type = "metaComputedAttribute")
+@JsonApiResource("metaComputedAttribute")
 public class MetaComputedAttribute extends MetaAttribute {
 
 	@Override

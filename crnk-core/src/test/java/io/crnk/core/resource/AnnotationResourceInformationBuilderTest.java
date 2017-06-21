@@ -297,7 +297,7 @@ public class AnnotationResourceInformationBuilderTest {
 				.contains(ResourceFieldType.RELATIONSHIP, ResourceFieldType.RELATIONSHIP);
 	}
 
-	@JsonApiResource(type = "tasks")
+	@JsonApiResource("tasks")
 	@JsonPropertyOrder(alphabetic = true)
 	public static class JsonIngoreTestResource {
 
@@ -313,7 +313,7 @@ public class AnnotationResourceInformationBuilderTest {
 		public String readWriteAttribute;
 	}
 
-	@JsonApiResource(type = "duplicatedIdAnnotationResources")
+	@JsonApiResource("duplicatedIdAnnotationResources")
 	private static class DuplicatedIdResource {
 
 		@JsonApiId
@@ -323,7 +323,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id2;
 	}
 
-	@JsonApiResource(type = "ignoredId")
+	@JsonApiResource("ignoredId")
 	private static class IgnoredIdResource {
 
 		@JsonApiId
@@ -331,7 +331,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id;
 	}
 
-	@JsonApiResource(type = "ignoredAttribute")
+	@JsonApiResource("ignoredAttribute")
 	private static class IgnoredAttributeResource {
 
 		@JsonApiId
@@ -341,7 +341,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private String attribute;
 	}
 
-	@JsonApiResource(type = "accessorGetter")
+	@JsonApiResource("accessorGetter")
 	private static class AccessorGetterResource {
 
 		@JsonApiId
@@ -352,7 +352,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "accessorGetter")
+	@JsonApiResource("accessorGetter")
 	private static class WriteOnlyAttributeResource {
 
 		@JsonApiId
@@ -367,7 +367,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "ignoredAccessorGetter")
+	@JsonApiResource("ignoredAccessorGetter")
 	private static class IgnoredAccessorGetterResource {
 
 		@JsonApiId
@@ -379,7 +379,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "fieldWithAccessorGetterResource")
+	@JsonApiResource("fieldWithAccessorGetterResource")
 	private static class FieldWithAccessorGetterResource {
 
 		@JsonApiId
@@ -391,7 +391,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "idFieldWithAccessorGetterResource")
+	@JsonApiResource("idFieldWithAccessorGetterResource")
 	private static class IdFieldWithAccessorGetterResource {
 
 		@JsonApiId
@@ -400,7 +400,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "annotationOnFieldAndMethod")
+	@JsonApiResource("annotationOnFieldAndMethod")
 	private static class AnnotationOnFieldAndMethodResource {
 
 		@JsonApiId
@@ -415,7 +415,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "ignoredAttribute")
+	@JsonApiResource("ignoredAttribute")
 	private static class IgnoredStaticAttributeResource {
 
 		public static String attribute;
@@ -423,7 +423,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id;
 	}
 
-	@JsonApiResource(type = "ignoredAttribute")
+	@JsonApiResource("ignoredAttribute")
 	private static class IgnoredTransientAttributeResource {
 
 		public transient int attribute;
@@ -436,7 +436,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 	}
 
-	@JsonApiResource(type = "ignoredAttribute")
+	@JsonApiResource("ignoredAttribute")
 	private static class IgnoredStaticGetterResource {
 
 		@JsonApiId
@@ -448,7 +448,7 @@ public class AnnotationResourceInformationBuilderTest {
 	}
 
 	@JsonPropertyOrder({"b", "a", "c"})
-	@JsonApiResource(type = "orderedResource")
+	@JsonApiResource("orderedResource")
 	private static class OrderedResource {
 
 		public String c;
@@ -459,7 +459,7 @@ public class AnnotationResourceInformationBuilderTest {
 	}
 
 	@JsonPropertyOrder(alphabetic = true)
-	@JsonApiResource(type = "AlphabeticResource")
+	@JsonApiResource("AlphabeticResource")
 	private static class AlphabeticResource {
 
 		public String c;
@@ -469,7 +469,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id;
 	}
 
-	@JsonApiResource(type = "multipleMetaInformationResource")
+	@JsonApiResource("multipleMetaInformationResource")
 	private static class MultipleMetaInformationResource {
 
 		@JsonApiMetaInformation
@@ -480,7 +480,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id;
 	}
 
-	@JsonApiResource(type = "multipleLinksInformationResource")
+	@JsonApiResource("multipleLinksInformationResource")
 	private static class MultipleLinksInformationResource {
 
 		@JsonApiLinksInformation
@@ -491,7 +491,7 @@ public class AnnotationResourceInformationBuilderTest {
 		private Long id;
 	}
 
-	@JsonApiResource(type = "differentTypes")
+	@JsonApiResource("differentTypes")
 	private static class DifferentTypes {
 
 		public Future<String> field;
@@ -504,7 +504,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "differentTypesv2")
+	@JsonApiResource("differentTypesv2")
 	private static class DifferentTypesv2 {
 
 		@JsonApiToOne
@@ -517,7 +517,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "jsonAPIRelationType")
+	@JsonApiResource("jsonAPIRelationType")
 	private static class JsonApiRelationType {
 
 		@JsonApiRelation
@@ -532,7 +532,7 @@ public class AnnotationResourceInformationBuilderTest {
 		}
 	}
 
-	@JsonApiResource(type = "jsonAPIRelationType")
+	@JsonApiResource("jsonAPIRelationType")
 	private static class JsonApiRelationTypeNonDefaults {
 
 		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, serialize = SerializeType.EAGER)

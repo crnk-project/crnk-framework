@@ -49,7 +49,7 @@ public class MetaPrimitiveTypeTest extends AbstractMetaTest {
 	}
 
 
-	@JsonApiResource(type = "withObjectNode")
+	@JsonApiResource("withObjectNode")
 	class ObjectNodeAttributeTestResource {
 
 		@JsonApiId

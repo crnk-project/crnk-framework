@@ -4,7 +4,7 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 
-@JsonApiResource(type = "resourceWithoutRepository")
+@JsonApiResource("resourceWithoutRepository")
 public class ResourceWithoutRepository {
 
 	@JsonApiId

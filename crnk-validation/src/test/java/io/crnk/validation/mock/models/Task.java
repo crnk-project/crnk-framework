@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 @ComplexValid
 public class Task {
 

@@ -79,7 +79,7 @@ public class HttpRequestProcessorImplTest {
 		moduleRegistry = boot.getModuleRegistry();
 	}
 
-	@JsonApiResource(type = "actionResource")
+	@JsonApiResource("actionResource")
 	public static class ActionResource {
 
 		@JsonApiId

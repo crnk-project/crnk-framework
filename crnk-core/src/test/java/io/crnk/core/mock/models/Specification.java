@@ -2,7 +2,7 @@ package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "specifications")
+@JsonApiResource("specifications")
 public class Specification extends Document {
 	private String designOutlines;
 

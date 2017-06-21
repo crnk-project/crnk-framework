@@ -5,7 +5,7 @@ import io.crnk.core.resource.annotations.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonApiResource(type = "eager-projects")
+@JsonApiResource("eager-projects")
 public class ProjectEager {
 
 	@JsonApiId

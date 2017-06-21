@@ -180,7 +180,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(2, idField.getAnnotations().size()); // nullable + jsonapiid
 	}
 
-	@JsonApiResource(type = "readMethodAnnotatedResource")
+	@JsonApiResource("readMethodAnnotatedResource")
 	class ReadMethodAnnotatedResource {
 
 		private String id;
@@ -197,7 +197,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 
-	@JsonApiResource(type = "readMethodAnnotatedResource")
+	@JsonApiResource("readMethodAnnotatedResource")
 	class WriteMethodAnnotatedResource {
 
 		private String id;

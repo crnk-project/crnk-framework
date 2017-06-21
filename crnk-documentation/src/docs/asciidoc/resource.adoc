@@ -15,7 +15,7 @@ The example below shows a sample class which contains a definition of a resource
 
 [source]
 ----
-  @JsonApiResource(type = "tasks")
+  @JsonApiResource("tasks")
   public class Task {
     // fields, getters and setters
   }
@@ -31,7 +31,7 @@ The example below shows a sample class which contains a definition of a field wh
 
 [source]
 ----
-  @JsonApiResource(type = "tasks")
+  @JsonApiResource("tasks")
   public class Task {
     @JsonApiId
     private Long id;
@@ -51,7 +51,7 @@ The example below shows a sample class which contains this kind of relationship.
 
 [source]
 ----
-  @JsonApiResource(type = "tasks")
+  @JsonApiResource("tasks")
   public class Task {
 
     // ID field
@@ -91,7 +91,7 @@ See http://jsonapi.org/format/#document-meta for more information about meta dat
 
 [source]
 ----
-	@JsonApiResource(type = "projects")
+	@JsonApiResource("projects")
 	public class Project {
 
 		...
@@ -124,7 +124,7 @@ See http://jsonapi.org/format/#document-links for more information about linking
 
 [source]
 ----
-	@JsonApiResource(type = "projects")
+	@JsonApiResource("projects")
 	public class Project {
 
 		...

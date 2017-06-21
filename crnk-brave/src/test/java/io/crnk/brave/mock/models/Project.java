@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("test")
 public class Project {
 
 	@JsonApiId

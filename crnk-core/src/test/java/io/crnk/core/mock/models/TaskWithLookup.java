@@ -5,7 +5,7 @@ import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 
-@JsonApiResource(type = "task-with-lookup")
+@JsonApiResource("task-with-lookup")
 public class TaskWithLookup {
 
 	@JsonApiId

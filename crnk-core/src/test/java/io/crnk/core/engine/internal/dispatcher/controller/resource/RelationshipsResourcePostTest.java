@@ -291,7 +291,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		// Create ProjectPolymorphic object
 		Document newProjectBody = new Document();
 		data = new Resource();
-		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().type();
+		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().value();
 		data.setType(type);
 		data.getRelationships().put("task", new Relationship(new ResourceIdentifier(taskIdOne.toString(), "tasks")));
 		data.getRelationships().put("tasks", new Relationship(Arrays.asList(new ResourceIdentifier(taskIdTwo.toString(),

@@ -145,7 +145,7 @@ public class ResourceRegistryTest {
 
 	@Test
 	public void onResourceGetEntryWithBackUp() {
-		String taskType = Task.class.getAnnotation(JsonApiResource.class).type();
+		String taskType = Task.class.getAnnotation(JsonApiResource.class).value();
 		resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, taskType));
 
 		// WHEN

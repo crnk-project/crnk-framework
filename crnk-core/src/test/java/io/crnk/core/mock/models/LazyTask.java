@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 
 import java.util.List;
 
-@JsonApiResource(type = "lazy_tasks")
+@JsonApiResource("lazy_tasks")
 public class LazyTask {
 
 	@JsonApiId

@@ -2,7 +2,7 @@ package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "documents")
+@JsonApiResource("documents")
 public abstract class Document extends Thing {
 	private String title;
 

@@ -19,7 +19,7 @@ package io.crnk.servlet.resource.model;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 public class Project {
 
 	@JsonApiId

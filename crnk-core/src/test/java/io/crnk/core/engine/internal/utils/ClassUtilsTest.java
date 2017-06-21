@@ -353,7 +353,7 @@ public class ClassUtilsTest {
 		}
 	}
 
-	@JsonApiResource(type = "document")
+	@JsonApiResource("document")
 	public static class ResourceClass {
 
 	}

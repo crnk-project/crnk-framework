@@ -2,7 +2,7 @@ package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "memoranda")
+@JsonApiResource("memoranda")
 public class Memorandum extends Document {
 	private String body;
 

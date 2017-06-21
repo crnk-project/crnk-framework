@@ -7,7 +7,7 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 @Entity("projects")
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 public class Project {
 
 	@Id

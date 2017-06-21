@@ -126,7 +126,7 @@ For this to work, relations must be set up bidirectionally with the `opposite` a
 
 [source]
 ----
-	@JsonApiResource(type = "tasks")
+	@JsonApiResource("tasks")
 	public class Task {
 
 		@JsonApiToOne(opposite = "tasks")

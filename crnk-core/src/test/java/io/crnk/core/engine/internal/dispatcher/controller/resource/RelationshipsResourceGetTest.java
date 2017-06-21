@@ -118,7 +118,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 	public void supportPolymorphicRelationshipTypes() throws JsonProcessingException {
 		// GIVEN
 		Long projectId = 1L;
-		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().type();
+		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().value();
 
 		ProjectPolymorphic projectPolymorphic = new ProjectPolymorphic();
 		projectPolymorphic.setId(projectId);
