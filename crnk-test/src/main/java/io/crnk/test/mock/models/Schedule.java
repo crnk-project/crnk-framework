@@ -9,7 +9,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 
-@JsonApiResource(type = "schedules")
+@JsonApiResource("schedules")
 public class Schedule {
 
 	@JsonApiId

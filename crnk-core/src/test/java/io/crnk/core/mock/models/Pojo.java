@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 
 import java.util.List;
 
-@JsonApiResource(type = "pojo")
+@JsonApiResource("pojo")
 public class Pojo extends Thing {
 
 	@JsonProperty("other-pojo")

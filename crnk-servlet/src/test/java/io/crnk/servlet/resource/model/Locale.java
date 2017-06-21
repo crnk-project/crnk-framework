@@ -3,7 +3,7 @@ package io.crnk.servlet.resource.model;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
 
-@JsonApiResource(type = "lang-locales")
+@JsonApiResource("lang-locales")
 public class Locale extends AbstractResource {
 
 	private java.util.Locale locale;

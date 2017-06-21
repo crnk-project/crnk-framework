@@ -350,7 +350,7 @@ public class ModuleRegistryTest {
 		Assert.assertNotNull(responseRelationshipEntry);
 	}
 
-	@JsonApiResource(type = "test2")
+	@JsonApiResource("test2")
 	static class TestResource2 {
 
 		@JsonApiId

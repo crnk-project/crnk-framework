@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 
 import java.util.List;
 
-@JsonApiResource(type = "meta/key")
+@JsonApiResource("meta/key")
 public class MetaKey extends MetaElement {
 
 	public static final String ID_ELEMENT_SEPARATOR = "-";

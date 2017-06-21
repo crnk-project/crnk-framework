@@ -2,7 +2,7 @@ package io.crnk.test.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "tasksSubType")
+@JsonApiResource("tasksSubType")
 public class TaskSubType extends Task {
 
 	private int subTypeValue;

@@ -6,7 +6,7 @@ import io.crnk.meta.model.MetaAttribute;
 /**
  * Field of a JSON API resource.
  */
-@JsonApiResource(type = "meta/resourceField")
+@JsonApiResource("meta/resourceField")
 public class MetaResourceField extends MetaAttribute {
 
 	private boolean meta;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "shapes")
+@JsonApiResource("shapes")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE)
 public class ShapeResource extends AbstractResource<ShapeResource.Shape> {

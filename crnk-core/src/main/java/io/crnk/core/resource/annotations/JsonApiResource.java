@@ -3,7 +3,7 @@ package io.crnk.core.resource.annotations;
 import java.lang.annotation.*;
 
 /**
- * Defines a resource. Each class annotated with {@link JsonApiResource} must have defined {@link JsonApiResource#type()}.
+ * Defines a resource. Each class annotated with {@link JsonApiResource} must have defined {@link JsonApiResource#value()}.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -17,5 +17,5 @@ public @interface JsonApiResource {
 	 * @return <i>type</i> of the resource
 	 * @see <a href="http://jsonapi.org/format/#document-structure-resource-types">JSON API - Resource Types</a>
 	 */
-	String type();
+	String value();
 }

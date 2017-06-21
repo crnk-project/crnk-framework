@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 public class Project {
 
 	@JsonApiId

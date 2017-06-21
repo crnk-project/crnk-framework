@@ -17,7 +17,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "meta/dataObject")
+@JsonApiResource("meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
 
 	private static final MetaAttributeFinder DEFAULT_ATTRIBUTE_FINDER = new MetaAttributeFinder() {

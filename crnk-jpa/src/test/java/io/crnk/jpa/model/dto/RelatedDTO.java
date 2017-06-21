@@ -3,7 +3,7 @@ package io.crnk.jpa.model.dto;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "relatedDTO")
+@JsonApiResource("relatedDTO")
 public class RelatedDTO {
 
 	@JsonApiId

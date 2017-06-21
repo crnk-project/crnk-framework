@@ -3,7 +3,7 @@ package io.crnk.core.mock.models;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "schedules")
+@JsonApiResource("schedules")
 public class Schedule {
 
 	@JsonApiId

@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 import java.util.Set;
 
 
-@JsonApiResource(type = "nodes")
+@JsonApiResource("nodes")
 public class Node extends AbstractResource {
 
 	@JsonApiToOne

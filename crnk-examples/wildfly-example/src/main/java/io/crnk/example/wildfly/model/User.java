@@ -10,7 +10,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 
 import java.util.List;
 
-@JsonApiResource(type = "users")
+@JsonApiResource("users")
 public class User {
 
 	@JsonApiId

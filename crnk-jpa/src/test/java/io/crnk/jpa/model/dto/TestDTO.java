@@ -4,7 +4,7 @@ import io.crnk.core.resource.annotations.*;
 
 import java.util.List;
 
-@JsonApiResource(type = "testDTO")
+@JsonApiResource("testDTO")
 public class TestDTO {
 
 	public static final String ATTR_COMPUTED_UPPER_STRING_VALUE = "computedUpperStringValue";

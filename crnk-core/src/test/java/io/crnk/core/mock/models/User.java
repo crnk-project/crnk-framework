@@ -7,7 +7,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 import java.util.Collections;
 import java.util.List;
 
-@JsonApiResource(type = "users")
+@JsonApiResource("users")
 public class User {
 
 	@JsonApiId

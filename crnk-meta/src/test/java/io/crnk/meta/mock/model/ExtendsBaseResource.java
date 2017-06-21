@@ -2,7 +2,7 @@ package io.crnk.meta.mock.model;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "extendsBase")
+@JsonApiResource("extendsBase")
 public class ExtendsBaseResource extends BaseObject {
 
 	private String name;

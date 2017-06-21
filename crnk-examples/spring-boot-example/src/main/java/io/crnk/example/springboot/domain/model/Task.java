@@ -25,7 +25,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 
 import javax.validation.constraints.Size;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 public class Task {
 
 	@JsonApiId

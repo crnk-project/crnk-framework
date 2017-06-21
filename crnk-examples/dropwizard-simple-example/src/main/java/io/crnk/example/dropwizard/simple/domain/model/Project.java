@@ -3,7 +3,7 @@ package io.crnk.example.dropwizard.simple.domain.model;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 public class Project {
 
 	@JsonApiId

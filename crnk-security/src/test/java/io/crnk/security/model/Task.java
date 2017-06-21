@@ -7,7 +7,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 public class Task {
 
 	@JsonApiId

@@ -191,7 +191,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		for (Annotation annotation : annotations) {
 			if (annotation instanceof JsonApiResource) {
 				JsonApiResource apiResource = (JsonApiResource) annotation;
-				return apiResource.type();
+				return apiResource.value();
 			}
 		}
 		if (allowNonResourceBaseClass) {

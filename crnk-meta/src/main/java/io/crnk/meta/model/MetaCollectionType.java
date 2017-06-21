@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "meta/collectionType")
+@JsonApiResource("meta/collectionType")
 public abstract class MetaCollectionType extends MetaType {
 
 	@JsonIgnore

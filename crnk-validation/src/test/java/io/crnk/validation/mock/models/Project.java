@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 
-@JsonApiResource(type = "projects")
+@JsonApiResource("projects")
 @ComplexValid
 public class Project {
 

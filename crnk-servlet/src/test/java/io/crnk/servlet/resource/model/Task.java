@@ -21,7 +21,7 @@ import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 public class Task {
 
 	@JsonApiId

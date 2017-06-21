@@ -4,7 +4,7 @@ import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 
-@JsonApiResource(type = "node-comments")
+@JsonApiResource("node-comments")
 public class NodeComment extends AbstractResource {
 
 	private String comment;

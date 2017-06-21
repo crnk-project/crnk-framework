@@ -9,7 +9,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 import java.util.Collections;
 import java.util.List;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 @JsonPropertyOrder(alphabetic = true)
 public class Task {
 

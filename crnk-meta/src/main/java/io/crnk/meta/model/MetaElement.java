@@ -11,7 +11,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "meta/element")
+@JsonApiResource("meta/element")
 public class MetaElement {
 
 	@JsonApiId

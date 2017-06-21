@@ -6,7 +6,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import javax.persistence.*;
 
 @Entity
-@JsonApiResource(type = "tablePerClassBase")
+@JsonApiResource("tablePerClassBase")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class JoinedTableBaseEntity {
 

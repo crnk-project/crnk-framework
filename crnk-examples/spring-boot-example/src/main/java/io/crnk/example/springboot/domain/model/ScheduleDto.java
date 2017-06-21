@@ -3,7 +3,7 @@ package io.crnk.example.springboot.domain.model;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "scheduleDto")
+@JsonApiResource("scheduleDto")
 public class ScheduleDto {
 
 	@JsonApiId

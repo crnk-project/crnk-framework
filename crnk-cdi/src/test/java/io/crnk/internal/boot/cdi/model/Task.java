@@ -6,7 +6,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 
 import java.util.List;
 
-@JsonApiResource(type = "tasks")
+@JsonApiResource("tasks")
 public class Task {
 
 	@JsonApiId

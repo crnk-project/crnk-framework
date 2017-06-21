@@ -15,7 +15,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
 
-@JsonApiResource(type = "meta/attribute")
+@JsonApiResource("meta/attribute")
 public class MetaAttribute extends MetaElement {
 
 	@JsonApiRelation(serialize = SerializeType.LAZY)

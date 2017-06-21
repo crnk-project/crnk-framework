@@ -5,7 +5,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-@JsonApiResource(type = "singleTableChild")
+@JsonApiResource("singleTableChild")
 @Entity
 public class SingleTableChildEntity extends SingleTableBaseEntity {
 

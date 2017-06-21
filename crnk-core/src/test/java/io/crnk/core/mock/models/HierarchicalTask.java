@@ -7,7 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 
 import java.util.List;
 
-@JsonApiResource(type = "hierarchicalTask")
+@JsonApiResource("hierarchicalTask")
 @JsonPropertyOrder(alphabetic = true)
 public class HierarchicalTask {
 

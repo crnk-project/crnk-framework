@@ -246,7 +246,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = new Resource();
-		data.setType(ClassUtils.getAnnotation(Task.class, JsonApiResource.class).get().type());
+		data.setType(ClassUtils.getAnnotation(Task.class, JsonApiResource.class).get().value());
 		newTaskBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -267,7 +267,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		// Create ProjectPolymorphic object
 		Document newProjectBody = new Document();
 		data = new Resource();
-		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().type();
+		String type = ClassUtils.getAnnotation(ProjectPolymorphic.class, JsonApiResource.class).get().value();
 		data.setType(type);
 		data.getRelationships().put("task", new Relationship(new ResourceIdentifier(taskIdOne.toString(), "tasks")));
 		data.getRelationships().put("tasks", new Relationship(Arrays.asList(new ResourceIdentifier(taskIdTwo.toString(), "tasks"), new ResourceIdentifier(taskIdThree.toString(), "tasks"))));

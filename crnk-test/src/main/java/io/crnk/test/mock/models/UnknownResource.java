@@ -4,7 +4,7 @@ package io.crnk.test.mock.models;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-@JsonApiResource(type = "unknown")
+@JsonApiResource("unknown")
 public class UnknownResource {
 
 	@JsonApiId

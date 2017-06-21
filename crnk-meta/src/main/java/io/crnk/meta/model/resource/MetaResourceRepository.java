@@ -4,7 +4,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 
-@JsonApiResource(type = "meta/resourceRepository")
+@JsonApiResource("meta/resourceRepository")
 public class MetaResourceRepository extends MetaElement {
 
 	private MetaResource resourceType;
