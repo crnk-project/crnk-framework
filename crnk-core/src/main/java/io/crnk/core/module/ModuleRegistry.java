@@ -32,6 +32,8 @@ import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -81,6 +83,8 @@ public class ModuleRegistry {
 	private ExceptionMapperRegistry exceptionMapperRegistry;
 
 	private RequestDispatcher requestDispatcher;
+
+	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
 	public ModuleRegistry() {
 		this(true);
@@ -197,6 +201,19 @@ public class ModuleRegistry {
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
 		this.serviceDiscovery = serviceDiscovery;
+	}
+
+	/**
+	 * Returns a {@link PropertiesProvider} instance
+	 *
+	 * @return property provider
+	 */
+	public PropertiesProvider getPropertiesProvider() {
+		return propertiesProvider;
+	}
+
+	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
+		this.propertiesProvider = propertiesProvider;
 	}
 
 	/**
