@@ -9,6 +9,7 @@ import io.crnk.core.engine.internal.information.repository.RelationshipRepositor
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.UntypedRelationshipRepository;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
@@ -24,8 +25,9 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
-		return RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class.isAssignableFrom(repositoryClass)
-				|| ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class).isPresent();
+		return !UntypedRelationshipRepository.class.isAssignableFrom(repositoryClass) && (
+				RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class.isAssignableFrom(repositoryClass)
+						|| ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class).isPresent());
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 			targetResourceInformation = new ResourceInformation(context.getTypeParser(), targetResourceClass, null, null, null);
 		}
 
-		return new RelationshipRepositoryInformationImpl(repositoryClass, sourceResourceInformation, targetResourceInformation);
+		return new RelationshipRepositoryInformationImpl(sourceResourceInformation, targetResourceInformation);
 	}
 
 	protected Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {

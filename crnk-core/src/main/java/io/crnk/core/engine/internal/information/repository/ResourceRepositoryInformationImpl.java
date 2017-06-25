@@ -12,13 +12,13 @@ public class ResourceRepositoryInformationImpl extends RepositoryInformationImpl
 	private String path;
 	private Map<String, RepositoryAction> actions;
 
-	public ResourceRepositoryInformationImpl(Class<?> repositoryClass, String path, ResourceInformation resourceInformation) {
-		this(repositoryClass, path, resourceInformation, new HashMap<String, RepositoryAction>());
+	public ResourceRepositoryInformationImpl(String path, ResourceInformation resourceInformation) {
+		this(path, resourceInformation, new HashMap<String, RepositoryAction>());
 	}
 
-	public ResourceRepositoryInformationImpl(Class<?> repositoryClass, String path,
+	public ResourceRepositoryInformationImpl(String path,
 											 ResourceInformation resourceInformation, Map<String, RepositoryAction> actions) {
-		super(repositoryClass, resourceInformation);
+		super(resourceInformation);
 		this.path = path;
 		this.actions = actions;
 	}

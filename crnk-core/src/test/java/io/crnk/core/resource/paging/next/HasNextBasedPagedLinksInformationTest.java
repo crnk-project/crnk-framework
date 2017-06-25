@@ -25,7 +25,7 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
 		HasNextPageTestRepository.clear();
 
 		super.setup();
-		RegistryEntry registryEntry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry registryEntry = resourceRegistry.getEntry(Task.class);
 		HasNextPageTestRepository repo = (HasNextPageTestRepository) registryEntry.getResourceRepository(null)
 				.getResourceRepository();
 

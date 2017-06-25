@@ -2,12 +2,12 @@ package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
 import io.crnk.legacy.registry.AnnotatedResourceEntry;
@@ -75,16 +75,16 @@ public class RegistryEntry {
 	}
 
 	@SuppressWarnings("unchecked")
-	public RelationshipRepositoryAdapter getRelationshipRepositoryForClass(Class<?> clazz, RepositoryMethodParameterProvider parameterProvider) {
+	public RelationshipRepositoryAdapter getRelationshipRepositoryForType(String targetResourceType, RepositoryMethodParameterProvider parameterProvider) {
 		ResponseRelationshipEntry foundRelationshipEntry = null;
 		for (ResponseRelationshipEntry relationshipEntry : relationshipEntries) {
-			if (clazz == relationshipEntry.getTargetAffiliation()) {
+			if (relationshipEntry.getTargetResourceType() == null || targetResourceType.equals(relationshipEntry.getTargetResourceType())) {
 				foundRelationshipEntry = relationshipEntry;
 				break;
 			}
 		}
 		if (foundRelationshipEntry == null) {
-			throw new RelationshipRepositoryNotFoundException(resourceInformation.getResourceClass(), clazz);
+			throw new RelationshipRepositoryNotFoundException(resourceInformation.getResourceType(), targetResourceType);
 		}
 
 		Object repoInstance;
@@ -161,5 +161,9 @@ public class RegistryEntry {
 	@Override
 	public int hashCode() {
 		return Objects.hash(repositoryInformation, resourceInformation, resourceEntry, relationshipEntries, moduleRegistry, parentRegistryEntry);
+	}
+
+	public ResourceRepositoryAdapter getResourceRepository() {
+		return getResourceRepository(null);
 	}
 }

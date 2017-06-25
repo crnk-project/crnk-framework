@@ -1,22 +1,14 @@
 package io.crnk.rs;
 
-import java.util.Map;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.SecurityContext;
-
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
@@ -30,6 +22,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Map;
 
 public class JaxrsModuleTest {
 
@@ -55,6 +51,11 @@ public class JaxrsModuleTest {
 			@Override
 			public TypeParser getTypeParser() {
 				return moduleRegistry.getTypeParser();
+			}
+
+			@Override
+			public InformationBuilder builder() {
+				return new DefaultInformationBuilder(moduleRegistry.getTypeParser());
 			}
 		};
 	}

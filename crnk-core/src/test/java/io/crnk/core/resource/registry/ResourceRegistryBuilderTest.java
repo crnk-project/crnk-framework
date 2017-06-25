@@ -114,7 +114,7 @@ public class ResourceRegistryBuilderTest {
 
 		assertThat(entry.getResourceInformation().getResourceClass()).isEqualTo(ResourceWithoutRepository.class);
 		assertThat(entry.getResourceRepository(null)).isExactlyInstanceOf(ResourceRepositoryAdapter.class);
-		assertThat(entry.getRelationshipRepositoryForClass(Project.class, null)).isExactlyInstanceOf(RelationshipRepositoryAdapter.class);
+		assertThat(entry.getRelationshipRepositoryForType("projects", null)).isExactlyInstanceOf(RelationshipRepositoryAdapter.class);
 	}
 
 	@Test

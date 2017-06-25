@@ -40,11 +40,14 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 	}
 
 	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map) {
-		RegistryEntry entry = resourceRegistry.findEntry(querySpec.getResourceClass());
-		if (entry == null) {
-			throw new RepositoryNotFoundException(querySpec.getResourceClass());
+		String resourceType = querySpec.getResourceType();
+		if (resourceType == null) {
+			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
+			if (entry == null) {
+				throw new RepositoryNotFoundException(querySpec.getResourceClass());
+			}
+			resourceType = entry.getResourceInformation().getResourceType();
 		}
-		String resourceType = entry.getResourceInformation().getResourceType();
 
 		serializeFilters(querySpec, resourceType, map);
 		serializeSorting(querySpec, resourceType, map);

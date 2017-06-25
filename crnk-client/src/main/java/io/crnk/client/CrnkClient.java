@@ -1,11 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -26,6 +20,7 @@ import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.module.ClientModule;
 import io.crnk.client.module.HttpAdapterAware;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -42,10 +37,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResponseRelationshipEntry;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
@@ -61,10 +53,18 @@ import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Client implementation giving access to JSON API repositories using stubs.
  */
 public class CrnkClient {
+
+	private final ServiceUrlProvider serviceUrlProvider;
 
 	private HttpAdapter httpAdapter;
 
@@ -99,6 +99,8 @@ public class CrnkClient {
 		moduleRegistry = new ModuleRegistry(false);
 
 		moduleRegistry.addModule(new ClientModule());
+
+		this.serviceUrlProvider = serviceUrlProvider;
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry, serviceUrlProvider);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
@@ -226,7 +228,7 @@ public class CrnkClient {
 			}
 		};
 		ResourceRepositoryInformation repositoryInformation =
-				new ResourceRepositoryInformationImpl(repositoryStub.getClass(), resourceInformation.getResourceType(),
+				new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
 						resourceInformation);
 		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
@@ -240,15 +242,15 @@ public class CrnkClient {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void allocateRepositoryRelations(RegistryEntry registryEntry, boolean allocateRelated,
-			List<ResponseRelationshipEntry> relationshipEntries) {
+											 List<ResponseRelationshipEntry> relationshipEntries) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
 		for (ResourceField relationshipField : relationshipFields) {
 			final Class<?> targetClass = relationshipField.getElementType();
-			Class<?> resourceClass = resourceInformation.getResourceClass();
+			final String targetResourceType = relationshipField.getOppositeResourceType();
 
 			final RelationshipRepositoryStubImpl relationshipRepositoryStub =
-					new RelationshipRepositoryStubImpl(this, resourceClass, targetClass, resourceInformation, urlBuilder);
+					new RelationshipRepositoryStubImpl(this, resourceInformation.getResourceClass(), targetClass, resourceInformation, urlBuilder);
 			RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder =
 					new RepositoryInstanceBuilder<RelationshipRepository>(null, null) {
 
@@ -261,8 +263,8 @@ public class CrnkClient {
 					new DirectResponseRelationshipEntry(relationshipRepositoryInstanceBuilder) {
 
 						@Override
-						public Class<?> getTargetAffiliation() {
-							return targetClass;
+						public String getTargetResourceType() {
+							return targetResourceType;
 						}
 					};
 			relationshipEntries.add(relationshipEntry);
@@ -299,7 +301,7 @@ public class CrnkClient {
 		ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
 		InvocationHandler invocationHandler =
 				new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-		return (R) Proxy.newProxyInstance(classLoader, new Class[] {repositoryInterfaceClass, ResourceRepositoryV2.class},
+		return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepositoryV2.class},
 				invocationHandler);
 	}
 
@@ -335,6 +337,27 @@ public class CrnkClient {
 	}
 
 	/**
+	 * Generic access using {@link Resource} class without type mapping.
+	 */
+	public ResourceRepositoryV2<Resource, String> getRepositoryForPath(String resourceType) {
+		init();
+
+		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null);
+		return new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder);
+	}
+
+	/**
+	 * Generic access using {@link Resource} class without type mapping.
+	 */
+	public RelationshipRepositoryV2<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType, String targetResourceType) {
+		init();
+
+		ResourceInformation sourceResourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null);
+		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
+	}
+
+
+	/**
 	 * @deprecated make use of getRepositoryForType()
 	 */
 	@Deprecated
@@ -355,9 +378,10 @@ public class CrnkClient {
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
 
-		RegistryEntry entry = resourceRegistry.findEntry(sourceClass);
+		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
+		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
 
-		RelationshipRepositoryAdapter repositoryAdapter = entry.getRelationshipRepositoryForClass(targetClass, null);
+		RelationshipRepositoryAdapter repositoryAdapter = sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
 		return (RelationshipRepositoryStub<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
 	}
 
@@ -372,9 +396,10 @@ public class CrnkClient {
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
 
-		RegistryEntry entry = resourceRegistry.findEntry(sourceClass);
+		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
+		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
 
-		RelationshipRepositoryAdapter repositoryAdapter = entry.getRelationshipRepositoryForClass(targetClass, null);
+		RelationshipRepositoryAdapter repositoryAdapter = sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
 		return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
 	}
 
@@ -451,7 +476,7 @@ public class CrnkClient {
 
 				@Override
 				public ServiceUrlProvider getServiceUrlProvider() {
-					return moduleRegistry.getResourceRegistry().getServiceUrlProvider();
+					return serviceUrlProvider;
 				}
 
 				@Override
@@ -470,10 +495,14 @@ public class CrnkClient {
 		return documentMapper;
 	}
 
+	public ServiceUrlProvider getServiceUrlProvider() {
+		return serviceUrlProvider;
+	}
+
 	class ClientResourceRegistry extends ResourceRegistryImpl {
 
 		public ClientResourceRegistry(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider) {
-			super(moduleRegistry, serviceUrlProvider);
+			super(new DefaultResourceRegistryPart(moduleRegistry), moduleRegistry, serviceUrlProvider);
 		}
 
 		@Override

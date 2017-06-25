@@ -45,14 +45,16 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 
 	private final ControllerRegistry controllerRegistry;
 	private final ExceptionMapperRegistry exceptionMapperRegistry;
+	private final ServiceUrlProvider serviceUrlProvider;
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private ModuleRegistry moduleRegistry;
 
 	private QueryAdapterBuilder queryAdapterBuilder;
 
-	public HttpRequestProcessorImpl(ModuleRegistry moduleRegistry, ControllerRegistry controllerRegistry,
+	public HttpRequestProcessorImpl(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider, ControllerRegistry controllerRegistry,
 									ExceptionMapperRegistry exceptionMapperRegistry, QueryAdapterBuilder queryAdapterBuilder) {
 		this.controllerRegistry = controllerRegistry;
+		this.serviceUrlProvider = serviceUrlProvider;
 		this.moduleRegistry = moduleRegistry;
 		this.exceptionMapperRegistry = exceptionMapperRegistry;
 		this.queryAdapterBuilder = queryAdapterBuilder;
@@ -64,8 +66,6 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 	@Override
 	public void process(HttpRequestContextBase requestContextBase) throws IOException {
 		HttpRequestContextBaseAdapter requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
-		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
-		ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
 		try {
 			if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 				((HttpRequestContextProvider) serviceUrlProvider).onRequestStarted(requestContext);

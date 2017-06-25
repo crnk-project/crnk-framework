@@ -1,4 +1,4 @@
-package io.crnk.core.repository.mock;
+package io.crnk.core.engine.repository.mock;
 
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 

@@ -191,7 +191,7 @@ public class CrnkBootTest {
 		boot.setDefaultServiceUrlProvider(serviceUrlProvider);
 		boot.boot();
 		Assert.assertEquals(serviceUrlProvider, boot.getDefaultServiceUrlProvider());
-		Assert.assertEquals(serviceUrlProvider, boot.getResourceRegistry().getServiceUrlProvider());
+		Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
 		Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
 	}
 
@@ -202,7 +202,7 @@ public class CrnkBootTest {
 		ServiceUrlProvider serviceUrlProvider = Mockito.mock(ServiceUrlProvider.class);
 		boot.setServiceUrlProvider(serviceUrlProvider);
 		boot.boot();
-		Assert.assertEquals(serviceUrlProvider, boot.getResourceRegistry().getServiceUrlProvider());
+		Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
 	}
 
 	@Test
@@ -221,7 +221,7 @@ public class CrnkBootTest {
 		boot.setPropertiesProvider(propertiesProvider);
 		boot.boot();
 
-		ServiceUrlProvider serviceUrlProvider = boot.getResourceRegistry().getServiceUrlProvider();
+		ServiceUrlProvider serviceUrlProvider = boot.getServiceUrlProvider();
 		Assert.assertTrue(serviceUrlProvider instanceof ConstantServiceUrlProvider);
 		Assert.assertEquals("http://something", serviceUrlProvider.getUrl());
 	}
@@ -256,7 +256,7 @@ public class CrnkBootTest {
 		RequestDispatcher requestDispatcher = boot.getRequestDispatcher();
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		RegistryEntry taskEntry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
 		Assert.assertNotEquals(0, taskEntry.getRelationshipEntries().size());
 		ResourceRepositoryAdapter<?, ?> repositoryAdapter = taskEntry.getResourceRepository(null);
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());

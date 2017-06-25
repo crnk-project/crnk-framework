@@ -1,5 +1,7 @@
 package io.crnk.core.resource.registry.repository;
 
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -25,10 +27,10 @@ public class AnnotatedRelationshipEntryBuilderTest {
 
 
 		// WHEN
-		final Class<?> targetClass = builder.getTargetAffiliation();
+		final String targetResourceType = builder.getTargetResourceType();
 
 		// THEN
-		assertThat(targetClass).isEqualTo(Character.class);
+		assertThat(targetResourceType).isEqualTo("projects");
 	}
 
 	@Test
@@ -46,10 +48,10 @@ public class AnnotatedRelationshipEntryBuilderTest {
 		);
 
 		// WHEN
-		final Class<?> targetClass = builder.getTargetAffiliation();
+		final String targetResourceType = builder.getTargetResourceType();
 
 		// THEN
-		assertThat(targetClass).isEqualTo(Character.class);
+		assertThat(targetResourceType).isEqualTo("projects");
 
 	}
 
@@ -68,14 +70,14 @@ public class AnnotatedRelationshipEntryBuilderTest {
 
 		// WHEN
 		try {
-			builder.getTargetAffiliation();
+			builder.getTargetResourceType();
 		} catch (Exception e) {
 			// THEN
 			assertThat(e).isInstanceOf(IllegalArgumentException.class);
 		}
 	}
 
-	@JsonApiRelationshipRepository(source = String.class, target = Character.class)
+	@JsonApiRelationshipRepository(source = Task.class, target = Project.class)
 	public static class SimpleRelationshipRepository {
 
 	}

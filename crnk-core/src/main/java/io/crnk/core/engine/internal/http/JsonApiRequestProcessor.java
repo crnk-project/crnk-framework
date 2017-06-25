@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -11,17 +7,19 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.internal.dispatcher.path.ActionPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 public class JsonApiRequestProcessor implements HttpRequestProcessor {
 
@@ -54,13 +52,7 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 			RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
 
-			ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
-
 			String path = requestContext.getPath();
-
-			if (serviceUrlProvider instanceof HttpRequestContextProvider) {
-				((HttpRequestContextProvider) serviceUrlProvider).onRequestStarted(requestContext);
-			}
 
 			JsonPath jsonPath = new PathBuilder(resourceRegistry).build(path);
 			Map<String, Set<String>> parameters = requestContext.getRequestParameters();
@@ -69,8 +61,7 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 			if (jsonPath instanceof ActionPath) {
 				// inital implementation, has to improve
 				requestDispatcher.dispatchAction(path, method, parameters);
-			}
-			else if (jsonPath != null) {
+			} else if (jsonPath != null) {
 				byte[] requestBody = requestContext.getRequestBody();
 
 				Document document = null;
@@ -83,8 +74,7 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 				Response crnkResponse = requestDispatcher
 						.dispatchRequest(path, method, parameters, parameterProvider, document);
 				setResponse(requestContext, crnkResponse);
-			}
-			else {
+			} else {
 				// no repositories invoked, we do nothing
 			}
 		}

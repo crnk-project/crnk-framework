@@ -8,9 +8,9 @@ public class RelationshipRepositoryInformationImpl extends RepositoryInformation
 
 	private ResourceInformation sourceResourceInformation;
 
-	public RelationshipRepositoryInformationImpl(Class<?> repositoryClass, ResourceInformation sourceResourceInformation,
+	public RelationshipRepositoryInformationImpl(ResourceInformation sourceResourceInformation,
 												 ResourceInformation targetResourceInformation) {
-		super(repositoryClass, targetResourceInformation);
+		super(targetResourceInformation);
 		this.sourceResourceInformation = sourceResourceInformation;
 	}
 

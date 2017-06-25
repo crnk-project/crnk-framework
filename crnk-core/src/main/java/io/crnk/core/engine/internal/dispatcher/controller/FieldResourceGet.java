@@ -11,7 +11,6 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -50,11 +49,8 @@ public class FieldResourceGet extends ResourceIncludeField {
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 
-		Class<?> relationshipFieldClass = ClassUtils
-				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
-
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
-				.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);
+				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
 		JsonApiResponse entities;
 		if (Iterable.class.isAssignableFrom(baseRelationshipFieldClass)) {
 			entities = relationshipRepositoryForClass.findManyTargets(castedResourceId, relationshipField, queryAdapter);

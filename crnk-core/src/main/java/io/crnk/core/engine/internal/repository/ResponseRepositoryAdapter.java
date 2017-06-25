@@ -1,18 +1,7 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
-import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.filter.RepositoryFilterContext;
-import io.crnk.core.engine.filter.RepositoryLinksFilterChain;
-import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
-import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
-import io.crnk.core.engine.filter.RepositoryResultFilterChain;
+import io.crnk.core.engine.filter.*;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
@@ -29,12 +18,17 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -72,8 +66,7 @@ public abstract class ResponseRepositoryAdapter {
 		boolean isCollection = result instanceof Iterable;
 		if (isCollection) {
 			resources = (Iterable<?>) result;
-		}
-		else {
+		} else {
 			resources = Collections.singletonList(result);
 		}
 		Iterable<?> filteredResult = filterResult(resources, requestSpec);
@@ -83,14 +76,12 @@ public abstract class ResponseRepositoryAdapter {
 		Object resultEntity;
 		if (isCollection) {
 			resultEntity = filteredResult;
-		}
-		else {
+		} else {
 			Iterator<?> iterator = filteredResult.iterator();
 			if (iterator.hasNext()) {
 				resultEntity = iterator.next();
 				PreconditionUtil.assertFalse("expected unique result", iterator.hasNext());
-			}
-			else {
+			} else {
 				resultEntity = null;
 			}
 		}
@@ -115,12 +106,10 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).metaRepositoryAvailable()) {
 				return ((AnnotatedRepositoryAdapter) repository).getMetaInformation(resources, queryAdapter);
 			}
-		}
-		else if (repository instanceof MetaRepositoryV2) {
+		} else if (repository instanceof MetaRepositoryV2) {
 			return ((MetaRepositoryV2) repository)
 					.getMetaInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
-		}
-		else if (repository instanceof MetaRepository) {
+		} else if (repository instanceof MetaRepository) {
 			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
 		}
 		return null;
@@ -158,12 +147,10 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).linksRepositoryAvailable()) {
 				linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 			}
-		}
-		else if (repository instanceof LinksRepositoryV2) {
+		} else if (repository instanceof LinksRepositoryV2) {
 			linksInformation = ((LinksRepositoryV2) repository)
 					.getLinksInformation(resources, requestSpec.getQuerySpec(getResourceInformation(repository)));
-		}
-		else if (repository instanceof LinksRepository) {
+		} else if (repository instanceof LinksRepository) {
 			linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}
 		// everything deprecated anyway
@@ -171,7 +158,7 @@ public abstract class ResponseRepositoryAdapter {
 	}
 
 	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
-			RepositoryRequestSpec requestSpec) {
+													RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
 		if (queryAdapter instanceof QuerySpecAdapter && (queryAdapter.getOffset() != 0 || queryAdapter.getLimit() != null)) {
@@ -182,7 +169,7 @@ public abstract class ResponseRepositoryAdapter {
 	}
 
 	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
-			QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+														QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
 		if (linksInformation == null) {
 			// use default implementation if no link information
 			// provided by resource
@@ -230,7 +217,7 @@ public abstract class ResponseRepositoryAdapter {
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation pagedLinksInformation, Long total, Boolean
 			isNextPageAvailable, QueryAdapter queryAdapter,
-			RepositoryRequestSpec requestSpec, boolean hasResults) {
+											  RepositoryRequestSpec requestSpec, boolean hasResults) {
 		long pageSize = queryAdapter.getLimit().longValue();
 		long offset = queryAdapter.getOffset();
 		long currentPage = offset / pageSize;
@@ -275,8 +262,7 @@ public abstract class ResponseRepositoryAdapter {
 		ResourceInformation rootInfo;
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();
-		}
-		else {
+		} else {
 			rootInfo = relationshipField.getParentResourceInformation();
 		}
 		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
@@ -300,8 +286,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetMetaInformation(repository, resources, context.getRequest());
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterMeta(context, resources, this);
@@ -324,8 +309,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetLinksInformation(repository, resources, context.getRequest());
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterLinks(context, resources, this);
@@ -348,8 +332,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return result;
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterResult(context, this);
@@ -366,8 +349,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterRequest(context, this);
@@ -386,8 +368,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterBulkRequest(context, this);

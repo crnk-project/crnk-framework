@@ -1,7 +1,5 @@
 package io.crnk.core.boot;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -10,9 +8,9 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
@@ -22,7 +20,10 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -49,6 +50,9 @@ import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -172,7 +176,7 @@ public class CrnkBoot {
 		setupObjectMapper();
 		addModules();
 		setupComponents();
-		resourceRegistry = new ResourceRegistryImpl(moduleRegistry, serviceUrlProvider);
+		setupResourceRegistry();
 
 		moduleRegistry.init(objectMapper);
 
@@ -181,6 +185,26 @@ public class CrnkBoot {
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
 
+	}
+
+	private void setupResourceRegistry() {
+		Map<String, ResourceRegistryPart> registryParts = moduleRegistry.getRegistryParts();
+
+		ResourceRegistryPart rootPart;
+		if (registryParts.isEmpty()) {
+			rootPart = new DefaultResourceRegistryPart();
+		} else {
+			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
+			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
+				hierarchialPart.putPart(entry.getKey(), entry.getValue());
+			}
+			if (!registryParts.containsKey("")) {
+				registryParts.put("", new DefaultResourceRegistryPart());
+			}
+			rootPart = hierarchialPart;
+		}
+
+		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry, serviceUrlProvider);
 	}
 
 	private void setupObjectMapper() {
@@ -206,12 +230,11 @@ public class CrnkBoot {
 		QueryAdapterBuilder queryAdapterBuilder;
 		if (queryParamsBuilder != null) {
 			queryAdapterBuilder = new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		}
-		else {
+		} else {
 			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		}
 
-		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
+		return new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
 	}
 
 	public DocumentMapper getDocumentMapper() {
@@ -269,23 +292,19 @@ public class CrnkBoot {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, resRepository.getClass());
 			Class resourceClass = typeArgs[0];
 			module.addRepository(resourceClass, resRepository);
-		}
-		else if (repository instanceof RelationshipRepository) {
+		} else if (repository instanceof RelationshipRepository) {
 			RelationshipRepository relRepository = (RelationshipRepository) repository;
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, relRepository.getClass());
 			Class sourceResourceClass = typeArgs[0];
 			Class targetResourceClass = typeArgs[2];
 			module.addRepository(sourceResourceClass, targetResourceClass, relRepository);
-		}
-		else if (repository instanceof ResourceRepositoryV2) {
+		} else if (repository instanceof ResourceRepositoryV2) {
 			ResourceRepositoryV2<?, ?> resRepository = (ResourceRepositoryV2<?, ?>) repository;
 			module.addRepository(resRepository.getResourceClass(), resRepository);
-		}
-		else if (repository instanceof RelationshipRepositoryV2) {
+		} else if (repository instanceof RelationshipRepositoryV2) {
 			RelationshipRepositoryV2<?, ?, ?, ?> relRepository = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
 			module.addRepository(relRepository.getSourceResourceClass(), relRepository.getTargetResourceClass(), relRepository);
-		}
-		else {
+		} else {
 			throw new IllegalStateException(repository.toString());
 		}
 	}
@@ -304,8 +323,7 @@ public class CrnkBoot {
 			if (resourceDefaultDomain != null) {
 				String serviceUrl = buildServiceUrl(resourceDefaultDomain, webPathPrefix);
 				serviceUrlProvider = new ConstantServiceUrlProvider(serviceUrl);
-			}
-			else {
+			} else {
 				// serviceUrl is obtained from incoming request context
 				serviceUrlProvider = defaultServiceUrlProvider;
 			}

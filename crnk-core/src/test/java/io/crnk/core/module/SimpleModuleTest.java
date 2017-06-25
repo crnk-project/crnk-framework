@@ -18,7 +18,9 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.ResourceLookup;
@@ -243,7 +245,7 @@ public class SimpleModuleTest {
 
 		@Override
 		public ResourceRegistry getResourceRegistry() {
-			return new ResourceRegistryImpl(null, null);
+			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(null), null, null);
 		}
 
 		@Override
@@ -274,6 +276,11 @@ public class SimpleModuleTest {
 		@Override
 		public ObjectMapper getObjectMapper() {
 			return null;
+		}
+
+		@Override
+		public void addRegistryPart(String prefix, ResourceRegistryPart part) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

@@ -1,5 +1,6 @@
 package io.crnk.legacy.queryParams;
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
@@ -10,6 +11,7 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.DefaultResourceLookup;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -27,33 +29,36 @@ public class DefaultQueryParamsSerializerTest {
 
 	private QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 	private JsonApiUrlBuilder urlBuilder;
-	private DefaultResourceLookup resourceLookup;
-	private ResourceRegistryBuilder resourceRegistryBuilder;
 	private ResourceRegistry resourceRegistry;
 
 	@Before
 	public void setup() {
-		JsonServiceLocator jsonServiceLocator = new SampleJsonServiceLocator();
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(
-				new ResourceFieldNameTransformer());
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		resourceRegistryBuilder = new ResourceRegistryBuilder(moduleRegistry, jsonServiceLocator, resourceInformationBuilder);
-		resourceLookup = new DefaultResourceLookup(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE);
-		resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, new ConstantServiceUrlProvider("http://127.0.0.1"));
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
+		boot.boot();
+		resourceRegistry = boot.getResourceRegistry();
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 	}
 
 	@Test
 	public void testHttpsSchema() {
-		ResourceRegistry resourceRegistry = resourceRegistryBuilder.build(resourceLookup, new ModuleRegistry(), new ConstantServiceUrlProvider("https://127.0.0.1"));
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.boot();
+		urlBuilder = new JsonApiUrlBuilder( boot.getResourceRegistry());
 		check("https://127.0.0.1/tasks/", null, new QueryParams());
 	}
 
 	@Test
 	public void testPort() {
-		ResourceRegistry resourceRegistry = resourceRegistryBuilder.build(resourceLookup, new ModuleRegistry(), new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.boot();
+		resourceRegistry = boot.getResourceRegistry();
+		urlBuilder = new JsonApiUrlBuilder( boot.getResourceRegistry());
 		check("https://127.0.0.1:1234/tasks/", null, new QueryParams());
 	}
 

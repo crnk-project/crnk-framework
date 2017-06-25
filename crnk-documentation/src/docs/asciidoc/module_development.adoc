@@ -60,7 +60,7 @@ various Crnk integrations, like the CrnkFeature. Modules have access to that
 ## Let a module hook into the Crnk HTTP client implementation
 
 Modules for the Crnk client can additionally implement `HttpAdapterAware`. It gives
-the module access to the underlying HTTP client implementation and allows abitrary
+the module access to the underlying HTTP client implementation and allows arbitrary
 customizations of it. Have a look at the Crnk client documentation for more information.
 
 ## Implement a custom integration
@@ -76,5 +76,75 @@ necessary is already be provided by `crnk-core`. The steps include:
   `HttpRequestContextBase`.
 - you may want to further implement `SecurityProvider`, `TransactionRunner`
   and `PropertiesProvider` to interface with that particular systems.
+
+
+## Create repositories at runtime
+
+Repositories are usually created at compile-time, either by making use of the various annotations or a module
+such as the ´JpaModule´. However, the module API also allows the creation of repositories at runtime.
+There are two complementary mechanisms in place to achieve this and outlined in the next two sections.
+
+
+### Implementing repositories dynamically at runtime
+
+A repository is implemented by providing a repository implementation and information about it. Information
+includes, most importantly, naming and a list of attributes. Such information
+is provided by a ´RepositoryInformationBuilder´:
+
+[source]
+.DynamicResourceRepositoryInformationBuilder.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepositoryInformationBuilder.java[tags=docs]
+----
+
+Since attributes are determined at runtime, usually no class will be present to represent that resource.
+In such cases there are three possibilities:
+
+- Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
+  pattern as for any compile-time repository.
+- Make use of the `Resource` class. It is the JSON API resource presentation within the Crnk engine.
+- Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
+  each `ResourceField` to specify how to read and write attributes.
+
+In the following example we make use of the second option:
+
+[source]
+.DynamicResourceRepository.java
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs1]
+...
+include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs2]
+----
+
+Finally the implemented code can be registered with a Module to Crnk:
+
+[source]
+.DynamicModule
+----
+include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicModule.java[tags=docs]
+----
+
+Have a look at the complete example
+in https://github.com/crnk-project/crnk-framework/tree/master/crnk-client/src/main/java/io/crnk/client/dynamic[`crnk-client`].
+There is a further example test case and relationship repository.
+
+### Registering repositories at runtime
+
+There are two possibilities to register a new repository at runtime:
+
+- by using a `Module` and invoking `ModuleContext.addRepository` as done in the previous section.
+- by implementing a `ResourceRegistryPart` and invoking `ModuleContext.addResourceRegistry`.
+
+The first is well suited if there is a predefined set of repositories that need to be registered
+(like a fixed set of JPA entities in the `JpaModule`). The later is suited for fully dynamic use cases where
+the set of repositories can change over time (like tables in a database or tasks in an activiti instance). In this
+case the repositories no longer need registration. Instead the custom `ResourceRegistryPart` implementation always
+provides an up-to-date set of repositories that is used by the Crnk engine.
+
+
+
+
+
+
 
 

@@ -283,7 +283,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		assertNotNull(projectPolymorphic.getRelationships().get("task").getSingleData().get());
 		assertNotNull(projectPolymorphic.getRelationships().get("tasks"));
 
-		ProjectPolymorphicRepository resourceRepository = (ProjectPolymorphicRepository) resourceRegistry.findEntry(ProjectPolymorphic.class).getResourceRepository(null).getResourceRepository();
+		ProjectPolymorphicRepository resourceRepository = (ProjectPolymorphicRepository) resourceRegistry.getEntry(ProjectPolymorphic.class).getResourceRepository(null).getResourceRepository();
 		ProjectPolymorphic projectPolymorphicObj = resourceRepository.findOne(projectId, null);
 		assertEquals(2, projectPolymorphicObj.getTasks().size());
 

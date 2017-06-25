@@ -1,9 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapterResponse;
@@ -17,10 +13,15 @@ import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ClientStubBaseTest {
 
@@ -41,7 +42,7 @@ public class ClientStubBaseTest {
 
 		urlBuilder = Mockito.mock(JsonApiUrlBuilder.class);
 
-		stub = new ClientStubBase(client, urlBuilder);
+		stub = new ClientStubBase(client, urlBuilder, Task.class);
 	}
 
 	@Test

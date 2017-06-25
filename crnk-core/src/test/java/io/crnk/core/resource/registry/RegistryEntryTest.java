@@ -41,7 +41,7 @@ public class RegistryEntryTest {
 				(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class))));
 
 		// WHEN
-		RelationshipRepositoryAdapter<Task, ?, ?, ?> relationshipRepository = sut.getRelationshipRepositoryForClass(Project.class, null);
+		RelationshipRepositoryAdapter<Task, ?, ?, ?> relationshipRepository = sut.getRelationshipRepositoryForType("projects", null);
 
 		// THEN
 		assertThat(relationshipRepository).isExactlyInstanceOf(RelationshipRepositoryAdapter.class);
@@ -58,13 +58,13 @@ public class RegistryEntryTest {
 		expectedException.expect(RelationshipRepositoryNotFoundException.class);
 
 		// WHEN
-		sut.getRelationshipRepositoryForClass(User.class, null);
+		sut.getRelationshipRepositoryForType("users", null);
 	}
 
 	private <T> ResourceRepositoryInformation newRepositoryInformation(Class<T> repositoryClass, String path) {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		TypeParser typeParser = moduleRegistry.getTypeParser();
-		return new ResourceRepositoryInformationImpl(null, path, new ResourceInformation(typeParser, Task.class, path, null, null));
+		return new ResourceRepositoryInformationImpl( path, new ResourceInformation(typeParser, Task.class, path, null, null));
 	}
 
 	@Test

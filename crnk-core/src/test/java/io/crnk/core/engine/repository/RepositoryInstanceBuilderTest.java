@@ -1,4 +1,4 @@
-package io.crnk.core.repository;
+package io.crnk.core.engine.repository;
 
 import io.crnk.core.exception.RepositoryInstanceNotFoundException;
 import io.crnk.core.mock.repository.TaskRepository;

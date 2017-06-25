@@ -1,13 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -24,6 +16,8 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
+
+import java.util.*;
 
 public class IncludeLookupUtil {
 
@@ -51,8 +45,7 @@ public class IncludeLookupUtil {
 
 		if (includeAutomaticallyOverwrite) {
 			return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-		}
-		else if (includeAutomatically) {
+		} else if (includeAutomatically) {
 			return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 		}
 		return LookupIncludeBehavior.NONE;
@@ -101,15 +94,13 @@ public class IncludeLookupUtil {
 		}
 	}
 
-	// TODO proper super type information
 	private ResourceInformation getSuperInformation(ResourceInformation information) {
-		Class<?> resourceClass = information.getResourceClass();
-		Class<?> superclass = resourceClass.getSuperclass();
-		if (superclass == Object.class) {
+		String superclass = information.getSuperResourceType();
+		if (superclass == null) {
 			return null;
 		}
 		boolean hasSuperType = resourceRegistry.hasEntry(superclass);
-		return hasSuperType ? resourceRegistry.findEntry(superclass).getResourceInformation() : null;
+		return hasSuperType ? resourceRegistry.getEntry(superclass).getResourceInformation() : null;
 	}
 
 	public List<Resource> filterByType(Collection<Resource> resources, ResourceInformation resourceInformation) {
@@ -146,8 +137,7 @@ public class IncludeLookupUtil {
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		}
-		else {
+		} else {
 			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
 		}
 	}
@@ -156,8 +146,7 @@ public class IncludeLookupUtil {
 		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
 		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
 			return contains(querySpec, toPathList(fieldPath, 0));
-		}
-		else {
+		} else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
 				List<String> path = toPathList(fieldPath, i);
 

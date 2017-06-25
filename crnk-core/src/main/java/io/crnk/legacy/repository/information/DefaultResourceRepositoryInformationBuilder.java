@@ -10,6 +10,7 @@ import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInf
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.UntypedResourceRepository;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
@@ -31,7 +32,8 @@ public class DefaultResourceRepositoryInformationBuilder implements RepositoryIn
 		boolean legacyRepo = ResourceRepository.class.isAssignableFrom(repositoryClass);
 		boolean interfaceRepo = ResourceRepositoryV2.class.isAssignableFrom(repositoryClass);
 		boolean anontationRepo = ClassUtils.getAnnotation(repositoryClass, JsonApiResourceRepository.class).isPresent();
-		return legacyRepo || interfaceRepo || anontationRepo;
+		boolean untypedRepo = UntypedResourceRepository.class.isAssignableFrom(repositoryClass);
+		return (legacyRepo || interfaceRepo || anontationRepo) && !untypedRepo;
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class DefaultResourceRepositoryInformationBuilder implements RepositoryIn
 		ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
 		String path = getPath(resourceInformation, repository);
 
-		return new ResourceRepositoryInformationImpl(repositoryClass, path, resourceInformation, buildActions(repositoryClass));
+		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass));
 	}
 
 	protected Map<String, RepositoryAction> buildActions(Class<? extends Object> repositoryClass) {

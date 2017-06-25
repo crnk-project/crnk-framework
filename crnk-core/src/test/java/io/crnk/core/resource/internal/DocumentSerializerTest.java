@@ -5,19 +5,13 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.*;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +31,12 @@ public class DocumentSerializerTest {
 
 	@Before
 	public void setup() {
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
-		ResourceRegistryBuilder registryBuilder = new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
-		ResourceRegistry resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		boot.boot();
 
-		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build());
+		objectMapper = boot.getObjectMapper();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		reader = objectMapper.reader().forType(Document.class);
