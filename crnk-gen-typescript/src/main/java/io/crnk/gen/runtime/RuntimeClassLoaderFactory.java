@@ -32,7 +32,7 @@ public class RuntimeClassLoaderFactory {
 		this.project = project;
 	}
 
-	public ClassLoader createClassLoader(ClassLoader parentClassLoader, Map<String, Class<?>> sharedClasses) {
+	public URLClassLoader createClassLoader(ClassLoader parentClassLoader, Map<String, Class<?>> sharedClasses) {
 		Set<URL> classURLs = new HashSet<>(); // NOSONAR URL needed by URLClassLoader
 		classURLs.addAll(getProjectClassUrls());
 		classURLs.add(getPluginUrl());
