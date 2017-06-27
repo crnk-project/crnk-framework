@@ -1,6 +1,8 @@
 package io.crnk.core.repository;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
@@ -17,7 +19,7 @@ public class ResourceRepositoryBaseTest {
 
 	class TestRepository extends ResourceRepositoryBase<Task, Integer> {
 
-		protected TestRepository() {
+		TestRepository() {
 			super(Task.class);
 		}
 
@@ -31,6 +33,15 @@ public class ResourceRepositoryBaseTest {
 	public void setup() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setPropertiesProvider(new PropertiesProvider() {
+			@Override
+			public String getProperty(String key) {
+				if (key.equals(CrnkProperties.RETURN_404_ON_NULL)) {
+					return "true";
+				}
+				return null;
+			}
+		});
 		boot.boot();
 
 		repository = new TestRepository();
@@ -39,7 +50,7 @@ public class ResourceRepositoryBaseTest {
 
 	@Test(expected = ResourceNotFoundException.class)
 	public void checkThrowExceptionWhenResourceNotFound() {
-		repository.findOne(12, new QuerySpec(Task.class));
+		repository.findOne(-1, new QuerySpec(Task.class));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

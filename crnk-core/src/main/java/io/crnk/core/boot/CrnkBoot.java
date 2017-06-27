@@ -336,6 +336,10 @@ public class CrnkBoot {
 		this.objectMapper = objectMapper;
 	}
 
+	public PropertiesProvider getPropertiesProvider() {
+		return propertiesProvider;
+	}
+
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
 		checkNotConfiguredYet();
 		this.propertiesProvider = propertiesProvider;
