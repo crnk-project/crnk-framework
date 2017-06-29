@@ -1,7 +1,5 @@
 package io.crnk.core.boot;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -10,9 +8,9 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
@@ -49,6 +47,8 @@ import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.List;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -261,6 +261,7 @@ public class CrnkBoot {
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
 		moduleRegistry.addModule(module);
+		moduleRegistry.setPropertiesProvider(propertiesProvider);
 	}
 
 	private void setupRepository(SimpleModule module, Object repository) {
@@ -333,6 +334,10 @@ public class CrnkBoot {
 		checkNotConfiguredYet();
 		PreconditionUtil.assertNull("ObjectMapper already set", this.objectMapper);
 		this.objectMapper = objectMapper;
+	}
+
+	public PropertiesProvider getPropertiesProvider() {
+		return propertiesProvider;
 	}
 
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
