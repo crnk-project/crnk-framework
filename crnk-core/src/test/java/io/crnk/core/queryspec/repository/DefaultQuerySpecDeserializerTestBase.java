@@ -391,6 +391,25 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));
 	}
 
+	@Test
+	public void testGenericCast() throws InstantiationException, IllegalAccessException {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[id]", "12");
+		add(params, "filter[name]", "test");
+		add(params, "filter[completed]", "true");
+		deserializer.setIgnoreParseExceptions(false);
+		QuerySpec querySpec = deserializer.deserialize(taskInformation, params);
+		Assert.assertEquals(Task.class, querySpec.getResourceClass());
+		Assert.assertEquals(Arrays.asList("id"), querySpec.getFilters().get(2).getAttributePath());
+		Long id = querySpec.getFilters().get(2).getValue();
+		Assert.assertEquals(Long.valueOf(12), id);
+		String name = querySpec.getFilters().get(0).getValue();
+		Assert.assertEquals("test", name);
+		Boolean completed = querySpec.getFilters().get(1).getValue();
+		Assert.assertEquals(Boolean.TRUE, completed);
+		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));
+	}
+
 	@Test(expected = ParametersDeserializationException.class)
 	public void testFailOnParseException() throws InstantiationException, IllegalAccessException {
 		Map<String, Set<String>> params = new HashMap<>();

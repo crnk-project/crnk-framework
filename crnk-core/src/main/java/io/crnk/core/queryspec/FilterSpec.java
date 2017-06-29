@@ -125,8 +125,8 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 		this.operator = condition;
 	}
 
-	public Object getValue() {
-		return value;
+	public <T> T getValue() {
+		return (T) value;
 	}
 
 	public void setValue(Object value) {
