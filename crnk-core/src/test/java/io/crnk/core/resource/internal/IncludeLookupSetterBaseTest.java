@@ -24,18 +24,25 @@ import io.crnk.core.mock.models.HierarchicalTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 
 	private HierarchicalTask h;
+
 	private HierarchicalTask h0;
+
 	private HierarchicalTask h1;
+
 	private HierarchicalTask h11;
+
+	private PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
@@ -47,10 +54,10 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		RelationshipRepositoryAdapter relRepositoryTaskToProject = resourceRegistry.findEntry(Task.class).getRelationshipRepositoryForType("projects", null);
 		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.findEntry(Project.class).getRelationshipRepositoryForType("tasks", null);
 		ResourceRepositoryAdapter projectRepository = resourceRegistry.findEntry(Project.class).getResourceRepository(null);
-		ResourceRepositoryAdapter hierarchicalTaskRepository = resourceRegistry.findEntry(HierarchicalTask.class).getResourceRepository(null);
+		ResourceRepositoryAdapter hierarchicalTaskRepository =
+				resourceRegistry.findEntry(HierarchicalTask.class).getResourceRepository(null);
 
 		// setup test data
-
 		ResourceInformation taskInfo = resourceRegistry.findEntry(Task.class).getResourceInformation();
 		ResourceInformation projectInfo = resourceRegistry.findEntry(Project.class).getResourceInformation();
 		ResourceField includedTaskField = projectInfo.findRelationshipFieldByName("includedTask");
@@ -77,7 +84,8 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		deepIncludedProject.setId(2L);
 		projectRepository.create(project, null);
 		relRepositoryTaskToProject.setRelation(includedTask, deepIncludedProject.getId(), includedProjectField, null);
-		relRepositoryTaskToProject.addRelations(includedTask, Collections.singletonList(project.getId()), includedProjectsField, null);
+		relRepositoryTaskToProject
+				.addRelations(includedTask, Collections.singletonList(project.getId()), includedProjectsField, null);
 
 		// setup hierarchy of resources
 		h = new HierarchicalTask();
@@ -110,6 +118,50 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		hierarchicalTaskRepository.create(h11, null);
 
 	}
+
+	@Test
+	public void paginationMustOnlyHappenRootButNotInclusions() {
+		HierarchicalTask hDetached = new HierarchicalTask();
+		hDetached.setId(1L);
+		hDetached.setName("");
+
+		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
+		querySpec.setOffset(0L);
+		querySpec.setLimit(1L);
+		querySpec.includeRelation(Arrays.asList("children"));
+
+		Document document = mapper.toDocument(toResponse(hDetached), toAdapter(querySpec));
+
+		Relationship childrenRelationship = document.getSingleData().get().getRelationships().get("children");
+		List<ResourceIdentifier> childIds = childrenRelationship.getCollectionData().get();
+		Assert.assertEquals(2, childIds.size());
+	}
+
+	@Test
+	public void paginationMustHappenRootAndInclusions() {
+		Mockito.when(propertiesProvider.getProperty(Mockito.eq(CrnkProperties.INCLUDE_PAGING_ENABLED))).thenReturn("true");
+		setup();
+
+		HierarchicalTask hDetached = new HierarchicalTask();
+		hDetached.setId(1L);
+		hDetached.setName("");
+
+		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
+		querySpec.setOffset(0L);
+		querySpec.setLimit(1L);
+		querySpec.includeRelation(Arrays.asList("children"));
+
+		Document document = mapper.toDocument(toResponse(hDetached), toAdapter(querySpec));
+
+		Relationship childrenRelationship = document.getSingleData().get().getRelationships().get("children");
+		List<ResourceIdentifier> childIds = childrenRelationship.getCollectionData().get();
+		Assert.assertEquals(1, childIds.size());
+	}
+
+	protected final PropertiesProvider getPropertiesProvider() {
+		return propertiesProvider;
+	}
+
 
 	@Test
 	public void includeOneRelationLookup() throws Exception {

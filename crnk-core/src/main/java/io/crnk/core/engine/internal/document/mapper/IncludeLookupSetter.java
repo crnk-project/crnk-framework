@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -27,6 +28,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Nullable;
+import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,9 @@ public class IncludeLookupSetter {
 
 	private IncludeLookupUtil util;
 
+	// currently
+	private boolean allowPagination = false;
+
 	public IncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
 			PropertiesProvider propertiesProvider) {
 		this.resourceMapper = resourceMapper;
@@ -51,11 +56,21 @@ public class IncludeLookupSetter {
 		this.globalLookupIncludeBehavior = IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider);
 		IncludeBehavior includeBehavior = IncludeLookupUtil.getIncludeBehavior(propertiesProvider);
 		this.util = new IncludeLookupUtil(resourceRegistry, includeBehavior);
-
+		this.allowPagination = propertiesProvider != null && Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties
+				.INCLUDE_PAGING_ENABLED));
 	}
 
 	public void setIncludedElements(Document document, Object entity, QueryAdapter queryAdapter,
 			RepositoryMethodParameterProvider parameterProvider, Set<String> additionalEagerLoadedRelations) {
+
+		QueryAdapter inclusionQueryAdapter = queryAdapter;
+		if(!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && queryAdapter != null) {
+			// offset/limit cannot properly work for nested inclusions if becomes cyclic
+			inclusionQueryAdapter = queryAdapter.duplicate();
+			inclusionQueryAdapter.setOffset(0);
+			inclusionQueryAdapter.setLimit(null);
+		}
+
 		List<Object> entityList = DocumentMapperUtil.toList(entity);
 		List<Resource> dataList = DocumentMapperUtil.toList(document.getData().get());
 		Map<ResourceIdentifier, Resource> dataMap = new HashMap<>();
@@ -74,7 +89,7 @@ public class IncludeLookupSetter {
 		PopulatedCache populatedCache = new PopulatedCache();
 
 		ArrayList<ResourceField> stack = new ArrayList<>();
-		populate(dataList, inclusions, resourceMap, entityMap, stack, queryAdapter, parameterProvider,
+		populate(dataList, inclusions, resourceMap, entityMap, stack, inclusionQueryAdapter, parameterProvider,
 				additionalEagerLoadedRelations, populatedCache);
 
 		// no need to include resources included in the data section

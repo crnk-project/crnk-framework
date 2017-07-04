@@ -1,10 +1,12 @@
 package io.crnk.core.engine.internal.repository;
 
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -23,11 +25,13 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 	private final Object resourceRepository;
 
 	private final boolean isAnnotated;
+	private boolean return404OnNull;
 
 	public ResourceRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry, Object resourceRepository) {
 		super(resourceInformation, moduleRegistry);
 		this.resourceRepository = resourceRepository;
 		this.isAnnotated = resourceRepository instanceof AnnotatedResourceRepositoryAdapter;
+		return404OnNull = Boolean.parseBoolean(moduleRegistry.getPropertiesProvider().getProperty(CrnkProperties.RETURN_404_ON_NULL));
 	}
 
 	public JsonApiResponse findOne(I id, QueryAdapter queryAdapter) {
@@ -46,6 +50,9 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec(resourceInformation));
 				} else {
 					resource = ((ResourceRepository) resourceRepository).findOne(id, request.getQueryParams());
+				}
+				if (resource == null && return404OnNull) {
+					throw new ResourceNotFoundException(resourceInformation.getResourceType());
 				}
 				return getResponse(resourceRepository, resource, request);
 			}

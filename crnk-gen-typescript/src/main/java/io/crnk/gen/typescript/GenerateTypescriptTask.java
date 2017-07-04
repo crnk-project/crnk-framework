@@ -2,6 +2,7 @@ package io.crnk.gen.typescript;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 		sharedClasses.put(TSGeneratorRuntimeContext.class.getName(), TSGeneratorRuntimeContext.class);
 
 		RuntimeClassLoaderFactory classLoaderFactory = new RuntimeClassLoaderFactory(getProject());
-		ClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader, sharedClasses);
+		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader, sharedClasses);
 
 		TSGeneratorConfiguration config = getConfig();
 		setupDefaultConfig(config);
@@ -87,6 +88,9 @@ public class GenerateTypescriptTask extends DefaultTask {
 		finally {
 			// make sure to restore the classloader when leaving this task
 			thread.setContextClassLoader(contextClassLoader);
+
+			// dispose classloader
+			classloader.close();
 		}
 
 	}

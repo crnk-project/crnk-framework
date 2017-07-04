@@ -284,6 +284,7 @@ public class CrnkBoot {
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
 		moduleRegistry.addModule(module);
+		moduleRegistry.setPropertiesProvider(propertiesProvider);
 	}
 
 	private void setupRepository(SimpleModule module, Object repository) {
@@ -351,6 +352,10 @@ public class CrnkBoot {
 		checkNotConfiguredYet();
 		PreconditionUtil.assertNull("ObjectMapper already set", this.objectMapper);
 		this.objectMapper = objectMapper;
+	}
+
+	public PropertiesProvider getPropertiesProvider() {
+		return propertiesProvider;
 	}
 
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {

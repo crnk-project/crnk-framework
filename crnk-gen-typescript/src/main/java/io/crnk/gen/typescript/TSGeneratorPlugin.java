@@ -26,9 +26,19 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 
 		final File workingDir = new File(project.getBuildDir(), "generated/source/typescript/");
 		compileTypescriptTask.setWorkingDir(workingDir);
+		compileTypescriptTask.getInputs().dir(new File(workingDir, "src"));
+		compileTypescriptTask.getInputs().dir(new File(workingDir, "package.json"));
+		compileTypescriptTask.getInputs().dir(new File(workingDir, "package-lock.json"));
+		compileTypescriptTask.getInputs().dir(new File(workingDir, ".npmrc"));
+		compileTypescriptTask.getOutputs().dir(new File(project.getBuildDir(), "build/npm"));
 
 		Configuration compileConfiguration = project.getConfigurations().getByName("compile");
 		generateTask.getInputs().file(compileConfiguration.getFiles());
+
+		generateTask.getOutputs().dir(new File(workingDir, "src"));
+		generateTask.getOutputs().file(new File(workingDir, "package.json"));
+		generateTask.getOutputs().file(new File(workingDir, "package-lock.json"));
+		generateTask.getOutputs().file(new File(workingDir, ".npmrc"));
 
 		try {
 			NpmInstallTask npmInstall = (NpmInstallTask) project.getTasks().getByName("npmInstall");

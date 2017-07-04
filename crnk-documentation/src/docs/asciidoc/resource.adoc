@@ -147,3 +147,25 @@ See http://jsonapi.org/format/#document-links for more information about linking
 	}
 ----
 
+anchor:jackson_annotations[]
+
+## Jackson annotations
+
+Crnk comes with (partial) support for Jackson annotations. Currently supported are:
+
+[cols="30,70"]
+|===
+| Annotation           		| Description
+
+| `@JsonIgnore`
+| Excludes a given attribute from serialization.
+
+| `@JsonProperty.value`
+| Renames an attribute during serialization.
+
+| `@JsonProperty.access`
+| Specifies whether an object can be read and/or written. `WRITE_ONLY` is not yet supported.
+
+|===
+
+Support for more annotations will be added in the future. PRs welcomed.

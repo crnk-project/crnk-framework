@@ -7,6 +7,9 @@ dependencies {
 	compileOnly project(':crnk-meta')
 	compileOnly 'junit:junit:4.12'
 	compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
+	compileOnly 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.7.1'
+
+
 	compileOnly 'javax:javaee-api:7.0'
 
 	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
