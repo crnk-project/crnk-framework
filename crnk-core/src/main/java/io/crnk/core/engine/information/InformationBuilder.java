@@ -9,20 +9,16 @@ import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
-	RelationshipRepository createRelationshipRepository(ResourceInformation sourceInformation, ResourceInformation targetInformation);
-
 	interface RelationshipRepository {
 
 		RelationshipRepositoryInformation build();
-	}
 
+	}
 	interface ResourceRepository {
 
-		Resource resource();
-
 		ResourceRepositoryInformation build();
-	}
 
+	}
 	interface Resource {
 
 		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
@@ -34,8 +30,8 @@ public interface InformationBuilder {
 		void superResourceType(String superResourceType);
 
 		ResourceInformation build();
-	}
 
+	}
 	interface Field {
 
 		ResourceField build();
@@ -63,9 +59,13 @@ public interface InformationBuilder {
 		void setAccessor(ResourceFieldAccessor accessor);
 
 		void setAccess(ResourceFieldAccess access);
+
 	}
 
+	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
 	ResourceRepository createResourceRepository(Class<?> resourceClass, String resourceType);
+
+	Resource createResource(Class<?> resourceClass, String resourceType);
 
 }

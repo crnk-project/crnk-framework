@@ -49,6 +49,7 @@ public abstract class ResponseRepositoryAdapter {
 	public ResponseRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
 		this.resourceInformation = resourceInformation;
+		PreconditionUtil.assertNotNull("moduleRegistry cannot be null", moduleRegistry);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

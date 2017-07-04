@@ -12,6 +12,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
@@ -189,6 +190,8 @@ public interface Module {
 
 		RequestDispatcher getRequestDispatcher();
 
-		RegistryEntryBuilder createRegistryEntryBuilder();
+		RegistryEntryBuilder newRegistryEntryBuilder();
+
+		void addRegistryEntry(RegistryEntry entry);
 	}
 }

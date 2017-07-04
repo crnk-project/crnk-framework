@@ -20,10 +20,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -199,9 +196,13 @@ public class CrnkBoot {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
 			}
 			if (!registryParts.containsKey("")) {
-				registryParts.put("", new DefaultResourceRegistryPart());
+				moduleRegistry.getContext().addRegistryPart("", new DefaultResourceRegistryPart() );
 			}
 			rootPart = hierarchialPart;
+		}
+
+		for(RegistryEntry entry : moduleRegistry.getRegistryEntries()){
+			rootPart.addEntry(entry);
 		}
 
 		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry, serviceUrlProvider);
@@ -268,7 +269,6 @@ public class CrnkBoot {
 		for (DocumentFilter filter : serviceDiscovery.getInstancesByType(DocumentFilter.class)) {
 			module.addFilter(filter);
 		}
-
 		for (Object repository : serviceDiscovery.getInstancesByType(Repository.class)) {
 			setupRepository(module, repository);
 		}

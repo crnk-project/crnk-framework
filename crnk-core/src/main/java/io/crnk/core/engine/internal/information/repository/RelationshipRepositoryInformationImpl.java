@@ -1,21 +1,43 @@
 package io.crnk.core.engine.internal.information.repository;
 
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.utils.Optional;
 
-public class RelationshipRepositoryInformationImpl extends RepositoryInformationImpl implements
+public class RelationshipRepositoryInformationImpl implements
 		RelationshipRepositoryInformation {
 
-	private ResourceInformation sourceResourceInformation;
+	private final String sourceResourceType;
 
-	public RelationshipRepositoryInformationImpl(ResourceInformation sourceResourceInformation,
-												 ResourceInformation targetResourceInformation) {
-		super(targetResourceInformation);
-		this.sourceResourceInformation = sourceResourceInformation;
+	private final String targetResourceType;
+
+	private Optional<Class> sourceResourceClass;
+
+	public RelationshipRepositoryInformationImpl(Class sourceResourceClass, String sourceResourceType,
+												 String targetResourceType) {
+		this.sourceResourceClass = Optional.of(sourceResourceClass);
+		this.sourceResourceType = sourceResourceType;
+		this.targetResourceType = targetResourceType;
+	}
+
+	public RelationshipRepositoryInformationImpl(String sourceResourceType,
+												 String targetResourceType) {
+		this.sourceResourceClass = Optional.empty();
+		this.sourceResourceType = sourceResourceType;
+		this.targetResourceType = targetResourceType;
 	}
 
 	@Override
-	public ResourceInformation getSourceResourceInformation() {
-		return sourceResourceInformation;
+	public Optional<Class> getSourceResourceClass() {
+		return sourceResourceClass;
+	}
+
+	@Override
+	public String getSourceResourceType() {
+		return sourceResourceType;
+	}
+
+	@Override
+	public String getTargetResourceType() {
+		return targetResourceType;
 	}
 }

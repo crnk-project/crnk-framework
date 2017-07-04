@@ -14,7 +14,6 @@ import io.crnk.core.engine.information.resource.ResourceInformationBuilderContex
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
-import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
@@ -199,7 +198,7 @@ public class ModuleRegistry {
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModules(getJacksonModules());
 
-		applyRepositoryRegistration(resourceRegistry);
+		applyRepositoryRegistrations(resourceRegistry);
 
 		for (Module module : modules) {
 			if (module instanceof InitializingModule) {
@@ -213,53 +212,63 @@ public class ModuleRegistry {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void applyRepositoryRegistration(ResourceRegistry resourceRegistry) {
+	private void applyRepositoryRegistrations(ResourceRegistry resourceRegistry) {
 		List<Object> repositories = aggregatedModule.getRepositories();
 
 
-		MultivaluedMap<Class<?>, RepositoryInformation> classMapping = new MultivaluedMap<>();
-		Map<RepositoryInformation, Object> resourceMapping = new HashMap<>();
-		mapRepositoryRegistrations(repositories, classMapping, resourceMapping);
+		MultivaluedMap<String, RepositoryInformation> typeInfoMapping = new MultivaluedMap<>();
+		Map<Object, Object> infoRepositoryMapping = new HashMap<>();
+		mapRepositoryRegistrations(repositories, typeInfoMapping, infoRepositoryMapping);
 
-		for (Class<?> resourceClass : classMapping.keySet()) {
-			applyRepositoryRegistrationForClass(resourceClass, classMapping, resourceMapping);
+		for (String resourceType : typeInfoMapping.keySet()) {
+			applyRepositoryRegistration(resourceType, typeInfoMapping, infoRepositoryMapping);
 		}
 	}
 
-	private void applyRepositoryRegistrationForClass(Class<?> resourceClass,
-													 MultivaluedMap<Class<?>, RepositoryInformation> classMapping, Map<RepositoryInformation, Object> resourceMapping) {
+	private void applyRepositoryRegistration(String resourceType,
+											 MultivaluedMap<String, RepositoryInformation> typeInfoMapping, Map<Object, Object> infoRepositoryMapping) {
+
+		ResourceInformation resourceInformation = null;
 
 		ResourceRepositoryInformation resourceRepositoryInformation = null;
 		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
 		ResourceEntry resourceEntry = null;
-		List<RepositoryInformation> repositoryInformations = classMapping.getList(resourceClass);
+		Class resourceClass = null;
+		List<RepositoryInformation> repositoryInformations = typeInfoMapping.getList(resourceType);
 		for (RepositoryInformation repositoryInformation : repositoryInformations) {
 			if (repositoryInformation instanceof ResourceRepositoryInformation) {
 				resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
-				Object repository = resourceMapping.get(resourceRepositoryInformation);
+				Object repository = infoRepositoryMapping.get(resourceRepositoryInformation);
 				resourceEntry = setupResourceRepository(repository);
 			} else {
 				RelationshipRepositoryInformation relationshipRepositoryInformation =
 						(RelationshipRepositoryInformation) repositoryInformation;
-				Object repository = resourceMapping.get(repositoryInformation);
+				Object repository = infoRepositoryMapping.get(repositoryInformation);
 				setupRelationship(relationshipEntries, relationshipRepositoryInformation, repository);
+
+				if (resourceClass == null) {
+					resourceClass = relationshipRepositoryInformation.getSourceResourceClass().get();
+				}
 			}
 		}
 
-		if (resourceRepositoryInformation == null) {
-			ResourceInformationBuilder resourceInformationBuilder = getResourceInformationBuilder();
-			ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
-			resourceRepositoryInformation =
-					new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-							resourceInformation);
+		if (resourceRepositoryInformation != null) {
+			resourceInformation = resourceRepositoryInformation.getResourceInformation().get();
 		}
 
-		RegistryEntry registryEntry = new RegistryEntry(resourceRepositoryInformation, resourceEntry, relationshipEntries);
-		resourceRegistry.addEntry(resourceClass, registryEntry);
+		if (resourceInformation == null) {
+			ResourceInformationBuilder resourceInformationBuilder = getResourceInformationBuilder();
+			PreconditionUtil.assertNotNull("resource class cannot be determined", resourceClass);
+			resourceInformation = resourceInformationBuilder.build(resourceClass);
+		}
+
+		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, resourceRepositoryInformation, resourceEntry, relationshipEntries);
+		registryEntry.initialize(this);
+		resourceRegistry.addEntry(registryEntry);
 	}
 
-	private void mapRepositoryRegistrations(List<Object> repositories, MultivaluedMap<Class<?>, RepositoryInformation> classMap,
-											Map<RepositoryInformation, Object> resourceInformationMap) {
+	private void mapRepositoryRegistrations(List<Object> repositories, MultivaluedMap<String, RepositoryInformation> resourceTypeMap,
+											Map<Object, Object> resourceInformationMap) {
 
 		RepositoryInformationBuilder repositoryInformationBuilder = getRepositoryInformationBuilder();
 		RepositoryInformationBuilderContext builderContext = new DefaultRepositoryInformationBuilderContext(this);
@@ -271,11 +280,11 @@ public class ModuleRegistry {
 				if (repositoryInformation instanceof ResourceRepositoryInformation) {
 					ResourceRepositoryInformation info = (ResourceRepositoryInformation) repositoryInformation;
 					resourceInformationMap.put(info, repository);
-					classMap.add(info.getResourceInformation().getResourceClass(), repositoryInformation);
+					resourceTypeMap.add(info.getResourceType(), repositoryInformation);
 				} else {
 					RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) repositoryInformation;
 					resourceInformationMap.put(info, repository);
-					classMap.add(info.getSourceResourceInformation().getResourceClass(), repositoryInformation);
+					resourceTypeMap.add(info.getSourceResourceType(), repositoryInformation);
 				}
 			}
 		}
@@ -301,7 +310,7 @@ public class ModuleRegistry {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private Object decorateRepository(Object repository) {
+	public Object decorateRepository(Object repository) {
 		Object decoratedRepository = repository;
 		List<RepositoryDecoratorFactory> repositoryDecorators = getRepositoryDecoratorFactories();
 		for (RepositoryDecoratorFactory repositoryDecorator : repositoryDecorators) {
@@ -406,6 +415,10 @@ public class ModuleRegistry {
 
 	public Map<String, ResourceRegistryPart> getRegistryParts() {
 		return aggregatedModule.getRegistryParts();
+	}
+
+	public List<RegistryEntry> getRegistryEntries() {
+		return aggregatedModule.getRegistryEntries();
 	}
 
 	/**
@@ -666,8 +679,13 @@ public class ModuleRegistry {
 		}
 
 		@Override
-		public RegistryEntryBuilder createRegistryEntryBuilder() {
+		public RegistryEntryBuilder newRegistryEntryBuilder() {
 			return new DefaultRegistryEntryBuilder(ModuleRegistry.this);
+		}
+
+		@Override
+		public void addRegistryEntry(RegistryEntry entry) {
+			aggregatedModule.addRegistryEntry(entry);
 		}
 	}
 }

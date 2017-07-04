@@ -61,7 +61,7 @@ public class ModuleRegistryTest {
 	@Before
 	public void setup() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(moduleRegistry), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
 
 		testModule = new TestModule();
 		moduleRegistry.addModule(new CoreModule("io.crnk.core.module.mock", new ResourceFieldNameTransformer()));
@@ -111,7 +111,7 @@ public class ModuleRegistryTest {
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
-		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
+		Assert.assertEquals(Task.class, info.getResourceInformation().get().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
 	}
 
@@ -121,7 +121,7 @@ public class ModuleRegistryTest {
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
-		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
+		Assert.assertEquals(Task.class, info.getResourceInformation().get().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
 	}
 
@@ -131,8 +131,8 @@ public class ModuleRegistryTest {
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
-		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
-		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
+		Assert.assertEquals("tasks", info.getSourceResourceType());
+		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
 	@Test
@@ -141,8 +141,8 @@ public class ModuleRegistryTest {
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
-		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
-		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
+		Assert.assertEquals("tasks", info.getSourceResourceType());
+		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
 	private RepositoryInformationBuilderContext newRepositoryInformationBuilderContext() {

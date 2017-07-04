@@ -4,6 +4,7 @@ import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
@@ -40,17 +41,19 @@ public class RegistryEntry {
 	private ResourceRepositoryInformation repositoryInformation;
 
 	public RegistryEntry(ResourceRepositoryInformation repositoryInformation, @SuppressWarnings("SameParameterValue") ResourceEntry resourceEntry) {
-		this(repositoryInformation, resourceEntry, new LinkedList<ResponseRelationshipEntry>());
+		this(repositoryInformation.getResourceInformation().get(), repositoryInformation, resourceEntry, new LinkedList<ResponseRelationshipEntry>());
 	}
 
-	public RegistryEntry(ResourceRepositoryInformation repositoryInformation, ResourceEntry resourceEntry, List<ResponseRelationshipEntry> relationshipEntries) {
+	public RegistryEntry(ResourceInformation resourceInformation, ResourceRepositoryInformation repositoryInformation, ResourceEntry resourceEntry, List<ResponseRelationshipEntry> relationshipEntries) {
 		this.repositoryInformation = repositoryInformation;
-		this.resourceInformation = repositoryInformation.getResourceInformation();
+		this.resourceInformation = resourceInformation;
 		this.resourceEntry = resourceEntry;
 		this.relationshipEntries = relationshipEntries;
+		PreconditionUtil.assertNotNull("no resourceInformation", resourceInformation);
 	}
 
 	public void initialize(ModuleRegistry moduleRegistry) {
+		PreconditionUtil.assertNotNull("no moduleRegistry", moduleRegistry);
 		this.moduleRegistry = moduleRegistry;
 	}
 

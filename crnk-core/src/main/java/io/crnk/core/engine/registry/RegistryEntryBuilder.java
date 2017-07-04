@@ -4,6 +4,7 @@ import io.crnk.core.engine.information.InformationBuilder;
 
 public interface RegistryEntryBuilder {
 
+
 	interface ResourceRepository {
 
 		InformationBuilder.ResourceRepository information();
@@ -13,12 +14,14 @@ public interface RegistryEntryBuilder {
 
 	interface RelationshipRepository {
 
-		InformationBuilder.ResourceRepository information();
+		InformationBuilder.RelationshipRepository information();
 
 		void instance(Object repository);
 	}
 
 	ResourceRepository resourceRepository();
+
+	InformationBuilder.Resource resource();
 
 	RelationshipRepository relationshipRepository(String targetResourceType);
 

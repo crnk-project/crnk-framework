@@ -232,7 +232,8 @@ public class CrnkClient {
 						resourceInformation);
 		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
-		RegistryEntry registryEntry = new RegistryEntry(repositoryInformation, resourceEntry, relationshipEntries);
+		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
+		registryEntry.initialize(moduleRegistry);
 		resourceRegistry.addEntry(resourceClass, registryEntry);
 
 		allocateRepositoryRelations(registryEntry, allocateRelated, relationshipEntries);
@@ -293,7 +294,7 @@ public class CrnkClient {
 		PreconditionUtil.assertTrue("no a valid repository interface", informationBuilder.accept(repositoryInterfaceClass));
 		ResourceRepositoryInformation repositoryInformation = (ResourceRepositoryInformation) informationBuilder
 				.build(repositoryInterfaceClass, new DefaultRepositoryInformationBuilderContext(moduleRegistry));
-		Class<?> resourceClass = repositoryInformation.getResourceInformation().getResourceClass();
+		Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
 
 		Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
 		ResourceRepositoryV2<?, Serializable> repositoryStub = getQuerySpecRepository(resourceClass);
@@ -502,7 +503,7 @@ public class CrnkClient {
 	class ClientResourceRegistry extends ResourceRegistryImpl {
 
 		public ClientResourceRegistry(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider) {
-			super(new DefaultResourceRegistryPart(moduleRegistry), moduleRegistry, serviceUrlProvider);
+			super(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrlProvider);
 		}
 
 		@Override

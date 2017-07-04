@@ -21,12 +21,20 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 	private final TypeParser typeParser;
 
+	public RelationshipRepository createRelationshipRepository(String targetResourceType) {
+		return createRelationshipRepository(null, targetResourceType);
+	}
+
 	@Override
-	public RelationshipRepository createRelationshipRepository(ResourceInformation sourceInformation, ResourceInformation targetInformation) {
+	public RelationshipRepository createRelationshipRepository(String sourceResourceType, String targetResourceType) {
 		DefaultRelationshipRepository repository = new DefaultRelationshipRepository();
-		repository.sourceResourceInformation = sourceInformation;
-		repository.targetResourceInformation = targetInformation;
+		repository.sourceResourceType = sourceResourceType;
+		repository.targetResourceType = targetResourceType;
 		return repository;
+	}
+
+	public ResourceRepository createResourceRepository() {
+		return createResourceRepository(null, null);
 	}
 
 	@Override
@@ -40,16 +48,24 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		return repository;
 	}
 
+	@Override
+	public Resource createResource(Class<?> resourceClass, String resourceType) {
+		DefaultResource resource = new DefaultResource();
+		resource.resourceClass(resourceClass);
+		resource.resourceType(resourceType);
+		return resource;
+	}
+
 	public class DefaultRelationshipRepository implements RelationshipRepository {
 
-		private ResourceInformation sourceResourceInformation;
+		private String sourceResourceType;
 
-		private ResourceInformation targetResourceInformation;
+		private String targetResourceType;
 
 
 		@Override
 		public RelationshipRepositoryInformation build() {
-			return new RelationshipRepositoryInformationImpl(sourceResourceInformation, targetResourceInformation);
+			return new RelationshipRepositoryInformationImpl(null, sourceResourceType, targetResourceType);
 		}
 	}
 

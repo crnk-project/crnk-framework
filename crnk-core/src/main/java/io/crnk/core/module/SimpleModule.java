@@ -7,6 +7,7 @@ import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
@@ -40,6 +41,8 @@ public class SimpleModule implements Module {
 	private List<Object> repositories = new ArrayList<>();
 
 	private List<ExceptionMapperLookup> exceptionMapperLookups = new ArrayList<>();
+
+	private List<RegistryEntry> registryEntries = new ArrayList<>();
 
 	private String moduleName;
 
@@ -244,6 +247,14 @@ public class SimpleModule implements Module {
 			throw new IllegalStateException("part with prefix " + prefix + " is already registered");
 		}
 		registryParts.put(prefix, part);
+	}
+
+	public List<RegistryEntry> getRegistryEntries() {
+		return Collections.unmodifiableList(registryEntries);
+	}
+
+	public void addRegistryEntry(RegistryEntry entry) {
+		registryEntries.add(entry);
 	}
 
 	@SuppressWarnings("rawtypes")

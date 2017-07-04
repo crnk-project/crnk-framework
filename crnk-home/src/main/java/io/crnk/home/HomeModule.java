@@ -6,6 +6,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -63,8 +64,9 @@ public class HomeModule implements Module {
 					ResourceRegistry resourceRegistry = context.getResourceRegistry();
 					for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
 						RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-						if (resourceEntry.getRepositoryInformation() != null) {
-							String resourceType = repositoryInformation.getResourceInformation().getResourceType();
+						if (repositoryInformation != null) {
+							ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
+							String resourceType = resourceInformation.getResourceType();
 							String tag = "tag:" + resourceType;
 							String href = "/" + resourceType + "/";
 							ObjectNode resourceNode = resourcesNode.putObject(tag);

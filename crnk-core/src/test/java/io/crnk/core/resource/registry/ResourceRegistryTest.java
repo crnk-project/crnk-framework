@@ -34,7 +34,7 @@ public class ResourceRegistryTest {
 	@Before
 	public void resetResourceRegistry() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(moduleRegistry), moduleRegistry, new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider(TEST_MODELS_URL));
 	}
 
 	@Test
@@ -45,8 +45,8 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
-		return new RegistryEntry(new ResourceRepositoryInformationImpl(path,
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null)), null, null);
+		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
+		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation), null, null);
 	}
 
 	@Test

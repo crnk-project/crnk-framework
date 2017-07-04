@@ -2,6 +2,7 @@ package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +29,10 @@ public class DefaultResourceRegistryPart implements ResourceRegistryPart {
 	public RegistryEntry addEntry(RegistryEntry entry) {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Class<?> resourceClass = resourceInformation.getResourceClass();
+		String resourceType = resourceInformation.getResourceType();
+		PreconditionUtil.assertNotNull("no resourceType set", resourceType);
 		resourcesByClass.put(resourceClass, entry);
-		resourcesByType.put(resourceInformation.getResourceType(), entry);
+		resourcesByType.put(resourceType, entry);
 		logger.debug("Added resource {} to ResourceRegistry", entry.getResourceInformation().getResourceType());
 		return entry;
 	}

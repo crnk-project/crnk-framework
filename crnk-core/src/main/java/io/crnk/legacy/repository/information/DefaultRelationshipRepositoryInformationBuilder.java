@@ -3,8 +3,6 @@ package io.crnk.legacy.repository.information;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -47,22 +45,13 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 		PreconditionUtil.assertNotNull("no sourceResourceClass", sourceResourceClass);
 		PreconditionUtil.assertNotNull("no targetResourceClass", targetResourceClass);
 
-		ResourceInformationBuilder resourceInformationBuilder = context.getResourceInformationBuilder();
-		PreconditionUtil.assertTrue("cannot get ResourceInformation for " + sourceResourceClass, resourceInformationBuilder.accept(sourceResourceClass));
-		ResourceInformation sourceResourceInformation = resourceInformationBuilder.build(sourceResourceClass);
+		String sourceResourceType = context.getResourceInformationBuilder().getResourceType(sourceResourceClass);
+		String targetResourceType = context.getResourceInformationBuilder().getResourceType(targetResourceClass);
 
-		ResourceInformation targetResourceInformation;
-		if (resourceInformationBuilder.accept(targetResourceClass)) {
-			targetResourceInformation = resourceInformationBuilder.build(targetResourceClass);
-		} else {
-			// support for polymorphism like relations to java.lang.Object
-			targetResourceInformation = new ResourceInformation(context.getTypeParser(), targetResourceClass, null, null, null);
-		}
-
-		return new RelationshipRepositoryInformationImpl(sourceResourceInformation, targetResourceInformation);
+		return new RelationshipRepositoryInformationImpl(sourceResourceClass, sourceResourceType, targetResourceType);
 	}
 
-	protected Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
+	public Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
 		Optional<JsonApiRelationshipRepository> annotation = ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class);
 
 		if (annotation.isPresent()) {

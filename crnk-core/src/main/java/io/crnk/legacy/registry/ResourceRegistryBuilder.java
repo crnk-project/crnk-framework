@@ -80,10 +80,13 @@ public class ResourceRegistryBuilder {
 			LOGGER.trace("{} has relationship repositories {}", resourceInformation.getResourceClass(), relationshipEntries);
 
 			ResourceRepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(), resourceInformation);
-			registryEntries.add(new RegistryEntry(repositoryInformation, resourceEntry, relationshipEntries));
+
+			RegistryEntry entry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
+			entry.initialize(moduleRegistry);
+			registryEntries.add(entry);
 		}
 
-		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(moduleRegistry), moduleRegistry, serviceUrl);
+		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrl);
 		for (RegistryEntry registryEntry : registryEntries) {
 			Class<?> resourceClass = registryEntry.getResourceInformation().getResourceClass();
 			RegistryEntry registryEntryParent = findParent(resourceClass, registryEntries);
