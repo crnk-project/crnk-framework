@@ -109,6 +109,18 @@ public class CrnkProperties {
 	 */
 	public static final String NULL_DATA_RESPONSE_ENABLED = "crnk.config.null.data.response.enabled";
 
+	/**
+	 * <p>
+	 * 	 Set a boolean whether Crnk should allow pagination on inclusions. Most to all times application will choose to do
+	 *   a second request. By default this is disabled.
+	 * </p>
+	 * <p>
+	 *   Note that it is currently not possible to specify different paging parameters for the same entity when
+	 *   it is the root resp. an included entity. This can lead to confusion if inclusions are cyclic (not that uncommon).
+	 *   For this reason support is disabled by default.
+	 * </p>
+	 */
+	public static final String INCLUDE_PAGING_ENABLED = "crnk.config.include.paging.enabled";
 
 	/**
 	 * <p>
@@ -116,4 +128,6 @@ public class CrnkProperties {
 	 * </p>
 	 */
 	public static final String RETURN_404_ON_NULL = "crnk.config.resource.response.return_404";
+
+
 }
