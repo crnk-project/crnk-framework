@@ -1,12 +1,11 @@
-package io.crnk.core.repository;
+package io.crnk.core.engine.repository;
 
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.RepositoryMethodException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.mock.NewInstanceRepositoryMethodParameterProvider;
+import io.crnk.core.engine.repository.mock.NewInstanceRepositoryMethodParameterProvider;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.QueryParamsAdapter;

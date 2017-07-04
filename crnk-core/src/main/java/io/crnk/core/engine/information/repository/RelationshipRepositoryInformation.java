@@ -1,6 +1,6 @@
 package io.crnk.core.engine.information.repository;
 
-import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.utils.Optional;
 
 /**
  * Holds information about the type of a relationship repository.
@@ -8,8 +8,12 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 public interface RelationshipRepositoryInformation extends RepositoryInformation {
 
 	/**
-	 * @return information about the source of the relationship.
+	 * @return resource class on source side. Used if no resource repository is available to
+	 * compute ResourceInformation with ResourceInformationBuilder. Can be null otherwise
 	 */
-	ResourceInformation getSourceResourceInformation();
+	Optional<Class> getSourceResourceClass();
 
+	String getSourceResourceType();
+
+	String getTargetResourceType();
 }

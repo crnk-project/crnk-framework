@@ -41,7 +41,7 @@ public class BasicActionTest extends AbstractClientTest {
 
 		ActionStubFactoryContext context = contextCaptor.getValue();
 		Assert.assertSame(client.getHttpAdapter(), context.getHttpAdapter());
-		Assert.assertSame(client.getRegistry().getServiceUrlProvider(), context.getServiceUrlProvider());
+		Assert.assertSame(client.getServiceUrlProvider(), context.getServiceUrlProvider());
 	}
 
 	@Test

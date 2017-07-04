@@ -6,12 +6,16 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
@@ -47,6 +51,12 @@ public interface Module {
 		void addHttpRequestProcessor(HttpRequestProcessor processor);
 
 		ObjectMapper getObjectMapper();
+
+		/**
+		 * Registers a {@link ResourceRegistryPart} implementation. An empty string as prefix will
+		 * register the root part.
+		 */
+		void addRegistryPart(String prefix, ResourceRegistryPart part);
 
 		/**
 		 * @return ServiceDiscovery
@@ -180,5 +190,8 @@ public interface Module {
 
 		RequestDispatcher getRequestDispatcher();
 
+		RegistryEntryBuilder newRegistryEntryBuilder();
+
+		void addRegistryEntry(RegistryEntry entry);
 	}
 }

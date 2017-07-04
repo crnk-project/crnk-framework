@@ -6,7 +6,7 @@ package io.crnk.core.engine.registry;
 public interface ResponseRelationshipEntry {
 
 	/**
-	 * @return target class
+	 * @return target resource type. null to accept any target
 	 */
-	Class<?> getTargetAffiliation();
+	String getTargetResourceType();
 }

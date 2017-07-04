@@ -3,12 +3,11 @@ package io.crnk.legacy.repository.information;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.UntypedRelationshipRepository;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
@@ -24,8 +23,9 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
-		return RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class.isAssignableFrom(repositoryClass)
-				|| ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class).isPresent();
+		return !UntypedRelationshipRepository.class.isAssignableFrom(repositoryClass) && (
+				RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class.isAssignableFrom(repositoryClass)
+						|| ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class).isPresent());
 	}
 
 	@Override
@@ -45,22 +45,13 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 		PreconditionUtil.assertNotNull("no sourceResourceClass", sourceResourceClass);
 		PreconditionUtil.assertNotNull("no targetResourceClass", targetResourceClass);
 
-		ResourceInformationBuilder resourceInformationBuilder = context.getResourceInformationBuilder();
-		PreconditionUtil.assertTrue("cannot get ResourceInformation for " + sourceResourceClass, resourceInformationBuilder.accept(sourceResourceClass));
-		ResourceInformation sourceResourceInformation = resourceInformationBuilder.build(sourceResourceClass);
+		String sourceResourceType = context.getResourceInformationBuilder().getResourceType(sourceResourceClass);
+		String targetResourceType = context.getResourceInformationBuilder().getResourceType(targetResourceClass);
 
-		ResourceInformation targetResourceInformation;
-		if (resourceInformationBuilder.accept(targetResourceClass)) {
-			targetResourceInformation = resourceInformationBuilder.build(targetResourceClass);
-		} else {
-			// support for polymorphism like relations to java.lang.Object
-			targetResourceInformation = new ResourceInformation(context.getTypeParser(), targetResourceClass, null, null, null);
-		}
-
-		return new RelationshipRepositoryInformationImpl(repositoryClass, sourceResourceInformation, targetResourceInformation);
+		return new RelationshipRepositoryInformationImpl(sourceResourceClass, sourceResourceType, targetResourceType);
 	}
 
-	protected Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
+	public Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
 		Optional<JsonApiRelationshipRepository> annotation = ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class);
 
 		if (annotation.isPresent()) {

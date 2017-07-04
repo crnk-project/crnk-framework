@@ -3,6 +3,7 @@ package io.crnk.core.resource.registry;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -33,7 +34,7 @@ public class ResourceRegistryTest {
 	@Before
 	public void resetResourceRegistry() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(moduleRegistry, new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider(TEST_MODELS_URL));
 	}
 
 	@Test
@@ -44,8 +45,8 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
-		return new RegistryEntry(new ResourceRepositoryInformationImpl(null, path,
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null)), null, null);
+		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
+		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation), null, null);
 	}
 
 	@Test

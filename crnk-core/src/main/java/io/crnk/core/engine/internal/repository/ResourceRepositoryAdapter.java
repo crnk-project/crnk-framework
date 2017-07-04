@@ -180,4 +180,8 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 	protected ResourceInformation getResourceInformation(Object repository) {
 		return resourceInformation;
 	}
+
+	public Class<?> getResourceClass() {
+		return resourceInformation.getResourceClass();
+	}
 }

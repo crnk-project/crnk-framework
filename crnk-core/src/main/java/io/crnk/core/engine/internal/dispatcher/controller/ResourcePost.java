@@ -17,13 +17,9 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.exception.RequestBodyNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.util.Collection;
 import java.util.Set;
 
 public class ResourcePost extends ResourceUpsert {
@@ -53,13 +49,20 @@ public class ResourcePost extends ResourceUpsert {
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 
-		Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
-		setId(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
-		setAttributes(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
-		setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
 
-		JsonApiResponse apiResponse = resourceRepository.create(newResource, queryAdapter);
+		JsonApiResponse apiResponse;
+		if (Resource.class.equals(resourceRepository.getResourceClass())) {
+			apiResponse = resourceRepository.create(resourceBody, queryAdapter);
+		} else {
+
+			Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
+			setId(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
+			setAttributes(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
+			setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
+
+			apiResponse = resourceRepository.create(newResource, queryAdapter);
+		}
 		if (apiResponse.getEntity() == null) {
 			throw new IllegalStateException("repository did not return the created resource");
 		}

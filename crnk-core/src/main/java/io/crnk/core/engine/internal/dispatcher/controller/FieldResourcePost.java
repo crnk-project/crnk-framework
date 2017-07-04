@@ -66,10 +66,8 @@ public class FieldResourcePost extends ResourceUpsert {
 		}
 
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
-		Class<?> relationshipFieldClass = ClassUtils
-				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
 
-		RegistryEntry relationshipRegistryEntry = resourceRegistry.findEntry(relationshipFieldClass);
+		RegistryEntry relationshipRegistryEntry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 
 		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
@@ -81,7 +79,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		Serializable resourceId = relationshipRegistryEntry.getResourceInformation().parseIdString(savedResourceResponse.getSingleData().get().getId());
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = endpointRegistryEntry
-				.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);
+				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
 
 		@SuppressWarnings("unchecked")
 		JsonApiResponse parent = endpointRegistryEntry.getResourceRepository(parameterProvider)

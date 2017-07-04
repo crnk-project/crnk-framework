@@ -7,10 +7,5 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
  */
 public interface RepositoryInformation {
 
-	Class<?> getRepositoryClass();
 
-	/**
-	 * @return information about the resources hold in this resource
-	 */
-	ResourceInformation getResourceInformation();
 }

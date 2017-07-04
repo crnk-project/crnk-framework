@@ -1,10 +1,5 @@
 package io.crnk.core.queryspec.internal;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -19,6 +14,11 @@ import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class QuerySpecAdapter implements QueryAdapter {
 
@@ -39,7 +39,7 @@ public class QuerySpecAdapter implements QueryAdapter {
 	public TypedParams<IncludedRelationsParams> getIncludedRelations() {
 		Map<String, IncludedRelationsParams> params = new HashMap<>();
 		addRelations(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
+		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
 			addRelations(params, relatedSpec);
 		}
 		return new TypedParams<>(params);
@@ -51,12 +51,15 @@ public class QuerySpecAdapter implements QueryAdapter {
 			for (IncludeRelationSpec relation : spec.getIncludedRelations()) {
 				set.add(new Inclusion(StringUtils.join(".", relation.getAttributePath())));
 			}
-			params.put(getResourceTypee(spec), new IncludedRelationsParams(set));
+			params.put(getResourceType(spec), new IncludedRelationsParams(set));
 		}
 	}
 
-	private String getResourceTypee(QuerySpec spec) {
-		RegistryEntry entry = resourceRegistry.findEntry(spec.getResourceClass());
+	private String getResourceType(QuerySpec spec) {
+		if (spec.getResourceType() != null) {
+			return spec.getResourceType();
+		}
+		RegistryEntry entry = resourceRegistry.getEntry(spec.getResourceClass());
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		return resourceInformation.getResourceType();
 	}
@@ -65,7 +68,7 @@ public class QuerySpecAdapter implements QueryAdapter {
 	public TypedParams<IncludedFieldsParams> getIncludedFields() {
 		Map<String, IncludedFieldsParams> params = new HashMap<>();
 		addFields(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
+		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
 			addFields(params, relatedSpec);
 		}
 		return new TypedParams<>(params);
@@ -77,13 +80,13 @@ public class QuerySpecAdapter implements QueryAdapter {
 			for (IncludeFieldSpec relation : spec.getIncludedFields()) {
 				set.add(StringUtils.join(".", relation.getAttributePath()));
 			}
-			params.put(getResourceTypee(spec), new IncludedFieldsParams(set));
+			params.put(getResourceType(spec), new IncludedFieldsParams(set));
 		}
 	}
 
 	@Override
 	public ResourceInformation getResourceInformation() {
-		return resourceRegistry.findEntry(querySpec.getResourceClass()).getResourceInformation();
+		return resourceRegistry.getEntry(getResourceType(querySpec)).getResourceInformation();
 	}
 
 	@Override

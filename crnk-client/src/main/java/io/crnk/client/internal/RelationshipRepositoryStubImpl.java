@@ -1,13 +1,10 @@
 package io.crnk.client.internal;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -20,6 +17,10 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+
 public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
 		implements RelationshipRepositoryStub<T, I, D, J>, RelationshipRepositoryV2<T, I, D, J> {
 
@@ -30,8 +31,8 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	private ResourceInformation sourceResourceInformation;
 
 	public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass,
-			ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
-		super(client, urlBuilder);
+										  ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
+		super(client, urlBuilder, targetClass);
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;
 		this.sourceResourceInformation = sourceResourceInformation;
@@ -66,6 +67,9 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	}
 
 	private Serializable getSourceId(T source) {
+		if (source instanceof Resource) {
+			return ((Resource) source).getId();
+		}
 		ResourceField idField = sourceResourceInformation.getIdField();
 		return (Serializable) idField.getAccessor().getValue(source);
 	}

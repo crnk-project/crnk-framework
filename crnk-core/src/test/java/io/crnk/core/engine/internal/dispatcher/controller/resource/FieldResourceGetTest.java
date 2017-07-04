@@ -106,15 +106,15 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onGivenIncludeRequestFieldResourcesGetShouldHandleIt() throws Exception {
 
 		// get repositories
-		ResourceRepositoryAdapter userRepo = resourceRegistry.findEntry(User.class).getResourceRepository(null);
-		ResourceRepositoryAdapter projectRepo = resourceRegistry.findEntry(Project.class).getResourceRepository(null);
-		ResourceRepositoryAdapter taskRepo = resourceRegistry.findEntry(Task.class).getResourceRepository(null);
+		ResourceRepositoryAdapter userRepo = resourceRegistry.getEntry(User.class).getResourceRepository(null);
+		ResourceRepositoryAdapter projectRepo = resourceRegistry.getEntry(Project.class).getResourceRepository(null);
+		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
 
-		RelationshipRepositoryAdapter relRepositoryUserToProject = resourceRegistry.findEntry(User.class).getRelationshipRepositoryForClass(Project.class, null);
-		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.findEntry(Project.class).getRelationshipRepositoryForClass(Task.class, null);
+		RelationshipRepositoryAdapter relRepositoryUserToProject = resourceRegistry.getEntry(User.class).getRelationshipRepositoryForType("projects", null);
+		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.getEntry(Project.class).getRelationshipRepositoryForType("tasks", null);
 
-		ResourceInformation userInfo = resourceRegistry.findEntry(User.class).getResourceInformation();
-		ResourceInformation projectInfo = resourceRegistry.findEntry(Project.class).getResourceInformation();
+		ResourceInformation userInfo = resourceRegistry.getEntry(User.class).getResourceInformation();
+		ResourceInformation projectInfo = resourceRegistry.getEntry(Project.class).getResourceInformation();
 		ResourceField includedTaskField = projectInfo.findRelationshipFieldByName("includedTask");
 		ResourceField assignedProjectsField = userInfo.findRelationshipFieldByName("assignedProjects");
 

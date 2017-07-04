@@ -1,7 +1,10 @@
 package io.crnk.legacy.internal;
 
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
 import net.jodah.typetools.TypeResolver;
@@ -17,7 +20,7 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 	}
 
 	@Override
-	public Class<?> getTargetAffiliation() {
+	public String getTargetResourceType() {
 		Class<?> repoClass = repositoryInstanceBuilder.getRepositoryClass();
 		Class<?> repoInterface = RelationshipRepositoryV2.class.isAssignableFrom(repoClass) ? RelationshipRepositoryV2.class
 				: RelationshipRepository.class;
@@ -25,7 +28,9 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 		Class<?>[] typeArgs = TypeResolver
 				.resolveRawArguments(repoInterface, repoClass);
 
-		return typeArgs[TARGET_TYPE_GENERIC_PARAMETER_IDX];
+		Class<?> typeArg = typeArgs[TARGET_TYPE_GENERIC_PARAMETER_IDX];
+		Optional<JsonApiResource> annotation = ClassUtils.getAnnotation(typeArg, JsonApiResource.class);
+		return annotation.get().type();
 	}
 
 	public Object getRepositoryInstanceBuilder() {

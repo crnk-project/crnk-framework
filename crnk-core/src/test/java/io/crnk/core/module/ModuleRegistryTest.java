@@ -1,12 +1,9 @@
 package io.crnk.core.module;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
@@ -20,31 +17,16 @@ import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator.De
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIllegalStateExceptionMapper;
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.models.ComplexPojo;
-import io.crnk.core.mock.models.Document;
-import io.crnk.core.mock.models.FancyProject;
-import io.crnk.core.mock.models.Project;
-import io.crnk.core.mock.models.Schedule;
-import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.models.Thing;
-import io.crnk.core.mock.models.User;
-import io.crnk.core.mock.repository.DocumentRepository;
-import io.crnk.core.mock.repository.PojoRepository;
-import io.crnk.core.mock.repository.ProjectRepository;
-import io.crnk.core.mock.repository.ResourceWithoutRepositoryToProjectRepository;
-import io.crnk.core.mock.repository.ScheduleRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
-import io.crnk.core.mock.repository.TaskToProjectRepository;
-import io.crnk.core.mock.repository.TaskWithLookupRepository;
-import io.crnk.core.mock.repository.UserRepository;
-import io.crnk.core.mock.repository.UserToProjectRepository;
+import io.crnk.core.mock.models.*;
+import io.crnk.core.mock.repository.*;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -62,6 +44,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class ModuleRegistryTest {
 
 	private ResourceRegistry resourceRegistry;
@@ -75,7 +61,7 @@ public class ModuleRegistryTest {
 	@Before
 	public void setup() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
 
 		testModule = new TestModule();
 		moduleRegistry.addModule(new CoreModule("io.crnk.core.module.mock", new ResourceFieldNameTransformer()));
@@ -125,8 +111,7 @@ public class ModuleRegistryTest {
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
-		Assert.assertEquals(TaskRepository.class, info.getRepositoryClass());
-		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
+		Assert.assertEquals(Task.class, info.getResourceInformation().get().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
 	}
 
@@ -136,8 +121,7 @@ public class ModuleRegistryTest {
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
-		Assert.assertEquals(TaskRepository.class, info.getRepositoryClass());
-		Assert.assertEquals(Task.class, info.getResourceInformation().getResourceClass());
+		Assert.assertEquals(Task.class, info.getResourceInformation().get().getResourceClass());
 		Assert.assertEquals("tasks", info.getPath());
 	}
 
@@ -147,9 +131,8 @@ public class ModuleRegistryTest {
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
-		Assert.assertEquals(TaskToProjectRepository.class, info.getRepositoryClass());
-		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
-		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
+		Assert.assertEquals("tasks", info.getSourceResourceType());
+		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
 	@Test
@@ -158,9 +141,8 @@ public class ModuleRegistryTest {
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
-		Assert.assertEquals(TaskToProjectRepository.class, info.getRepositoryClass());
-		Assert.assertEquals(Project.class, info.getResourceInformation().getResourceClass());
-		Assert.assertEquals(Task.class, info.getSourceResourceInformation().getResourceClass());
+		Assert.assertEquals("tasks", info.getSourceResourceType());
+		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
 	private RepositoryInformationBuilderContext newRepositoryInformationBuilderContext() {
@@ -174,6 +156,11 @@ public class ModuleRegistryTest {
 			@Override
 			public TypeParser getTypeParser() {
 				return moduleRegistry.getTypeParser();
+			}
+
+			@Override
+			public InformationBuilder builder() {
+				return new DefaultInformationBuilder(getTypeParser());
 			}
 		};
 	}
@@ -268,8 +255,7 @@ public class ModuleRegistryTest {
 		try {
 			informationBuilder.build(Object.class);
 			Assert.fail();
-		}
-		catch (UnsupportedOperationException e) {
+		} catch (UnsupportedOperationException e) {
 			// ok
 		}
 
@@ -323,7 +309,7 @@ public class ModuleRegistryTest {
 		List<RepositoryDecoratorFactory> decorators = moduleRegistry.getRepositoryDecoratorFactories();
 		Assert.assertEquals(2, decorators.size());
 
-		RegistryEntry entry = this.resourceRegistry.findEntry(Schedule.class);
+		RegistryEntry entry = this.resourceRegistry.getEntry(Schedule.class);
 		Object resourceRepository = entry.getResourceRepository(null).getResourceRepository();
 		Assert.assertNotNull(resourceRepository);
 		Assert.assertTrue(resourceRepository instanceof ScheduleRepository);
@@ -339,7 +325,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void testRepositoryRegistration() {
-		RegistryEntry entry = resourceRegistry.findEntry(TestResource2.class);
+		RegistryEntry entry = resourceRegistry.getEntry(TestResource2.class);
 		ResourceInformation info = entry.getResourceInformation();
 		Assert.assertEquals(TestResource2.class, info.getResourceClass());
 

@@ -1,26 +1,25 @@
 package io.crnk.core.engine.registry;
 
-import java.util.Collection;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 
-public interface ResourceRegistry {
+/**
+ * ${@link ResourceRegistryPart} implementation if a number of convenience methods used and exposed
+ * trough the Module API.
+ */
+public interface ResourceRegistry extends ResourceRegistryPart {
 
-	RegistryEntry addEntry(Class<?> clazz, RegistryEntry entry);
-
-	boolean hasEntry(Class<?> clazz);
-
-	RegistryEntry getEntry(String resourceType);
 
 	RegistryEntry findEntry(Class<?> resourceClass);
 
-	Collection<RegistryEntry> getResources();
 
-	RegistryEntry getEntry(Class<?> clazz);
+	@Deprecated
+	RegistryEntry addEntry(Class<?> clazz, RegistryEntry entry);
 
+	@Deprecated
 	ServiceUrlProvider getServiceUrlProvider();
 
+	@Deprecated
 	String getResourceUrl(ResourceInformation resourceInformation);
 
 	/**

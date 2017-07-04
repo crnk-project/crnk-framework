@@ -54,10 +54,8 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 		// only modify responses which contain a single or a list of Crnk resources
 		if (isResourceResponse(response)) {
 			CrnkBoot boot = feature.getBoot();
-			ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 			DocumentMapper documentMapper = boot.getDocumentMapper();
-
-			ServiceUrlProvider serviceUrlProvider = resourceRegistry.getServiceUrlProvider();
+			ServiceUrlProvider serviceUrlProvider = boot.getServiceUrlProvider();
 			try {
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					HttpRequestContext context = new HttpRequestContextBaseAdapter(new JaxrsRequestContext(requestContext,

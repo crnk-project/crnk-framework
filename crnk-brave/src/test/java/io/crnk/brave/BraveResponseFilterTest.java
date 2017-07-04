@@ -65,7 +65,7 @@ public class BraveResponseFilterTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		queryAdapter = new QuerySpecAdapter(querySpec, boot.getResourceRegistry());
 
-		ResourceInformation taskResourceInformation = boot.getResourceRegistry().findEntry(Task.class).getResourceInformation();
+		ResourceInformation taskResourceInformation = boot.getResourceRegistry().getEntry(Task.class).getResourceInformation();
 		requestSpec = Mockito.mock(RepositoryRequestSpec.class);
 		Mockito.when(requestSpec.getMethod()).thenReturn(HttpMethod.GET);
 		Mockito.when(requestSpec.getQueryAdapter()).thenReturn(queryAdapter);

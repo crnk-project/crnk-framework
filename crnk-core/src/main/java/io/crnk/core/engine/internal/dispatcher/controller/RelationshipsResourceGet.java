@@ -11,7 +11,6 @@ import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -45,13 +44,12 @@ public class RelationshipsResourceGet extends ResourceIncludeField {
 			throw new ResourceFieldNotFoundException(elementName);
 		}
 
-		Class<?> baseRelationshipFieldClass = relationshipField.getType();
-		Class<?> relationshipFieldClass = ClassUtils
-				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
+		boolean isCollection = Iterable.class.isAssignableFrom(relationshipField.getType());
 
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);
+
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
 		JsonApiResponse entities;
-		if (Iterable.class.isAssignableFrom(baseRelationshipFieldClass)) {
+		if (isCollection) {
 			entities = relationshipRepositoryForClass.findManyTargets(castedResourceId, relationshipField, queryAdapter);
 		} else {
 			entities = relationshipRepositoryForClass.findOneTarget(castedResourceId, relationshipField, queryAdapter);

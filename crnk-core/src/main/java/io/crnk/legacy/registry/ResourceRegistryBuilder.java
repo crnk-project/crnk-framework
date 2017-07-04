@@ -5,10 +5,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResponseRelationshipEntry;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.DefaultResourceLookup;
@@ -82,11 +79,14 @@ public class ResourceRegistryBuilder {
 			List<ResponseRelationshipEntry> relationshipEntries = repositoryEntryBuilder.buildRelationshipRepositories(resourceLookup, resourceClass);
 			LOGGER.trace("{} has relationship repositories {}", resourceInformation.getResourceClass(), relationshipEntries);
 
-			ResourceRepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(null, resourceInformation.getResourceType(), resourceInformation);
-			registryEntries.add(new RegistryEntry(repositoryInformation, resourceEntry, relationshipEntries));
+			ResourceRepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(), resourceInformation);
+
+			RegistryEntry entry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
+			entry.initialize(moduleRegistry);
+			registryEntries.add(entry);
 		}
 
-		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(moduleRegistry, serviceUrl);
+		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrl);
 		for (RegistryEntry registryEntry : registryEntries) {
 			Class<?> resourceClass = registryEntry.getResourceInformation().getResourceClass();
 			RegistryEntry registryEntryParent = findParent(resourceClass, registryEntries);

@@ -1,6 +1,7 @@
 package io.crnk.core.engine.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -22,6 +23,7 @@ import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.mock.repository.UserToTaskRepository;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
@@ -44,7 +46,7 @@ public class RepositoryFilterTest {
 
 	private RepositoryFilter filter = Mockito.spy(new RepositoryFilterBase());
 
-	private ModuleRegistry moduleRegistry = new ModuleRegistry();
+	private ModuleRegistry moduleRegistry;
 
 	private ResourceRegistry resourceRegistry;
 
@@ -79,23 +81,25 @@ public class RepositoryFilterTest {
 
 	@Before
 	public void prepare() {
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
-		ResourceRegistryBuilder registryBuilder = new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
-		resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		SimpleModule filterModule = new SimpleModule("filter");
 		filterModule.addRepositoryFilter(filter);
-		moduleRegistry.addModule(filterModule);
-		moduleRegistry.init(new ObjectMapper());
+		boot.addModule(filterModule);
+		boot.boot();
+		resourceRegistry = boot.getResourceRegistry();
 
 		querySpec = new QuerySpec(User.class);
 		queryAdapter = new QuerySpecAdapter(querySpec, resourceRegistry);
 
-		scheduleInfo = resourceRegistry.findEntry(Schedule.class).getResourceInformation();
-		RegistryEntry userEntry = resourceRegistry.findEntry(User.class);
+		scheduleInfo = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
+		RegistryEntry userEntry = resourceRegistry.getEntry(User.class);
 		resourceAdapter = userEntry.getResourceRepository(null);
-		projectRelationAdapter = userEntry.getRelationshipRepositoryForClass(Project.class, null);
-		taskRelationAdapter = userEntry.getRelationshipRepositoryForClass(Task.class, null);
+		projectRelationAdapter = userEntry.getRelationshipRepositoryForType("projects", null);
+		taskRelationAdapter = userEntry.getRelationshipRepositoryForType("tasks", null);
 		userInfo = userEntry.getResourceInformation();
 
 		UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
@@ -113,8 +117,8 @@ public class RepositoryFilterTest {
 		userTaskRepository.addRelations(user1, Arrays.asList(21L), "assignedTasks");
 		userTaskRepository.addRelations(user2, Arrays.asList(22L), "assignedTasks");
 
-		assignedTasksField = resourceRegistry.findEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedTasks");
-		assignedProjectsField = resourceRegistry.findEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedProjects");
+		assignedTasksField = resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedTasks");
+		assignedProjectsField = resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedProjects");
 
 	}
 
@@ -122,7 +126,7 @@ public class RepositoryFilterTest {
 	@Test
 	public void findAllWithResourceListResult() throws Exception {
 
-		RegistryEntry scheduleRegistry = resourceRegistry.findEntry(Schedule.class);
+		RegistryEntry scheduleRegistry = resourceRegistry.getEntry(Schedule.class);
 		ResourceRepositoryAdapter<Schedule, Serializable> scheduleResourceAdapter = scheduleRegistry.getResourceRepository(null);
 
 		querySpec = new QuerySpec(Schedule.class);

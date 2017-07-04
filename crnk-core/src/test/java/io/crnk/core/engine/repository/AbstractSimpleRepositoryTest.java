@@ -1,4 +1,4 @@
-package io.crnk.core.repository;
+package io.crnk.core.engine.repository;
 
 import io.crnk.core.mock.models.Task;
 import io.crnk.legacy.repository.AbstractSimpleRepository;

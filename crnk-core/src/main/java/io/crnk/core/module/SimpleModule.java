@@ -7,6 +7,8 @@ import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -40,9 +42,13 @@ public class SimpleModule implements Module {
 
 	private List<ExceptionMapperLookup> exceptionMapperLookups = new ArrayList<>();
 
+	private List<RegistryEntry> registryEntries = new ArrayList<>();
+
 	private String moduleName;
 
 	private ModuleContext context;
+
+	private Map<String, ResourceRegistryPart> registryParts = new HashMap<>();
 
 	public SimpleModule(String moduleName) {
 		this.moduleName = moduleName;
@@ -133,6 +139,10 @@ public class SimpleModule implements Module {
 	protected List<RepositoryInformationBuilder> getRepositoryInformationBuilders() {
 		checkInitialized();
 		return Collections.unmodifiableList(repositoryInformationBuilders);
+	}
+
+	public Map<String, ResourceRegistryPart> getRegistryParts() {
+		return Collections.unmodifiableMap(registryParts);
 	}
 
 	public void addFilter(DocumentFilter filter) {
@@ -230,6 +240,21 @@ public class SimpleModule implements Module {
 
 	public List<HttpRequestProcessor> getHttpRequestProcessors() {
 		return Collections.unmodifiableList(httpRequestProcessors);
+	}
+
+	public void addRegistryPart(String prefix, ResourceRegistryPart part) {
+		if (registryParts.containsKey(prefix)) {
+			throw new IllegalStateException("part with prefix " + prefix + " is already registered");
+		}
+		registryParts.put(prefix, part);
+	}
+
+	public List<RegistryEntry> getRegistryEntries() {
+		return Collections.unmodifiableList(registryEntries);
+	}
+
+	public void addRegistryEntry(RegistryEntry entry) {
+		registryEntries.add(entry);
 	}
 
 	@SuppressWarnings("rawtypes")

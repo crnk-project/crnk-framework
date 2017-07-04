@@ -1,16 +1,13 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
-
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -41,16 +38,16 @@ public class ResourceFieldImpl implements ResourceField {
 	private final ResourceFieldAccess access;
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType) {
+							 Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, true, false, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true));
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
-			boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
-			ResourceFieldAccess access) {
+							 Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
+							 boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
+							 ResourceFieldAccess access) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -96,7 +93,9 @@ public class ResourceFieldImpl implements ResourceField {
 
 	public String getOppositeResourceType() {
 		PreconditionUtil.assertEquals("not an association", ResourceFieldType.RELATIONSHIP, resourceFieldType);
-		PreconditionUtil.assertNotNull("resourceType must not be null", oppositeResourceType);
+		if (getElementType() != Object.class) {
+			PreconditionUtil.assertNotNull("resourceType must not be null", oppositeResourceType);
+		}
 		return oppositeResourceType;
 	}
 
@@ -146,12 +145,13 @@ public class ResourceFieldImpl implements ResourceField {
 	 * @return Ask Remmo
 	 */
 	public Class<?> getElementType() {
+		if (Iterable.class.isAssignableFrom(type) && getGenericType() instanceof Class) {
+			return Object.class;
+		}
 		if (Iterable.class.isAssignableFrom(type)) {
 			return (Class<?>) ((ParameterizedType) getGenericType()).getActualTypeArguments()[0];
 		}
-		else {
-			return type;
-		}
+		return type;
 	}
 
 	public ResourceInformation getParentResourceInformation() {
@@ -170,7 +170,9 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public void setResourceInformation(ResourceInformation resourceInformation) {
-		if (this.accessor == null) {
+		if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
+			this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
+		} else if (this.accessor == null) {
 			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
 		}
 		this.parentResourceInformation = resourceInformation;

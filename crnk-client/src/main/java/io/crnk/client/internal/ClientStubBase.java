@@ -1,7 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
@@ -9,16 +7,23 @@ import io.crnk.client.TransportException;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
+import io.crnk.client.response.JsonLinksInformation;
+import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
+import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
 
 public class ClientStubBase {
 
@@ -28,9 +33,12 @@ public class ClientStubBase {
 
 	protected JsonApiUrlBuilder urlBuilder;
 
-	public ClientStubBase(CrnkClient client, JsonApiUrlBuilder urlBuilder) {
+	protected Class<?> resourceClass;
+
+	public ClientStubBase(CrnkClient client, JsonApiUrlBuilder urlBuilder, Class<?> resourceClass) {
 		this.client = client;
 		this.urlBuilder = urlBuilder;
+		this.resourceClass = resourceClass;
 	}
 
 	protected Object executeGet(String requestUrl, ResponseType responseType) {
@@ -68,16 +76,35 @@ public class ClientStubBase {
 			LOGGER.debug("response body: {}", body);
 			ObjectMapper objectMapper = client.getObjectMapper();
 
-			if (responseType != ResponseType.NONE) {
+			if (responseType != ResponseType.NONE && Resource.class.equals(resourceClass)) {
+				Document document = objectMapper.readValue(body, Document.class);
+				return toResourceResponse(document, objectMapper);
+			} else if (responseType != ResponseType.NONE) {
 				Document document = objectMapper.readValue(body, Document.class);
 
 				ClientDocumentMapper documentMapper = client.getDocumentMapper();
 				return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
 			}
 			return null;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new TransportException(e);
+		}
+	}
+
+	private static Object toResourceResponse(Document document, ObjectMapper objectMapper) {
+		Object data = document.getData().get();
+		if (data instanceof List) {
+			DefaultResourceList<Resource> list = new DefaultResourceList<>();
+			list.addAll((List<Resource>) data);
+			if (document.getMeta() != null) {
+				list.setMeta(new JsonMetaInformation(document.getMeta(), objectMapper));
+			}
+			if (document.getLinks() != null) {
+				list.setLinks(new JsonLinksInformation(document.getMeta(), objectMapper));
+			}
+			return list;
+		} else {
+			return data;
 		}
 	}
 
@@ -103,12 +130,10 @@ public class ClientStubBase {
 			Throwable throwable = mapper.get().fromErrorResponse(errorResponse);
 			if (throwable instanceof RuntimeException) {
 				return (RuntimeException) throwable;
-			}
-			else {
+			} else {
 				return new ClientException(response.code(), response.message(), throwable);
 			}
-		}
-		else {
+		} else {
 			return new ClientException(response.code(), response.message());
 		}
 	}

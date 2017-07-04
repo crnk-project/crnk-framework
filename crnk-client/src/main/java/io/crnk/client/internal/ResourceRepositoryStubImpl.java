@@ -1,13 +1,10 @@
 package io.crnk.client.internal;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -19,17 +16,19 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.queryParams.QueryParams;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
 		implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
 
 	private ResourceInformation resourceInformation;
 
-	private Class<T> resourceClass;
 
 	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
-			JsonApiUrlBuilder urlBuilder) {
-		super(client, urlBuilder);
-		this.resourceClass = resourceClass;
+									  JsonApiUrlBuilder urlBuilder) {
+		super(client, urlBuilder, resourceClass);
 		this.resourceInformation = resourceInformation;
 	}
 
@@ -94,8 +93,9 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		}
 		if (create) {
 			return null;
-		}
-		else {
+		} else if (entity instanceof Resource) {
+			return ((Resource) entity).getId();
+		} else {
 			ResourceField idField = resourceInformation.getIdField();
 			return idField.getAccessor().getValue(entity);
 		}
@@ -109,7 +109,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 
 	@Override
 	public Class<T> getResourceClass() {
-		return resourceClass;
+		return (Class<T>) resourceClass;
 	}
 
 	@Override

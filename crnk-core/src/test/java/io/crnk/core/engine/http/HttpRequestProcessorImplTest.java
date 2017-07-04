@@ -1,19 +1,5 @@
 package io.crnk.core.engine.http;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -39,6 +25,7 @@ import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
@@ -57,6 +44,17 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+
 public class HttpRequestProcessorImplTest {
 
 	@Rule
@@ -67,6 +65,7 @@ public class HttpRequestProcessorImplTest {
 	private ModuleRegistry moduleRegistry;
 
 	private DocumentFilter documentFilter = Mockito.spy(AbstractDocumentFilter.class);
+	private ServiceUrlProvider serviceUrlProvider;
 
 	@Before
 	public void prepare() {
@@ -75,6 +74,7 @@ public class HttpRequestProcessorImplTest {
 		boot.addModule(new ActionTestModule());
 		boot.boot();
 
+		serviceUrlProvider = boot.getServiceUrlProvider();
 		resourceRegistry = boot.getResourceRegistry();
 		moduleRegistry = boot.getModuleRegistry();
 	}
@@ -133,7 +133,7 @@ public class HttpRequestProcessorImplTest {
 					ResourceAction action = Mockito.mock(ResourceAction.class);
 					Mockito.when(action.getActionType()).thenReturn(RepositoryAction.RepositoryActionType.RESOURCE);
 					actions.put("someAction", action);
-					RepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(null, "actionResource",
+					RepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl("actionResource",
 							resourceInformation, actions);
 					return repositoryInformation;
 
@@ -164,7 +164,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
 		sut.process(requestContext);
 
 		verify(controller, times(1))
@@ -183,7 +183,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
@@ -207,7 +207,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
@@ -229,7 +229,7 @@ public class HttpRequestProcessorImplTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		Map<String, Set<String>> parameters = new HashMap<>();
@@ -257,7 +257,7 @@ public class HttpRequestProcessorImplTest {
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher
-				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry,
+				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry,
 				ExceptionMapperRegistryTest.exceptionMapperRegistry, queryAdapterBuilder);
 
 		Response response = requestDispatcher.dispatchRequest("tasks", null, null, null, null);
@@ -276,7 +276,7 @@ public class HttpRequestProcessorImplTest {
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher
-				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry,
+				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry,
 				ExceptionMapperRegistryTest.exceptionMapperRegistry, queryAdapterBuilder);
 
 		expectedException.expect(ArithmeticException.class);

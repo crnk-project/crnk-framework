@@ -44,9 +44,9 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		ScheduleRepositoryImpl.clear();
 
 		super.setup();
-		RegistryEntry taskEntry = resourceRegistry.findEntry(Task.class);
-		RegistryEntry projectEntry = resourceRegistry.findEntry(Project.class);
-		RegistryEntry scheduleEntry = resourceRegistry.findEntry(Schedule.class);
+		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
+		RegistryEntry projectEntry = resourceRegistry.getEntry(Project.class);
+		RegistryEntry scheduleEntry = resourceRegistry.getEntry(Schedule.class);
 		TaskQuerySpecRepository repo = (TaskQuerySpecRepository) taskEntry.getResourceRepository(null).getResourceRepository();
 
 		repo = Mockito.spy(repo);
@@ -54,8 +54,8 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		scheduleAdapter = scheduleEntry.getResourceRepository(null);
 		projectAdapter = projectEntry.getResourceRepository(null);
 		taskAdapter = taskEntry.getResourceRepository(null);
-		projectRelAdapter = taskEntry.getRelationshipRepositoryForClass(Project.class, null);
-		tasksRelAdapter = projectEntry.getRelationshipRepositoryForClass(Task.class, null);
+		projectRelAdapter = taskEntry.getRelationshipRepositoryForType("projects", null);
+		tasksRelAdapter = projectEntry.getRelationshipRepositoryForType("tasks", null);
 	}
 
 	@Test
@@ -108,8 +108,8 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		Assert.assertEquals(1, tasks.size());
 
 		// relation adapter
-		ResourceField projectField = resourceRegistry.findEntry(Task.class).getResourceInformation().findRelationshipFieldByName("project");
-		ResourceField tasksField = resourceRegistry.findEntry(Project.class).getResourceInformation().findRelationshipFieldByName("tasks");
+		ResourceField projectField = resourceRegistry.getEntry(Task.class).getResourceInformation().findRelationshipFieldByName("project");
+		ResourceField tasksField = resourceRegistry.getEntry(Project.class).getResourceInformation().findRelationshipFieldByName("tasks");
 		projectRelAdapter.setRelation(task, project.getId(), projectField, queryAdapter);
 		Assert.assertNotNull(task.getProject());
 		Assert.assertEquals(1, project.getTasks().size());

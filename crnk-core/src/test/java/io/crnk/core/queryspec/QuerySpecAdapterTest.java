@@ -3,6 +3,7 @@ package io.crnk.core.queryspec;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -22,9 +23,10 @@ public class QuerySpecAdapterTest {
 	@Test
 	public void test() {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
-		resourceRegistry.addEntry(Task.class,
-				new RegistryEntry(new ResourceRepositoryInformationImpl(Task.class, "tasks", new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null)), null, null));
+		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
+		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null);
+		resourceRegistry.addEntry(
+				new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl("tasks", resourceInformation), null, null));
 
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.includeField(Arrays.asList("test"));

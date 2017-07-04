@@ -274,13 +274,12 @@ public class IncludeLookupSetter {
 		List<Serializable> resourceIds = getIds(sourceResources, resourceInformation);
 
 		boolean isMany = Iterable.class.isAssignableFrom(relationshipField.getType());
-		Class<?> relationshipFieldClass = relationshipField.getElementType();
 
 		Set<Resource> loadedTargets = new HashSet<>();
 
 		@SuppressWarnings("rawtypes")
 		RelationshipRepositoryAdapter relationshipRepository =
-				registyEntry.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);
+				registyEntry.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
 		if (relationshipRepository != null) {
 			Map<Object, JsonApiResponse> responseMap;
 			if (isMany) {

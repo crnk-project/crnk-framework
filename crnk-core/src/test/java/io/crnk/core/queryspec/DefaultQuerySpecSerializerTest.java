@@ -1,5 +1,6 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
@@ -10,12 +11,10 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.module.discovery.DefaultResourceLookup;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,42 +25,46 @@ import static org.junit.Assert.assertEquals;
 
 public class DefaultQuerySpecSerializerTest {
 
-	private ModuleRegistry moduleRegistry = new ModuleRegistry();
 	private JsonApiUrlBuilder urlBuilder;
-
-	private DefaultResourceLookup resourceLookup;
-
-	private ResourceRegistryBuilder resourceRegistryBuilder;
 
 	private ResourceRegistry resourceRegistry;
 
 	@Before
 	public void setup() {
-		JsonServiceLocator jsonServiceLocator = new SampleJsonServiceLocator();
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
-		resourceRegistryBuilder = new ResourceRegistryBuilder(moduleRegistry, jsonServiceLocator, resourceInformationBuilder);
-		resourceLookup = new DefaultResourceLookup(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE);
-		resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, new ConstantServiceUrlProvider("http://127.0.0.1"));
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.boot();
+
+		resourceRegistry = boot.getResourceRegistry();
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 	}
 
 	@Test
 	public void testHttpsSchema() {
-		ResourceRegistry resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, new ConstantServiceUrlProvider("https://127.0.0.1"));
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.boot();
+
+		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
 		check("https://127.0.0.1/tasks/", null, new QuerySpec(Task.class));
 	}
 
 	@Test
 	public void testPort() {
-		ResourceRegistry resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.boot();
+
+		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
 		check("https://127.0.0.1:1234/tasks/", null, new QuerySpec(Task.class));
 	}
 
 	@Test(expected = RepositoryNotFoundException.class)
 	public void unknownResourceShouldThrowException() throws InstantiationException, IllegalAccessException {
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		Class<?> notAResourceClass = String.class;
 		urlBuilder.buildUrl(entry.getResourceInformation(), null, new QuerySpec(notAResourceClass));
 	}
@@ -85,7 +88,7 @@ public class DefaultQuerySpecSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(FilterSpec.or(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"), new FilterSpec(Arrays.asList("name"), FilterOperator.GE, "test")));
 
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		urlBuilder.buildUrl(entry.getResourceInformation(), null, querySpec);
 	}
 
@@ -156,7 +159,7 @@ public class DefaultQuerySpecSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("value1", "value2")));
 
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), null, querySpec);
 		String expectedUrl0 = "http://127.0.0.1/tasks/?filter[tasks][name][EQ]=value2&filter[tasks][name][EQ]=value1";
 		String expectedUrl1 = "http://127.0.0.1/tasks/?filter[tasks][name][EQ]=value1&filter[tasks][name][EQ]=value2";
@@ -193,7 +196,7 @@ public class DefaultQuerySpecSerializerTest {
 		querySpec.setLimit(2L);
 		querySpec.setOffset(1L);
 
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), 1L, querySpec, "projects");
 		assertEquals("http://127.0.0.1/tasks/1/relationships/projects/?page[limit]=2&page[offset]=1", actualUrl);
 	}
@@ -213,7 +216,7 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	private void check(String expectedUrl, Object id, QuerySpec querySpec) {
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), id, querySpec);
 		assertEquals(expectedUrl, actualUrl);
 	}

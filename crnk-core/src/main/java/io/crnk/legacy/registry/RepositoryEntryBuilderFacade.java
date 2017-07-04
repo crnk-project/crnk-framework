@@ -65,7 +65,7 @@ public class RepositoryEntryBuilderFacade implements RepositoryEntryBuilder {
 	private boolean contains(List<ResponseRelationshipEntry> targetEntries, ResponseRelationshipEntry directEntry) {
 		boolean contains = false;
 		for (ResponseRelationshipEntry targetEntry : targetEntries) {
-			if (targetEntry.getTargetAffiliation().equals(directEntry.getTargetAffiliation())) {
+			if (targetEntry.getTargetResourceType().equals(directEntry.getTargetResourceType())) {
 				contains = true;
 				break;
 			}

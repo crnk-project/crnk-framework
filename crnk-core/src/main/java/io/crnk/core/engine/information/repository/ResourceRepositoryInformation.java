@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.repository;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.utils.Optional;
 
 import java.util.Map;
 
@@ -12,7 +13,9 @@ public interface ResourceRepositoryInformation extends RepositoryInformation {
 	/**
 	 * @return information about the resources hold in this resource
 	 */
-	ResourceInformation getResourceInformation();
+	Optional<ResourceInformation> getResourceInformation();
+
+	String getResourceType();
 
 	/**
 	 * @return path from which the repository is accessible

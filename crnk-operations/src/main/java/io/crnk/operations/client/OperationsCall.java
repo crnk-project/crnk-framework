@@ -88,7 +88,7 @@ public class OperationsCall {
 		try {
 			String operationsJson = mapper.writer().writeValueAsString(operations.toArray(new Operation[operations.size()]));
 
-			String url = client.getCrnk().getRegistry().getServiceUrlProvider().getUrl() + "/operations";
+			String url = client.getCrnk().getServiceUrlProvider().getUrl() + "/operations";
 			HttpAdapterRequest request = adapter.newRequest(url, HttpMethod.PATCH, operationsJson);
 			HttpAdapterResponse response = request.execute();
 

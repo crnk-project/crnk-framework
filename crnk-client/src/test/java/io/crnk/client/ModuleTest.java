@@ -62,14 +62,14 @@ public class ModuleTest extends AbstractClientTest {
 
 	@Test
 	public void testResourceLookupInitializesRepository() {
-		Assert.assertTrue(client.getRegistry().hasEntry(Schedule.class));
+		Assert.assertNotNull(client.getRegistry().findEntry(Schedule.class));
 
 		// related loaded as well
-		Assert.assertTrue(client.getRegistry().hasEntry(Project.class));
-		Assert.assertTrue(client.getRegistry().hasEntry(Task.class));
+		Assert.assertNotNull(client.getRegistry().findEntry(Project.class));
+		Assert.assertNotNull(client.getRegistry().findEntry(Task.class));
 
 		// unrelated not loaded
-		Assert.assertTrue(client.getRegistry().hasEntry(UnknownResource.class));
+		Assert.assertNotNull(client.getRegistry().findEntry(UnknownResource.class));
 	}
 
 	@Test

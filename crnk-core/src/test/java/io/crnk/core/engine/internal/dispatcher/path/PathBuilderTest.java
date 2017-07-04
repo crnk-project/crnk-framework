@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
@@ -13,6 +14,7 @@ import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -37,18 +39,14 @@ public class PathBuilderTest {
 
 	@Before
 	public void prepare() {
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		boot.boot();
 
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(
-				new ResourceFieldNameTransformer());
-		ResourceRegistryBuilder registryBuilder = new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(),
-				resourceInformationBuilder);
-		ResourceRegistry resourceRegistry = registryBuilder
-				.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry, new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+		pathBuilder = new PathBuilder(boot.getResourceRegistry());
 
-		pathBuilder = new PathBuilder(resourceRegistry);
-
-		RegistryEntry entry = resourceRegistry.findEntry(Task.class);
+		RegistryEntry entry = boot.getResourceRegistry().findEntry(Task.class);
 		ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 		repositoryInformation.getActions().put("someRepositoryAction", Mockito.mock(RepositoryAction.class));
 		repositoryInformation.getActions().put("someResourceAction", Mockito.mock(RepositoryAction.class));

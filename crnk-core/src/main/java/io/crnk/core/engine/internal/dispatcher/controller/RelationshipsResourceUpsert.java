@@ -9,6 +9,7 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
@@ -48,7 +49,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	 * @param queryAdapter                   QueryAdapter
 	 * @param relationshipRepositoryForClass Relationship repository
 	 */
-	protected abstract void processToManyRelationship(Object resource, Class<? extends Serializable> relationshipIdType,
+	protected abstract void processToManyRelationship(Object resource, ResourceInformation targetResourceInformation,
 													  ResourceField resourceField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
 													  RelationshipRepositoryAdapter relationshipRepositoryForClass);
 
@@ -62,7 +63,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	 * @param queryAdapter                   QueryAdapter
 	 * @param relationshipRepositoryForClass Relationship repository
 	 */
-	protected abstract void processToOneRelationship(Object resource, Class<? extends Serializable> relationshipIdType,
+	protected abstract void processToOneRelationship(Object resource, ResourceInformation targetResourceInformation,
 													 ResourceField resourceField, ResourceIdentifier dataBody, QueryAdapter queryAdapter,
 													 RelationshipRepositoryAdapter relationshipRepositoryForClass);
 
@@ -93,25 +94,22 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 		@SuppressWarnings("unchecked")
 		Object resource = extractResource(resourceRepository.findOne(castedResourceId, queryAdapter));
 
-		Class<?> baseRelationshipFieldClass = relationshipField.getType();
-		Class<?> relationshipFieldClass = ClassUtils
-				.getResourceClass(relationshipField.getGenericType(), baseRelationshipFieldClass);
-		@SuppressWarnings("unchecked") Class<? extends Serializable> relationshipIdType = (Class<? extends Serializable>) resourceRegistry
-				.findEntry(relationshipFieldClass).getResourceInformation().getIdField().getType();
+		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
+
 
 		@SuppressWarnings("unchecked")
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
-				.getRelationshipRepositoryForClass(relationshipFieldClass, parameterProvider);
-		if (Iterable.class.isAssignableFrom(baseRelationshipFieldClass)) {
+				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+		if (Iterable.class.isAssignableFrom(relationshipField.getType())) {
 			Iterable<ResourceIdentifier> dataBodies = (Iterable<ResourceIdentifier>) (requestBody.isMultiple() ? requestBody.getData().get() : Collections.singletonList(requestBody.getData().get()));
-			processToManyRelationship(resource, relationshipIdType, relationshipField, dataBodies, queryAdapter,
+			processToManyRelationship(resource, targetInformation, relationshipField, dataBodies, queryAdapter,
 					relationshipRepositoryForClass);
 		} else {
 			if (requestBody.isMultiple()) {
 				throw new RequestBodyException(HttpMethod.POST, resourceName, "Multiple data in body");
 			}
 			ResourceIdentifier dataBody = (ResourceIdentifier) requestBody.getData().get();
-			processToOneRelationship(resource, relationshipIdType, relationshipField, dataBody, queryAdapter,
+			processToOneRelationship(resource, targetInformation, relationshipField, dataBody, queryAdapter,
 					relationshipRepositoryForClass);
 		}
 

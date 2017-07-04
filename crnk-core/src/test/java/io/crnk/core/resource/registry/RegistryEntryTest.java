@@ -3,15 +3,18 @@ package io.crnk.core.resource.registry;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
-import io.crnk.core.mock.models.*;
+import io.crnk.core.mock.models.Document;
+import io.crnk.core.mock.models.Memorandum;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.Thing;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
@@ -20,6 +23,7 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -37,11 +41,13 @@ public class RegistryEntryTest {
 	public void onValidRelationshipClassShouldReturnRelationshipRepository() throws Exception {
 		// GIVEN
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		RegistryEntry sut = new RegistryEntry(new ResourceRepositoryInformationImpl(null, null, null), new AnnotatedResourceEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskRepository.class)),
+		ResourceInformation resourceInformation = Mockito.mock(ResourceInformation.class);
+		RegistryEntry sut = new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(null, resourceInformation, null), new AnnotatedResourceEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskRepository.class)),
 				(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class))));
+		sut.initialize(moduleRegistry);
 
 		// WHEN
-		RelationshipRepositoryAdapter<Task, ?, ?, ?> relationshipRepository = sut.getRelationshipRepositoryForClass(Project.class, null);
+		RelationshipRepositoryAdapter<Task, ?, ?, ?> relationshipRepository = sut.getRelationshipRepositoryForType("projects", null);
 
 		// THEN
 		assertThat(relationshipRepository).isExactlyInstanceOf(RelationshipRepositoryAdapter.class);
@@ -50,21 +56,21 @@ public class RegistryEntryTest {
 	@Test
 	public void onInvalidRelationshipClassShouldThrowException() throws Exception {
 		// GIVEN
-		ResourceRepositoryInformation resourceInformation = newRepositoryInformation(Task.class, "tasks");
-		RegistryEntry sut = new RegistryEntry(resourceInformation, null,
-				(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class))));
+		ResourceRepositoryInformation repositoryInformation = newRepositoryInformation(Task.class, "tasks");
+		List relRepos =	(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class)));
+		RegistryEntry sut = new RegistryEntry(repositoryInformation.getResourceInformation().get(), repositoryInformation, null, relRepos);
 
 		// THEN
 		expectedException.expect(RelationshipRepositoryNotFoundException.class);
 
 		// WHEN
-		sut.getRelationshipRepositoryForClass(User.class, null);
+		sut.getRelationshipRepositoryForType("users", null);
 	}
 
 	private <T> ResourceRepositoryInformation newRepositoryInformation(Class<T> repositoryClass, String path) {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		TypeParser typeParser = moduleRegistry.getTypeParser();
-		return new ResourceRepositoryInformationImpl(null, path, new ResourceInformation(typeParser, Task.class, path, null, null));
+		return new ResourceRepositoryInformationImpl( path, new ResourceInformation(typeParser, Task.class, path, null, null));
 	}
 
 	@Test
