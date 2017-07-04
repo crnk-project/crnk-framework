@@ -19,6 +19,7 @@ The feature set includes:
    `filter[project.name][NEQ]=someValue` or `include=project.tasks`.
 - support for entity inheritance by allowing sorting, filtering and inclusions
   to refer to attributes on subtypes.
+- support for Jackson annotations to customize entity attributes on the JSON API layer, see <<jackson_annotations,here>>.
 - DTO mapping support to map entities to DTOs before sending them to clients.
 - JPA Criteria API and QueryDSL support to issue queries.
 - filter API to intercept and modify issued queries.
