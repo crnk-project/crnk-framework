@@ -1,6 +1,7 @@
 import {QTask, Task} from './task'
-import {BeanPath, BooleanExpression, QTypedManyResourceRelationship, QTypedOneResourceRelationship, StringExpression} from '@crnk/binding'
 import {DefaultPagedLinksInformation} from '@crnk/core/'
+import {BeanPath, BooleanExpression, StringExpression} from '@crnk/ngrx/binding/expression'
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/ngrx/binding/stub'
 import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
 
 export module Schedule {

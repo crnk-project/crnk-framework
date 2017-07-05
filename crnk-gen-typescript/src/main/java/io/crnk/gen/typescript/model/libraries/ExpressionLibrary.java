@@ -7,6 +7,10 @@ import io.crnk.gen.typescript.model.TSType;
 
 public class ExpressionLibrary {
 
+	public static final TSSource EXPRESSION_SOURCE = new TSSource();
+
+	public static final TSSource JSONAPI_SOURCE = new TSSource();
+
 	public static final TSClassType BEAN_PATH;
 
 	public static final TSClassType STRING_EXPRESSION;
@@ -20,32 +24,32 @@ public class ExpressionLibrary {
 	public static final TSClassType QTYPED_MANY_RESOURCE_RELATIONSHIP;
 
 	static {
-		TSSource ngrxJsonApiSource = new TSSource();
-		ngrxJsonApiSource.setNpmPackage("@crnk/binding");
+		EXPRESSION_SOURCE.setNpmPackage("@crnk/ngrx/binding/expression");
+		JSONAPI_SOURCE.setNpmPackage("@crnk/ngrx/binding/stub");
 
 		BEAN_PATH = new TSClassType();
 		BEAN_PATH.setName("BeanPath");
-		BEAN_PATH.setParent(ngrxJsonApiSource);
+		BEAN_PATH.setParent(EXPRESSION_SOURCE);
 
 		STRING_EXPRESSION = new TSClassType();
 		STRING_EXPRESSION.setName("StringExpression");
-		STRING_EXPRESSION.setParent(ngrxJsonApiSource);
+		STRING_EXPRESSION.setParent(EXPRESSION_SOURCE);
 
 		NUMBER_EXPRESSION = new TSClassType();
 		NUMBER_EXPRESSION.setName("NumberExpression");
-		NUMBER_EXPRESSION.setParent(ngrxJsonApiSource);
+		NUMBER_EXPRESSION.setParent(EXPRESSION_SOURCE);
 
 		BOOLEAN_EXPRESSION = new TSClassType();
 		BOOLEAN_EXPRESSION.setName("BooleanExpression");
-		BOOLEAN_EXPRESSION.setParent(ngrxJsonApiSource);
+		BOOLEAN_EXPRESSION.setParent(EXPRESSION_SOURCE);
 
 		QTYPED_ONE_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_ONE_RESOURCE_RELATIONSHIP.setName("QTypedOneResourceRelationship");
-		QTYPED_ONE_RESOURCE_RELATIONSHIP.setParent(ngrxJsonApiSource);
+		QTYPED_ONE_RESOURCE_RELATIONSHIP.setParent(JSONAPI_SOURCE);
 
 		QTYPED_MANY_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_MANY_RESOURCE_RELATIONSHIP.setName("QTypedManyResourceRelationship");
-		QTYPED_MANY_RESOURCE_RELATIONSHIP.setParent(ngrxJsonApiSource);
+		QTYPED_MANY_RESOURCE_RELATIONSHIP.setParent(JSONAPI_SOURCE);
 	}
 
 	private ExpressionLibrary() {

@@ -40,8 +40,6 @@ public class GenerateTypescriptTaskTest {
 
 		outputDir = testProjectDir.getRoot();
 
-		outputDir = new File("c:/projects/temp");
-
 		Project project = ProjectBuilder.builder().withName("crnk-gen-typescript-test").withProjectDir(outputDir).build();
 		project.setVersion("0.0.1");
 

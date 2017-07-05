@@ -2,6 +2,7 @@ package io.crnk.gen.typescript.transform;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -45,6 +46,7 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		primitiveMapping.put(LocalDateTime.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(OffsetDateTime.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(OffsetDateTime.class, TSPrimitiveType.STRING);
+		primitiveMapping.put(Duration.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(byte[].class, TSPrimitiveType.STRING);
 	}
 
