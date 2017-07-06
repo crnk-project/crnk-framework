@@ -6,12 +6,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.utils.Optional;
+
 
 /**
  * Provides reflection methods for parsing information about a class.
@@ -22,8 +24,201 @@ public class ClassUtils {
 
 	public static final String PREFIX_GETTER_GET = "get";
 
+
+	private static final Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap();
+
+	private static final Map<Class<?>, Class<?>> wrapperPrimitiveMap;
+
+	static {
+		primitiveWrapperMap.put(Boolean.TYPE, Boolean.class);
+		primitiveWrapperMap.put(Byte.TYPE, Byte.class);
+		primitiveWrapperMap.put(Character.TYPE, Character.class);
+		primitiveWrapperMap.put(Short.TYPE, Short.class);
+		primitiveWrapperMap.put(Integer.TYPE, Integer.class);
+		primitiveWrapperMap.put(Long.TYPE, Long.class);
+		primitiveWrapperMap.put(Double.TYPE, Double.class);
+		primitiveWrapperMap.put(Float.TYPE, Float.class);
+		primitiveWrapperMap.put(Void.TYPE, Void.TYPE);
+		wrapperPrimitiveMap = new HashMap();
+		Iterator i$ = primitiveWrapperMap.keySet().iterator();
+
+		while (i$.hasNext()) {
+			Class primitiveClass = (Class) i$.next();
+			Class wrapperClass = (Class) primitiveWrapperMap.get(primitiveClass);
+			if (!primitiveClass.equals(wrapperClass)) {
+				wrapperPrimitiveMap.put(wrapperClass, primitiveClass);
+			}
+		}
+	}
+
 	private ClassUtils() {
 	}
+
+
+	/**
+	 * Returns whether the given {@code type} is a primitive wrapper ({@link Boolean}, {@link Byte}, {@link Character}, {@link Short},
+	 * {@link Integer}, {@link Long}, {@link Double}, {@link Float}).
+	 *
+	 * @param type
+	 *            The class to query or null.
+	 * @return true if the given {@code type} is a primitive wrapper ({@link Boolean}, {@link Byte}, {@link Character}, {@link Short},
+	 *         {@link Integer}, {@link Long}, {@link Double}, {@link Float}).
+	 * @since 3.1
+	 */
+	public static boolean isPrimitiveWrapper(final Class<?> type) {
+		return wrapperPrimitiveMap.containsKey(type);
+	}
+
+
+	/**
+	 * <p>Checks if one {@code Class} can be assigned to a variable of
+	 * another {@code Class}.</p>
+	 *
+	 * <p>Unlike the {@link Class#isAssignableFrom(java.lang.Class)} method,
+	 * this method takes into account widenings of primitive classes and
+	 * {@code null}s.</p>
+	 *
+	 * <p>Primitive widenings allow an int to be assigned to a long, float or
+	 * double. This method returns the correct result for these cases.</p>
+	 *
+	 * <p>{@code Null} may be assigned to any reference type. This method
+	 * will return {@code true} if {@code null} is passed in and the
+	 * toClass is non-primitive.</p>
+	 *
+	 * <p>Specifically, this method tests whether the type represented by the
+	 * specified {@code Class} parameter can be converted to the type
+	 * represented by this {@code Class} object via an identity conversion
+	 * widening primitive or widening reference conversion. See
+	 * <em><a href="http://docs.oracle.com/javase/specs/">The Java Language Specification</a></em>,
+	 * sections 5.1.1, 5.1.2 and 5.1.4 for details.</p>
+	 *
+	 * @param cls  the Class to check, may be null
+	 * @param toClass  the Class to try to assign into, returns false if null
+	 * @return {@code true} if assignment possible
+	 */
+	public static boolean isAssignable(Class<?> cls, final Class<?> toClass) {
+		final boolean autoboxing = true;
+		if (toClass == null) {
+			return false;
+		}
+		// have to check for null, as isAssignableFrom doesn't
+		if (cls == null) {
+			return !toClass.isPrimitive();
+		}
+		//autoboxing:
+		if (autoboxing) {
+			if (cls.isPrimitive() && !toClass.isPrimitive()) {
+				cls = primitiveToWrapper(cls);
+				if (cls == null) {
+					return false;
+				}
+			}
+			if (toClass.isPrimitive() && !cls.isPrimitive()) {
+				cls = wrapperToPrimitive(cls);
+				if (cls == null) {
+					return false;
+				}
+			}
+		}
+		if (cls.equals(toClass)) {
+			return true;
+		}
+		if (cls.isPrimitive()) {
+			if (toClass.isPrimitive() == false) {
+				return false;
+			}
+			if (Integer.TYPE.equals(cls)) {
+				return Long.TYPE.equals(toClass)
+						|| Float.TYPE.equals(toClass)
+						|| Double.TYPE.equals(toClass);
+			}
+			if (Long.TYPE.equals(cls)) {
+				return Float.TYPE.equals(toClass)
+						|| Double.TYPE.equals(toClass);
+			}
+			if (Boolean.TYPE.equals(cls)) {
+				return false;
+			}
+			if (Double.TYPE.equals(cls)) {
+				return false;
+			}
+			if (Float.TYPE.equals(cls)) {
+				return Double.TYPE.equals(toClass);
+			}
+			if (Character.TYPE.equals(cls)) {
+				return Integer.TYPE.equals(toClass)
+						|| Long.TYPE.equals(toClass)
+						|| Float.TYPE.equals(toClass)
+						|| Double.TYPE.equals(toClass);
+			}
+			if (Short.TYPE.equals(cls)) {
+				return Integer.TYPE.equals(toClass)
+						|| Long.TYPE.equals(toClass)
+						|| Float.TYPE.equals(toClass)
+						|| Double.TYPE.equals(toClass);
+			}
+			if (Byte.TYPE.equals(cls)) {
+				return Short.TYPE.equals(toClass)
+						|| Integer.TYPE.equals(toClass)
+						|| Long.TYPE.equals(toClass)
+						|| Float.TYPE.equals(toClass)
+						|| Double.TYPE.equals(toClass);
+			}
+			// should never get here
+			return false;
+		}
+		return toClass.isAssignableFrom(cls);
+	}
+
+	public static Class<?> primitiveToWrapper(Class<?> cls) {
+		Class convertedClass = cls;
+		if (cls != null && cls.isPrimitive()) {
+			convertedClass = (Class) primitiveWrapperMap.get(cls);
+		}
+
+		return convertedClass;
+	}
+
+	public static Class<?>[] primitivesToWrappers(Class... classes) {
+		if (classes == null) {
+			return null;
+		}
+		else if (classes.length == 0) {
+			return classes;
+		}
+		else {
+			Class[] convertedClasses = new Class[classes.length];
+
+			for (int i = 0; i < classes.length; ++i) {
+				convertedClasses[i] = primitiveToWrapper(classes[i]);
+			}
+
+			return convertedClasses;
+		}
+	}
+
+	public static Class<?> wrapperToPrimitive(Class<?> cls) {
+		return (Class) wrapperPrimitiveMap.get(cls);
+	}
+
+	public static Class<?>[] wrappersToPrimitives(Class... classes) {
+		if (classes == null) {
+			return null;
+		}
+		else if (classes.length == 0) {
+			return classes;
+		}
+		else {
+			Class[] convertedClasses = new Class[classes.length];
+
+			for (int i = 0; i < classes.length; ++i) {
+				convertedClasses[i] = wrapperToPrimitive(classes[i]);
+			}
+
+			return convertedClasses;
+		}
+	}
+
 
 	@Deprecated // at least current use cases should be eliminated and replace by resourceType
 	public static Class<?> getResourceClass(Type genericType, Class baseClass) {
@@ -50,7 +245,8 @@ public class ClassUtils {
 		try {
 			Class.forName(className);
 			return true;
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			return false;
 		}
 	}
@@ -85,9 +281,9 @@ public class ClassUtils {
 	/**
 	 * Returns an instance of bean's annotation
 	 *
-	 * @param beanClass       class to be searched for
+	 * @param beanClass class to be searched for
 	 * @param annotationClass type of an annotation
-	 * @param <T>             type of an annotation
+	 * @param <T> type of an annotation
 	 * @return an instance of an annotation
 	 */
 	public static <T extends Annotation> Optional<T> getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
@@ -192,7 +388,8 @@ public class ClassUtils {
 
 		try {
 			return beanClass.getMethod("set" + upperCaseName, fieldType);
-		} catch (NoSuchMethodException e1) {
+		}
+		catch (NoSuchMethodException e1) {
 			return null;
 		}
 	}
@@ -225,7 +422,8 @@ public class ClassUtils {
 		return results;
 	}
 
-	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap, LinkedList<Method> results) {
+	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap,
+			LinkedList<Method> results) {
 		for (Method method : currentClass.getDeclaredMethods()) {
 			if (!method.isSynthetic() && isGetter(method)) {
 				Method v = resultMap.get(method.getName());
@@ -267,7 +465,7 @@ public class ClassUtils {
 	/**
 	 * Return a first occurrence of a method annotated with specified annotation
 	 *
-	 * @param searchClass     class to be searched
+	 * @param searchClass class to be searched
 	 * @param annotationClass annotation class
 	 * @return annotated method or null
 	 */
@@ -287,13 +485,14 @@ public class ClassUtils {
 	 * Create a new instance of a object using a default constructor
 	 *
 	 * @param clazz new instance class
-	 * @param <T>   new instance class
+	 * @param <T> new instance class
 	 * @return new instance
 	 */
 	public static <T> T newInstance(Class<T> clazz) {
 		try {
 			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+		}
+		catch (InstantiationException | IllegalAccessException e) {
 			throw new ResourceException(String.format("couldn't create a new instance of %s", clazz));
 		}
 	}
@@ -342,9 +541,11 @@ public class ClassUtils {
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
-		} else if (type instanceof ParameterizedType) {
+		}
+		else if (type instanceof ParameterizedType) {
 			return getRawType(((ParameterizedType) type).getRawType());
-		} else {
+		}
+		else {
 			throw new IllegalStateException("unknown type: " + type);
 		}
 	}

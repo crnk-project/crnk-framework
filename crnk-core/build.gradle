@@ -2,13 +2,13 @@ apply plugin: 'java'
 
 dependencies {
 
-	compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 	compile group: 'net.jodah', name: 'typetools', version: '0.4.4'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.13'
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.7'
+	compileOnly group: 'org.reflections', name: 'reflections', version: '0.9.9'
 
+	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 	testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.13'
 	testCompile group: 'net.javacrumbs.json-unit', name: 'json-unit-fluent', version: '1.5.3'
 	testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '1.7.2'

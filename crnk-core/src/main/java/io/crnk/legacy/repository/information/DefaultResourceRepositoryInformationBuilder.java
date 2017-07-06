@@ -1,5 +1,8 @@
 package io.crnk.legacy.repository.information;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
@@ -15,9 +18,6 @@ import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class DefaultResourceRepositoryInformationBuilder implements RepositoryInformationBuilder {
 

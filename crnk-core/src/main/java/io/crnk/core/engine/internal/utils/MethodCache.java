@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.crnk.core.utils.Optional;
-import org.apache.commons.lang3.ObjectUtils;
 
 public class MethodCache {
 
@@ -58,7 +57,7 @@ public class MethodCache {
 				return false;
 			}
 			MethodCacheKey other = (MethodCacheKey) obj;
-			return ObjectUtils.equals(clazz, other.clazz) && ObjectUtils.equals(name, other.name) && Arrays
+			return CompareUtils.isEquals(clazz, other.clazz) && CompareUtils.isEquals(name, other.name) && Arrays
 					.equals(parameters, other.parameters);
 		}
 	}
