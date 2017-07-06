@@ -6,7 +6,8 @@ import io.crnk.validation.internal.ValidationExceptionMapper;
 
 public class ValidationModule implements Module {
 
-	private ValidationModule() {
+	// protected for CDI
+	protected ValidationModule() {
 	}
 
 	/**

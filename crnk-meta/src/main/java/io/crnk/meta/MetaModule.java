@@ -1,5 +1,9 @@
 package io.crnk.meta;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -11,18 +15,30 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import io.crnk.meta.internal.MetaRelationshipRepository;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaCollectionType;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaInterface;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaProvider;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MetaModule implements Module, InitializingModule {
 
 	private MetaLookup lookup = new MetaLookup();
 
 	private ModuleContext context;
+
+	// make protected for CDI in the future and remove deprecation
+	@Deprecated
+	public MetaModule(){
+	}
 
 	public static MetaModule create() {
 		return new MetaModule();

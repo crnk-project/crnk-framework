@@ -2,6 +2,7 @@ package io.crnk.brave;
 
 import com.github.kristofa.brave.Brave;
 import io.crnk.client.http.HttpAdapter;
+import io.crnk.test.mock.ClassTestUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,11 @@ public class BasicBraveModuleTest {
 	public void setup() {
 		brave = Mockito.mock(Brave.class);
 		module = BraveModule.newServerModule(brave);
+	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(BraveModule.class);
 	}
 
 	@Test

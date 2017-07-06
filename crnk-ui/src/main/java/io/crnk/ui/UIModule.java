@@ -9,7 +9,12 @@ public class UIModule implements Module {
 
 	private final UIModuleConfig config;
 
-	private UIModule(UIModuleConfig config) {
+	// protected for CDI
+	protected UIModule() {
+		config = null;
+	}
+
+	protected UIModule(UIModuleConfig config) {
 		this.config = config;
 	}
 

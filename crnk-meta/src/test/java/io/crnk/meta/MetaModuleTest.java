@@ -11,4 +11,10 @@ public class MetaModuleTest {
 		MetaModule module = MetaModule.create();
 		Assert.assertEquals("meta", module.getModuleName());
 	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		// TODO ClassTestUtils.assertProtectedConstructor(MetaModuleTest.class);
+	}
+
 }

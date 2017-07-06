@@ -1,5 +1,7 @@
 package io.crnk.home;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.http.HttpMethod;
@@ -12,8 +14,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 
-import java.io.IOException;
-
 /**
  * Displays a list of available resources in the root directory.
  */
@@ -23,9 +23,8 @@ public class HomeModule implements Module {
 
 	public static final String JSON_CONTENT_TYPE = "application/json";
 
-
-	private HomeModule() {
-
+	// protected for CDI
+	protected HomeModule() {
 	}
 
 	public static HomeModule create() {

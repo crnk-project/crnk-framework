@@ -22,7 +22,8 @@ public class OperationsModule implements Module {
 		return new OperationsModule();
 	}
 
-	private OperationsModule(){
+	// protected for CDI
+	protected OperationsModule(){
 	}
 
 	public void addFilter(io.crnk.operations.server.OperationFilter filter) {

@@ -1,19 +1,26 @@
 package io.crnk.jpa.repository;
 
+import java.util.Set;
+import javax.persistence.EntityManager;
+
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.model.TestEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
+import io.crnk.test.mock.ClassTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import java.util.Set;
-
 @Transactional
 public class JpaModuleTest extends AbstractJpaTest {
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(JpaModule.class);
+	}
+
 
 	@Override
 	protected void setupModule(JpaModule module) {

@@ -33,6 +33,10 @@ public class BraveModule implements Module, HttpAdapterAware {
 
 	private SpanNameProvider spanNameProvider;
 
+	// protected for CDI
+	protected BraveModule(){
+	}
+
 	private BraveModule(Brave brave, boolean server) {
 		this.brave = brave;
 		this.server = server;

@@ -1,5 +1,10 @@
 package io.crnk.security;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -10,11 +15,6 @@ import io.crnk.core.utils.Supplier;
 import io.crnk.security.internal.SecurityFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class SecurityModule implements InitializingModule {
 
@@ -33,6 +33,10 @@ public class SecurityModule implements InitializingModule {
 	};
 
 	private SecurityConfig config;
+
+	// protected for CDI
+	protected SecurityModule(){
+	}
 
 	protected SecurityModule(SecurityConfig config) {
 		this.config = config;
