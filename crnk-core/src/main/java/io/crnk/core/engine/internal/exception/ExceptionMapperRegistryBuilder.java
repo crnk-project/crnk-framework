@@ -1,14 +1,14 @@
 package io.crnk.core.engine.internal.exception;
 
-import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
-import org.apache.commons.lang3.reflect.TypeUtils;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.crnk.core.engine.error.ExceptionMapper;
+import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.internal.utils.TypeUtils;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 
 public final class ExceptionMapperRegistryBuilder {
 	private final Set<ExceptionMapperType> exceptionMappers = new HashSet<>();
@@ -41,7 +41,8 @@ public final class ExceptionMapperRegistryBuilder {
 		}
 
 		for (Type type : types) {
-			if (type instanceof ParameterizedType && (TypeUtils.isAssignable(((ParameterizedType) type).getRawType(), JsonApiExceptionMapper.class)
+			if (type instanceof ParameterizedType && (
+					TypeUtils.isAssignable(((ParameterizedType) type).getRawType(), JsonApiExceptionMapper.class)
 					|| TypeUtils.isAssignable(((ParameterizedType) type).getRawType(), ExceptionMapper.class))) {
 				//noinspection unchecked
 				return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];

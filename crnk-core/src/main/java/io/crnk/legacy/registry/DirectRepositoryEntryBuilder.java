@@ -1,24 +1,24 @@
 package io.crnk.legacy.registry;
 
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.internal.DirectResponseResourceEntry;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.exception.RepositoryInstanceNotFoundException;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
 import net.jodah.typetools.TypeResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Repository entries builder for classes implementing document interfaces.

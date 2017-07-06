@@ -3,8 +3,6 @@ apply plugin: 'java'
 dependencies {
 	compile project(':crnk-core')
 	compile project(':crnk-meta')
-
-	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.2'
 	compileOnly group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
 
 	testCompile project(':crnk-client')

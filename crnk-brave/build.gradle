@@ -10,7 +10,6 @@ dependencies {
 
 	compile group: 'io.zipkin.brave', name: 'brave-okhttp', version: '3.14.1'
 	compile group: 'io.zipkin.brave', name: 'brave-apache-http-interceptors', version: '3.14.1'
-	compile group: 'com.google.guava', name: 'guava', version: '15.0'
 
 	// TODO make testCompile, but BraveModule needs dependency cleanup for server-side
 	compile project(':crnk-client')
