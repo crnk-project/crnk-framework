@@ -16,7 +16,6 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -54,7 +53,6 @@ public class GenerateTypescriptTask extends DefaultTask {
 		return sourceSets.getByName("main");
 	}
 
-	@OutputDirectory
 	public File getOutputDirectory() {
 		Project project = getProject();
 		String srcDirectoryPath = "generated/source/typescript/";

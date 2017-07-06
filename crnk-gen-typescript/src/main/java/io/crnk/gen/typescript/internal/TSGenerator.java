@@ -131,7 +131,16 @@ public class TSGenerator {
 			packageJson.put("name", config.getNpmPackageName());
 			packageJson.put("version", config.getNpmPackageVersion());
 
-			mapper.writer().writeValue(packageJsonFile, packageJson);
+			// match what is expected by NPM. Otherwise NPM will reformat it and up-to-date checking will fail
+			// the first time (also platform specific)
+			String text = mapper.writer().writeValueAsString(packageJson);
+			text = text.replace(" : ", ": ");
+			text = text + "\n";
+			text = text.replace(System.lineSeparator(), "\n");
+
+			try(FileWriter writer = new FileWriter(packageJsonFile)) {
+				writer.write(text);
+			}
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(e);
