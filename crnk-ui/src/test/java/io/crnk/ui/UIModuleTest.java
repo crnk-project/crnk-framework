@@ -4,6 +4,7 @@ package io.crnk.ui;
 import java.io.IOException;
 
 import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.ui.internal.UIHttpRequestProcessor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +17,11 @@ public class UIModuleTest {
 	public void ui() {
 		UIModule module = UIModule.create(new UIModuleConfig());
 		Assert.assertEquals("ui", module.getModuleName());
+	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(UIModule.class);
 	}
 
 	@Test

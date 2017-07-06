@@ -1,5 +1,7 @@
 package io.crnk.home;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
@@ -7,13 +9,12 @@ import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.test.mock.ClassTestUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class HomeModuleTest {
 
@@ -30,6 +31,11 @@ public class HomeModuleTest {
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
 				()));
 		boot.boot();
+	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(HomeModule.class);
 	}
 
 	@Test
@@ -58,7 +64,8 @@ public class HomeModuleTest {
 
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(anyRequest ? "*" : HomeModule.JSON_HOME_CONTENT_TYPE);
+		Mockito.when(requestContextBase.getRequestHeader("Accept"))
+				.thenReturn(anyRequest ? "*" : HomeModule.JSON_HOME_CONTENT_TYPE);
 
 		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);

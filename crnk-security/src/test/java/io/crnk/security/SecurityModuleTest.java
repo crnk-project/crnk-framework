@@ -14,6 +14,7 @@ import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
 import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
+import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.test.mock.models.UnknownResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,6 +66,11 @@ public class SecurityModuleTest {
 	@Test
 	public void testModuleName() {
 		Assert.assertEquals("security", securityModule.getModuleName());
+	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(SecurityModule.class);
 	}
 
 	@Test

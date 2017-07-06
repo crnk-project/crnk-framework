@@ -3,6 +3,7 @@ package io.crnk.operations;
 import io.crnk.operations.server.OperationFilter;
 import io.crnk.operations.server.OperationsModule;
 import io.crnk.operations.server.order.OperationOrderStrategy;
+import io.crnk.test.mock.ClassTestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -14,6 +15,11 @@ public class OperationsModuleTest extends AbstractOperationsTest {
 	@Test
 	public void testName() {
 		Assert.assertEquals("operations", module.getModuleName());
+	}
+
+	@Test
+	public void hasProtectedConstructor() {
+		ClassTestUtils.assertProtectedConstructor(OperationsModule.class);
 	}
 
 	@Test

@@ -115,7 +115,8 @@ public class JpaModule implements Module {
 	/**
 	 * Constructor used on client side.
 	 */
-	private JpaModule() {
+	// protected for CDI
+	protected JpaModule() {
 		this.jpaMetaLookup.addProvider(new JpaMetaProvider());
 		this.resourceMetaProvider = new ResourceMetaProvider(false);
 		this.resourceMetaLookup.addProvider(resourceMetaProvider);

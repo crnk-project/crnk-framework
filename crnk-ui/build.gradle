@@ -6,6 +6,7 @@ apply plugin:'java'
 
 dependencies{
 	compile project(':crnk-core')
+	testCompile project(':crnk-test')
 }
 
 sourceSets {
