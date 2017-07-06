@@ -2,9 +2,12 @@ package io.crnk.gen.typescript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
 import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
 import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
 import io.crnk.gen.typescript.processor.TSImportProcessor;
@@ -40,9 +43,16 @@ public class TSGeneratorConfiguration {
 
 	private String npmDescription = null;
 
-	private Map<String, String> npmDependencies = new HashMap<>();
+	private Map<String, String> npmPeerDependencies = new HashMap<>();
 
 	private Map<String, String> npmDevDependencies = new HashMap<>();
+
+	private Set<String> includes = new HashSet<>();
+
+	private Set<String> excludes = new HashSet<>();
+
+	// TODO setup crnk frontend library project
+	private String expressionLibrary;
 
 	public TSGeneratorConfiguration() {
 		sourceProcessors.add(new TSExpressionObjectProcessor());
@@ -62,12 +72,50 @@ public class TSGeneratorConfiguration {
 		npmPackageMapping.put("io.crnk.jpa", crnkNpm);
 		npmPackageMapping.put("io.crnk.core.resource.links", crnkNpm);
 
-		npmDependencies.put("ngrx-json-api", ">=1.2.0");
-		npmDependencies.put("rxjs", ">=5.2.0");
+		npmPeerDependencies.put("ngrx-json-api", "1.2.0");
+		npmPeerDependencies.put("rxjs", "5.2.0");
+		npmPeerDependencies.put("lodash", "4.17.4");
 
-		npmDevDependencies.put("typescript", ">=2.1.5");
-		npmDevDependencies.put("ncp", ">=2.0.0");
-		npmDevDependencies.put("rimraf", ">=2.5.4");
+		npmDevDependencies.put("typescript", "2.2.0");
+		npmDevDependencies.put("ncp", "2.0.0");
+		npmDevDependencies.put("rimraf", "2.5.4");
+	}
+
+	/**
+	 * @return list of meta ids (or prefixes there of) that should be generated. An empty list generates everything.
+	 */
+	public Set<String> getIncludes() {
+		return includes;
+	}
+
+	public void setIncludes(Set<String> includes) {
+		this.includes = includes;
+	}
+
+	/**
+	 * TODO internal use only, crnk-ngrx frontend library needs to be setup
+	 */
+	@Deprecated
+	public String getExpressionLibrary() {
+		return expressionLibrary;
+	}
+
+	public void setExpressionLibrary(String expressionLibrary) {
+		this.expressionLibrary = expressionLibrary;
+
+		ExpressionLibrary.EXPRESSION_SOURCE.setNpmPackage(expressionLibrary + "/binding/expression");
+		ExpressionLibrary.JSONAPI_SOURCE.setNpmPackage(expressionLibrary + "/binding/jsonapi");
+	}
+
+	/**
+	 * @return list of meta ids (or prefixes there of) that should not be exported to typescript
+	 */
+	public Set<String> getExcludes() {
+		return excludes;
+	}
+
+	public void setExcludes(Set<String> excludes) {
+		this.excludes = excludes;
 	}
 
 	public boolean getGenerateExpressions() {
@@ -173,12 +221,28 @@ public class TSGeneratorConfiguration {
 	}
 
 
+	/**
+	 * @Deprecated use npmPeerDependencies
+	 */
+	@Deprecated
 	public Map<String, String> getNpmDependencies() {
-		return npmDependencies;
+		return npmPeerDependencies;
 	}
 
+	/**
+	 * @Deprecated use npmPeerDependencies
+	 */
+	@Deprecated
 	public void setNpmDependencies(Map<String, String> npmDependencies) {
-		this.npmDependencies = npmDependencies;
+		this.npmPeerDependencies = npmDependencies;
+	}
+
+	public Map<String, String> getPeerNpmDependencies() {
+		return npmPeerDependencies;
+	}
+
+	public void setPeerNpmDependencies(Map<String, String> npmPeerDependencies) {
+		this.npmPeerDependencies = npmPeerDependencies;
 	}
 
 	public Map<String, String> getNpmDevDependencies() {

@@ -111,12 +111,12 @@ public class TSGenerator {
 			packageJson.put("version", config.getNpmPackageVersion());
 			packageJson.put("description", config.getNpmDescription());
 			packageJson.put("license", config.getNpmLicense());
-			ObjectNode dependencies = packageJson.putObject("dependencies");
-			for (Map.Entry<String, String> entry : config.getNpmDependencies().entrySet()) {
-				dependencies.put(entry.getKey(), entry.getValue());
-			}
-
+			ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
 			ObjectNode devDependencies = packageJson.putObject("devDependencies");
+			for (Map.Entry<String, String> entry : config.getPeerNpmDependencies().entrySet()) {
+				peerDependencies.put(entry.getKey(), entry.getValue());
+				devDependencies.put(entry.getKey(), entry.getValue());
+			}
 			for (Map.Entry<String, String> entry : config.getNpmDevDependencies().entrySet()) {
 				devDependencies.put(entry.getKey(), entry.getValue());
 			}
@@ -131,7 +131,16 @@ public class TSGenerator {
 			packageJson.put("name", config.getNpmPackageName());
 			packageJson.put("version", config.getNpmPackageVersion());
 
-			mapper.writer().writeValue(packageJsonFile, packageJson);
+			// match what is expected by NPM. Otherwise NPM will reformat it and up-to-date checking will fail
+			// the first time (also platform specific)
+			String text = mapper.writer().writeValueAsString(packageJson);
+			text = text.replace(" : ", ": ");
+			text = text + "\n";
+			text = text.replace(System.lineSeparator(), "\n");
+
+			try(FileWriter writer = new FileWriter(packageJsonFile)) {
+				writer.write(text);
+			}
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -174,10 +183,26 @@ public class TSGenerator {
 	public void transformMetaToTypescript() {
 		Collection<MetaElement> elements = lookup.getMetaById().values();
 		for (MetaElement element : elements) {
-			if (isRoot(element)) {
+			if (isRoot(element) && isGenerated(element)) {
 				transform(element, TSMetaTransformationOptions.EMPTY);
 			}
 		}
+	}
+
+	private boolean isGenerated(MetaElement element) {
+		Set<String> includes = config.getIncludes();
+		Set<String> excludes = config.getExcludes();
+		return (includes.isEmpty() || matches(element.getId(), includes))
+				&& !matches(element.getId(), excludes);
+	}
+
+	private boolean matches(String id, Set<String> set) {
+		for (String element : set) {
+			if (id.startsWith(element)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
