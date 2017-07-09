@@ -36,15 +36,16 @@ export interface ScheduleListResult extends ManyQueryResult {
 	meta?: ScheduleListResult.ScheduleListMeta;
 }
 export class QSchedule extends BeanPath<Schedule> {
+	metaId: string = 'io.crnk.test.mock.models.Schedule';
 	relationships: QSchedule.QRelationships = new QSchedule.QRelationships(this, 'relationships');
 	attributes: QSchedule.QAttributes = new QSchedule.QAttributes(this, 'attributes');
 }
 export module QSchedule {
 	export class QRelationships extends BeanPath<Schedule.Relationships> {
-		task: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'task', new QTask(null, 'data'));
-		lazyTask: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'lazyTask', new QTask(null, 'data'));
-		tasks: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasks', new QTask(null, 'data'));
-		tasksList: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', new QTask(null, 'data'));
+		task: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'task', QTask);
+		lazyTask: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'lazyTask', QTask);
+		tasks: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasks', QTask);
+		tasksList: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', QTask);
 	}
 	export class QAttributes extends BeanPath<Schedule.Attributes> {
 		name: StringExpression = this.createString('name');
