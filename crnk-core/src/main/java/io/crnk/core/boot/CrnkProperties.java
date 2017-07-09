@@ -66,8 +66,8 @@ public class CrnkProperties {
 	 * requested.
 	 * <p>
 	 * <ul>
-	 * <li>include[tasks]=project.schedule</li> (BY_TYPE)
-	 * <li>include[tasks]=project&include[projects]=schedule</li> (BY_ROOT_PATH)
+	 * <li>include[tasks]=project.schedule</li> (BY_ROOT_PATH)
+	 * <li>include[tasks]=project&include[projects]=schedule</li> (BY_TYPE)
 	 * </ul>
 	 * <p>
 	 * For simple object structures they are semantically the same, but they do differ

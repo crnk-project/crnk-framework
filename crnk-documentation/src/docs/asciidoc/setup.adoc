@@ -274,3 +274,30 @@ provided by `CrnkProperties`:
   ** When building ``links`` objects in responses
   ** When performing method matching
   An example of a prefix ``/api/v1``.
+
+* `crnk.config.include.paging.enabled` enables pagination for inclusions. Disabled by default. Be aware this may
+  inadvertently enable pagination for included resources when doing paging on root resources if data structures
+  are cyclic. See `CrnkProperties.INCLUDE_PAGING_ENABLED` fore mor information.
+
+* `crnk.config.include.behavior` with possible values `BY_TYPE` (default) and `BY_ROOT_PATH`.
+   `BY_ROOT_PATH` specifies that an inclusion can only requested as path from the root
+   resource such as `include[tasks]=project.schedule`. While `BY_TYPE` can further request
+   inclusions by type directly such as `include[tasks]=project&include[projects]=schedule`.
+   For simple object structures they are semantically the same, but they do differ
+   for more complex ones, like when multiple attributes lead
+   to the same type or for cycle structures. In the later case BY_TYPE inclusions
+   become recursive, while BY_ROOT_PATH do not. Note that the use of BY_TYPE
+   outmatches BY_ROOT_PATH, so BY_TYPE includes everything BY_ROOT_PATH does
+   and potentially more. For more information see `CrnkProperties.INCLUDE_BEHAVIOR`.
+
+* `crnk.config.resource.immutableWrite` with values IGNORE (default) or FAIL.
+  Determines how to deal with field that cannot be changed upon a PATCH or POST
+  request. For more information see `CrnkProperties.RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR`.
+
+* `crnk.config.resource.response.return_404` with values true and false (default).
+  Enforces a 404 response should a repository return a null value. This is common practice, but
+  not strictly mandated by the JSON API specification. In general it is recommended for
+  repository to throw `ResourceNotFoundException`.
+
+
+
