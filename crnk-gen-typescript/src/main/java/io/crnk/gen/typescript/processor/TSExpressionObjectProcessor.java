@@ -1,28 +1,18 @@
 package io.crnk.gen.typescript.processor;
 
+import io.crnk.gen.typescript.internal.TypescriptUtils;
+import io.crnk.gen.typescript.model.*;
+import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
+import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
+import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
+import io.crnk.meta.model.MetaElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import io.crnk.gen.typescript.model.TSClassType;
-import io.crnk.gen.typescript.model.TSContainerElement;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSEnumType;
-import io.crnk.gen.typescript.model.TSField;
-import io.crnk.gen.typescript.model.TSModule;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.gen.typescript.model.TSVisitorBase;
-import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.crnk.gen.typescript.internal.TypescriptUtils;
-import io.crnk.gen.typescript.model.TSInterfaceType;
-import io.crnk.gen.typescript.model.TSParameterizedType;
-import io.crnk.gen.typescript.model.TSSource;
-import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
 
 /**
  * Computes Type-safe query classes similar to QueryDSL for resource types.
@@ -67,10 +57,18 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			queryType.setSuperType(new TSParameterizedType(ExpressionLibrary.BEAN_PATH, interfaceType));
 			translationMap.put(interfaceType, queryType);
 
+			String metaElementId = interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
+			if (metaElementId != null) {
+				TSField metaField = new TSField();
+				metaField.setName("metaId");
+				metaField.setType(TSPrimitiveType.STRING);
+				metaField.setInitializer("'" + metaElementId + "'");
+				queryType.addDeclaredMember(metaField);
+			}
+
 			if (parent instanceof TSSource) {
 				parent.addElement(queryType);
-			}
-			else {
+			} else {
 				TSModule module = (TSModule) parent;
 				TSContainerElement grandParent = (TSContainerElement) module.getParent();
 
@@ -99,18 +97,14 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				String primitiveName = TypescriptUtils.firstToUpper(primitiveFieldType.getName());
 				qField.setType(ExpressionLibrary.getExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
-			}
-			else if (fieldType instanceof TSEnumType) {
+			} else if (fieldType instanceof TSEnumType) {
 				qField.setType(ExpressionLibrary.STRING_EXPRESSION);
 				qField.setInitializer(setupPrimitiveField("String", qField));
-			}
-			else if (fieldType instanceof TSInterfaceType) {
+			} else if (fieldType instanceof TSInterfaceType) {
 				setupInterfaceField(qField, field);
-			}
-			else if (isRelationship(fieldType)) {
+			} else if (isRelationship(fieldType)) {
 				setupRelationshipField(interfaceType, qField, field);
-			}
-			else {
+			} else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}
@@ -149,12 +143,12 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				initializer.append("(this, \'");
 				initializer.append(qField.getName());
 				initializer.append("\'");
-				initializer.append(", new " + qElementType.getName() + "(null, 'data')");
+				//initializer.append(", new " + qElementType.getName() + "(null, 'data')");
+				initializer.append(", " + qElementType.getName());
 				initializer.append(")");
 				qField.setInitializer(initializer.toString());
 				qField.setType(new TSParameterizedType(qbaseType, qElementType, elementType));
-			}
-			else {
+			} else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}

@@ -30,6 +30,8 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
 	public static final String PRIVATE_DATA_RESOURCE_TYPE = "resourceType";
 
+	public static final String PRIVATE_DATA_META_ELEMENT_ID = "metaElement";
+
 
 	@Override
 	public boolean accepts(MetaElement element) {
@@ -49,6 +51,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			String resourceType = metaResource.getResourceType();
 			interfaceType.setPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_RESOURCE_TYPE, resourceType);
 		}
+		interfaceType.setPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, element.getId());
 
 		context.putMapping(metaDataObject, interfaceType);
 

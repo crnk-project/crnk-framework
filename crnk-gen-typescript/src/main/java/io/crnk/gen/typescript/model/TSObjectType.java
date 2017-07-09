@@ -56,7 +56,7 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 			}
 		}
 
-		return declaredMembers;
+		return members;
 	}
 
 	public void setDeclaredMembers(List<TSMember> members) {
@@ -90,7 +90,7 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 
 	public List<TSField> getFields() {
 		List<TSField> fields = new ArrayList<>();
-		for (TSMember member : declaredMembers) {
+		for (TSMember member : getMembers()) {
 			if (member instanceof TSField) {
 				fields.add((TSField) member);
 			}
