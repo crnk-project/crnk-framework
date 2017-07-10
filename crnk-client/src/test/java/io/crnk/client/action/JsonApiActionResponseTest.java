@@ -72,7 +72,7 @@ public class JsonApiActionResponseTest extends AbstractClientTest {
 	public void testInvokeRepositoryAction() {
 		// tag::invokeService[]
 		String result = scheduleRepository.repositoryAction("hello");
-		Assert.assertEquals("repository action: hello", result);
+		Assert.assertEquals("{\"data\":\"repository action: hello\"}", result);
 		// end::invokeService[]
 
 		// check filters
@@ -124,7 +124,7 @@ public class JsonApiActionResponseTest extends AbstractClientTest {
 		scheduleRepository.create(schedule);
 
 		String result = scheduleRepository.resourceAction(1, "hello");
-		Assert.assertEquals("resource action: hello@scheduleName", result);
+		Assert.assertEquals("{\"data\":\"resource action: hello@scheduleName\"}", result);
 
 		// check filters
 		ArgumentCaptor<DocumentFilterContext> contexts = ArgumentCaptor.forClass(DocumentFilterContext.class);
