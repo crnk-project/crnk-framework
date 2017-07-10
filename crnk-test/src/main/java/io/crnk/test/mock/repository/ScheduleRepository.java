@@ -1,5 +1,10 @@
 package io.crnk.test.mock.repository;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
@@ -7,11 +12,6 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.test.mock.models.Schedule;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 // tag::annotation[]
 @Path("schedules")
@@ -32,6 +32,10 @@ public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long>
 	@GET
 	@Path("repositoryActionWithException")
 	Schedule repositoryActionWithException(@QueryParam(value = "msg") String msg);
+
+	@GET
+	@Path("repositoryActionWithNullResponse")
+	String repositoryActionWithNullResponse();
 
 	@GET
 	@Path("{id}/resourceAction")

@@ -1,15 +1,15 @@
 package io.crnk.test.mock.repository;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Long> implements ScheduleRepository {
 
@@ -42,6 +42,11 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 		schedule.setId(1L);
 		schedule.setName(msg);
 		return schedule;
+	}
+
+	@Override
+	public String repositoryActionWithNullResponse() {
+		return null;
 	}
 
 	@Override

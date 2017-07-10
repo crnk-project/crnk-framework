@@ -115,7 +115,7 @@ public class InteroperabilityTest extends JerseyTestBase {
 	public void testInvokeRepositoryAction() {
 		// tag::invokeService[]
 		String result = scheduleRepository.repositoryAction("hello");
-		Assert.assertEquals("repository action: hello", result);
+		Assert.assertEquals("{\"data\":\"repository action: hello\"}", result);
 		// end::invokeService[]
 
 		// check filters
@@ -179,7 +179,7 @@ public class InteroperabilityTest extends JerseyTestBase {
 		scheduleRepository.create(scheduleResource);
 
 		String result = scheduleRepository.resourceAction(1, "hello");
-		Assert.assertEquals("resource action: hello@scheduleName", result);
+		Assert.assertEquals("{\"data\":\"resource action: hello@scheduleName\"}", result);
 
 		// check filters
 		ArgumentCaptor<DocumentFilterContext> contexts = ArgumentCaptor.forClass(DocumentFilterContext.class);
