@@ -462,12 +462,12 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
-		Assert.assertEquals(4, children.size());
+		Assert.assertEquals(5, children.size());
 
 		MetaResourceAction repositoryActionMeta = (MetaResourceAction) children.get(0);
 		Assert.assertEquals("repositoryAction", repositoryActionMeta.getName());
 		Assert.assertEquals(MetaRepositoryActionType.REPOSITORY, repositoryActionMeta.getActionType());
-		MetaResourceAction resourceActionMeta = (MetaResourceAction) children.get(3);
+		MetaResourceAction resourceActionMeta = (MetaResourceAction) children.get(4);
 		Assert.assertEquals("resourceAction", resourceActionMeta.getName());
 		Assert.assertEquals(MetaRepositoryActionType.RESOURCE, resourceActionMeta.getActionType());
 
