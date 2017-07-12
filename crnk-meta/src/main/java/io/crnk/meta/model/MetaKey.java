@@ -1,11 +1,11 @@
 package io.crnk.meta.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
-
-import java.util.List;
 
 @JsonApiResource(type = "meta/key")
 public class MetaKey extends MetaElement {
@@ -55,6 +55,9 @@ public class MetaKey extends MetaElement {
 	}
 
 	public String toKeyString(Object id) {
+		if(id == null){
+			return null;
+		}
 		// => support compound keys with unique ids
 		PreconditionUtil.assertEquals("compound primary key not supported", 1, elements.size());
 		MetaAttribute keyAttr = elements.get(0);
