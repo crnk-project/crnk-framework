@@ -40,7 +40,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 	private static Client httpClient;
 	private boolean enableNullResponse;
-	private boolean alwaysReturnJsonApi;
+	private boolean jsonApiByDefault;
 
 	@BeforeClass
 	public static void setup() {
@@ -52,9 +52,9 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	@ApplicationPath("/")
 	class TestApplication extends ResourceConfig {
 
-		TestApplication(JsonApiResponseFilterTestBase instance, boolean enableNullResponse, boolean alwaysReturnJsonApi) {
+		TestApplication(JsonApiResponseFilterTestBase instance, boolean enableNullResponse, boolean jsonApiByDefault) {
 			instance.setEnableNullResponse(enableNullResponse);
-			instance.setAlwaysReturnJsonApi(alwaysReturnJsonApi);
+			instance.setJsonApiByDefault(jsonApiByDefault);
 
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
 			property(CrnkProperties.NULL_DATA_RESPONSE_ENABLED, Boolean.toString(enableNullResponse));
@@ -63,7 +63,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 			feature.addModule(new TestModule());
 
 			JsonApiResponseFilter jsonApiResponseFilter =
-					alwaysReturnJsonApi ? new JsonApiResponseFilter(feature) : new JsonApiResponseFilter(feature, false);
+					jsonApiByDefault ? new JsonApiResponseFilter(feature) : new JsonApiResponseFilter(feature, false);
 			register(jsonApiResponseFilter);
 			register(new JsonapiExceptionMapperBridge(feature));
 			register(new JacksonFeature());
@@ -77,8 +77,8 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		this.enableNullResponse = enableNullResponse;
 	}
 
-	void setAlwaysReturnJsonApi(boolean alwaysReturnJsonApi) {
-		this.alwaysReturnJsonApi = alwaysReturnJsonApi;
+	void setJsonApiByDefault(boolean jsonApiByDefault) {
+		this.jsonApiByDefault = jsonApiByDefault;
 	}
 
 	Response get(String path, Map<String, String> queryParams) {
@@ -101,7 +101,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		// GIVEN
 		// mapping of null responses to JSON-API enabled, but method produces text/plain -> no wrapping
 		Assume.assumeFalse(enableNullResponse);
-		Assume.assumeFalse(alwaysReturnJsonApi);
+		Assume.assumeFalse(jsonApiByDefault);
 
 		// WHEN
 		Response response = get("/repositoryActionWithNullResponse", null);
@@ -213,7 +213,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	@Test
 	public void testStringResponse() throws Exception {
 		// GIVEN
-		Assume.assumeFalse(alwaysReturnJsonApi);
+		Assume.assumeFalse(jsonApiByDefault);
 		Map<String, String> queryParams = new HashMap<>();
 		queryParams.put("msg", "msg");
 

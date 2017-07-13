@@ -34,7 +34,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 
 	private CrnkFeature feature;
 
-	private boolean alwaysReturnJsonApi = true;
+	private boolean jsonApiByDefault = true;
 
 	@Context
 	private ResourceInfo resourceInfo;
@@ -43,9 +43,9 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 		this.feature = feature;
 	}
 
-	public JsonApiResponseFilter(CrnkFeature feature, boolean alwaysReturnJsonApi) {
+	public JsonApiResponseFilter(CrnkFeature feature, boolean jsonApiByDefault) {
 		this.feature = feature;
-		this.alwaysReturnJsonApi = alwaysReturnJsonApi;
+		this.jsonApiByDefault = jsonApiByDefault;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
 		Object response = responseContext.getEntity();
 		if (response == null) {
-			if ((alwaysReturnJsonApi || isJsonApiResponse(resourceInfo)) && feature.getBoot().isNullDataResponseEnabled()) {
+			if (isJsonApiResponse(resourceInfo) && feature.getBoot().isNullDataResponseEnabled()) {
 				Document document = new Document();
 				document.setData(Nullable.nullValue());
 				responseContext.setEntity(document);
@@ -91,11 +91,11 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				}
 			}
 		}
-		else if ((alwaysReturnJsonApi || isJsonApiResponse(responseContext)) && !doNotWrap(response)) {
+		else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
 			Document document = new Document();
 			document.setData(Nullable.of(response));
 			responseContext.setEntity(document);
-			if (alwaysReturnJsonApi) {
+			if (jsonApiByDefault) {
 				responseContext.getHeaders().put("Content-Type",
 						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 			}
@@ -127,7 +127,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 */
 	private boolean isJsonApiResponse(ResourceInfo resourceInfo) {
 		Method method = resourceInfo.getResourceMethod();
-		return hasProducesJsonApiAnnotation(method, null);
+		return jsonApiByDefault || hasProducesJsonApiAnnotation(method, null);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 * 			<code>false</code>, otherwise
 	 */
 	private boolean isJsonApiResponse(ContainerResponseContext responseContext) {
-		return JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
+		return jsonApiByDefault || JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
 	}
 
 	/**
