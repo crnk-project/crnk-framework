@@ -127,6 +127,21 @@ public class InteroperabilityTest extends JerseyTestBase {
 	}
 
 	@Test
+	public void testInvokeRepositoryActionWithJsonApiResponse() {
+		// tag::invokeService[]
+		String result = scheduleRepository.repositoryActionWithJsonApiResponse("hello");
+		Assert.assertEquals("{\"data\":\"repository action: hello\"}", result);
+		// end::invokeService[]
+
+		// check filters
+		ArgumentCaptor<DocumentFilterContext> contexts = ArgumentCaptor.forClass(DocumentFilterContext.class);
+		Mockito.verify(filter, Mockito.times(1)).filter(contexts.capture(), Mockito.any(DocumentFilterChain.class));
+		DocumentFilterContext actionContext = contexts.getAllValues().get(0);
+		Assert.assertEquals("GET", actionContext.getMethod());
+		Assert.assertTrue(actionContext.getJsonPath() instanceof ActionPath);
+	}
+
+	@Test
 	public void testInvokeRepositoryActionWithResourceResult() {
 		// resources should be received in json api format
 		String url = getBaseUri() + "schedules/repositoryActionWithResourceResult?msg=hello";

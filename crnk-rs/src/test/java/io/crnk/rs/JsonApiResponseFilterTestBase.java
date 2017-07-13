@@ -1,5 +1,8 @@
 package io.crnk.rs;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
@@ -20,7 +23,10 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 
 public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
@@ -33,6 +39,8 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	private static Client httpClient;
+	private boolean enableNullResponse;
+	private boolean alwaysReturnJsonApi;
 
 	@BeforeClass
 	public static void setup() {
@@ -42,18 +50,21 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@ApplicationPath("/")
-	static class TestApplication extends ResourceConfig {
+	class TestApplication extends ResourceConfig {
 
-		TestApplication(boolean enableNullResponse) {
+		TestApplication(JsonApiResponseFilterTestBase instance, boolean enableNullResponse, boolean alwaysReturnJsonApi) {
+			instance.setEnableNullResponse(enableNullResponse);
+			instance.setAlwaysReturnJsonApi(alwaysReturnJsonApi);
+
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
-			if (enableNullResponse) {
-				property(CrnkProperties.NULL_DATA_RESPONSE_ENABLED, "true");
-			}
+			property(CrnkProperties.NULL_DATA_RESPONSE_ENABLED, Boolean.toString(enableNullResponse));
 
 			CrnkFeature feature = new CrnkFeature();
 			feature.addModule(new TestModule());
 
-			register(new JsonApiResponseFilter(feature));
+			JsonApiResponseFilter jsonApiResponseFilter =
+					alwaysReturnJsonApi ? new JsonApiResponseFilter(feature) : new JsonApiResponseFilter(feature, false);
+			register(jsonApiResponseFilter);
 			register(new JsonapiExceptionMapperBridge(feature));
 			register(new JacksonFeature());
 
@@ -62,11 +73,19 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 	}
 
-	Response get(String path, Map<String, String> queryParams, boolean requestJsonApi) {
-		return request(path, queryParams, requestJsonApi).get();
+	void setEnableNullResponse(boolean enableNullResponse) {
+		this.enableNullResponse = enableNullResponse;
 	}
 
-	private Invocation.Builder request(String path, Map<String, String> queryParams, boolean requestJsonApi) {
+	void setAlwaysReturnJsonApi(boolean alwaysReturnJsonApi) {
+		this.alwaysReturnJsonApi = alwaysReturnJsonApi;
+	}
+
+	Response get(String path, Map<String, String> queryParams) {
+		return request(path, queryParams).get();
+	}
+
+	private Invocation.Builder request(String path, Map<String, String> queryParams) {
 		WebTarget target = httpClient.target(getBaseUri() + BASE_PATH).path(path);
 		if (queryParams != null && !queryParams.isEmpty()) {
 			Set<String> keys = queryParams.keySet();
@@ -74,7 +93,242 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 				target = target.queryParam(key, queryParams.get(key));
 			}
 		}
-		return target.request().accept(requestJsonApi ? JsonApiMediaType.APPLICATION_JSON_API : MediaType.TEXT_PLAIN);
+		return target.request();
+	}
+
+	@Test
+	public void testNullResponseNotWrapped() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API enabled, but method produces text/plain -> no wrapping
+		Assume.assumeFalse(enableNullResponse);
+		Assume.assumeFalse(alwaysReturnJsonApi);
+
+		// WHEN
+		Response response = get("/repositoryActionWithNullResponse", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+		assertThat(response.getMediaType())
+				.describedAs("Media-Type")
+				.isEqualTo(null);
+
+		Object entity = response.readEntity(Object.class);
+		assertThat(entity)
+				.describedAs("Response content")
+				.isEqualTo(null);
+	}
+
+	@Test
+	public void testNullResponseJsonApi() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API enabled
+		Assume.assumeTrue(enableNullResponse);
+
+		// WHEN
+		Response response = get("/repositoryActionWithNullResponseJsonApi", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+		assertThat(response.getMediaType())
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+
+		String entity = response.readEntity(String.class);
+		assertThat(entity)
+				.describedAs("Response content")
+				.isEqualTo("{\"data\":null}");
+	}
+
+	@Test
+	public void testNonInterfaceMethodWithNullResponseJsonApiWrapped() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API enabled
+		Assume.assumeTrue(enableNullResponse);
+
+		// WHEN
+		Response response = get("/nonInterfaceMethodWithNullResponseJsonApi", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+		String schedule = response.readEntity(String.class);
+		assertThat(schedule)
+				.describedAs("Response content")
+				.isEqualTo("{\"data\":null}");
+	}
+
+	@Test
+	public void testNullResponse() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API disabled
+		Assume.assumeFalse(enableNullResponse);
+
+		// WHEN
+		Response response = get("/repositoryActionWithNullResponse", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(null);
+	}
+
+	@Test
+	public void testNonInterfaceMethodWithNullResponseJsonApi() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API disabled
+		Assume.assumeFalse(enableNullResponse);
+
+		// WHEN
+		Response response = get("/nonInterfaceMethodWithNullResponseJsonApi", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.NO_CONTENT.getStatusCode());
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(null);
+	}
+
+	@Test
+	public void testStringResponse() throws Exception {
+		// GIVEN
+		Assume.assumeFalse(alwaysReturnJsonApi);
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("msg", "msg");
+
+		// WHEN
+		Response response = get("/repositoryAction", queryParams);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(MediaType.TEXT_HTML_TYPE);
+		String entity = response.readEntity(String.class);
+		assertThat(entity)
+				.describedAs("Response content")
+				.isEqualTo("repository action: msg");
+	}
+
+	@Test
+	public void testStringResponseWrapped() throws Exception {
+		// GIVEN
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("msg", "msg");
+
+		// WHEN
+		Response response = get("/repositoryActionWithJsonApiResponse", queryParams);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+		String entity = response.readEntity(String.class);
+		assertThat(entity)
+				.describedAs("Response content")
+				.isEqualTo("{\"data\":\"repository action: msg\"}");
+	}
+
+	@Test
+	public void testErrorResponse() throws Exception {
+		// GIVEN
+
+		// WHEN
+		Response response = get("/repositoryActionWithException", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.FORBIDDEN.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+		String error = response.readEntity(String.class);
+		assertThat(error)
+				.describedAs("Response content")
+				.startsWith("{\"errors\":");
+	}
+
+	@Test
+	public void testJsonApiResourceListResponse() throws Exception {
+		// GIVEN
+
+		// WHEN
+		Response response = get("", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		// media type contains charset with this response
+		String mediaType = response.getMediaType().toString();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.startsWith(JsonApiMediaType.APPLICATION_JSON_API);
+		String schedules = response.readEntity(String.class);
+		assertThat(schedules)
+				.describedAs("Response content")
+				.startsWith("{\"data\":").contains("\"links\":{").contains("\"meta\":{");
+	}
+
+	@Test
+	public void testJsonApiResourceResponse() throws Exception {
+		// GIVEN
+
+		// WHEN
+		Response response = get("/repositoryActionWithResourceResult", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+		String schedule = response.readEntity(String.class);
+		assertThat(schedule)
+				.describedAs("Response content")
+				.startsWith("{\"data\":").contains("\"links\":{");
 	}
 
 }

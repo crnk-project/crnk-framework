@@ -3,6 +3,7 @@ package io.crnk.test.mock.repository;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import io.crnk.core.queryspec.QuerySpec;
@@ -11,6 +12,7 @@ import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.rs.type.JsonApiMediaType;
 import io.crnk.test.mock.models.Schedule;
 
 // tag::annotation[]
@@ -26,6 +28,11 @@ public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long>
 	String repositoryAction(@QueryParam(value = "msg") String msg);
 
 	@GET
+	@Path("repositoryActionWithJsonApiResponse")
+	@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+	String repositoryActionWithJsonApiResponse(@QueryParam(value = "msg") String msg);
+
+	@GET
 	@Path("repositoryActionWithResourceResult")
 	Schedule repositoryActionWithResourceResult(@QueryParam(value = "msg") String msg);
 
@@ -36,6 +43,11 @@ public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long>
 	@GET
 	@Path("repositoryActionWithNullResponse")
 	String repositoryActionWithNullResponse();
+
+	@GET
+	@Path("repositoryActionWithNullResponseJsonApi")
+	@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+	String repositoryActionWithNullResponseJsonApi();
 
 	@GET
 	@Path("{id}/resourceAction")

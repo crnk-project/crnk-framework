@@ -4,9 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
+import io.crnk.rs.type.JsonApiMediaType;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -26,7 +31,14 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	}
 
 	@Override
+	// No @Produces annotation -> produces text/html
 	public String repositoryAction(String msg) {
+		return "repository action: " + msg;
+	}
+
+	@Override
+	// @Produces Json-Api annotation
+	public String repositoryActionWithJsonApiResponse(String msg) {
 		return "repository action: " + msg;
 	}
 
@@ -45,7 +57,21 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	}
 
 	@Override
+	// No @Produces annotation -> produces text/html
 	public String repositoryActionWithNullResponse() {
+		return null;
+	}
+
+	@Override
+	// @Produces Json-Api annotation
+	public String repositoryActionWithNullResponseJsonApi() {
+		return null;
+	}
+
+	@GET
+	@Path("nonInterfaceMethodWithNullResponseJsonApi")
+	@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+	public String nonInterfaceMethodWithNullResponseJsonApi() {
 		return null;
 	}
 
