@@ -2,11 +2,7 @@ package io.crnk.rs;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -34,18 +30,11 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 
 	private CrnkFeature feature;
 
-	private boolean jsonApiByDefault = true;
-
 	@Context
 	private ResourceInfo resourceInfo;
 
 	public JsonApiResponseFilter(CrnkFeature feature) {
 		this.feature = feature;
-	}
-
-	public JsonApiResponseFilter(CrnkFeature feature, boolean jsonApiByDefault) {
-		this.feature = feature;
-		this.jsonApiByDefault = jsonApiByDefault;
 	}
 
 	/**
@@ -55,7 +44,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
 		Object response = responseContext.getEntity();
 		if (response == null) {
-			if (isJsonApiResponse(resourceInfo) && feature.getBoot().isNullDataResponseEnabled()) {
+			if (feature.getBoot().isNullDataResponseEnabled()) {
 				Document document = new Document();
 				document.setData(Nullable.nullValue());
 				responseContext.setEntity(document);
@@ -95,10 +84,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 			Document document = new Document();
 			document.setData(Nullable.of(response));
 			responseContext.setEntity(document);
-			if (jsonApiByDefault) {
-				responseContext.getHeaders().put("Content-Type",
-						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
-			}
 		}
 	}
 
@@ -118,53 +103,6 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	}
 
 	/**
-	 * Retrieves the called resource method from the passed <code>resourceInfo</code> to
-	 * determine whether it has a <code>@Produces</code> annotation specifying the JSON-API media type.
-	 *
-	 * @param resourceInfo the resource information for the currently processed request
-	 * @return <code>true</code>, if the called resource method produces JSON-API,<br />
-	 * 			<code>false</code>, otherwise
-	 */
-	private boolean isJsonApiResponse(ResourceInfo resourceInfo) {
-		Method method = resourceInfo.getResourceMethod();
-		return jsonApiByDefault || hasProducesJsonApiAnnotation(method, null);
-	}
-
-	/**
-	 * Checks the annotations of the passed <code>method</code>, and if necessary the super interface(s) to
-	 * determine whether it has a <code>@Produces</code> annotation specifying the JSON-API media type.
-	 *
-	 * @param method the method whose annotations should be checked
-	 * @param previous the class which contains the method to check
-	 * @return <code>true</code>, if the passed method produces JSON-API,<br />
-	 * 			<code>false</code>, otherwise
-	 */
-	private boolean hasProducesJsonApiAnnotation(Method method, Class<?> previous) {
-		Produces produces = method.getAnnotation(Produces.class);
-		if (produces == null) {
-			// check if the method is declared in an interface
-			Class<?>[] interfaces = resourceInfo.getResourceClass().getInterfaces();
-			for (Class<?> intf : interfaces) {
-				if (!intf.equals(previous)) {
-					try {
-						Method interfaceMethod = intf.getDeclaredMethod(method.getName(), method.getParameterTypes());
-						return hasProducesJsonApiAnnotation(interfaceMethod, intf);
-					}
-					catch (NoSuchMethodException e) {
-						// ignore and continue
-					}
-				}
-			}
-		}
-		else {
-			List<String> value = Arrays.asList(produces.value());
-			return value.contains(JsonApiMediaType.APPLICATION_JSON_API);
-
-		}
-		return false;
-	}
-
-	/**
 	 * Reads the media type from the response context and compares it against {@link JsonApiMediaType#APPLICATION_JSON_API}.
 	 *
 	 * @param responseContext the container response context for the current request
@@ -172,7 +110,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 * 			<code>false</code>, otherwise
 	 */
 	private boolean isJsonApiResponse(ContainerResponseContext responseContext) {
-		return jsonApiByDefault || JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
+		return JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
 	}
 
 	/**

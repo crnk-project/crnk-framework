@@ -31,13 +31,18 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	}
 
 	@Override
-	// No @Produces annotation -> produces text/html
+	// Explicit @Produces annotation -> produces text/html
 	public String repositoryAction(String msg) {
 		return "repository action: " + msg;
 	}
 
 	@Override
-	// @Produces Json-Api annotation
+	// Uses default @Produces annotation -> produces json-api
+	public String repositoryActionJsonApi(String msg) {
+		return "repository action: " + msg;
+	}
+
+	@Override
 	public String repositoryActionWithJsonApiResponse(String msg) {
 		return "repository action: " + msg;
 	}
@@ -57,13 +62,12 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	}
 
 	@Override
-	// No @Produces annotation -> produces text/html
+	// Explicit @Produces annotation -> produces text/html
 	public String repositoryActionWithNullResponse() {
 		return null;
 	}
 
 	@Override
-	// @Produces Json-Api annotation
 	public String repositoryActionWithNullResponseJsonApi() {
 		return null;
 	}

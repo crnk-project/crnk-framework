@@ -6,7 +6,7 @@ public class JsonApiResponseFilterNullTest extends JsonApiResponseFilterTestBase
 
 	@Override
 	protected Application configure() {
-		return new JsonApiResponseFilterTestBase.TestApplication(this, true, false);
+		return new JsonApiResponseFilterTestBase.TestApplication(this, true);
 	}
 
 }

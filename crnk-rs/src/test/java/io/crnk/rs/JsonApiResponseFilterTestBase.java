@@ -40,7 +40,6 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 	private static Client httpClient;
 	private boolean enableNullResponse;
-	private boolean jsonApiByDefault;
 
 	@BeforeClass
 	public static void setup() {
@@ -52,9 +51,8 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	@ApplicationPath("/")
 	class TestApplication extends ResourceConfig {
 
-		TestApplication(JsonApiResponseFilterTestBase instance, boolean enableNullResponse, boolean jsonApiByDefault) {
+		TestApplication(JsonApiResponseFilterTestBase instance, boolean enableNullResponse) {
 			instance.setEnableNullResponse(enableNullResponse);
-			instance.setJsonApiByDefault(jsonApiByDefault);
 
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.rs.resource");
 			property(CrnkProperties.NULL_DATA_RESPONSE_ENABLED, Boolean.toString(enableNullResponse));
@@ -62,9 +60,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 			CrnkFeature feature = new CrnkFeature();
 			feature.addModule(new TestModule());
 
-			JsonApiResponseFilter jsonApiResponseFilter =
-					jsonApiByDefault ? new JsonApiResponseFilter(feature) : new JsonApiResponseFilter(feature, false);
-			register(jsonApiResponseFilter);
+			register(new JsonApiResponseFilter(feature));
 			register(new JsonapiExceptionMapperBridge(feature));
 			register(new JacksonFeature());
 
@@ -75,10 +71,6 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 	void setEnableNullResponse(boolean enableNullResponse) {
 		this.enableNullResponse = enableNullResponse;
-	}
-
-	void setJsonApiByDefault(boolean jsonApiByDefault) {
-		this.jsonApiByDefault = jsonApiByDefault;
 	}
 
 	Response get(String path, Map<String, String> queryParams) {
@@ -101,7 +93,6 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		// GIVEN
 		// mapping of null responses to JSON-API enabled, but method produces text/plain -> no wrapping
 		Assume.assumeFalse(enableNullResponse);
-		Assume.assumeFalse(jsonApiByDefault);
 
 		// WHEN
 		Response response = get("/repositoryActionWithNullResponse", null);
@@ -141,31 +132,6 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 		String entity = response.readEntity(String.class);
 		assertThat(entity)
-				.describedAs("Response content")
-				.isEqualTo("{\"data\":null}");
-	}
-
-	@Test
-	public void testNonInterfaceMethodWithNullResponseJsonApiWrapped() throws Exception {
-		// GIVEN
-		// mapping of null responses to JSON-API enabled
-		Assume.assumeTrue(enableNullResponse);
-
-		// WHEN
-		Response response = get("/nonInterfaceMethodWithNullResponseJsonApi", null);
-
-		// THEN
-		Assert.assertNotNull(response);
-		assertThat(response.getStatus())
-				.describedAs("Status code")
-				.isEqualTo(Response.Status.OK.getStatusCode());
-
-		MediaType mediaType = response.getMediaType();
-		assertThat(mediaType)
-				.describedAs("Media-Type")
-				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
-		String schedule = response.readEntity(String.class);
-		assertThat(schedule)
 				.describedAs("Response content")
 				.isEqualTo("{\"data\":null}");
 	}
@@ -211,9 +177,33 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
+	public void testNonInterfaceMethodWithNullResponseJsonApiWrapped() throws Exception {
+		// GIVEN
+		// mapping of null responses to JSON-API enabled
+		Assume.assumeTrue(enableNullResponse);
+
+		// WHEN
+		Response response = get("/nonInterfaceMethodWithNullResponseJsonApi", null);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getStatus())
+				.describedAs("Status code")
+				.isEqualTo(Response.Status.OK.getStatusCode());
+
+		MediaType mediaType = response.getMediaType();
+		assertThat(mediaType)
+				.describedAs("Media-Type")
+				.isEqualTo(JsonApiMediaType.APPLICATION_JSON_API_TYPE);
+		String schedule = response.readEntity(String.class);
+		assertThat(schedule)
+				.describedAs("Response content")
+				.isEqualTo("{\"data\":null}");
+	}
+
+	@Test
 	public void testStringResponse() throws Exception {
 		// GIVEN
-		Assume.assumeFalse(jsonApiByDefault);
 		Map<String, String> queryParams = new HashMap<>();
 		queryParams.put("msg", "msg");
 
@@ -243,7 +233,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		queryParams.put("msg", "msg");
 
 		// WHEN
-		Response response = get("/repositoryActionWithJsonApiResponse", queryParams);
+		Response response = get("/repositoryActionJsonApi", queryParams);
 
 		// THEN
 		Assert.assertNotNull(response);
