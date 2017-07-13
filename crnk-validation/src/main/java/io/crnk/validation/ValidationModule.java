@@ -14,11 +14,11 @@ public class ValidationModule implements Module {
 	 * @deprecated make use of {{@link #create()}}
 	 */
 	@Deprecated
-	public static final ValidationModule newInstance() {
+	public static ValidationModule newInstance() {
 		return new ValidationModule();
 	}
 
-	public static final ValidationModule create() {
+	public static ValidationModule create() {
 		return new ValidationModule();
 	}
 
