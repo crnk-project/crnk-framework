@@ -1,15 +1,20 @@
 package io.crnk.test.mock.repository;
 
-import io.crnk.core.exception.ForbiddenException;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryBase;
-import io.crnk.test.mock.TestException;
-import io.crnk.test.mock.models.Schedule;
-import io.crnk.test.mock.models.Task;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryBase;
+import io.crnk.rs.type.JsonApiMediaType;
+import io.crnk.test.mock.TestException;
+import io.crnk.test.mock.models.Schedule;
+import io.crnk.test.mock.models.Task;
 
 public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Long> implements ScheduleRepository {
 
@@ -26,7 +31,19 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	}
 
 	@Override
+	// Explicit @Produces annotation -> produces text/html
 	public String repositoryAction(String msg) {
+		return "repository action: " + msg;
+	}
+
+	@Override
+	// Uses default @Produces annotation -> produces json-api
+	public String repositoryActionJsonApi(String msg) {
+		return "repository action: " + msg;
+	}
+
+	@Override
+	public String repositoryActionWithJsonApiResponse(String msg) {
 		return "repository action: " + msg;
 	}
 
@@ -42,6 +59,24 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 		schedule.setId(1L);
 		schedule.setName(msg);
 		return schedule;
+	}
+
+	@Override
+	// Explicit @Produces annotation -> produces text/html
+	public String repositoryActionWithNullResponse() {
+		return null;
+	}
+
+	@Override
+	public String repositoryActionWithNullResponseJsonApi() {
+		return null;
+	}
+
+	@GET
+	@Path("nonInterfaceMethodWithNullResponseJsonApi")
+	@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+	public String nonInterfaceMethodWithNullResponseJsonApi() {
+		return null;
 	}
 
 	@Override

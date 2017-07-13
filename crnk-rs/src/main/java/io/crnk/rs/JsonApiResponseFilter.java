@@ -1,19 +1,21 @@
 package io.crnk.rs;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.util.Collections;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.ResourceListBase;
@@ -26,8 +28,10 @@ import io.crnk.rs.type.JsonApiMediaType;
  */
 public class JsonApiResponseFilter implements ContainerResponseFilter {
 
-
 	private CrnkFeature feature;
+
+	@Context
+	private ResourceInfo resourceInfo;
 
 	public JsonApiResponseFilter(CrnkFeature feature) {
 		this.feature = feature;
@@ -40,13 +44,13 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
 		Object response = responseContext.getEntity();
 		if (response == null) {
-			// TODO
 			if (feature.getBoot().isNullDataResponseEnabled()) {
 				Document document = new Document();
 				document.setData(Nullable.nullValue());
 				responseContext.setEntity(document);
 				responseContext.setStatus(Response.Status.OK.getStatusCode());
-				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
+				responseContext.getHeaders().put("Content-Type",
+						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 			}
 			return;
 		}
@@ -67,14 +71,19 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				jsonApiResponse.setEntity(response);
 				// use the Crnk document mapper to create a JSON API response
 				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, null));
-				responseContext.getHeaders().put("Content-Type", Arrays.asList((Object) JsonApiMediaType.APPLICATION_JSON_API));
-
+				responseContext.getHeaders().put("Content-Type",
+						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
 			}
 			finally {
 				if (serviceUrlProvider instanceof HttpRequestContextProvider) {
 					((HttpRequestContextProvider) serviceUrlProvider).onRequestFinished();
 				}
 			}
+		}
+		else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
+			Document document = new Document();
+			document.setData(Nullable.of(response));
+			responseContext.setEntity(document);
 		}
 	}
 
@@ -92,4 +101,31 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 		boolean resourceList = ResourceListBase.class.isAssignableFrom(response.getClass());
 		return singleResource || resourceList;
 	}
+
+	/**
+	 * Reads the media type from the response context and compares it against {@link JsonApiMediaType#APPLICATION_JSON_API}.
+	 *
+	 * @param responseContext the container response context for the current request
+	 * @return <code>true</code>, if the requested method returns JSON-API,<br />
+	 * 			<code>false</code>, otherwise
+	 */
+	private boolean isJsonApiResponse(ContainerResponseContext responseContext) {
+		return JsonApiMediaType.APPLICATION_JSON_API_TYPE.equals(responseContext.getMediaType());
+	}
+
+	/**
+	 * Some entity objects cannot be wrapped in a {@link Document} object. These include
+	 * <ul>
+	 *     <li>{@link Document}, and</li>
+	 *     <li>{@link InputStream}</li>
+	 * </ul>
+	 *
+	 * @param entity the container response context's entity object
+	 * @return <code>true</code>, if the response is of one of the aforementioned types and should thus not be wrapped,<br />
+	 * 			<code>false</code>, otherwise
+	 */
+	private boolean doNotWrap(Object entity) {
+		return entity instanceof Document || entity instanceof InputStream;
+	}
+
 }
