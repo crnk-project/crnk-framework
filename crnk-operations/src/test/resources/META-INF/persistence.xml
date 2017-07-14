@@ -8,6 +8,7 @@
 
 		<class>io.crnk.operations.model.MovieEntity</class>
 		<class>io.crnk.operations.model.PersonEntity</class>
+		<class>io.crnk.operations.model.VoteEntity</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
