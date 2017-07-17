@@ -72,7 +72,7 @@ public class Resource extends ResourceIdentifier implements MetaContainer, Links
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(attributes, relationships, links, meta);
+		return Objects.hash(id, type, attributes, relationships, links, meta);
 	}
 
 	@Override
@@ -82,7 +82,8 @@ public class Resource extends ResourceIdentifier implements MetaContainer, Links
 		}
 		Resource other = (Resource) obj;
 		return Objects.equals(attributes, other.attributes) && Objects.equals(relationships, other.relationships) && Objects
-				.equals(meta, other.meta) && Objects.equals(links, other.links);
+				.equals(meta, other.meta) && Objects.equals(links, other.links)
+				&& Objects.equals(id, other.id) && Objects.equals(type, other.type);
 	}
 
 	public ResourceIdentifier toIdentifier() {
