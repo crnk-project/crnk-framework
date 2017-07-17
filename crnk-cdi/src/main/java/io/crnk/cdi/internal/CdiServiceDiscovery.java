@@ -1,5 +1,6 @@
 package io.crnk.cdi.internal;
 
+import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.utils.Optional;
@@ -8,7 +9,9 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -22,11 +25,18 @@ public class CdiServiceDiscovery implements ServiceDiscovery {
 	@Override
 	public <T> List<T> getInstancesByType(Class<T> clazz) {
 		BeanManager beanManager = CDI.current().getBeanManager();
-		Set<Bean<?>> beans = beanManager.getBeans(clazz);
+
+		Type type = clazz;
+		if(clazz == JsonApiExceptionMapper.class){
+			TypeLiteral<JsonApiExceptionMapper<?>> typeLiteral = new TypeLiteral<JsonApiExceptionMapper<?>>() {};
+			type = typeLiteral.getType();
+		}
+
+		Set<Bean<?>> beans = beanManager.getBeans(type);
 		List<T> list = new ArrayList<>();
 		for (Bean<?> bean : beans) {
 			CreationalContext<?> creationalContext = beanManager.createCreationalContext(bean);
-			T object = (T) beanManager.getReference(bean, clazz, creationalContext);
+			T object = (T) beanManager.getReference(bean, type, creationalContext);
 			list.add(object);
 		}
 		return list;
