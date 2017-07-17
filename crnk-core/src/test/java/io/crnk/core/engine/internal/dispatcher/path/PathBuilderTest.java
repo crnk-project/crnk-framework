@@ -53,15 +53,15 @@ public class PathBuilderTest {
 	}
 
 	@Test
-	public void onEmptyPathShouldThrowResourceException() {
+	public void onEmptyPathReturnsNull() {
 		// GIVEN
 		String path = "/";
 
-		// THEN
-		expectedException.expect(ResourceException.class);
-
 		// WHEN
-		pathBuilder.build(path);
+		JsonPath jsonPath = pathBuilder.build(path);
+
+		// THEN
+		assertThat(jsonPath).isNull();
 	}
 
 	@Test
