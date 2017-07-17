@@ -30,7 +30,14 @@ public final class ExceptionMapperRegistryBuilder {
 	}
 
 	private void registerExceptionMapper(JsonApiExceptionMapper<? extends Throwable> exceptionMapper) {
-		Class<? extends Throwable> exceptionClass = getGenericType(exceptionMapper.getClass());
+		Class<? extends JsonApiExceptionMapper> mapperClass = exceptionMapper.getClass();
+		Class<? extends Throwable> exceptionClass = getGenericType(mapperClass);
+		if(exceptionClass == null && mapperClass.getName().contains("$$")){
+			// deal if dynamic proxies, like in CDI
+			mapperClass = (Class<? extends JsonApiExceptionMapper>) mapperClass.getSuperclass();
+			exceptionClass = getGenericType(mapperClass);
+		}
+
 		exceptionMappers.add(new ExceptionMapperType(exceptionClass, exceptionMapper));
 	}
 
