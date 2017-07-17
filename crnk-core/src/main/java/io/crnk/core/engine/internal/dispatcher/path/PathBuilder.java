@@ -86,7 +86,7 @@ public class PathBuilder {
 	public JsonPath build(String path) {
 		String[] strings = splitPath(path);
 		if (strings.length == 0 || (strings.length == 1 && "".equals(strings[0]))) {
-			throw new ResourceException("Path is empty");
+			return null;
 		}
 
 		JsonPath previousJsonPath = null, currentJsonPath = null;
