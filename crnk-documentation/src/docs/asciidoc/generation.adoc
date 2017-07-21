@@ -52,10 +52,20 @@ node {
 }
 
 apply plugin: 'crnk-gen-typescript'
-typescriptGen.npmPackageVersion = '0.0.1'
-typescriptGen.npmPackageName = '@adnovum/moap-movie-management-api'
-typescriptGen.npmPackageMapping.put('my.company.app.model', '@company/app-model')
-typescriptGen.npmDependencies.put('ngrx-json-api', '>=1.2.0');
+
+typescriptGen{
+	npm {
+		packageVersion = '0.0.1'
+		packageName = '@adnovum/moap-movie-management-api'
+		description = 'movie management API to access backend'
+		gitRepository = 'https://.../bitbucket/scm/moap/moap-movie.git'
+
+		packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
+		peerDependencies['ngrx-json-api'] = '>=1.1.1-adn.5'
+	}
+}
+
+
 ----
 
 - the `moowork` plugin is used to to gain a `node` setup.
@@ -67,9 +77,9 @@ typescriptGen.npmDependencies.put('ngrx-json-api', '>=1.2.0');
 - crnk-meta is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
   Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
   the package resp. class name. But for more advanced use cases those may differ.
-- two new tasks are available: `generateTypescript` and `compileTypescript`. The former is added as dependency
-  to `assemble`. We choose not to add a dependency from `compileTypescript` to `assemble` has a backend-only
-  develop may not need to run with every `assemble` run. Typically `compileTypescript` is either hooked
+- there is a new task available: `assembleTypescript`. It and its dependencies generate, compile
+  and package the Typescript sources. We choose not to add a dependency from `assembleTypescript` to `assemble` has a backend-only
+  develop may not need to run with every `assemble` run. Typically `assembleTypescript` is either hooked
   into the publishing or added as dependency on a frontend project contained within the same Gradle project.
 
 NOTE: the generator plugin is not yet included in any example applications. It is not possible to
