@@ -1,12 +1,12 @@
 package io.crnk.gen.typescript;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import groovy.lang.Closure;
 import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
 import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
 import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
@@ -18,14 +18,12 @@ import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
+import org.gradle.api.Project;
 
 public class TSGeneratorConfiguration {
 
-	private Map<String, String> npmPackageMapping = new HashMap<>();
 
-	private String npmPackageName;
-
-	private String npmPackageVersion;
+	private final Project project;
 
 	private TSCodeStyle codeStyle = new TSCodeStyle();
 
@@ -39,14 +37,6 @@ public class TSGeneratorConfiguration {
 
 	private String sourceDirectoryName = "src";
 
-	private String npmLicense = "UNLICENSED";
-
-	private String npmDescription = null;
-
-	private Map<String, String> npmPeerDependencies = new HashMap<>();
-
-	private Map<String, String> npmDevDependencies = new HashMap<>();
-
 	private Set<String> includes = new HashSet<>();
 
 	private Set<String> excludes = new HashSet<>();
@@ -54,9 +44,11 @@ public class TSGeneratorConfiguration {
 	// TODO setup crnk frontend library project
 	private String expressionLibrary;
 
-	private String gitRepository;
+	private TSNpmConfiguration npm = new TSNpmConfiguration();
 
-	public TSGeneratorConfiguration() {
+	public TSGeneratorConfiguration(Project project) {
+		this.project = project;
+
 		sourceProcessors.add(new TSExpressionObjectProcessor());
 		sourceProcessors.add(new TSImportProcessor());
 		sourceProcessors.add(new TSIndexFileProcessor());
@@ -68,19 +60,15 @@ public class TSGeneratorConfiguration {
 		metaTransformationClassNames.add(TSMetaPrimitiveTypeTransformation.class.getName());
 		metaTransformationClassNames.add(TSMetaResourceRepositoryTransformation.class.getName());
 
-		String crnkNpm = "@crnk/core";
-		npmPackageMapping.put("io.crnk.meta", crnkNpm);
-		npmPackageMapping.put("io.crnk.meta.resource", crnkNpm);
-		npmPackageMapping.put("io.crnk.jpa", crnkNpm);
-		npmPackageMapping.put("io.crnk.core.resource.links", crnkNpm);
 
-		npmPeerDependencies.put("ngrx-json-api", "1.2.0");
-		npmPeerDependencies.put("rxjs", "5.2.0");
-		npmPeerDependencies.put("lodash", "4.17.4");
+	}
 
-		npmDevDependencies.put("typescript", "2.2.0");
-		npmDevDependencies.put("ncp", "2.0.0");
-		npmDevDependencies.put("rimraf", "2.5.4");
+	public TSNpmConfiguration getNpm() {
+		return npm;
+	}
+
+	public TSNpmConfiguration npm(Closure closure) {
+		return (TSNpmConfiguration) project.configure(npm, closure);
 	}
 
 	/**
@@ -129,26 +117,35 @@ public class TSGeneratorConfiguration {
 	}
 
 	/**
-	 * @return Maps meta ID prefixes to NPM package names. Frequently, the meta ID roughly correspond to Java package names if
-	 * not configured otherwise.
+	 * @Deprecated use npm object
 	 */
+	@Deprecated
 	public Map<String, String> getNpmPackageMapping() {
-		return npmPackageMapping;
-	}
-
-	public void setNpmPackageMapping(Map<String, String> packageMapping) {
-		this.npmPackageMapping = packageMapping;
+		return npm.getPackageMapping();
 	}
 
 	/**
-	 * @return npmPackageName for publishing.
+	 * @Deprecated use npm object
 	 */
-	public String getNpmPackageName() {
-		return npmPackageName;
+	@Deprecated
+	public void setNpmPackageMapping(Map<String, String> packageMapping) {
+		this.npm.setPackageMapping(packageMapping);
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
+	public String getNpmPackageName() {
+		return npm.getPackageName();
+	}
+
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setNpmPackageName(String npmPackageName) {
-		this.npmPackageName = npmPackageName;
+		this.npm.setPackageName(npmPackageName);
 	}
 
 	/**
@@ -188,14 +185,19 @@ public class TSGeneratorConfiguration {
 	}
 
 	/**
-	 * @return version to use for the npm package, by default matches the version of this build.
+	 * @Deprecated use npm object
 	 */
+	@Deprecated
 	public String getNpmPackageVersion() {
-		return npmPackageVersion;
+		return npm.getPackageVersion();
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setNpmPackageVersion(String npmPackageVersion) {
-		this.npmPackageVersion = npmPackageVersion;
+		this.npm.setPackageVersion(npmPackageVersion);
 	}
 
 	public String getSourceDirectoryName() {
@@ -206,20 +208,36 @@ public class TSGeneratorConfiguration {
 		this.sourceDirectoryName = sourceDirectoryName;
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public String getNpmDescription() {
-		return npmDescription;
+		return npm.getDescription();
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public String getNpmLicense() {
-		return npmLicense;
+		return npm.getLicense();
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setNpmLicense(String npmLicense) {
-		this.npmLicense = npmLicense;
+		this.npm.setLicense(npmLicense);
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setNpmDescription(String npmDescription) {
-		this.npmDescription = npmDescription;
+		this.npm.setDescription(npmDescription);
 	}
 
 
@@ -228,7 +246,7 @@ public class TSGeneratorConfiguration {
 	 */
 	@Deprecated
 	public Map<String, String> getNpmDependencies() {
-		return npmPeerDependencies;
+		return npm.getPeerDependencies();
 	}
 
 	/**
@@ -236,30 +254,38 @@ public class TSGeneratorConfiguration {
 	 */
 	@Deprecated
 	public void setNpmDependencies(Map<String, String> npmDependencies) {
-		this.npmPeerDependencies = npmDependencies;
+		this.setPeerNpmDependencies(npmDependencies);
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public Map<String, String> getPeerNpmDependencies() {
-		return npmPeerDependencies;
+		return npm.getPeerDependencies();
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setPeerNpmDependencies(Map<String, String> npmPeerDependencies) {
-		this.npmPeerDependencies = npmPeerDependencies;
+		this.npm.setPeerDependencies(npmPeerDependencies);
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public Map<String, String> getNpmDevDependencies() {
-		return npmDevDependencies;
+		return npm.getDevDependencies();
 	}
 
+	/**
+	 * @Deprecated use npm object
+	 */
+	@Deprecated
 	public void setNpmDevDependencies(Map<String, String> npmDevDependencies) {
-		this.npmDevDependencies = npmDevDependencies;
-	}
-
-	public String getGitRepository() {
-		return gitRepository;
-	}
-
-	public void setGitRepository(String gitRepository) {
-		this.gitRepository = gitRepository;
+		this.npm.setDevDependencies(npmDevDependencies);
 	}
 }
