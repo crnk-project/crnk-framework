@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSNpmConfiguration;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
@@ -77,10 +78,8 @@ public class TSGenerator {
 			compilerOptions.put("declaration", false);
 			compilerOptions.put("emitDecoratorMetadata", true);
 			compilerOptions.put("experimentalDecorators", true);
-			compilerOptions.put("mapRoot", "./");
 			compilerOptions.put("module", "es6");
 			compilerOptions.put("moduleResolution", "node");
-			compilerOptions.put("outDir", "../../../../npm/");
 			compilerOptions.put("sourceMap", true);
 			compilerOptions.put("target", "es5");
 			ArrayNode typeArrays = compilerOptions.putArray("typeRoots");
@@ -107,17 +106,26 @@ public class TSGenerator {
 
 			ObjectNode packageJson = mapper.createObjectNode();
 
-			packageJson.put("name", config.getNpmPackageName());
-			packageJson.put("version", config.getNpmPackageVersion());
-			packageJson.put("description", config.getNpmDescription());
-			packageJson.put("license", config.getNpmLicense());
+			TSNpmConfiguration npm = config.getNpm();
+
+			packageJson.put("name", npm.getPackageName());
+			packageJson.put("version", npm.getPackageVersion());
+			packageJson.put("description", npm.getDescription());
+			packageJson.put("license", npm.getLicense());
+			if (npm.getGitRepository() != null) {
+				ObjectNode repository = packageJson.putObject("repository");
+				repository.put("type", "git");
+				repository.put("url", npm.getGitRepository());
+			}
+
+
 			ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
 			ObjectNode devDependencies = packageJson.putObject("devDependencies");
-			for (Map.Entry<String, String> entry : config.getPeerNpmDependencies().entrySet()) {
+			for (Map.Entry<String, String> entry : npm.getPeerDependencies().entrySet()) {
 				peerDependencies.put(entry.getKey(), entry.getValue());
 				devDependencies.put(entry.getKey(), entry.getValue());
 			}
-			for (Map.Entry<String, String> entry : config.getNpmDevDependencies().entrySet()) {
+			for (Map.Entry<String, String> entry : npm.getDevDependencies().entrySet()) {
 				devDependencies.put(entry.getKey(), entry.getValue());
 			}
 
@@ -125,11 +133,10 @@ public class TSGenerator {
 			packageJsonFile.getParentFile().mkdirs();
 
 			ObjectNode scripts = packageJson.putObject("scripts");
-			scripts.put("build", "npm run build:js && npm run copyPackageJson && rimraf ../../../npm/node_modules");
-			scripts.put("copyPackageJson", "ncp package.json ../../../npm/package.json");
+			scripts.put("build", "npm run build:js");
 			scripts.put("build:js", "tsc -p ./src --declaration");
-			packageJson.put("name", config.getNpmPackageName());
-			packageJson.put("version", config.getNpmPackageVersion());
+			packageJson.put("name", npm.getPackageName());
+			packageJson.put("version", npm.getPackageVersion());
 
 			// match what is expected by NPM. Otherwise NPM will reformat it and up-to-date checking will fail
 			// the first time (also platform specific)
@@ -138,7 +145,7 @@ public class TSGenerator {
 			text = text + "\n";
 			text = text.replace(System.lineSeparator(), "\n");
 
-			try(FileWriter writer = new FileWriter(packageJsonFile)) {
+			try (FileWriter writer = new FileWriter(packageJsonFile)) {
 				writer.write(text);
 			}
 		}

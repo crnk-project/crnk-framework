@@ -67,6 +67,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 		Map<String, Class<?>> sharedClasses = new HashMap<>();
 		sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
 		sharedClasses.put(TSGeneratorConfiguration.class.getName(), TSGeneratorConfiguration.class);
+		sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
 		sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
 		sharedClasses.put(RuntimeMetaResolver.class.getName(), RuntimeMetaResolver.class);
 		sharedClasses.put(TSSourceProcessor.class.getName(), TSSourceProcessor.class);
