@@ -77,11 +77,11 @@ public class TSGenerator {
 			compilerOptions.put("declaration", false);
 			compilerOptions.put("emitDecoratorMetadata", true);
 			compilerOptions.put("experimentalDecorators", true);
-			compilerOptions.put("mapRoot", "./");
 			compilerOptions.put("module", "es6");
 			compilerOptions.put("moduleResolution", "node");
 			compilerOptions.put("outDir", "../../../../npm/");
 			compilerOptions.put("sourceMap", true);
+			compilerOptions.put("inlineSources", true);
 			compilerOptions.put("target", "es5");
 			ArrayNode typeArrays = compilerOptions.putArray("typeRoots");
 			typeArrays.add("node_modules/@types");
@@ -111,6 +111,13 @@ public class TSGenerator {
 			packageJson.put("version", config.getNpmPackageVersion());
 			packageJson.put("description", config.getNpmDescription());
 			packageJson.put("license", config.getNpmLicense());
+			if (config.getGitRepository() != null) {
+				ObjectNode repository = packageJson.putObject("repository");
+				repository.put("type", "git");
+				repository.put("url", config.getGitRepository());
+			}
+
+
 			ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
 			ObjectNode devDependencies = packageJson.putObject("devDependencies");
 			for (Map.Entry<String, String> entry : config.getPeerNpmDependencies().entrySet()) {
@@ -138,7 +145,7 @@ public class TSGenerator {
 			text = text + "\n";
 			text = text.replace(System.lineSeparator(), "\n");
 
-			try(FileWriter writer = new FileWriter(packageJsonFile)) {
+			try (FileWriter writer = new FileWriter(packageJsonFile)) {
 				writer.write(text);
 			}
 		}

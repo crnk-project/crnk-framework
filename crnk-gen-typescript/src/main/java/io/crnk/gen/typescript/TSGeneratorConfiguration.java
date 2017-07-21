@@ -39,7 +39,7 @@ public class TSGeneratorConfiguration {
 
 	private String sourceDirectoryName = "src";
 
-	private String npmLicense = null;
+	private String npmLicense = "UNLICENSED";
 
 	private String npmDescription = null;
 
@@ -53,6 +53,8 @@ public class TSGeneratorConfiguration {
 
 	// TODO setup crnk frontend library project
 	private String expressionLibrary;
+
+	private String gitRepository;
 
 	public TSGeneratorConfiguration() {
 		sourceProcessors.add(new TSExpressionObjectProcessor());
@@ -251,5 +253,13 @@ public class TSGeneratorConfiguration {
 
 	public void setNpmDevDependencies(Map<String, String> npmDevDependencies) {
 		this.npmDevDependencies = npmDevDependencies;
+	}
+
+	public String getGitRepository() {
+		return gitRepository;
+	}
+
+	public void setGitRepository(String gitRepository) {
+		this.gitRepository = gitRepository;
 	}
 }
