@@ -59,9 +59,13 @@ typescriptGen{
 		packageName = '@adnovum/moap-movie-management-api'
 		description = 'movie management API to access backend'
 		gitRepository = 'https://.../bitbucket/scm/moap/moap-movie.git'
+		license = 'MIT'
+
+		includes = ['ch.adnovum.moap.movie.somePackage']
+		excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
 
 		packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
-		peerDependencies['ngrx-json-api'] = '>=1.1.1-adn.5'
+		peerDependencies['ngrx-json-api'] = '>=1.2.0'
 	}
 }
 
@@ -69,16 +73,18 @@ typescriptGen{
 ----
 
 - the `moowork` plugin is used to to gain a `node` setup.
+- `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
 - by default the package version matches the npm version.
-- `npmPackageName` is necessary to use for publishing.
-- a mapping of Java package name (resp. `MetaElement.id`) to npm packages has to be provided.
-  Only resources are generated whose package matches the chosen `npmPackageName`.
+- a mapping of Java package name (resp. `MetaElement.id`) to npm packages must be specified.
+  Only resources are generated whose package matches the chosen `npm.packageName`.
   All other resources are imported as external NPM dependency.
+- `includes` and `excludes` allow to include and exclude packages from generation.
 - crnk-meta is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
   Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
   the package resp. class name. But for more advanced use cases those may differ.
-- there is a new task available: `assembleTypescript`. It and its dependencies generate, compile
-  and package the Typescript sources. We choose not to add a dependency from `assembleTypescript` to `assemble` has a backend-only
+- applying `crnk-gen-typescript` results in a new `assembleTypescript` task. It and its dependencies
+  generate, compile and package the Typescript sources. We chose not to add a dependency from `assembleTypescript` to
+  `assemble` has a backend-only
   develop may not need to run with every `assemble` run. Typically `assembleTypescript` is either hooked
   into the publishing or added as dependency on a frontend project contained within the same Gradle project.
 

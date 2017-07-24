@@ -48,6 +48,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		httpClient = ClientBuilder.newClient(config);
 	}
 
+	// tag::docs[]
 	@ApplicationPath("/")
 	class TestApplication extends ResourceConfig {
 
@@ -66,8 +67,8 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 
 			register(feature);
 		}
-
 	}
+	// end::docs[]
 
 	void setEnableNullResponse(boolean enableNullResponse) {
 		this.enableNullResponse = enableNullResponse;

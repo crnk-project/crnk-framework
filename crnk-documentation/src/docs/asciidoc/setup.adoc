@@ -84,12 +84,40 @@ use of the JSON API resp. Crnk exception handling in JAX-RS services, one can ad
 *JsonapiExceptionMapperBridge* to the JAX-RS application. The constructor of `JsonapiExceptionMapperBridge`
 takes `CrnkFeature` as parameter.
 
-### Return resources with JAX-RS services
+For an example have a look at the next section which make use of it together with `JsonApiResponseFilter`.
+
+
+### Use JSON API format with JAX-RS services
 
 Similar to `JsonapiExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
-resources in JSON API format. In order to properly serialize such responses, add
-*JsonApiResponseFilter* to your JAX-RS application. The constructor of `JsonApiResponseFilter`
-takes `CrnkFeature` as parameter.
+resources in JSON API format with *JsonApiResponseFilter*. `JsonApiResponseFilter` wraps primitive
+responses with a `data` object; resource objects with `data` and `included` objects.
+The constructor of `JsonApiResponseFilter` takes `CrnkFeature` as parameter.
+
+
+To determine which JAX-RS services should be wrapped, `JsonApiResponseFilter` checks whether the
+`@Produce` annotation delivers JSON API. The produce
+annotation can be added, for example, to the class:
+
+[source]
+.ScheduleRepository.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/repository/ScheduleRepository.java[tags=annotation]
+----
+
+And the JAX-RS application setup looks like:
+
+[source]
+.JsonApiResponseFilterTestBase.java
+----
+include::../../../../crnk-rs/src/test/java/io/crnk/rs/JsonApiResponseFilterTestBase.java[tags=docs]
+----
+
+Note that:
+
+- `CrnkProperties.NULL_DATA_RESPONSE_ENABLED` determines whether null responses should be wrapped
+   as JSON API responses.
+- Make use of proper service discovery instead of `CrnkProperties.RESOURCE_SEARCH_PACKAGE` in real applications.
 
 
 ### JAX-RS interoperability
