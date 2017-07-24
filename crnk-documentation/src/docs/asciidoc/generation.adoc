@@ -60,13 +60,13 @@ typescriptGen{
 		description = 'movie management API to access backend'
 		gitRepository = 'https://.../bitbucket/scm/moap/moap-movie.git'
 		license = 'MIT'
-
-		includes = ['ch.adnovum.moap.movie.somePackage']
-		excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
-
-		packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
-		peerDependencies['ngrx-json-api'] = '>=1.2.0'
 	}
+
+	includes = ['ch.adnovum.moap.movie.somePackage']
+	excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
+
+	packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
+	peerDependencies['ngrx-json-api'] = '>=1.2.0'
 }
 
 
