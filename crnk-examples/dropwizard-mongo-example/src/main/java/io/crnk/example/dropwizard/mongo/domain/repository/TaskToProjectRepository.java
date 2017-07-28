@@ -1,19 +1,18 @@
 package io.crnk.example.dropwizard.mongo.domain.repository;
 
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.dropwizard.mongo.domain.model.Project;
 import io.crnk.example.dropwizard.mongo.domain.model.Task;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.bson.types.ObjectId;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-public class TaskToProjectRepository implements RelationshipRepository<Task, ObjectId, Project, ObjectId> {
+public class TaskToProjectRepository implements RelationshipRepositoryV2<Task, ObjectId, Project, ObjectId> {
 
 	private TaskRepository taskRepository;
 	private ProjectRepository projectRepository;
@@ -22,6 +21,16 @@ public class TaskToProjectRepository implements RelationshipRepository<Task, Obj
 	public TaskToProjectRepository(TaskRepository taskRepository, ProjectRepository projectRepository) {
 		this.taskRepository = taskRepository;
 		this.projectRepository = projectRepository;
+	}
+
+	@Override
+	public Class<Task> getSourceResourceClass() {
+		return Task.class;
+	}
+
+	@Override
+	public Class<Project> getTargetResourceClass() {
+		return Project.class;
 	}
 
 	@Override
@@ -118,7 +127,7 @@ public class TaskToProjectRepository implements RelationshipRepository<Task, Obj
 	}
 
 	@Override
-	public Project findOneTarget(ObjectId objectId, String fieldName, QueryParams requestParams) {
+	public Project findOneTarget(ObjectId objectId, String fieldName, QuerySpec requestParams) {
 		Task task = taskRepository.findOne(objectId, requestParams);
 		try {
 			return (Project) PropertyUtils.getProperty(task, fieldName);
@@ -128,10 +137,12 @@ public class TaskToProjectRepository implements RelationshipRepository<Task, Obj
 	}
 
 	@Override
-	public Iterable<Project> findManyTargets(ObjectId objectId, String fieldName, QueryParams requestParams) {
+	public ResourceList<Project> findManyTargets(ObjectId objectId, String fieldName, QuerySpec requestParams) {
 		Task task = taskRepository.findOne(objectId, requestParams);
 		try {
-			return (Iterable<Project>) PropertyUtils.getProperty(task, fieldName);
+			DefaultResourceList<Project> result = new DefaultResourceList<>();
+			result.addAll((Collection<Project>) PropertyUtils.getProperty(task, fieldName));
+			return result;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

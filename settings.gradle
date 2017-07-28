@@ -9,6 +9,7 @@ include ':crnk-validation'
 
 include ':crnk-servlet'
 include ':crnk-cdi'
+include ':crnk-guice'
 include ':crnk-spring'
 include ':crnk-brave'
 include ':crnk-security'
