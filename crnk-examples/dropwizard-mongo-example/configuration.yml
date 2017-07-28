@@ -2,8 +2,8 @@ mongo:
   host:     localhost
   port:     27017
   db:       crnk
-  user:
-  password:
+  user:		john
+  password:	doe
 
 server:
   type: simple

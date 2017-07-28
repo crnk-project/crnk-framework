@@ -1,16 +1,19 @@
 package io.crnk.example.dropwizard.mongo.domain.repository;
 
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.dropwizard.mongo.domain.model.Task;
 import io.crnk.example.dropwizard.mongo.managed.MongoManaged;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
 
 import javax.inject.Inject;
 
-public class TaskRepository implements ResourceRepository<Task, ObjectId> {
+public class TaskRepository implements ResourceRepositoryV2<Task, ObjectId> {
+
 	private Datastore datastore;
 
 	@Inject
@@ -23,18 +26,33 @@ public class TaskRepository implements ResourceRepository<Task, ObjectId> {
 		return (S) datastore.getByKey(Task.class, saveKey);
 	}
 
-	public Task findOne(ObjectId id, QueryParams requestParams) {
+	@Override
+	public <S extends Task> S create(S entity) {
+		return save(entity);
+	}
+
+	@Override
+	public Class<Task> getResourceClass() {
+		return Task.class;
+	}
+
+	public Task findOne(ObjectId id, QuerySpec requestParams) {
 		return datastore.getByKey(Task.class, new Key<>(Task.class, id));
 	}
 
 	@Override
-	public Iterable<Task> findAll(QueryParams requestParams) {
-		return datastore.find(Task.class);
+	public ResourceList<Task> findAll(QuerySpec requestParams) {
+		DefaultResourceList<Task> results = new DefaultResourceList<>();
+		results.addAll(datastore.find(Task.class).asList());
+		return results;
 	}
 
 	@Override
-	public Iterable<Task> findAll(Iterable<ObjectId> iterable, QueryParams requestParams) {
-		return datastore.get(Task.class, iterable);
+	public ResourceList<Task> findAll(Iterable<ObjectId> iterable, QuerySpec requestParams) {
+		DefaultResourceList<Task> results = new DefaultResourceList<>();
+		results.addAll(datastore.get(Task.class, iterable).asList());
+		return results;
+
 	}
 
 	public void delete(ObjectId id) {
