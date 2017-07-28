@@ -238,7 +238,7 @@ export class BrowseComponent {
 		}
 	}
 
-	private updateAvailableRelationships() {
+	public updateAvailableRelationships() {
 		if (_.isEmpty(this.preferences.query.type)) {
 			this.availableRelationships = [];
 		}
