@@ -1,14 +1,13 @@
 package io.crnk.core.engine.internal.exception;
 
+import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
-
-import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.internal.utils.TypeUtils;
-import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 
 public final class ExceptionMapperRegistryBuilder {
 	private final Set<ExceptionMapperType> exceptionMappers = new HashSet<>();
@@ -32,7 +31,7 @@ public final class ExceptionMapperRegistryBuilder {
 	private void registerExceptionMapper(JsonApiExceptionMapper<? extends Throwable> exceptionMapper) {
 		Class<? extends JsonApiExceptionMapper> mapperClass = exceptionMapper.getClass();
 		Class<? extends Throwable> exceptionClass = getGenericType(mapperClass);
-		if(exceptionClass == null && mapperClass.getName().contains("$$")){
+		if (exceptionClass == null && mapperClass.getName().contains("$$")) {
 			// deal if dynamic proxies, like in CDI
 			mapperClass = (Class<? extends JsonApiExceptionMapper>) mapperClass.getSuperclass();
 			exceptionClass = getGenericType(mapperClass);
@@ -48,15 +47,15 @@ public final class ExceptionMapperRegistryBuilder {
 		}
 
 		for (Type type : types) {
-			if (type instanceof ParameterizedType && (
-					TypeUtils.isAssignable(((ParameterizedType) type).getRawType(), JsonApiExceptionMapper.class)
-					|| TypeUtils.isAssignable(((ParameterizedType) type).getRawType(), ExceptionMapper.class))) {
+			Class<?> rawType = ClassUtils.getRawType(type);
+			if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType))
+			{
 				//noinspection unchecked
 				return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
 			}
 		}
 		//Won't get in here
-		return null;
+		throw new IllegalStateException("unable to discover exception class for " + mapper.getName());
 	}
 
 }

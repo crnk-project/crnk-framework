@@ -18,10 +18,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.engine.internal.utils.*;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.resource.annotations.JsonApiField;
@@ -224,9 +221,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		List<ResourceFieldWrapper> fieldWrappers = new ArrayList<>(classGetters.size());
 		for (Method getter : classGetters) {
 			String underlyingName = ClassUtils.getGetterFieldName(getter);
-			if (underlyingName == null) {
-				continue;
-			}
+			PreconditionUtil.assertNotNull("not a valid getter", underlyingName);
 			String jsonName = resourceFieldNameTransformer.getName(getter);
 			fieldWrappers.add(getResourceField(resourceClass, getter, jsonName, underlyingName, getter.getReturnType(), getter.getGenericReturnType(), Arrays.asList(getter.getAnnotations())));
 		}

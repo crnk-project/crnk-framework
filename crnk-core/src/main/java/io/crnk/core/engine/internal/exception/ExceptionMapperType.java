@@ -11,6 +11,10 @@ final class ExceptionMapperType {
 	public ExceptionMapperType(Class<? extends Throwable> exceptionClass, JsonApiExceptionMapper exceptionMapper) {
 		this.exceptionMapper = exceptionMapper;
 		this.exceptionClass = exceptionClass;
+
+		if(exceptionClass == null){
+			throw new IllegalStateException();
+		}
 	}
 
 	public Class<? extends Throwable> getExceptionClass() {

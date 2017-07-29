@@ -1,7 +1,19 @@
 apply plugin: 'java'
 
+apply plugin: 'java-gradle-plugin'
+
+gradlePlugin {
+	plugins {
+		'crnk-gen-typescript' {
+			id = "crnk-gen-typescript"
+			implementationClass = "io.crnk.gen.typescript.TSGeneratorPlugin"
+		}
+	}
+}
+
 dependencies {
 	compile gradleApi()
+	testCompile gradleTestKit()
 
 	compileOnly project(':crnk-core')
 	compileOnly project(':crnk-meta')
@@ -18,7 +30,7 @@ dependencies {
 	testCompile project(':crnk-meta')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-cdi')
-    testCompile 'junit:junit:4.12'
+	testCompile 'junit:junit:4.12'
 	testCompile 'commons-io:commons-io:2.5'
 	testCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
 	testCompile 'org.apache.deltaspike.core:deltaspike-core-impl:1.7.1'
@@ -27,6 +39,8 @@ dependencies {
 	testCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.7.1'
 	testCompile 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
 	testCompile 'javax:javaee-api:7.0'
+
+
 }
 
 // e.g. CDI expects those directories to be equal
@@ -41,6 +55,7 @@ sourceSets {
 jar {
 	duplicatesStrategy = 'exclude'
 }
+
 
 
 

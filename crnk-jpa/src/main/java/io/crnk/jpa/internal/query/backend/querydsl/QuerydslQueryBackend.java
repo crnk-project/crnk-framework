@@ -83,9 +83,7 @@ public class QuerydslQueryBackend<T>
 
 	private Expression<Object> getParentIdExpression(MetaDataObject parentMeta, MetaAttribute parentAttr) {
 		MetaKey primaryKey = parentMeta.getPrimaryKey();
-		if (primaryKey == null) {
-			throw new IllegalStateException("no primary key specified for parentAttribute " + parentAttr.getId());
-		}
+		PreconditionUtil.assertNotNull("no primary key specified for parentAttribute " + parentAttr.getId(), parentMeta);
 		List<MetaAttribute> elements = primaryKey.getElements();
 		PreconditionUtil.assertEquals("composite primary keys not supported yet", 1, elements.size());
 		MetaAttribute primaryKeyAttr = elements.get(0);

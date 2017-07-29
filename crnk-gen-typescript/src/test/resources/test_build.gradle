@@ -1,0 +1,77 @@
+buildscript {
+	repositories {
+		maven {
+			url('https://plugins.gradle.org/m2')
+		}
+	}
+
+	dependencies {
+		classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
+		classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.2'
+		classpath files(new File('../build/classes/main'))
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url('https://plugins.gradle.org/m2')
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'com.moowork.node'
+apply plugin: 'org.unbroken-dome.test-sets'
+
+testSets {
+	integrationTest
+}
+
+node {
+	version = '6.10.3'
+	npmVersion = '5.1.0'
+	download = true
+}
+
+
+dependencies {
+	compile files(('../../crnk-core/build/classes/main'))
+	compile files(('../../crnk-meta/build/classes/main'))
+	compile files(('../../crnk-cdi/build/classes/main'))
+	compile 'javax:javaee-api:7.0'
+
+	compile 'org.slf4j:slf4j-api:1.7.13'
+	compile 'com.fasterxml.jackson.core:jackson-databind:2.8.7'
+
+	integrationTestCompile 'junit:junit:4.12'
+	integrationTestCompile 'commons-io:commons-io:2.5'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
+	integrationTestCompile 'org.apache.deltaspike.core:deltaspike-core-impl:1.7.1'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
+	integrationTestCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-impl:1.7.1'
+	integrationTestCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.7.1'
+	integrationTestCompile 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
+}
+
+apply plugin: io.crnk.gen.typescript.TSGeneratorPlugin
+
+typescriptGen{
+	npmPackageVersion = '0.0.1'
+	npmPackageName = '@crnk/test'
+	npmPackageMapping['ch.crnk.gen.typescript'] = '@crnk/test'
+	npmDependencies['ngrx-json-api'] = '>=1.1.0'
+}
+
+
+// e.g. CDI expects those directories to be equal
+sourceSets {
+	main {
+		output.resourcesDir = output.classesDir
+	}
+	test {
+		output.resourcesDir = output.classesDir
+	}
+}
+jar {
+	duplicatesStrategy = 'exclude'
+}
