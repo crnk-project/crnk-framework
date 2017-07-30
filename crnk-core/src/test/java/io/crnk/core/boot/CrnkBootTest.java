@@ -6,6 +6,8 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.error.ErrorResponse;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
@@ -170,7 +172,7 @@ public class CrnkBootTest {
 
 		Module module = Mockito.mock(Module.class);
 		DocumentFilter filter = Mockito.mock(DocumentFilter.class);
-		JsonApiExceptionMapper exceptionMapper = Mockito.mock(JsonApiExceptionMapper.class);
+		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(Module.class))).thenReturn(Arrays.asList(module));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(JsonApiExceptionMapper.class)))
@@ -181,6 +183,24 @@ public class CrnkBootTest {
 		Assert.assertTrue(moduleRegistry.getModules().contains(module));
 		Assert.assertTrue(moduleRegistry.getFilters().contains(filter));
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
+	}
+
+	class TestExceptionMapper implements ExceptionMapper<IllegalStateException>{
+
+		@Override
+		public ErrorResponse toErrorResponse(IllegalStateException exception) {
+			return null;
+		}
+
+		@Override
+		public IllegalStateException fromErrorResponse(ErrorResponse errorResponse) {
+			return null;
+		}
+
+		@Override
+		public boolean accepts(ErrorResponse errorResponse) {
+			return false;
+		}
 	}
 
 	@Test

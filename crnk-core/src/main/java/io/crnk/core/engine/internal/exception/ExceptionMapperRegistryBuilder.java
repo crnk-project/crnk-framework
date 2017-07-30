@@ -31,13 +31,18 @@ public final class ExceptionMapperRegistryBuilder {
 	private void registerExceptionMapper(JsonApiExceptionMapper<? extends Throwable> exceptionMapper) {
 		Class<? extends JsonApiExceptionMapper> mapperClass = exceptionMapper.getClass();
 		Class<? extends Throwable> exceptionClass = getGenericType(mapperClass);
-		if (exceptionClass == null && mapperClass.getName().contains("$$")) {
+		if (exceptionClass == null && isProxy(mapperClass)) {
 			// deal if dynamic proxies, like in CDI
 			mapperClass = (Class<? extends JsonApiExceptionMapper>) mapperClass.getSuperclass();
 			exceptionClass = getGenericType(mapperClass);
 		}
 
 		exceptionMappers.add(new ExceptionMapperType(exceptionClass, exceptionMapper));
+	}
+
+	private boolean isProxy(Class<? extends JsonApiExceptionMapper> mapperClass) {
+		return mapperClass.getName().contains("$$")
+				&& JsonApiExceptionMapper.class.isAssignableFrom(mapperClass.getSuperclass());
 	}
 
 	private Class<? extends Throwable> getGenericType(Class<? extends JsonApiExceptionMapper> mapper) {
@@ -54,6 +59,11 @@ public final class ExceptionMapperRegistryBuilder {
 				return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
 			}
 		}
+
+		if(isProxy(mapper)){
+			return getGenericType((Class<? extends JsonApiExceptionMapper>) mapper.getSuperclass());
+		}
+
 		//Won't get in here
 		throw new IllegalStateException("unable to discover exception class for " + mapper.getName());
 	}

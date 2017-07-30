@@ -12,7 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Ignore // FIXME
+@Ignore // classpath issues somewhere
 public class GradleDeltaspikeTest {
 
 	public TemporaryFolder testFolder = new TemporaryFolder();
@@ -30,7 +30,7 @@ public class GradleDeltaspikeTest {
 		saveFile("TestModuleProducer.java", "src/main/java/io/crnk/gen/typescript/TestModuleProducer.java");
 
 		GradleRunner runner = GradleRunner.create();
-//		runner = runner.withPluginClasspath();
+		runner = runner.withPluginClasspath();
 
 		// List<File> files = Arrays.asList(new File("C:\\projects\\oss\\crnk-framework\\crnk-gen-typescript\\build\\classes\\main"));
 
@@ -39,6 +39,7 @@ public class GradleDeltaspikeTest {
 
 		// TODO move to assembleTypescript once ngrx-json-api released
 		runner = runner.withArguments("generateTypescript");
+
 
 		BuildResult build = runner.build();
 		System.out.println(build.getOutput());

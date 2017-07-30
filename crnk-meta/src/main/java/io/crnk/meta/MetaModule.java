@@ -15,18 +15,8 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import io.crnk.meta.internal.MetaRelationshipRepository;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaCollectionType;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaInterface;
-import io.crnk.meta.model.MetaKey;
-import io.crnk.meta.model.MetaListType;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
+import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.MetaProvider;
 
 public class MetaModule implements Module, InitializingModule {
@@ -69,18 +59,21 @@ public class MetaModule implements Module, InitializingModule {
 		lookup.setModuleContext(context);
 
 		final Set<Class<? extends MetaElement>> metaClasses = new HashSet<>();
-		metaClasses.add(MetaElement.class);
+		metaClasses.add(MetaArrayType.class);
 		metaClasses.add(MetaAttribute.class);
 		metaClasses.add(MetaCollectionType.class);
 		metaClasses.add(MetaDataObject.class);
+		metaClasses.add(MetaElement.class);
+		metaClasses.add(MetaEnumType.class);
+		metaClasses.add(MetaInterface.class);
 		metaClasses.add(MetaKey.class);
 		metaClasses.add(MetaListType.class);
+		metaClasses.add(MetaLiteral.class);
 		metaClasses.add(MetaMapType.class);
+		metaClasses.add(MetaPrimaryKey.class);
 		metaClasses.add(MetaPrimitiveType.class);
 		metaClasses.add(MetaSetType.class);
 		metaClasses.add(MetaType.class);
-		metaClasses.add(MetaInterface.class);
-		metaClasses.add(MetaPrimaryKey.class);
 		for (MetaProvider provider : lookup.getProviders()) {
 			metaClasses.addAll(provider.getMetaTypes());
 		}

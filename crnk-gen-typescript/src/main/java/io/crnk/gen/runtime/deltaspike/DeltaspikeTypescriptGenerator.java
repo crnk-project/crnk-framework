@@ -33,7 +33,7 @@ public class DeltaspikeTypescriptGenerator {
 		Optional<MetaModule> optionalModule = moduleRegistry.getModule(MetaModule.class);
 
 		if (!optionalModule.isPresent()) {
-			throw new IllegalStateException("add MetaModule to CDI setup, got: " + moduleRegistry.getModules());
+			throw new IllegalStateException("add MetaModule to CDI setup, got: " + moduleRegistry.getModules() + " with " + boot.getServiceDiscovery());
 		}
 
 		MetaModule metaModule = optionalModule.get();
