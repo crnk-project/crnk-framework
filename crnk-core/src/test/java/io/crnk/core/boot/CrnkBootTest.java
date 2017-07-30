@@ -1,9 +1,5 @@
 package io.crnk.core.boot;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ErrorResponse;
@@ -39,6 +35,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 public class CrnkBootTest {
 
@@ -106,6 +106,15 @@ public class CrnkBootTest {
 		boot.boot();
 		Mockito.verify(serviceDiscoveryFactory, Mockito.times(1)).getInstance();
 		Assert.assertNotNull(boot.getServiceDiscovery());
+	}
+
+	@Test
+	public void getPropertiesProvider() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
+		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.boot();
+		Assert.assertNotNull(boot.getPropertiesProvider());
 	}
 
 	@Test
@@ -185,7 +194,7 @@ public class CrnkBootTest {
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
 	}
 
-	class TestExceptionMapper implements ExceptionMapper<IllegalStateException>{
+	class TestExceptionMapper implements ExceptionMapper<IllegalStateException> {
 
 		@Override
 		public ErrorResponse toErrorResponse(IllegalStateException exception) {
