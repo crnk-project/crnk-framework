@@ -14,10 +14,7 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
-import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.RequestBodyNotFoundException;
-import io.crnk.core.exception.ResourceException;
+import io.crnk.core.exception.*;
 import io.crnk.core.mock.models.Pojo;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.PojoRepository;
@@ -31,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -78,6 +76,23 @@ public class ResourcePostTest extends BaseControllerTest {
 
 		// THEN
 		expectedException.expect(RuntimeException.class);
+
+		// WHEN
+		sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+	}
+
+	@Test
+	public void onMultipleDataThrowException() throws Exception {
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject();
+		newProjectBody.setData(Nullable.of((Object) new ArrayList<>()));
+
+		JsonPath projectPath = pathBuilder.build("/tasks");
+		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+
+		// THEN
+		expectedException.expect(RequestBodyException.class);
 
 		// WHEN
 		sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);

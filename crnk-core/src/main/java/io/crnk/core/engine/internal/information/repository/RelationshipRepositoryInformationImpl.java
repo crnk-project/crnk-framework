@@ -19,13 +19,6 @@ public class RelationshipRepositoryInformationImpl implements
 		this.targetResourceType = targetResourceType;
 	}
 
-	public RelationshipRepositoryInformationImpl(String sourceResourceType,
-												 String targetResourceType) {
-		this.sourceResourceClass = Optional.empty();
-		this.sourceResourceType = sourceResourceType;
-		this.targetResourceType = targetResourceType;
-	}
-
 	@Override
 	public Optional<Class> getSourceResourceClass() {
 		return sourceResourceClass;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,14 +47,17 @@ public class RawResourceFieldAccessor implements io.crnk.core.engine.information
 				return null;
 			case META_INFORMATION:
 				return toObject(resource.getMeta());
-			case LINKS_INFORMATION:
+			default:
+				PreconditionUtil.assertEquals("invalid type", fieldType, ResourceFieldType.LINKS_INFORMATION);
 				return toObject(resource.getLinks());
 		}
-		throw new IllegalStateException();
 	}
 
 	private Object toObject(JsonNode node) {
 		try {
+			if (node == null) {
+				return null;
+			}
 			return reader.readValue(node);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);

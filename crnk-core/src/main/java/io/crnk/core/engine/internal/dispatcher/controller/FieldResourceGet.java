@@ -43,9 +43,7 @@ public class FieldResourceGet extends ResourceIncludeField {
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
-		if (relationshipField == null) {
-			throw new ResourceFieldNotFoundException(elementName);
-		}
+		verifyFieldNotNull(relationshipField, elementName);
 
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();

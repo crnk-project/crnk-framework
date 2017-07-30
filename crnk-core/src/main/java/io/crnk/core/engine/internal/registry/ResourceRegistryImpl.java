@@ -7,7 +7,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundInitializationException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
 
@@ -56,11 +55,9 @@ public class ResourceRegistryImpl implements ResourceRegistry {
 	/**
 	 * Searches the registry for a resource identified by a JSON API resource
 	 * class. If a resource cannot be found,
-	 * {@link ResourceNotFoundInitializationException} is thrown.
 	 *
 	 * @param clazz resource type
 	 * @return registry entry
-	 * @throws ResourceNotFoundInitializationException if resource is not found
 	 */
 	public RegistryEntry findEntry(Class<?> clazz) {
 		return findEntry(clazz, false);

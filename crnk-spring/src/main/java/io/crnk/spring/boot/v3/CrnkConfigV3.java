@@ -1,7 +1,5 @@
 package io.crnk.spring.boot.v3;
 
-import javax.servlet.Filter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.core.boot.CrnkBoot;
@@ -21,6 +19,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.Filter;
+
 /**
  * Current crnk configuration with JSON API compliance, QuerySpec and module support.
  * Note that there is no support for QueryParams is this version due to the lack of JSON API compatibility.
@@ -31,11 +31,15 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 
 	private ApplicationContext applicationContext;
 
-	@Autowired
 	private CrnkSpringBootProperties properties;
 
-	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	public CrnkConfigV3(CrnkSpringBootProperties properties, ObjectMapper objectMapper) {
+		this.properties = properties;
+		this.objectMapper = objectMapper;
+	}
 
 	@Bean
 	public SpringServiceDiscovery discovery() {

@@ -1,24 +1,19 @@
 package io.crnk.gen.typescript;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import groovy.lang.Closure;
 import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
-import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
-import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
-import io.crnk.gen.typescript.processor.TSImportProcessor;
-import io.crnk.gen.typescript.processor.TSIndexFileProcessor;
-import io.crnk.gen.typescript.processor.TSSourceProcessor;
+import io.crnk.gen.typescript.processor.*;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.Project;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TSGeneratorConfiguration {
 
@@ -117,38 +112,6 @@ public class TSGeneratorConfiguration {
 	}
 
 	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public Map<String, String> getNpmPackageMapping() {
-		return npm.getPackageMapping();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmPackageMapping(Map<String, String> packageMapping) {
-		this.npm.setPackageMapping(packageMapping);
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public String getNpmPackageName() {
-		return npm.getPackageName();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmPackageName(String npmPackageName) {
-		this.npm.setPackageName(npmPackageName);
-	}
-
-	/**
 	 * @return code style to use for generated TypeScript sources.
 	 */
 	public TSCodeStyle getCodeStyle() {
@@ -184,108 +147,11 @@ public class TSGeneratorConfiguration {
 		this.metaResolverClassName = metaResolverClassName;
 	}
 
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public String getNpmPackageVersion() {
-		return npm.getPackageVersion();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmPackageVersion(String npmPackageVersion) {
-		this.npm.setPackageVersion(npmPackageVersion);
-	}
-
 	public String getSourceDirectoryName() {
 		return sourceDirectoryName;
 	}
 
 	public void setSourceDirectoryName(String sourceDirectoryName) {
 		this.sourceDirectoryName = sourceDirectoryName;
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public String getNpmDescription() {
-		return npm.getDescription();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public String getNpmLicense() {
-		return npm.getLicense();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmLicense(String npmLicense) {
-		this.npm.setLicense(npmLicense);
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmDescription(String npmDescription) {
-		this.npm.setDescription(npmDescription);
-	}
-
-
-	/**
-	 * @Deprecated use npmPeerDependencies
-	 */
-	@Deprecated
-	public Map<String, String> getNpmDependencies() {
-		return npm.getPeerDependencies();
-	}
-
-	/**
-	 * @Deprecated use npmPeerDependencies
-	 */
-	@Deprecated
-	public void setNpmDependencies(Map<String, String> npmDependencies) {
-		this.setPeerNpmDependencies(npmDependencies);
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public Map<String, String> getPeerNpmDependencies() {
-		return npm.getPeerDependencies();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setPeerNpmDependencies(Map<String, String> npmPeerDependencies) {
-		this.npm.setPeerDependencies(npmPeerDependencies);
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public Map<String, String> getNpmDevDependencies() {
-		return npm.getDevDependencies();
-	}
-
-	/**
-	 * @Deprecated use npm object
-	 */
-	@Deprecated
-	public void setNpmDevDependencies(Map<String, String> npmDevDependencies) {
-		this.npm.setDevDependencies(npmDevDependencies);
 	}
 }

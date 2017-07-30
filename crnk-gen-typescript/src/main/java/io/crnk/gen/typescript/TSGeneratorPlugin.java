@@ -1,19 +1,15 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-
 import com.moowork.gradle.node.npm.NpmInstallTask;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
-import org.gradle.api.Action;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.UnknownTaskException;
+import org.gradle.api.*;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.tasks.Copy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class TSGeneratorPlugin implements Plugin<Project> {
 
@@ -26,6 +22,9 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		final File distDir = new File(project.getBuildDir(), "npm");
 
 		Configuration compileConfiguration = project.getConfigurations().getByName("compile");
+
+		project.getTasks().create(PublishTypescriptStubsTask.NAME, PublishTypescriptStubsTask.class);
+
 		GenerateTypescriptTask generateTask = project.getTasks().create(GenerateTypescriptTask.NAME,
 				GenerateTypescriptTask.class);
 		generateTask.getInputs().file(compileConfiguration.getFiles());
@@ -58,8 +57,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			npmInstall.getInputs().file(new File(buildDir, "package.json"));
 			npmInstall.getOutputs().dir(new File(buildDir, "node_modules"));
 			compileTypescriptTask.dependsOn(npmInstall);
-		}
-		catch (UnknownTaskException e) {
+		} catch (UnknownTaskException e) {
 			LOGGER.warn("task not found, ok in testing", e);
 		}
 
@@ -76,8 +74,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			Task integrationCompileJavaTask = project.getTasks().getByName("compileIntegrationTestJava");
 			Task assembleTask = project.getTasks().getByName("assemble");
 			generateTask.dependsOn(assembleTask, integrationCompileJavaTask, processIntegrationTestResourcesTask);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("failed to setup dependencies, is integrationTest and testSet plugin properly setup", e);
 		}
 

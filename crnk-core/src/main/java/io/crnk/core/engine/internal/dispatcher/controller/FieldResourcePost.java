@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-import java.util.Collections;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -17,15 +14,17 @@ import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.io.Serializable;
+import java.util.Collections;
 
 /**
  * Creates a new post in a similar manner as in {@link ResourcePost}, but additionally adds a relation to a field.
@@ -39,9 +38,7 @@ public class FieldResourcePost extends ResourceUpsert {
 
 	@Override
 	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		if (jsonPath == null) {
-			throw new IllegalArgumentException();
-		}
+		PreconditionUtil.assertNotNull("path cannot be null", jsonPath);
 		return !jsonPath.isCollection()
 				&& FieldPath.class.equals(jsonPath.getClass())
 				&& HttpMethod.POST.name()
@@ -61,9 +58,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		Serializable castedResourceId = getResourceId(resourceIds, endpointRegistryEntry);
 		ResourceField relationshipField = endpointRegistryEntry.getResourceInformation()
 				.findRelationshipFieldByName(jsonPath.getElementName());
-		if (relationshipField == null) {
-			throw new ResourceFieldNotFoundException(jsonPath.getElementName());
-		}
+		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 

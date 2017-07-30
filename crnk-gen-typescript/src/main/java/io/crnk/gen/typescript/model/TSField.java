@@ -17,7 +17,6 @@ public class TSField extends TSMember {
 		this.initializer = initializer;
 	}
 
-
 	@Override
 	public boolean isField() {
 		return true;

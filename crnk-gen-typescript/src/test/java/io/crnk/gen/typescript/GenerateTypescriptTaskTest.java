@@ -1,9 +1,11 @@
 package io.crnk.gen.typescript;
 
-import io.crnk.gen.runtime.deltaspike.DummyInitialContextFactory;
+import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.tasks.Copy;
 import org.gradle.internal.impldep.org.junit.Assert;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
@@ -13,6 +15,7 @@ import org.junit.rules.TemporaryFolder;
 import javax.naming.Context;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -40,6 +43,12 @@ public class GenerateTypescriptTaskTest {
 		testProjectDir.newFolder("src", "main", "java");
 
 		outputDir = testProjectDir.getRoot();
+		outputDir = new File("temp");
+
+		File npmrcFile = new File(outputDir, ".npmrc");
+		FileWriter npmrcWriter = new FileWriter(npmrcFile);
+		npmrcWriter.write("");
+		npmrcWriter.close();
 
 		Project project = ProjectBuilder.builder().withName("crnk-gen-typescript-test").withProjectDir(outputDir).build();
 		project.setVersion("0.0.1");
@@ -51,12 +60,16 @@ public class GenerateTypescriptTaskTest {
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getNpm().setPackageName(testPackage);
+		config.getNpm().setGitRepository("someThing");
 		config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
 		config.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
 		config.getNpm().setPackageVersion("0.0.1");
 
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
 		task.runGeneration();
+
+		Copy processTask = (Copy) project.getTasks().getByName("processTypescript");
+		processTask.execute();
 
 		assertExists("build/generated/source/typescript/package.json");
 		assertExists("build/generated/source/typescript/src/index.ts");
@@ -70,6 +83,12 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/generated/source/typescript/src/meta.key.ts");
 		assertExists("build/generated/source/typescript/src/meta.element.ts");
 		assertExists("build/generated/source/typescript/src/meta.data.object.ts");
+
+		// check whether source copied to compile directory for proper source bundling
+		assertExists("build/npm_compile/.npmrc");
+		assertExists("build/npm_compile/package.json");
+		assertExists("build/npm_compile/src/index.ts");
+		assertExists("build/npm_compile/src/meta.element.ts");
 
 		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :

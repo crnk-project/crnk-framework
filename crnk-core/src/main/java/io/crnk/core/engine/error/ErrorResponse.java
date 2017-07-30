@@ -1,17 +1,11 @@
 package io.crnk.core.engine.error;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
+
+import java.util.*;
 
 public final class ErrorResponse {
 
@@ -44,14 +38,6 @@ public final class ErrorResponse {
 	public JsonApiResponse getResponse() {
 		return new JsonApiResponse()
 				.setEntity(data);
-	}
-
-	public JsonPath getJsonPath() {
-		return null;
-	}
-
-	public QueryAdapter getQueryAdapter() {
-		return null;
 	}
 
 	@Override

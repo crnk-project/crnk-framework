@@ -13,6 +13,7 @@ buildscript {
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 		classpath 'org.ajoberstar:gradle-git-publish:0.2.1'
 		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
+		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 	}
 }
 
@@ -29,9 +30,8 @@ ext {
 
 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
 if (ext.timestampedVersion) {
-	version = BUILD_VERSION_PREFIX + "." + format.format(new Date())
-}
-else {
+	version = BUILD_VERSION_PREFIX "." format.format(new Date())
+} else {
 	version = '0.0.0-SNAPSHOT'
 }
 group = GROUP_ID
@@ -74,6 +74,26 @@ gradle.beforeProject { Project project ->
 				toolVersion = "0.7.6.201602180812"
 			}
 
+			rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
+			rootProject.tasks.jacocoRootReport.additionalSourceDirs files(sourceSets.main.allSource.srcDirs)
+
+			def sourceDirs = rootProject.tasks.jacocoRootReport.sourceDirectories
+			def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
+
+			def mainOutput = files(files(sourceSets.main.output).collect {
+				fileTree(dir: it, exclude: '**/legacy/**')
+			})
+
+			if (sourceDirs == null) {
+				rootProject.tasks.jacocoRootReport.sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+				rootProject.tasks.jacocoRootReport.classDirectories = mainOutput
+
+			} else {
+				rootProject.tasks.jacocoRootReport.sourceDirectories = sourceDirs.plus(files(sourceSets.main.allSource.srcDirs))
+				rootProject.tasks.jacocoRootReport.classDirectories = classDirs.plus(mainOutput)
+			}
+			rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
+
 
 			sonarqube {
 				properties {
@@ -81,6 +101,12 @@ gradle.beforeProject { Project project ->
 				}
 			}
 
+			jacocoTestReport {
+				reports {
+					xml.enabled = true // coveralls plugin depends on xml format report
+					html.enabled = true
+				}
+			}
 		}
 
 		apply plugin: 'maven-publish'
@@ -171,7 +197,7 @@ gradle.beforeProject { Project project ->
 				}
 
 				tasks.publish.dependsOn(tasks.uploadArchives)
-			}else{
+			} else {
 				apply plugin: 'maven-publish'
 
 				publishing {
@@ -187,4 +213,50 @@ gradle.beforeProject { Project project ->
 
 	}
 }
+
+// coveralls setup
+apply plugin: "jacoco"
+apply plugin: "com.github.kt3k.coveralls"
+
+def publishedProjects = subprojects.findAll {
+	it.name != 'crnk-documentation' && it.name != 'crnk-ui' && it.name != 'crnk-test' && !it.name.contains('example')
+}
+
+task jacocoMerge(type: JacocoMerge) {
+	destinationFile = new File(project.buildDir, 'jacoco/test.exec')
+	doFirst {
+		executionData = files(executionData.findAll { it.exists() })
+	}
+	for (publishedProject in publishedProjects) {
+		dependsOn publishedProject.path + ":check"
+	}
+}
+
+
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+	description = 'Generates an aggregate report from all subprojects'
+
+	dependsOn tasks.jacocoMerge
+
+	executionData tasks.jacocoMerge.destinationFile
+
+	reports {
+		html.enabled = true // human readable
+		xml.enabled = true // required by coveralls
+	}
+
+}
+
+
+coveralls {
+	jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+}
+
+tasks.coveralls {
+	group = 'Coverage reports'
+	description = 'Uploads the aggregated coverage report to Coveralls'
+
+	dependsOn jacocoRootReport
+}
+
 

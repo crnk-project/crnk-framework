@@ -1,22 +1,18 @@
 package io.crnk.gen.runtime;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-
 import io.crnk.gen.typescript.GenerateTypescriptTask;
 import io.crnk.gen.typescript.model.TSElement;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * Code generation runs within the application classpath, not in the gradle classpath.
@@ -32,7 +28,7 @@ public class RuntimeClassLoaderFactory {
 		this.project = project;
 	}
 
-	public URLClassLoader createClassLoader(ClassLoader parentClassLoader, Map<String, Class<?>> sharedClasses) {
+	public URLClassLoader createClassLoader(ClassLoader parentClassLoader, final Map<String, Class<?>> sharedClasses) {
 		Set<URL> classURLs = new HashSet<>(); // NOSONAR URL needed by URLClassLoader
 		classURLs.addAll(getProjectClassUrls());
 		classURLs.add(getPluginUrl());
@@ -53,25 +49,30 @@ public class RuntimeClassLoaderFactory {
 		private Map<String, Class<?>> sharedClasses;
 
 		public SharedClassLoader(ClassLoader bootstrapClassLoader, ClassLoader parentClassLoader,
-				Map<String, Class<?>> sharedClasses) {
+								 Map<String, Class<?>> sharedClasses) {
 			super(bootstrapClassLoader);
 			this.parentClassLoader = parentClassLoader;
 			this.sharedClasses = sharedClasses;
 		}
 
 		@Override
+		protected synchronized Enumeration<URL> findResources(String name) throws IOException {
+
+			return super.findResources(name);
+		}
+
+		@Override
 		protected synchronized URL findResource(String name) {
-			URL sharedResourceUrl = GenerateTypescriptTask.class.getClassLoader().getResource(name);
-			if (sharedResourceUrl != null) {
-				return sharedResourceUrl;
-			}
-			URL resource = super.findResource(name);
-			if (resource == null && "logback-test.xml".equals(name)) {
-				URL logbackUrl = RuntimeClassLoaderFactory.class.getClassLoader().getResource("logback-test.xml");
-				if (logbackUrl == null) {
-					throw new IllegalStateException("logback-test.xml could not be found");
+			URL resource = GenerateTypescriptTask.class.getClassLoader().getResource(name);
+			if (resource == null) {
+				resource = super.findResource(name);
+				if (resource == null && "logback-test.xml".equals(name)) {
+					URL logbackUrl = RuntimeClassLoaderFactory.class.getClassLoader().getResource("logback-test.xml");
+					if (logbackUrl == null) {
+						throw new IllegalStateException("logback-test.xml could not be found");
+					}
+					resource = logbackUrl;
 				}
-				return logbackUrl;
 			}
 			return resource;
 		}
@@ -116,8 +117,15 @@ public class RuntimeClassLoaderFactory {
 		}
 
 		// add gradle integrationTest dependencies to url
-		org.gradle.api.artifacts.Configuration runtimeConfiguration = project.getConfigurations()
-				.getByName("integrationTestRuntime");
+		ConfigurationContainer configurations = project.getConfigurations();
+		org.gradle.api.artifacts.Configuration runtimeConfiguration;
+		if (configurations.findByName("integrationTestRuntime") != null) {
+			runtimeConfiguration = configurations
+					.getByName("integrationTestRuntime");
+		} else {
+			runtimeConfiguration = configurations
+					.getByName("testRuntime");
+		}
 		classpath.addAll(runtimeConfiguration.getFiles());
 
 		return classpath;
@@ -129,8 +137,7 @@ public class RuntimeClassLoaderFactory {
 		for (File file : projectClassFiles) {
 			try {
 				urls.add(file.toURI().toURL());
-			}
-			catch (MalformedURLException e) {
+			} catch (MalformedURLException e) {
 				throw new IllegalStateException();
 			}
 		}

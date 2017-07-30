@@ -1,11 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
@@ -15,11 +9,13 @@ import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.SkipWhenEmpty;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GenerateTypescriptTask extends DefaultTask {
 
@@ -83,8 +79,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 			thread.setContextClassLoader(classloader);
 
 			runGeneration();
-		}
-		finally {
+		} finally {
 			// make sure to restore the classloader when leaving this task
 			thread.setContextClassLoader(contextClassLoader);
 
@@ -96,8 +91,8 @@ public class GenerateTypescriptTask extends DefaultTask {
 
 	protected void setupDefaultConfig(TSGeneratorConfiguration config) {
 		String defaultVersion = getProject().getVersion().toString();
-		if (config.getNpmPackageVersion() == null) {
-			config.setNpmPackageVersion(defaultVersion);
+		if (config.getNpm().getPackageVersion() == null) {
+			config.getNpm().setPackageVersion(defaultVersion);
 		}
 	}
 
@@ -107,8 +102,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 		try {
 			Class<?> clazz = getClass().getClassLoader().loadClass(runtimeClass);
 			return (RuntimeMetaResolver) clazz.newInstance();
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException("failed to load runtime " + runtimeClass, e);
 		}
 	}
@@ -125,8 +119,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 			genContext.setConfig(config);
 			RuntimeMetaResolver runtime = getRuntime();
 			runtime.run(context, classLoader);
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException("failed to load class", e);
 		}
 	}
