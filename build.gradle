@@ -30,7 +30,7 @@ ext {
 
 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
 if (ext.timestampedVersion) {
-	version = BUILD_VERSION_PREFIX "." format.format(new Date())
+	version = BUILD_VERSION_PREFIX + "." + format.format(new Date())
 } else {
 	version = '0.0.0-SNAPSHOT'
 }
