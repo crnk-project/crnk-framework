@@ -61,6 +61,7 @@ public class ExceptionMapperRegistry {
 	int getDistanceBetweenExceptions(Class<?> clazz, Class<?> mapperTypeClazz) {
 		int distance = 0;
 		Class<?> superClazz = clazz;
+
 		if (!mapperTypeClazz.isAssignableFrom(clazz)) {
 			return Integer.MAX_VALUE;
 		}

@@ -6,6 +6,8 @@ import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.Module;
@@ -226,13 +228,13 @@ public class JpaModule implements Module {
 	/**
 	 * Adds the resource to this module.
 	 *
-	 * @param configuration to use
+	 * @param config to use
 	 */
 	public <T> void addRepository(JpaRepositoryConfig<T> config) {
 		checkNotInitialized();
 		Class<?> resourceClass = config.getResourceClass();
 		if (repositoryConfigurationMap.containsKey(resourceClass)) {
-			throw new IllegalArgumentException(resourceClass.getName() + " is already registered");
+			throw new IllegalStateException(resourceClass.getName() + " is already registered");
 		}
 		repositoryConfigurationMap.put(resourceClass, config);
 	}
@@ -293,38 +295,36 @@ public class JpaModule implements Module {
 	}
 
 	private void addHibernateConstraintViolationExceptionMapper() {
-		try {
-			Class.forName("org.hibernate.exception.ConstraintViolationException");
-		} catch (ClassNotFoundException e) { // NOSONAR
-			// may not be available depending on environment
-			return;
-		}
+		// may not be available depending on environment
+		if (ClassUtils.existsClass("org.hibernate.exception.ConstraintViolationException")) {
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 
-		try {
-			Class<?> mapperClass = Class.forName("io.crnk.jpa.internal.HibernateConstraintViolationExceptionMapper");
-			Constructor<?> constructor = mapperClass.getConstructor();
-			ExceptionMapper<?> mapper = (ExceptionMapper<?>) constructor.newInstance();
-			context.addExceptionMapper(mapper);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+				@Override
+				public Object call() throws Exception {
+					Class<?> mapperClass = Class.forName("io.crnk.jpa.internal.HibernateConstraintViolationExceptionMapper");
+					Constructor<?> constructor = mapperClass.getConstructor();
+					ExceptionMapper<?> mapper = (ExceptionMapper<?>) constructor.newInstance();
+					context.addExceptionMapper(mapper);
+					return null;
+				}
+			});
 		}
 	}
 
 	private void addTransactionRollbackExceptionMapper() {
-		try {
-			Class.forName("javax.transaction.RollbackException");
-		} catch (ClassNotFoundException e) { // NOSONAR
-			// may not be available depending on environment
-			return;
-		}
+		// may not be available depending on environment
+		if (ClassUtils.existsClass("javax.transaction.RollbackException")) {
+			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 
-		try {
-			Class<?> mapperClass = Class.forName("io.crnk.jpa.internal.TransactionRollbackExceptionMapper");
-			Constructor<?> constructor = mapperClass.getConstructor(ModuleContext.class);
-			ExceptionMapper<?> mapper = (ExceptionMapper<?>) constructor.newInstance(context);
-			context.addExceptionMapper(mapper);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+				@Override
+				public Object call() throws Exception {
+					Class<?> mapperClass = Class.forName("io.crnk.jpa.internal.TransactionRollbackExceptionMapper");
+					Constructor<?> constructor = mapperClass.getConstructor(ModuleContext.class);
+					ExceptionMapper<?> mapper = (ExceptionMapper<?>) constructor.newInstance(context);
+					context.addExceptionMapper(mapper);
+					return null;
+				}
+			});
 		}
 	}
 
@@ -351,7 +351,7 @@ public class JpaModule implements Module {
 	}
 
 	private void setupRepository(JpaRepositoryConfig<?> config) {
-		if(config.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()){
+		if (config.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()) {
 			// TODO not that nice...
 			config.setListMetaClass(DefaultHasMoreResourcesMetaInformation.class);
 		}
@@ -406,10 +406,9 @@ public class JpaModule implements Module {
 
 			if (attrType instanceof MetaEntity) {
 				setupRelationshipRepositoryForEntity(resourceClass, attrType);
-			} else if (attrType instanceof MetaResource) {
-				setupRelationshipRepositoryForResource(resourceClass, attr, attrType);
 			} else {
-				throw new IllegalStateException("unable to process relation: " + attr.getId() + ", neither a entity nor a mapped entity is referenced");
+				PreconditionUtil.verify(attrType instanceof MetaResource, "unable to process relation: %s, neither a entity nor a mapped entity is referenced", attr.getId());
+				setupRelationshipRepositoryForResource(resourceClass, attr, attrType);
 			}
 		}
 	}
@@ -429,9 +428,10 @@ public class JpaModule implements Module {
 	private void setupRelationshipRepositoryForResource(Class<?> resourceClass, MetaAttribute attr, MetaType attrType) {
 		Class<?> attrImplClass = attrType.getImplementationClass();
 		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
-		if (attrConfig == null || attrConfig.getMapper() == null) {
-			throw new IllegalStateException("no mapped entity for " + attrType.getName() + " reference by " + attr.getId() + " registered");
-		}
+
+		PreconditionUtil.verify(attrConfig != null && attrConfig.getMapper() != null,
+				"no mapped entity for %s reference by %s registered", attrType.getName(), attr.getId());
+
 		JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
 		Class<?> targetResourceClass = targetConfig.getResourceClass();
 
@@ -469,9 +469,7 @@ public class JpaModule implements Module {
 	 * @param resourceInformationBuilder
 	 */
 	public void setResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
-		if (this.resourceInformationBuilder != null) {
-			throw new IllegalStateException("already set");
-		}
+		PreconditionUtil.verify(this.resourceInformationBuilder == null, "already set");
 		this.resourceInformationBuilder = resourceInformationBuilder;
 	}
 
@@ -530,10 +528,6 @@ public class JpaModule implements Module {
 
 	public MetaLookup getJpaMetaLookup() {
 		return jpaMetaLookup;
-	}
-
-	public MetaLookup getResourceMetaLookup() {
-		return resourceMetaLookup;
 	}
 
 	public boolean isTotalResourceCountUsed() {

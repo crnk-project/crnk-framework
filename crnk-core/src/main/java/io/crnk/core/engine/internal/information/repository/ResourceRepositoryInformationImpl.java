@@ -10,21 +10,21 @@ import java.util.Map;
 
 public class ResourceRepositoryInformationImpl implements ResourceRepositoryInformation {
 
-	private final Optional<ResourceInformation> resourceInformation;
-	private final String resourceType;
+	private Optional<ResourceInformation> resourceInformation;
+	private String resourceType;
 	private String path;
 	private Map<String, RepositoryAction> actions;
 
+	@Deprecated
 	public ResourceRepositoryInformationImpl(String path, ResourceInformation resourceInformation) {
 		this(path, resourceInformation, new HashMap<String, RepositoryAction>());
 	}
 
+	@Deprecated
 	public ResourceRepositoryInformationImpl(String path,
 											 ResourceInformation resourceInformation, Map<String, RepositoryAction> actions) {
-		this.path = path;
-		this.actions = actions;
+		this(path, resourceInformation.getResourceType(), actions);
 		this.resourceInformation = Optional.of(resourceInformation);
-		this.resourceType = resourceInformation.getResourceType();
 	}
 
 	public ResourceRepositoryInformationImpl(String path, String resourceType, Map<String, RepositoryAction> actions) {

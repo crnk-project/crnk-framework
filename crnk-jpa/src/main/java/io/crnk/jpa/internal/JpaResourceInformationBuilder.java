@@ -1,34 +1,10 @@
 package io.crnk.jpa.internal;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.ElementCollection;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OptimisticLockException;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
-import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
+import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder.AnnotatedResourceField;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
@@ -40,17 +16,20 @@ import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Optional;
-import io.crnk.jpa.annotations.JpaMergeRelations;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.information.MetaAwareInformation;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaKey;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -72,14 +51,11 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		for (Annotation annotation : annotations) {
 			if (annotation instanceof ElementCollection) {
 				return ((ElementCollection) annotation).fetch() == FetchType.LAZY;
-			}
-			else if (annotation instanceof ManyToOne) {
+			} else if (annotation instanceof ManyToOne) {
 				return ((ManyToOne) annotation).fetch() == FetchType.LAZY;
-			}
-			else if (annotation instanceof OneToMany) {
+			} else if (annotation instanceof OneToMany) {
 				return ((OneToMany) annotation).fetch() == FetchType.LAZY;
-			}
-			else if (annotation instanceof ManyToMany) {
+			} else if (annotation instanceof ManyToMany) {
 				return ((ManyToMany) annotation).fetch() == FetchType.LAZY;
 			}
 		}
@@ -90,8 +66,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		for (Annotation annotation : annotations) {
 			if (annotation instanceof OneToMany) {
 				return StringUtils.emptyToNull(((OneToMany) annotation).mappedBy());
-			}
-			else if (annotation instanceof ManyToMany) {
+			} else if (annotation instanceof ManyToMany) {
 				return StringUtils.emptyToNull(((ManyToMany) annotation).mappedBy());
 			}
 		}
@@ -111,8 +86,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 			MetaEntity metaEntity = (MetaEntity) meta;
 			MetaKey primaryKey = metaEntity.getPrimaryKey();
 			return primaryKey != null && primaryKey.getElements().size() == 1;
-		}
-		else {
+		} else {
 			// note that DTOs cannot be handled here
 			return meta instanceof MetaJpaDataObject;
 		}
@@ -127,7 +101,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		DefaultResourceInstanceBuilder instanceBuilder;
 
 		meta = jpaMetaLookup.getMeta(resourceClass, MetaJpaDataObject.class).asDataObject();
-		instanceBuilder = new JpaResourceInstanceBuilder((MetaJpaDataObject) meta, resourceClass);
+		instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
 		List<ResourceField> fields = buildFields(meta);
 		Set<String> ignoredFields = getIgnoredFields(meta);
@@ -172,17 +146,6 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 	}
 
 	protected boolean isAssociation(MetaDataObject meta, MetaAttribute attr) {
-		// merged attribute are handled as normal data attributes
-		JpaMergeRelations mergeAnnotation = meta.getImplementationClass().getAnnotation(JpaMergeRelations.class);
-		if (mergeAnnotation != null) {
-			String[] mergedAttrs = mergeAnnotation.attributes();
-			for (String mergedAttr : mergedAttrs) {
-				if (mergedAttr.equals(attr.getName())) {
-					return false;
-				}
-			}
-		}
-
 		return attr.isAssociation();
 	}
 
@@ -212,8 +175,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		if (getter != null) {
 			type = getter.getReturnType();
 			genericType = getter.getGenericReturnType();
-		}
-		else if (field != null) {
+		} else if (field != null) {
 			type = field.getType();
 			genericType = field.getGenericType();
 		}
@@ -260,26 +222,6 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		this.context = context;
 	}
 
-	class JpaResourceInstanceBuilder<T> extends DefaultResourceInstanceBuilder<T> {
-
-		private MetaJpaDataObject meta;
-
-		public JpaResourceInstanceBuilder(MetaJpaDataObject meta, Class<T> resourceClass) {
-			super(resourceClass);
-			this.meta = meta;
-		}
-
-		@Override
-		public int hashCode() {
-			return super.hashCode() | meta.getName().hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return super.equals(obj) && obj instanceof JpaResourceInstanceBuilder;
-		}
-	}
-
 	class JpaResourceInformation extends ResourceInformation implements MetaAwareInformation<MetaDataObject> {
 
 		private MetaDataObject jpaMeta;
@@ -287,8 +229,8 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		private Set<String> ignoredFields;
 
 		public JpaResourceInformation(TypeParser typeParser, MetaDataObject meta, Class<?> resourceClass,
-				String resourceType, String superResourceType, // NOSONAR
-				ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Set<String> ignoredFields) {
+									  String resourceType, String superResourceType, // NOSONAR
+									  ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Set<String> ignoredFields) {
 			super(typeParser, resourceClass, resourceType, superResourceType, instanceBuilder, fields);
 			this.jpaMeta = meta;
 			this.ignoredFields = ignoredFields;
@@ -336,8 +278,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			}
-			else {
+			} else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

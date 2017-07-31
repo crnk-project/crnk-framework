@@ -32,18 +32,7 @@ public abstract class TSMember extends TSElementBase {
 		this.nullable = nullable;
 	}
 
-	public TSType getElementType() {
-		if (type instanceof TSArrayType) {
-			return ((TSArrayType) type).getElementType();
-		}
-		return type;
-	}
+	public abstract boolean isField();
 
-	public boolean isField() {
-		return false;
-	}
-
-	public TSField asField() {
-		throw new UnsupportedOperationException();
-	}
+	public abstract TSField asField();
 }

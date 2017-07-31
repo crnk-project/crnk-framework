@@ -447,7 +447,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	@Test
 	public void testRepository() {
 		MetaResource resourceMeta = lookup.getMeta(Schedule.class, MetaResource.class);
-		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "Repository");
+		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "$Repository");
 		Assert.assertEquals(resourceMeta, meta.getResourceType());
 		Assert.assertNotNull(meta.getListLinksType());
 		Assert.assertNotNull(meta.getListMetaType());

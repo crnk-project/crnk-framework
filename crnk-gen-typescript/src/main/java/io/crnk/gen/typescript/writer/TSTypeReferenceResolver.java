@@ -1,21 +1,9 @@
 package io.crnk.gen.typescript.writer;
 
+import io.crnk.gen.typescript.model.*;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import io.crnk.gen.typescript.model.TSArrayType;
-import io.crnk.gen.typescript.model.TSClassType;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSField;
-import io.crnk.gen.typescript.model.TSIndexSignature;
-import io.crnk.gen.typescript.model.TSInterfaceType;
-import io.crnk.gen.typescript.model.TSMember;
-import io.crnk.gen.typescript.model.TSModule;
-import io.crnk.gen.typescript.model.TSObjectType;
-import io.crnk.gen.typescript.model.TSParameterizedType;
-import io.crnk.gen.typescript.model.TSSource;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.gen.typescript.model.TSVisitorBase;
 
 public class TSTypeReferenceResolver extends TSVisitorBase {
 
@@ -74,20 +62,15 @@ public class TSTypeReferenceResolver extends TSVisitorBase {
 	}
 
 	private void addReference(TSType type) {
-		if (type == null) {
-			throw new NullPointerException();
-		}
 		if (type.getParent() instanceof TSModule) {
 			return;
 		}
 
 		if (type instanceof TSParameterizedType) {
 			type.accept(this);
-		}
-		else if (type instanceof TSArrayType) {
+		} else if (type instanceof TSArrayType) {
 			addReference(((TSArrayType) type).getElementType());
-		}
-		else {
+		} else {
 			types.add(type);
 		}
 	}

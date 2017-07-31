@@ -274,14 +274,15 @@ public class QuerySpec {
 	@Override
 	public String toString() {
 		return "QuerySpec{" +
-				"resourceClass=" + resourceClass +
-				", limit=" + limit +
-				", offset=" + offset +
-				", filters=" + filters +
-				", sort=" + sort +
-				", includedFields=" + includedFields +
-				", includedRelations=" + includedRelations +
-				", relatedSpecs=" + relatedSpecs +
+				(resourceClass != null ? "resourceClass=" + resourceClass.getName() : "") +
+				(resourceType != null ? "resourceType=" + resourceType : "") +
+				(limit != null ? ", limit=" + limit : "") +
+				(offset > 0 ? ", offset=" + offset : "") +
+				(!filters.isEmpty() ? ", filters=" + filters : "") +
+				(!sort.isEmpty() ? ", sort=" + sort : "") +
+				(!includedFields.isEmpty() ? ", includedFields=" + includedFields : "") +
+				(!includedRelations.isEmpty() ? ", includedRelations=" + includedRelations : "") +
+				(!relatedSpecs.isEmpty() ? ", relatedSpecs=" + relatedSpecs : "") +
 				'}';
 	}
 }

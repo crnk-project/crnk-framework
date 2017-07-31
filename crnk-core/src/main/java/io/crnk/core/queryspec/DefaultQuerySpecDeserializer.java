@@ -1,13 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -21,6 +13,9 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -156,10 +151,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
 		for (Parameter parameter : parameters) {
-			QuerySpec querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
-			if (querySpec == null) {
-				querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
-				setupDefaults(querySpec);
+			QuerySpec querySpec = rootQuerySpec;
+			if (parameter.resourceInformation != null) {
+				querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
+				if (querySpec == null) {
+					querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
+					setupDefaults(querySpec);
+				}
 			}
 			switch (parameter.paramType) {
 				case sort:
@@ -293,7 +291,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	}
 
 	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
-		throw new IllegalStateException(parameter.paramType.toString());
+		throw new ParametersDeserializationException(parameter.paramType.toString());
 	}
 
 	private List<Parameter> parseParameters(Map<String, Set<String>> params, ResourceInformation rootResourceInformation) {
@@ -308,13 +306,20 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	private Parameter parseParameter(String parameterName, Set<String> values, ResourceInformation rootResourceInformation) {
 		int typeSep = parameterName.indexOf('[');
 		String strParamType = typeSep != -1 ? parameterName.substring(0, typeSep) : parameterName;
-		RestrictedQueryParamsMembers paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
+
+		RestrictedQueryParamsMembers paramType;
+		try {
+			paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
+		} catch (IllegalArgumentException e) {
+			paramType = RestrictedQueryParamsMembers.unknown;
+		}
 
 		List<String> elements = parseParameterNameArguments(parameterName, typeSep);
 
 		Parameter param = new Parameter();
-		param.fullKey = parameterName;
+		param.name = parameterName;
 		param.paramType = paramType;
+		param.strParamType = strParamType;
 		param.values = values;
 
 		if (paramType == RestrictedQueryParamsMembers.filter && elements.size() >= 1) {
@@ -325,6 +330,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 			param.pageParameter = elements.get(1);
+		} else if (paramType == RestrictedQueryParamsMembers.unknown) {
+			param.resourceInformation = null;
 		} else if (elements.size() == 1) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 		} else {
@@ -351,14 +358,14 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		parseFilterOperator(param, elements);
 
 		if (elements.isEmpty()) {
-			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected "
+			throw new ParametersDeserializationException("failed to parse " + param.name + ", expected "
 					+ "([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() > 2) {
-			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException("failed to parse " + param.name + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() == 2) {
-			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
+			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			param.attributePath = Arrays.asList(elements.get(1).split("\\."));
 		} else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
@@ -373,7 +380,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
-			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
+			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			elements.remove(0);
 		} else {
 			param.resourceInformation = rootResourceInformation;
@@ -430,21 +437,23 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	public class Parameter {
 
-		String pageParameter;
+		private String pageParameter;
 
-		String fullKey;
+		private String name;
 
-		RestrictedQueryParamsMembers paramType;
+		private RestrictedQueryParamsMembers paramType;
 
-		ResourceInformation resourceInformation;
+		private String strParamType;
 
-		FilterOperator operator;
+		private ResourceInformation resourceInformation;
 
-		List<String> attributePath;
+		private FilterOperator operator;
 
-		Set<String> values;
+		private List<String> attributePath;
 
-		public Long getLongValue() {
+		private Set<String> values;
+
+		private Long getLongValue() {
 			if (values.size() != 1) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
@@ -457,7 +466,35 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 		@Override
 		public String toString() {
-			return fullKey + "=" + values;
+			return name + "=" + values;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public RestrictedQueryParamsMembers getParamType() {
+			return paramType;
+		}
+
+		public String getStrParamType() {
+			return strParamType;
+		}
+
+		public ResourceInformation getResourceInformation() {
+			return resourceInformation;
+		}
+
+		public FilterOperator getOperator() {
+			return operator;
+		}
+
+		public List<String> getAttributePath() {
+			return attributePath;
+		}
+
+		public Set<String> getValues() {
+			return values;
 		}
 	}
 }

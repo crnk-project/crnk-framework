@@ -33,10 +33,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class ResourceMetaProviderImpl extends MetaProviderBase {
@@ -119,7 +116,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
 
 			// enforce setup of meta data
-			for (RegistryEntry entry : resourceRegistry.getResources()) {
+			Collection<RegistryEntry> entries = resourceRegistry.getResources();
+			for (RegistryEntry entry : entries) {
 				ResourceInformation information = entry.getResourceInformation();
 				MetaResource metaResource = context.getLookup().getMeta(information.getResourceClass(), MetaResource.class);
 				ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
@@ -139,8 +137,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);
-		meta.setName(metaResource.getName() + "Repository");
-		meta.setId(metaResource.getId() + "Repository");
+		meta.setName(metaResource.getName() + "$Repository");
+		meta.setId(metaResource.getId() + "$Repository");
 
 		for (RepositoryAction action : repositoryInformation.getActions().values()) {
 			MetaResourceAction metaAction = new MetaResourceAction();
@@ -299,8 +297,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		boolean isId = field.getResourceFieldType() == ResourceFieldType.ID;
 		attr.setNullable(!isPrimitive && !isId);
 
-		PreconditionUtil.assertFalse(attr.getName(),
-				!attr.isAssociation() && MetaElement.class.isAssignableFrom(field.getElementType()));
+		//PreconditionUtil.assertFalse(resource.getName() + "." + attr.getName(),
+		//		!attr.isAssociation() && MetaElement.class.isAssignableFrom(field.getElementType()));
 
 		// enrich with information not available in the crnk information model
 		if (field instanceof MetaAwareInformation) {

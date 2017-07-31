@@ -55,7 +55,7 @@ public class ExpressionLibrary {
 	private ExpressionLibrary() {
 	}
 
-	public static TSType getExpression(String primitiveName) {
+	public static TSType getPrimitiveExpression(String primitiveName) {
 		if (TSPrimitiveType.STRING.getName().equalsIgnoreCase(primitiveName)) {
 			return STRING_EXPRESSION;
 		}

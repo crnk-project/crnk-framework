@@ -193,12 +193,10 @@ public class JpaCriteriaQueryBackend<T> implements JpaQueryBackend<From<?, ?>, O
 			return cb.lessThan(expression, (Comparable) value);
 		} else if (operator == FilterOperator.GE) {
 			return cb.greaterThanOrEqualTo(expression, (Comparable) value);
-		} else if (operator == FilterOperator.LE) {
-			return cb.lessThanOrEqualTo(expression, (Comparable) value);
 		} else {
-			throw new IllegalStateException("unexpected operator " + operator);
+			PreconditionUtil.verify(operator == FilterOperator.LE, "unexpected operator %s", operator);
+			return cb.lessThanOrEqualTo(expression, (Comparable) value);
 		}
-
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})

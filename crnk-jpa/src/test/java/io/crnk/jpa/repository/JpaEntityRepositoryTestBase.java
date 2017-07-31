@@ -5,6 +5,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.jpa.JpaEntityRepository;
 import io.crnk.jpa.JpaRepositoryConfig;
+import io.crnk.jpa.model.FieldOnlyEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.SequenceEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -12,6 +13,7 @@ import io.crnk.jpa.query.AbstractJpaTest;
 import org.hibernate.Hibernate;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +33,13 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
-	public void testGetEntityType() throws InstantiationException, IllegalAccessException {
+	public void testGetResourceType() throws InstantiationException, IllegalAccessException {
 		Assert.assertEquals(TestEntity.class, repo.getResourceClass());
+	}
+
+	@Test
+	public void testGetEntityType() throws InstantiationException, IllegalAccessException {
+		Assert.assertEquals(TestEntity.class, repo.getEntityClass());
 	}
 
 	@Test
@@ -41,6 +48,38 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 
 		List<TestEntity> list = repo.findAll(querySpec);
 		Assert.assertEquals(numTestEntities, list.size());
+	}
+
+	@Test
+	public void testFindOne() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+
+		TestEntity entity = repo.findOne(1L, querySpec);
+		Assert.assertEquals("test1", entity.getStringValue());
+	}
+
+	@Test
+	public void testFindAllById() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+
+		ResourceList<TestEntity> entities = repo.findAll(Arrays.asList(1L, 2L), querySpec);
+		Assert.assertEquals(2, entities.size());
+		Assert.assertEquals("test1", entities.get(0).getStringValue());
+		Assert.assertEquals("test2", entities.get(1).getStringValue());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testInvalidLimit() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.setLimit(Long.MAX_VALUE);
+		repo.findAll(querySpec);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testInvalidOffset() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.setOffset(Long.MAX_VALUE);
+		repo.findAll(querySpec);
 	}
 
 	@Test
@@ -295,5 +334,27 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 		entity.setStringValue("someUpdatedValue");
 		entity = sequenceRepo.save(entity);
 		Assert.assertEquals("someUpdatedValue", entity.getStringValue());
+	}
+
+	@Test
+	@Ignore // currently not supported
+	public void testFieldOnlyEntity() throws InstantiationException, IllegalAccessException {
+		QuerySpec querySpec = new QuerySpec(FieldOnlyEntity.class);
+		JpaEntityRepository<FieldOnlyEntity, Long> fieldRepo = new JpaEntityRepository<>(module, JpaRepositoryConfig.create(FieldOnlyEntity.class));
+		List<FieldOnlyEntity> list = fieldRepo.findAll(querySpec);
+		Assert.assertEquals(0, list.size());
+
+		FieldOnlyEntity entity = new FieldOnlyEntity();
+		entity.id = 13L;
+		entity.longValue = 14L;
+		fieldRepo.create(entity);
+
+		FieldOnlyEntity savedEntity = fieldRepo.findOne(13L, querySpec);
+		Assert.assertNotNull(savedEntity);
+		Assert.assertEquals(14L, savedEntity.longValue);
+
+		fieldRepo.delete(13L);
+		list = fieldRepo.findAll(querySpec);
+		Assert.assertEquals(0, list.size());
 	}
 }

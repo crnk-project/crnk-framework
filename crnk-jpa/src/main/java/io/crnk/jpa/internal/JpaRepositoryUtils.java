@@ -6,7 +6,6 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.jpa.annotations.JpaMergeRelations;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.meta.model.MetaAttribute;
@@ -67,37 +66,5 @@ public class JpaRepositoryUtils {
 			}
 			executor.setLimit((int) querySpec.getLimit().longValue());
 		}
-
-		addMergeInclusions(executor, querySpec);
-
 	}
-
-	/**
-	 * related attribute that are merged into a resource should be loaded by
-	 * graph control to avoid lazy-loading or potential lack of session in
-	 * serialization.
-	 */
-	private static void addMergeInclusions(JpaQueryExecutor<?> executor, QuerySpec querySpec) {
-		ArrayDeque<String> attributePath = new ArrayDeque<>();
-		Class<?> resourceClass = querySpec.getResourceClass();
-
-		addMergeInclusions(attributePath, executor, resourceClass);
-	}
-
-	private static void addMergeInclusions(Deque<String> attributePath, JpaQueryExecutor<?> executor, Class<?> resourceClass) {
-		JpaMergeRelations annotation = resourceClass.getAnnotation(JpaMergeRelations.class);
-		if (annotation != null) {
-			for (String attrName : annotation.attributes()) {
-				attributePath.push(attrName);
-				executor.fetch(new ArrayList<>(attributePath));
-
-				// recurse
-				Class attrType = PropertyUtils.getPropertyClass(resourceClass, attrName);
-				addMergeInclusions(attributePath, executor, attrType);
-
-				attributePath.pop();
-			}
-		}
-	}
-
 }

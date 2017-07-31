@@ -1,5 +1,7 @@
 package io.crnk.gen.runtime;
 
+import java.io.IOException;
+
 public interface GeneratorTrigger {
 
 	/**
@@ -7,5 +9,5 @@ public interface GeneratorTrigger {
 	 *
 	 * @param lookup of type io.katharsis.meta.MetaLookup. Not that the MetaLookup class is not available here.
 	 */
-	void generate(Object lookup);
+	void generate(Object lookup) throws IOException;
 }

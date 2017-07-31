@@ -18,6 +18,32 @@ public class QuerySpecTest {
 		EqualsVerifier.forClass(QuerySpec.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
+
+	@Test
+	public void checkToString() {
+		QuerySpec	spec = new QuerySpec("projects");
+		Assert.assertEquals("QuerySpec{resourceType=projects}", spec.toString());
+
+		 spec = new QuerySpec(Project.class);
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project}", spec.toString());
+
+		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, filters=[filterAttr EQ test]}", spec.toString());
+
+		spec.addSort(new SortSpec(Arrays.asList("sortAttr"), Direction.ASC));
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, filters=[filterAttr EQ test], sort=[sortAttr ASC]}", spec.toString());
+
+		spec.includeField(Arrays.asList("includedField"));
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, filters=[filterAttr EQ test], sort=[sortAttr ASC], includedFields=[includedField]}", spec.toString());
+
+		spec.includeRelation(Arrays.asList("includedRelation"));
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, filters=[filterAttr EQ test], sort=[sortAttr ASC], includedFields=[includedField], includedRelations=[includedRelation]}", spec.toString());
+
+		spec.setOffset(12);
+		spec.setLimit(13L);
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, limit=13, offset=12, filters=[filterAttr EQ test], sort=[sortAttr ASC], includedFields=[includedField], includedRelations=[includedRelation]}", spec.toString());
+	}
+
 	@Test
 	public void testBasic() {
 		QuerySpec spec = new QuerySpec(Project.class);
@@ -73,6 +99,25 @@ public class QuerySpecTest {
 		Assert.assertEquals(spec, duplicate);
 		Assert.assertNotSame(spec.getQuerySpec(Task.class), duplicate.getQuerySpec(Task.class));
 		Assert.assertEquals(spec.getQuerySpec(Task.class), duplicate.getQuerySpec(Task.class));
+	}
+
+	@Test
+	public void setNestedSpecWithClass() {
+		QuerySpec spec = new QuerySpec(Project.class);
+		QuerySpec relatedSpec = new QuerySpec(Task.class);
+		spec.setNestedSpecs(Arrays.asList(relatedSpec));
+		Assert.assertSame(relatedSpec, spec.getQuerySpec(Task.class));
+	}
+
+	@Test
+	public void setNestedSpecWithResourceType() {
+		QuerySpec spec = new QuerySpec("projects");
+		QuerySpec relatedSpec = new QuerySpec("tasks");
+		spec.setNestedSpecs(Arrays.asList(relatedSpec));
+		Assert.assertSame(spec, spec.getQuerySpec("projects"));
+		Assert.assertSame(relatedSpec, spec.getQuerySpec("tasks"));
+		Assert.assertSame(relatedSpec, spec.getOrCreateQuerySpec("tasks"));
+		Assert.assertNotSame(relatedSpec, spec.getOrCreateQuerySpec("schedules"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

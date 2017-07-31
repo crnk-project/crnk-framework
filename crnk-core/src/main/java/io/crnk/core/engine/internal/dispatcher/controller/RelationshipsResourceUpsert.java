@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-import java.util.Collections;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -16,7 +13,6 @@ import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -25,6 +21,9 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.io.Serializable;
+import java.util.Collections;
 
 public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
@@ -87,12 +86,10 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(jsonPath
 				.getElementName());
-		if (relationshipField == null) {
-			throw new ResourceFieldNotFoundException(jsonPath.getElementName());
-		}
+		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 		@SuppressWarnings("unchecked")
-		Object resource = extractResource(resourceRepository.findOne(castedResourceId, queryAdapter));
+		Object resource = resourceRepository.findOne(castedResourceId, queryAdapter).getEntity();
 
 		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
 
@@ -115,6 +112,8 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
 		return new Response(new Document(), HttpStatus.NO_CONTENT_204);
 	}
+
+
 
 	private Serializable getResourceId(PathIds resourceIds, RegistryEntry registryEntry) {
 		String resourceId = resourceIds.getIds().get(0);

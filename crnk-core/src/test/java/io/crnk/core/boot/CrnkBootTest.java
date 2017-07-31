@@ -1,11 +1,9 @@
 package io.crnk.core.boot;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.error.ErrorResponse;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
@@ -37,6 +35,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 public class CrnkBootTest {
 
@@ -107,6 +109,15 @@ public class CrnkBootTest {
 	}
 
 	@Test
+	public void getPropertiesProvider() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
+		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.boot();
+		Assert.assertNotNull(boot.getPropertiesProvider());
+	}
+
+	@Test
 	public void setInvalidRepository() {
 		SimpleModule module = new SimpleModule("test");
 		module.addRepository("not a repository");
@@ -170,7 +181,7 @@ public class CrnkBootTest {
 
 		Module module = Mockito.mock(Module.class);
 		DocumentFilter filter = Mockito.mock(DocumentFilter.class);
-		JsonApiExceptionMapper exceptionMapper = Mockito.mock(JsonApiExceptionMapper.class);
+		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(Module.class))).thenReturn(Arrays.asList(module));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(JsonApiExceptionMapper.class)))
@@ -181,6 +192,24 @@ public class CrnkBootTest {
 		Assert.assertTrue(moduleRegistry.getModules().contains(module));
 		Assert.assertTrue(moduleRegistry.getFilters().contains(filter));
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
+	}
+
+	class TestExceptionMapper implements ExceptionMapper<IllegalStateException> {
+
+		@Override
+		public ErrorResponse toErrorResponse(IllegalStateException exception) {
+			return null;
+		}
+
+		@Override
+		public IllegalStateException fromErrorResponse(ErrorResponse errorResponse) {
+			return null;
+		}
+
+		@Override
+		public boolean accepts(ErrorResponse errorResponse) {
+			return false;
+		}
 	}
 
 	@Test

@@ -12,6 +12,7 @@ public enum RestrictedQueryParamsMembers {
 	/**
 	 * Field to group by the collection
 	 */
+	@Deprecated
 	group, // NOSONAR ok in this case
 	/**
 	 * Pagination properties
@@ -21,7 +22,7 @@ public enum RestrictedQueryParamsMembers {
 	 * List of specified fields to include in models
 	 */
 	fields,// NOSONAR ok in this case
-	/**
+	unknown, /**
 	 * Additional resources that should be attached to response
 	 */
 	include// NOSONAR ok in this case

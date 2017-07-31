@@ -31,4 +31,8 @@ public class UIModule implements Module {
 	public void setupModule(ModuleContext context) {
 		context.addHttpRequestProcessor(new UIHttpRequestProcessor(config));
 	}
+
+	public UIModuleConfig getConfig() {
+		return config;
+	}
 }

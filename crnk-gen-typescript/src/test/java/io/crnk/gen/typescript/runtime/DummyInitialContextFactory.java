@@ -1,4 +1,4 @@
-package io.crnk.gen.typescript;
+package io.crnk.gen.typescript.runtime;
 
 import java.util.Hashtable;
 

@@ -83,9 +83,7 @@ public class QuerydslQueryBackend<T>
 
 	private Expression<Object> getParentIdExpression(MetaDataObject parentMeta, MetaAttribute parentAttr) {
 		MetaKey primaryKey = parentMeta.getPrimaryKey();
-		if (primaryKey == null) {
-			throw new IllegalStateException("no primary key specified for parentAttribute " + parentAttr.getId());
-		}
+		PreconditionUtil.assertNotNull("no primary key specified for parentAttribute " + parentAttr.getId(), parentMeta);
 		List<MetaAttribute> elements = primaryKey.getElements();
 		PreconditionUtil.assertEquals("composite primary keys not supported yet", 1, elements.size());
 		MetaAttribute primaryKeyAttr = elements.get(0);
@@ -237,13 +235,15 @@ public class QuerydslQueryBackend<T>
 
 	}
 
-	private Predicate handleEquals(Expression<?> expression, FilterOperator operator, Object value) {
+	private Predicate handleEquals(Expression<?> leftExpression, FilterOperator operator, Object value) {
+		Expression<?> expression = leftExpression;
+		if (Collection.class.isAssignableFrom(expression.getType())) {
+			CollectionPathBase collectionExpr = (CollectionPathBase) expression;
+			expression = collectionExpr.any();
+		}
+
 		if (value instanceof List) {
 			Predicate p = ((SimpleExpression) expression).in((List) value);
-			return negateIfNeeded(p, operator);
-		} else if (Collection.class.isAssignableFrom(expression.getType())) {
-			SimpleExpression simpleExpr = (SimpleExpression) expression;
-			Predicate p = simpleExpr.in(value);
 			return negateIfNeeded(p, operator);
 		} else if (expression instanceof MapExpressionBase) {
 			MapExpressionBase mapExpression = (MapExpressionBase) expression;

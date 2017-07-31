@@ -157,10 +157,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
 
 		public ResourceField build() {
-			return new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
+			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
 					genericType, oppositeResourceType, oppositeName, lazy,
 					includeByDefault, lookupIncludeBehavior,
 					access);
+			if (accessor != null) {
+				impl.setAccessor(accessor);
+			}
+			return impl;
 		}
 
 		public void jsonName(String jsonName) {

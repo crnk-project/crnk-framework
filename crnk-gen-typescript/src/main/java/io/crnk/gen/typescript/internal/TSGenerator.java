@@ -1,16 +1,5 @@
 package io.crnk.gen.typescript.internal;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -28,6 +17,12 @@ import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class TSGenerator {
 
@@ -60,7 +55,7 @@ public class TSGenerator {
 		}
 	}
 
-	public void run() {
+	public void run() throws IOException {
 		writePackaging();
 		writeTypescriptConfig();
 		transformMetaToTypescript();
@@ -68,96 +63,83 @@ public class TSGenerator {
 		writeSources();
 	}
 
-	private void writeTypescriptConfig() {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			ObjectNode root = mapper.createObjectNode();
-			ObjectNode compilerOptions = root.putObject("compilerOptions");
-			compilerOptions.put("baseUrl", "");
-			compilerOptions.put("declaration", false);
-			compilerOptions.put("emitDecoratorMetadata", true);
-			compilerOptions.put("experimentalDecorators", true);
-			compilerOptions.put("module", "es6");
-			compilerOptions.put("moduleResolution", "node");
-			compilerOptions.put("sourceMap", true);
-			compilerOptions.put("target", "es5");
-			ArrayNode typeArrays = compilerOptions.putArray("typeRoots");
-			typeArrays.add("node_modules/@types");
-			ArrayNode libs = compilerOptions.putArray("lib");
-			libs.add("es6");
-			libs.add("dom");
+	private void writeTypescriptConfig() throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		ObjectNode root = mapper.createObjectNode();
+		ObjectNode compilerOptions = root.putObject("compilerOptions");
+		compilerOptions.put("baseUrl", "");
+		compilerOptions.put("declaration", false);
+		compilerOptions.put("emitDecoratorMetadata", true);
+		compilerOptions.put("experimentalDecorators", true);
+		compilerOptions.put("module", "es6");
+		compilerOptions.put("moduleResolution", "node");
+		compilerOptions.put("sourceMap", true);
+		compilerOptions.put("target", "es5");
+		ArrayNode typeArrays = compilerOptions.putArray("typeRoots");
+		typeArrays.add("node_modules/@types");
+		ArrayNode libs = compilerOptions.putArray("lib");
+		libs.add("es6");
+		libs.add("dom");
 
-			File outputSourceDir = new File(outputDir, config.getSourceDirectoryName());
-			File file = new File(outputSourceDir, "tsconfig.json");
-			file.getParentFile().mkdirs();
-			mapper.writer().writeValue(file, root);
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		File outputSourceDir = new File(outputDir, config.getSourceDirectoryName());
+		File file = new File(outputSourceDir, "tsconfig.json");
+		file.getParentFile().mkdirs();
+		mapper.writer().writeValue(file, root);
 	}
 
 
-	protected void writePackaging() {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+	protected void writePackaging() throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-			ObjectNode packageJson = mapper.createObjectNode();
+		ObjectNode packageJson = mapper.createObjectNode();
 
-			TSNpmConfiguration npm = config.getNpm();
+		TSNpmConfiguration npm = config.getNpm();
 
-			packageJson.put("name", npm.getPackageName());
-			packageJson.put("version", npm.getPackageVersion());
-			packageJson.put("description", npm.getDescription());
-			packageJson.put("license", npm.getLicense());
-			if (npm.getGitRepository() != null) {
-				ObjectNode repository = packageJson.putObject("repository");
-				repository.put("type", "git");
-				repository.put("url", npm.getGitRepository());
-			}
-
-
-			ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
-			ObjectNode devDependencies = packageJson.putObject("devDependencies");
-			for (Map.Entry<String, String> entry : npm.getPeerDependencies().entrySet()) {
-				peerDependencies.put(entry.getKey(), entry.getValue());
-				devDependencies.put(entry.getKey(), entry.getValue());
-			}
-			for (Map.Entry<String, String> entry : npm.getDevDependencies().entrySet()) {
-				devDependencies.put(entry.getKey(), entry.getValue());
-			}
-
-			File packageJsonFile = new File(outputDir, "package.json");
-			packageJsonFile.getParentFile().mkdirs();
-
-			ObjectNode scripts = packageJson.putObject("scripts");
-			scripts.put("build", "npm run build:js");
-			scripts.put("build:js", "tsc -p ./src --declaration");
-			packageJson.put("name", npm.getPackageName());
-			packageJson.put("version", npm.getPackageVersion());
-
-			// match what is expected by NPM. Otherwise NPM will reformat it and up-to-date checking will fail
-			// the first time (also platform specific)
-			String text = mapper.writer().writeValueAsString(packageJson);
-			text = text.replace(" : ", ": ");
-			text = text + "\n";
-			text = text.replace(System.lineSeparator(), "\n");
-
-			try (FileWriter writer = new FileWriter(packageJsonFile)) {
-				writer.write(text);
-			}
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
+		packageJson.put("name", npm.getPackageName());
+		packageJson.put("version", npm.getPackageVersion());
+		packageJson.put("description", npm.getDescription());
+		packageJson.put("license", npm.getLicense());
+		if (npm.getGitRepository() != null) {
+			ObjectNode repository = packageJson.putObject("repository");
+			repository.put("type", "git");
+			repository.put("url", npm.getGitRepository());
 		}
 
+
+		ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
+		ObjectNode devDependencies = packageJson.putObject("devDependencies");
+		for (Map.Entry<String, String> entry : npm.getPeerDependencies().entrySet()) {
+			peerDependencies.put(entry.getKey(), entry.getValue());
+			devDependencies.put(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String, String> entry : npm.getDevDependencies().entrySet()) {
+			devDependencies.put(entry.getKey(), entry.getValue());
+		}
+
+		File packageJsonFile = new File(outputDir, "package.json");
+		packageJsonFile.getParentFile().mkdirs();
+
+		ObjectNode scripts = packageJson.putObject("scripts");
+		scripts.put("build", "npm run build:js");
+		scripts.put("build:js", "tsc -p ./src --declaration");
+		packageJson.put("name", npm.getPackageName());
+		packageJson.put("version", npm.getPackageVersion());
+
+		// match what is expected by NPM. Otherwise NPM will reformat it and up-to-date checking will fail
+		// the first time (also platform specific)
+		String text = mapper.writer().writeValueAsString(packageJson);
+		text = text.replace(" : ", ": ");
+		text = text + "\n";
+		text = text.replace(System.lineSeparator(), "\n");
+
+		try (FileWriter writer = new FileWriter(packageJsonFile)) {
+			writer.write(text);
+		}
 	}
 
-	protected void writeSources() {
-		PreconditionUtil.assertNotNull("no typescriptGen.npmPackageName configured", config.getNpmPackageName());
-
+	protected void writeSources() throws IOException {
 		for (TSSource fileSource : sources) {
 			TSWriter writer = new TSWriter(config.getCodeStyle());
 			fileSource.accept(writer);
@@ -168,13 +150,10 @@ public class TSGenerator {
 		}
 	}
 
-	protected static void write(File file, String source) {
+	protected static void write(File file, String source) throws IOException {
 		file.getParentFile().mkdirs();
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(source);
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("failed to write " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -219,16 +198,20 @@ public class TSGenerator {
 		}
 	}
 
-	private TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
+	protected TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				return transformation.transform(element, new TSMetaTransformationContextImpl(), options);
+				return transformation.transform(element, createMetaTransformationContext(), options);
 			}
 		}
 		throw new IllegalStateException("unexpected element: " + element);
+	}
+
+	protected TSMetaTransformationContext createMetaTransformationContext() {
+		return new TSMetaTransformationContextImpl();
 	}
 
 	private boolean isRoot(MetaElement element) {
@@ -243,7 +226,7 @@ public class TSGenerator {
 	protected class TSMetaTransformationContextImpl implements TSMetaTransformationContext {
 
 		private boolean isGenerated(TSSource source) {
-			return source.getNpmPackage().equals(config.getNpmPackageName());
+			return source.getNpmPackage().equals(config.getNpm().getPackageName());
 		}
 
 		@Override
@@ -251,7 +234,7 @@ public class TSGenerator {
 			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			String prefix = idPath;
 			while (true) {
-				String npmName = config.getNpmPackageMapping().get(prefix);
+				String npmName = config.getNpm().getPackageMapping().get(prefix);
 				if (npmName != null) {
 					return idPath.substring(prefix.length()).replace('.', '/');
 				}
@@ -269,7 +252,7 @@ public class TSGenerator {
 			String idPath = meta.getId().substring(0, meta.getId().lastIndexOf('.'));
 			String prefix = idPath;
 			while (true) {
-				String npmName = config.getNpmPackageMapping().get(prefix);
+				String npmName = config.getNpm().getPackageMapping().get(prefix);
 				if (npmName != null) {
 					return npmName;
 				}
