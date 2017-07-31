@@ -57,6 +57,7 @@ public class GenerateTypescriptTaskTest {
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
 		TSGeneratorConfiguration config = project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		config.setExpressionLibrary("@crnk/ngrx");
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getRuntime().setConfiguration("test");
