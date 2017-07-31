@@ -65,6 +65,8 @@ public class FieldResourcePost extends ResourceUpsert {
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 
+		verifyTypes(HttpMethod.POST, relationshipRegistryEntry, bodyRegistryEntry);
+
 		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
 		setAttributes(resourceBody, newResource, relationshipRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);

@@ -11,6 +11,23 @@ import java.util.Collection;
 
 public class HierarchicalResourceRegistryPartTest {
 
+	@Test(expected = IllegalStateException.class)
+	public void testDuplicatePartThrowsException() {
+		HierarchicalResourceRegistryPart part = new HierarchicalResourceRegistryPart();
+		part.putPart("", new DefaultResourceRegistryPart());
+		part.putPart("", new DefaultResourceRegistryPart());
+	}
+
+	@Test
+	public void checkHasEntryForNonExistentEntry() {
+		HierarchicalResourceRegistryPart part = new HierarchicalResourceRegistryPart();
+		Assert.assertFalse(part.hasEntry("doesNotExists"));
+		Assert.assertFalse(part.hasEntry(String.class));
+		Assert.assertNull(part.getEntry("doesNotExists")); // TODO consider exception
+		Assert.assertNull(part.getEntry(String.class)); // TODO consider exception
+	}
+
+
 	@Test
 	public void testRootPart() {
 		HierarchicalResourceRegistryPart part = new HierarchicalResourceRegistryPart();

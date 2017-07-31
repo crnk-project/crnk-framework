@@ -53,7 +53,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
 		String resourceType = path.getResourceType();
-		RegistryEntry endpointRegistryEntry = getRegistryEntry(path);
 
 		assertRequestDocument(requestDocument, method, resourceType);
 
@@ -69,12 +68,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		if (bodyRegistryEntry == null) {
 			throw new RepositoryNotFoundException(resourceBody.getType());
 		}
-
-		if (path.getElementName() == null) {
-			// TODO add relationship type validation as well
-			verifyTypes(method, resourceType, endpointRegistryEntry, bodyRegistryEntry);
-		}
-
 		return resourceBody;
 	}
 

@@ -1,33 +1,8 @@
 package io.crnk.gen.typescript.writer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import io.crnk.gen.typescript.model.*;
 
-import io.crnk.gen.typescript.model.TSAny;
-import io.crnk.gen.typescript.model.TSArrayType;
-import io.crnk.gen.typescript.model.TSClassType;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSEnumLiteral;
-import io.crnk.gen.typescript.model.TSEnumType;
-import io.crnk.gen.typescript.model.TSExport;
-import io.crnk.gen.typescript.model.TSExportedElement;
-import io.crnk.gen.typescript.model.TSField;
-import io.crnk.gen.typescript.model.TSFunction;
-import io.crnk.gen.typescript.model.TSImport;
-import io.crnk.gen.typescript.model.TSIndexSignature;
-import io.crnk.gen.typescript.model.TSInterfaceType;
-import io.crnk.gen.typescript.model.TSMember;
-import io.crnk.gen.typescript.model.TSModule;
-import io.crnk.gen.typescript.model.TSParameter;
-import io.crnk.gen.typescript.model.TSParameterizedType;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSSource;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.gen.typescript.model.TSVisitor;
+import java.util.*;
 
 public class TSWriter implements TSVisitor {
 
@@ -123,7 +98,7 @@ public class TSWriter implements TSVisitor {
 		}
 	}
 
-	public void visitReference(TSModule module) {
+	private void visitReference(TSModule module) {
 		if (module.getParent() instanceof TSModule) {
 			visitReference((TSModule) module.getParent());
 			builder.append(".");
@@ -144,8 +119,7 @@ public class TSWriter implements TSVisitor {
 				visitReference(parameters.get(i));
 			}
 			builder.append(">");
-		}
-		else {
+		} else {
 			if (type.getParent() instanceof TSModule) {
 				visitReference((TSModule) type.getParent());
 				builder.append(".");
@@ -306,8 +280,7 @@ public class TSWriter implements TSVisitor {
 		builder.append("export ");
 		if (exportElement.getAny()) {
 			builder.append("*");
-		}
-		else {
+		} else {
 			builder.append("{");
 			Iterator<String> iterator = exportElement.getTypeNames().iterator();
 			while (iterator.hasNext()) {

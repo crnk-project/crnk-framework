@@ -36,12 +36,13 @@ public class RuntimeClassoaderFactoryTest {
 		project.setVersion("0.0.1");
 		project.getPluginManager().apply(JavaPlugin.class);
 
-		Map<String, Class<?>> sharedClasses = new HashMap<>();
-		sharedClasses.put("test", String.class);
-
 		RuntimeClassLoaderFactory factory = new RuntimeClassLoaderFactory(project);
 		ClassLoader parentClassLoader = ClassLoader.getSystemClassLoader();
-		URLClassLoader classLoader = factory.createClassLoader(parentClassLoader, sharedClasses);
+		URLClassLoader classLoader = factory.createClassLoader(parentClassLoader);
+
+		RuntimeClassLoaderFactory.SharedClassLoader sharedClassLoader = (RuntimeClassLoaderFactory.SharedClassLoader) classLoader.getParent();
+		sharedClassLoader.putSharedClass("test", String.class);
+
 		Assert.assertNotEquals(0, classLoader.getURLs().length);
 
 		// check shared class loading

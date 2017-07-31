@@ -48,6 +48,7 @@ public class ResourcePost extends ResourceUpsert {
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
+		verifyTypes(HttpMethod.POST, endpointRegistryEntry, bodyRegistryEntry);
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
 

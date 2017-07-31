@@ -1,7 +1,13 @@
 package io.crnk.gen.runtime;
 
 import io.crnk.gen.typescript.GenerateTypescriptTask;
+import io.crnk.gen.typescript.RuntimeMetaResolver;
+import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSNpmConfiguration;
+import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.processor.TSSourceProcessor;
+import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.tasks.SourceSet;
@@ -28,7 +34,7 @@ public class RuntimeClassLoaderFactory {
 		this.project = project;
 	}
 
-	public URLClassLoader createClassLoader(ClassLoader parentClassLoader, final Map<String, Class<?>> sharedClasses) {
+	public URLClassLoader createClassLoader(ClassLoader parentClassLoader) {
 		Set<URL> classURLs = new HashSet<>(); // NOSONAR URL needed by URLClassLoader
 		classURLs.addAll(getProjectClassUrls());
 		classURLs.add(getPluginUrl());
@@ -37,22 +43,30 @@ public class RuntimeClassLoaderFactory {
 		ClassLoader bootstrapClassLaoder = ClassLoader.getSystemClassLoader().getParent();
 
 		// some classes still need to be shared between plugin and generation
-		ClassLoader sharedClassLoader = new SharedClassLoader(bootstrapClassLaoder, parentClassLoader, sharedClasses);
+		ClassLoader sharedClassLoader = new SharedClassLoader(bootstrapClassLaoder, parentClassLoader);
 
 		return new URLClassLoader(classURLs.toArray(new URL[0]), sharedClassLoader);
 	}
 
-	protected class SharedClassLoader extends ClassLoader {
+
+	public static class SharedClassLoader extends ClassLoader {
 
 		private ClassLoader parentClassLoader;
 
 		private Map<String, Class<?>> sharedClasses;
 
-		public SharedClassLoader(ClassLoader bootstrapClassLoader, ClassLoader parentClassLoader,
-								 Map<String, Class<?>> sharedClasses) {
+		public SharedClassLoader(ClassLoader bootstrapClassLoader, ClassLoader parentClassLoader) {
 			super(bootstrapClassLoader);
 			this.parentClassLoader = parentClassLoader;
-			this.sharedClasses = sharedClasses;
+
+			sharedClasses = new HashMap<>();
+			sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
+			sharedClasses.put(TSGeneratorConfiguration.class.getName(), TSGeneratorConfiguration.class);
+			sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
+			sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
+			sharedClasses.put(io.crnk.gen.typescript.RuntimeMetaResolver.class.getName(), RuntimeMetaResolver.class);
+			sharedClasses.put(TSSourceProcessor.class.getName(), TSSourceProcessor.class);
+			sharedClasses.put(TSGeneratorRuntimeContext.class.getName(), TSGeneratorRuntimeContext.class);
 		}
 
 		@Override
@@ -90,6 +104,9 @@ public class RuntimeClassLoaderFactory {
 			return super.loadClass(name, resolve);
 		}
 
+		public void putSharedClass(String name, Class<?> clazz) {
+			sharedClasses.put(name, clazz);
+		}
 	}
 
 	private URL getPluginUrl() {

@@ -1,39 +1,23 @@
 package io.crnk.meta;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.meta.model.MetaArrayType;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.MetaListType;
-import io.crnk.meta.model.MetaLiteral;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
 import io.crnk.meta.provider.MetaProvider;
 import io.crnk.meta.provider.MetaProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaLookup {
 
@@ -206,10 +190,7 @@ public class MetaLookup {
 			}
 
 			if (elementMetaClass.isInstance(meta)) {
-				if (result != null) {
-					throw new IllegalStateException(
-							"multiple elements found of type " + elementMetaClass + ": " + result + " vs " + element);
-				}
+				PreconditionUtil.verify(result == null, "multiple elements found of type %s: %s vs %s", elementMetaClass, result, element);
 				result = element;
 			}
 		}
@@ -351,11 +332,6 @@ public class MetaLookup {
 		return null;
 	}
 
-
-	public boolean exists(Type type, Class<MetaElement> metaElementClass) {
-		return this.allocateMeta(type, metaElementClass, true) != null;
-	}
-
 	private MetaElement allocateMetaFromCollectionType(ParameterizedType paramType,
 													   Class<? extends MetaElement> elementMetaClass) {
 		PreconditionUtil.assertEquals("expected single type argument", 1, paramType.getActualTypeArguments().length);
@@ -373,7 +349,7 @@ public class MetaLookup {
 			metaSet.setImplementationType(paramType);
 			metaSet.setElementType(elementType);
 			return metaSet;
-    }
+		}
 		if (isList) {
 			PreconditionUtil.assertTrue("expected a list type", isList);
 			MetaListType metaList = new MetaListType();
@@ -462,9 +438,8 @@ public class MetaLookup {
 		if (implPackage == null && implClass.isArray()) {
 			implPackage = implClass.getComponentType().getPackage();
 		}
-		if (implPackage == null) {
-			throw new IllegalStateException(implClass.getName() + " does not belong to a package");
-		}
+		PreconditionUtil.verify(implPackage != null, "%s does not belong to a package", implClass.getName());
+
 		String packageName = implPackage.getName();
 		StringBuilder idInfix = new StringBuilder(".");
 		while (true) {

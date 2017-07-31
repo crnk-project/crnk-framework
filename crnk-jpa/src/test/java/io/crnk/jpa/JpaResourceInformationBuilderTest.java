@@ -4,7 +4,6 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.jpa.internal.JpaResourceInformationBuilder;
-import io.crnk.jpa.merge.MergedResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.*;
 import io.crnk.jpa.util.ResourceFieldComparator;
@@ -15,7 +14,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -172,20 +170,6 @@ public class JpaResourceInformationBuilderTest {
 
 		Assert.assertFalse(attribute.isInsertable());
 		Assert.assertFalse(attribute.isUpdatable());
-	}
-
-	@Test
-	@Ignore
-	public void mergeRelationsAnnotation() {
-		Assert.assertTrue(builder.accept(MergedResource.class));
-
-		ResourceInformation info = builder.build(MergedResource.class);
-		Assert.assertEquals("merged", info.getResourceType());
-		Assert.assertEquals(MergedResource.class, info.getResourceClass());
-		Assert.assertNull(info.findRelationshipFieldByName("oneRelatedValue"));
-		Assert.assertNull(info.findRelationshipFieldByName("manyRelatedValues"));
-		Assert.assertNotNull(info.findAttributeFieldByName("oneRelatedValue"));
-		Assert.assertNotNull(info.findAttributeFieldByName("manyRelatedValues"));
 	}
 
 	@Test

@@ -67,9 +67,7 @@ public class PreconditionUtil {
 	 * @param condition condition to be checked
 	 */
 	public static void assertTrue(String message, boolean condition) {
-		if (!condition) {
-			fail(message);
-		}
+		verify(condition, message);
 	}
 
 	/**
@@ -94,5 +92,12 @@ public class PreconditionUtil {
 	 */
 	public static void assertNull(String message, Object object) {
 		assertTrue(message, object == null);
+	}
+
+	public static void verify(boolean condition, String messageFormat, Object... args) {
+		if (!condition) {
+			String message = messageFormat != null ? String.format(messageFormat, args) : null;
+			fail(message);
+		}
 	}
 }

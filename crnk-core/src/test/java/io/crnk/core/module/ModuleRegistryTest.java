@@ -98,11 +98,18 @@ public class ModuleRegistryTest {
 	public void repositoryInformationBuilderAccept() {
 		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
 		Assert.assertFalse(builder.accept("no resource"));
+		Assert.assertFalse(builder.accept(String.class));
 		Assert.assertTrue(builder.accept(TaskRepository.class));
 		Assert.assertTrue(builder.accept(ProjectRepository.class));
 		Assert.assertTrue(builder.accept(TaskToProjectRepository.class));
 		Assert.assertTrue(builder.accept(new TaskRepository()));
 		Assert.assertTrue(builder.accept(new TaskToProjectRepository()));
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void buildWithInvalidRepositoryClass() {
+		RepositoryInformationBuilderContext context = Mockito.mock(RepositoryInformationBuilderContext.class);
+		moduleRegistry.getRepositoryInformationBuilder().build(String.class, context);
 	}
 
 	@Test

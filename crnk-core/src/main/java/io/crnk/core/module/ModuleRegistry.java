@@ -117,9 +117,7 @@ public class ModuleRegistry {
 	 * has not yet been called.
 	 */
 	protected void checkNotInitialized() {
-		if (initialized) {
-			throw new IllegalStateException("already initialized, cannot be changed anymore");
-		}
+		PreconditionUtil.verify(!initialized, "already initialized, cannot be changed anymore");
 	}
 
 	/**
@@ -586,10 +584,8 @@ public class ModuleRegistry {
 
 		@Override
 		public void addJacksonModule(com.fasterxml.jackson.databind.Module module) {
+			checkNotInitialized();
 			aggregatedModule.addJacksonModule(module);
-			if (objectMapper != null) {
-				objectMapper.registerModule(module);
-			}
 		}
 
 		@Override

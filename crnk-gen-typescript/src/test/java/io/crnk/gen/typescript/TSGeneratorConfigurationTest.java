@@ -30,6 +30,10 @@ public class TSGeneratorConfigurationTest {
 		config.setGenerateExpressions(true);
 		Assert.assertTrue(config.getGenerateExpressions());
 
+		Assert.assertEquals(null, config.getExpressionLibrary());
+		config.setExpressionLibrary("@crnk/test");
+		Assert.assertEquals("@crnk/test", config.getExpressionLibrary());
+
 		Assert.assertEquals("src", config.getSourceDirectoryName());
 		config.setSourceDirectoryName("testDir");
 		Assert.assertEquals("testDir", config.getSourceDirectoryName());

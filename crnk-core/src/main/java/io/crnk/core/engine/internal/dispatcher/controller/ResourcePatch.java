@@ -54,9 +54,11 @@ public class ResourcePatch extends ResourceUpsert {
 		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
+		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, bodyRegistryEntry);
+
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
 		JsonApiResponse resourceFindResponse = resourceRepository.findOne(resourceId, queryAdapter);
-		Object resource = extractResource(resourceFindResponse);
+		Object resource = resourceFindResponse.getEntity();
 		if (resource == null) {
 			throw new ResourceNotFoundException(jsonPath.toString());
 		}

@@ -1,7 +1,7 @@
 package io.crnk.jpa;
 
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.internal.proxy.ObjectProxy;
+import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.exception.ResourceNotFoundException;

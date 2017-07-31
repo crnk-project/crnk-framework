@@ -89,7 +89,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 		@SuppressWarnings("unchecked")
-		Object resource = extractResource(resourceRepository.findOne(castedResourceId, queryAdapter));
+		Object resource = resourceRepository.findOne(castedResourceId, queryAdapter).getEntity();
 
 		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
 
