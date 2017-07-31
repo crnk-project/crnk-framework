@@ -101,7 +101,7 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 		DefaultResourceInstanceBuilder instanceBuilder;
 
 		meta = jpaMetaLookup.getMeta(resourceClass, MetaJpaDataObject.class).asDataObject();
-		instanceBuilder = new JpaResourceInstanceBuilder((MetaJpaDataObject) meta, resourceClass);
+		instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
 		List<ResourceField> fields = buildFields(meta);
 		Set<String> ignoredFields = getIgnoredFields(meta);
@@ -220,26 +220,6 @@ public class JpaResourceInformationBuilder implements ResourceInformationBuilder
 	@Override
 	public void init(ResourceInformationBuilderContext context) {
 		this.context = context;
-	}
-
-	class JpaResourceInstanceBuilder<T> extends DefaultResourceInstanceBuilder<T> {
-
-		private MetaJpaDataObject meta;
-
-		public JpaResourceInstanceBuilder(MetaJpaDataObject meta, Class<T> resourceClass) {
-			super(resourceClass);
-			this.meta = meta;
-		}
-
-		@Override
-		public int hashCode() {
-			return super.hashCode() | meta.getName().hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return super.equals(obj) && obj instanceof JpaResourceInstanceBuilder;
-		}
 	}
 
 	class JpaResourceInformation extends ResourceInformation implements MetaAwareInformation<MetaDataObject> {

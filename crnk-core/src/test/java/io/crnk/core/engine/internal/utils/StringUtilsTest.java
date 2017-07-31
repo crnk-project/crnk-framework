@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.utils;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -44,6 +45,18 @@ public class StringUtilsTest {
 		assertTrue(StringUtils.isBlank(" "));
 		assertFalse(StringUtils.isBlank("crnk"));
 		assertFalse(StringUtils.isBlank("  crnk  "));
+	}
+
+	@Test
+	public void onJoinOfNulls() throws Exception {
+		Assert.assertEquals("null,null", StringUtils.join(",", Arrays.asList(null, null)));
+	}
+
+	@Test
+	public void checkDecapitalize() throws Exception {
+		Assert.assertEquals("", StringUtils.decapitalize(""));
+		Assert.assertEquals("test", StringUtils.decapitalize("Test"));
+		Assert.assertEquals("someTest", StringUtils.decapitalize("SomeTest"));
 	}
 
 

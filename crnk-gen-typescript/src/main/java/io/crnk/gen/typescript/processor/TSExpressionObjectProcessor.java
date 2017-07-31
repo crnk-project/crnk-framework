@@ -5,7 +5,6 @@ import io.crnk.gen.typescript.model.*;
 import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
-import io.crnk.meta.model.MetaElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +94,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			if (fieldType instanceof TSPrimitiveType) {
 				TSPrimitiveType primitiveFieldType = (TSPrimitiveType) fieldType;
 				String primitiveName = TypescriptUtils.firstToUpper(primitiveFieldType.getName());
-				qField.setType(ExpressionLibrary.getExpression(primitiveName));
+				qField.setType(ExpressionLibrary.getPrimitiveExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
 			} else if (fieldType instanceof TSEnumType) {
 				qField.setType(ExpressionLibrary.STRING_EXPRESSION);

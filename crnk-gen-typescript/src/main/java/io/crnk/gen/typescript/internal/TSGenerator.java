@@ -200,16 +200,20 @@ public class TSGenerator {
 		}
 	}
 
-	private TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
+	protected TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				return transformation.transform(element, new TSMetaTransformationContextImpl(), options);
+				return transformation.transform(element, createMetaTransformationContext(), options);
 			}
 		}
 		throw new IllegalStateException("unexpected element: " + element);
+	}
+
+	protected TSMetaTransformationContext createMetaTransformationContext() {
+		return new TSMetaTransformationContextImpl();
 	}
 
 	private boolean isRoot(MetaElement element) {

@@ -204,6 +204,16 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals((Long) 2L, builder().addFilter(TestEntity.ATTR_oneRelatedValue + "." + RelatedEntity.ATTR_stringValue, FilterOperator.EQ, "related2").buildExecutor().getUniqueResult(false).getId());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void testThrowExceptionOnNonUnique() {
+		builder().buildExecutor().getUniqueResult(false);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testThrowExceptionOnNonNullableUnique() {
+		builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.EQ, "doesNotExist").buildExecutor().getUniqueResult(false);
+	}
+
 	@Test
 	public void testPrimitiveOrder() {
 		assertEquals(5, builder().addSortBy(Arrays.asList(TestEntity.ATTR_id), Direction.DESC).buildExecutor().getResultList().size());

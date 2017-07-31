@@ -14,6 +14,8 @@ import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -143,24 +145,14 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 
 	Object buildNewResource(RegistryEntry registryEntry, Resource dataBody, String resourceName) {
-		if (dataBody == null) {
-			throw new ResourceException("No data field in the body.");
-		}
-		if (!resourceName.equals(dataBody.getType())) {
-			throw new ResourceException(String.format("Inconsistent type definition between path and body: body type: " +
-							"%s, request type: %s",
-					dataBody.getType(),
-					resourceName));
-		}
-		try {
-			return registryEntry.getResourceInformation()
-					.getResourceClass()
-					.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new ResourceException(
-					String.format("couldn't create a new instance of %s", registryEntry.getResourceInformation()
-							.getResourceClass()));
-		}
+		PreconditionUtil.verify(dataBody != null, "No data field in the body.");
+		PreconditionUtil.verify(resourceName.equals(dataBody.getType()), "Inconsistent type definition between path and body: body type: " +
+						"%s, request type: %s",
+				dataBody.getType(),
+				resourceName);
+		Class resourceClass = registryEntry.getResourceInformation()
+				.getResourceClass();
+		return ClassUtils.newInstance(resourceClass);
 	}
 
 	protected void setRelations(Object newResource, RegistryEntry registryEntry, Resource resource, QueryAdapter

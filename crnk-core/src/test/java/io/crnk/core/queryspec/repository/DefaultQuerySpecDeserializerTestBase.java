@@ -10,6 +10,7 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.queryspec.*;
+import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,12 +25,13 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	public ExpectedException expectedException = ExpectedException.none();
 	protected DefaultQuerySpecDeserializer deserializer;
 	protected ResourceInformation taskInformation;
+	private QuerySpecDeserializerContext deserializerContext;
 
 	@Before
 	public void setup() {
 		super.setup();
-		deserializer = new DefaultQuerySpecDeserializer();
-		deserializer.init(new QuerySpecDeserializerContext() {
+
+		deserializerContext = new QuerySpecDeserializerContext() {
 
 			@Override
 			public ResourceRegistry getResourceRegistry() {
@@ -40,7 +42,10 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 			public TypeParser getTypeParser() {
 				return moduleRegistry.getTypeParser();
 			}
-		});
+		};
+
+		deserializer = new DefaultQuerySpecDeserializer();
+		deserializer.init(deserializerContext);
 		taskInformation = resourceRegistry.getEntryForClass(Task.class).getResourceInformation();
 	}
 
@@ -60,7 +65,44 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFindAll() throws InstantiationException, IllegalAccessException {
+	public void checkIgnoreParseExceptions() {
+		Assert.assertFalse(deserializer.isIgnoreParseExceptions());
+		deserializer.setIgnoreParseExceptions(true);
+		Assert.assertTrue(deserializer.isIgnoreParseExceptions());
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[id]", "notAnInteger");
+		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
+		expectedSpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "notAnInteger"));
+		Assert.assertEquals(expectedSpec, actualSpec);
+	}
+
+	@Test(expected = ParametersDeserializationException.class)
+	public void throwParseExceptionsByDefault() {
+		Assert.assertFalse(deserializer.isIgnoreParseExceptions());
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[id]", "notAnInteger");
+		deserializer.deserialize(taskInformation, params);
+	}
+
+	@Test(expected = ParametersDeserializationException.class)
+	public void throwParseExceptionsForMultiValuedOffset() {
+		Map<String, Set<String>> params = new HashMap<>();
+		params.put("page[offset]", new HashSet<>(Arrays.asList("1", "2")));
+		deserializer.deserialize(taskInformation, params);
+	}
+
+	@Test(expected = ParametersDeserializationException.class)
+	public void throwParseExceptionsWhenBracketsNotClosed() {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[", "someValue");
+		deserializer.deserialize(taskInformation, params);
+	}
+
+	@Test
+	public void testFindAll() {
 		Map<String, Set<String>> params = new HashMap<>();
 
 		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
@@ -94,7 +136,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFindAllOrderByAsc() throws InstantiationException, IllegalAccessException {
+	public void testFindAllOrderByAsc() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 
@@ -105,7 +147,19 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testOrderByMultipleAttributes() throws InstantiationException, IllegalAccessException {
+	public void testFollowNestedObjectWithinResource() {
+		// follow ProjectData.data
+		QuerySpec expectedSpec = new QuerySpec(Project.class);
+		expectedSpec.addSort(new SortSpec(Arrays.asList("data", "data"), Direction.ASC));
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "sort", "data.data");
+		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
+		Assert.assertEquals(expectedSpec, actualSpec);
+	}
+
+	@Test
+	public void testOrderByMultipleAttributes() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 		expectedSpec.addSort(new SortSpec(Arrays.asList("id"), Direction.ASC));
@@ -117,7 +171,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFindAllOrderByDesc() throws InstantiationException, IllegalAccessException {
+	public void testFindAllOrderByDesc() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addSort(new SortSpec(Arrays.asList("name"), Direction.DESC));
 
@@ -129,7 +183,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterWithDefaultOp() throws InstantiationException, IllegalAccessException {
+	public void testFilterWithDefaultOp() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "value"));
 
@@ -141,7 +195,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterWithComputedAttribute() throws InstantiationException, IllegalAccessException {
+	public void testFilterWithComputedAttribute() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("computedAttribute"), FilterOperator.EQ, 13));
 
@@ -153,7 +207,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterWithDotNotation() throws InstantiationException, IllegalAccessException {
+	public void testFilterWithDotNotation() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("project", "name"), FilterOperator.EQ, "value"));
 
@@ -165,7 +219,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterWithDotNotationMultipleElements() throws InstantiationException, IllegalAccessException {
+	public void testFilterWithDotNotationMultipleElements() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("project", "task", "name"), FilterOperator.EQ, "value"));
 
@@ -177,7 +231,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testUnknownPropertyAllowed() throws InstantiationException, IllegalAccessException {
+	public void testUnknownPropertyAllowed() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("doesNotExists"), FilterOperator.EQ, "value"));
 
@@ -191,7 +245,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test(expected = PropertyException.class)
-	public void testUnknownPropertyNotAllowed() throws InstantiationException, IllegalAccessException {
+	public void testUnknownPropertyNotAllowed() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("doesNotExists"), FilterOperator.EQ, "value"));
 
@@ -204,7 +258,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterByOne() throws InstantiationException, IllegalAccessException {
+	public void testFilterByOne() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "value"));
 
@@ -216,7 +270,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterByMany() throws InstantiationException, IllegalAccessException {
+	public void testFilterByMany() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, new HashSet<>(Arrays.asList("value1", "value2"))));
 
@@ -228,7 +282,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterEquals() throws InstantiationException, IllegalAccessException {
+	public void testFilterEquals() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 1L));
 
@@ -240,7 +294,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterGreater() throws InstantiationException, IllegalAccessException {
+	public void testFilterGreater() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.LE, 1L));
 
@@ -252,7 +306,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testFilterGreaterOnRoot() throws InstantiationException, IllegalAccessException {
+	public void testFilterGreaterOnRoot() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.LE, 1L));
 
@@ -264,7 +318,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testPaging() throws InstantiationException, IllegalAccessException {
+	public void testPaging() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.setLimit(2L);
 		expectedSpec.setOffset(1L);
@@ -277,8 +331,40 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}
 
+	@Test
+	public void deserializeUnknownParameter() {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "doesNotExist[something]", "someValue");
+
+		final boolean[] deserialized = new boolean[1];
+		deserializer = new DefaultQuerySpecDeserializer() {
+			@Override
+			protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
+				Assert.assertEquals(RestrictedQueryParamsMembers.unknown, parameter.getParamType());
+				Assert.assertEquals("doesNotExist", parameter.getStrParamType());
+				Assert.assertEquals("doesNotExist[something]", parameter.getName());
+				Assert.assertNull(parameter.getResourceInformation());
+				Assert.assertNull(parameter.getOperator());
+				Assert.assertNull(parameter.getAttributePath());
+				Assert.assertEquals(1, parameter.getValues().size());
+				deserialized[0] = true;
+			}
+		};
+		deserializer.init(deserializerContext);
+		deserializer.deserialize(taskInformation, params);
+		Assert.assertTrue(deserialized[0]);
+	}
+
+
 	@Test(expected = ParametersDeserializationException.class)
-	public void testPagingError() throws InstantiationException, IllegalAccessException {
+	public void testInvalidPagingType() {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "page[doesNotExist]", "1");
+		deserializer.deserialize(taskInformation, params);
+	}
+
+	@Test(expected = ParametersDeserializationException.class)
+	public void testPagingError() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.setLimit(2L);
 		expectedSpec.setOffset(1L);
@@ -291,7 +377,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testPagingMaxLimitNotAllowed() throws InstantiationException, IllegalAccessException {
+	public void testPagingMaxLimitNotAllowed() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "page[offset]", "1");
 		add(params, "page[limit]", "5");
@@ -303,7 +389,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testPagingMaxLimitAllowed() throws InstantiationException, IllegalAccessException {
+	public void testPagingMaxLimitAllowed() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.setOffset(1L);
 		expectedSpec.setLimit(5L);
@@ -318,7 +404,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testIncludeRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeRelations() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.includeRelation(Arrays.asList("project"));
 
@@ -330,7 +416,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testIncludeRelationsOnRoot() throws InstantiationException, IllegalAccessException {
+	public void testIncludeRelationsOnRoot() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.includeRelation(Arrays.asList("project"));
 
@@ -342,7 +428,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testIncludeAttributes() throws InstantiationException, IllegalAccessException {
+	public void testIncludeAttributes() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.includeField(Arrays.asList("name"));
 
@@ -354,7 +440,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testIncludeAttributesOnRoot() throws InstantiationException, IllegalAccessException {
+	public void testIncludeAttributesOnRoot() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.includeField(Arrays.asList("name"));
 
@@ -380,7 +466,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testIngoreParseException() throws InstantiationException, IllegalAccessException {
+	public void testIngoreParseException() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[id]", "NotAnId");
 		deserializer.setIgnoreParseExceptions(true);
@@ -392,7 +478,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test
-	public void testGenericCast() throws InstantiationException, IllegalAccessException {
+	public void testGenericCast() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[id]", "12");
 		add(params, "filter[name]", "test");
@@ -411,15 +497,15 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test(expected = ParametersDeserializationException.class)
-	public void testFailOnParseException() throws InstantiationException, IllegalAccessException {
+	public void testFailOnParseException() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[id]", "NotAnId");
 		deserializer.setIgnoreParseExceptions(false);
 		deserializer.deserialize(taskInformation, params);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void testUnknownProperty() throws InstantiationException, IllegalAccessException {
+	@Test(expected = ParametersDeserializationException.class)
+	public void testUnknownProperty() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "group", "test");
 		deserializer.setIgnoreParseExceptions(false);
