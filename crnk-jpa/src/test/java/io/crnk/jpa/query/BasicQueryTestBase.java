@@ -3,8 +3,6 @@ package io.crnk.jpa.query;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.model.CollectionAttributesTestEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -225,10 +223,16 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
-	public void testOneRelatedOrder() {
+	public void testOneRelatedEntityOrder() {
 		assertEquals(5, builder().setDefaultJoinType(JoinType.LEFT).addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor().getResultList().size());
 		assertEquals((Long) 0L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.ASC).buildExecutor().getResultList().get(0).getId());
 		assertEquals((Long) 3L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor().getResultList().get(0).getId());
+	}
+
+	@Test
+	public void testOneRelatedAttributeOrder() {
+		assertEquals((Long) 0L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.ASC).buildExecutor().getResultList().get(0).getId());
+		assertEquals((Long) 3L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.DESC).buildExecutor().getResultList().get(0).getId());
 	}
 
 	@Test

@@ -41,6 +41,8 @@ public class TSGeneratorConfiguration {
 
 	private TSNpmConfiguration npm = new TSNpmConfiguration();
 
+	private TSRuntimeConfiguration runtime = new TSRuntimeConfiguration();
+
 	public TSGeneratorConfiguration(Project project) {
 		this.project = project;
 
@@ -54,8 +56,10 @@ public class TSGeneratorConfiguration {
 		metaTransformationClassNames.add(TSMetaEnumTypeTransformation.class.getName());
 		metaTransformationClassNames.add(TSMetaPrimitiveTypeTransformation.class.getName());
 		metaTransformationClassNames.add(TSMetaResourceRepositoryTransformation.class.getName());
+	}
 
-
+	public TSRuntimeConfiguration getRuntime() {
+		return runtime;
 	}
 
 	public TSNpmConfiguration getNpm() {

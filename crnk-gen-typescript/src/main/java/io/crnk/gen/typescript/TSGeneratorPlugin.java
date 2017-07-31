@@ -25,7 +25,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 
 		project.getTasks().create(PublishTypescriptStubsTask.NAME, PublishTypescriptStubsTask.class);
 
-		GenerateTypescriptTask generateTask = project.getTasks().create(GenerateTypescriptTask.NAME,
+		final GenerateTypescriptTask generateTask = project.getTasks().create(GenerateTypescriptTask.NAME,
 				GenerateTypescriptTask.class);
 		generateTask.getInputs().file(compileConfiguration.getFiles());
 		generateTask.getOutputs().dir(sourcesDir);
@@ -69,14 +69,6 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		compileTypescriptTask.getInputs().files(fileTree);
 		compileTypescriptTask.setWorkingDir(buildDir);
 		compileTypescriptTask.getOutputs().dir(buildDir);
-		try {
-			Task processIntegrationTestResourcesTask = project.getTasks().getByName("processIntegrationTestResources");
-			Task integrationCompileJavaTask = project.getTasks().getByName("compileIntegrationTestJava");
-			Task assembleTask = project.getTasks().getByName("assemble");
-			generateTask.dependsOn(assembleTask, integrationCompileJavaTask, processIntegrationTestResourcesTask);
-		} catch (Exception e) {
-			LOGGER.error("failed to setup dependencies, is integrationTest and testSet plugin properly setup", e);
-		}
 
 		ConfigurableFileTree assembleFileTree = project.fileTree(new File(buildDir, "src"));
 		assembleFileTree.include("**/*.ts");
@@ -89,7 +81,24 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		assembleSources.into(distDir);
 		assembleSources.dependsOn(compileTypescriptTask);
 
-		TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
+		final TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
 		project.getExtensions().add("typescriptGen", config);
+
+		// setup dependency of generate task (configurable by extension)
+		final Task assembleTask = project.getTasks().getByName("assemble");
+		generateTask.dependsOn(assembleTask);
+		project.afterEvaluate(new Action<Project>() {
+			@Override
+			public void execute(Project project) {
+				String runtimeConfiguration = config.getRuntime().getConfiguration();
+				String runtimeConfigurationFirstUpper = Character.toUpperCase(runtimeConfiguration.charAt(0)) + runtimeConfiguration.substring(1);
+
+				Task processIntegrationTestResourcesTask = project.getTasks().getByName("process" + runtimeConfigurationFirstUpper + "Resources");
+				Task integrationCompileJavaTask = project.getTasks().getByName("compile" + runtimeConfigurationFirstUpper + "Java");
+				generateTask.dependsOn(integrationCompileJavaTask, processIntegrationTestResourcesTask);
+			}
+		});
+
+
 	}
 }

@@ -1,20 +1,20 @@
 package io.crnk.gen.runtime;
 
-import io.crnk.gen.typescript.GenerateTypescriptTask;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
 import io.crnk.gen.typescript.TSGeneratorConfiguration;
 import io.crnk.gen.typescript.TSNpmConfiguration;
+import io.crnk.gen.typescript.TSRuntimeConfiguration;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -63,6 +63,7 @@ public class RuntimeClassLoaderFactory {
 			sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
 			sharedClasses.put(TSGeneratorConfiguration.class.getName(), TSGeneratorConfiguration.class);
 			sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
+			sharedClasses.put(TSRuntimeConfiguration.class.getName(), TSRuntimeConfiguration.class);
 			sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
 			sharedClasses.put(io.crnk.gen.typescript.RuntimeMetaResolver.class.getName(), RuntimeMetaResolver.class);
 			sharedClasses.put(TSSourceProcessor.class.getName(), TSSourceProcessor.class);
@@ -70,25 +71,15 @@ public class RuntimeClassLoaderFactory {
 		}
 
 		@Override
-		protected synchronized Enumeration<URL> findResources(String name) throws IOException {
-
-			return super.findResources(name);
-		}
-
-		@Override
 		protected synchronized URL findResource(String name) {
-			URL resource = GenerateTypescriptTask.class.getClassLoader().getResource(name);
-			if (resource == null) {
-				resource = super.findResource(name);
-				if (resource == null && "logback-test.xml".equals(name)) {
-					URL logbackUrl = RuntimeClassLoaderFactory.class.getClassLoader().getResource("logback-test.xml");
-					if (logbackUrl == null) {
-						throw new IllegalStateException("logback-test.xml could not be found");
-					}
-					resource = logbackUrl;
+			if ("logback-test.xml".equals(name)) {
+				URL logbackUrl = parentClassLoader.getResource("logback-test.xml");
+				if (logbackUrl == null) {
+					throw new IllegalStateException("logback-test.xml could not be found");
 				}
+				return logbackUrl;
 			}
-			return resource;
+			return super.findResource(name);
 		}
 
 		@Override
@@ -133,16 +124,12 @@ public class RuntimeClassLoaderFactory {
 			}
 		}
 
-		// add gradle integrationTest dependencies to url
+		// add  dependencies from configured gradle configuration to url (usually test or integrationTest)
+		TSGeneratorConfiguration generatorConfiguration = project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		String configurationName = generatorConfiguration.getRuntime().getConfiguration();
+
 		ConfigurationContainer configurations = project.getConfigurations();
-		org.gradle.api.artifacts.Configuration runtimeConfiguration;
-		if (configurations.findByName("integrationTestRuntime") != null) {
-			runtimeConfiguration = configurations
-					.getByName("integrationTestRuntime");
-		} else {
-			runtimeConfiguration = configurations
-					.getByName("testRuntime");
-		}
+		Configuration runtimeConfiguration = configurations.getByName(configurationName + "Runtime");
 		classpath.addAll(runtimeConfiguration.getFiles());
 
 		return classpath;

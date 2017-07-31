@@ -2,7 +2,6 @@ package io.crnk.gen.typescript;
 
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
-import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.Copy;
@@ -53,12 +52,14 @@ public class GenerateTypescriptTaskTest {
 		Project project = ProjectBuilder.builder().withName("crnk-gen-typescript-test").withProjectDir(outputDir).build();
 		project.setVersion("0.0.1");
 
+		project.getPluginManager().apply("com.moowork.node");
 		project.getPluginManager().apply(JavaPlugin.class);
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
 		TSGeneratorConfiguration config = project.getExtensions().getByType(TSGeneratorConfiguration.class);
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
+		config.getRuntime().setConfiguration("test");
 		config.getNpm().setPackageName(testPackage);
 		config.getNpm().setGitRepository("someThing");
 		config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
