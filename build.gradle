@@ -50,7 +50,7 @@ gradle.beforeProject { Project project ->
 
 		def docs = project.name == 'crnk-documentation'
 		def ui = project.name == 'crnk-ui'
-		def test = project.name == 'crnk-test'
+		def testProject = project.name == 'crnk-test'
 		def examples = project.name.contains('example')
 
 		if (!docs) {
@@ -63,9 +63,15 @@ gradle.beforeProject { Project project ->
 				testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
 				testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
 			}
+
+			test {
+				testLogging {
+					exceptionFormat = 'full'
+				}
+			}
 		}
 
-		if (!docs && !examples && !test) {
+		if (!docs && !examples && !testProject) {
 			// https://about.sonarqube.com/get-started/
 			apply plugin: "org.sonarqube"
 			apply plugin: "jacoco"
