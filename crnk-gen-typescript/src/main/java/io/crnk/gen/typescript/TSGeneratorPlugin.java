@@ -43,6 +43,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 				@Override
 				public void execute(Task task) {
 					File targetFile = new File(buildDir, ".npmrc");
+					buildDir.mkdirs();
 					TypescriptUtils.copyFile(npmrcFile, targetFile);
 				}
 			});

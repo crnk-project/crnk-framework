@@ -140,8 +140,6 @@ public class TSGenerator {
 	}
 
 	protected void writeSources() throws IOException {
-		PreconditionUtil.assertNotNull("no typescriptGen.npmPackageName configured", config.getNpm().getPackageName());
-
 		for (TSSource fileSource : sources) {
 			TSWriter writer = new TSWriter(config.getCodeStyle());
 			fileSource.accept(writer);

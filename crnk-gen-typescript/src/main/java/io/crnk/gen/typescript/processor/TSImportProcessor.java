@@ -66,7 +66,6 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static String computeImportPath(TSSource refSource, TSSource source) {
-		PreconditionUtil.verify(refSource != null, "refSource cannot be null");
 		StringBuilder pathBuilder = new StringBuilder();
 		if (!source.getNpmPackage().equals(refSource.getNpmPackage())) {
 			appendThirdPartyImport(pathBuilder, refSource);
