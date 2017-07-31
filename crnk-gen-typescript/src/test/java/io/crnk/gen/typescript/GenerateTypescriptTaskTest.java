@@ -42,7 +42,7 @@ public class GenerateTypescriptTaskTest {
 		testProjectDir.newFolder("src", "main", "java");
 
 		outputDir = testProjectDir.getRoot();
-		outputDir = new File("temp");
+		outputDir.mkdirs();
 
 		File npmrcFile = new File(outputDir, ".npmrc");
 		FileWriter npmrcWriter = new FileWriter(npmrcFile);
