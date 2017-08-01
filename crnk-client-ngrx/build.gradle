@@ -1,15 +1,47 @@
-import com.moowork.gradle.node.npm.NpmTask;
-
 apply plugin: 'com.moowork.node'
 
+apply plugin: 'java'
+
+sourceSets {
+	gen {
+		java
+	}
+}
+
+dependencies {
+	genCompile project(':crnk-meta')
+	genCompile project(':crnk-gen-typescript')
+
+	genCompile 'com.google.guava:guava:18.0'
+}
+
+ClassLoader getClassLoader(Configuration config) {
+	ArrayList urls = new ArrayList()
+	config.files.each { File file ->
+		urls += file.toURI().toURL()
+	}
+	urls += sourceSets.gen.output.classesDir.toURI().toURL()
+
+	def bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent()
+	return new URLClassLoader(urls.toArray(new URL[0]), bootstrapClassLoader)
+}
+
+task generateMetaStubs {
+	dependsOn tasks.compileGenJava
+	doLast({
+		def genClassLoader = getClassLoader(configurations.getByName("genRuntime"))
+		def executor = genClassLoader.loadClass("io.crnk.client.ngrx.gen.GeneratorExecutor").newInstance()
+		executor.run()
+	})
+}
 
 def isProductionBuild = System.env.NEXUS_DEPLOY_USER != null
-if(isProductionBuild){
+if (isProductionBuild) {
 	ext {
 		NG_BUILD_ARGS = ['--environment', 'prod', '--target', 'production']
 		NG_E2E_ARGS = NG_BUILD_ARGS
 	}
-}else{
+} else {
 	ext {
 		NG_BUILD_ARGS = []
 		NG_E2E_ARGS = NG_BUILD_ARGS
@@ -26,8 +58,8 @@ node {
 def npmStagingDir = file("${buildDir}/npm")
 task copyNpmFiles(type: Copy) {
 	from(
-		file('.npmrc'),
-		file('.npmignore')
+			file('.npmrc'),
+			file('.npmignore')
 	)
 	into npmStagingDir
 }
@@ -38,6 +70,7 @@ npmInstall.outputs.dir(file('node_modules'))
 task npmRunBuild(type: NpmTask) {
 	dependsOn tasks.npmInstall
 	dependsOn tasks.copyNpmFiles
+	dependsOn tasks.generateMetaStubs
 
 	npmCommand = ['run', 'build']
 	// TODO: Programmatically include all subfolders except buildDir?

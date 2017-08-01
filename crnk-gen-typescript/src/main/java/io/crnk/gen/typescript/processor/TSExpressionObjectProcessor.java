@@ -2,7 +2,7 @@ package io.crnk.gen.typescript.processor;
 
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.*;
-import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
+import io.crnk.gen.typescript.model.libraries.CrnkLibrary;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			queryType.setName(name);
 			queryType.setExported(true);
 			queryType.setParent(parent);
-			queryType.setSuperType(new TSParameterizedType(ExpressionLibrary.BEAN_PATH, interfaceType));
+			queryType.setSuperType(new TSParameterizedType(CrnkLibrary.BEAN_PATH, interfaceType));
 			translationMap.put(interfaceType, queryType);
 
 			String metaElementId = interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
@@ -94,10 +94,10 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			if (fieldType instanceof TSPrimitiveType) {
 				TSPrimitiveType primitiveFieldType = (TSPrimitiveType) fieldType;
 				String primitiveName = TypescriptUtils.firstToUpper(primitiveFieldType.getName());
-				qField.setType(ExpressionLibrary.getPrimitiveExpression(primitiveName));
+				qField.setType(CrnkLibrary.getPrimitiveExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
 			} else if (fieldType instanceof TSEnumType) {
-				qField.setType(ExpressionLibrary.STRING_EXPRESSION);
+				qField.setType(CrnkLibrary.STRING_EXPRESSION);
 				qField.setInitializer(setupPrimitiveField("String", qField));
 			} else if (fieldType instanceof TSInterfaceType) {
 				setupInterfaceField(qField, field);
@@ -114,7 +114,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 
 			TSType baseType = parameterizedType.getBaseType();
 			TSType qbaseType = baseType == NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP
-					? ExpressionLibrary.QTYPED_MANY_RESOURCE_RELATIONSHIP : ExpressionLibrary.QTYPED_ONE_RESOURCE_RELATIONSHIP;
+					? CrnkLibrary.QTYPED_MANY_RESOURCE_RELATIONSHIP : CrnkLibrary.QTYPED_ONE_RESOURCE_RELATIONSHIP;
 
 			List<TSType> parameters = parameterizedType.getParameters();
 			if (parameters.size() == 1 && parameters.get(0) instanceof TSInterfaceType) {

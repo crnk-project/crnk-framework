@@ -5,11 +5,11 @@ import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
 
-public class ExpressionLibrary {
+public class CrnkLibrary {
 
 	public static final TSSource EXPRESSION_SOURCE = new TSSource();
 
-	public static final TSSource JSONAPI_SOURCE = new TSSource();
+	public static final TSSource STUB_SOURCE = new TSSource();
 
 	public static final TSClassType BEAN_PATH;
 
@@ -24,8 +24,10 @@ public class ExpressionLibrary {
 	public static final TSClassType QTYPED_MANY_RESOURCE_RELATIONSHIP;
 
 	static {
-		EXPRESSION_SOURCE.setNpmPackage("@crnk/ngrx/binding/expression");
-		JSONAPI_SOURCE.setNpmPackage("@crnk/ngrx/binding/stub");
+		EXPRESSION_SOURCE.setNpmPackage("@crnk/ngrx");
+		EXPRESSION_SOURCE.setDirectory("expression");
+		STUB_SOURCE.setNpmPackage("@crnk/ngrx");
+		STUB_SOURCE.setDirectory("stub");
 
 		BEAN_PATH = new TSClassType();
 		BEAN_PATH.setName("BeanPath");
@@ -45,14 +47,14 @@ public class ExpressionLibrary {
 
 		QTYPED_ONE_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_ONE_RESOURCE_RELATIONSHIP.setName("QTypedOneResourceRelationship");
-		QTYPED_ONE_RESOURCE_RELATIONSHIP.setParent(JSONAPI_SOURCE);
+		QTYPED_ONE_RESOURCE_RELATIONSHIP.setParent(STUB_SOURCE);
 
 		QTYPED_MANY_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_MANY_RESOURCE_RELATIONSHIP.setName("QTypedManyResourceRelationship");
-		QTYPED_MANY_RESOURCE_RELATIONSHIP.setParent(JSONAPI_SOURCE);
+		QTYPED_MANY_RESOURCE_RELATIONSHIP.setParent(STUB_SOURCE);
 	}
 
-	private ExpressionLibrary() {
+	private CrnkLibrary() {
 	}
 
 	public static TSType getPrimitiveExpression(String primitiveName) {

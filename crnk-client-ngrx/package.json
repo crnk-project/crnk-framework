@@ -12,12 +12,10 @@
 		"karma": "karma start",
 		"karma:watch": "karma start --no-single-run",
 		"lint": "tslint src/**/*.ts",
-		"postbuild": "npm run clean:post && npm run copyAssets && npm run copyTemplates",
+		"postbuild": "npm run clean:post",
 		"test:unit": "npm run karma",
 		"test:unit:watch": "npm run karma:watch",
-		"test": "npm run test:unit && npm run lint:lib && npm run coveralls",
-		"copyAssets": "ncp assets build/npm/assets",
-		"copyTemplates": "ncp component build/npm/component -filter=.*html"
+		"test": "npm run test:unit && npm run lint:lib && npm run coveralls"
 	},
 	"main": "./index.js",
 	"types": "./index.d.ts",
