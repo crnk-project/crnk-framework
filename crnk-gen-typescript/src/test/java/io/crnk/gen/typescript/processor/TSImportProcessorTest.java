@@ -121,4 +121,34 @@ public class TSImportProcessorTest {
 		Assert.assertEquals("./some-interface", classSource.getImports().get(0).getPath());
 		Assert.assertEquals("./some-param", classSource.getImports().get(1).getPath());
 	}
+
+	@Test
+	public void checkModuleImport() {
+		TSInterfaceType moduleInterface = new TSInterfaceType();
+		moduleInterface.setName("SomeInterface");
+
+		TSModule module = new TSModule();
+		module.setName("SomeModule");
+		module.addElement(moduleInterface);
+
+		TSSource moduleSource = new TSSource();
+		moduleSource.addElement(module);
+		moduleSource.setNpmPackage("@crnk/test");
+		moduleSource.setDirectory("someDir");
+		moduleSource.setName("some-module");
+		sources.add(moduleSource);
+
+		TSField field = new TSField();
+		field.setName("someField");
+		field.setType(moduleInterface);
+		classType.getImplementedInterfaces().clear();
+		classType.addDeclaredMember(field);
+
+		processor.process(sources);
+		Assert.assertEquals(1, classSource.getImports().size());
+		TSImport intImport = classSource.getImports().get(0);
+		Assert.assertEquals("./some-module", intImport.getPath());
+		Assert.assertEquals(1, intImport.getTypeNames().size());
+		Assert.assertEquals("SomeModule", intImport.getTypeNames().iterator().next());
+	}
 }

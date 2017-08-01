@@ -17,4 +17,10 @@ public abstract class TSContainerElementBase extends TSElementBase implements TS
 		elements.add(element);
 		element.setParent(this);
 	}
+
+	@Override
+	public void addElement(int index, TSElement element) {
+		elements.add(index, element);
+		element.setParent(this);
+	}
 }

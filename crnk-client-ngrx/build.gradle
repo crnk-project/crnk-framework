@@ -27,9 +27,12 @@ ClassLoader getClassLoader(Configuration config) {
 }
 
 task generateMetaStubs {
+	def genConfig = configurations.getByName("genRuntime")
+	inputs.files genConfig.asFileTree
+	outputs.dir file('src/typescript/meta')
 	dependsOn tasks.compileGenJava
 	doLast({
-		def genClassLoader = getClassLoader(configurations.getByName("genRuntime"))
+		def genClassLoader = getClassLoader(genConfig)
 		def executor = genClassLoader.loadClass("io.crnk.client.ngrx.gen.GeneratorExecutor").newInstance()
 		executor.run()
 	})

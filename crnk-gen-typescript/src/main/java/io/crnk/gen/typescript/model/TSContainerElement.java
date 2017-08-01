@@ -7,4 +7,6 @@ public interface TSContainerElement extends TSElement {
 	List<TSElement> getElements();
 
 	void addElement(TSElement element);
+
+	void addElement(int insertIndex, TSElement element);
 }

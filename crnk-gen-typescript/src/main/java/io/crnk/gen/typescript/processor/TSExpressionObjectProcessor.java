@@ -35,7 +35,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 
 		@Override
 		public void visit(TSInterfaceType interfaceType) {
-			boolean doGenerate = interfaceType.getImplementedInterfaces().contains(NgrxJsonApiLibrary.STORE_RESOURCE);
+			boolean doGenerate = interfaceType.implementsInterface(NgrxJsonApiLibrary.STORE_RESOURCE);
 			if (doGenerate) {
 				generate(interfaceType);
 			}
@@ -65,8 +65,18 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				queryType.addDeclaredMember(metaField);
 			}
 
+			if (interfaceType.getName().equals("MetaKey")) {
+				System.out.println("Hallo");
+			}
+
 			if (parent instanceof TSSource) {
-				parent.addElement(queryType);
+
+				TSModule module = TypescriptUtils.getModule(parent, queryType.getName(), -1, false);
+
+				// class must come before module according to Typescript
+				List<TSElement> elements = parent.getElements();
+				int insertIndex = module != null ? elements.indexOf(module) : elements.size();
+				parent.addElement(insertIndex, queryType);
 			} else {
 				TSModule module = (TSModule) parent;
 				TSContainerElement grandParent = (TSContainerElement) module.getParent();

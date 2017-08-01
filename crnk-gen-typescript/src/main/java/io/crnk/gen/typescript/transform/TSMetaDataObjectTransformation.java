@@ -63,7 +63,9 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		}
 
 		if (generateAsResource(metaDataObject)) {
-			interfaceType.getImplementedInterfaces().add(NgrxJsonApiLibrary.STORE_RESOURCE);
+			if(metaDataObject.getSuperType() == null) {
+				interfaceType.getImplementedInterfaces().add(NgrxJsonApiLibrary.STORE_RESOURCE);
+			}
 			generateResourceFields(context, interfaceType, metaDataObject);
 		}
 		else {
