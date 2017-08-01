@@ -1,0 +1,44 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"module": "es2015",
+		"sourceMap": true,
+		"outDir": "./build/npm",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"removeComments": false,
+		"moduleResolution": "node",
+		"noEmitOnError": false,
+		"declaration": true,
+		"strictNullChecks": false,
+		"inlineSources": true,
+		"baseUrl": ".",
+		"skipLibCheck": true,
+		"types": [
+			"lodash",
+			"node",
+			"source-map"
+		],
+		"lib": [
+			"dom",
+			"es2015"
+		],
+		"baseUrl": ".",
+		"stripInternal": true,
+		"rootDir": "."
+	},
+	"compileOnSave": false,
+	"atom": {
+		"rewriteTsconfig": false
+	},
+	"files": [
+		"index.ts"
+	],
+	"exclude": [
+		"node_modules"
+	],
+	"angularCompilerOptions": {
+		"genDir": "build/npm",
+		"strictMetadataEmit": true
+	}
+}
