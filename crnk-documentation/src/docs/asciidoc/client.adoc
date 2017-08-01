@@ -42,6 +42,42 @@ An example of the usage:
 Have a look at, for example, the QuerySpecClientTest to see more examples of how it is used.
 
 
+## Modules
+
+`CrnkClient` can be extended by modules:
+
+[source]
+----
+  CrnkClient client = new CrnkClient("http://localhost:8080/api");
+  client.addModule(ValidationModule.create());
+----
+
+Typical use cases include:
+
+- adding exception mappers
+- registering new types of resources (like JPA entities by the `JpaModule`)
+- intercepting requests for monitoring
+- adding security tokens to requests
+
+Many modules allow a registration both on server and client side.
+The client part then typically makes use of a subset of the server features, like
+exception mappers and resource registrations.
+
+There is a mechanism to discover and register client modules automatically:
+
+[source]
+----
+  CrnkClient client = new CrnkClient("http://localhost:8080/api");
+  client.findModules();
+----
+
+`findModules` makes use of `java.util.ServiceLoader` and looks up
+for `ClientModuleFactory`. `JpaModule`, `ValidationModule`,
+`MetaModule`, `SecurityModule` implement such a service registration.
+In contrast, `BraveModule` needs a Brave instance and does not yet
+allow a fully automated setup.
+
+
 ## Type-Safety
 
 It is possible to work with `CrnkClient` in a fully type-safe manner.

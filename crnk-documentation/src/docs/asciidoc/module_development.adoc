@@ -141,9 +141,28 @@ https://github.com/crnk-project/crnk-framework/tree/master/crnk-core/src/test/ja
 
 
 
+## Discovery of Modules by CrnkClient
 
+If a module does not need configuration, it can provide a `ClientModuleFactory`
+implementation and register it to the `java.util.ServiceLoader` by adding a
+'META-INF/services/io.crnk.client.module.ClientModuleFactory` file
+with the implementation class name. This lets `CrnkClient` discover
+the module automatically when calling `CrnkClient.findModules()`.
+An example looks like:
 
+[source]
+.ValidationClientModuleFactory
+----
+include::../../../../crnk-validation/src/main/java/io/crnk/validation/internal/ValidationClientModuleFactory.java[]
+----
 
+and
+
+[source]
+.META-INF/services/io.crnk.client.module.ClientModuleFactory
+----
+include::../../../../crnk-validation/src/main/resources/META-INF/services/io.crnk.client.module.ClientModuleFactory[]
+----
 
 
 
