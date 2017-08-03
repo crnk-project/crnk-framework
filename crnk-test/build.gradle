@@ -2,7 +2,6 @@ apply plugin: 'java'
 
 dependencies {
 	compile project(':crnk-core')
-	compile project(':crnk-rs')
 
 	compile group: 'junit', name: 'junit', version: '4.12'
 	compile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'

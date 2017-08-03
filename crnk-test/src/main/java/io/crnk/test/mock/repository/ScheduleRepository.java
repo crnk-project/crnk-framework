@@ -7,22 +7,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.rs.type.JsonApiMediaType;
 import io.crnk.test.mock.models.Schedule;
 
 // tag::annotation[]
 @Path("schedules")
-@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+@Produces(HttpHeaders.JSONAPI_CONTENT_TYPE)
 // end::annotation[]
 // tag::doc[]
 public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
-// end::doc[]
+	// end::doc[]
 
 	// tag::services[]
 	@GET
