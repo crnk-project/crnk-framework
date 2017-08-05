@@ -27,7 +27,6 @@ import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
-import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
 import io.crnk.jpa.query.querydsl.QuerydslRepositoryFilter;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
@@ -133,7 +132,9 @@ public class JpaModule implements Module {
 		this.emFactory = emFactory;
 		this.em = em;
 		this.transactionRunner = transactionRunner;
-		setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+
+		QueryFactoryDiscovery queryFactoryDiscovery = new QueryFactoryDiscovery();
+		setQueryFactory(queryFactoryDiscovery.discoverDefaultFactory());
 
 		if (emFactory != null) {
 			Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
