@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+	  "outDir": "build/npm-test",
+    "module": "commonjs",
+    "target": "es5",
+    "baseUrl": "",
+    "noImplicitAny" : "false",
+    "types": [
+      "jasmine",
+      "node"
+    ]
+  },
+  "files": [
+    "src/test/typescript/test.ts"
+  ],
+  "include": [
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
+}

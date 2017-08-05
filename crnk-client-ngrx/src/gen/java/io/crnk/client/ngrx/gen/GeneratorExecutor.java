@@ -26,7 +26,7 @@ public class GeneratorExecutor {
 		config.getNpm().setPackageName("@crnk/ngrx");
 		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/ngrx");
 
-		File outputDir = new File("src/typescript");
+		File outputDir = new File("src/main/typescript");
 
 		MetaModule metaModule = MetaModule.create();
 		metaModule.addMetaProvider(new ResourceMetaProvider());

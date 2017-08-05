@@ -15,7 +15,7 @@
 		"postbuild": "npm run clean:post",
 		"test:unit": "npm run karma",
 		"test:unit:watch": "npm run karma:watch",
-		"test": "npm run test:unit && npm run lint:lib && npm run coveralls"
+		"test": "npm run test:unit && npm run lint && npm run coveralls"
 	},
 	"main": "./index.js",
 	"types": "./index.d.ts",
@@ -49,6 +49,22 @@
 		"rimraf": "2.5.4",
 		"@types/lodash": "4.14.61",
 		"@types/node": "6.0.41",
+		"coveralls": "2.11.15",
+		"tslint": "4.4.2",
+
+		"jasmine-core": "~2.6.2",
+		"jasmine-reporters": "^2.2.1",
+		"jasmine-spec-reporter": "~4.1.0",
+		"karma": "~1.7.0",
+		"karma-chrome-launcher": "~2.1.1",
+		"karma-cli": "~1.0.1",
+		"karma-coverage-istanbul-reporter": "^1.2.1",
+		"karma-firefox-launcher": "^1.0.1",
+		"karma-jasmine": "~1.1.0",
+		"karma-jasmine-html-reporter": "^0.2.2",
+		"karma-junit-reporter": "^1.2.0",
+
 		"@types/source-map": "0.1.26"
+
 	}
 }
