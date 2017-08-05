@@ -19,6 +19,7 @@ import io.crnk.client.internal.proxy.ClientProxyFactoryContext;
 import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.module.ClientModule;
+import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
@@ -57,7 +58,9 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -115,6 +118,21 @@ public class CrnkClient {
 
 		documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, null);
 		setProxyFactory(new BasicProxyFactory());
+	}
+
+	/**
+	 * Finds and registers modules on the classpath trough the use of java.util.ServiceLoader.
+	 * Each module can register itself for lookup by registering a ClientModuleFactory.
+	 */
+	public void findModules() {
+		ServiceLoader<ClientModuleFactory> loader = ServiceLoader.load(ClientModuleFactory.class);
+
+		Iterator<ClientModuleFactory> iterator = loader.iterator();
+		while (iterator.hasNext()) {
+			ClientModuleFactory factory = iterator.next();
+			Module module = factory.create();
+			addModule(module);
+		}
 	}
 
 	public void setProxyFactory(ClientProxyFactory proxyFactory) {

@@ -7,6 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
+import io.crnk.client.module.TestModule;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
