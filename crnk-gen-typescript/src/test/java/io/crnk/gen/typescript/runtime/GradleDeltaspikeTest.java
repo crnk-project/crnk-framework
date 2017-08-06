@@ -27,7 +27,7 @@ public class GradleDeltaspikeTest {
 		saveFile("test_build.gradle", "build.gradle");
 		saveFile("test_settings.gradle", "settings.gradle");
 		saveFile("META-INF/beans.xml", "src/main/resources/META-INF/beans.xml");
-		saveFile("TestModuleProducer.java", "src/main/java/io/crnk/gen/typescript/TestModuleProducer.java");
+		saveFile("TestModuleProducer.template", "src/main/java/io/crnk/gen/typescript/TestModuleProducer.java");
 
 		GradleRunner runner = GradleRunner.create();
 		runner = runner.withPluginClasspath();

@@ -14,6 +14,7 @@ buildscript {
 		classpath 'org.ajoberstar:gradle-git-publish:0.2.1'
 		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
+		classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
 	}
 }
 
@@ -46,6 +47,8 @@ if (JavaVersion.current().isJava8Compatible()) {
 
 gradle.beforeProject { Project project ->
 	project.with {
+		apply plugin: "eclipse"
+	
 		apply plugin: 'maven'
 
 		def docs = project.name == 'crnk-documentation'
