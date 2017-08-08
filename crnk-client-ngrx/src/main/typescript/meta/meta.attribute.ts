@@ -1,8 +1,8 @@
-import {BeanPath, BooleanExpression, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, BooleanExpression, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaAttribute {
 	export interface Relationships extends MetaElement.Relationships {
@@ -11,18 +11,18 @@ export module MetaAttribute {
 		oppositeAttribute?: TypedOneResourceRelationship<MetaAttribute>;
 	}
 	export interface Attributes extends MetaElement.Attributes {
-		association?: boolean;
-		derived?: boolean;
-		lazy?: boolean;
-		version?: boolean;
-		primaryKeyAttribute?: boolean;
-		sortable?: boolean;
-		filterable?: boolean;
-		insertable?: boolean;
-		updatable?: boolean;
-		lob?: boolean;
-		nullable?: boolean;
-		cascaded?: boolean;
+		association?;
+		derived?;
+		lazy?;
+		version?;
+		primaryKeyAttribute?;
+		sortable?;
+		filterable?;
+		insertable?;
+		updatable?;
+		lob?;
+		nullable?;
+		cascaded?;
 	}
 }
 export interface MetaAttribute extends MetaElement {
@@ -36,7 +36,7 @@ export interface MetaAttributeListResult extends ManyQueryResult {
 	data?: Array<MetaAttribute>;
 }
 export class QMetaAttribute extends BeanPath<MetaAttribute> {
-	metaId: string = 'io.crnk.meta.MetaAttribute';
+	metaId = 'io.crnk.meta.MetaAttribute';
 	relationships: QMetaAttribute.QRelationships = new QMetaAttribute.QRelationships(this, 'relationships');
 	attributes: QMetaAttribute.QAttributes = new QMetaAttribute.QAttributes(this, 'attributes');
 }

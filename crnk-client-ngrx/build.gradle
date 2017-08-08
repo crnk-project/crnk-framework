@@ -104,6 +104,34 @@ task npmRunBuild(type: NpmTask) {
 	}
 }
 
+task testKarma(type: NpmTask) {
+	group 'verification'
+	dependsOn npmRunBuild
+
+	npmCommand = ['run', 'test:unit']
+	group = 'node'
+}
+
+task lint(type: NpmTask) {
+	group 'verification'
+	dependsOn npmRunBuild
+
+	npmCommand = ['run', 'lint']
+	group = 'node'
+}
+
+task coveralls(type: NpmTask) {
+	group 'verification'
+	dependsOn npmRunBuild
+
+	npmCommand = ['run', 'coveralls']
+	group = 'node'
+}
+
+check.dependsOn testKarma
+check.dependsOn lint
+// TODO check.dependsOn coveralls
+
 task npmCacheVerify(type: NpmTask) {
 	npmCommand = ['cache', 'verify']
 	group = 'node'

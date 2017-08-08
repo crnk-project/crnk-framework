@@ -1,6 +1,6 @@
-import {BeanPath} from '../expression/'
-import {MetaDataObject, QMetaDataObject} from './meta.data.object'
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces'
+import {BeanPath} from '../expression/';
+import {MetaDataObject, QMetaDataObject} from './meta.data.object';
+import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
 
 export interface MetaInterface extends MetaDataObject {
 }
@@ -11,7 +11,7 @@ export interface MetaInterfaceListResult extends ManyQueryResult {
 	data?: Array<MetaInterface>;
 }
 export class QMetaInterface extends BeanPath<MetaInterface> {
-	metaId: string = 'io.crnk.meta.MetaInterface';
+	metaId = 'io.crnk.meta.MetaInterface';
 	relationships: QMetaDataObject.QRelationships = new QMetaDataObject.QRelationships(this, 'relationships');
 	attributes: QMetaDataObject.QAttributes = new QMetaDataObject.QAttributes(this, 'attributes');
 }

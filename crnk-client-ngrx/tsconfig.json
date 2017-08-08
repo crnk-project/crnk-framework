@@ -10,7 +10,7 @@
 		"moduleResolution": "node",
 		"declaration": true,
 		"strictNullChecks": false,
-		"baseUrl": "./src/typescript",
+		"baseUrl": ".",
 		"types": [
 			"lodash",
 			"node",

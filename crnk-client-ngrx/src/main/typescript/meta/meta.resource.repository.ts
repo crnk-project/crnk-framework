@@ -1,9 +1,9 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaDataObject, QMetaDataObject} from './meta.data.object'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaResource, QMetaResource} from './meta.resource'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaDataObject, QMetaDataObject} from './meta.data.object';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaResource, QMetaResource} from './meta.resource';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceRepository {
 	export interface Relationships extends MetaElement.Relationships {
@@ -26,7 +26,7 @@ export interface MetaResourceRepositoryListResult extends ManyQueryResult {
 	data?: Array<MetaResourceRepository>;
 }
 export class QMetaResourceRepository extends BeanPath<MetaResourceRepository> {
-	metaId: string = 'io.crnk.meta.resource.MetaResourceRepository';
+	metaId = 'io.crnk.meta.resource.MetaResourceRepository';
 	relationships: QMetaResourceRepository.QRelationships = new QMetaResourceRepository.QRelationships(this, 'relationships');
 	attributes: QMetaResourceRepository.QAttributes = new QMetaResourceRepository.QAttributes(this, 'attributes');
 }

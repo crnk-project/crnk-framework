@@ -1,4 +1,4 @@
-import {ResourceIdentifier, StoreResource, OneResourceRelationship, ManyResourceRelationship} from 'ngrx-json-api';
+import {ManyResourceRelationship, OneResourceRelationship, ResourceIdentifier, StoreResource} from 'ngrx-json-api';
 import {BeanPath, StringExpression} from '../expression';
 
 export interface TypedManyResourceRelationship<T extends StoreResource> extends ManyResourceRelationship {
@@ -25,8 +25,8 @@ export class QTypedOneResourceRelationship<Q extends BeanPath<T>, T extends Stor
 		super(parent, property);
 	}
 
-	public get reference(): Q{
-		if(this._reference == null){
+	public get reference(): Q {
+		if (this._reference == null) {
 			this._reference = new this._referenceType(null, 'data');
 			this._reference.parent = this;
 		}
@@ -43,8 +43,8 @@ export class QTypedManyResourceRelationship<Q extends BeanPath<T>, T extends Sto
 		super(parent, property);
 	}
 
-	public get reference(): Q{
-		if(this._reference == null){
+	public get reference(): Q {
+		if (this._reference == null) {
 			this._reference = new this._referenceType(null, 'data');
 			this._reference.parent = this;
 		}

@@ -67,60 +67,55 @@ export class OperationsEffects {
 	@Effect() applyResources$ = this.actions$
 		.ofType(OperationActionTypes.OPERATIONS_INIT)
 		.withLatestFrom(this.store.select(this.selectors.storeLocation), (ngrxstore: NgrxJsonApiStore) => {
-			try {
-				const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
-				if (pending.length === 0) {
-					return Observable.of(new ApiApplySuccessAction([]));
-				}
+			const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
+			if (pending.length === 0) {
+				return Observable.of(new ApiApplySuccessAction([]));
+			}
 
-				const operations: Array<Operation> = [];
-				for (const pendingChange of pending) {
-					operations.push(this.toOperation(pendingChange));
-				}
+			const operations: Array<Operation> = [];
+			for (const pendingChange of pending) {
+				operations.push(this.toOperation(pendingChange));
+			}
 
-				const requestOptions = new RequestOptions({
-					method: RequestMethod.Patch,
-					url: this.jsonApi.config.apiUrl + '/operations/',
-					body: JSON.stringify(operations)
+			const requestOptions = new RequestOptions({
+				method: RequestMethod.Patch,
+				url: this.jsonApi.config.apiUrl + '/operations/',
+				body: JSON.stringify(operations)
+			});
+
+			const request = new Request(requestOptions.merge({
+				headers: this.headers
+			}));
+
+			return this.http.request(request)
+				.map(res => res.json() as Array<OperationResponse>)
+				.map(operationResponses => {
+					const actions: Array<Action> = [];
+					for (const index of Object.keys(operationResponses)) {
+						const operationResponse = operationResponses[index];
+						const pendingChange = pending[index];
+						actions.push(this.toResponseAction(pendingChange, operationResponse));
+					}
+					return this.toApplyAction(actions);
+				})
+				.catch(errorResponse => {
+					// transform http to json api error
+					const error: ResourceError = {
+						status: errorResponse.status.toString(),
+						code: errorResponse.statusText
+					};
+					const errors: Array<ResourceError> = [error];
+
+					const actions: Array<Action> = [];
+					for (const pendingChange of pending) {
+						const operationResponse: OperationResponse = {
+							errors: errors,
+							status: 500
+						} as OperationResponse;
+						actions.push(this.toResponseAction(pendingChange, operationResponse));
+					}
+					return Observable.of(new ApiApplyFailAction(actions));
 				});
-
-				const request = new Request(requestOptions.merge({
-					headers: this.headers
-				}));
-
-				return this.http.request(request)
-					.map(res => res.json() as Array<OperationResponse>)
-					.map(operationResponses => {
-						const actions: Array<Action> = [];
-						for (const index of Object.keys(operationResponses)) {
-							const operationResponse = operationResponses[index];
-							const pendingChange = pending[index];
-							actions.push(this.toResponseAction(pendingChange, operationResponse));
-						}
-						return this.toApplyAction(actions);
-					})
-					.catch(errorResponse => {
-						// transform http to json api error
-						const error: ResourceError = {
-							status: errorResponse.status.toString(),
-							code: errorResponse.statusText
-						};
-						const errors: Array<ResourceError> = [error];
-
-						const actions: Array<Action> = [];
-						for (const pendingChange of pending) {
-							const operationResponse: OperationResponse = {
-								errors: errors,
-								status: 500
-							} as OperationResponse;
-							actions.push(this.toResponseAction(pendingChange, operationResponse));
-						}
-						return Observable.of(new ApiApplyFailAction(actions));
-					});
-			}
-			catch (e) {
-				console.log(e); // TODO
-			}
 		});
 
 

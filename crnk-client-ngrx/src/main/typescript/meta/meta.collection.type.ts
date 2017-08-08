@@ -1,8 +1,8 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaCollectionType {
 	export interface Relationships extends MetaType.Relationships {
@@ -22,7 +22,7 @@ export interface MetaCollectionTypeListResult extends ManyQueryResult {
 	data?: Array<MetaCollectionType>;
 }
 export class QMetaCollectionType extends BeanPath<MetaCollectionType> {
-	metaId: string = 'io.crnk.meta.MetaCollectionType';
+	metaId = 'io.crnk.meta.MetaCollectionType';
 	relationships: QMetaCollectionType.QRelationships = new QMetaCollectionType.QRelationships(this, 'relationships');
 	attributes: QMetaCollectionType.QAttributes = new QMetaCollectionType.QAttributes(this, 'attributes');
 }

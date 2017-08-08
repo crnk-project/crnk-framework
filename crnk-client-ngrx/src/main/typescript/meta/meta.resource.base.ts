@@ -1,14 +1,14 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaAttribute, QMetaAttribute} from './meta.attribute'
-import {MetaDataObject, QMetaDataObject} from './meta.data.object'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaInterface, QMetaInterface} from './meta.interface'
-import {MetaJsonObject} from './meta.json.object'
-import {MetaKey, QMetaKey} from './meta.key'
-import {MetaPrimaryKey, QMetaPrimaryKey} from './meta.primary.key'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaAttribute, QMetaAttribute} from './meta.attribute';
+import {MetaDataObject, QMetaDataObject} from './meta.data.object';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaInterface, QMetaInterface} from './meta.interface';
+import {MetaJsonObject} from './meta.json.object';
+import {MetaKey, QMetaKey} from './meta.key';
+import {MetaPrimaryKey, QMetaPrimaryKey} from './meta.primary.key';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceBase {
 	export interface Relationships extends MetaJsonObject.Relationships {
@@ -28,7 +28,7 @@ export interface MetaResourceBaseListResult extends ManyQueryResult {
 	data?: Array<MetaResourceBase>;
 }
 export class QMetaResourceBase extends BeanPath<MetaResourceBase> {
-	metaId: string = 'io.crnk.meta.resource.MetaResourceBase';
+	metaId = 'io.crnk.meta.resource.MetaResourceBase';
 	relationships: QMetaResourceBase.QRelationships = new QMetaResourceBase.QRelationships(this, 'relationships');
 	attributes: QMetaResourceBase.QAttributes = new QMetaResourceBase.QAttributes(this, 'attributes');
 }

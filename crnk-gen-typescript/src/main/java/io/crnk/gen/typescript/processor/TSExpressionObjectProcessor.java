@@ -65,10 +65,6 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				queryType.addDeclaredMember(metaField);
 			}
 
-			if (interfaceType.getName().equals("MetaKey")) {
-				System.out.println("Hallo");
-			}
-
 			if (parent instanceof TSSource) {
 
 				TSModule module = TypescriptUtils.getModule(parent, queryType.getName(), -1, false);

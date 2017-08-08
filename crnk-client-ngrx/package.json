@@ -11,7 +11,7 @@
 		"build": "npm run build:js",
 		"karma": "karma start",
 		"karma:watch": "karma start --no-single-run",
-		"lint": "tslint src/**/*.ts",
+		"lint": "tslint src/main/typescript/**/*.ts",
 		"postbuild": "npm run clean:post",
 		"test:unit": "npm run karma",
 		"test:unit:watch": "npm run karma:watch",
@@ -50,8 +50,6 @@
 		"@types/lodash": "4.14.61",
 		"@types/node": "6.0.41",
 		"coveralls": "2.11.15",
-		"tslint": "4.4.2",
-
 		"jasmine-core": "~2.6.2",
 		"jasmine-reporters": "^2.2.1",
 		"jasmine-spec-reporter": "~4.1.0",
@@ -63,8 +61,8 @@
 		"karma-jasmine": "~1.1.0",
 		"karma-jasmine-html-reporter": "^0.2.2",
 		"karma-junit-reporter": "^1.2.0",
-
-		"@types/source-map": "0.1.26"
-
+		"@types/source-map": "0.1.26",
+		"codelyzer": "^3.0.1",
+		"tslint": "4.4.2"
 	}
 }

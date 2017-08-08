@@ -1,7 +1,7 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaElement, QMetaElement} from './meta.element'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaElement, QMetaElement} from './meta.element';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaLiteral {
 	export interface Relationships extends MetaElement.Relationships {
@@ -21,7 +21,7 @@ export interface MetaLiteralListResult extends ManyQueryResult {
 	data?: Array<MetaLiteral>;
 }
 export class QMetaLiteral extends BeanPath<MetaLiteral> {
-	metaId: string = 'io.crnk.meta.MetaLiteral';
+	metaId = 'io.crnk.meta.MetaLiteral';
 	relationships: QMetaLiteral.QRelationships = new QMetaLiteral.QRelationships(this, 'relationships');
 	attributes: QMetaLiteral.QAttributes = new QMetaLiteral.QAttributes(this, 'attributes');
 }

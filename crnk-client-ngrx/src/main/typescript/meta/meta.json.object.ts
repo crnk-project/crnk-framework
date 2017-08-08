@@ -1,13 +1,13 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaAttribute, QMetaAttribute} from './meta.attribute'
-import {MetaDataObject, QMetaDataObject} from './meta.data.object'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaInterface, QMetaInterface} from './meta.interface'
-import {MetaKey, QMetaKey} from './meta.key'
-import {MetaPrimaryKey, QMetaPrimaryKey} from './meta.primary.key'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaAttribute, QMetaAttribute} from './meta.attribute';
+import {MetaDataObject, QMetaDataObject} from './meta.data.object';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaInterface, QMetaInterface} from './meta.interface';
+import {MetaKey, QMetaKey} from './meta.key';
+import {MetaPrimaryKey, QMetaPrimaryKey} from './meta.primary.key';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaJsonObject {
 	export interface Relationships extends MetaDataObject.Relationships {
@@ -27,7 +27,7 @@ export interface MetaJsonObjectListResult extends ManyQueryResult {
 	data?: Array<MetaJsonObject>;
 }
 export class QMetaJsonObject extends BeanPath<MetaJsonObject> {
-	metaId: string = 'io.crnk.meta.resource.MetaJsonObject';
+	metaId = 'io.crnk.meta.resource.MetaJsonObject';
 	relationships: QMetaJsonObject.QRelationships = new QMetaJsonObject.QRelationships(this, 'relationships');
 	attributes: QMetaJsonObject.QAttributes = new QMetaJsonObject.QAttributes(this, 'attributes');
 }

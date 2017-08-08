@@ -1,44 +1,44 @@
 import {
-	Optional,
-	Self,
+	Directive,
+	ElementRef,
+	EventEmitter,
+	forwardRef,
 	Inject,
 	Input,
-	Directive,
-	SimpleChanges,
-	EventEmitter,
 	OnChanges,
 	OnDestroy,
+	Optional,
 	Output,
-	forwardRef,
-	ElementRef,
-	Renderer
+	Renderer,
+	Self,
+	SimpleChanges
 } from "@angular/core";
 import {
-	ControlContainer,
-	NgForm,
-	NG_VALUE_ACCESSOR,
-	NG_VALIDATORS,
-	NG_ASYNC_VALIDATORS,
-	Validator,
-	ControlValueAccessor,
-	AsyncValidatorFn,
-	ValidatorFn,
-	FormControl,
-	NgModelGroup,
 	AbstractFormGroupDirective,
+	AsyncValidatorFn,
+	ControlContainer,
+	ControlValueAccessor,
+	DefaultValueAccessor,
+	FormControl,
+	NG_ASYNC_VALIDATORS,
+	NG_VALIDATORS,
+	NG_VALUE_ACCESSOR,
 	NgControl,
-	DefaultValueAccessor
+	NgForm,
+	NgModelGroup,
+	Validator,
+	ValidatorFn
 } from "@angular/forms";
 import {
+	ArbControl,
 	composeAsyncValidators,
-	isPropertyUpdated,
 	composeValidators,
 	controlPath,
+	isPropertyUpdated,
 	selectValueAccessor,
-	TemplateDrivenErrors,
-	ArbControl
+	TemplateDrivenErrors
 } from "./crnk.expression.form.utils";
-import {Path, ExpressionAccessor} from "../crnk.expression";
+import {ExpressionAccessor, Path} from "../crnk.expression";
 
 
 const resolvedPromise = Promise.resolve(null);
@@ -67,7 +67,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 		this._pathModel = pathModel;
 
 		const expressionAccessor = this.valueAccessor as any as ExpressionAccessor;
-		if(!expressionAccessor){
+		if (!expressionAccessor) {
 			throw new Error("no value accessor found");
 		}
 		if (expressionAccessor.setExpression) {
@@ -88,8 +88,8 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 
 	name: string;
 
-	@Input('disabled') isDisabled: boolean = false;
-	@Output('arbFormExpressionChange') update = new EventEmitter();
+	@Input('disabled') disabled: false;
+	@Output('arbFormExpressionChange') arbFormExpressionChange = new EventEmitter();
 
 	/**
 	 * NOTE that in contract to NgModel we do not use @Host for parent. This would enforce that the
@@ -99,9 +99,9 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 	 * dependency (there is no provider for children only, but itself as well).
 	 */
 	constructor(@Optional() parent: ControlContainer,
-		@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator|ValidatorFn>,
-		@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator|AsyncValidatorFn>,
-		@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+				@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator | ValidatorFn>,
+				@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator | AsyncValidatorFn>,
+				@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
 		super();
 		this._parent = parent;
 		this._rawValidators = validators || [];
@@ -114,7 +114,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 		if (!this._registered) {
 			this._setUpControl();
 		}
-		if ('isDisabled' in changes) {
+		if ('disabled' in changes) {
 			this._updateDisabled(changes);
 		}
 
@@ -153,7 +153,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 
 	viewToModelUpdate(newValue: any): void {
 		this.viewModel = newValue;
-		this.update.emit(newValue);
+		this.arbFormExpressionChange.emit(newValue);
 	}
 
 	private _setUpControl(): void {
@@ -193,16 +193,16 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 	}
 
 	private _updateDisabled(changes: SimpleChanges) {
-		const disabledValue = changes['isDisabled'].currentValue;
+		const disabledValue = changes['disabled'].currentValue;
 
-		const isDisabled =
+		const disabled =
 			disabledValue === '' || (disabledValue && disabledValue !== 'false');
 
 		resolvedPromise.then(() => {
-			if (isDisabled && !this.control.disabled) {
+			if (disabled && !this.control.disabled) {
 				this.control.disable();
 			}
-			else if (!isDisabled && this.control.disabled) {
+			else if (!disabled && this.control.disabled) {
 				this.control.enable();
 			}
 		});
@@ -211,7 +211,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 
 export const DEFAULT_VALUE_ACCESSOR: any = {
 	provide: NG_VALUE_ACCESSOR,
-	useExisting: forwardRef(() => PathDefaultValueAccessor),
+	useExisting: forwardRef(() => PathDefaultValueAccessorDirective),
 	multi: true
 };
 
@@ -220,7 +220,7 @@ export const DEFAULT_VALUE_ACCESSOR: any = {
 	host: {'(input)': 'onChange($event.target.value)', '(blur)': 'onTouched()'},
 	providers: [DEFAULT_VALUE_ACCESSOR]
 })
-export class PathDefaultValueAccessor extends DefaultValueAccessor {
+export class PathDefaultValueAccessorDirective extends DefaultValueAccessor {
 
 	constructor(_renderer: Renderer, _elementRef: ElementRef) {
 		super(_renderer, _elementRef, false);
@@ -263,8 +263,8 @@ function setUpFormControl(control: FormControl, dir: NgControl): void {
 
 	if (dir.valueAccessor !.setDisabledState) {
 		control.registerOnDisabledChange(
-			(isDisabled: boolean) => {
-				dir.valueAccessor !.setDisabledState !(isDisabled);
+			(disabled: boolean) => {
+				dir.valueAccessor !.setDisabledState !(disabled);
 			});
 	}
 
@@ -312,8 +312,8 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 
 	_registered = false;
 
-	@Input('disabled') isDisabled: boolean;
-	@Output('arbExpressionChange') update = new EventEmitter();
+	@Input('disabled') disabled: boolean;
+	@Output('arbExpressionChange') arbExpressionChange = new EventEmitter();
 
 	/**
 	 * NOTE that in contract to NgModel we do not use @Host for parent. This would enforce that the
@@ -322,9 +322,9 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 	 * to expose an existing ControlContainer again with @Component.providers as it would lead to a circular
 	 * dependency (there is no provider for children only, but itself as well).
 	 */
-	constructor(@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator|ValidatorFn>,
-		@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator|AsyncValidatorFn>,
-		@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+	constructor(@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator | ValidatorFn>,
+				@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator | AsyncValidatorFn>,
+				@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
 		super();
 		this._rawValidators = validators || [];
 		this._rawAsyncValidators = asyncValidators || [];
@@ -337,7 +337,7 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 			this._setUpControl();
 		}
 
-		if ('isDisabled' in changes) {
+		if ('disabled' in changes) {
 			this._updateDisabled(changes);
 		}
 
@@ -376,7 +376,7 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 
 	viewToModelUpdate(newValue: any): void {
 		this.viewModel = newValue;
-		this.update.emit(newValue);
+		this.arbExpressionChange.emit(newValue);
 	}
 
 	private _updateValue(value: any): void {
@@ -387,16 +387,16 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 	}
 
 	private _updateDisabled(changes: SimpleChanges) {
-		const disabledValue = changes['isDisabled'].currentValue;
+		const disabledValue = changes['disabled'].currentValue;
 
-		const isDisabled =
+		const disabled =
 			disabledValue === '' || (disabledValue && disabledValue !== 'false');
 
 		resolvedPromise.then(() => {
-			if (isDisabled && !this.control.disabled) {
+			if (disabled && !this.control.disabled) {
 				this.control.disable();
 			}
-			else if (!isDisabled && this.control.disabled) {
+			else if (!disabled && this.control.disabled) {
 				this.control.enable();
 			}
 		});

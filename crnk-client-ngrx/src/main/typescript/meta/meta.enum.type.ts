@@ -1,8 +1,8 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaEnumType {
 	export interface Relationships extends MetaType.Relationships {
@@ -22,7 +22,7 @@ export interface MetaEnumTypeListResult extends ManyQueryResult {
 	data?: Array<MetaEnumType>;
 }
 export class QMetaEnumType extends BeanPath<MetaEnumType> {
-	metaId: string = 'io.crnk.meta.MetaEnumType';
+	metaId = 'io.crnk.meta.MetaEnumType';
 	relationships: QMetaEnumType.QRelationships = new QMetaEnumType.QRelationships(this, 'relationships');
 	attributes: QMetaEnumType.QAttributes = new QMetaEnumType.QAttributes(this, 'attributes');
 }

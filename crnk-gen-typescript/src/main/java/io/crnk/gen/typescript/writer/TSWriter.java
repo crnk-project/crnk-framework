@@ -136,8 +136,11 @@ public class TSWriter implements TSVisitor {
 		if (element.isNullable()) {
 			builder.append("?");
 		}
-		builder.append(": ");
-		visitReference(element.getType());
+		if (!(element.getType() instanceof TSPrimitiveType)) {
+			// primitive types can be trivially inferred and break tslint otherwise
+			builder.append(": ");
+			visitReference(element.getType());
+		}
 		if (element.getInitializer() != null) {
 			builder.append(" = ");
 			builder.append(element.getInitializer());
@@ -271,7 +274,7 @@ public class TSWriter implements TSVisitor {
 		}
 		builder.append("} from '");
 		builder.append(importElement.getPath());
-		builder.append("'");
+		builder.append("';");
 		builder.append(codeStyle.getLineSeparator());
 	}
 

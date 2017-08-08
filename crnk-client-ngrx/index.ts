@@ -1,2 +1,2 @@
-export * from './src/typescript';
+export * from './src/main/typescript';
 

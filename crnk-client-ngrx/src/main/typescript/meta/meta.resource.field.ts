@@ -1,17 +1,17 @@
-import {BeanPath, BooleanExpression, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaAttribute, QMetaAttribute} from './meta.attribute'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaType, QMetaType} from './meta.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, BooleanExpression, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaAttribute, QMetaAttribute} from './meta.attribute';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaType, QMetaType} from './meta.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceField {
 	export interface Relationships extends MetaAttribute.Relationships {
 		[key: string]: ResourceRelationship;
 	}
 	export interface Attributes extends MetaAttribute.Attributes {
-		meta?: boolean;
-		links?: boolean;
+		meta?;
+		links?;
 	}
 }
 export interface MetaResourceField extends MetaAttribute {
@@ -25,7 +25,7 @@ export interface MetaResourceFieldListResult extends ManyQueryResult {
 	data?: Array<MetaResourceField>;
 }
 export class QMetaResourceField extends BeanPath<MetaResourceField> {
-	metaId: string = 'io.crnk.meta.resource.MetaResourceField';
+	metaId = 'io.crnk.meta.resource.MetaResourceField';
 	relationships: QMetaResourceField.QRelationships = new QMetaResourceField.QRelationships(this, 'relationships');
 	attributes: QMetaResourceField.QAttributes = new QMetaResourceField.QAttributes(this, 'attributes');
 }

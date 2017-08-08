@@ -8,7 +8,7 @@ import 'rxjs/add/operator/filter';
 import {ResourceIdentifier, StoreResource, Query, QueryParams, ResourceError, QueryResult} from 'ngrx-json-api';
 
 import * as _ from 'lodash';
-import {Observable} from 'rxjs';
+import {Observable} from 'rxjs/Observable';
 
 
 export const waitWhileLoading = function () {

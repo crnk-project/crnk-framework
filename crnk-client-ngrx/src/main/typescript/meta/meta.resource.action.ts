@@ -1,8 +1,8 @@
-import {BeanPath, StringExpression} from '../expression/'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/'
-import {MetaElement, QMetaElement} from './meta.element'
-import {MetaRepositoryActionType} from './meta.repository.action.type'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {BeanPath, StringExpression} from '../expression/';
+import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
+import {MetaElement, QMetaElement} from './meta.element';
+import {MetaRepositoryActionType} from './meta.repository.action.type';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceAction {
 	export interface Relationships extends MetaElement.Relationships {
@@ -23,7 +23,7 @@ export interface MetaResourceActionListResult extends ManyQueryResult {
 	data?: Array<MetaResourceAction>;
 }
 export class QMetaResourceAction extends BeanPath<MetaResourceAction> {
-	metaId: string = 'io.crnk.meta.resource.MetaResourceAction';
+	metaId = 'io.crnk.meta.resource.MetaResourceAction';
 	relationships: QMetaResourceAction.QRelationships = new QMetaResourceAction.QRelationships(this, 'relationships');
 	attributes: QMetaResourceAction.QAttributes = new QMetaResourceAction.QAttributes(this, 'attributes');
 }
