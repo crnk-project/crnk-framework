@@ -1,16 +1,21 @@
 package io.crnk.meta.provider.resource;
 
-import io.crnk.meta.internal.JsonObjectMetaProvider;
-import io.crnk.meta.internal.ResourceMetaProviderImpl;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.resource.*;
-import io.crnk.meta.provider.MetaProvider;
-import io.crnk.meta.provider.MetaProviderBase;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.crnk.meta.internal.JsonObjectMetaProvider;
+import io.crnk.meta.internal.ResourceMetaProviderImpl;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
+import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
+import io.crnk.meta.provider.MetaProvider;
+import io.crnk.meta.provider.MetaProviderBase;
 
 public class ResourceMetaProvider extends MetaProviderBase {
 
@@ -31,6 +36,7 @@ public class ResourceMetaProvider extends MetaProviderBase {
 
 	@Override
 	public Set<Class<? extends MetaElement>> getMetaTypes() {
-		return new HashSet<>(Arrays.asList(MetaResource.class, MetaJsonObject.class, MetaResourceField.class, MetaResourceRepository.class, MetaResourceAction.class));
+		return new HashSet<>(Arrays.asList(MetaResourceBase.class, MetaResource.class, MetaJsonObject.class, MetaResourceField
+				.class, MetaResourceRepository.class, MetaResourceAction.class));
 	}
 }

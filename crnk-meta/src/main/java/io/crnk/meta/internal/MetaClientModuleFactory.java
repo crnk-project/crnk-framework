@@ -7,6 +7,6 @@ public class MetaClientModuleFactory implements ClientModuleFactory {
 
 	@Override
 	public MetaModule create() {
-		return MetaModule.create();
+		return MetaModule.createClientModule();
 	}
 }

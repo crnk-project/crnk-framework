@@ -1,11 +1,14 @@
 package io.crnk.gen.typescript.internal;
 
+import java.io.File;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.gen.typescript.TSGeneratorConfiguration;
 import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
 import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.meta.MetaModule;
+import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.gradle.api.Project;
@@ -14,8 +17,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
-
-import java.io.File;
 
 public class TSGeneratorTest {
 
@@ -31,8 +32,9 @@ public class TSGeneratorTest {
 		TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
 		File outputDir = testProjectDir.getRoot();
 
-		MetaModule metaModule = MetaModule.create();
-		metaModule.addMetaProvider(new ResourceMetaProvider());
+		MetaModuleConfig metaConfig = new MetaModuleConfig();
+		metaConfig.addMetaProvider(new ResourceMetaProvider());
+		MetaModule metaModule = MetaModule.createServerModule(metaConfig);
 
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscovery(new EmptyServiceDiscovery());

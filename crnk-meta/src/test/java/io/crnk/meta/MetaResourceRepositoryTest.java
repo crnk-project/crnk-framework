@@ -3,6 +3,7 @@ package io.crnk.meta;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.utils.Supplier;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -28,7 +29,12 @@ public class MetaResourceRepositoryTest extends AbstractMetaTest {
 		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
 		lookup.initialize();
 
-		repo = new MetaResourceRepositoryImpl(lookup, MetaElement.class);
+		repo = new MetaResourceRepositoryImpl(new Supplier<MetaLookup>() {
+			@Override
+			public MetaLookup get() {
+				return lookup;
+			}
+		}, MetaElement.class);
 	}
 
 	@Test(expected = ResourceNotFoundException.class)

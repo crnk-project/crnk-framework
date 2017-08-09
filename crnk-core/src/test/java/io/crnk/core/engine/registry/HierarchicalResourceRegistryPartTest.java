@@ -1,13 +1,13 @@
 package io.crnk.core.engine.registry;
 
 
+import java.util.Collection;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.module.TestResource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Collection;
 
 public class HierarchicalResourceRegistryPartTest {
 
@@ -51,8 +51,11 @@ public class HierarchicalResourceRegistryPartTest {
 
 	@Test
 	public void testChildPart() {
+		ResourceRegistryPartListener listener = Mockito.mock(ResourceRegistryPartListener.class);
+
 		HierarchicalResourceRegistryPart part = new HierarchicalResourceRegistryPart();
 		part.putPart("child", new DefaultResourceRegistryPart());
+		part.addListener(listener);
 
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("child/test");
@@ -61,6 +64,7 @@ public class HierarchicalResourceRegistryPartTest {
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
 		RegistryEntry savedEntry = part.addEntry(entry);
 		Assert.assertSame(savedEntry, entry);
+		Mockito.verify(listener, Mockito.times(1)).onChanged(Mockito.any(ResourceRegistryPartEvent.class));
 
 		Collection<RegistryEntry> resources = part.getResources();
 		Assert.assertEquals(1, resources.size());

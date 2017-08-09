@@ -32,4 +32,6 @@ public class ValidationModule implements Module {
 		context.addExceptionMapper(new ConstraintViolationExceptionMapper(context));
 		context.addExceptionMapper(new ValidationExceptionMapper());
 	}
+
+
 }

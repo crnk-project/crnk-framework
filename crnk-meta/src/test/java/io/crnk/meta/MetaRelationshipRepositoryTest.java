@@ -4,6 +4,7 @@ package io.crnk.meta;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.utils.Supplier;
 import io.crnk.meta.internal.MetaRelationshipRepository;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
@@ -33,7 +34,12 @@ public class MetaRelationshipRepositoryTest extends AbstractMetaTest {
 		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
 		lookup.initialize();
 
-		repo = new MetaRelationshipRepository(lookup, MetaElement.class, MetaElement.class);
+		repo = new MetaRelationshipRepository(new Supplier<MetaLookup>() {
+			@Override
+			public MetaLookup get() {
+				return lookup;
+			}
+		}, MetaElement.class, MetaElement.class);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

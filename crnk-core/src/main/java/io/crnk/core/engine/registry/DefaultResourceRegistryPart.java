@@ -1,24 +1,29 @@
 package io.crnk.core.engine.registry;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
 
 /**
  * Implements ResourceRegistryPart by maintaining a simple set of RegistryEntry in memory.
  */
-public class DefaultResourceRegistryPart implements ResourceRegistryPart {
+public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 
 	private final Logger logger = LoggerFactory.getLogger(ResourceRegistryImpl.class);
 
 	private final Map<String, RegistryEntry> resourcesByType;
 
 	private final Map<Class, RegistryEntry> resourcesByClass;
+
 
 	public DefaultResourceRegistryPart() {
 		this.resourcesByType = new HashMap<>();
@@ -34,6 +39,7 @@ public class DefaultResourceRegistryPart implements ResourceRegistryPart {
 		resourcesByClass.put(resourceClass, entry);
 		resourcesByType.put(resourceType, entry);
 		logger.debug("Added resource {} to ResourceRegistry", entry.getResourceInformation().getResourceType());
+		notifyChange();
 		return entry;
 	}
 

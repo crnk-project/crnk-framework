@@ -7,21 +7,24 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
 public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, String> {
 
-	private MetaLookup lookup;
 
-	public MetaResourceRepositoryImpl(MetaLookup lookup, Class<T> resourceClass) {
+	private final Supplier<MetaLookup> lookupSupplier;
+
+	public MetaResourceRepositoryImpl(Supplier<MetaLookup> lookupSupplier, Class<T> resourceClass) {
 		super(resourceClass);
-		this.lookup = lookup;
+		this.lookupSupplier = lookupSupplier;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public T findOne(String id, QuerySpec querySpec) {
+		MetaLookup lookup = lookupSupplier.get();
 		MetaElement metaElement = lookup.getMetaById().get(id);
 		Class<T> resourceClass = this.getResourceClass();
 		if (metaElement != null && resourceClass.isInstance(metaElement)) {
@@ -32,6 +35,7 @@ public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, Str
 
 	@Override
 	public ResourceList<T> findAll(QuerySpec querySpec) {
+		MetaLookup lookup = lookupSupplier.get();
 		Collection<T> values = filterByType(lookup.getMetaById().values());
 		return querySpec.apply(values);
 	}
