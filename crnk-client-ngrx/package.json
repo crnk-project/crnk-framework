@@ -20,7 +20,7 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "peerDependencies": {
-    "ngrx-json-api": ">=1.1.1-adn.1",
+    "ngrx-json-api": ">=1.1.1-adn.7",
     "lodash": ">=4.17.4"
   },
   "devDependencies": {
@@ -62,11 +62,11 @@
     "lodash": "4.17.4",
     "ncp": "2.0.0",
     "ngrx-json-api": "1.1.1-adn.7",
-    "primeng": "4.0.2",
+    "primeng": "^4.0.2",
     "rimraf": "2.5.4",
-    "rxjs": "5.2.0",
+    "rxjs": "5.3.0",
     "tslint": "4.4.2",
     "typescript": "2.2.2",
-    "zone.js": "0.8.4"
+    "zone.js": "0.8.8"
   }
 }

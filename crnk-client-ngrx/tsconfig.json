@@ -1,37 +1,16 @@
 {
+	"compileOnSave": false,
 	"compilerOptions": {
-		"target": "ES5",
-		"module": "commonjs",
-		"sourceMap": true,
-		"outDir": "build/npm",
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"removeComments": false,
-		"moduleResolution": "node",
-		"declaration": true,
-		"strictNullChecks": false,
-		"baseUrl": ".",
+		"target": "ES5",
+		"module": "commonjs",
 		"types": [
-			"lodash",
-			"node",
-			"source-map"
-		],
-		"lib": [
-			"dom",
-			"es6"
+			"jasmine",
+			"node"
 		]
 	},
-	"compileOnSave": false,
-	"atom": {
-		"rewriteTsconfig": false
-	},
-	"files": [
-		"index.ts"
-	],
 	"exclude": [
 		"node_modules"
-	],
-	"angularCompilerOptions": {
-		"strictMetadataEmit": true
-	}
+	]
 }
