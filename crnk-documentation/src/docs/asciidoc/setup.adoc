@@ -1,4 +1,6 @@
 
+anchor:setup[]
+
 # Setup
 
 There are two main, orthogonal aspects of Crnk that need configuration:

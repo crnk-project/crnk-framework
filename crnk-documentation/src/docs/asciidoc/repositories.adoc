@@ -396,16 +396,36 @@ provides a number of customization options:
 * `setMaxPageLimit(Long)`
 	Sets the maximum page limit allowed to be requested.
 
-* `setIgnoreUnknownAttributes(boolean)`
-	DefaultQuerySpecDeserializer validates all passed parameters against the domain model and fails
+* `setAllowUnknownAttributes(boolean)`
+	`DefaultQuerySpecDeserializer` validates all passed parameters against the domain model and fails
 	if one of the attributes is unknown. This flag allows to disable that check in case the should be necessary.
 
+* `setIgnoreParseExceptions(boolean)`
+	`DefaultQuerySpecDeserializer` attempts to convert all filter parameters to their proper type based on the
+	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
+	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
+	such values and provide them as `String` within `FilterSpec`.
+
+* `setEnforceDotPathSeparator(boolean)`
+	DefaultQuerySpecDeserializer by default supports by default two URL conventions:
+	 `http://.../resource?filter[task][project][name]=myProject` and
+	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
+	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
+	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
+	 there is danger of introducing ambiguity with resources and attributes are named equally.
+
+
 Note that appropriate page limits are vital to protect against denial-of-service attacks when working
-with large data sets!
+with large data sets! Such attacks may not be of malicious nature, but normals users using a browser
+and omitting to specify pagination parameters.
 
 `DefaultQuerySpecDeserializer` implements `QuerySpecDeserializer` and you may also provide your own
 implementation to further customize its behavior. The various integrations like `CrnkFeature` will
 allow to replace the implementation.
+
+One can get access to `DefaultQuerySpecDeserializer` trough the various integrations, e.g.
+`CrnkFeature.getQuerySpecDeserializer()`. For more information have a look at the
+<<setup,setup chapter>>.
 
 
 
