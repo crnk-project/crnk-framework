@@ -38,6 +38,13 @@ public class MetaModuleTest {
 		boot.boot();
 	}
 
+	@Test
+	public void checkDeprecatedMethods() {
+		metaModule.putIdMapping("package1", "other1");
+		metaModule.putIdMapping("package2", MetaResource.class, "other2");
+		Assert.assertEquals(2, metaModuleConfig.getIdMappings().size());
+	}
+
 
 	@Test
 	public void checkName() {

@@ -54,7 +54,11 @@ public class MetaModuleConfig {
 		return providers;
 	}
 
-	class IdMapping {
+	protected List<IdMapping> getIdMappings() {
+		return idMappings;
+	}
+
+	protected static class IdMapping {
 
 		private final String packageName;
 
