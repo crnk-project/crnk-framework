@@ -1,5 +1,6 @@
 package io.crnk.meta;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -200,9 +201,9 @@ public class MetaModule implements Module, InitializingModule {
 		metaClasses.add(MetaPrimitiveType.class);
 		metaClasses.add(MetaSetType.class);
 		metaClasses.add(MetaType.class);
-		for (MetaProvider provider : config.getProviders()) {
-			metaClasses.addAll(provider.getMetaTypes());
-		}
+
+		collectMetaClasses(metaClasses, config.getProviders());
+
 		context.addResourceLookup(new ResourceLookup() {
 
 			@SuppressWarnings("unchecked")
@@ -217,6 +218,13 @@ public class MetaModule implements Module, InitializingModule {
 			}
 		});
 		return metaClasses;
+	}
+
+	private void collectMetaClasses(Set<Class<? extends MetaElement>> metaClasses, Collection<MetaProvider> providers) {
+		for (MetaProvider provider : providers) {
+			metaClasses.addAll(provider.getMetaTypes());
+			collectMetaClasses(metaClasses, provider.getDependencies());
+		}
 	}
 
 	@Override

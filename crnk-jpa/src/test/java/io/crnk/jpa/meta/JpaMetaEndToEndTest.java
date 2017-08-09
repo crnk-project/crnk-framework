@@ -1,9 +1,16 @@
 package io.crnk.jpa.meta;
 
+import java.io.Serializable;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.AbstractJpaJerseyTest;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
+import io.crnk.jpa.model.AnnotationTestEntity;
+import io.crnk.jpa.model.RenamedTestEntity;
+import io.crnk.jpa.model.SequenceEntity;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.jpa.model.dto.TestDTO;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
@@ -16,9 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.Serializable;
-
-public class MetaEndToEndTest extends AbstractJpaJerseyTest {
+public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 
 	@Override
 	@Before

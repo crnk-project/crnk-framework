@@ -1,6 +1,9 @@
 package io.crnk.meta;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -8,7 +11,10 @@ import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceRepository;
+import io.crnk.meta.provider.MetaProvider;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.internal.JaxrsModule;
 import io.crnk.test.mock.models.Task;
@@ -16,6 +22,7 @@ import io.crnk.test.mock.repository.TaskRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class MetaModuleTest {
 
@@ -30,7 +37,10 @@ public class MetaModuleTest {
 		metaModuleConfig = new MetaModuleConfig();
 		metaModuleConfig.addMetaProvider(new ResourceMetaProvider());
 		metaModule = MetaModule.createServerModule(metaModuleConfig);
+		setupBoot();
+	}
 
+	private void setupBoot() {
 		boot = new CrnkBoot();
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
@@ -43,6 +53,25 @@ public class MetaModuleTest {
 		metaModule.putIdMapping("package1", "other1");
 		metaModule.putIdMapping("package2", MetaResource.class, "other2");
 		Assert.assertEquals(2, metaModuleConfig.getIdMappings().size());
+	}
+
+
+	@Test
+	public void testTransitiveRegistrationOfProviderDependencies() {
+		MetaProvider testProvider = Mockito.mock(MetaProvider.class);
+		Mockito.when(testProvider.getDependencies()).thenReturn((Collection) Arrays.asList(new ResourceMetaProvider()));
+
+		metaModuleConfig = new MetaModuleConfig();
+		metaModuleConfig.addMetaProvider(testProvider);
+		metaModule = MetaModule.createServerModule(metaModuleConfig);
+
+		setupBoot();
+
+		Set<Class<? extends MetaElement>> metaClasses = metaModule.collectMetaClasses();
+
+		// meta classes out of testProvider dependency (resource meta provider)
+		Assert.assertTrue(metaClasses.contains(MetaResource.class));
+		Assert.assertTrue(metaClasses.contains(MetaResourceRepository.class));
 	}
 
 
