@@ -1,21 +1,23 @@
 {
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-	  "outDir": "build/npm-test",
-    "module": "commonjs",
-    "target": "es5",
-    "baseUrl": "",
-    "noImplicitAny" : "false",
-    "types": [
-      "jasmine",
-      "node"
-    ]
-  },
-  "files": [
-    "src/test/typescript/test.ts"
-  ],
-  "include": [
-    "**/*.spec.ts",
-    "**/*.d.ts"
-  ]
+{{{{{{{}}}
+	"compilerOptions": {
+		"baseUrl": "./src",
+		"experimentalDecorators": true,
+		"moduleResolution": "node",
+		"rootDir": "./src/test/typescript",
+		"target": "es5",
+		"noImplicitAny": "false",
+		"typeRoots": [
+			"node_modules/@types"
+		],
+		"lib": [
+			"es6",
+			"dom"
+		],
+		"skipLibCheck": true,
+		"types": [
+			"jasmine",
+			"node"
+		]
+	}
 }
