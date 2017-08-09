@@ -7,20 +7,21 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
 public class MetaRelationshipRepository implements RelationshipRepositoryV2<MetaElement, String, MetaElement, String> {
 
-	private MetaLookup lookup;
+	private Supplier<MetaLookup> lookupSupplier;
 
 	private Class<? extends MetaElement> sourceResourceClass;
 
 	private Class<? extends MetaElement> targetResourceClass;
 
-	public MetaRelationshipRepository(MetaLookup lookup, Class<? extends MetaElement> sourceClass,
+	public MetaRelationshipRepository(Supplier<MetaLookup> lookupSupplier, Class<? extends MetaElement> sourceClass,
 			Class<? extends MetaElement> targetClass) {
-		this.lookup = lookup;
+		this.lookupSupplier = lookupSupplier;
 		this.sourceResourceClass = sourceClass;
 		this.targetResourceClass = targetClass;
 	}
@@ -41,6 +42,7 @@ public class MetaRelationshipRepository implements RelationshipRepositoryV2<Meta
 	}
 
 	private MetaElement getSource(String sourceId) {
+		MetaLookup lookup = lookupSupplier.get();
 		MetaElement source = lookup.getMetaById().get(sourceId);
 		if (source == null) {
 			throw new ResourceNotFoundException(sourceId);

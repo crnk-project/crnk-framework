@@ -1,11 +1,15 @@
 package io.crnk.core.engine.information;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-
-import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
@@ -14,51 +18,54 @@ public interface InformationBuilder {
 		RelationshipRepositoryInformation build();
 
 	}
+
 	interface ResourceRepository {
 
 		ResourceRepositoryInformation build();
 
 	}
+
 	interface Resource {
 
 		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-		void resourceClass(Class<?> resourceClass);
+		Resource resourceClass(Class<?> resourceClass);
 
-		void resourceType(String resourceType);
+		Resource resourceType(String resourceType);
 
-		void superResourceType(String superResourceType);
+		Resource superResourceType(String superResourceType);
 
 		ResourceInformation build();
 
 	}
+
 	interface Field {
 
 		ResourceField build();
 
-		void jsonName(String jsonName);
+		Field jsonName(String jsonName);
 
-		void underlyingName(String underlyingName);
+		Field underlyingName(String underlyingName);
 
-		void type(Class<?> type);
+		Field type(Class<?> type);
 
-		void genericType(Type genericType);
+		Field genericType(Type genericType);
 
-		void lazy(boolean lazy);
+		Field lazy(boolean lazy);
 
-		void oppositeResourceType(String oppositeResourceType);
+		Field oppositeResourceType(String oppositeResourceType);
 
-		void lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
+		Field lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		void includeByDefault(boolean includeByDefault);
+		Field includeByDefault(boolean includeByDefault);
 
-		void fieldType(ResourceFieldType fieldType);
+		Field fieldType(ResourceFieldType fieldType);
 
-		void setOppositeName(String oppositeName);
+		Field setOppositeName(String oppositeName);
 
-		void setAccessor(ResourceFieldAccessor accessor);
+		Field setAccessor(ResourceFieldAccessor accessor);
 
-		void setAccess(ResourceFieldAccess access);
+		Field setAccess(ResourceFieldAccess access);
 
 	}
 

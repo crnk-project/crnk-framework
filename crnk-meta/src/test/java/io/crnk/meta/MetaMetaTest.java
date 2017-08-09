@@ -21,8 +21,10 @@ public class MetaMetaTest {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.addModule(new TestModule());
-		MetaModule module = MetaModule.create();
-		module.addMetaProvider(new ResourceMetaProvider());
+
+		MetaModuleConfig moduleConfig = new MetaModuleConfig();
+		moduleConfig.addMetaProvider(new ResourceMetaProvider());
+		MetaModule module = MetaModule.createServerModule(moduleConfig);
 		boot.addModule(module);
 		boot.boot();
 

@@ -209,10 +209,19 @@ gradle.beforeProject { Project project ->
 			} else {
 				apply plugin: 'maven-publish'
 
+				task sourcesJar(type: Jar) {
+					from sourceSets.main.allSource
+					classifier = 'sources'
+				}
+
 				publishing {
 					publications {
 						mavenJava(MavenPublication) {
 							from components.java
+
+							artifact sourcesJar {
+								classifier "sources"
+							}
 						}
 					}
 				}

@@ -1,21 +1,25 @@
 package io.crnk.core.engine.internal.information;
 
-import io.crnk.core.engine.information.InformationBuilder;
-import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryAction;
-import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
-import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
-import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
+import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -109,16 +113,19 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return field;
 		}
 
-		public void resourceClass(Class<?> resourceClass) {
+		public DefaultResource resourceClass(Class<?> resourceClass) {
 			this.resourceClass = resourceClass;
+			return this;
 		}
 
-		public void resourceType(String resourceType) {
+		public DefaultResource resourceType(String resourceType) {
 			this.resourceType = resourceType;
+			return this;
 		}
 
-		public void superResourceType(String superResourceType) {
+		public DefaultResource superResourceType(String superResourceType) {
 			this.superResourceType = superResourceType;
+			return this;
 		}
 
 		public ResourceInformation build() {
@@ -136,8 +143,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	public class DefaultField implements InformationBuilder.Field {
 
 		private String jsonName;
+
 		private String underlyingName;
+
 		private Class<?> type;
+
 		private Type genericType;
 
 		private boolean lazy = true;
@@ -167,53 +177,65 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return impl;
 		}
 
-		public void jsonName(String jsonName) {
+		public DefaultField jsonName(String jsonName) {
 			this.jsonName = jsonName;
+			return this;
 		}
 
-		public void underlyingName(String underlyingName) {
+		public DefaultField underlyingName(String underlyingName) {
 			this.underlyingName = underlyingName;
+			return this;
 		}
 
 
-		public void type(Class<?> type) {
+		public DefaultField type(Class<?> type) {
 			this.type = type;
+			return this;
 		}
 
-		public void genericType(Type genericType) {
+		public DefaultField genericType(Type genericType) {
 			this.genericType = genericType;
+			return this;
 		}
 
-		public void lazy(boolean lazy) {
+		public DefaultField lazy(boolean lazy) {
 			this.lazy = lazy;
+			return this;
 		}
 
-		public void oppositeResourceType(String oppositeResourceType) {
+		public DefaultField oppositeResourceType(String oppositeResourceType) {
 			this.oppositeResourceType = oppositeResourceType;
+			return this;
 		}
 
-		public void lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior) {
+		public DefaultField lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior) {
 			this.lookupIncludeBehavior = lookupIncludeBehavior;
+			return this;
 		}
 
-		public void includeByDefault(boolean includeByDefault) {
+		public DefaultField includeByDefault(boolean includeByDefault) {
 			this.includeByDefault = includeByDefault;
+			return this;
 		}
 
-		public void fieldType(ResourceFieldType fieldType) {
+		public DefaultField fieldType(ResourceFieldType fieldType) {
 			this.fieldType = fieldType;
+			return this;
 		}
 
-		public void setOppositeName(String oppositeName) {
+		public DefaultField setOppositeName(String oppositeName) {
 			this.oppositeName = oppositeName;
+			return this;
 		}
 
-		public void setAccessor(ResourceFieldAccessor accessor) {
+		public DefaultField setAccessor(ResourceFieldAccessor accessor) {
 			this.accessor = accessor;
+			return this;
 		}
 
-		public void setAccess(ResourceFieldAccess access) {
+		public DefaultField setAccess(ResourceFieldAccess access) {
 			this.access = access;
+			return this;
 		}
 	}
 
