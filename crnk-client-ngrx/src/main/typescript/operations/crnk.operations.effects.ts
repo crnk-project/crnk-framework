@@ -66,16 +66,20 @@ export class OperationsEffects {
 
 	@Effect() applyResources$ = this.actions$
 		.ofType(OperationActionTypes.OPERATIONS_INIT)
-		.withLatestFrom(this.store.select(this.selectors.storeLocation), (ngrxstore: NgrxJsonApiStore) => {
+		.withLatestFrom(this.store.select(this.selectors.storeLocation), (action, ngrxstore: NgrxJsonApiStore) => {
+			console.log("store", action, ngrxstore, this.store, this.selectors.storeLocation);
+			console.log(this);
 			const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
 			if (pending.length === 0) {
 				return Observable.of(new ApiApplySuccessAction([]));
 			}
 
+
 			const operations: Array<Operation> = [];
 			for (const pendingChange of pending) {
 				operations.push(this.toOperation(pendingChange));
 			}
+			console.log("hi", operations);
 
 			const requestOptions = new RequestOptions({
 				method: RequestMethod.Patch,

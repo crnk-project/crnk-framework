@@ -28,7 +28,7 @@ module.exports = function(config) {
 			}
 		},
 
-		singleRun: true,
+		singleRun: false,
 
 		reporters: ["dots", "karma-typescript"],
 
