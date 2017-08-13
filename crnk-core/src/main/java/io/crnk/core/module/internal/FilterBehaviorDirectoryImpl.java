@@ -2,7 +2,7 @@ package io.crnk.core.module.internal;
 
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.FilterBehaviorDirectory;
-import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -23,13 +23,13 @@ public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FilterBehaviorDirectoryImpl.class);
 
-	private final List<RepositoryFilter> filters;
+	private final List<ResourceFilter> filters;
 
 	private final HttpRequestContextProvider requestContextProvider;
 
 	private final ResourceRegistry resourceRegistry;
 
-	public FilterBehaviorDirectoryImpl(List<RepositoryFilter> filters, HttpRequestContextProvider requestContextProvider, ResourceRegistry resourceRegistry) {
+	public FilterBehaviorDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider, ResourceRegistry resourceRegistry) {
 		this.filters = filters;
 		this.requestContextProvider = requestContextProvider;
 		this.resourceRegistry = resourceRegistry;
@@ -46,7 +46,7 @@ public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
 		}
 
 		behavior = FilterBehavior.NONE;
-		for (RepositoryFilter filter : filters) {
+		for (ResourceFilter filter : filters) {
 			behavior = behavior.merge(filter.filterResource(resourceInformation, method));
 			if (behavior == FilterBehavior.FORBIDDEN) {
 				break;
@@ -66,7 +66,7 @@ public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
 		}
 
 		behavior = FilterBehavior.NONE;
-		for (RepositoryFilter filter : filters) {
+		for (ResourceFilter filter : filters) {
 			behavior = behavior.merge(filter.filterField(field, method));
 			if (behavior == FilterBehavior.FORBIDDEN) {
 				break;

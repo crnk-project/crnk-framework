@@ -3,6 +3,7 @@ package io.crnk.core.module;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
@@ -26,9 +27,11 @@ public class SimpleModule implements Module {
 
 	private List<RepositoryInformationBuilder> repositoryInformationBuilders = new ArrayList<>();
 
-	private List<DocumentFilter> filters = new ArrayList<>();
+	private List<DocumentFilter> documentFilters = new ArrayList<>();
 
 	private List<RepositoryFilter> repositoryFilters = new ArrayList<>();
+
+	private List<ResourceFilter> resourceFilters = new ArrayList<>();
 
 	private List<RepositoryDecoratorFactory> repositoryDecoratorFactories = new ArrayList<>();
 
@@ -71,11 +74,14 @@ public class SimpleModule implements Module {
 		for (ResourceLookup resourceLookup : resourceLookups) {
 			context.addResourceLookup(resourceLookup);
 		}
-		for (DocumentFilter filter : filters) {
+		for (DocumentFilter filter : documentFilters) {
 			context.addFilter(filter);
 		}
 		for (RepositoryFilter filter : repositoryFilters) {
 			context.addRepositoryFilter(filter);
+		}
+		for (ResourceFilter filter : resourceFilters) {
+			context.addResourceFilter(filter);
 		}
 		for (RepositoryDecoratorFactory decorator : repositoryDecoratorFactories) {
 			context.addRepositoryDecoratorFactory(decorator);
@@ -147,12 +153,17 @@ public class SimpleModule implements Module {
 
 	public void addFilter(DocumentFilter filter) {
 		checkInitialized();
-		filters.add(filter);
+		documentFilters.add(filter);
 	}
 
 	public void addRepositoryFilter(RepositoryFilter filter) {
 		checkInitialized();
 		repositoryFilters.add(filter);
+	}
+
+	public void addResourceFilter(ResourceFilter filter) {
+		checkInitialized();
+		resourceFilters.add(filter);
 	}
 
 	public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator) {
@@ -162,12 +173,17 @@ public class SimpleModule implements Module {
 
 	protected List<DocumentFilter> getFilters() {
 		checkInitialized();
-		return Collections.unmodifiableList(filters);
+		return Collections.unmodifiableList(documentFilters);
 	}
 
 	protected List<RepositoryFilter> getRepositoryFilters() {
 		checkInitialized();
 		return Collections.unmodifiableList(repositoryFilters);
+	}
+
+	protected List<ResourceFilter> getResourceFilters() {
+		checkInitialized();
+		return Collections.unmodifiableList(resourceFilters);
 	}
 
 	protected List<RepositoryDecoratorFactory> getRepositoryDecoratorFactories() {

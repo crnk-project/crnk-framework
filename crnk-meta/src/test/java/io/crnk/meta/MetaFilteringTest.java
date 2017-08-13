@@ -1,8 +1,8 @@
 package io.crnk.meta;
 
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.filter.RepositoryFilterBase;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterBase;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -32,7 +32,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 	private ResourceRepositoryV2<MetaResource, Serializable> repository;
 
-	private RepositoryFilter filter;
+	private ResourceFilter filter;
 
 
 	@Before
@@ -43,9 +43,9 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 	@Override
 	protected void setupFeature(CrnkFeature feature) {
-		filter = Mockito.spy(RepositoryFilterBase.class);
+		filter = Mockito.spy(ResourceFilterBase.class);
 		SimpleModule filterModule = new SimpleModule("filter");
-		filterModule.addRepositoryFilter(filter);
+		filterModule.addResourceFilter(filter);
 		feature.addModule(filterModule);
 	}
 

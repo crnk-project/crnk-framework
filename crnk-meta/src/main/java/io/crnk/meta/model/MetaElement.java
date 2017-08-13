@@ -1,11 +1,13 @@
 package io.crnk.meta.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.resource.annotations.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Root of the meta model. Elements are identified by id. Have a name. All except the root have a parent and
@@ -100,10 +102,12 @@ public class MetaElement implements Cloneable {
 	}
 
 	public MetaElement duplicate() {
-		try {
-			return (MetaElement) clone();
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalStateException();
-		}
+		return ExceptionUtil.wrapCatchedExceptions(new Callable<MetaElement>() {
+
+			@Override
+			public MetaElement call() throws Exception {
+				return (MetaElement) MetaElement.this.clone();
+			}
+		});
 	}
 }

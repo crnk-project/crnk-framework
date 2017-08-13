@@ -1,30 +1,19 @@
 package io.crnk.security.internal;
 
-import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryFilterBase;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
-import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.security.ResourcePermission;
 import io.crnk.security.ResourcePermissionInformation;
 import io.crnk.security.SecurityModule;
 
-public class SecurityFilter extends RepositoryFilterBase {
+public class SecurityRepositoryFilter extends RepositoryFilterBase {
 
 	private SecurityModule module;
 
-	public SecurityFilter(SecurityModule module) {
+	public SecurityRepositoryFilter(SecurityModule module) {
 		this.module = module;
-	}
-
-	@Override
-	public FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method) {
-		ResourcePermission requiredPermission = ResourcePermission.fromMethod(method);
-		boolean allowed = module.isAllowed(resourceInformation.getResourceType(), requiredPermission);
-		return allowed ? FilterBehavior.NONE : FilterBehavior.FORBIDDEN;
 	}
 
 	@Override

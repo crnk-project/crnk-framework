@@ -8,6 +8,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
@@ -290,6 +291,11 @@ public class SimpleModuleTest {
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
 			numFilters++;
+		}
+
+		@Override
+		public void addResourceFilter(ResourceFilter filter) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

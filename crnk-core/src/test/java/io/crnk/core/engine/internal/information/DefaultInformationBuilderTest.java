@@ -1,6 +1,9 @@
 package io.crnk.core.engine.internal.information;
 
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
@@ -70,5 +73,25 @@ public class DefaultInformationBuilderTest {
 		Assert.assertTrue(projectInfo.getAccess().isPatchable());
 		Assert.assertTrue(projectInfo.isLazy());
 		Assert.assertFalse(projectInfo.isCollection());
+	}
+
+	@Test
+	public void checkResourceRepository() {
+		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository(Task.class, "tasks");
+		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
+		repositoryBuilder.setAccess(expectedAccess);
+		ResourceRepositoryInformation repositoryInformation = repositoryBuilder.build();
+		RepositoryMethodAccess actualAccess = repositoryInformation.getAccess();
+		Assert.assertEquals(expectedAccess, actualAccess);
+	}
+
+	@Test
+	public void checkRelationshipRepository() {
+		InformationBuilder.RelationshipRepository repositoryBuilder = builder.createRelationshipRepository("projects", "tasks");
+		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
+		repositoryBuilder.setAccess(expectedAccess);
+		RelationshipRepositoryInformation repositoryInformation = repositoryBuilder.build();
+		RepositoryMethodAccess actualAccess = repositoryInformation.getAccess();
+		Assert.assertEquals(expectedAccess, actualAccess);
 	}
 }

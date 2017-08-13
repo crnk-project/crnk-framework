@@ -1,7 +1,7 @@
 package io.crnk.core.module.internal;
 
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
@@ -24,9 +24,9 @@ public class FilterBehaviorDirectoryImplTest {
 
 	private HttpRequestContextProvider requestContextProvider;
 
-	private List<RepositoryFilter> filters = new ArrayList<>();
+	private List<ResourceFilter> filters = new ArrayList<>();
 
-	private RepositoryFilter filter;
+	private ResourceFilter filter;
 
 	private FilterBehaviorDirectoryImpl directory;
 
@@ -40,7 +40,7 @@ public class FilterBehaviorDirectoryImplTest {
 	@Before
 	public void setup() {
 		requestContextProvider = new HttpRequestContextProvider();
-		filter = Mockito.mock(RepositoryFilter.class);
+		filter = Mockito.mock(ResourceFilter.class);
 		filters.add(filter);
 
 		resourceInformation = Mockito.mock(ResourceInformation.class);
@@ -53,7 +53,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeResourceFilterWithNoneNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setResourceBehavior(HttpMethod.GET, FilterBehavior.NONE);
@@ -66,7 +66,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeResourceFilterWithNoneForbidden() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setResourceBehavior(HttpMethod.GET, FilterBehavior.NONE);
@@ -79,7 +79,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeResourceFilterWithIgnoredForbidden() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setResourceBehavior(HttpMethod.GET, FilterBehavior.IGNORED);
@@ -92,7 +92,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeResourceFilterWithIgnoredNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setResourceBehavior(HttpMethod.GET, FilterBehavior.IGNORED);
@@ -105,7 +105,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeResourceFilterWithForbiddenNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setResourceBehavior(HttpMethod.GET, FilterBehavior.FORBIDDEN);
@@ -120,7 +120,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeFieldFilterWithNoneNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setFieldBehavior(HttpMethod.GET, FilterBehavior.NONE);
@@ -133,7 +133,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeFieldFilterWithNoneForbidden() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setFieldBehavior(HttpMethod.GET, FilterBehavior.NONE);
@@ -146,7 +146,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeFieldFilterWithIgnoredForbidden() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setFieldBehavior(HttpMethod.GET, FilterBehavior.IGNORED);
@@ -159,7 +159,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeFieldFilterWithIgnoredNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setFieldBehavior(HttpMethod.GET, FilterBehavior.IGNORED);
@@ -172,7 +172,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	@Test
 	public void checkMergeFieldFilterWithForbiddenNone() {
-		RepositoryFilter filter2 = Mockito.mock(RepositoryFilter.class);
+		ResourceFilter filter2 = Mockito.mock(ResourceFilter.class);
 		filters.add(filter2);
 
 		setFieldBehavior(HttpMethod.GET, FilterBehavior.FORBIDDEN);

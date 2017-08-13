@@ -7,6 +7,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.*;
@@ -232,7 +233,7 @@ public class ModuleRegistry {
 		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
 		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 
-		filterBehaviorProvider = new FilterBehaviorDirectoryImpl(aggregatedModule.getRepositoryFilters(), httpRequestContextProvider, resourceRegistry);
+		filterBehaviorProvider = new FilterBehaviorDirectoryImpl(aggregatedModule.getResourceFilters(), httpRequestContextProvider, resourceRegistry);
 	}
 
 	public HttpRequestContextProvider getHttpRequestContextProvider() {
@@ -667,6 +668,11 @@ public class ModuleRegistry {
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
 			aggregatedModule.addRepositoryFilter(filter);
+		}
+
+		@Override
+		public void addResourceFilter(ResourceFilter filter) {
+			aggregatedModule.addResourceFilter(filter);
 		}
 
 		@Override

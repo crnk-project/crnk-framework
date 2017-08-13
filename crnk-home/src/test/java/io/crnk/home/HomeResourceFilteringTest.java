@@ -3,7 +3,7 @@ package io.crnk.home;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -25,13 +25,13 @@ public class HomeResourceFilteringTest {
 	private CrnkBoot boot;
 
 	private HomeModule module;
-	private RepositoryFilter filter;
+	private ResourceFilter filter;
 
 	@Before
 	public void setup() {
-		filter = Mockito.mock(RepositoryFilter.class);
+		filter = Mockito.mock(ResourceFilter.class);
 		SimpleModule filterModule = new SimpleModule("filter");
-		filterModule.addRepositoryFilter(filter);
+		filterModule.addResourceFilter(filter);
 
 		this.module = Mockito.spy(HomeModule.create());
 		boot = new CrnkBoot();

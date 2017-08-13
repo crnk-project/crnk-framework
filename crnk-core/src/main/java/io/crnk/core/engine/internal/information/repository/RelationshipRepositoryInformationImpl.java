@@ -17,7 +17,7 @@ public class RelationshipRepositoryInformationImpl implements
 
 	public RelationshipRepositoryInformationImpl(Class sourceResourceClass, String sourceResourceType,
 												 String targetResourceType, RepositoryMethodAccess access) {
-		this.sourceResourceClass = Optional.of(sourceResourceClass);
+		this.sourceResourceClass = Optional.ofNullable(sourceResourceClass);
 		this.sourceResourceType = sourceResourceType;
 		this.targetResourceType = targetResourceType;
 		this.access = access;
