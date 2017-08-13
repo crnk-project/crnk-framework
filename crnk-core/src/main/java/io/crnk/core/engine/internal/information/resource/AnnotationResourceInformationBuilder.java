@@ -223,7 +223,7 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			String underlyingName = ClassUtils.getGetterFieldName(getter);
 			PreconditionUtil.assertNotNull("not a valid getter", underlyingName);
 			String jsonName = resourceFieldNameTransformer.getName(getter);
-			fieldWrappers.add(getResourceField(resourceClass, getter, jsonName, underlyingName, getter.getReturnType(), getter.getGenericReturnType(), Arrays.asList(getter.getAnnotations())));
+			fieldWrappers.add(getResourceField(resourceClass, getter, underlyingName, jsonName, getter.getReturnType(), getter.getGenericReturnType(), Arrays.asList(getter.getAnnotations())));
 		}
 		return fieldWrappers;
 	}
