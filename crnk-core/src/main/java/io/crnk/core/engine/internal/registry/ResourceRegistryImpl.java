@@ -19,8 +19,6 @@ import io.crnk.core.utils.Optional;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
-	private final ServiceUrlProvider serviceUrlProvider;
-
 	private ModuleRegistry moduleRegistry;
 
 	private ConcurrentHashMap<String, ResourceInformation> baseTypeCache = new ConcurrentHashMap<>();
@@ -34,11 +32,9 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		}
 	};
 
-	public ResourceRegistryImpl(ResourceRegistryPart rootPart, ModuleRegistry moduleRegistry,
-			ServiceUrlProvider serviceUrlProvider) {
+	public ResourceRegistryImpl(ResourceRegistryPart rootPart, ModuleRegistry moduleRegistry) {
 		this.rootPart = rootPart;
 		this.moduleRegistry = moduleRegistry;
-		this.serviceUrlProvider = serviceUrlProvider;
 		this.moduleRegistry.setResourceRegistry(this);
 
 		rootPart.addListener(rootListener);
@@ -92,7 +88,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {
-		return serviceUrlProvider;
+		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
 
 
@@ -111,7 +107,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
-		String url = UrlUtils.removeTrailingSlash(serviceUrlProvider.getUrl());
+		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
 		return url + "/" + resourceInformation.getResourceType();
 	}
 

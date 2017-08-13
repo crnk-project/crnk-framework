@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
@@ -193,5 +193,7 @@ public interface Module {
 		RegistryEntryBuilder newRegistryEntryBuilder();
 
 		void addRegistryEntry(RegistryEntry entry);
+
+		FilterBehaviorDirectory getFilterBehaviorProvider();
 	}
 }

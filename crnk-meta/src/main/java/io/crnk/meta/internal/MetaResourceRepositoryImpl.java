@@ -1,8 +1,5 @@
 package io.crnk.meta.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
@@ -11,8 +8,10 @@ import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
-public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, String> {
+import java.util.ArrayList;
+import java.util.Collection;
 
+public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, String> {
 
 	private final Supplier<MetaLookup> lookupSupplier;
 
@@ -28,7 +27,10 @@ public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, Str
 		MetaElement metaElement = lookup.getMetaById().get(id);
 		Class<T> resourceClass = this.getResourceClass();
 		if (metaElement != null && resourceClass.isInstance(metaElement)) {
-			return (T) metaElement;
+			MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, metaElement);
+			if (wrappedElement != null) {
+				return (T) metaElement;
+			}
 		}
 		throw new ResourceNotFoundException(id);
 	}
@@ -44,11 +46,16 @@ public class MetaResourceRepositoryImpl<T> extends ResourceRepositoryBase<T, Str
 	private Collection<T> filterByType(Collection<MetaElement> values) {
 		Collection<T> results = new ArrayList<>();
 		Class<T> resourceClass = this.getResourceClass();
+		MetaLookup lookup = lookupSupplier.get();
 		for (MetaElement element : values) {
 			if (resourceClass.isInstance(element)) {
-				results.add((T) element);
+				MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, element);
+				if (wrappedElement != null) {
+					results.add((T) wrappedElement);
+				}
 			}
 		}
 		return results;
 	}
+
 }

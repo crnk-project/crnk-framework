@@ -56,7 +56,7 @@ public class SecurityModuleTest {
 		Assert.assertSame(config, securityModule.getConfig());
 
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, null));
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(securityModule);
 		moduleRegistry.addModule(appModule);
 		moduleRegistry.addModule(new CoreModule(new ResourceFieldNameTransformer()));

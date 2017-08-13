@@ -1,10 +1,5 @@
 package io.crnk.meta;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
@@ -21,24 +16,15 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.utils.Supplier;
 import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
-import io.crnk.meta.internal.MetaRelationshipRepository;
+import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.MetaArrayType;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaCollectionType;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.MetaInterface;
-import io.crnk.meta.model.MetaKey;
-import io.crnk.meta.model.MetaListType;
-import io.crnk.meta.model.MetaLiteral;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
 import io.crnk.meta.provider.MetaProvider;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MetaModule implements Module, InitializingModule {
 
@@ -142,8 +128,7 @@ public class MetaModule implements Module, InitializingModule {
 			public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
 				try {
 					return chain.doFilter(filterRequestContext);
-				}
-				finally {
+				} finally {
 					lookupRequestLocal.remove();
 				}
 			}
@@ -158,7 +143,7 @@ public class MetaModule implements Module, InitializingModule {
 	}
 
 	protected void registerRepositories(AnnotationResourceInformationBuilder informationBuilder,
-			Set<Class<? extends MetaElement>> metaClasses) {
+										Set<Class<? extends MetaElement>> metaClasses) {
 
 		Supplier<MetaLookup> lookupSupplier = new Supplier<MetaLookup>() {
 			@Override
@@ -179,7 +164,7 @@ public class MetaModule implements Module, InitializingModule {
 				targetResourceClasses.add((Class<? extends MetaElement>) relationshipField.getElementType());
 			}
 			for (Class<? extends MetaElement> targetResourceClass : targetResourceClasses) {
-				context.addRepository(new MetaRelationshipRepository(lookupSupplier, metaClass, targetResourceClass));
+				context.addRepository(new MetaRelationshipRepositoryImpl(lookupSupplier, metaClass, targetResourceClass));
 			}
 		}
 	}

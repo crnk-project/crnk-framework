@@ -6,8 +6,6 @@ import io.crnk.core.engine.internal.dispatcher.controller.ResourceDelete;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +51,7 @@ public class ResourceDeleteTest extends BaseControllerTest {
 		ResourceDelete sut = new ResourceDelete(resourceRegistry);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(new QueryParams()), null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
 
 		// THEN
 		assertThat(response.getDocument()).isNull();

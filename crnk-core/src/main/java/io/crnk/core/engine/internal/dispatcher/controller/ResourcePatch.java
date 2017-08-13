@@ -35,6 +35,11 @@ public class ResourcePatch extends ResourceUpsert {
 	}
 
 	@Override
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.PATCH;
+	}
+
+	@Override
 	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
 		return !jsonPath.isCollection() &&
 				jsonPath instanceof ResourcePath &&
@@ -158,11 +163,4 @@ public class ResourcePatch extends ResourceUpsert {
 			source.put(fieldName, updatedValue);
 		}
 	}
-
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// allow dynamic field where field == null
-		return field == null || field.getAccess().isPostable();
-	}
-
 }

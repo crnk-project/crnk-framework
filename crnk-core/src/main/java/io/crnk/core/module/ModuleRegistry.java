@@ -5,7 +5,9 @@ import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.*;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -29,6 +31,7 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
+import io.crnk.core.module.internal.FilterBehaviorDirectoryImpl;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
@@ -70,7 +73,11 @@ public class ModuleRegistry {
 
 	private RequestDispatcher requestDispatcher;
 
+	private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider();
+
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
+
+	private FilterBehaviorDirectory filterBehaviorProvider;
 
 	public ModuleRegistry() {
 		this(true);
@@ -224,6 +231,12 @@ public class ModuleRegistry {
 		ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
 		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
 		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
+
+		filterBehaviorProvider = new FilterBehaviorDirectoryImpl(aggregatedModule.getRepositoryFilters(), httpRequestContextProvider, resourceRegistry);
+	}
+
+	public HttpRequestContextProvider getHttpRequestContextProvider() {
+		return httpRequestContextProvider;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -699,6 +712,11 @@ public class ModuleRegistry {
 		@Override
 		public void addRegistryEntry(RegistryEntry entry) {
 			aggregatedModule.addRegistryEntry(entry);
+		}
+
+		@Override
+		public FilterBehaviorDirectory getFilterBehaviorProvider() {
+			return filterBehaviorProvider;
 		}
 	}
 }

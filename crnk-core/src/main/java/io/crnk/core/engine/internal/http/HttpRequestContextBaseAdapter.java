@@ -1,21 +1,24 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
 	private HttpRequestContextBase base;
 
 	private boolean hasResponse;
+
+	private HashMap<String, Object> requestAttributes = new HashMap<>();
 
 	public HttpRequestContextBaseAdapter(HttpRequestContextBase base) {
 		this.base = base;
@@ -92,6 +95,16 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 			return (T) base;
 		}
 		return null;
+	}
+
+	@Override
+	public Object getRequestAttribute(String name) {
+		return requestAttributes.get(name);
+	}
+
+	@Override
+	public void setRequestAttribute(String name, Object value) {
+		requestAttributes.put(name, value);
 	}
 
 	protected boolean isCompatible(String accept, String contentType) {

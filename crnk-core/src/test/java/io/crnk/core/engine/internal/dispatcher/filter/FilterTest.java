@@ -69,7 +69,7 @@ public class FilterTest {
 		collectionGet = mock(CollectionGet.class);
 		controllerRegistry.addController(collectionGet);
 		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		dispatcher = new HttpRequestProcessorImpl(moduleRegistry, boot.getServiceUrlProvider(), controllerRegistry, null, queryAdapterBuilder);
+		dispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 	}
 
 	@Test

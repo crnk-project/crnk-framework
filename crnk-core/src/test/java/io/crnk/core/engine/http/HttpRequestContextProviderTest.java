@@ -16,7 +16,7 @@ public class HttpRequestContextProviderTest {
 
 		Assert.assertNull(provider.getRequestContext());
 		try {
-			provider.getUrl();
+			provider.getServiceUrlProvider().getUrl();
 			Assert.fail();
 		} catch (IllegalStateException e) {
 			// ok
@@ -24,7 +24,7 @@ public class HttpRequestContextProviderTest {
 
 		provider.onRequestStarted(context);
 		Assert.assertSame(context, provider.getRequestContext());
-		Assert.assertEquals("http://test", provider.getUrl());
+		Assert.assertEquals("http://test", provider.getServiceUrlProvider().getUrl());
 		provider.onRequestFinished();
 		Assert.assertNull(provider.getRequestContext());
 	}

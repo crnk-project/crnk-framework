@@ -37,7 +37,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
 			propertiesProvider) {
-		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, true);
+		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null,true);
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();
 		this.objectMapper = objectMapper;
@@ -45,7 +45,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	@Override
 	protected ResourceMapper newResourceMapper(final DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
-		return new ResourceMapper(util, client, objectMapper) {
+		return new ResourceMapper(util, client, objectMapper, null) {
 
 			@Override
 			protected void setRelationship(Resource resource, ResourceField field, Object entity,

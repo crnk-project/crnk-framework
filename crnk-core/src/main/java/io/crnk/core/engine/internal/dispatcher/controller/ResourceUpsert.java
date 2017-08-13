@@ -7,8 +7,11 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -23,10 +26,7 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.exception.ResourceException;
+import io.crnk.core.exception.*;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +37,11 @@ import java.util.Map.Entry;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected final ObjectMapper objectMapper;
 
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
+	protected final FilterBehaviorDirectory filterBehaviorDirectory;
 
 	private PropertiesProvider propertiesProvider;
 
@@ -51,6 +50,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		super(resourceRegistry, typeParser, documentMapper);
 		this.propertiesProvider = propertiesProvider;
 		this.objectMapper = objectMapper;
+		this.filterBehaviorDirectory = documentMapper != null ? documentMapper.getFilterBehaviorManager() : null;
 	}
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
@@ -115,24 +115,9 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 				ResourceField field = resourceInformation.findAttributeFieldByName(attributeName);
 				if (canModifyField(resourceInformation, attributeName, field)) {
 					resourceAttributesBridge.setProperty(objectMapper, instance, entry.getValue(), entry.getKey());
-				} else {
-					handleImmutableField(entry.getKey());
 				}
 			}
 
-		}
-	}
-
-
-	private void handleImmutableField(String fieldName) {
-		String strBehavior = propertiesProvider.getProperty(CrnkProperties.RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR);
-		ResourceFieldImmutableWriteBehavior behavior =
-				strBehavior != null ? ResourceFieldImmutableWriteBehavior.valueOf(strBehavior)
-						: ResourceFieldImmutableWriteBehavior.IGNORE;
-		if (behavior == ResourceFieldImmutableWriteBehavior.IGNORE) {
-			logger.debug("attribute '{}' is immutable", fieldName);
-		} else {
-			throw new BadRequestException("attribute '" + fieldName + "' is immutable");
 		}
 	}
 
@@ -141,7 +126,37 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	 *
 	 * @param field from the information model or null if is a dynamic field (like JsonAny).
 	 */
-	protected abstract boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field);
+	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
+		if (field == null) {
+			return true;
+		}
+
+		HttpMethod method = getHttpMethod();
+		ResourceFieldAccess access = field.getAccess();
+		boolean modifiable = method == HttpMethod.POST ? access.isPostable() : access.isPatchable();
+		FilterBehavior filterBehavior = modifiable ? FilterBehavior.NONE : getDefaultFilterBehavior();
+		filterBehavior = filterBehavior.merge(filterBehaviorDirectory.get(field, method));
+
+		if (filterBehavior == FilterBehavior.NONE) {
+			return true;
+		} else if (filterBehavior == FilterBehavior.FORBIDDEN) {
+			throw new ForbiddenException("field '" + fieldName + "' cannot be modified");
+		} else {
+			PreconditionUtil.assertEquals("unknown behavior", FilterBehavior.IGNORED, filterBehavior);
+			return false;
+		}
+	}
+
+
+	public FilterBehavior getDefaultFilterBehavior() {
+		String strBehavior = propertiesProvider.getProperty(CrnkProperties.RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR);
+		ResourceFieldImmutableWriteBehavior behavior =
+				strBehavior != null ? ResourceFieldImmutableWriteBehavior.valueOf(strBehavior)
+						: ResourceFieldImmutableWriteBehavior.IGNORE;
+		return behavior == ResourceFieldImmutableWriteBehavior.IGNORE ? FilterBehavior.IGNORED : FilterBehavior.FORBIDDEN;
+	}
+
+	protected abstract HttpMethod getHttpMethod();
 
 
 	Object buildNewResource(RegistryEntry registryEntry, Resource dataBody, String resourceName) {
@@ -245,4 +260,5 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 										QueryAdapter queryAdapter) {
 		return entry.getResourceRepository(parameterProvider).findOne(relationId, queryAdapter).getEntity();
 	}
+
 }

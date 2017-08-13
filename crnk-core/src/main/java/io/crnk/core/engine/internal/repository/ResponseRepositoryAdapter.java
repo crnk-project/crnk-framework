@@ -8,6 +8,7 @@ import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.LinksRepositoryV2;
@@ -347,6 +348,9 @@ public abstract class ResponseRepositoryAdapter {
 
 		@Override
 		public JsonApiResponse doFilter(RepositoryFilterContext context) {
+			if (filterIndex == 0) {
+				checkResourceAccess(context);
+			}
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
@@ -354,6 +358,17 @@ public abstract class ResponseRepositoryAdapter {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterRequest(context, this);
+			}
+		}
+
+		private void checkResourceAccess(RepositoryFilterContext context) {
+			FilterBehaviorDirectory filterBehaviorDirectory = moduleRegistry.getContext().getFilterBehaviorProvider();
+			RepositoryRequestSpec request = context.getRequest();
+			ResourceInformation resourceInformation = request.getQueryAdapter().getResourceInformation();
+			FilterBehavior filterBehavior = filterBehaviorDirectory.get(resourceInformation, request.getMethod());
+			if (filterBehavior != FilterBehavior.NONE) {
+				String msg = "not allowed to access " + resourceInformation.getResourceType();
+				throw new ForbiddenException(msg);
 			}
 		}
 

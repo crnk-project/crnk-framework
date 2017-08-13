@@ -1,24 +1,18 @@
 package io.crnk.security.internal;
 
-import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
+import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryFilterBase;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
-import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.exception.ForbiddenException;
-import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.security.ResourcePermission;
 import io.crnk.security.ResourcePermissionInformation;
 import io.crnk.security.SecurityModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SecurityFilter extends RepositoryFilterBase {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityFilter.class);
 
 	private SecurityModule module;
 
@@ -27,22 +21,10 @@ public class SecurityFilter extends RepositoryFilterBase {
 	}
 
 	@Override
-	public JsonApiResponse filterRequest(RepositoryFilterContext context, RepositoryRequestFilterChain chain) {
-		RepositoryRequestSpec request = context.getRequest();
-		QueryAdapter queryAdapter = request.getQueryAdapter();
-		Class<?> resourceClass = queryAdapter.getResourceInformation().getResourceClass();
-
-		HttpMethod method = request.getMethod();
+	public FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method) {
 		ResourcePermission requiredPermission = ResourcePermission.fromMethod(method);
-
-		boolean allowed = module.isAllowed(resourceClass, requiredPermission);
-		if (!allowed) {
-			String msg = "user not allowed to access " + resourceClass.getName();
-			throw new ForbiddenException(msg);
-		} else {
-			LOGGER.debug("user allowed to access {}", resourceClass.getSimpleName());
-			return chain.doFilter(context);
-		}
+		boolean allowed = module.isAllowed(resourceInformation.getResourceType(), requiredPermission);
+		return allowed ? FilterBehavior.NONE : FilterBehavior.FORBIDDEN;
 	}
 
 	@Override

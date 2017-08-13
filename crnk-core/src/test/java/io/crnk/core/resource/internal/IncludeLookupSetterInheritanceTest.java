@@ -15,11 +15,13 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.FancyProject;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,20 +46,23 @@ public class IncludeLookupSetterInheritanceTest extends AbstractDocumentMapperTe
 		ResourceInformation taskInfo = resourceRegistry.getEntry(Task.class).getResourceInformation();
 		ResourceField includedProjectsField = taskInfo.findRelationshipFieldByName("includedProjects");
 
+		QueryAdapter emptyProjectQuery = new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry);
+		QueryAdapter emptyTaskQuery = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+
 		Project project1 = new Project();
 		project1.setId(3L);
-		projectRepository.create(project1, null);
+		projectRepository.create(project1, emptyProjectQuery);
 
 		FancyProject project2 = new FancyProject();
 		project2.setId(ProjectRepository.FANCY_PROJECT_ID);
-		projectRepository.create(project2, null);
+		projectRepository.create(project2, emptyProjectQuery);
 
 
 		Task task = new Task();
 		task.setId(1L);
-		taskRepository.create(task, null);
-		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project1.getId()), includedProjectsField, null);
-		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project2.getId()), includedProjectsField, null);
+		taskRepository.create(task, emptyTaskQuery);
+		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project1.getId()), includedProjectsField, emptyProjectQuery);
+		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project2.getId()), includedProjectsField, emptyProjectQuery);
 	}
 
 	@Test

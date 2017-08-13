@@ -1,12 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -18,6 +11,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceUpsert;
@@ -29,6 +23,13 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -184,5 +185,10 @@ class ClientResourceUpsert extends ResourceUpsert {
 		// there is only a need to check field access when receiving resources
 		// on the server-side client needs all the data he gets from the server
 		return true;
+	}
+
+	@Override
+	protected HttpMethod getHttpMethod() {
+		throw new UnsupportedOperationException();
 	}
 }

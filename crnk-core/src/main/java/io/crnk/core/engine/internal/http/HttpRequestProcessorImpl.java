@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -27,7 +22,6 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
@@ -37,6 +31,11 @@ import io.crnk.legacy.queryParams.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs
  * and crnk-servlet for usage.
@@ -45,16 +44,14 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 
 	private final ControllerRegistry controllerRegistry;
 	private final ExceptionMapperRegistry exceptionMapperRegistry;
-	private final ServiceUrlProvider serviceUrlProvider;
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private ModuleRegistry moduleRegistry;
 
 	private QueryAdapterBuilder queryAdapterBuilder;
 
-	public HttpRequestProcessorImpl(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider, ControllerRegistry controllerRegistry,
+	public HttpRequestProcessorImpl(ModuleRegistry moduleRegistry, ControllerRegistry controllerRegistry,
 									ExceptionMapperRegistry exceptionMapperRegistry, QueryAdapterBuilder queryAdapterBuilder) {
 		this.controllerRegistry = controllerRegistry;
-		this.serviceUrlProvider = serviceUrlProvider;
 		this.moduleRegistry = moduleRegistry;
 		this.exceptionMapperRegistry = exceptionMapperRegistry;
 		this.queryAdapterBuilder = queryAdapterBuilder;
@@ -66,10 +63,9 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 	@Override
 	public void process(HttpRequestContextBase requestContextBase) throws IOException {
 		HttpRequestContextBaseAdapter requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
+		HttpRequestContextProvider httpRequestContextProvider = moduleRegistry.getHttpRequestContextProvider();
 		try {
-			if (serviceUrlProvider instanceof HttpRequestContextProvider) {
-				((HttpRequestContextProvider) serviceUrlProvider).onRequestStarted(requestContext);
-			}
+			httpRequestContextProvider.onRequestStarted(requestContext);
 
 			List<HttpRequestProcessor> processors = moduleRegistry.getHttpRequestProcessors();
 			PreconditionUtil.assertFalse("no processors available", processors.isEmpty());
@@ -80,9 +76,7 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 				}
 			}
 		} finally {
-			if (serviceUrlProvider instanceof HttpRequestContextProvider) {
-				((HttpRequestContextProvider) serviceUrlProvider).onRequestFinished();
-			}
+			httpRequestContextProvider.onRequestFinished();
 		}
 	}
 

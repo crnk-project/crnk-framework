@@ -3,6 +3,7 @@ package io.crnk.legacy.repository.information;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -48,7 +49,13 @@ public class DefaultRelationshipRepositoryInformationBuilder implements Reposito
 		String sourceResourceType = context.getResourceInformationBuilder().getResourceType(sourceResourceClass);
 		String targetResourceType = context.getResourceInformationBuilder().getResourceType(targetResourceClass);
 
-		return new RelationshipRepositoryInformationImpl(sourceResourceClass, sourceResourceType, targetResourceType);
+		RepositoryMethodAccess access = getAccess(repository);
+		return new RelationshipRepositoryInformationImpl(sourceResourceClass, sourceResourceType, targetResourceType, access);
+	}
+
+	// FIXME
+	protected RepositoryMethodAccess getAccess(Object repository) {
+		return new RepositoryMethodAccess(true, true, true, true);
 	}
 
 	public Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {

@@ -5,7 +5,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Supplier;
-import io.crnk.meta.internal.MetaRelationshipRepository;
+import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.resource.MetaResource;
@@ -15,9 +15,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MetaRelationshipRepositoryTest extends AbstractMetaTest {
+public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
-	private MetaRelationshipRepository repo;
+	private MetaRelationshipRepositoryImpl repo;
 
 	private MetaLookup lookup;
 
@@ -34,7 +34,7 @@ public class MetaRelationshipRepositoryTest extends AbstractMetaTest {
 		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
 		lookup.initialize();
 
-		repo = new MetaRelationshipRepository(new Supplier<MetaLookup>() {
+		repo = new MetaRelationshipRepositoryImpl(new Supplier<MetaLookup>() {
 			@Override
 			public MetaLookup get() {
 				return lookup;

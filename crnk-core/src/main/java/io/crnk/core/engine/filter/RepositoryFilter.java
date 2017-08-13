@@ -1,5 +1,8 @@
 package io.crnk.core.engine.filter;
 
+import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -55,5 +58,19 @@ public interface RepositoryFilter {
 	 * @return filtered linksInformation to be returned to next filter resp. caller
 	 */
 	<T> LinksInformation filterLinks(RepositoryFilterContext context, Iterable<T> resources, RepositoryLinksFilterChain chain);
+
+	/**
+	 * Allows to filter the given type.
+	 *
+	 * @param resourceInformation to filter
+	 */
+	FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method);
+
+	/**
+	 * Allows to filter the given type.
+	 *
+	 * @param field to filter
+	 */
+	FilterBehavior filterField(ResourceField field, HttpMethod method);
 
 }

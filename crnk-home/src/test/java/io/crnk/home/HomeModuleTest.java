@@ -1,10 +1,12 @@
 package io.crnk.home;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
@@ -15,6 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class HomeModuleTest {
 
@@ -54,7 +58,6 @@ public class HomeModuleTest {
 	public void testWithHomeRequest() throws IOException {
 		testHomeJsonReturned(false);
 	}
-
 
 	private void testHomeJsonReturned(boolean anyRequest) throws IOException {
 		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);

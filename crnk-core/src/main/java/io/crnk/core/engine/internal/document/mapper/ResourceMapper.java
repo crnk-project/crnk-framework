@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -19,14 +22,17 @@ public class ResourceMapper {
 	private static final String SELF_FIELD_NAME = "self";
 	private static final String RELATED_FIELD_NAME = "related";
 
+	private final FilterBehaviorDirectory filterBehaviorDirectory;
+
 	private DocumentMapperUtil util;
 	private boolean client;
 	private ObjectMapper objectMapper;
 
-	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
+	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, FilterBehaviorDirectory filterBehaviorDirectory) {
 		this.util = util;
 		this.client = client;
 		this.objectMapper = objectMapper;
+		this.filterBehaviorDirectory = filterBehaviorDirectory;
 	}
 
 	public Resource toData(Object entity, QueryAdapter queryAdapter) {
@@ -88,7 +94,7 @@ public class ResourceMapper {
 	}
 
 	protected boolean isIgnored(ResourceField field) { // NOSONAR signature is ok since protected
-		return false;
+		return filterBehaviorDirectory != null && filterBehaviorDirectory.get(field, HttpMethod.GET) != FilterBehavior.NONE;
 	}
 
 	protected void setAttribute(Resource resource, ResourceField field, Object entity) {

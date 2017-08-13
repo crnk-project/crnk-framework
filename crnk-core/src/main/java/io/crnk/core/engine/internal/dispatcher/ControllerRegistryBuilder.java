@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseController;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
@@ -24,12 +25,13 @@ public class ControllerRegistryBuilder {
 	private final PropertiesProvider propertiesProvider;
 
 	public ControllerRegistryBuilder(@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry, @SuppressWarnings("SameParameterValue") TypeParser typeParser,
-									 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider) {
+									 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
+									 FilterBehaviorDirectory filterBehaviorDirectory) {
 		this.resourceRegistry = resourceRegistry;
 		this.typeParser = typeParser;
 		this.propertiesProvider = propertiesProvider;
 		this.objectMapper = objectMapper;
-		this.documentMapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider);
+		this.documentMapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterBehaviorDirectory);
 	}
 
 	/**

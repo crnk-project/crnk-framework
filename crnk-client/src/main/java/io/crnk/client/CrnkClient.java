@@ -23,6 +23,7 @@ import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -67,8 +68,6 @@ import java.util.ServiceLoader;
  */
 public class CrnkClient {
 
-	private final ServiceUrlProvider serviceUrlProvider;
-
 	private HttpAdapter httpAdapter;
 
 	private ObjectMapper objectMapper;
@@ -100,12 +99,11 @@ public class CrnkClient {
 		this.registerHttpAdapterProvider(new HttpClientAdapterProvider());
 
 		moduleRegistry = new ModuleRegistry(false);
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 
 		moduleRegistry.addModule(new ClientModule());
 
-		this.serviceUrlProvider = serviceUrlProvider;
-
-		resourceRegistry = new ClientResourceRegistry(moduleRegistry, serviceUrlProvider);
+		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 
 		objectMapper = new ObjectMapper();
@@ -247,7 +245,7 @@ public class CrnkClient {
 		};
 		ResourceRepositoryInformation repositoryInformation =
 				new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-						resourceInformation);
+						resourceInformation, RepositoryMethodAccess.ALL);
 		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
 		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
@@ -495,7 +493,7 @@ public class CrnkClient {
 
 				@Override
 				public ServiceUrlProvider getServiceUrlProvider() {
-					return serviceUrlProvider;
+					return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 				}
 
 				@Override
@@ -515,13 +513,13 @@ public class CrnkClient {
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {
-		return serviceUrlProvider;
+		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
 
 	class ClientResourceRegistry extends ResourceRegistryImpl {
 
-		public ClientResourceRegistry(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider) {
-			super(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrlProvider);
+		public ClientResourceRegistry(ModuleRegistry moduleRegistry) {
+			super(new DefaultResourceRegistryPart(), moduleRegistry);
 		}
 
 		@Override

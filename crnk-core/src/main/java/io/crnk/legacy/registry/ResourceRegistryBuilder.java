@@ -1,5 +1,6 @@
 package io.crnk.legacy.registry;
 
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
@@ -79,14 +80,15 @@ public class ResourceRegistryBuilder {
 			List<ResponseRelationshipEntry> relationshipEntries = repositoryEntryBuilder.buildRelationshipRepositories(resourceLookup, resourceClass);
 			LOGGER.trace("{} has relationship repositories {}", resourceInformation.getResourceClass(), relationshipEntries);
 
-			ResourceRepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(), resourceInformation);
+			RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
+			ResourceRepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(), resourceInformation, access);
 
 			RegistryEntry entry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
 			entry.initialize(moduleRegistry);
 			registryEntries.add(entry);
 		}
 
-		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrl);
+		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		for (RegistryEntry registryEntry : registryEntries) {
 			Class<?> resourceClass = registryEntry.getResourceInformation().getResourceClass();
 			RegistryEntry registryEntryParent = findParent(resourceClass, registryEntries);

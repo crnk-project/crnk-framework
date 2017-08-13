@@ -1,12 +1,6 @@
 package io.crnk.legacy.repository.information;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import io.crnk.core.engine.information.repository.RepositoryAction;
-import io.crnk.core.engine.information.repository.RepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.*;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
@@ -18,6 +12,9 @@ import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultResourceRepositoryInformationBuilder implements RepositoryInformationBuilder {
 
@@ -57,7 +54,12 @@ public class DefaultResourceRepositoryInformationBuilder implements RepositoryIn
 		ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
 		String path = getPath(resourceInformation, repository);
 
-		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass));
+		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass), getAccess(repository));
+	}
+
+	// FIXME
+	protected RepositoryMethodAccess getAccess(Object repository) {
+		return new RepositoryMethodAccess(true, true, true, true);
 	}
 
 	protected Map<String, RepositoryAction> buildActions(Class<? extends Object> repositoryClass) {

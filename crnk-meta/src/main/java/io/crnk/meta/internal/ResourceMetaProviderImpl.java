@@ -1,5 +1,8 @@
 package io.crnk.meta.internal;
 
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
@@ -11,6 +14,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -49,6 +53,75 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		return new HashSet<>(
 				Arrays.asList(MetaResource.class, MetaJsonObject.class, MetaResourceBase.class, MetaResourceField.class));
 	}
+
+
+	@Override
+	public MetaElement adjustForRequest(MetaElement element) {
+		if (element instanceof MetaResource) {
+			MetaResource metaResource = (MetaResource) element;
+			return adjustResourceForRequest(metaResource);
+		} else if (element instanceof MetaResourceField) {
+			MetaResourceField field = (MetaResourceField) element;
+			return adjustFieldForRequest(field);
+		}
+		return element;
+	}
+
+	private MetaElement adjustFieldForRequest(MetaResourceField field) {
+		MetaResource metaResource = (MetaResource) field.getParent();
+
+		Module.ModuleContext moduleContext = context.getModuleContext();
+		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getName());
+
+		FilterBehaviorDirectory filterBehaviorProvider = moduleContext.getFilterBehaviorProvider();
+		boolean readable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
+		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.POST) == FilterBehavior.NONE;
+		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
+
+		// hide element if no permission
+		if (!readable && !insertable && !updatable) {
+			return null;
+		}
+
+		if (field.isUpdatable() != updatable || field.isInsertable() != insertable) {
+			MetaResourceField clone = (MetaResourceField) field.duplicate();
+			clone.setInsertable(insertable);
+			clone.setUpdatable(updatable);
+			return clone;
+		}
+		return field;
+	}
+
+	private MetaElement adjustResourceForRequest(MetaResource metaResource) {
+		Module.ModuleContext moduleContext = context.getModuleContext();
+		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+
+		FilterBehaviorDirectory filterBehaviorProvider = moduleContext.getFilterBehaviorProvider();
+		boolean readable = metaResource.isReadable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.GET) == FilterBehavior.NONE;
+		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.POST) == FilterBehavior.NONE;
+		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
+		boolean deletable = metaResource.isDeletable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.DELETE) == FilterBehavior.NONE;
+
+		// hide element if no permission
+		if (!readable && !insertable && !updatable && !deletable) {
+			return null;
+		}
+
+		// update element if necessary
+		if (metaResource.isReadable() != readable || metaResource.isUpdatable() != updatable || metaResource.isInsertable() != insertable || metaResource.isDeletable() != deletable) {
+			MetaResource clone = (MetaResource) metaResource.duplicate();
+			clone.setReadable(readable);
+			clone.setInsertable(insertable);
+			clone.setUpdatable(updatable);
+			clone.setDeletable(deletable);
+			return clone;
+		}
+		return metaResource;
+	}
+
 
 	@Override
 	public boolean accept(Type type, Class<? extends MetaElement> metaClass) {

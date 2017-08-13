@@ -1,5 +1,8 @@
 package io.crnk.core.engine.filter;
 
+import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -36,5 +39,15 @@ public class RepositoryFilterBase implements RepositoryFilter {
 	public <T> LinksInformation filterLinks(RepositoryFilterContext context, Iterable<T> resources,
 											RepositoryLinksFilterChain chain) {
 		return chain.doFilter(context, resources);
+	}
+
+	@Override
+	public FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method) {
+		return FilterBehavior.NONE;
+	}
+
+	@Override
+	public FilterBehavior filterField(ResourceField field, HttpMethod method) {
+		return FilterBehavior.NONE;
 	}
 }

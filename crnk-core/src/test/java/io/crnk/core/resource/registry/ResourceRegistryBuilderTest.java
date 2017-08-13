@@ -8,6 +8,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.RepositoryInstanceNotFoundException;
 import io.crnk.core.mock.models.Document;
 import io.crnk.core.mock.models.Project;
@@ -47,7 +48,9 @@ public class ResourceRegistryBuilderTest {
 		ResourceRegistryBuilder sut = new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
 
 		// WHEN
-		ResourceRegistry resourceRegistry = sut.build(TEST_MODELS_PACKAGE, new ModuleRegistry(), new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		ServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider(TEST_MODELS_URL);
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
+		ResourceRegistry resourceRegistry = sut.build(TEST_MODELS_PACKAGE, moduleRegistry, serviceUrlProvider);
 
 		// THEN
 		RegistryEntry tasksEntry = resourceRegistry.getEntry("tasks");

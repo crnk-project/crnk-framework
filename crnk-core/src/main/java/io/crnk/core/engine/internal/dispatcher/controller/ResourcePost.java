@@ -28,6 +28,11 @@ public class ResourcePost extends ResourceUpsert {
 		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
 	}
 
+	@Override
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.POST;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -73,9 +78,4 @@ public class ResourcePost extends ResourceUpsert {
 		return new Response(responseDocument, HttpStatus.CREATED_201);
 	}
 
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// allow dynamic field where field == null
-		return field == null || field.getAccess().isPostable();
-	}
 }

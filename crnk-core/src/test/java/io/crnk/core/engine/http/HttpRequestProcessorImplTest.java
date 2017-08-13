@@ -8,10 +8,7 @@ import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
-import io.crnk.core.engine.information.repository.RepositoryAction;
-import io.crnk.core.engine.information.repository.RepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.*;
 import io.crnk.core.engine.information.resource.ResourceAction;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
@@ -65,7 +62,6 @@ public class HttpRequestProcessorImplTest {
 	private ModuleRegistry moduleRegistry;
 
 	private DocumentFilter documentFilter = Mockito.spy(AbstractDocumentFilter.class);
-	private ServiceUrlProvider serviceUrlProvider;
 
 	@Before
 	public void prepare() {
@@ -74,7 +70,6 @@ public class HttpRequestProcessorImplTest {
 		boot.addModule(new ActionTestModule());
 		boot.boot();
 
-		serviceUrlProvider = boot.getServiceUrlProvider();
 		resourceRegistry = boot.getResourceRegistry();
 		moduleRegistry = boot.getModuleRegistry();
 	}
@@ -134,7 +129,7 @@ public class HttpRequestProcessorImplTest {
 					Mockito.when(action.getActionType()).thenReturn(RepositoryAction.RepositoryActionType.RESOURCE);
 					actions.put("someAction", action);
 					RepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl("actionResource",
-							resourceInformation, actions);
+							resourceInformation, actions, RepositoryMethodAccess.ALL);
 					return repositoryInformation;
 
 				}
@@ -164,7 +159,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 		sut.process(requestContext);
 
 		verify(controller, times(1))
@@ -183,7 +178,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
@@ -207,7 +202,7 @@ public class HttpRequestProcessorImplTest {
 		controllerRegistry.addController(controller);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
@@ -229,7 +224,7 @@ public class HttpRequestProcessorImplTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
-		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, null, queryAdapterBuilder);
+		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
 		Map<String, Set<String>> parameters = new HashMap<>();
@@ -257,7 +252,7 @@ public class HttpRequestProcessorImplTest {
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher
-				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry,
+				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry,
 				ExceptionMapperRegistryTest.exceptionMapperRegistry, queryAdapterBuilder);
 
 		Response response = requestDispatcher.dispatchRequest("tasks", null, null, null, null);
@@ -276,7 +271,7 @@ public class HttpRequestProcessorImplTest {
 		QuerySpecAdapterBuilder queryAdapterBuilder =
 				new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher
-				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry,
+				requestDispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry,
 				ExceptionMapperRegistryTest.exceptionMapperRegistry, queryAdapterBuilder);
 
 		expectedException.expect(ArithmeticException.class);
