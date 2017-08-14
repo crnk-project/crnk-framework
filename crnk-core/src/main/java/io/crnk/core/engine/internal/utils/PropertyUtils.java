@@ -209,11 +209,11 @@ public class PropertyUtils {
 		}
 	}
 
-	private void checkGetterNotNull(Method getter, Class<?> bean, String fieldName) {
+	private void checkGetterNotNull(Method getter, Class<?> beanClass, String fieldName) {
 		if (getter == null) {
 			String message = String
-					.format("Cannot find an getter for %s.%s", bean.getClass().getCanonicalName(), fieldName);
-			throw new PropertyException(message, bean, fieldName);
+					.format("Cannot find an getter for %s.%s", beanClass.getCanonicalName(), fieldName);
+			throw new PropertyException(message, beanClass, fieldName);
 		}
 	}
 
