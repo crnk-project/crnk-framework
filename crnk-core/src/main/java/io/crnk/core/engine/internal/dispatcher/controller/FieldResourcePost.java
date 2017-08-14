@@ -7,7 +7,6 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
@@ -34,6 +33,11 @@ public class FieldResourcePost extends ResourceUpsert {
 	public FieldResourcePost(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, @SuppressWarnings
 			("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper) {
 		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+	}
+
+	@Override
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.POST;
 	}
 
 	@Override
@@ -102,9 +106,4 @@ public class FieldResourcePost extends ResourceUpsert {
 		return typeParser.parse(resourceId, idClass);
 	}
 
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// allow dynamic field where field == null
-		return field == null || field.getAccess().isPostable();
-	}
 }

@@ -48,7 +48,7 @@ public class CrnkFilter implements Filter {
 		boot = new CrnkBoot();
 		boot.setPropertiesProvider(new FilterPropertiesProvider(filterConfig));
 
-		HttpRequestContextProvider provider = (HttpRequestContextProvider) boot.getDefaultServiceUrlProvider();
+		HttpRequestContextProvider provider = boot.getModuleRegistry().getHttpRequestContextProvider();
 		boot.addModule(new ServletModule(provider));
 		initCrnk(boot);
 		boot.boot();

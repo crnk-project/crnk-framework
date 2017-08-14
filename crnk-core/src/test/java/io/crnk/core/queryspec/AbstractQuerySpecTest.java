@@ -1,5 +1,6 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
@@ -7,6 +8,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.ModuleRegistry;
@@ -67,8 +69,11 @@ public abstract class AbstractQuerySpecTest {
 		moduleRegistry = new ModuleRegistry();
 		ResourceRegistryBuilder resourceRegistryBuilder = new ResourceRegistryBuilder(moduleRegistry, jsonServiceLocator, resourceInformationBuilder);
 		DefaultResourceLookup resourceLookup = newResourceLookup();
-		resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, new ConstantServiceUrlProvider("http://127.0.0.1"));
+		ServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider("http://127.0.0.1");
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
+		resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, serviceUrlProvider);
 		moduleRegistry.setResourceRegistry(resourceRegistry);
+		moduleRegistry.init(new ObjectMapper());
 		parser = new DefaultQuerySpecConverter(moduleRegistry);
 	}
 

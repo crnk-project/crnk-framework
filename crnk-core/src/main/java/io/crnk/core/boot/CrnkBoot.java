@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
@@ -66,8 +65,6 @@ public class CrnkBoot {
 
 	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
 
-	private ServiceUrlProvider serviceUrlProvider;
-
 	private boolean configured;
 
 	private JsonServiceLocator serviceLocator = new SampleJsonServiceLocator();
@@ -79,8 +76,6 @@ public class CrnkBoot {
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
 	private ResourceFieldNameTransformer resourceFieldNameTransformer;
-
-	private ServiceUrlProvider defaultServiceUrlProvider = new HttpRequestContextProvider();
 
 	private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
 
@@ -138,7 +133,7 @@ public class CrnkBoot {
 	 */
 	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
 		checkNotConfiguredYet();
-		this.serviceUrlProvider = serviceUrlProvider;
+		this.moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 	}
 
 	private void checkNotConfiguredYet() {
@@ -205,7 +200,7 @@ public class CrnkBoot {
 			rootPart.addEntry(entry);
 		}
 
-		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry, serviceUrlProvider);
+		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry);
 	}
 
 	private void setupObjectMapper() {
@@ -224,7 +219,7 @@ public class CrnkBoot {
 	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
 		ControllerRegistryBuilder controllerRegistryBuilder =
 				new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider);
+						propertiesProvider, moduleRegistry.getContext().getFilterBehaviorProvider());
 		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
 		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
 
@@ -235,7 +230,7 @@ public class CrnkBoot {
 			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		}
 
-		return new HttpRequestProcessorImpl(moduleRegistry, serviceUrlProvider, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
+		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
 	}
 
 	public DocumentMapper getDocumentMapper() {
@@ -318,18 +313,12 @@ public class CrnkBoot {
 	}
 
 	private void setupServiceUrlProvider() {
-		if (serviceUrlProvider == null) {
-			String resourceDefaultDomain = propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN);
-			String webPathPrefix = getWebPathPrefix();
-			if (resourceDefaultDomain != null) {
-				String serviceUrl = buildServiceUrl(resourceDefaultDomain, webPathPrefix);
-				serviceUrlProvider = new ConstantServiceUrlProvider(serviceUrl);
-			} else {
-				// serviceUrl is obtained from incoming request context
-				serviceUrlProvider = defaultServiceUrlProvider;
-			}
+		String resourceDefaultDomain = propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN);
+		String webPathPrefix = getWebPathPrefix();
+		if (resourceDefaultDomain != null) {
+			String serviceUrl = buildServiceUrl(resourceDefaultDomain, webPathPrefix);
+			moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider(serviceUrl));
 		}
-		PreconditionUtil.assertNotNull("expected serviceUrlProvider", serviceUrlProvider);
 	}
 
 	public HttpRequestProcessorImpl getRequestDispatcher() {
@@ -368,12 +357,20 @@ public class CrnkBoot {
 		this.resourceFieldNameTransformer = resourceFieldNameTransformer;
 	}
 
+	/**
+	 * @deprecated use {@link #setServiceUrlProvider(ServiceUrlProvider)}
+	 */
+	@Deprecated
 	public ServiceUrlProvider getDefaultServiceUrlProvider() {
-		return defaultServiceUrlProvider;
+		return getServiceUrlProvider();
 	}
 
+	/**
+	 * @deprecated use {@link #getServiceUrlProvider()}
+	 */
+	@Deprecated
 	public void setDefaultServiceUrlProvider(ServiceUrlProvider defaultServiceUrlProvider) {
-		this.defaultServiceUrlProvider = defaultServiceUrlProvider;
+		setServiceUrlProvider(defaultServiceUrlProvider);
 	}
 
 	public String getWebPathPrefix() {
@@ -442,6 +439,6 @@ public class CrnkBoot {
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {
-		return serviceUrlProvider;
+		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
 }

@@ -64,7 +64,7 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		addParams(params, "sort[tasks][name]", "asc");
 		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
 
-		QueryParamsAdapter queryAdapter = new QueryParamsAdapter(queryParams);
+		QueryParamsAdapter queryAdapter = new QueryParamsAdapter(resourceRegistry.getEntry(Task.class).getResourceInformation(), queryParams, moduleRegistry);
 		checkCrud(queryAdapter);
 	}
 

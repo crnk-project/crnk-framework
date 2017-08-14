@@ -289,7 +289,7 @@ public class CrnkBootTest {
 		Assert.assertNotEquals(0, taskEntry.getRelationshipEntries().size());
 		ResourceRepositoryAdapter<?, ?> repositoryAdapter = taskEntry.getResourceRepository(null);
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
-		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(new QueryParams()));
+		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(), new QueryParams(), boot.getModuleRegistry()));
 		Assert.assertNotNull(response);
 
 		Assert.assertNotNull(requestDispatcher);

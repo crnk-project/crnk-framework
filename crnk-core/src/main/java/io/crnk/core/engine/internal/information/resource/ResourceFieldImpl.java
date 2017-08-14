@@ -130,12 +130,12 @@ public class ResourceFieldImpl implements ResourceField {
 			return false;
 		}
 		ResourceFieldImpl that = (ResourceFieldImpl) o;
-		return Objects.equals(jsonName, that.jsonName);
+		return Objects.equals(jsonName, that.jsonName) && parentResourceInformation == that.parentResourceInformation;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(jsonName);
+		return Objects.hash(jsonName, parentResourceInformation);
 	}
 
 	/**

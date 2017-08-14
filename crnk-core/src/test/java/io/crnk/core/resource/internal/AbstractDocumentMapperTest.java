@@ -1,6 +1,7 @@
 package io.crnk.core.resource.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
@@ -32,6 +33,9 @@ public abstract class AbstractDocumentMapperTest {
 
 	protected ObjectMapper objectMapper;
 
+	protected FilterBehaviorDirectory filterBehaviorDirectory;
+	private ModuleRegistry moduleRegistry;
+
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
@@ -43,19 +47,26 @@ public abstract class AbstractDocumentMapperTest {
 		//boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		//boot.boot();
 
+		ConstantServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL);
 
 		ResourceInformationBuilder resourceInformationBuilder =
 				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		moduleRegistry = new ModuleRegistry();
 		ResourceRegistryBuilder registryBuilder =
 				new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
 		resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry,
-				new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
+				serviceUrlProvider);
+
 
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, getPropertiesProvider());
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
+		moduleRegistry.init(objectMapper);
+
+		filterBehaviorDirectory = moduleRegistry.getContext().getFilterBehaviorProvider();
+
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, getPropertiesProvider(), filterBehaviorDirectory);
 	}
 
 	protected PropertiesProvider getPropertiesProvider() {
@@ -67,8 +78,8 @@ public abstract class AbstractDocumentMapperTest {
 		MockRepositoryUtil.clear();
 	}
 
-	protected QueryAdapter createAdapter() {
-		return new QueryParamsAdapter(new QueryParams());
+	protected QueryAdapter createAdapter(Class resourceClass) {
+		return new QueryParamsAdapter(resourceRegistry.getEntry(resourceClass).getResourceInformation(), new QueryParams(), moduleRegistry);
 	}
 
 	protected QueryAdapter toAdapter(QuerySpec querySpec) {

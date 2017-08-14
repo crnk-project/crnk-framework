@@ -4,7 +4,10 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.document.mapper.IncludeBehavior;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.HierarchicalTask;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -65,9 +68,10 @@ public abstract class AbstractIncludeBehaviorTest extends AbstractDocumentMapper
 		h1.setChildren(Arrays.asList(h11));
 		h11.setChildren(new ArrayList<HierarchicalTask>());
 
-		hierarchicalTaskRepository.create(h, null);
-		hierarchicalTaskRepository.create(h0, null);
-		hierarchicalTaskRepository.create(h1, null);
-		hierarchicalTaskRepository.create(h11, null);
+		QueryAdapter emptyQueryAdapter = new QuerySpecAdapter(new QuerySpec(HierarchicalTask.class), resourceRegistry);
+		hierarchicalTaskRepository.create(h, emptyQueryAdapter);
+		hierarchicalTaskRepository.create(h0, emptyQueryAdapter);
+		hierarchicalTaskRepository.create(h1, emptyQueryAdapter);
+		hierarchicalTaskRepository.create(h11, emptyQueryAdapter);
 	}
 }

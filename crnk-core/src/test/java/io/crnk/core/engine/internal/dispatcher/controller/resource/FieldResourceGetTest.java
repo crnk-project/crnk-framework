@@ -16,8 +16,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
@@ -81,7 +79,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(new QueryParams()), null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -95,7 +93,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry), null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -121,15 +119,15 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// setup test data
 		User user = new User();
 		user.setId(1L);
-		userRepo.create(user, null);
+		userRepo.create(user, emptyUserQuery);
 		Project project = new Project();
 		project.setId(2L);
-		projectRepo.create(project, null);
+		projectRepo.create(project, emptyProjectQuery);
 		Task task = new Task();
 		task.setId(3L);
-		taskRepo.create(task, null);
-		relRepositoryUserToProject.setRelations(user, Collections.singletonList(project.getId()), assignedProjectsField, null);
-		relRepositoryProjectToTask.setRelation(project, task.getId(), includedTaskField, null);
+		taskRepo.create(task, emptyTaskQuery);
+		relRepositoryUserToProject.setRelations(user, Collections.singletonList(project.getId()), assignedProjectsField, emptyProjectQuery);
+		relRepositoryProjectToTask.setRelation(project, task.getId(), includedTaskField, emptyTaskQuery);
 
 		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
 		addParams(params, "include[projects]", "includedTask");

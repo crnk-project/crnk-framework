@@ -3,12 +3,13 @@ package io.crnk.core.engine.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
+import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -28,9 +29,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
+import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,9 +38,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 public class RepositoryFilterTest {
 
@@ -71,6 +74,7 @@ public class RepositoryFilterTest {
 	private ResourceInformation userInfo;
 
 	private ResourceInformation scheduleInfo;
+	private CrnkBoot boot;
 
 	@Before
 	@After
@@ -82,7 +86,7 @@ public class RepositoryFilterTest {
 	@Before
 	public void prepare() {
 
-		CrnkBoot boot = new CrnkBoot();
+		boot = new CrnkBoot();
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
@@ -547,5 +551,4 @@ public class RepositoryFilterTest {
 		Assert.assertEquals(Arrays.asList(1L, 2L), requestSpec1.getIds());
 		Assert.assertSame(querySpec, requestSpec1.getQuerySpec(userInfo));
 	}
-
 }

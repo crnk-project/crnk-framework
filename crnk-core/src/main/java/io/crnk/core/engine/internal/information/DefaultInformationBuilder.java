@@ -1,25 +1,22 @@
 package io.crnk.core.engine.internal.information;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -66,10 +63,15 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private String targetResourceType;
 
+		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
+
+		public void setAccess(RepositoryMethodAccess access) {
+			this.access = access;
+		}
 
 		@Override
 		public RelationshipRepositoryInformation build() {
-			return new RelationshipRepositoryInformationImpl(null, sourceResourceType, targetResourceType);
+			return new RelationshipRepositoryInformationImpl(null, sourceResourceType, targetResourceType, access);
 		}
 	}
 
@@ -79,15 +81,21 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private Map<String, RepositoryAction> actions = new HashMap<>();
 
+		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
+
 		public DefaultResource resource() {
 			return resource;
+		}
+
+		public void setAccess(RepositoryMethodAccess access) {
+			this.access = access;
 		}
 
 		public ResourceRepositoryInformation build() {
 			ResourceInformation resourceInformation = resource.build();
 
 			return new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-					resourceInformation, actions);
+					resourceInformation, actions, access);
 		}
 	}
 

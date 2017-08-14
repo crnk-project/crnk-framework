@@ -54,6 +54,11 @@ public class MetaProviderBase implements MetaProvider {
 	}
 
 	@Override
+	public MetaElement adjustForRequest(MetaElement element) {
+		return element;
+	}
+
+	@Override
 	public void init(MetaProviderContext context) {
 		this.context = context;
 	}

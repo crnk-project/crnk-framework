@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
@@ -141,9 +142,16 @@ public interface Module {
 		/**
 		 * Adds a repository filter to intercept repository calls.
 		 *
-		 * @param RepositoryFilter filter
+		 * @param filter
 		 */
 		void addRepositoryFilter(RepositoryFilter filter);
+
+		/**
+		 * Adds a resource filter to manage access to resources and fields.
+		 *
+		 * @param filter
+		 */
+		void addResourceFilter(ResourceFilter filter);
 
 		/**
 		 * Adds a repository decorator to intercept repository calls.
@@ -193,5 +201,7 @@ public interface Module {
 		RegistryEntryBuilder newRegistryEntryBuilder();
 
 		void addRegistryEntry(RegistryEntry entry);
+
+		FilterBehaviorDirectory getFilterBehaviorProvider();
 	}
 }

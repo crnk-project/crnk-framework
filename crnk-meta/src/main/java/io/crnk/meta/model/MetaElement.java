@@ -1,28 +1,33 @@
 package io.crnk.meta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.resource.annotations.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.SerializeType;
-
+/**
+ * Root of the meta model. Elements are identified by id. Have a name. All except the root have a parent and
+ * may have children.
+ * <p>
+ * Relationships are defined with LookupIncludeBehavior.AUTOMATICALLY_ALWAYS to allow to customize the
+ * meta model towards the request (hide elements, update mutation information, etc.)
+ */
 @JsonApiResource(type = "meta/element")
-public class MetaElement {
+public class MetaElement implements Cloneable {
 
 	@JsonApiId
 	private String id;
 
 	private String name;
 
-	@JsonApiRelation(serialize = SerializeType.LAZY, opposite = "children")
+	@JsonApiRelation(serialize = SerializeType.LAZY, opposite = "children", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaElement parent;
 
-	@JsonApiToMany(opposite = "parent")
+	@JsonApiRelation(opposite = "parent", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private List<MetaElement> children = new ArrayList<>();
 
 	public MetaElement getParent() {
@@ -94,5 +99,15 @@ public class MetaElement {
 	@JsonIgnore
 	public boolean hasId() {
 		return id != null;
+	}
+
+	public MetaElement duplicate() {
+		return ExceptionUtil.wrapCatchedExceptions(new Callable<MetaElement>() {
+
+			@Override
+			public MetaElement call() throws Exception {
+				return (MetaElement) MetaElement.this.clone();
+			}
+		});
 	}
 }

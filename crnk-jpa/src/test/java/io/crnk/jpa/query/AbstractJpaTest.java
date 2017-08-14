@@ -88,9 +88,9 @@ public abstract class AbstractJpaTest {
 
 	@Before
 	public void setup() {
-
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost:1234"));
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		module = JpaModule.newServerModule(emFactory, em, transactionRunner);
 		setupModule(module);
 		moduleRegistry.addModule(new CoreModule(new ResourceFieldNameTransformer()));

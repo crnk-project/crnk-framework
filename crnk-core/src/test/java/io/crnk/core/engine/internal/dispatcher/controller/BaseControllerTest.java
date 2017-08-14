@@ -10,13 +10,15 @@ import io.crnk.core.engine.properties.EmptyPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.models.*;
 import io.crnk.core.mock.repository.*;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,8 +35,6 @@ public abstract class BaseControllerTest {
 
 	protected static final long PROJECT_ID = 2;
 
-	protected static final QueryParams REQUEST_PARAMS = new QueryParams();
-
 	protected static final PropertiesProvider PROPERTIES_PROVIDER = new EmptyPropertiesProvider();
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -45,6 +45,12 @@ public abstract class BaseControllerTest {
 	protected DocumentMapper documentMapper;
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 	protected ModuleRegistry moduleRegistry;
+
+	protected QuerySpecAdapter emptyTaskQuery;
+	protected QuerySpecAdapter emptyProjectQuery;
+	protected QuerySpecAdapter emptyUserQuery;
+	protected QuerySpecAdapter emptyComplexPojoQuery;
+	protected QuerySpecAdapter emptyMemorandumQuery;
 
 	@Before
 	public void prepare() {
@@ -65,6 +71,12 @@ public abstract class BaseControllerTest {
 		UserToProjectRepository.clear();
 		TaskToProjectRepository.clear();
 		ProjectToTaskRepository.clear();
+
+		emptyTaskQuery = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+		emptyProjectQuery = new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry);
+		emptyUserQuery = new QuerySpecAdapter(new QuerySpec(User.class), resourceRegistry);
+		emptyComplexPojoQuery = new QuerySpecAdapter(new QuerySpec(ComplexPojo.class), resourceRegistry);
+		emptyMemorandumQuery = new QuerySpecAdapter(new QuerySpec(Memorandum.class), resourceRegistry);
 	}
 
 	public Resource createTask() {

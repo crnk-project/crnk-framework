@@ -1,14 +1,11 @@
 package io.crnk.meta;
 
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
@@ -19,9 +16,15 @@ import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.concurrent.TimeUnit;
+
 public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 
 	protected CrnkClient client;
+
+	protected CrnkBoot boot;
 
 	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
 		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
@@ -64,8 +67,13 @@ public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 			ObjectMapper objectMapper = feature.getObjectMapper();
 			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 			feature.addModule(createModule());
+			boot = feature.getBoot();
+			setupFeature(feature);
 			register(feature);
 		}
+	}
+
+	protected void setupFeature(CrnkFeature feature) {
 	}
 
 }

@@ -17,11 +17,11 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.CrnkException;
+import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -69,7 +69,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		expectedException.expect(RuntimeException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		sut.handle(new ResourcePath("fridges"), emptyProjectQuery, null, null);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		ResourcePost resourcePost =
 				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 		assertThat(taskId).isNotNull();
@@ -98,7 +98,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, taskPatch);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -121,7 +121,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, taskPatch);
+		sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		JsonPath postPath = pathBuilder.build("/tasks");
 		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		post.handle(postPath, new QueryParamsAdapter(REQUEST_PARAMS), null, requestDocument);
+		post.handle(postPath, emptyTaskQuery, null, requestDocument);
 
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
 
@@ -152,10 +152,10 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		try {
 			JsonPath patchPath = pathBuilder.build("/tasks/" + data.getId());
-			sut.handle(patchPath, new QueryParamsAdapter(REQUEST_PARAMS), null, requestDocument);
+			sut.handle(patchPath, emptyTaskQuery, null, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		} catch (BadRequestException e) {
-			Assert.assertEquals("attribute 'readOnlyValue' is immutable", e.getMessage());
+		} catch (ForbiddenException e) {
+			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
 		}
 	}
 
@@ -172,7 +172,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		ResourcePost resourcePost =
 				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 		assertThat(taskId).isNotNull();
@@ -189,7 +189,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		Response response = null;
 		try {
-			response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, taskPatch);
+			response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 			Assert.fail("Should have recieved exception.");
 		} catch (CrnkException rbe) {
 			// Got correct exception
@@ -215,7 +215,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response taskResponse = resourcePost.handle(documentsPath, new QueryParamsAdapter(REQUEST_PARAMS), null, memorandumBody);
+		Response taskResponse = resourcePost.handle(documentsPath, emptyMemorandumQuery, null, memorandumBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("memoranda");
@@ -235,7 +235,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response memorandumResponse = sut.handle(documentPath, new QueryParamsAdapter(REQUEST_PARAMS), null, memorandumBody);
+		Response memorandumResponse = sut.handle(documentPath, emptyMemorandumQuery, null, memorandumBody);
 
 		// THEN
 		assertThat(memorandumResponse.getDocument().getSingleData().get().getType()).isEqualTo("memoranda");
@@ -257,7 +257,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		ResourcePost resourcePost =
 				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 		assertThat(taskId).isNotNull();
@@ -272,7 +272,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, taskPatch);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -291,7 +291,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response taskResponse = post.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = post.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 
 		Document newProjectBody = new Document();
@@ -302,7 +302,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
-		Response projectsResponse = post.handle(projectsPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, null, newProjectBody);
 		assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData()
 				.get())
 				.hasSize(1);
@@ -313,7 +313,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		Nullable<Object> emptyRelation = Nullable.of((Object) new ArrayList<ResourceIdentifier>());
 		data.getRelationships().get("tasks").setData(emptyRelation);
 		projectsResponse =
-				patch.handle(pathBuilder.build("/projects/2"), new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+				patch.handle(pathBuilder.build("/projects/2"), emptyProjectQuery, null, newProjectBody);
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
 		assertThat(projectsResponse.getDocument().getSingleData().get().getAttributes().get("name").asText())
 				.isEqualTo("sample project");
@@ -335,7 +335,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		// WHEN
 		ResourcePost resourcePost =
 				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response projectResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, null, newProjectBody);
 		Resource savedProject = projectResponse.getDocument().getSingleData().get();
 		assertThat(savedProject.getType()).isEqualTo("projects");
 		assertThat(projectResponse.getDocument().getSingleData().get().getAttributes().get("data")).isNull();
@@ -354,7 +354,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, projectPatch);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, projectPatch);
 
 		// THEN
 		assertThat(response.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("sample "
@@ -374,7 +374,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
-		Response taskResponse = post.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = post.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 
 		Document newProjectBody = new Document();
@@ -385,7 +385,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
-		Response projectsResponse = post.handle(projectsPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, null, newProjectBody);
 		assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData()
 				.get())
 				.hasSize(1);
@@ -396,7 +396,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.getRelationships().remove("tasks");
 		data.getAttributes().put("name", objectMapper.readTree("\"updated project\""));
 		projectsResponse =
-				patch.handle(pathBuilder.build("/projects/2"), new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+				patch.handle(pathBuilder.build("/projects/2"), emptyProjectQuery, null, newProjectBody);
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
 		assertThat(projectsResponse.getDocument().getSingleData().get().getAttributes().get("name").asText())
 				.isEqualTo("updated project");
@@ -412,7 +412,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		// WHEN
 		ResourceGet resourceGet = new ResourceGet(resourceRegistry, typeParser, documentMapper);
-		Response complexPojoResponse = resourceGet.handle(complexPojoPath, new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		Response complexPojoResponse = resourceGet.handle(complexPojoPath, emptyComplexPojoQuery, null, null);
 		assertThat(complexPojoResponse.getDocument().getSingleData().get().getType()).isEqualTo("complexpojos");
 		Long complexPojoId = Long.parseLong(complexPojoResponse.getDocument().getSingleData().get().getId());
 		assertThat(complexPojoId).isNotNull();
@@ -434,7 +434,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, complexPojoPatch);
+		Response response = sut.handle(jsonPath, emptyComplexPojoQuery, null, complexPojoPatch);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -456,7 +456,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
 		Task task = new Task();
 		task.setName("Mary Joe");
-		JsonApiResponse jsonApiResponse = taskRepo.create(task, null);
+		JsonApiResponse jsonApiResponse = taskRepo.create(task, emptyTaskQuery);
 		task = (Task) (jsonApiResponse.getEntity());
 
 		// GIVEN
@@ -469,7 +469,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, taskPatch);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 
 		// THEN
 		Assert.assertNotNull(response);

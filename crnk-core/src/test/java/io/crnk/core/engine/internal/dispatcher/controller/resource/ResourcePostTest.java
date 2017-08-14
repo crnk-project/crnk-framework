@@ -8,17 +8,23 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
+import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.*;
 import io.crnk.core.mock.models.Pojo;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.PojoRepository;
 import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
@@ -78,7 +84,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expect(RuntimeException.class);
 
 		// WHEN
-		sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		sut.handle(projectPath, emptyTaskQuery, null, newProjectBody);
 	}
 
 	@Test
@@ -95,7 +101,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expect(RequestBodyException.class);
 
 		// WHEN
-		sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		sut.handle(projectPath, emptyTaskQuery, null, newProjectBody);
 	}
 
 	@Test
@@ -112,7 +118,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expect(RepositoryNotFoundException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		sut.handle(new ResourcePath("fridges"), emptyTaskQuery, null, newProjectBody);
 	}
 
 	@Test
@@ -124,7 +130,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expect(RepositoryNotFoundException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("fridges"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		sut.handle(new ResourcePath("fridges"), emptyTaskQuery, null, null);
 	}
 
 	@Test
@@ -136,7 +142,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expect(RequestBodyNotFoundException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("tasks"), new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		sut.handle(new ResourcePath("tasks"), emptyTaskQuery, null, null);
 	}
 
 	@Test
@@ -150,7 +156,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -172,7 +178,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTasksBody);
+		Response taskResponse = sut.handle(taskPath, emptyTaskQuery, null, newTasksBody);
 
 		// THEN
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -209,10 +215,10 @@ public class ResourcePostTest extends BaseControllerTest {
 
 		// WHEN
 		try {
-			sut.handle(path, new QueryParamsAdapter(REQUEST_PARAMS), null, requestDocument);
+			sut.handle(path, emptyTaskQuery, null, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		} catch (BadRequestException e) {
-			Assert.assertEquals("attribute 'readOnlyValue' is immutable", e.getMessage());
+		} catch (ForbiddenException e) {
+			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
 		}
 	}
 
@@ -238,7 +244,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(path, new QueryParamsAdapter(REQUEST_PARAMS), null, requestDocument);
+		Response response = sut.handle(path, emptyTaskQuery, null, requestDocument);
 		String persistedValue = response.getDocument().getSingleData().get().getAttributes().get("readOnlyValue").asText();
 		Assert.assertEquals("someReadOnlyValue", persistedValue);
 	}
@@ -255,7 +261,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -276,7 +282,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		JsonPath taskPath = pathBuilder.build("/users");
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newUserBody);
+		Response taskResponse = sut.handle(taskPath, emptyUserQuery, null, newUserBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("users");
@@ -300,7 +306,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newTaskBody);
+		Response taskResponse = sut.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -321,7 +327,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
 		// WHEN
-		Response projectsResponse = sut.handle(projectsPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -332,6 +338,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData().get()).hasSize(1);
 		assertThat(projectsResponse.getDocument().getSingleData().get().getRelationships().get("tasks").getCollectionData().get().get(0).getId()).isEqualTo(taskId.toString());
 	}
+
 
 	@Test
 	public void onUnchangedLazyRelationshipDataShouldNotReturnThatData() throws Exception {
@@ -344,7 +351,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
 		// WHEN
-		Response projectsResponse = sut.handle(projectsPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -369,7 +376,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response memorandumResponse = sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newMemorandumBody);
+		Response memorandumResponse = sut.handle(projectPath, emptyMemorandumQuery, null, newMemorandumBody);
 
 		// THEN
 		assertThat(memorandumResponse.getDocument().getSingleData().get().getType()).isEqualTo("memoranda");
@@ -391,7 +398,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -416,7 +423,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		// WHEN
 		QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 		QueryParams queryParams = queryParamsBuilder.buildQueryParams(Collections.singletonMap("include[pojo]", Collections.singleton("projects")));
-		Response pojoResponse = sut.handle(pojoPath, new QueryParamsAdapter(queryParams), null, pojoBody);
+		Response pojoResponse = sut.handle(pojoPath, toQueryAdapter(queryParams, Pojo.class), null, pojoBody);
 
 		// THEN
 		assertThat(pojoResponse.getDocument().getSingleData().get().getType()).isEqualTo("pojo");
@@ -446,7 +453,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(REQUEST_PARAMS), null, newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyTaskQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -473,6 +480,14 @@ public class ResourcePostTest extends BaseControllerTest {
 		expectedException.expectMessage(String.format("Invalid relationship name: %s", invalidRelationshipName));
 
 		// WHEN
-		sut.handle(pojoPath, new QueryParamsAdapter(REQUEST_PARAMS), null, pojoBody);
+		sut.handle(pojoPath, new QuerySpecAdapter(new QuerySpec(Pojo.class), resourceRegistry), null, pojoBody);
+	}
+
+
+	private QueryAdapter toQueryAdapter(QueryParams requestParams, Class resourceType) {
+		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
+		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		return new QueryParamsAdapter(resourceInformation, requestParams, moduleRegistry);
 	}
 }

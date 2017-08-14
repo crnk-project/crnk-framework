@@ -6,7 +6,9 @@ import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
@@ -243,7 +245,7 @@ public class SimpleModuleTest {
 
 		@Override
 		public ResourceRegistry getResourceRegistry() {
-			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null, null);
+			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null);
 		}
 
 		@Override
@@ -289,6 +291,11 @@ public class SimpleModuleTest {
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
 			numFilters++;
+		}
+
+		@Override
+		public void addResourceFilter(ResourceFilter filter) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -338,6 +345,11 @@ public class SimpleModuleTest {
 
 		@Override
 		public void addRegistryEntry(RegistryEntry entry) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public FilterBehaviorDirectory getFilterBehaviorProvider() {
 			throw new UnsupportedOperationException();
 		}
 	}

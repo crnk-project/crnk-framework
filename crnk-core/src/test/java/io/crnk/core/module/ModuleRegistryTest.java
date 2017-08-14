@@ -61,7 +61,8 @@ public class ModuleRegistryTest {
 	@Before
 	public void setup() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 
 		testModule = new TestModule();
 		moduleRegistry.addModule(new CoreModule("io.crnk.core.module.mock", new ResourceFieldNameTransformer()));
