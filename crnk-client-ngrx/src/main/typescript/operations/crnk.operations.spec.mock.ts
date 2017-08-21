@@ -7,8 +7,14 @@ import 'rxjs/add/observable/throw';
 import {NgrxJsonApi, NgrxJsonApiEffects} from 'ngrx-json-api';
 
 export class JsonApiMock {
+
+	public config = {
+		apiUrl: 'api'
+	};
+
 	constructor() {
 	}
+
 
 	create(query, document) {
 		if (document.data.type === 'SUCCESS') {

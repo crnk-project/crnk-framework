@@ -94,16 +94,24 @@ export class OperationsEffects {
 			return this.http.request(request)
 				.map(res => res.json() as Array<OperationResponse>)
 				.map(operationResponses => {
+					if(!_.isArray(operationResponses)){
+						throw new Error("expected array as operations response");
+					}
+
+					console.log("operationResponse", operationResponses)
 					const actions: Array<Action> = [];
 					for (const index of Object.keys(operationResponses)) {
 						const operationResponse = operationResponses[index];
 						const pendingChange = pending[index];
+						console.log("pending: ", index, pending);
+						console.log(pendingChange);
 						actions.push(this.toResponseAction(pendingChange, operationResponse));
 					}
 					return this.toApplyAction(actions);
 				})
 				.catch(errorResponse => {
 					// transform http to json api error
+					console.log("errorResponse", errorResponse);
 					const error: ResourceError = {
 						status: errorResponse.status.toString(),
 						code: errorResponse.statusText

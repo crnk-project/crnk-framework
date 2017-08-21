@@ -1,22 +1,21 @@
-import {inject, TestBed, getTestBed} from '@angular/core/testing';
+import {getTestBed, TestBed} from '@angular/core/testing';
 
 import "rxjs/add/operator/merge";
-import {StoreModule} from '@ngrx/store';
+import {Store, StoreModule} from '@ngrx/store';
 
 import {EffectsRunner, EffectsTestingModule} from '@ngrx/effects/testing';
 
 import {
 	ApiApplySuccessAction,
-	ApiPostInitAction,
 	initialNgrxJsonApiState,
 	NGRX_JSON_API_CONFIG,
-	NgrxJsonApiEffects,
 	NgrxJsonApiSelectors,
+	NgrxJsonApiStore,
 	selectorsFactory,
 	updateStoreDataFromPayload
 } from 'ngrx-json-api';
 
-import {testPayload, testResource} from './crnk.operations.spec.utils'
+import {testPayload} from './crnk.operations.spec.utils'
 
 import {MOCK_JSON_API_PROVIDERS} from './crnk.operations.spec.mock';
 
@@ -30,9 +29,10 @@ describe('OperationsEffects', () => {
 	let runner: EffectsRunner;
 	let effects: OperationsEffects;
 	let mockBackend: MockBackend;
+	let store: Store<any>;
 
 	beforeEach(() => {
-		let store = {
+		let initialState = {
 			api: Object.assign({}, initialNgrxJsonApiState, {
 				data: updateStoreDataFromPayload({}, testPayload),
 			},)
@@ -40,7 +40,7 @@ describe('OperationsEffects', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				EffectsTestingModule,
-				StoreModule.provideStore({api: OperationsStoreReducer}, store),
+				StoreModule.provideStore({api: OperationsStoreReducer}, initialState),
 			],
 			providers: [
 
@@ -55,7 +55,8 @@ describe('OperationsEffects', () => {
 				{
 					provide: NGRX_JSON_API_CONFIG,
 					useValue: {
-						storeLocation: 'api'
+						storeLocation: 'api',
+						apiUrl: 'api'
 					}
 				},
 				MockBackend,
@@ -77,6 +78,8 @@ describe('OperationsEffects', () => {
 		mockBackend = getTestBed().get(MockBackend);
 		effects = getTestBed().get(OperationsEffects);
 		runner = getTestBed().get(EffectsRunner);
+		store = getTestBed().get(Store);
+		console.log("hi", store);
 
 		initMockHttpResponses();
 	});
@@ -124,6 +127,24 @@ describe('OperationsEffects', () => {
 		expect(res).toBeDefined();
 	});
 
+	fit('should post created resource', () => {
+		let res;
+
+		let api = store['source']['_value']['api'] as NgrxJsonApiStore;
+		api.data['Article']['1'].state = 'CREATED';
+
+		console.log(store['source']['_value']['api']);
+
+		console.log("store", store);
+		runner.queue(new OperationsInitAction());
+		effects.applyResources$.flatMap(it => it).subscribe(result => {
+			res = result;
+			console.log("got result", result);
+
+			expect(result).toEqual(new ApiApplySuccessAction([]));
+		});
+		expect(res).toBeDefined();
+	});
 
 	function initMockHttpResponses() {
 		const mockMovie1 = {
@@ -147,17 +168,28 @@ describe('OperationsEffects', () => {
 			}
 		};
 
+
 		mockBackend.connections.subscribe((connection: MockConnection) => {
 			switch (connection.request.method) {
-				case RequestMethod.Get: {
-					connection.mockRespond(new Response(new ResponseOptions({
-						body: {'data':  [mockMovie1]}
-					})));
-					break;
-				}
 				case RequestMethod.Patch: {
+					const response = [
+						{
+							op: 'POST',
+							path: 'Article',
+							value: {
+								data: {
+									type: 'Article',
+									id: '1',
+									attributes: {
+										title: 'Updated Title'
+									}
+								}
+							}
+						}
+					];
+
 					connection.mockRespond(new Response(new ResponseOptions({
-						body: {'data':  [mockMovie1]}
+						body: response
 					})));
 					break;
 				}
