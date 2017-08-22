@@ -4,7 +4,7 @@ import java.io.File;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSGeneratorExtension;
 import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
 import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.meta.MetaModule;
@@ -29,7 +29,7 @@ public class TSGeneratorTest {
 	@Before
 	public void setup() {
 		Project project = Mockito.mock(Project.class);
-		TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
+		TSGeneratorExtension config = new TSGeneratorExtension(project, null);
 		File outputDir = testProjectDir.getRoot();
 
 		MetaModuleConfig metaConfig = new MetaModuleConfig();

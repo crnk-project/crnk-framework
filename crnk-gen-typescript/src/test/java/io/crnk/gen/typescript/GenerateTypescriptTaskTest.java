@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import javax.naming.Context;
+
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -10,13 +17,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.naming.Context;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class GenerateTypescriptTaskTest {
 
@@ -56,7 +56,7 @@ public class GenerateTypescriptTaskTest {
 		project.getPluginManager().apply(JavaPlugin.class);
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
-		TSGeneratorConfiguration config = project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
 		config.setExpressionLibrary("@crnk/ngrx");
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
@@ -66,6 +66,9 @@ public class GenerateTypescriptTaskTest {
 		config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
 		config.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
 		config.getNpm().setPackageVersion("0.0.1");
+
+		TSGeneratorPlugin plugin = project.getPlugins().getPlugin(TSGeneratorPlugin.class);
+		plugin.init(project);
 
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
 		task.runGeneration();

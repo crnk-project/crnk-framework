@@ -53,13 +53,28 @@ node {
 
 apply plugin: 'crnk-gen-typescript'
 
+configurations {
+	typescriptGenRuntime
+}
+
+dependencies {
+	typescriptGenRuntime project(':project-to-generate-from')
+}
+
 typescriptGen{
+
+	runtime {
+		configuration = 'typescriptGenRuntime'
+	}
+
 	npm {
 		packageVersion = '0.0.1'
 		packageName = '@adnovum/moap-movie-management-api'
 		description = 'movie management API to access backend'
 		gitRepository = 'https://.../bitbucket/scm/moap/moap-movie.git'
 		license = 'MIT'
+		// packagingEnabled = false
+		// outputDir = ...
 	}
 
 	includes = ['ch.adnovum.moap.movie.somePackage']
@@ -67,7 +82,11 @@ typescriptGen{
 
 	packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
 	peerDependencies['ngrx-json-api'] = '>=1.2.0'
+
+	// genDir = ...
+
 }
+typescriptGen.init()
 
 
 ----
@@ -87,6 +106,15 @@ typescriptGen{
   `assemble` has a backend-only
   develop may not need to run with every `assemble` run. Typically `assembleTypescript` is either hooked
   into the publishing or added as dependency on a frontend project contained within the same Gradle project.
+- `runtime.configuration` sets the Gradle configuration to use to obtain a classpath. In the given example
+   `typescriptGenRuntime` is used. You may also use `compile` or anything else.
+- `packagingEnabled` enabled is enabled by default and leads to the generation of a `package.json` and `tsconfig.json` file.
+  With this a fully functional NPM package is generated. This is typically used when a backend application wants to
+  publish its stubs to an NPM repository. Setting it to false will result in the generation of the
+  Typescript files only. This is typically used when the files are directly generated into a frontend project.
+- `genDir` allows to update where the source files are generated to.
+- `npm.outputDirectory` allows to specify where the compiled NPM package should be placed.
+
 
 NOTE: the generator plugin is not yet included in any example applications. It is not possible to
 include a plugin from within the same project. At some point an external example application will be

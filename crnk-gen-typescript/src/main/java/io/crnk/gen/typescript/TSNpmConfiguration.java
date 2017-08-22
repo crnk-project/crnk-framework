@@ -1,5 +1,6 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +21,11 @@ public class TSNpmConfiguration {
 
 	private Map<String, String> devDependencies = new HashMap<>();
 
-
 	private String gitRepository;
+
+	private File outputDir = null;
+
+	private boolean packagingEnabled = true;
 
 	public TSNpmConfiguration() {
 		String crnkNpm = "@crnk/core";
@@ -37,6 +41,29 @@ public class TSNpmConfiguration {
 		devDependencies.put("typescript", "2.2.0");
 		devDependencies.put("ncp", "2.0.0");
 		devDependencies.put("rimraf", "2.5.4");
+	}
+
+	/**
+	 * @return true if npm package if generated (package.json, tsconfig, etc.). Otherwise the generator will only
+	 * output the generated sources.
+	 */
+	public boolean isPackagingEnabled() {
+		return packagingEnabled;
+	}
+
+	public void setPackagingEnabled(boolean packagingEnabled) {
+		this.packagingEnabled = packagingEnabled;
+	}
+
+	/**
+	 * @return directory where the compiled npm package is placed. Defaults to ${buildDir}/npm.
+	 */
+	public File getOutputDir() {
+		return outputDir;
+	}
+
+	public void setOutputDir(File outputDir) {
+		this.outputDir = outputDir;
 	}
 
 	public Map<String, String> getPackageMapping() {

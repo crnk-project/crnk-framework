@@ -1,37 +1,112 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+
 import com.moowork.gradle.node.npm.NpmInstallTask;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
-import org.gradle.api.*;
+import org.gradle.api.Action;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.TaskContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 public class TSGeneratorPlugin implements Plugin<Project> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TSGeneratorPlugin.class);
 
+
 	@Override
 	public void apply(final Project project) {
-		final File sourcesDir = new File(project.getBuildDir(), "generated/source/typescript/");
-		final File buildDir = new File(project.getBuildDir(), "npm_compile");
-		final File distDir = new File(project.getBuildDir(), "npm");
 
-		Configuration compileConfiguration = project.getConfigurations().getByName("compile");
+		final Runnable initRunner = new Runnable() {
+
+			private boolean initialized = false;
+
+			@Override
+			public void run() {
+				if (!initialized) {
+					initialized = true;
+					init(project);
+				}
+			}
+		};
+
+		final TSGeneratorExtension config = new TSGeneratorExtension(project, initRunner);
+		project.getExtensions().add("typescriptGen", config);
+		project.afterEvaluate(new Action<Project>() {
+			@Override
+			public void execute(Project project) {
+				initRunner.run();
+			}
+		});
+	}
+
+
+	protected void init(Project project) {
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		GenerateTypescriptTask generateTask = setupGenerateTask(project);
+		if (config.getNpm().isPackagingEnabled()) {
+			setupPackageTasks(project, generateTask);
+		}
+		setupRuntimeDependencies(project, generateTask);
+	}
+
+	private void setupRuntimeDependencies(Project project, GenerateTypescriptTask generateTask) {
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		String runtimeConfiguration = config.getRuntime().getConfiguration();
+		if (runtimeConfiguration != null) {
+			String runtimeConfigurationFirstUpper =
+					Character.toUpperCase(runtimeConfiguration.charAt(0)) + runtimeConfiguration.substring(1);
+
+			// make sure applications is compiled in order to startup and extract meta information
+			String processResourcesName = "process" + runtimeConfigurationFirstUpper + "Resources";
+			String compileJavaName = "compile" + runtimeConfigurationFirstUpper + "Java";
+			TaskContainer tasks = project.getTasks();
+			Task processResourceTask = tasks.findByName(processResourcesName);
+			Task compileJavaTask = tasks.findByName(compileJavaName);
+			if (processResourceTask != null) {
+				generateTask.dependsOn(processResourceTask);
+			}
+			if (compileJavaTask != null) {
+				generateTask.dependsOn(compileJavaTask, compileJavaTask);
+			}
+
+			// setup up-to-date checking
+			Configuration compileConfiguration = project.getConfigurations().getByName("compile");
+			generateTask.getInputs().file(compileConfiguration.getFiles());
+			generateTask.getOutputs().dir(config.getGenDir());
+		}
+	}
+
+	private File getNpmOutputDir(Project project) {
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		File typescriptGenDir = config.getNpm().getOutputDir();
+		if (typescriptGenDir == null) {
+			return new File(project.getBuildDir(), "npm");
+		}
+		return typescriptGenDir;
+	}
+
+	private GenerateTypescriptTask setupGenerateTask(Project project) {
+		return project.getTasks().create(GenerateTypescriptTask.NAME,
+				GenerateTypescriptTask.class);
+	}
+
+	void setupPackageTasks(Project project, GenerateTypescriptTask generateTask) {
+		final File buildDir = new File(project.getBuildDir(), "npm_compile");
+		final File distDir = getNpmOutputDir(project);
 
 		project.getTasks().create(PublishTypescriptStubsTask.NAME, PublishTypescriptStubsTask.class);
-
-		final GenerateTypescriptTask generateTask = project.getTasks().create(GenerateTypescriptTask.NAME,
-				GenerateTypescriptTask.class);
-		generateTask.getInputs().file(compileConfiguration.getFiles());
-		generateTask.getOutputs().dir(sourcesDir);
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
 
 		Copy copySources = project.getTasks().create("processTypescript", Copy.class);
-		copySources.from(sourcesDir);
+		copySources.from(config.getGenDir());
 		copySources.into(buildDir);
 		copySources.dependsOn(generateTask);
 
@@ -58,7 +133,8 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			npmInstall.getInputs().file(new File(buildDir, "package.json"));
 			npmInstall.getOutputs().dir(new File(buildDir, "node_modules"));
 			compileTypescriptTask.dependsOn(npmInstall);
-		} catch (UnknownTaskException e) {
+		}
+		catch (UnknownTaskException e) {
 			LOGGER.warn("task not found, ok in testing", e);
 		}
 
@@ -81,25 +157,5 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		assembleSources.from(new File(buildDir, "package.json"));
 		assembleSources.into(distDir);
 		assembleSources.dependsOn(compileTypescriptTask);
-
-		final TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
-		project.getExtensions().add("typescriptGen", config);
-
-		// setup dependency of generate task (configurable by extension)
-		final Task assembleTask = project.getTasks().getByName("assemble");
-		generateTask.dependsOn(assembleTask);
-		project.afterEvaluate(new Action<Project>() {
-			@Override
-			public void execute(Project project) {
-				String runtimeConfiguration = config.getRuntime().getConfiguration();
-				String runtimeConfigurationFirstUpper = Character.toUpperCase(runtimeConfiguration.charAt(0)) + runtimeConfiguration.substring(1);
-
-				Task processIntegrationTestResourcesTask = project.getTasks().getByName("process" + runtimeConfigurationFirstUpper + "Resources");
-				Task integrationCompileJavaTask = project.getTasks().getByName("compile" + runtimeConfigurationFirstUpper + "Java");
-				generateTask.dependsOn(integrationCompileJavaTask, processIntegrationTestResourcesTask);
-			}
-		});
-
-
 	}
 }
