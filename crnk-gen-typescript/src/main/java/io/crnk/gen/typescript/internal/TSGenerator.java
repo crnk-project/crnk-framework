@@ -1,12 +1,22 @@
 package io.crnk.gen.typescript.internal;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSGeneratorExtension;
 import io.crnk.gen.typescript.TSNpmConfiguration;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
@@ -18,19 +28,13 @@ import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-
 public class TSGenerator {
 
 	private File outputDir;
 
 	private MetaLookup lookup;
 
-	private TSGeneratorConfiguration config;
+	private TSGeneratorExtension config;
 
 	private Map<MetaElement, TSElement> elementSourceMap = new HashMap<>();
 
@@ -38,7 +42,7 @@ public class TSGenerator {
 
 	private ArrayList<TSMetaTransformation> transformations;
 
-	public TSGenerator(File outputDir, MetaLookup lookup, TSGeneratorConfiguration config) {
+	public TSGenerator(File outputDir, MetaLookup lookup, TSGeneratorExtension config) {
 		this.outputDir = outputDir;
 		this.lookup = lookup;
 		this.config = config;
@@ -69,7 +73,7 @@ public class TSGenerator {
 		ObjectNode root = mapper.createObjectNode();
 		ObjectNode compilerOptions = root.putObject("compilerOptions");
 		compilerOptions.put("baseUrl", "");
-		compilerOptions.put("declaration", false);
+		compilerOptions.put("declaration", true);
 		compilerOptions.put("emitDecoratorMetadata", true);
 		compilerOptions.put("experimentalDecorators", true);
 		compilerOptions.put("module", "es6");
@@ -106,7 +110,6 @@ public class TSGenerator {
 			repository.put("type", "git");
 			repository.put("url", npm.getGitRepository());
 		}
-
 
 		ObjectNode peerDependencies = packageJson.putObject("peerDependencies");
 		ObjectNode devDependencies = packageJson.putObject("devDependencies");
@@ -159,7 +162,7 @@ public class TSGenerator {
 
 	protected File getFile(TSSource sourceFile) {
 		File srcOutputDir = outputDir;
-		if (config.getSourceDirectoryName() != null) {
+		if (config.getNpm().isPackagingEnabled() && config.getSourceDirectoryName() != null) {
 			srcOutputDir = new File(outputDir, config.getSourceDirectoryName());
 		}
 		File dir = new File(srcOutputDir, sourceFile.getDirectory());

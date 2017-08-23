@@ -1,8 +1,18 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import groovy.lang.Closure;
 import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
-import io.crnk.gen.typescript.processor.*;
+import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
+import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
+import io.crnk.gen.typescript.processor.TSImportProcessor;
+import io.crnk.gen.typescript.processor.TSIndexFileProcessor;
+import io.crnk.gen.typescript.processor.TSSourceProcessor;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
@@ -10,15 +20,12 @@ import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.Project;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-public class TSGeneratorConfiguration {
+public class TSGeneratorExtension {
 
 
 	private final Project project;
+
+	private final Runnable initMethod;
 
 	private TSCodeStyle codeStyle = new TSCodeStyle();
 
@@ -29,8 +36,6 @@ public class TSGeneratorConfiguration {
 	private String metaResolverClassName = "io.crnk.gen.runtime.deltaspike.DeltaspikeMetaResolver";
 
 	private boolean generateExpressions = false;
-
-	private String sourceDirectoryName = "src";
 
 	private Set<String> includes = new HashSet<>();
 
@@ -43,8 +48,13 @@ public class TSGeneratorConfiguration {
 
 	private TSRuntimeConfiguration runtime = new TSRuntimeConfiguration();
 
-	public TSGeneratorConfiguration(Project project) {
+	private String sourceDirectoryName = "src";
+
+	private File genDir = null;
+
+	public TSGeneratorExtension(Project project, Runnable initMethod) {
 		this.project = project;
+		this.initMethod = initMethod;
 
 		sourceProcessors.add(new TSExpressionObjectProcessor());
 		sourceProcessors.add(new TSImportProcessor());
@@ -58,8 +68,30 @@ public class TSGeneratorConfiguration {
 		metaTransformationClassNames.add(TSMetaResourceRepositoryTransformation.class.getName());
 	}
 
+	public void init() {
+		initMethod.run();
+	}
+
+	/**
+	 * @return location where the generated sources are placed.
+	 */
+	public File getGenDir() {
+		if (genDir == null) {
+			return new File(project.getBuildDir(), "generated/source/typescript/");
+		}
+		return genDir;
+	}
+
+	public void setGenDir(File genDir) {
+		this.genDir = genDir;
+	}
+
 	public TSRuntimeConfiguration getRuntime() {
 		return runtime;
+	}
+
+	public TSRuntimeConfiguration runtime(Closure closure) {
+		return (TSRuntimeConfiguration) project.configure(runtime, closure);
 	}
 
 	public TSNpmConfiguration getNpm() {
@@ -151,6 +183,9 @@ public class TSGeneratorConfiguration {
 		this.metaResolverClassName = metaResolverClassName;
 	}
 
+	/**
+	 * Only to be used with packagingEnabled is true.
+	 */
 	public String getSourceDirectoryName() {
 		return sourceDirectoryName;
 	}
@@ -158,4 +193,6 @@ public class TSGeneratorConfiguration {
 	public void setSourceDirectoryName(String sourceDirectoryName) {
 		this.sourceDirectoryName = sourceDirectoryName;
 	}
+
+
 }

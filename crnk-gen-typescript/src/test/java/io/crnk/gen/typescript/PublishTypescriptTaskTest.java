@@ -1,5 +1,9 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.IOException;
+import javax.naming.Context;
+
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
@@ -8,10 +12,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.naming.Context;
-import java.io.File;
-import java.io.IOException;
 
 public class PublishTypescriptTaskTest {
 
@@ -31,6 +31,12 @@ public class PublishTypescriptTaskTest {
 		project.setVersion("0.0.1");
 		project.getPluginManager().apply(JavaPlugin.class);
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
+
+		TSGeneratorExtension extension = project.getExtensions().getByType(TSGeneratorExtension.class);
+		extension.getRuntime().setConfiguration(null);
+
+		TSGeneratorPlugin plugin = project.getPlugins().getPlugin(TSGeneratorPlugin.class);
+		plugin.init(project);
 
 		PublishTypescriptStubsTask task = (PublishTypescriptStubsTask) project.getTasks().getByName("publishTypescript");
 		Assert.assertEquals("publish", task.getGroup());

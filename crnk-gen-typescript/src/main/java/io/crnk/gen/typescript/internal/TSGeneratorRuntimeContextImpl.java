@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import io.crnk.gen.runtime.GeneratorTrigger;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSGeneratorExtension;
 import io.crnk.meta.MetaLookup;
 
 
@@ -12,7 +12,7 @@ public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGenera
 
 	private File outputDir;
 
-	private TSGeneratorConfiguration config;
+	private TSGeneratorExtension config;
 
 	@Override
 	public void generate(Object meta) throws IOException {
@@ -28,7 +28,7 @@ public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGenera
 	}
 
 	@Override
-	public void setConfig(TSGeneratorConfiguration config) {
+	public void setConfig(TSGeneratorExtension config) {
 		this.config = config;
 	}
 }

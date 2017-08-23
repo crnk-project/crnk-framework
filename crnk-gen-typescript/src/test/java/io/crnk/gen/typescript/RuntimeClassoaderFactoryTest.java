@@ -1,5 +1,11 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import javax.naming.Context;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import io.crnk.gen.typescript.model.TSClassType;
@@ -14,12 +20,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.naming.Context;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 public class RuntimeClassoaderFactoryTest {
 
@@ -48,7 +48,7 @@ public class RuntimeClassoaderFactoryTest {
 		project.getPluginManager().apply(JavaPlugin.class);
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
-		TSGeneratorConfiguration config = project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
 		config.getRuntime().setConfiguration("test");
 
 		factory = new RuntimeClassLoaderFactory(project);

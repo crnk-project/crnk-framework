@@ -1,7 +1,20 @@
 package io.crnk.gen.runtime;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+
 import io.crnk.gen.typescript.RuntimeMetaResolver;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSGeneratorExtension;
 import io.crnk.gen.typescript.TSNpmConfiguration;
 import io.crnk.gen.typescript.TSRuntimeConfiguration;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
@@ -13,12 +26,8 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Code generation runs within the application classpath, not in the gradle classpath.
@@ -28,6 +37,8 @@ import java.util.*;
  */
 public class RuntimeClassLoaderFactory {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeClassLoaderFactory.class);
+
 	private Project project;
 
 	public RuntimeClassLoaderFactory(Project project) {
@@ -36,7 +47,7 @@ public class RuntimeClassLoaderFactory {
 
 	public URLClassLoader createClassLoader(ClassLoader parentClassLoader) {
 		Set<URL> classURLs = new HashSet<>(); // NOSONAR URL needed by URLClassLoader
-		classURLs.addAll(getProjectClassUrls());
+		classURLs.addAll(getProjectLibraryUrls());
 		classURLs.add(getPluginUrl());
 
 		// do not expose the gradle classpath, so we use the bootstrap classloader instead
@@ -61,7 +72,7 @@ public class RuntimeClassLoaderFactory {
 
 			sharedClasses = new HashMap<>();
 			sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
-			sharedClasses.put(TSGeneratorConfiguration.class.getName(), TSGeneratorConfiguration.class);
+			sharedClasses.put(TSGeneratorExtension.class.getName(), TSGeneratorExtension.class);
 			sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
 			sharedClasses.put(TSRuntimeConfiguration.class.getName(), TSRuntimeConfiguration.class);
 			sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
@@ -111,7 +122,7 @@ public class RuntimeClassLoaderFactory {
 		throw new IllegalStateException("crnk-gen-typescript.jar not found in gradle build classpath");
 	}
 
-	private Set<File> getProjectClassFiles() {
+	private Set<File> getProjectLibraries() {
 		Set<File> classpath = new HashSet<>();
 
 		SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
@@ -125,23 +136,31 @@ public class RuntimeClassLoaderFactory {
 		}
 
 		// add  dependencies from configured gradle configuration to url (usually test or integrationTest)
-		TSGeneratorConfiguration generatorConfiguration = project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		TSGeneratorExtension generatorConfiguration = project.getExtensions().getByType(TSGeneratorExtension.class);
 		String configurationName = generatorConfiguration.getRuntime().getConfiguration();
 
 		ConfigurationContainer configurations = project.getConfigurations();
-		Configuration runtimeConfiguration = configurations.getByName(configurationName + "Runtime");
+		Configuration runtimeConfiguration = configurations.findByName(configurationName + "Runtime");
+		if (runtimeConfiguration == null) {
+			runtimeConfiguration = configurations.getByName(configurationName);
+		}
 		classpath.addAll(runtimeConfiguration.getFiles());
+
+		for (File file : classpath) {
+			LOGGER.debug("classpath entry: {}", file);
+		}
 
 		return classpath;
 	}
 
-	private Collection<? extends URL> getProjectClassUrls() {
-		Set<File> projectClassFiles = getProjectClassFiles();
+	private Collection<? extends URL> getProjectLibraryUrls() {
+		Set<File> projectClassFiles = getProjectLibraries();
 		Collection<URL> urls = new ArrayList<>();
 		for (File file : projectClassFiles) {
 			try {
 				urls.add(file.toURI().toURL());
-			} catch (MalformedURLException e) {
+			}
+			catch (MalformedURLException e) {
 				throw new IllegalStateException();
 			}
 		}

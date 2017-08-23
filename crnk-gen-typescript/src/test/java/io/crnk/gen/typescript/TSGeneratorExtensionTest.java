@@ -1,22 +1,22 @@
 package io.crnk.gen.typescript;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import groovy.lang.Closure;
 import org.gradle.api.Project;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-public class TSGeneratorConfigurationTest {
+public class TSGeneratorExtensionTest {
 
 	@Test
 	public void test() {
 		Project project = Mockito.mock(Project.class);
-		TSGeneratorConfiguration config = new TSGeneratorConfiguration(project);
+		TSGeneratorExtension config = new TSGeneratorExtension(project, null);
 
 		Set<String> includes = new HashSet<>();
 		config.setIncludes(includes);

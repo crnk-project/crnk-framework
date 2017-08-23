@@ -1,16 +1,17 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URLClassLoader;
+
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContextImpl;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URLClassLoader;
 
 public class GenerateTypescriptTask extends DefaultTask {
 
@@ -21,10 +22,10 @@ public class GenerateTypescriptTask extends DefaultTask {
 		setDescription("generate Typescript stubs from a Crnk setup");
 	}
 
+	@OutputDirectory
 	public File getOutputDirectory() {
-		Project project = getProject();
-		String srcDirectoryPath = "generated/source/typescript/";
-		return new File(project.getBuildDir(), srcDirectoryPath);
+		TSGeneratorExtension config = getConfig();
+		return config.getGenDir();
 	}
 
 	@TaskAction
@@ -38,7 +39,8 @@ public class GenerateTypescriptTask extends DefaultTask {
 			thread.setContextClassLoader(classloader);
 
 			runGeneration();
-		} finally {
+		}
+		finally {
 			// make sure to restore the classloader when leaving this task
 			thread.setContextClassLoader(contextClassLoader);
 
@@ -48,7 +50,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 
 	}
 
-	protected void setupDefaultConfig(TSGeneratorConfiguration config) {
+	protected void setupDefaultConfig(TSGeneratorExtension config) {
 		String defaultVersion = getProject().getVersion().toString();
 		if (config.getNpm().getPackageVersion() == null) {
 			config.getNpm().setPackageVersion(defaultVersion);
@@ -56,16 +58,16 @@ public class GenerateTypescriptTask extends DefaultTask {
 	}
 
 	protected RuntimeMetaResolver getRuntime() {
-		TSGeneratorConfiguration config = getConfig();
+		TSGeneratorExtension config = getConfig();
 		String runtimeClass = config.getMetaResolverClassName();
 		return (RuntimeMetaResolver) loadClass(getClass().getClassLoader(), runtimeClass);
 	}
 
 	protected void runGeneration() {
-		TSGeneratorConfiguration config = getConfig();
+		TSGeneratorExtension config = getConfig();
 		setupDefaultConfig(config);
 
-		File outputDir = getOutputDirectory();
+		File outputDir = config.getGenDir();
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		GeneratorTrigger context = (GeneratorTrigger) loadClass(classLoader, TSGeneratorRuntimeContextImpl.class.getName());
@@ -82,14 +84,15 @@ public class GenerateTypescriptTask extends DefaultTask {
 		try {
 			Class<?> clazz = classLoader.loadClass(name);
 			return clazz.newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException("failed to load class", e);
 		}
 	}
 
-	private TSGeneratorConfiguration getConfig() {
+	private TSGeneratorExtension getConfig() {
 		Project project = getProject();
-		return project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		return project.getExtensions().getByType(TSGeneratorExtension.class);
 	}
 
 }
