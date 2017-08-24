@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
@@ -12,6 +13,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -61,6 +63,8 @@ public class CrnkBoot {
 
 	private ObjectMapper objectMapper;
 
+	private AttributeSerializationInformationProvider attributeSerializationInformationProvider;
+	
 	private QueryParamsBuilder queryParamsBuilder;
 
 	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
@@ -256,7 +260,7 @@ public class CrnkBoot {
 		};
 		module.addRepositoryInformationBuilder(new DefaultResourceRepositoryInformationBuilder());
 		module.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
-		module.addResourceInformationBuilder(new AnnotationResourceInformationBuilder(resourceFieldNameTransformer));
+		module.addResourceInformationBuilder(new AnnotationResourceInformationBuilder(getAttributeSerializationInformationProvider(), resourceFieldNameTransformer));
 
 		for (JsonApiExceptionMapper<?> exceptionMapper : serviceDiscovery.getInstancesByType(JsonApiExceptionMapper.class)) {
 			module.addExceptionMapper(exceptionMapper);
@@ -440,5 +444,30 @@ public class CrnkBoot {
 
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
+	}
+
+	/**
+	 * Return the {@link AttributeSerializationInformationProvider} that will be used during
+	 * serialization to make decisions about the serialization output.
+	 * 
+	 * @return
+	 */
+	public AttributeSerializationInformationProvider getAttributeSerializationInformationProvider() {
+		if (attributeSerializationInformationProvider == null) {
+			attributeSerializationInformationProvider = new JacksonAttributeSerializationInformationProvider(getObjectMapper());
+		}
+		
+		return attributeSerializationInformationProvider;
+	}
+
+	/**
+	 * Set the {@link AttributeSerializationInformationProvider} that will be used during
+	 * serialization to make decisions about the serialization output.
+	 * 
+	 * @param attributeSerializationInformationProvider
+	 */
+	public void setAttributeSerializationInformationProvider(	AttributeSerializationInformationProvider attributeSerializationInformationProvider) 
+	{	
+		this.attributeSerializationInformationProvider = attributeSerializationInformationProvider;
 	}
 }

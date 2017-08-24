@@ -3,6 +3,7 @@ package io.crnk.legacy.queryParams;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -23,7 +24,7 @@ public class QueryParamsAdapterTest {
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		QueryParams params = new QueryParams();
 
-		AnnotationResourceInformationBuilder builder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
+		AnnotationResourceInformationBuilder builder = new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(), new ResourceFieldNameTransformer());
 		builder.init(new DefaultResourceInformationBuilderContext(builder, moduleRegistry.getTypeParser()));
 		ResourceInformation info = builder.build(Task.class);
 

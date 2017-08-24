@@ -10,6 +10,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
@@ -38,6 +39,7 @@ public class JaxrsModuleTest {
 		final ModuleRegistry moduleRegistry = new ModuleRegistry();
 		builder = new JaxrsResourceRepositoryInformationBuilder();
 		final ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(
+				new JacksonAttributeSerializationInformationProvider(),
 				new ResourceFieldNameTransformer());
 		resourceInformationBuilder
 				.init(new DefaultResourceInformationBuilderContext(resourceInformationBuilder, moduleRegistry.getTypeParser()));

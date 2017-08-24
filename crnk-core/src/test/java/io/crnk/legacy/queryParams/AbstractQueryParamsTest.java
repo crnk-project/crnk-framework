@@ -3,6 +3,7 @@ package io.crnk.legacy.queryParams;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
@@ -38,7 +39,7 @@ public abstract class AbstractQueryParamsTest {
 	@Before
 	public void setup() {
 		JsonServiceLocator jsonServiceLocator = new SampleJsonServiceLocator();
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
+		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(), new ResourceFieldNameTransformer());
 		moduleRegistry = new ModuleRegistry();
 		ResourceRegistryBuilder resourceRegistryBuilder = new ResourceRegistryBuilder(moduleRegistry, jsonServiceLocator, resourceInformationBuilder);
 		DefaultResourceLookup resourceLookup = newResourceLookup();

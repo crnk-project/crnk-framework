@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.*;
 import io.crnk.core.mock.models.ShapeResource;
@@ -28,7 +29,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 	private static final String NAME_PROPERTY = "underlyingName";
 	private final ResourceInformationBuilder resourceInformationBuilder =
-			new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
+			new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(), new ResourceFieldNameTransformer());
 	private final ResourceInformationBuilderContext context =
 			new DefaultResourceInformationBuilderContext(resourceInformationBuilder, new TypeParser());
 	@Rule
@@ -203,10 +204,17 @@ public class AnnotationResourceInformationBuilderTest {
 	}
 
 	@Test
+	public void shouldNotIncludeIgnoredInterfaceMethod() throws Exception {		
+		ResourceInformation resourceInformation = resourceInformationBuilder.build(JsonIgnoreMethodImpl.class);
+		
+		assertThat(resourceInformation.findFieldByName("ignoredMember")).isNull();
+	}
+	
+	@Test
 	public void shouldReturnMergedAnnotationsOnAnnotationsOnFieldAndMethod() throws Exception {
 		ResourceInformation resourceInformation = resourceInformationBuilder.build(AnnotationOnFieldAndMethodResource.class);
 
-		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(0);
+		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(1);
 	}
 
 	@Test
@@ -317,10 +325,10 @@ public class AnnotationResourceInformationBuilderTest {
 	private static class DuplicatedIdResource {
 
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		@JsonApiId
-		private Long id2;
+		public Long id2;
 	}
 
 	@JsonApiResource(type = "ignoredId")
@@ -404,7 +412,7 @@ public class AnnotationResourceInformationBuilderTest {
 	private static class AnnotationOnFieldAndMethodResource {
 
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		@JsonIgnore
 		private String field;
@@ -420,7 +428,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 		public static String attribute;
 		@JsonApiId
-		private Long id;
+		public Long id;
 	}
 
 	@JsonApiResource(type = "ignoredAttribute")
@@ -428,7 +436,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 		public transient int attribute;
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		public int getAttribute() {
 			return attribute;
@@ -496,7 +504,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 		public Future<String> field;
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		@JsonApiToOne
 		public String getField() {
@@ -525,7 +533,7 @@ public class AnnotationResourceInformationBuilderTest {
 		@JsonApiRelation
 		public Collection<Future<String>> fields;
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		public String getField() {
 			return null;
@@ -540,10 +548,33 @@ public class AnnotationResourceInformationBuilderTest {
 		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
 		public Collection<Future<String>> fields;
 		@JsonApiId
-		private Long id;
+		public Long id;
 
 		public String getField() {
 			return null;
+		}
+	}
+	
+	private static interface JsonIgnoreMethodInterface {
+		@JsonIgnore
+		public String getIgnoredMember();
+		
+		public String getNotIgnoredMember();
+	}
+	
+	@JsonApiResource(type = "jsonIgnoredInterfaceMethod")
+	private static class JsonIgnoreMethodImpl implements JsonIgnoreMethodInterface {
+		@JsonApiId
+		public Long id;
+		
+		@Override
+		public String getIgnoredMember() {
+			return "ignored";
+		}
+
+		@Override
+		public String getNotIgnoredMember() {
+			return "not ignored";
 		}
 	}
 }

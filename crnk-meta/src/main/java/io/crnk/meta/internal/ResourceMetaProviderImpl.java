@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
@@ -339,6 +340,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 
 		if (allowNonResourceBaseClass) {
 			AnnotationResourceInformationBuilder fallbackBuilder = new AnnotationResourceInformationBuilder(
+					new JacksonAttributeSerializationInformationProvider(),
 					new ResourceFieldNameTransformer());
 			fallbackBuilder.init(new DefaultResourceInformationBuilderContext(infoBuilder, new TypeParser()));
 			return fallbackBuilder.build(resourceClass, true);

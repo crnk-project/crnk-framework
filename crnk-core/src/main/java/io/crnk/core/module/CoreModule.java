@@ -1,10 +1,12 @@
 package io.crnk.core.module;
 
+import io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
 import io.crnk.core.module.discovery.DefaultResourceLookup;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 
@@ -26,7 +28,8 @@ public class CoreModule extends SimpleModule {
 
 	public CoreModule(ResourceFieldNameTransformer resourceFieldNameTransformer) {
 		super(MODULE_NAME);
-		this.addResourceInformationBuilder(new AnnotationResourceInformationBuilder(resourceFieldNameTransformer));
+		AttributeSerializationInformationProvider infoProvider = new JacksonAttributeSerializationInformationProvider();
+		this.addResourceInformationBuilder(new AnnotationResourceInformationBuilder(infoProvider, resourceFieldNameTransformer));
 		this.addRepositoryInformationBuilder(new DefaultResourceRepositoryInformationBuilder());
 		this.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
 	}
