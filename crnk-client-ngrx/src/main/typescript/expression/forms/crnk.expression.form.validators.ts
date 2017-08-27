@@ -1,12 +1,14 @@
-import {Directive, forwardRef} from "@angular/core";
+import {Directive, forwardRef, Input} from "@angular/core";
 import {
+	AbstractControl,
 	CheckboxRequiredValidator,
 	EmailValidator,
 	MaxLengthValidator,
 	MinLengthValidator,
 	NG_VALIDATORS,
 	PatternValidator,
-	RequiredValidator
+	RequiredValidator,
+	Validators
 } from "@angular/forms";
 
 export const EXPRESSION_REQUIRED_VALIDATOR: any = {
@@ -22,6 +24,28 @@ export const EXPRESSION_REQUIRED_VALIDATOR: any = {
 	host: {'[attr.required]': 'required ? "" : null'}
 })
 export class ExpressionRequiredValidator extends RequiredValidator {
+
+	private _required: boolean;
+	private _onChange: () => void;
+
+	@Input()
+	get required(): boolean /*| string*/ {
+		return this._required;
+	}
+
+	set required(value: boolean) {
+		this._required = value != null && value !== false && `${value}` !== 'false';
+		if (this._onChange) this._onChange();
+	}
+
+	validate(c: AbstractControl): { [key: string]: any } {
+		console.log("validate!!!", c,  Validators.required(c));
+		return this.required ? Validators.required(c) : null;
+	}
+
+	registerOnValidatorChange(fn: () => void): void {
+		this._onChange = fn;
+	}
 }
 
 

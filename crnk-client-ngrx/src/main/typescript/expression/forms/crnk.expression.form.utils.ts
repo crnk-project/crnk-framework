@@ -2,21 +2,22 @@
 // copy/pasted from @angular/forms to due the lack of customizability of their implementation
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 import {
-	ControlContainer,
-	Validator,
-	ControlValueAccessor,
+	AbstractControl,
+	AbstractControlDirective,
+	AsyncValidator,
 	AsyncValidatorFn,
-	ValidatorFn,
+	CheckboxControlValueAccessor,
+	ControlContainer,
+	ControlValueAccessor,
+	DefaultValueAccessor,
 	FormControl,
 	NgControl,
-	AbstractControlDirective,
-	Validators,
-	CheckboxControlValueAccessor,
-	AbstractControl,
+	RadioControlValueAccessor,
 	SelectControlValueAccessor,
 	SelectMultipleControlValueAccessor,
-	DefaultValueAccessor,
-	RadioControlValueAccessor
+	Validator,
+	ValidatorFn,
+	Validators
 } from "@angular/forms";
 
 
@@ -29,14 +30,12 @@ export function normalizeValidator(validator: ValidatorFn | Validator): Validato
 	}
 }
 
-export function normalizeAsyncValidator(validator: AsyncValidatorFn): AsyncValidatorFn {
-	// TODO experimental functionality disabled as not exported by Angular
-	/*if ((<AsyncValidator>validator).validate) {
-	 return (c: AbstractControl) => (<AsyncValidator>validator).validate(c);
-	 } else {
-	 return <AsyncValidatorFn>validator;
-	 }*/
-	return <AsyncValidatorFn>validator;
+export function normalizeAsyncValidator(validator: AsyncValidatorFn | AsyncValidator): AsyncValidatorFn {
+	if ((<AsyncValidator>validator).validate) {
+		return (c: AbstractControl) => (<AsyncValidator>validator).validate(c);
+	} else {
+		return <AsyncValidatorFn>validator;
+	}
 }
 
 export function looseIdentical(a: any, b: any): boolean {
@@ -124,16 +123,16 @@ function _throwError(dir: AbstractControlDirective, message: string): void {
 	throw new Error(`${message} ${messageEnd}`);
 }
 
-export function composeValidators(validators: Array<Validator|Function>): ValidatorFn {
+export function composeValidators(validators: Array<Validator | Function>): ValidatorFn {
 	return isPresent(validators) ? Validators.compose(validators.map(normalizeValidator)) : null;
 }
 
-export function composeAsyncValidators(validators: Array<Validator|Function>): AsyncValidatorFn {
+export function composeAsyncValidators(validators: Array<Validator | Function>): AsyncValidatorFn {
 	return isPresent(validators) ? Validators.composeAsync(validators.map(normalizeAsyncValidator)) :
 		null;
 }
 
-export function isPropertyUpdated(changes: {[key: string]: any}, viewModel: any): boolean {
+export function isPropertyUpdated(changes: { [key: string]: any }, viewModel: any): boolean {
 	if (!changes.hasOwnProperty('pathModel')) {
 		return false;
 	}
@@ -237,9 +236,9 @@ export abstract class CrnkControl extends NgControl {
 	name: string = null;
 	valueAccessor: ControlValueAccessor = null;
 	/** @internal */
-	_rawValidators: Array<Validator|ValidatorFn> = [];
+	_rawValidators: Array<Validator | ValidatorFn> = [];
 	/** @internal */
-	_rawAsyncValidators: Array<Validator|ValidatorFn> = [];
+	_rawAsyncValidators: Array<Validator | ValidatorFn> = [];
 
 	get validator(): ValidatorFn {
 		return <ValidatorFn>unimplemented();

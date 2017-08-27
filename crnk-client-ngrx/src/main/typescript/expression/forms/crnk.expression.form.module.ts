@@ -1,10 +1,6 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {
-	ExpressionDirective,
-	FormExpressionDirective,
-	PathDefaultValueAccessorDirective
-} from './crnk.expression.form.model';
+import {ExpressionDirective} from './crnk.expression.form.model.default';
 import {
 	ExpressionCheckboxRequiredValidator,
 	ExpressionMaxLengthValidator,
@@ -12,6 +8,8 @@ import {
 	ExpressionPatternValidator,
 	ExpressionRequiredValidator
 } from "./crnk.expression.form.validators";
+import {FormExpressionDirective} from "./crnk.expression.form.model.form";
+import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.model.accessor";
 
 /**
  * Adds support for the {@link FormExpressionDirective} to bind expressions to expectForm controls.
@@ -19,13 +17,13 @@ import {
 @NgModule({
 	imports: [FormsModule],
 	exports: [
-		FormsModule, ExpressionDirective, FormExpressionDirective, PathDefaultValueAccessorDirective,
+		FormsModule, ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
 		ExpressionPatternValidator, ExpressionMaxLengthValidator, ExpressionMinLengthValidator, ExpressionCheckboxRequiredValidator,
 		ExpressionRequiredValidator
 	],
 	declarations: [
-		ExpressionDirective, FormExpressionDirective, PathDefaultValueAccessorDirective,
+		ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
 		ExpressionPatternValidator, ExpressionMaxLengthValidator, ExpressionMinLengthValidator, ExpressionCheckboxRequiredValidator,
 		ExpressionRequiredValidator
