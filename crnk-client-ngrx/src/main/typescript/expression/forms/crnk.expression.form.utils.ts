@@ -52,7 +52,7 @@ export function controlPath(name: string, parent: ControlContainer): string[] {
 	return [...parent.path, name];
 }
 
-export function setUpControl(control: FormControl, dir: ArbControl): void {
+export function setUpControl(control: FormControl, dir: CrnkControl): void {
 	if (!control) {
 		_throwError(dir, 'Cannot find control with');
 	}
@@ -231,7 +231,7 @@ function unimplemented(): any {
 	throw new Error('unimplemented');
 }
 
-export abstract class ArbControl extends NgControl {
+export abstract class CrnkControl extends NgControl {
 	/** @internal */
 	_parent: ControlContainer = null;
 	name: string = null;

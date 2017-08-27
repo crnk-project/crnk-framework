@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {ManyQueryResult, OneQueryResult, ResourceRelationship} from 'ngrx-json-api/src/interfaces';
@@ -22,6 +22,8 @@ export interface MetaLiteralListResult extends ManyQueryResult {
 }
 export class QMetaLiteral extends BeanPath<MetaLiteral> {
 	metaId = 'io.crnk.meta.MetaLiteral';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaLiteral.QRelationships = new QMetaLiteral.QRelationships(this, 'relationships');
 	attributes: QMetaLiteral.QAttributes = new QMetaLiteral.QAttributes(this, 'attributes');
 }
@@ -31,7 +33,7 @@ export module QMetaLiteral {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaLiteral.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaLiteral = function(id: string): MetaLiteral {

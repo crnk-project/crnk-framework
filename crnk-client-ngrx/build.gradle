@@ -59,33 +59,29 @@ node {
 }
 
 def npmStagingDir = file("${buildDir}/npm")
-task copyNpmFiles(type: Copy) {
-	from(
-			file('.npmrc'),
-			file('.npmignore')
-	)
-	into npmStagingDir
-}
 
 npmInstall.inputs.file(file('package.json'))
+npmInstall.inputs.file(file('package-lock.json'))
 npmInstall.outputs.dir(file('node_modules'))
 
+
+def inputFileTree = fileTree('.') {
+	include 'package.json'
+	include 'package-lock.json'
+	include 'tsconfig.json'
+	include 'tsconfig.dist.json'
+	include 'src/main/typescript**'
+}
+
 task npmRunBuild(type: NpmTask) {
-	dependsOn tasks.npmInstall
-	dependsOn tasks.copyNpmFiles
+	group 'node'
+
 	dependsOn tasks.generateMetaStubs
+	dependsOn tasks.npmInstall
 
 	npmCommand = ['run', 'build']
-	// TODO: Programmatically include all subfolders except buildDir?
-	inputs.dir 'app'
-	inputs.dir 'assets'
-	inputs.dir 'binding'
-	inputs.dir 'common'
-	inputs.dir 'component'
-	inputs.dir 'meta'
-	inputs.dir 'presentation'
+	inputs.files inputFileTree
 
-	inputs.files 'angular-cli.json', 'package.json'
 	// We need this since the version is added to package.json during the build
 	inputs.property 'version', project.version
 
@@ -94,19 +90,31 @@ task npmRunBuild(type: NpmTask) {
 	// always do package.json in same task to have proper up-to-date checks
 	// and properly updated version timestamps
 	def packageInputFile = file("package.json")
-	def PackageOutputFile = file("${npmStagingDir}/package.json")
+	def packageOutputFile = file("${npmStagingDir}/package.json")
 	doLast {
 		def packageJson = new groovy.json.JsonSlurper().parseText(packageInputFile.text)
 		packageJson['version'] = project.version
 		def jsonOutput = new groovy.json.JsonOutput()
-		PackageOutputFile.createNewFile()
-		PackageOutputFile.write jsonOutput.prettyPrint(jsonOutput.toJson(packageJson))
+		packageOutputFile.createNewFile()
+		packageOutputFile.write jsonOutput.prettyPrint(jsonOutput.toJson(packageJson))
+
+		project.copy({
+			from(
+					file('.npmrc'),
+					file('.npmignore')
+			)
+			into npmStagingDir
+		})
 	}
 }
+
 
 task testKarma(type: NpmTask) {
 	group 'verification'
 	dependsOn npmRunBuild
+
+	inputs.files inputFileTree
+	outputs.dir "${buildDir}/test/log/karma"
 
 	npmCommand = ['run', 'test:unit']
 	group = 'node'
@@ -116,13 +124,26 @@ task lint(type: NpmTask) {
 	group 'verification'
 	dependsOn npmRunBuild
 
+	inputs.files inputFileTree
+
 	npmCommand = ['run', 'lint']
 	group = 'node'
+
+	// output file needed for up-to-date check
+	def lintMarkerFile = file("${buildDir}/lint.timestamp")
+	outputs.files lintMarkerFile
+	doLast {
+		lintMarkerFile.createNewFile()
+		lintMarkerFile.write Long.toString(System.currentTimeMillis())
+	}
 }
 
 task coveralls(type: NpmTask) {
 	group 'verification'
 	dependsOn npmRunBuild
+
+	inputs.files inputFileTree
+	outputs.dir 'coverage'
 
 	npmCommand = ['run', 'coveralls']
 	group = 'node'
@@ -130,12 +151,21 @@ task coveralls(type: NpmTask) {
 
 check.dependsOn testKarma
 check.dependsOn lint
-// TODO check.dependsOn coveralls
+// check.dependsOn coveralls
 
 task npmCacheVerify(type: NpmTask) {
 	npmCommand = ['cache', 'verify']
 	group = 'node'
 }
+
+tasks.assemble.dependsOn 'npmRunBuild'
+
+clean.doFirst {
+	delete "${projectDir}/node_modules/"
+}
+
+
+
 
 task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
 	group = 'publishing'
@@ -145,8 +175,4 @@ task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
 
 tasks.publish.dependsOn publishNpmPackage
 
-tasks.assemble.dependsOn 'npmRunBuild'
 
-clean.doFirst {
-	delete "${projectDir}/node_modules/"
-}

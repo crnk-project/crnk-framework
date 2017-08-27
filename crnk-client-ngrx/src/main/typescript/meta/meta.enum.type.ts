@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {MetaType, QMetaType} from './meta.type';
@@ -23,6 +23,8 @@ export interface MetaEnumTypeListResult extends ManyQueryResult {
 }
 export class QMetaEnumType extends BeanPath<MetaEnumType> {
 	metaId = 'io.crnk.meta.MetaEnumType';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaEnumType.QRelationships = new QMetaEnumType.QRelationships(this, 'relationships');
 	attributes: QMetaEnumType.QAttributes = new QMetaEnumType.QAttributes(this, 'attributes');
 }
@@ -33,7 +35,7 @@ export module QMetaEnumType {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaEnumType.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaEnumType = function(id: string): MetaEnumType {

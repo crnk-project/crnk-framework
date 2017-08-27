@@ -217,7 +217,7 @@ export class BooleanConstant extends BooleanExpression implements Constant<boole
 
 function toFormNameInternal(path: Path<any>, resource: any) {
 	if (resource !== null) {
-		return '/' + resource.type + '/' + resource.id + '/' + path.toString();
+		return '//' + resource.type + '//' + resource.id + '//' + path.toString();
 	}
 	else {
 		throw new Error('resource not available for ' + path.toString());
@@ -264,7 +264,7 @@ export class StringConstant extends StringExpression implements Constant<string>
 export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 
 
-	constructor(public parent: BeanPath<any>, private property: string) {
+	constructor(public parent: BeanPath<any>, private property?: string) {
 		super();
 	}
 

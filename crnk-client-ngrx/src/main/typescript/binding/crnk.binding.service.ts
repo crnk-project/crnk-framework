@@ -4,18 +4,22 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinct';
 import 'rxjs/add/operator/switch';
-import {DataTableBindingConfig, DataTableBinding} from './crnk.binding.table';
-import {FormBindingConfig, FormBinding} from './crnk.binding.form';
-import {SelectorBindingConfig, SelectorBinding} from './crnk.binding.selector';
+import {DataTableBinding, DataTableBindingConfig} from './crnk.binding.table';
+import {FormBinding, FormBindingConfig} from './crnk.binding.form';
+import {SelectorBinding, SelectorBindingConfig} from './crnk.binding.selector';
 import {OperationsService} from '../operations';
 import {NgrxJsonApiService} from 'ngrx-json-api';
-import {NgrxBindingUtils} from './crnk.binding.utils';
+import {CrnkBindingUtils} from './crnk.binding.utils';
+import {Store} from "@ngrx/store";
+import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
 
 @Injectable()
-export class JsonApiBindingService {
+export class CrnkBindingService {
 
-	constructor(private ngrxJsonApiService: NgrxJsonApiService, private utils: NgrxBindingUtils,
-		@Optional() private operationsService: OperationsService) {
+	constructor(private ngrxJsonApiService: NgrxJsonApiService, private utils: CrnkBindingUtils,
+				private store: Store<any>,
+				private ngrxJsonApiSelectors: NgrxJsonApiSelectors<any>,
+				@Optional() private operationsService: OperationsService) {
 
 	}
 
@@ -24,7 +28,7 @@ export class JsonApiBindingService {
 	}
 
 	public bindForm(config: FormBindingConfig): FormBinding {
-		return new FormBinding(this.ngrxJsonApiService, config, this.operationsService);
+		return new FormBinding(this.ngrxJsonApiService, config, this.operationsService, this.store, this.ngrxJsonApiSelectors);
 	}
 
 	public bindSelector(config: SelectorBindingConfig): SelectorBinding {

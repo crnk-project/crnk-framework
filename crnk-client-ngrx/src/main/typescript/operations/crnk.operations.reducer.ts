@@ -10,13 +10,12 @@ import "rxjs/add/operator/switchMapTo";
 import "rxjs/add/operator/take";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/withLatestFrom";
-import {NgrxJsonApiStore, NgrxJsonApiStoreReducer, StoreResource} from "ngrx-json-api";
+import {NgrxJsonApiStore, StoreResource} from "ngrx-json-api";
 import {OperationActionTypes} from "./crnk.operations.actions";
 
 import {getPendingChanges} from './crnk.operations.utils';
 
 export function OperationsStoreReducer(state: NgrxJsonApiStore, action: Action) {
-	console.log("reduce", action);
 	switch (action.type) {
 		case OperationActionTypes.OPERATIONS_INIT:
 			const pending: Array<StoreResource> = getPendingChanges(state);
@@ -37,7 +36,6 @@ export function OperationsStoreReducer(state: NgrxJsonApiStore, action: Action) 
 			}
 			return newState;
 		default:
-			// TODO Consider compose?
-			return NgrxJsonApiStoreReducer(state, action);
+			return state;
 	}
 };

@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {MetaType, QMetaType} from './meta.type';
@@ -24,6 +24,8 @@ export interface MetaMapTypeListResult extends ManyQueryResult {
 }
 export class QMetaMapType extends BeanPath<MetaMapType> {
 	metaId = 'io.crnk.meta.MetaMapType';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaMapType.QRelationships = new QMetaMapType.QRelationships(this, 'relationships');
 	attributes: QMetaMapType.QAttributes = new QMetaMapType.QAttributes(this, 'attributes');
 }
@@ -35,7 +37,7 @@ export module QMetaMapType {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaMapType.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaMapType = function(id: string): MetaMapType {

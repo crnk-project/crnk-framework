@@ -1,0 +1,18 @@
+<form #formRef="ngForm">
+	<div *ngIf="resource != null">
+
+		<input id="nameInput" required [crnkFormExpression]="resource.attributes.name"/>
+
+		<crnk-control-errors [expression]="resource.attributes.name">
+			<ng-template let-error="error">
+				<span id="controlError">{{error.detail}}</span>
+			</ng-template>
+		</crnk-control-errors>
+
+		<crnk-resource-errors [expression]="resource.attributes.name">
+			<ng-template let-error="error">
+				<span id="resourceError">{{error.detail}}</span>
+			</ng-template>
+		</crnk-resource-errors>
+	</div>
+</form>

@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaDataObject, QMetaDataObject} from './meta.data.object';
 import {MetaElement, QMetaElement} from './meta.element';
@@ -27,6 +27,8 @@ export interface MetaResourceRepositoryListResult extends ManyQueryResult {
 }
 export class QMetaResourceRepository extends BeanPath<MetaResourceRepository> {
 	metaId = 'io.crnk.meta.resource.MetaResourceRepository';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaResourceRepository.QRelationships = new QMetaResourceRepository.QRelationships(this, 'relationships');
 	attributes: QMetaResourceRepository.QAttributes = new QMetaResourceRepository.QAttributes(this, 'attributes');
 }
@@ -39,7 +41,7 @@ export module QMetaResourceRepository {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaResourceRepository.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaResourceRepository = function(id: string): MetaResourceRepository {

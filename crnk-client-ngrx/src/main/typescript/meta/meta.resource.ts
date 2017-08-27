@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, BooleanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaAttribute, QMetaAttribute} from './meta.attribute';
 import {MetaDataObject, QMetaDataObject} from './meta.data.object';
@@ -15,7 +15,7 @@ export module MetaResource {
 		[key: string]: ResourceRelationship;
 	}
 	export interface Attributes extends MetaResourceBase.Attributes {
-		resourceType?;
+		resourceType?: string;
 	}
 }
 export interface MetaResource extends MetaResourceBase {
@@ -30,6 +30,8 @@ export interface MetaResourceListResult extends ManyQueryResult {
 }
 export class QMetaResource extends BeanPath<MetaResource> {
 	metaId = 'io.crnk.meta.resource.MetaResource';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaResource.QRelationships = new QMetaResource.QRelationships(this, 'relationships');
 	attributes: QMetaResource.QAttributes = new QMetaResource.QAttributes(this, 'attributes');
 }
@@ -47,8 +49,12 @@ export module QMetaResource {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaResource.Attributes> {
-		resourceType: StringExpression = this.createString('resourceType');
-		name: StringExpression = this.createString('name');
+		resourceType: StringPath = this.createString('resourceType');
+		insertable: BooleanPath = this.createBoolean('insertable');
+		updatable: BooleanPath = this.createBoolean('updatable');
+		deletable: BooleanPath = this.createBoolean('deletable');
+		readable: BooleanPath = this.createBoolean('readable');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaResource = function(id: string): MetaResource {

@@ -4,7 +4,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 
-import {NgrxJsonApi, NgrxJsonApiEffects} from 'ngrx-json-api';
+import {NgrxJsonApi} from 'ngrx-json-api/src/api';
 
 export class JsonApiMock {
 
@@ -64,32 +64,3 @@ export const MOCK_JSON_API_PROVIDERS = [
 	{provide: JsonApiMock, useClass: JsonApiMock},
 	{provide: NgrxJsonApi, useExisting: JsonApiMock}
 ];
-
-/*
-export class NgrxJsonApiMockEffects extends NgrxJsonApiEffects {
-	// constructor() {
-	//   // super()
-	// }
-
-	private toErrorPayload(query, response) {
-		if (response === 'FAIL QUERY') {
-			return {query: query};
-		} else if (response === 'Unknown query') {
-			return query;
-		}
-		return ({
-			query: query,
-			jsonApiData: {data: {type: response}}
-		});
-	}
-
-	private generatePayload(resource, operation) {
-		return resource;
-	}
-}
-
-export const MOCK_NGRX_EFFECTS_PROVIDERS = [
-	{provide: NgrxJsonApiMockEffects, useClass: NgrxJsonApiMockEffects},
-	{provide: NgrxJsonApiEffects, useExisting: NgrxJsonApiMockEffects}
-];
-*/

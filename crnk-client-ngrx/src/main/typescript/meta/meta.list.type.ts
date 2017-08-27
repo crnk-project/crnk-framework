@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaCollectionType} from './meta.collection.type';
 import {MetaElement, QMetaElement} from './meta.element';
@@ -24,6 +24,8 @@ export interface MetaListTypeListResult extends ManyQueryResult {
 }
 export class QMetaListType extends BeanPath<MetaListType> {
 	metaId = 'io.crnk.meta.MetaListType';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaListType.QRelationships = new QMetaListType.QRelationships(this, 'relationships');
 	attributes: QMetaListType.QAttributes = new QMetaListType.QAttributes(this, 'attributes');
 }
@@ -34,7 +36,7 @@ export module QMetaListType {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaListType.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaListType = function(id: string): MetaListType {

@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, BooleanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaAttribute, QMetaAttribute} from './meta.attribute';
 import {MetaDataObject, QMetaDataObject} from './meta.data.object';
@@ -28,6 +28,8 @@ export interface MetaJsonObjectListResult extends ManyQueryResult {
 }
 export class QMetaJsonObject extends BeanPath<MetaJsonObject> {
 	metaId = 'io.crnk.meta.resource.MetaJsonObject';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaJsonObject.QRelationships = new QMetaJsonObject.QRelationships(this, 'relationships');
 	attributes: QMetaJsonObject.QAttributes = new QMetaJsonObject.QAttributes(this, 'attributes');
 }
@@ -45,7 +47,11 @@ export module QMetaJsonObject {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaJsonObject.Attributes> {
-		name: StringExpression = this.createString('name');
+		insertable: BooleanPath = this.createBoolean('insertable');
+		updatable: BooleanPath = this.createBoolean('updatable');
+		deletable: BooleanPath = this.createBoolean('deletable');
+		readable: BooleanPath = this.createBoolean('readable');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaJsonObject = function(id: string): MetaJsonObject {

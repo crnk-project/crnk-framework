@@ -3,7 +3,7 @@ package io.crnk.client.ngrx.gen;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
-import io.crnk.gen.typescript.TSGeneratorConfiguration;
+import io.crnk.gen.typescript.TSGeneratorExtension;
 import io.crnk.gen.typescript.internal.TSGenerator;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.model.MetaElement;
@@ -19,14 +19,13 @@ public class GeneratorExecutor {
 	}
 
 	public void run() {
-		TSGeneratorConfiguration config = new TSGeneratorConfiguration();
-		config.setSourceDirectoryName("meta");
+		TSGeneratorExtension config = new TSGeneratorExtension(null, null);
 		config.setGenerateExpressions(true);
-		config.getNpm().setEnabled(false);
+		config.getNpm().setPackagingEnabled(false);
 		config.getNpm().setPackageName("@crnk/ngrx");
 		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/ngrx");
 
-		File outputDir = new File("src/main/typescript");
+		File outputDir = new File("src/main/typescript/meta");
 
 		MetaModule metaModule = MetaModule.create();
 		metaModule.addMetaProvider(new ResourceMetaProvider());

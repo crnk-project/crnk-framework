@@ -1,6 +1,6 @@
-import {Task} from './task'
-import {DefaultPagedLinksInformation} from '@crnk/core/'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {Task} from './task';
+import {DefaultPagedLinksInformation} from '@crnk/ngrx/';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module Schedule {
 	export interface Relationships {

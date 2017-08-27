@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, BooleanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaAttribute, QMetaAttribute} from './meta.attribute';
 import {MetaDataObject, QMetaDataObject} from './meta.data.object';
@@ -29,6 +29,8 @@ export interface MetaResourceBaseListResult extends ManyQueryResult {
 }
 export class QMetaResourceBase extends BeanPath<MetaResourceBase> {
 	metaId = 'io.crnk.meta.resource.MetaResourceBase';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaResourceBase.QRelationships = new QMetaResourceBase.QRelationships(this, 'relationships');
 	attributes: QMetaResourceBase.QAttributes = new QMetaResourceBase.QAttributes(this, 'attributes');
 }
@@ -46,7 +48,11 @@ export module QMetaResourceBase {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaResourceBase.Attributes> {
-		name: StringExpression = this.createString('name');
+		insertable: BooleanPath = this.createBoolean('insertable');
+		updatable: BooleanPath = this.createBoolean('updatable');
+		deletable: BooleanPath = this.createBoolean('deletable');
+		readable: BooleanPath = this.createBoolean('readable');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaResourceBase = function(id: string): MetaResourceBase {

@@ -8,9 +8,24 @@ import "rxjs/add/operator/distinct";
 import "rxjs/add/operator/switch";
 import "rxjs/add/operator/finally";
 import "rxjs/add/operator/share";
-import {NgForm} from "@angular/forms";
+import {AbstractControl, NgForm} from "@angular/forms";
 import {OperationsService} from "../operations";
-import {NgrxJsonApiService, ResourceError, Resource, StoreResource, ResourceIdentifier} from "ngrx-json-api";
+import {
+	NgrxJsonApiService,
+	NgrxJsonApiStoreData,
+	Resource,
+	ResourceError,
+	ResourceIdentifier,
+	StoreResource
+} from "ngrx-json-api";
+import {Store} from "@ngrx/store";
+import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
+
+
+interface ResourceFieldRef {
+	resourceId: ResourceIdentifier;
+	path: String;
+}
 
 export interface FormBindingConfig {
 	/**
@@ -24,6 +39,22 @@ export interface FormBindingConfig {
 	 * (typically when performing the route to a new page).
 	 */
 	queryId: string;
+
+	/**
+	 * JSON API errors get mapped to AbstractControl errors. The id resp. code of the JSON API error
+	 * is used as key for the control error. This property specifies a prefix for that key. It allows
+	 * to make use of JSON API errors next to other kinds of errors without influencing each other
+	 * (updates of JSON API errors are synchronized to control errors with that prefix, other kinds of errors
+	 * remain unaffected). by default 'jsonapi.` is used.
+	 */
+	controlErrorIdPrefix?: string;
+
+
+	/**
+	 * By default a denormalized selectOneResults is used to fetch resources. Any update of those
+	 * resources triggers an update of the FormControl states. Set this flag to true to listen to all store changes.
+	 */
+	mapNonResultResources?: boolean;
 }
 
 /**
@@ -54,7 +85,7 @@ export interface FormBindingConfig {
  * mapping is not found, the error is added to the errors attribute of this class. Usually applications show such errors above
  * all fields in the config.
  *
- * You may also have a look at the ArbExpressionModule. Its ExpressionDirective provides an alternative to NgModel
+ * You may also have a look at the CrnkExpressionModule. Its ExpressionDirective provides an alternative to NgModel
  * that binds both a value and sets the label of forFormElement control with a single (type-safe) attribute.
  */
 export class FormBinding {
@@ -69,7 +100,7 @@ export class FormBinding {
 	 * Contains all errors that cannot be assigned to a forFormElement control. Usually such errors are shown on top above
 	 * all controls.
 	 */
-	public errors: Array<ResourceError> = [];
+	public unmappedErrors: Array<ResourceError> = [];
 
 	/**
 	 * the forFormElement also sends out valueChanges upon initialization, we do not want that and filter them out with this flag
@@ -87,8 +118,15 @@ export class FormBinding {
 	 */
 	private formSubscription: Subscription = null;
 
+	private storeSubscription: Subscription = null;
+
+	private formControlsInitialized = false;
+
+	private controlErrorIdPrefix = 'jsonapi.';
+
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
-		private operationsService: OperationsService) {
+				private operationsService: OperationsService, private store: Store<any>,
+				private ngrxJsonApiSelectors: NgrxJsonApiSelectors<any>) {
 
 		if (this.config.form === null) {
 			throw new Error('no forFormElement provided');
@@ -96,6 +134,10 @@ export class FormBinding {
 		if (this.config.queryId === null) {
 			throw new Error('no queryId provided');
 		}
+		if (this.config.controlErrorIdPrefix) {
+			this.controlErrorIdPrefix = this.config.controlErrorIdPrefix;
+		}
+
 
 		// we make use of share() to keep the this.config.resource$ subscription
 		// as long as there is at least subscriber on this.resource$.
@@ -106,75 +148,136 @@ export class FormBinding {
 			.distinctUntilChanged(function (a, b) {
 				return _.isEqual(a, b);
 			})
-			.do(resource => this.checkFormSubscription())
+			.do(() => this.checkSubscriptions())
 			.do(resource => this.primaryResourceId = {type: resource.type, id: resource.id})
-			.do(resource => this.updateFormErrorsFromStoreUpdates(resource))
-			.finally(() => this.cancelFormSubscription)
+			.do(() => this.mapResourceToControlErrors())
+			.finally(() => this.cancelSubscriptions)
 			.share();
+
 	}
 
-	protected cancelFormSubscription() {
+	protected cancelSubscriptions() {
 		if (this.formSubscription !== null) {
 			this.formSubscription.unsubscribe();
 			this.formSubscription = null;
 		}
+		if (this.storeSubscription !== null) {
+			this.storeSubscription.unsubscribe();
+			this.storeSubscription = null;
+		}
 	}
 
-	protected checkFormSubscription() {
+	private get storeDataSnapshot(): NgrxJsonApiStoreData {
+		return this.ngrxJsonApiService['storeSnapshot']['data'] as NgrxJsonApiStoreData;
+	}
+
+
+	protected checkSubscriptions() {
 		if (this.formSubscription === null) {
 			// update store from value changes, for more information see
 			// https://embed.plnkr.co/9aNuw6DG9VM4X8vUtkAa?show=app%2Fapp.components.ts,preview
 			const formChanges$ = this.config.form.statusChanges
 				.filter(valid => valid === 'VALID')
+				.do(() => {
+					// it may take a moment for a form with all controls to initialize and register.
+					// there seems no proper Angular lifecycle for this to check(???). Till no
+					// control is found, we perform the mapping also here.
+					//
+					// geting notified about new control would be great...
+					if(!this.formControlsInitialized){
+						this.mapResourceToControlErrors();
+					}
+				})
+
 				.withLatestFrom(this.config.form.valueChanges, (valid, values) => values)
 				.filter(it => this.config.form.dirty || this.wasDirty)
-				.debounceTime(100)
+				.debounceTime(20)
 				.distinctUntilChanged(function (a, b) {
 					return _.isEqual(a, b);
 				})
 				.do(it => this.wasDirty = true);
 			this.formSubscription = formChanges$.subscribe(formValues => this.updateStoreFromFormValues(formValues));
 		}
+
+		if (this.storeSubscription != null && this.config.mapNonResultResources) {
+			this.storeSubscription = this.store
+				.let(this.ngrxJsonApiSelectors.getNgrxJsonApiStore$())
+				.let(this.ngrxJsonApiSelectors.getStoreData$())
+				.subscribe(data => {
+					this.mapResourceToControlErrors();
+				});
+		}
 	}
 
-	protected updateFormErrorsFromStoreUpdates(resource: StoreResource) {
-		const errors = resource.errors;
-		const newResourceErrors = [];
-		if (errors) {
-			for (const error  of errors) {
-				let control = null;
-				if (error.source && error.source.pointer && (error.code || error.id) &&
-					error.source.pointer.startsWith('data/')) {
-					const sourcePointer = error.source.pointer;
-					const basicFormName = this.toBasicFormName(sourcePointer);
-					control = this.config.form.controls[basicFormName];
-					if (!control) {
-						const resourceFormName = this.toResourceFormName(resource, basicFormName);
-						control = this.config.form.controls[resourceFormName];
-					}
-				}
-				if (control !== null) {
-					let key = error.id;
-					if (!key) {
-						key = error.code;
-					}
-					const controlErrors = {};
-					controlErrors[key] = error;
-					control.setErrors(controlErrors);
-				}
-				else {
-					newResourceErrors.push(error);
-				}
+	private collectNonJsonApiControlErrors(control: AbstractControl) {
+		let controlErrors = {};
+		let otherErrorKeys = _.keys(control.errors).filter(it => !it.startsWith(this.controlErrorIdPrefix));
+		for (let otherErrorKey in otherErrorKeys) {
+			if(control.errors.hasOwnProperty(otherErrorKey)) {
+				controlErrors[otherErrorKey] = control.errors[otherErrorKey];
 			}
 		}
-		this.errors = newResourceErrors;
+		return controlErrors;
+	}
+
+	private computeControlErrorKey(error: ResourceError) {
+		return error.id ? error.id : error.code;
+	}
+
+	protected mapResourceToControlErrors() {
+
+		console.log("mapResourceToControlErrors");
+		for (let formName in this.config.form.controls) {
+			this.formControlsInitialized = true;
+
+			let control = this.config.form.controls[formName];
+
+			console.log("formName", formName, control, control.errors);
+
+			let fieldRef = this.parseResourceFieldRef(formName);
+			let sourcePointer = '/data/' + fieldRef.path.replace(new RegExp('\\.', 'g'), '/');
+			let resource = this.storeDataSnapshot[fieldRef.resourceId.type][fieldRef.resourceId.id];
+
+			if (resource) {
+				const controlErrors = this.collectNonJsonApiControlErrors(control);
+				for (const resourceError of resource.errors) {
+					let errorKey = this.computeControlErrorKey(resourceError);
+					console.log("error", fieldRef, sourcePointer,  resourceError.source.pointer, errorKey);
+					if (resourceError.source && sourcePointer == resourceError.source.pointer && errorKey) {
+						controlErrors[this.controlErrorIdPrefix + errorKey] = resourceError;
+					}
+				}
+				console.log("set control errors", controlErrors, resource);
+				control.setErrors(controlErrors);
+			}
+		}
+
+		let form = this.config.form;
+		if (this.primaryResourceId) {
+			let primaryResource = this.storeDataSnapshot[this.primaryResourceId.type][this.primaryResourceId.id];
+
+			const newUnmappedErrors = [];
+			for (const resourceError of primaryResource.errors) {
+				let errorKey = this.computeControlErrorKey(resourceError);
+				if (resourceError.source && resourceError.source.pointer && errorKey) {
+					const path = this.toPath(resourceError.source.pointer);
+					const formName = this.toResourceFormName(primaryResource, path);
+					if (!form.controls[formName] && !form.controls[path]) {
+						newUnmappedErrors.push(resourceError);
+					}
+				}
+			}
+			this.unmappedErrors = newUnmappedErrors;
+
+			console.log("unmapped", newUnmappedErrors);
+		}
 	}
 
 	protected toResourceFormName(resource: StoreResource, basicFormName: string) {
-		return '/' + resource.type + '/' + resource.id + '/' + basicFormName;
+		return '//' + resource.type + '//' + resource.id + '//' + basicFormName;
 	}
 
-	protected toBasicFormName(sourcePointer: string) {
+	protected toPath(sourcePointer: string) {
 		let formName = sourcePointer.replace(new RegExp('/', 'g'), '.');
 		if (formName.startsWith('.')) {
 			formName = formName.substring(1);
@@ -207,33 +310,49 @@ export class FormBinding {
 		);
 	}
 
+	/**
+	 * computes type, id and field path from formName.
+	 */
+	private parseResourceFieldRef(formName: string): ResourceFieldRef {
+		if (formName.startsWith('//')) {
+			let [type, id, path] = formName.substring(2).split('//');
+			return {
+				resourceId: {
+					type: type,
+					id: id
+				},
+				path: path
+			}
+		}
+		else {
+			return {
+				resourceId: {
+					type: this.primaryResourceId.type,
+					id: this.primaryResourceId.id
+				},
+				path: formName
+			}
+		}
+	}
+
 	public updateStoreFromFormValues(values: any) {
-		const patchedResourceMap: {[id: string]: Resource} = {};
+		const patchedResourceMap: { [id: string]: Resource } = {};
 		for (const formName of Object.keys(values)) {
 			const value = values[formName];
 
-			let type, id, path;
-			if (formName.startsWith('/')) {
-				[type, id, path] = formName.substring(1).split('/');
-			}
-			else {
-				type = this.primaryResourceId.type;
-				id = this.primaryResourceId.id;
-				path = formName;
-			}
-			if (path.startsWith('attributes.') || path.startsWith('relationships.')) {
-				const key = type + '_' + id;
+			let formRef = this.parseResourceFieldRef(formName);
+			if (formRef.path.startsWith('attributes.') || formRef.path.startsWith('relationships.')) {
+				const key = formRef.resourceId.type + '_' + formRef.resourceId.id;
 				let patchedResource = patchedResourceMap[key];
 				if (!patchedResource) {
 					patchedResource = {
-						id: id,
-						type: type,
+						id: formRef.resourceId.id,
+						type: formRef.resourceId.type,
 						attributes: {}
 					};
 					patchedResourceMap[key] = patchedResource;
 				}
-
-				_.set(patchedResource, path, value);
+				_.set(patchedResource, formRef.path, value);
 			}
 		}
 

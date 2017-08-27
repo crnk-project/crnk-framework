@@ -5,7 +5,8 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: "base.spec.ts" },
-			{ pattern: "src/main/typescript/**/*.+(ts|html)" }
+			{ pattern: "src/main/typescript/**/*.+(ts|html)" },
+			{ pattern: "src/test/typescript/**/*.+(ts|html)" }
 		],
 
 		preprocessors: {
@@ -13,7 +14,12 @@ module.exports = function(config) {
 		},
 
 		karmaTypescriptConfig: {
+			//tsconfig: 'tsconfig.spec.json',
 
+			exclude: [
+				"node_modules",
+				"build"
+			],
 
 			bundlerOptions: {
 				entrypoints: /\.spec\.ts$/,
@@ -24,6 +30,7 @@ module.exports = function(config) {
 				]
 			},
 			compilerOptions: {
+				skipLibCheck: true,
 				lib: ["ES2015", "DOM"]
 			}
 		},

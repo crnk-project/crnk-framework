@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {MetaRepositoryActionType} from './meta.repository.action.type';
@@ -24,6 +24,8 @@ export interface MetaResourceActionListResult extends ManyQueryResult {
 }
 export class QMetaResourceAction extends BeanPath<MetaResourceAction> {
 	metaId = 'io.crnk.meta.resource.MetaResourceAction';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaResourceAction.QRelationships = new QMetaResourceAction.QRelationships(this, 'relationships');
 	attributes: QMetaResourceAction.QAttributes = new QMetaResourceAction.QAttributes(this, 'attributes');
 }
@@ -33,8 +35,8 @@ export module QMetaResourceAction {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaResourceAction.Attributes> {
-		actionType: StringExpression = this.createString('actionType');
-		name: StringExpression = this.createString('name');
+		actionType: StringPath = this.createString('actionType');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaResourceAction = function(id: string): MetaResourceAction {

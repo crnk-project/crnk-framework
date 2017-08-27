@@ -7,7 +7,7 @@ import "rxjs/add/operator/debounceTime";
 import "rxjs/add/operator/distinct";
 import "rxjs/add/operator/switch";
 import {FilteringParam, ManyQueryResult, NgrxJsonApiService, Query, ResourceIdentifier} from "ngrx-json-api";
-import {NgrxBindingUtils} from "./crnk.binding.utils";
+import {CrnkBindingUtils} from "./crnk.binding.utils";
 
 export interface SelectorBindingConfig {
 	query: Query;
@@ -19,7 +19,7 @@ export class SelectorBinding {
 	private querySubject: Subject<string>;
 	public values: Observable<Array<ResourceIdentifier>>;
 
-	constructor(private service: NgrxJsonApiService, private config: SelectorBindingConfig, private utils: NgrxBindingUtils) {
+	constructor(private service: NgrxJsonApiService, private config: SelectorBindingConfig, private utils: CrnkBindingUtils) {
 
 		const termToQuery = (queryTerm: String): Query => {
 			const query = _.cloneDeep(this.config.query);

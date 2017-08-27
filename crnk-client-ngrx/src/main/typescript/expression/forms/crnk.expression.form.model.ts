@@ -9,7 +9,7 @@ import {
 	OnDestroy,
 	Optional,
 	Output,
-	Renderer,
+	Renderer, Renderer2,
 	Self,
 	SimpleChanges
 } from "@angular/core";
@@ -30,7 +30,7 @@ import {
 	ValidatorFn
 } from "@angular/forms";
 import {
-	ArbControl,
+	CrnkControl,
 	composeAsyncValidators,
 	composeValidators,
 	controlPath,
@@ -54,15 +54,15 @@ const formControlBinding: any = {
  * can hold both
  */
 @Directive({
-	selector: '[arbFormExpression]:not([formControlName]):not([formControl])',
+	selector: '[crnkFormExpression]:not([formControlName]):not([formControl])',
 	providers: [formControlBinding],
-	exportAs: 'arbFormExpression'
+	exportAs: 'crnkFormExpression'
 })
-export class FormExpressionDirective extends ArbControl implements OnChanges, OnDestroy {
+export class FormExpressionDirective extends CrnkControl implements OnChanges, OnDestroy {
 
 	private _pathModel: Path<any>;
 
-	@Input('arbFormExpression')
+	@Input('crnkFormExpression')
 	public set pathModel(pathModel: Path<any>) {
 		this._pathModel = pathModel;
 
@@ -106,6 +106,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 		this._parent = parent;
 		this._rawValidators = validators || [];
 		this._rawAsyncValidators = asyncValidators || [];
+		console.log("new model", validators, asyncValidators);
 		this.valueAccessor = selectValueAccessor(this, valueAccessors);
 	}
 
@@ -158,7 +159,7 @@ export class FormExpressionDirective extends ArbControl implements OnChanges, On
 
 	private _setUpControl(): void {
 		if (!this.pathModel) {
-			throw new Error('Attribute arbFormExpression is required');
+			throw new Error('Attribute crnkFormExpression is required');
 		}
 
 		this.name = this.pathModel.toFormName();
@@ -216,13 +217,13 @@ export const DEFAULT_VALUE_ACCESSOR: any = {
 };
 
 @Directive({
-	selector: 'input:not([type=checkbox])[arbExpression],textarea[arbExpression],input:not([type=checkbox])[arbFormExpression],textarea[arbFormExpression]',
+	selector: '[crnkFormExpression]',
 	host: {'(input)': 'onChange($event.target.value)', '(blur)': 'onTouched()'},
 	providers: [DEFAULT_VALUE_ACCESSOR]
 })
 export class PathDefaultValueAccessorDirective extends DefaultValueAccessor {
 
-	constructor(_renderer: Renderer, _elementRef: ElementRef) {
+	constructor(_renderer: Renderer2, _elementRef: ElementRef) {
 		super(_renderer, _elementRef, false);
 	}
 }
@@ -282,15 +283,15 @@ function setUpFormControl(control: FormControl, dir: NgControl): void {
 
 
 @Directive({
-	selector: '[arbExpression]:not([formControlName]):not([formControl])',
+	selector: '[crnkExpression]',
 	providers: [formControlBinding],
-	exportAs: 'arbExpression'
+	exportAs: 'crnkExpression'
 })
-export class ExpressionDirective extends ArbControl implements OnChanges, OnDestroy {
+export class ExpressionDirective extends CrnkControl implements OnChanges, OnDestroy {
 
 	private _pathModel: Path<any>;
 
-	@Input('arbExpression')
+	@Input('crnkExpression')
 	public set pathModel(pathModel: Path<any>) {
 		this._pathModel = pathModel;
 
@@ -313,7 +314,7 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 	_registered = false;
 
 	@Input('disabled') disabled: boolean;
-	@Output('arbExpressionChange') arbExpressionChange = new EventEmitter();
+	@Output('crnkExpressionChange') crnkExpressionChange = new EventEmitter();
 
 	/**
 	 * NOTE that in contract to NgModel we do not use @Host for parent. This would enforce that the
@@ -376,7 +377,7 @@ export class ExpressionDirective extends ArbControl implements OnChanges, OnDest
 
 	viewToModelUpdate(newValue: any): void {
 		this.viewModel = newValue;
-		this.arbExpressionChange.emit(newValue);
+		this.crnkExpressionChange.emit(newValue);
 	}
 
 	private _updateValue(value: any): void {

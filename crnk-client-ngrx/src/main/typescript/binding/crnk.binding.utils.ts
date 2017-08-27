@@ -35,7 +35,7 @@ export class QueryError extends Error {
 }
 
 @Injectable()
-export class NgrxBindingUtils {
+export class CrnkBindingUtils {
 
 
 	public toResourceIdentifier(resource: StoreResource): ResourceIdentifier {

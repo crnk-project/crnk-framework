@@ -136,7 +136,7 @@ public class TSWriter implements TSVisitor {
 		if (element.isNullable()) {
 			builder.append("?");
 		}
-		if (!(element.getType() instanceof TSPrimitiveType)) {
+		if (element.getInitializer() == null ||!(element.getType() instanceof TSPrimitiveType)) {
 			// primitive types can be trivially inferred and break tslint otherwise
 			builder.append(": ");
 			visitReference(element.getType());

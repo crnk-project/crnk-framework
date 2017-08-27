@@ -13,11 +13,11 @@ public class CrnkLibrary {
 
 	public static final TSClassType BEAN_PATH;
 
-	public static final TSClassType STRING_EXPRESSION;
+	public static final TSClassType STRING_PATH;
 
-	public static final TSClassType NUMBER_EXPRESSION;
+	public static final TSClassType NUMBER_PATH;
 
-	public static final TSClassType BOOLEAN_EXPRESSION;
+	public static final TSClassType BOOLEAN_PATH;
 
 	public static final TSClassType QTYPED_ONE_RESOURCE_RELATIONSHIP;
 
@@ -33,17 +33,17 @@ public class CrnkLibrary {
 		BEAN_PATH.setName("BeanPath");
 		BEAN_PATH.setParent(EXPRESSION_SOURCE);
 
-		STRING_EXPRESSION = new TSClassType();
-		STRING_EXPRESSION.setName("StringExpression");
-		STRING_EXPRESSION.setParent(EXPRESSION_SOURCE);
+		STRING_PATH = new TSClassType();
+		STRING_PATH.setName("StringPath");
+		STRING_PATH.setParent(EXPRESSION_SOURCE);
 
-		NUMBER_EXPRESSION = new TSClassType();
-		NUMBER_EXPRESSION.setName("NumberExpression");
-		NUMBER_EXPRESSION.setParent(EXPRESSION_SOURCE);
+		NUMBER_PATH = new TSClassType();
+		NUMBER_PATH.setName("NumberPath");
+		NUMBER_PATH.setParent(EXPRESSION_SOURCE);
 
-		BOOLEAN_EXPRESSION = new TSClassType();
-		BOOLEAN_EXPRESSION.setName("BooleanExpression");
-		BOOLEAN_EXPRESSION.setParent(EXPRESSION_SOURCE);
+		BOOLEAN_PATH = new TSClassType();
+		BOOLEAN_PATH.setName("BooleanPath");
+		BOOLEAN_PATH.setParent(EXPRESSION_SOURCE);
 
 		QTYPED_ONE_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_ONE_RESOURCE_RELATIONSHIP.setName("QTypedOneResourceRelationship");
@@ -59,13 +59,13 @@ public class CrnkLibrary {
 
 	public static TSType getPrimitiveExpression(String primitiveName) {
 		if (TSPrimitiveType.STRING.getName().equalsIgnoreCase(primitiveName)) {
-			return STRING_EXPRESSION;
+			return STRING_PATH;
 		}
 		if (TSPrimitiveType.BOOLEAN.getName().equalsIgnoreCase(primitiveName)) {
-			return BOOLEAN_EXPRESSION;
+			return BOOLEAN_PATH;
 		}
 		if (TSPrimitiveType.NUMBER.getName().equalsIgnoreCase(primitiveName)) {
-			return NUMBER_EXPRESSION;
+			return NUMBER_PATH;
 		}
 		throw new IllegalStateException(primitiveName);
 	}

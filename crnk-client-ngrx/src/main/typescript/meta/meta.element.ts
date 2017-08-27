@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
@@ -9,7 +9,7 @@ export module MetaElement {
 		children?: TypedManyResourceRelationship<MetaElement>;
 	}
 	export interface Attributes {
-		name?;
+		name?: string;
 	}
 }
 export interface MetaElement extends StoreResource {
@@ -24,6 +24,8 @@ export interface MetaElementListResult extends ManyQueryResult {
 }
 export class QMetaElement extends BeanPath<MetaElement> {
 	metaId = 'io.crnk.meta.MetaElement';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaElement.QRelationships = new QMetaElement.QRelationships(this, 'relationships');
 	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
@@ -33,7 +35,7 @@ export module QMetaElement {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaElement.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaElement = function(id: string): MetaElement {

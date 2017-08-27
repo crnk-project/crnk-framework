@@ -1,17 +1,30 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
+		"baseUrl": ".",
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"target": "ES5",
-		"sourceMap": true,
-		"module": "commonjs",
+		"removeComments": false,
+		"declaration": true,
+		"strictNullChecks": false,
+		"inlineSources": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"lib": [
+			"es2016",
+			"dom"
+		],
 		"types": [
 			"jasmine",
-			"node"
+			"lodash",
+			"node",
+			"source-map"
 		]
 	},
 	"exclude": [
-		"node_modules"
+		"node_modules",
+		"build"
 	]
 }
+
+

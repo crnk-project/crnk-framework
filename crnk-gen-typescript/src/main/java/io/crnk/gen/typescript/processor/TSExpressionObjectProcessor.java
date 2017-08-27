@@ -8,10 +8,7 @@ import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Computes Type-safe query classes similar to QueryDSL for resource types.
@@ -83,7 +80,21 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				queryModule.addElement(queryType);
 			}
 
-			List<TSField> fields = interfaceType.getFields();
+			List<TSField> fields = new ArrayList<>(interfaceType.getFields());
+
+			boolean isResource = interfaceType.implementsInterface(NgrxJsonApiLibrary.STORE_RESOURCE);
+			if(isResource){
+				TSField idField = new TSField();
+				idField.setName("id");
+				idField.setType(TSPrimitiveType.STRING);
+				fields.add(0, idField);
+
+				TSField typeField = new TSField();
+				typeField.setName("type");
+				typeField.setType(TSPrimitiveType.STRING);
+				fields.add(1, typeField);
+			}
+
 			for (TSField field : fields) {
 				TSField qField = new TSField();
 				qField.setName(field.getName());
@@ -103,7 +114,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				qField.setType(CrnkLibrary.getPrimitiveExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
 			} else if (fieldType instanceof TSEnumType) {
-				qField.setType(CrnkLibrary.STRING_EXPRESSION);
+				qField.setType(CrnkLibrary.STRING_PATH);
 				qField.setInitializer(setupPrimitiveField("String", qField));
 			} else if (fieldType instanceof TSInterfaceType) {
 				setupInterfaceField(qField, field);

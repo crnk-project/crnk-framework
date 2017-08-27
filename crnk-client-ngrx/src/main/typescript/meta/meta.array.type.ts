@@ -1,4 +1,4 @@
-import {BeanPath, StringExpression} from '../expression/';
+import {BeanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {MetaType, QMetaType} from './meta.type';
@@ -23,6 +23,8 @@ export interface MetaArrayTypeListResult extends ManyQueryResult {
 }
 export class QMetaArrayType extends BeanPath<MetaArrayType> {
 	metaId = 'io.crnk.meta.MetaArrayType';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaArrayType.QRelationships = new QMetaArrayType.QRelationships(this, 'relationships');
 	attributes: QMetaArrayType.QAttributes = new QMetaArrayType.QAttributes(this, 'attributes');
 }
@@ -33,7 +35,7 @@ export module QMetaArrayType {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaArrayType.Attributes> {
-		name: StringExpression = this.createString('name');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaArrayType = function(id: string): MetaArrayType {

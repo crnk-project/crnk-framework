@@ -14,17 +14,17 @@ public class ExpressionLibraryTest {
 
 	@Test
 	public void checkGetStringExpression() {
-		Assert.assertSame(CrnkLibrary.STRING_EXPRESSION, CrnkLibrary.getPrimitiveExpression("string"));
+		Assert.assertSame(CrnkLibrary.STRING_PATH, CrnkLibrary.getPrimitiveExpression("string"));
 	}
 
 	@Test
 	public void checkGetNumberExpression() {
-		Assert.assertSame(CrnkLibrary.NUMBER_EXPRESSION, CrnkLibrary.getPrimitiveExpression("number"));
+		Assert.assertSame(CrnkLibrary.NUMBER_PATH, CrnkLibrary.getPrimitiveExpression("number"));
 	}
 
 	@Test
 	public void checkGetBooleanExpression() {
-		Assert.assertSame(CrnkLibrary.BOOLEAN_EXPRESSION, CrnkLibrary.getPrimitiveExpression("boolean"));
+		Assert.assertSame(CrnkLibrary.BOOLEAN_PATH, CrnkLibrary.getPrimitiveExpression("boolean"));
 	}
 
 	@Test(expected = IllegalStateException.class)

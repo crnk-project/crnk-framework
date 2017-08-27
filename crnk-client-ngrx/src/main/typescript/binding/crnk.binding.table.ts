@@ -15,7 +15,7 @@ import {
 	Resource,
 	SortingParam
 } from 'ngrx-json-api';
-import {NgrxBindingUtils} from './crnk.binding.utils';
+import {CrnkBindingUtils} from './crnk.binding.utils';
 // TODO get rid of this? or support multiple ones, only dependency to primeng here...
 import {LazyLoadEvent} from 'primeng/primeng';
 
@@ -27,6 +27,8 @@ export interface DataTableBindingConfig {
 	 * query to use if specified query is not already in the store
 	 */
 	baseQuery?: Query;
+
+	fromServer?: boolean;
 }
 
 export class DataTableBinding {
@@ -42,9 +44,12 @@ export class DataTableBinding {
 	private num = 0;
 
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
-				private utils: NgrxBindingUtils) {
+				private utils: CrnkBindingUtils) {
 		if (!this.config.queryId) {
 			throw new Error('no queryId specified in config');
+		}
+		if (_.isUndefined(this.config.fromServer)) {
+			this.config.fromServer = true;
 		}
 		this.baseQuery = this.config.baseQuery;
 
@@ -138,7 +143,7 @@ export class DataTableBinding {
 		if (!_.isEqual(query, this.latestQuery)) {
 			this.ngrxJsonApiService.putQuery({
 					query: query,
-					fromServer: true
+					fromServer: this.config.fromServer
 				}
 			);
 			this.latestQuery = query;

@@ -17,6 +17,16 @@ import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/withLatestFrom";
 import {Headers, Http, Request, RequestMethod, RequestOptions} from "@angular/http";
 import {
+	Document,
+	NgrxJsonApiActionTypes,
+	NgrxJsonApiStore,
+	Query,
+	Resource,
+	ResourceError,
+	StoreResource
+} from "ngrx-json-api";
+
+import {
 	ApiApplyFailAction,
 	ApiApplySuccessAction,
 	ApiDeleteFailAction,
@@ -25,19 +35,13 @@ import {
 	ApiPatchSuccessAction,
 	ApiPostFailAction,
 	ApiPostSuccessAction,
-	Document,
-	NgrxJsonApi,
-	NgrxJsonApiActionTypes,
-	NgrxJsonApiSelectors,
-	NgrxJsonApiStore,
-	Query,
-	Resource,
-	ResourceError,
-	StoreResource
-} from "ngrx-json-api";
+} from "ngrx-json-api/src/actions";
+
 import {OperationActionTypes} from "./crnk.operations.actions";
 
 import {getPendingChanges} from './crnk.operations.utils';
+import {NgrxJsonApi} from "ngrx-json-api/src/api";
+import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
 
 
 interface Operation {
@@ -66,9 +70,7 @@ export class OperationsEffects {
 
 	@Effect() applyResources$ = this.actions$
 		.ofType(OperationActionTypes.OPERATIONS_INIT)
-		.withLatestFrom(this.store.select(this.selectors.storeLocation), (action, ngrxstore: NgrxJsonApiStore) => {
-			console.log("store", action, ngrxstore, this.store, this.selectors.storeLocation);
-			console.log(this);
+		.withLatestFrom(this.store.select(it => it['NgrxJsonApi']['api']), (action, ngrxstore: NgrxJsonApiStore) => {
 			const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
 			if (pending.length === 0) {
 				return Observable.of(new ApiApplySuccessAction([]));
@@ -79,7 +81,6 @@ export class OperationsEffects {
 			for (const pendingChange of pending) {
 				operations.push(this.toOperation(pendingChange));
 			}
-			console.log("hi", operations);
 
 			const requestOptions = new RequestOptions({
 				method: RequestMethod.Patch,
@@ -94,24 +95,20 @@ export class OperationsEffects {
 			return this.http.request(request)
 				.map(res => res.json() as Array<OperationResponse>)
 				.map(operationResponses => {
-					if(!_.isArray(operationResponses)){
+					if (!_.isArray(operationResponses)) {
 						throw new Error("expected array as operations response");
 					}
 
-					console.log("operationResponse", operationResponses)
 					const actions: Array<Action> = [];
 					for (const index of Object.keys(operationResponses)) {
 						const operationResponse = operationResponses[index];
 						const pendingChange = pending[index];
-						console.log("pending: ", index, pending);
-						console.log(pendingChange);
 						actions.push(this.toResponseAction(pendingChange, operationResponse));
 					}
 					return this.toApplyAction(actions);
 				})
 				.catch(errorResponse => {
 					// transform http to json api error
-					console.log("errorResponse", errorResponse);
 					const error: ResourceError = {
 						status: errorResponse.status.toString(),
 						code: errorResponse.statusText

@@ -1,10 +1,10 @@
-import {BeanPath, BooleanExpression} from '../expression/';
+import {BeanPath, BooleanPath, StringPath} from '../expression/';
 import {MetaKey, QMetaKey} from './meta.key';
 import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
 
 export module MetaPrimaryKey {
-	export interface Attributes {
-		generated?;
+	export interface Attributes extends MetaKey.Attributes {
+		generated?: boolean;
 	}
 }
 export interface MetaPrimaryKey extends MetaKey {
@@ -18,12 +18,14 @@ export interface MetaPrimaryKeyListResult extends ManyQueryResult {
 }
 export class QMetaPrimaryKey extends BeanPath<MetaPrimaryKey> {
 	metaId = 'io.crnk.meta.MetaPrimaryKey';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	attributes: QMetaPrimaryKey.QAttributes = new QMetaPrimaryKey.QAttributes(this, 'attributes');
 	relationships: QMetaKey.QRelationships = new QMetaKey.QRelationships(this, 'relationships');
 }
 export module QMetaPrimaryKey {
 	export class QAttributes extends BeanPath<MetaPrimaryKey.Attributes> {
-		generated: BooleanExpression = this.createBoolean('generated');
+		generated: BooleanPath = this.createBoolean('generated');
 	}
 }
 export let createEmptyMetaPrimaryKey = function(id: string): MetaPrimaryKey {

@@ -42,6 +42,7 @@ public class GenerateTypescriptTaskTest {
 		testProjectDir.newFolder("src", "main", "java");
 
 		outputDir = testProjectDir.getRoot();
+		outputDir = new File("temp");
 		outputDir.mkdirs();
 
 		File npmrcFile = new File(outputDir, ".npmrc");
@@ -57,7 +58,6 @@ public class GenerateTypescriptTaskTest {
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
 		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
-		config.setExpressionLibrary("@crnk/ngrx");
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getRuntime().setConfiguration("test");

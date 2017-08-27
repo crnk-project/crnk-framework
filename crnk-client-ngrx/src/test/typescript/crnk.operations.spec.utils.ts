@@ -1,5 +1,6 @@
-import {NgrxJsonApi, Resource} from "ngrx-json-api";
+import {Resource} from "ngrx-json-api";
 import {JsonApiMock} from "./crnk.operations.spec.mock";
+import {NgrxJsonApi} from "ngrx-json-api/src/api";
 
 
 export const MOCK_JSON_API_PROVIDERS = [

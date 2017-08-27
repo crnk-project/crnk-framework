@@ -1,4 +1,4 @@
-import {BeanPath, BooleanExpression, StringExpression} from '../expression/';
+import {BeanPath, BooleanPath, StringPath} from '../expression/';
 import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
 import {MetaAttribute, QMetaAttribute} from './meta.attribute';
 import {MetaElement, QMetaElement} from './meta.element';
@@ -10,7 +10,7 @@ export module MetaKey {
 		elements?: TypedManyResourceRelationship<MetaAttribute>;
 	}
 	export interface Attributes extends MetaElement.Attributes {
-		unique?;
+		unique?: boolean;
 	}
 }
 export interface MetaKey extends MetaElement {
@@ -25,6 +25,8 @@ export interface MetaKeyListResult extends ManyQueryResult {
 }
 export class QMetaKey extends BeanPath<MetaKey> {
 	metaId = 'io.crnk.meta.MetaKey';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QMetaKey.QRelationships = new QMetaKey.QRelationships(this, 'relationships');
 	attributes: QMetaKey.QAttributes = new QMetaKey.QAttributes(this, 'attributes');
 }
@@ -35,8 +37,8 @@ export module QMetaKey {
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
 	export class QAttributes extends BeanPath<MetaKey.Attributes> {
-		unique: BooleanExpression = this.createBoolean('unique');
-		name: StringExpression = this.createString('name');
+		unique: BooleanPath = this.createBoolean('unique');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaKey = function(id: string): MetaKey {
