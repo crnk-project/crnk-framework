@@ -7,9 +7,9 @@ import {
 	MinLengthValidator,
 	NG_VALIDATORS,
 	PatternValidator,
-	RequiredValidator,
+	RequiredValidator, Validator,
 	Validators
-} from "@angular/forms";
+} from '@angular/forms';
 
 export const EXPRESSION_REQUIRED_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
@@ -25,26 +25,25 @@ export const EXPRESSION_REQUIRED_VALIDATOR: any = {
 })
 export class ExpressionRequiredValidator extends RequiredValidator {
 
-	private _required: boolean;
-	private _onChange: () => void;
+	private _required1: boolean;
+	private _onChange1: () => void;
 
 	@Input()
 	get required(): boolean /*| string*/ {
-		return this._required;
+		return this._required1;
 	}
 
 	set required(value: boolean) {
-		this._required = value != null && value !== false && `${value}` !== 'false';
-		if (this._onChange) this._onChange();
+		this._required1 = value != null && value !== false && `${value}` !== 'false';
+		if (this._onChange1) this._onChange1();
 	}
 
 	validate(c: AbstractControl): { [key: string]: any } {
-		console.log("validate!!!", c,  Validators.required(c));
 		return this.required ? Validators.required(c) : null;
 	}
 
 	registerOnValidatorChange(fn: () => void): void {
-		this._onChange = fn;
+		this._onChange1 = fn;
 	}
 }
 

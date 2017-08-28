@@ -1,5 +1,18 @@
 package io.crnk.validation;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.validation.internal.ConstraintViolationImpl;
@@ -9,9 +22,6 @@ import io.crnk.validation.mock.models.ProjectData;
 import io.crnk.validation.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;
-
-import javax.validation.*;
-import java.util.*;
 
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
 public class ValidationEndToEndTest extends AbstractValidationTest {
@@ -106,7 +116,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataList[0].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -134,7 +144,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataMap[someKey].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -164,13 +174,13 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertTrue(violation.getPropertyPath().toString().startsWith("dataSet["));
 			Assert.assertTrue(violation.getPropertyPath().toString().endsWith("].value"));
 
-			Assert.assertTrue(violation.getErrorData().getSourcePointer().startsWith("data/attributes/dataSet/"));
+			Assert.assertTrue(violation.getErrorData().getSourcePointer().startsWith("/data/attributes/dataSet/"));
 
 			//	TODO attempt to preserver order in Crnk by comparing incoming request, sourcePointer and server Set
 			//  or use of order preserving sets
 			//			List<ProjectData> list = new ArrayList<>(project.getDataSet());
 			//			int index = list.indexOf(corrupedElement);
-			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "data/attributes/dataSet/" + index +
+			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "/data/attributes/dataSet/" + index +
 			// "/value");
 		}
 	}
@@ -228,7 +238,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("tasks[0]", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -252,7 +262,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{complex.message}", violation.getMessageTemplate());
 			Assert.assertEquals("task", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/relationships/task", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/relationships/task", violation.getErrorData().getSourcePointer());
 		}
 	}
 

@@ -64,7 +64,7 @@ describe('FormBinding', () => {
 
 	}));
 
-	fit('should sync JSON API errors to FormControl errors', fakeAsync(() => {
+	it('should sync JSON API errors to FormControl errors', fakeAsync(() => {
 
 		store.dispatch(new ModifyStoreResourceErrorsAction({
 			resourceId: {
@@ -99,7 +99,7 @@ describe('FormBinding', () => {
 
 		let controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(1);
-		expect(controlErrorElements[0].nativeElement.textContent).toEqual("someError");
+		expect(controlErrorElements[0].nativeElement.textContent).toEqual("jsonapi.someCode");
 
 		// make a change to clear the errors in the store
 		nameInputElement.nativeElement.value = "UpdatedAttribute";
@@ -116,7 +116,6 @@ describe('FormBinding', () => {
 		controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(0);
 
-		console.log("make illegal change...");
 		// make an illegal change that triggers the required validation of the FormControl
 		nameInputElement.nativeElement.value = ""; // => illegal
 		nameInputElement.nativeElement.dispatchEvent(new Event('input'));
@@ -132,6 +131,7 @@ describe('FormBinding', () => {
 		expect(resourceErrorElements.length).toEqual(0);
 		controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(1);
+
 
 	}));
 });

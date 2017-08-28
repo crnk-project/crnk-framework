@@ -221,18 +221,15 @@ export class FormBinding {
 	}
 
 	private computeControlErrorKey(error: ResourceError) {
-		return error.id ? error.id : error.code;
+		return error.code ? error.code : error.id;
 	}
 
 	protected mapResourceToControlErrors() {
 
-		console.log("mapResourceToControlErrors");
 		for (let formName in this.config.form.controls) {
 			this.formControlsInitialized = true;
 
 			let control = this.config.form.controls[formName];
-
-			console.log("formName", formName, control, control.errors);
 
 			let fieldRef = this.parseResourceFieldRef(formName);
 			let sourcePointer = '/data/' + fieldRef.path.replace(new RegExp('\\.', 'g'), '/');
@@ -242,12 +239,10 @@ export class FormBinding {
 				const controlErrors = this.collectNonJsonApiControlErrors(control);
 				for (const resourceError of resource.errors) {
 					let errorKey = this.computeControlErrorKey(resourceError);
-					console.log("error", fieldRef, sourcePointer,  resourceError.source.pointer, errorKey);
 					if (resourceError.source && sourcePointer == resourceError.source.pointer && errorKey) {
 						controlErrors[this.controlErrorIdPrefix + errorKey] = resourceError;
 					}
 				}
-				console.log("set control errors", controlErrors, resource);
 				control.setErrors(controlErrors);
 			}
 		}
@@ -268,8 +263,6 @@ export class FormBinding {
 				}
 			}
 			this.unmappedErrors = newUnmappedErrors;
-
-			console.log("unmapped", newUnmappedErrors);
 		}
 	}
 

@@ -103,7 +103,6 @@ export class FormExpressionDirective extends CrnkControl implements OnChanges, O
 		this._parent = parent;
 		this._rawValidators = validators || [];
 		this._rawAsyncValidators = asyncValidators || [];
-		console.log("new model", validators, asyncValidators);
 		this.valueAccessor = selectValueAccessor(this, valueAccessors);
 	}
 
