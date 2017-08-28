@@ -1,0 +1,13 @@
+<div *ngIf="result != null">
+	<p-dataTable [value]="result.data"
+			     selectionMode="single"
+				 [(selection)]="binding.selectedResource"
+				 [lazy]="true" [rows]="10" [paginator]="true"
+				 (onLazyLoad)="binding.onLazyLoad($event)"
+				 (onRowDblclick)="open($event.data)"
+	>
+		<p-column field="attributes.name" [header]="name" sortable="true"
+				  [filter]="true" filterMatchMode="exact">
+		</p-column>
+	</p-dataTable>
+</div>

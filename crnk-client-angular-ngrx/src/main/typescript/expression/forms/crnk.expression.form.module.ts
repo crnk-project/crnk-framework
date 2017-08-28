@@ -29,5 +29,5 @@ import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.mo
 		ExpressionRequiredValidator
 	]
 })
-export class CrnkExpressionModule {
+export class CrnkExpressionFormModule {
 }

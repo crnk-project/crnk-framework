@@ -9,7 +9,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {CrnkBindingModule} from "../../main/typescript/binding/crnk.binding.module";
-import {CrnkExpressionModule} from "../../main/typescript/expression/forms/crnk.expression.form.module";
+import {CrnkExpressionFormModule} from "../../main/typescript/expression/forms/crnk.expression.form.module";
 import {CommonModule} from "@angular/common";
 
 
@@ -33,7 +33,7 @@ let initialState = {
 		StoreModule.forRoot(testReducer, {initialState: initialState}),
 		EffectsModule.forRoot([]),
 		FormsModule,
-		CrnkExpressionModule,
+		CrnkExpressionFormModule,
 		CrnkBindingModule,
 		HttpClientTestingModule,
 		HttpClientModule,
@@ -45,7 +45,7 @@ let initialState = {
 	exports: [
 		CommonModule,
 		FormsModule,
-		CrnkExpressionModule,
+		CrnkExpressionFormModule,
 		CrnkBindingModule,
 		HttpClientTestingModule,
 		HttpClientModule,

@@ -28,8 +28,9 @@ export class TestEditorComponent implements OnInit, OnDestroy {
 			queryId: 'editorQuery'
 		});
 
-		// note that one could use the "async" pipe and "as" operator, but so far code completion
-		// does not seem to work in Intellij. For this reason the example sticks to slightly more verbose subscriptions.
+		// note that one could use the "async" pipe and "as" operator, but so
+		// far code completion does not seem to work in Intellij. For this reason
+		// the example sticks to slightly more verbose subscriptions.
 		this.subscription = this.binding.resource$.subscribe(
 			person => {
 				this.resource = new QMetaAttribute(new BeanBinding(person), null);

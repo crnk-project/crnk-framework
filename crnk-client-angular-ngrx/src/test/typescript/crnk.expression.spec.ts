@@ -6,6 +6,7 @@ import {BeanBinding} from "../../main/typescript/expression/crnk.expression";
 
 describe('Expression', () => {
 
+	// tag::docs[]
 	let bean: MetaAttribute;
 	let qbean: QMetaAttribute;
 
@@ -37,4 +38,5 @@ describe('Expression', () => {
 	it('should provide form name', () => {
 		expect(qbean.attributes.name.toFormName()).toEqual('//meta/attribute//someBean.title//attributes.name');
 	});
+	// end::docs[]
 });

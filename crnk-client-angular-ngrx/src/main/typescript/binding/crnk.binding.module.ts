@@ -10,7 +10,7 @@ import {NgrxJsonApiModule, NgrxJsonApiService} from 'ngrx-json-api';
 import {CrnkBindingUtils} from './crnk.binding.utils';
 import {ControlErrorsComponent, ResourceErrorsComponent} from "./crnk.binding.error";
 import {CommonModule} from "@angular/common";
-import {CrnkExpressionModule} from "../expression/forms/crnk.expression.form.module";
+import {CrnkExpressionFormModule} from "../expression/forms/crnk.expression.form.module";
 import {Store} from "@ngrx/store";
 import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
 
@@ -27,12 +27,12 @@ export function bingingServiceFactory(service: NgrxJsonApiService, utils: CrnkBi
 	imports: [
 		CommonModule,
 		NgrxJsonApiModule,
-		CrnkExpressionModule
+		CrnkExpressionFormModule
 	],
 	exports: [
 		CommonModule,
 		NgrxJsonApiModule,
-		CrnkExpressionModule,
+		CrnkExpressionFormModule,
 
 		ControlErrorsComponent, ResourceErrorsComponent
 	],
