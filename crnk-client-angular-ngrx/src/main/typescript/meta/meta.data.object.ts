@@ -19,7 +19,7 @@ export module MetaDataObject {
 		declaredKeys?: TypedManyResourceRelationship<MetaKey>;
 		interfaces?: TypedManyResourceRelationship<MetaInterface>;
 	}
-	export interface Attributes extends MetaType.Attributes {
+	export interface Attributes extends MetaElement.Attributes {
 		insertable?: boolean;
 		updatable?: boolean;
 		deletable?: boolean;

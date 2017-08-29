@@ -12,12 +12,9 @@ export module MetaResourceRepository {
 		listMetaType?: TypedOneResourceRelationship<MetaDataObject>;
 		listLinksType?: TypedOneResourceRelationship<MetaDataObject>;
 	}
-	export interface Attributes extends MetaElement.Attributes {
-	}
 }
 export interface MetaResourceRepository extends MetaElement {
 	relationships?: MetaResourceRepository.Relationships;
-	attributes?: MetaResourceRepository.Attributes;
 }
 export interface MetaResourceRepositoryResult extends OneQueryResult {
 	data?: MetaResourceRepository;
@@ -30,7 +27,7 @@ export class QMetaResourceRepository extends BeanPath<MetaResourceRepository> {
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaResourceRepository.QRelationships = new QMetaResourceRepository.QRelationships(this, 'relationships');
-	attributes: QMetaResourceRepository.QAttributes = new QMetaResourceRepository.QAttributes(this, 'attributes');
+	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaResourceRepository {
 	export class QRelationships extends BeanPath<MetaResourceRepository.Relationships> {
@@ -40,16 +37,11 @@ export module QMetaResourceRepository {
 		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
-	export class QAttributes extends BeanPath<MetaResourceRepository.Attributes> {
-		name: StringPath = this.createString('name');
-	}
 }
 export let createEmptyMetaResourceRepository = function(id: string): MetaResourceRepository {
 	return {
 		id: id,
 		type: 'meta/resourceRepository',
-		attributes: {
-		},
 		relationships: {
 			resourceType: {data: null},
 			listMetaType: {data: null},

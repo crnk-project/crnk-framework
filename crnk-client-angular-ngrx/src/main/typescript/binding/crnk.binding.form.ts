@@ -184,7 +184,7 @@ export class FormBinding {
 					// control is found, we perform the mapping also here.
 					//
 					// geting notified about new control would be great...
-					if(!this.formControlsInitialized){
+					if (!this.formControlsInitialized) {
 						this.mapResourceToControlErrors();
 					}
 				})
@@ -210,10 +210,10 @@ export class FormBinding {
 	}
 
 	private collectNonJsonApiControlErrors(control: AbstractControl) {
-		let controlErrors = {};
-		let otherErrorKeys = _.keys(control.errors).filter(it => !it.startsWith(this.controlErrorIdPrefix));
-		for (let otherErrorKey in otherErrorKeys) {
-			if(control.errors.hasOwnProperty(otherErrorKey)) {
+		const controlErrors = {};
+		const otherErrorKeys = _.keys(control.errors).filter(it => !it.startsWith(this.controlErrorIdPrefix));
+		for (const otherErrorKey in otherErrorKeys) {
+			if (control.errors.hasOwnProperty(otherErrorKey)) {
 				controlErrors[otherErrorKey] = control.errors[otherErrorKey];
 			}
 		}
@@ -226,34 +226,37 @@ export class FormBinding {
 
 	protected mapResourceToControlErrors() {
 
-		for (let formName in this.config.form.controls) {
-			this.formControlsInitialized = true;
+		const controls = this.config.form.controls;
+		for (const formName in controls) {
+			if (controls.hasOwnProperty(formName)) {
+				this.formControlsInitialized = true;
 
-			let control = this.config.form.controls[formName];
+				const control = this.config.form.controls[formName];
 
-			let fieldRef = this.parseResourceFieldRef(formName);
-			let sourcePointer = '/data/' + fieldRef.path.replace(new RegExp('\\.', 'g'), '/');
-			let resource = this.storeDataSnapshot[fieldRef.resourceId.type][fieldRef.resourceId.id];
+				const fieldRef = this.parseResourceFieldRef(formName);
+				const sourcePointer = '/data/' + fieldRef.path.replace(new RegExp('\\.', 'g'), '/');
+				const resource = this.storeDataSnapshot[fieldRef.resourceId.type][fieldRef.resourceId.id];
 
-			if (resource) {
-				const controlErrors = this.collectNonJsonApiControlErrors(control);
-				for (const resourceError of resource.errors) {
-					let errorKey = this.computeControlErrorKey(resourceError);
-					if (resourceError.source && sourcePointer == resourceError.source.pointer && errorKey) {
-						controlErrors[this.controlErrorIdPrefix + errorKey] = resourceError;
+				if (resource) {
+					const controlErrors = this.collectNonJsonApiControlErrors(control);
+					for (const resourceError of resource.errors) {
+						const errorKey = this.computeControlErrorKey(resourceError);
+						if (resourceError.source && sourcePointer === resourceError.source.pointer && errorKey) {
+							controlErrors[this.controlErrorIdPrefix + errorKey] = resourceError;
+						}
 					}
+					control.setErrors(controlErrors);
 				}
-				control.setErrors(controlErrors);
 			}
 		}
 
-		let form = this.config.form;
+		const form = this.config.form;
 		if (this.primaryResourceId) {
-			let primaryResource = this.storeDataSnapshot[this.primaryResourceId.type][this.primaryResourceId.id];
+			const primaryResource = this.storeDataSnapshot[this.primaryResourceId.type][this.primaryResourceId.id];
 
 			const newUnmappedErrors = [];
 			for (const resourceError of primaryResource.errors) {
-				let errorKey = this.computeControlErrorKey(resourceError);
+				const errorKey = this.computeControlErrorKey(resourceError);
 				if (resourceError.source && resourceError.source.pointer && errorKey) {
 					const path = this.toPath(resourceError.source.pointer);
 					const formName = this.toResourceFormName(primaryResource, path);
@@ -308,14 +311,14 @@ export class FormBinding {
 	 */
 	private parseResourceFieldRef(formName: string): ResourceFieldRef {
 		if (formName.startsWith('//')) {
-			let [type, id, path] = formName.substring(2).split('//');
+			const [type, id, path] = formName.substring(2).split('//');
 			return {
 				resourceId: {
 					type: type,
 					id: id
 				},
 				path: path
-			}
+			};
 		}
 		else {
 			return {
@@ -324,7 +327,7 @@ export class FormBinding {
 					id: this.primaryResourceId.id
 				},
 				path: formName
-			}
+			};
 		}
 	}
 
@@ -333,7 +336,7 @@ export class FormBinding {
 		for (const formName of Object.keys(values)) {
 			const value = values[formName];
 
-			let formRef = this.parseResourceFieldRef(formName);
+			const formRef = this.parseResourceFieldRef(formName);
 			if (formRef.path.startsWith('attributes.') || formRef.path.startsWith('relationships.')) {
 				const key = formRef.resourceId.type + '_' + formRef.resourceId.id;
 				let patchedResource = patchedResourceMap[key];

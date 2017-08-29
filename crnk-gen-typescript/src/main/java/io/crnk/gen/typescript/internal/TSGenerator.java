@@ -1,16 +1,5 @@
 package io.crnk.gen.typescript.internal;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -28,6 +17,12 @@ import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+
 public class TSGenerator {
 
 	private File outputDir;
@@ -41,6 +36,8 @@ public class TSGenerator {
 	private Set<TSSource> sources = new HashSet<>();
 
 	private ArrayList<TSMetaTransformation> transformations;
+
+	private List<TSElement> transformedElements = new ArrayList<>();
 
 	public TSGenerator(File outputDir, MetaLookup lookup, TSGeneratorExtension config) {
 		this.outputDir = outputDir;
@@ -60,8 +57,10 @@ public class TSGenerator {
 	}
 
 	public void run() throws IOException {
-		writePackaging();
-		writeTypescriptConfig();
+		if (config.getNpm().isPackagingEnabled()) {
+			writePackaging();
+			writeTypescriptConfig();
+		}
 		transformMetaToTypescript();
 		runProcessors();
 		writeSources();
@@ -176,6 +175,12 @@ public class TSGenerator {
 				transform(element, TSMetaTransformationOptions.EMPTY);
 			}
 		}
+
+		for (TSElement transformedElement : transformedElements) {
+			for (TSMetaTransformation transformation : transformations) {
+				transformation.postTransform(transformedElement, createMetaTransformationContext());
+			}
+		}
 	}
 
 	private boolean isGenerated(MetaElement element) {
@@ -201,13 +206,16 @@ public class TSGenerator {
 		}
 	}
 
+
 	protected TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				return transformation.transform(element, createMetaTransformationContext(), options);
+				TSElement tsElement = transformation.transform(element, createMetaTransformationContext(), options);
+				transformedElements.add(tsElement);
+				return tsElement;
 			}
 		}
 		throw new IllegalStateException("unexpected element: " + element);
@@ -289,6 +297,11 @@ public class TSGenerator {
 		@Override
 		public MetaElement getMeta(Class<?> implClass) {
 			return lookup.getMeta(implClass);
+		}
+
+		@Override
+		public MetaElement getMeta(String metaId) {
+			return lookup.getMetaById().get(metaId);
 		}
 	}
 

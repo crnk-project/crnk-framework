@@ -1,6 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
 *.class
+replay_pid*
+hs_err_pid*
+temp*
+coverage**
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

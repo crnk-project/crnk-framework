@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for typescript\expression\forms\crnk.expression.form.model.default.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../index.html">all files</a> / <a href="index.html">typescript/expression/forms/</a> crnk.expression.form.model.default.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">2.41% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>4/166</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/82</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/44</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">2.63% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>4/152</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405</td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import {</span>
+	Directive,
+	ElementRef,
+	EventEmitter,
+	forwardRef,
+	Inject,
+	Input,
+	OnChanges,
+	OnDestroy,
+	Optional,
+	Output,
+	Renderer,
+	Self,
+	SimpleChanges
+} from "@angular/core";
+<span class="cstat-no" title="statement not covered" >import {</span>
+	AbstractFormGroupDirective,
+	AsyncValidatorFn,
+	ControlContainer,
+	ControlValueAccessor,
+	DefaultValueAccessor,
+	FormControl,
+	NG_ASYNC_VALIDATORS,
+	NG_VALIDATORS,
+	NG_VALUE_ACCESSOR,
+	NgControl,
+	NgForm,
+	NgModelGroup,
+	Validator,
+	ValidatorFn
+} from "@angular/forms";
+<span class="cstat-no" title="statement not covered" >import {</span>
+	ArbControl,
+	composeAsyncValidators,
+	composeValidators,
+	controlPath,
+	isPropertyUpdated,
+	selectValueAccessor,
+	TemplateDrivenErrors
+} from "./crnk.expression.form.utils";
+import {ExpressionAccessor, Path} from "../crnk.expression";
+&nbsp;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >const resolvedPromise = Promise.resolve(null);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >const formControlBinding: any = {</span>
+	provide: NgControl,
+	useExisting: forwardRef(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" ></span>FormExpressionDirective)</span>
+};
+&nbsp;
+/**
+ * Allows to bind expressions of type {link Expression} to expectForm controls. The directive is very similar to
+ * NgModel, but allows to bind an expression instead of a generic object. The advantage is that an expression
+ * can hold both
+ */
+@Directive({
+	selector: '[arbFormExpression]:not([formControlName]):not([formControl])',
+	providers: [formControlBinding],
+	exportAs: 'arbFormExpression'
+})
+<span class="cstat-no" title="statement not covered" >export class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >FormExpressionDirective<span class="fstat-no" title="function not covered" > </span>extends <span class="cstat-no" title="statement not covered" >ArbControl </span>implements OnChanges, OnDestroy {</span></span></span>
+&nbsp;
+	private _pathModel: Path&lt;any&gt;;
+&nbsp;
+	@Input('arbFormExpression')
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	public set pathModel(pathModel: Path&lt;any&gt;)</span> {</span>
+<span class="cstat-no" title="statement not covered" >		this._pathModel = pathModel;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		const expressionAccessor = this.valueAccessor as any as ExpressionAccessor;</span>
+<span class="cstat-no" title="statement not covered" >		if (!expressionAccessor) {</span>
+<span class="cstat-no" title="statement not covered" >			throw new Error("no value accessor found");</span>
+		}
+<span class="cstat-no" title="statement not covered" >		if (expressionAccessor.setExpression) {</span>
+<span class="cstat-no" title="statement not covered" >			expressionAccessor.setExpression(pathModel);</span>
+		}
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public get pathModel() {</span>
+<span class="cstat-no" title="statement not covered" >		return this._pathModel;</span>
+	}
+&nbsp;
+&nbsp;
+	/** @internal */
+<span class="cstat-no" title="statement not covered" >	_control = new FormControl();</span>
+	/** @internal */
+<span class="cstat-no" title="statement not covered" >	_registered = false;</span>
+	viewModel: any;
+&nbsp;
+	name: string;
+&nbsp;
+	@Input('disabled') <span class="cstat-no" title="statement not covered" >disabled: false;</span>
+	@Output('arbFormExpressionChange') <span class="cstat-no" title="statement not covered" >arbFormExpressionChange = new EventEmitter();</span>
+&nbsp;
+	/**
+	 * NOTE that in contract to NgModel we do not use @Host for parent. This would enforce that the
+	 * components are direct children of the forms component. TODO investigate whether there is
+	 * any better solutions (maybe something similar to FormGroup). It does not seem like it is possible
+	 * to expose an existing ControlContainer again with @Component.providers as it would lead to a circular
+	 * dependency (there is no provider for children only, but itself as well).
+	 */
+<span class="fstat-no" title="function not covered" >	constructor(@Optional() parent: ControlContainer,</span>
+				@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array&lt;Validator | ValidatorFn&gt;,
+				@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array&lt;Validator | AsyncValidatorFn&gt;,
+				@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+		super();
+<span class="cstat-no" title="statement not covered" >		this._parent = parent;</span>
+<span class="cstat-no" title="statement not covered" >		this._rawValidators = validators || [];</span>
+<span class="cstat-no" title="statement not covered" >		this._rawAsyncValidators = asyncValidators || [];</span>
+<span class="cstat-no" title="statement not covered" >		this.valueAccessor = selectValueAccessor(this, valueAccessors);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	ngOnChanges(changes: SimpleChanges)</span> {</span>
+<span class="cstat-no" title="statement not covered" >		this._checkForErrors();</span>
+<span class="cstat-no" title="statement not covered" >		if (!this._registered) {</span>
+<span class="cstat-no" title="statement not covered" >			this._setUpControl();</span>
+		}
+<span class="cstat-no" title="statement not covered" >		if ('disabled' in changes) {</span>
+<span class="cstat-no" title="statement not covered" >			this._updateDisabled(changes);</span>
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if (isPropertyUpdated(changes, this.viewModel)) {</span>
+<span class="cstat-no" title="statement not covered" >			const value = this.pathModel.getValue();</span>
+<span class="cstat-no" title="statement not covered" >			this._updateValue(value);</span>
+<span class="cstat-no" title="statement not covered" >			this.viewModel = value;</span>
+		}
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	ngOnDestroy(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		if (this.formDirective) {</span>
+<span class="cstat-no" title="statement not covered" >			this.formDirective.removeControl(this);</span>
+		}
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get control(): FormControl {</span></span>
+<span class="cstat-no" title="statement not covered" >		return this._control;</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get path(): string[] {</span></span>
+<span class="cstat-no" title="statement not covered" >		return this._parent ? controlPath(this.pathModel.toFormName(), this._parent) : [this.pathModel.toFormName()];</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get formDirective(): any {</span></span>
+<span class="cstat-no" title="statement not covered" >		return this._parent ? this._parent.formDirective : null;</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get validator(): ValidatorFn {</span></span>
+<span class="cstat-no" title="statement not covered" >		return composeValidators(this._rawValidators);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get asyncValidator(): AsyncValidatorFn {</span></span>
+<span class="cstat-no" title="statement not covered" >		return composeAsyncValidators(this._rawAsyncValidators);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	viewToModelUpdate(newValue: any)</span>: void {</span>
+<span class="cstat-no" title="statement not covered" >		this.viewModel = newValue;</span>
+<span class="cstat-no" title="statement not covered" >		this.arbFormExpressionChange.emit(newValue);</span>
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_setUpControl(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		if (!this.pathModel) {</span>
+<span class="cstat-no" title="statement not covered" >			throw new Error('Attribute arbFormExpression is required');</span>
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		this.name = this.pathModel.toFormName();</span>
+<span class="cstat-no" title="statement not covered" >		if (this.formDirective) {</span>
+<span class="cstat-no" title="statement not covered" >			this.formDirective.addControl(this);</span>
+<span class="cstat-no" title="statement not covered" >			this._registered = true;</span>
+		}
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_checkForErrors(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		if (this._parent) {</span>
+<span class="cstat-no" title="statement not covered" >			this._checkParentType();</span>
+		}
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_checkParentType(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		if (!(this._parent instanceof NgModelGroup) &amp;&amp;</span>
+			this._parent instanceof AbstractFormGroupDirective) {
+<span class="cstat-no" title="statement not covered" >			TemplateDrivenErrors.formGroupNameException();</span>
+		}
+		else <span class="cstat-no" title="statement not covered" >if (</span>
+			!(this._parent instanceof NgModelGroup) &amp;&amp; !(this._parent instanceof NgForm)) {
+<span class="cstat-no" title="statement not covered" >			TemplateDrivenErrors.modelParentException();</span>
+		}
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_updateValue(value: any)</span>: void {</span></span>
+<span class="cstat-no" title="statement not covered" >		resolvedPromise.then(</span>
+<span class="fstat-no" title="function not covered" >			() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.setValue(value, {emitViewToModelChange: false});</span>
+			});
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_updateDisabled(changes: SimpleChanges)</span> {</span></span>
+<span class="cstat-no" title="statement not covered" >		const disabledValue = changes['disabled'].currentValue;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		const disabled =</span>
+			disabledValue === '' || (disabledValue &amp;&amp; disabledValue !== 'false');
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		resolvedPromise.then(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >			if (disabled &amp;&amp; !this.control.disabled) {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.disable();</span>
+			}
+			else <span class="cstat-no" title="statement not covered" >if (!disabled &amp;&amp; this.control.disabled) {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.enable();</span>
+			}
+		});
+	}
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+export const <span class="cstat-no" title="statement not covered" >DEFAULT_VALUE_ACCESSOR: any = {</span>
+	provide: NG_VALUE_ACCESSOR,
+	useExisting: forwardRef(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" ></span>PathDefaultValueAccessorDirective)</span>,
+	multi: true
+};
+&nbsp;
+@Directive({
+	selector: 'input:not([type=checkbox])[arbExpression],textarea[arbExpression],input:not([type=checkbox])[arbFormExpression],textarea[arbFormExpression]',
+	host: {'(input)': 'onChange($event.target.value)', '(blur)': 'onTouched()'},
+	providers: [DEFAULT_VALUE_ACCESSOR]
+})
+<span class="cstat-no" title="statement not covered" >export class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >PathDefaultValueAccessorDirective<span class="fstat-no" title="function not covered" > </span>extends <span class="cstat-no" title="statement not covered" >DefaultValueAccessor </span>{</span></span></span>
+&nbsp;
+<span class="fstat-no" title="function not covered" >	constructor(_renderer: Renderer, _elementRef: ElementRef)</span> {
+		super(_renderer, _elementRef, false);
+	}
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+&nbsp;
+<span class="fstat-no" title="function not covered" >function setUpFormControl(control: FormControl, dir: NgControl)</span>: void {
+<span class="cstat-no" title="statement not covered" >	if (!control) {</span>
+<span class="cstat-no" title="statement not covered" >		throw new Error('Cannot find control with');</span>
+	}
+<span class="cstat-no" title="statement not covered" >	if (!dir.valueAccessor) {</span>
+<span class="cstat-no" title="statement not covered" >		throw new Error('No value accessor for form control with');</span>
+	}
+&nbsp;
+	//control.validator = Validators.compose([control.validator !, dir.validator]);
+	//control.asyncValidator = Validators.composeAsync([control.asyncValidator !, dir.asyncValidator]);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	dir.valueAccessor !.writeValue(control.value);</span>
+&nbsp;
+	// view -&gt; model
+<span class="cstat-no" title="statement not covered" >	dir.valueAccessor !.registerOnChange(<span class="fstat-no" title="function not covered" >(newValue: any)</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >		dir.viewToModelUpdate(newValue);</span>
+<span class="cstat-no" title="statement not covered" >		control.markAsDirty();</span>
+<span class="cstat-no" title="statement not covered" >		control.setValue(newValue, {emitModelToViewChange: false});</span>
+	});
+&nbsp;
+	// touched
+<span class="cstat-no" title="statement not covered" >	dir.valueAccessor !.registerOnTouched(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" ></span>control.markAsTouched())</span>;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	control.registerOnChange(<span class="fstat-no" title="function not covered" >(newValue: any, emitModelEvent: boolean)</span> =&gt; {</span>
+		// control -&gt; view
+<span class="cstat-no" title="statement not covered" >		dir.valueAccessor !.writeValue(newValue);</span>
+&nbsp;
+		// control -&gt; ngModel
+<span class="cstat-no" title="statement not covered" >		if (emitModelEvent) {</span>
+<span class="cstat-no" title="statement not covered" >			dir.viewToModelUpdate(newValue);</span>
+		}
+	});
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	if (dir.valueAccessor !.setDisabledState) {</span>
+<span class="cstat-no" title="statement not covered" >		control.registerOnDisabledChange(</span>
+<span class="fstat-no" title="function not covered" >			(disabled: boolean)</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >				dir.valueAccessor !.setDisabledState !(disabled);</span>
+			});
+	}
+&nbsp;
+	// re-run validation when validator binding changes, e.g. minlength=3 -&gt; minlength=4
+	/*dir._rawValidators.forEach((validator: Validator | ValidatorFn) =&gt; {
+	 if ((&lt;Validator&gt;validator).registerOnValidatorChange)
+	 (&lt;Validator&gt;validator).registerOnValidatorChange !(() =&gt; control.updateValueAndValidity());
+	 });
+&nbsp;
+	 dir._rawAsyncValidators.forEach((validator: AsyncValidator | AsyncValidatorFn) =&gt; {
+	 if ((&lt;Validator&gt;validator).registerOnValidatorChange)
+	 (&lt;Validator&gt;validator).registerOnValidatorChange !(() =&gt; control.updateValueAndValidity());
+	 });*/
+}
+&nbsp;
+&nbsp;
+@Directive({
+	selector: '[arbExpression]:not([formControlName]):not([formControl])',
+	providers: [formControlBinding],
+	exportAs: 'arbExpression'
+})
+<span class="cstat-no" title="statement not covered" >export class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >ExpressionDirective<span class="fstat-no" title="function not covered" > </span>extends <span class="cstat-no" title="statement not covered" >ArbControl </span>implements OnChanges, OnDestroy {</span></span></span>
+&nbsp;
+	private _pathModel: Path&lt;any&gt;;
+&nbsp;
+	@Input('arbExpression')
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	public set pathModel(pathModel: Path&lt;any&gt;)</span> {</span>
+<span class="cstat-no" title="statement not covered" >		this._pathModel = pathModel;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		const expressionAccessor = this.valueAccessor as any as ExpressionAccessor;</span>
+<span class="cstat-no" title="statement not covered" >		if (expressionAccessor.setExpression) {</span>
+<span class="cstat-no" title="statement not covered" >			expressionAccessor.setExpression(pathModel);</span>
+		}
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public get pathModel() {</span>
+<span class="cstat-no" title="statement not covered" >		return this._pathModel;</span>
+	}
+&nbsp;
+&nbsp;
+	/** @internal */
+<span class="cstat-no" title="statement not covered" >	_control = new FormControl();</span>
+&nbsp;
+	viewModel: any;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	_registered = false;</span>
+&nbsp;
+	@Input('disabled') <span class="cstat-no" title="statement not covered" >disabled: boolean;</span>
+	@Output('arbExpressionChange') <span class="cstat-no" title="statement not covered" >arbExpressionChange = new EventEmitter();</span>
+&nbsp;
+	/**
+	 * NOTE that in contract to NgModel we do not use @Host for parent. This would enforce that the
+	 * components are direct children of the forms component. TODO investigate whether there is
+	 * any better solutions (maybe something similar to FormGroup). It does not seem like it is possible
+	 * to expose an existing ControlContainer again with @Component.providers as it would lead to a circular
+	 * dependency (there is no provider for children only, but itself as well).
+	 */
+<span class="fstat-no" title="function not covered" >	constructor(@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array&lt;Validator | ValidatorFn&gt;,</span>
+				@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array&lt;Validator | AsyncValidatorFn&gt;,
+				@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+		super();
+<span class="cstat-no" title="statement not covered" >		this._rawValidators = validators || [];</span>
+<span class="cstat-no" title="statement not covered" >		this._rawAsyncValidators = asyncValidators || [];</span>
+<span class="cstat-no" title="statement not covered" >		this.valueAccessor = selectValueAccessor(this, valueAccessors);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	ngOnChanges(changes: SimpleChanges)</span> {</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if (!this._registered) {</span>
+<span class="cstat-no" title="statement not covered" >			this._setUpControl();</span>
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if ('disabled' in changes) {</span>
+<span class="cstat-no" title="statement not covered" >			this._updateDisabled(changes);</span>
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if (isPropertyUpdated(changes, this.viewModel)) {</span>
+<span class="cstat-no" title="statement not covered" >			const value = this.pathModel.getValue();</span>
+<span class="cstat-no" title="statement not covered" >			this._updateValue(value);</span>
+<span class="cstat-no" title="statement not covered" >			this.viewModel = value;</span>
+		}
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	ngOnDestroy(): void {</span></span>
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_setUpControl(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		this._setUpStandalone();</span>
+<span class="cstat-no" title="statement not covered" >		this._registered = true;</span>
+	}
+&nbsp;
+&nbsp;
+<span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_setUpStandalone(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >		setUpFormControl(this._control, this);</span>
+<span class="cstat-no" title="statement not covered" >		this._control.updateValueAndValidity({emitEvent: false});</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get control(): FormControl {</span></span>
+<span class="cstat-no" title="statement not covered" >		return this._control;</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get validator(): ValidatorFn {</span></span>
+<span class="cstat-no" title="statement not covered" >		return composeValidators(this._rawValidators);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	get asyncValidator(): AsyncValidatorFn {</span></span>
+<span class="cstat-no" title="statement not covered" >		return composeAsyncValidators(this._rawAsyncValidators);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	viewToModelUpdate(newValue: any)</span>: void {</span>
+<span class="cstat-no" title="statement not covered" >		this.viewModel = newValue;</span>
+<span class="cstat-no" title="statement not covered" >		this.arbExpressionChange.emit(newValue);</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_updateValue(value: any)</span>: void {</span></span>
+<span class="cstat-no" title="statement not covered" >		resolvedPromise.then(</span>
+<span class="fstat-no" title="function not covered" >			() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.setValue(value, {emitViewToModelChange: false});</span>
+			});
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >	private <span class="cstat-no" title="statement not covered" >_updateDisabled(changes: SimpleChanges)</span> {</span></span>
+<span class="cstat-no" title="statement not covered" >		const disabledValue = changes['disabled'].currentValue;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		const disabled =</span>
+			disabledValue === '' || (disabledValue &amp;&amp; disabledValue !== 'false');
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		resolvedPromise.then(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >			if (disabled &amp;&amp; !this.control.disabled) {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.disable();</span>
+			}
+			else <span class="cstat-no" title="statement not covered" >if (!disabled &amp;&amp; this.control.disabled) {</span>
+<span class="cstat-no" title="statement not covered" >				this.control.enable();</span>
+			}
+		});
+	}
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Aug 26 2017 09:11:32 GMT+0200 (Mitteleuropäische Sommerzeit)
+</div>
+</div>
+<script src="../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../sorter.js"></script>
+</body>
+</html>

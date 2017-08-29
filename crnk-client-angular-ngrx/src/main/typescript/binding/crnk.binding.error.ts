@@ -1,11 +1,19 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Input, OnDestroy, TemplateRef} from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	ChangeDetectorRef,
+	Component,
+	ContentChild,
+	Input,
+	OnDestroy,
+	TemplateRef
+} from '@angular/core';
 import {AbstractControl, NgForm} from '@angular/forms';
 import {ResourceError} from 'ngrx-json-api';
 import {Path} from '../expression/crnk.expression';
 import {Subscription} from 'rxjs/Subscription';
 
 
-interface ErrorEntry {
+export interface ErrorEntry {
 	code: string;
 	data: any;
 }
@@ -17,9 +25,9 @@ interface ErrorEntry {
 	selector: 'crnk-control-errors',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	template: `
-		<div *ngFor="let error of errors">
+		<div *ngFor="let error of controlErrors">
 			<ng-container [ngTemplateOutlet]="template"
-				[ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
+						  [ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
 		</div>
 	`,
 })
@@ -35,7 +43,7 @@ export class ControlErrorsComponent implements OnDestroy {
 
 	private formSubscription: Subscription;
 
-	public errors: Array<ErrorEntry> = [];
+	public controlErrors: Array<ErrorEntry> = [];
 
 	@ContentChild(TemplateRef) template;
 
@@ -89,22 +97,24 @@ export class ControlErrorsComponent implements OnDestroy {
 	private collectErrors() {
 		this.initControl();
 		if (this.control) {
-			let newControlErrors = [];
+			const newControlErrors = [];
 
-			let errors = this.control.errors;
-			for (let errorCode in errors) {
-				newControlErrors.push({
-					code: errorCode,
-					data: errors[errorCode]
-				});
+			const errors = this.control.errors;
+			for (const errorCode in errors) {
+				if (errors.hasOwnProperty(errorCode)) {
+					newControlErrors.push({
+						code: errorCode,
+						data: errors[errorCode]
+					});
+				}
 			}
 
-			this.errors = newControlErrors;
+			this.controlErrors = newControlErrors;
 
 			this.cd.markForCheck();
 		}
 		else {
-			this.errors = undefined;
+			this.controlErrors = undefined;
 		}
 	}
 }
@@ -120,7 +130,7 @@ export class ControlErrorsComponent implements OnDestroy {
 	template: `
 		<div *ngFor="let error of pathErrors">
 			<ng-container [ngTemplateOutlet]="template"
-				[ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
+						  [ngOutletContext]="{errorCode: error.code, errorData: error.data}"></ng-container>
 		</div>
 	`,
 })
@@ -167,7 +177,7 @@ export class ResourceErrorsComponent {
 				}
 			}
 		}
-		this.pathErrors = pathErrors
+		this.pathErrors = pathErrors;
 
 		this.cd.markForCheck();
 	}

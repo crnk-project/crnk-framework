@@ -42,7 +42,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("name", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("null"));
-			Assert.assertEquals("data/attributes/name", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/name", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -69,7 +69,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("0"));
 			Assert.assertTrue(violation.getMessage().contains("3"));
-			Assert.assertEquals("data/attributes/keywords", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/keywords", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -92,7 +92,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("data.value", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/attributes/data/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/data/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 

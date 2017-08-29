@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for typescript\binding\crnk.binding.utils.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">typescript/binding/</a> crnk.binding.utils.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">3.03% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>2/66</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/28</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/14</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">3.39% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>2/59</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110</td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import {Injectable} from '@angular/core';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/zip';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/do';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/debounceTime';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/distinct';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/switch';</span>
+<span class="cstat-no" title="statement not covered" >import 'rxjs/add/operator/filter';</span>
+import {ResourceIdentifier, StoreResource, Query, QueryParams, ResourceError, QueryResult} from 'ngrx-json-api';
+&nbsp;
+<span class="cstat-no" title="statement not covered" >import * as _ from 'lodash';</span>
+import {Observable} from 'rxjs/Observable';
+&nbsp;
+&nbsp;
+export const <span class="cstat-no" title="statement not covered" >waitWhileLoading = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >	return <span class="fstat-no" title="function not covered" >(result$: Observable&lt;QueryResult&gt;)</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >		return result$.filter(<span class="fstat-no" title="function not covered" >it </span>=&gt; <span class="cstat-no" title="statement not covered" >!it.loading)</span>;</span>
+	};
+};
+&nbsp;
+export const <span class="cstat-no" title="statement not covered" >assumeNoError = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >	return <span class="fstat-no" title="function not covered" >(result$: Observable&lt;QueryResult&gt;)</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >		return result$.do(<span class="fstat-no" title="function not covered" >it </span>=&gt; {</span>
+<span class="cstat-no" title="statement not covered" >			if (!_.isEmpty(it.errors)) {</span>
+<span class="cstat-no" title="statement not covered" >				throw new QueryError(it.errors);</span>
+			}
+		});
+	};
+};
+&nbsp;
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export class <span class="cstat-no" title="statement not covered" >QueryError </span>extends <span class="cstat-no" title="statement not covered" >Error </span>{</span></span>
+&nbsp;
+<span class="fstat-no" title="function not covered" >	constructor(public <span class="cstat-no" title="statement not covered" >errors: Array&lt;ResourceError&gt;)</span></span> {
+		super();
+	}
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+@Injectable()
+<span class="fstat-no" title="function not covered" >export class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >NgrxBindingUtils<span class="fstat-no" title="function not covered" > </span>{</span></span></span>
+&nbsp;
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public <span class="cstat-no" title="statement not covered" >toResourceIdentifier(resource: StoreResource)</span>: ResourceIdentifier {</span>
+<span class="cstat-no" title="statement not covered" >		return {type: resource.type, id: resource.id};</span>
+	};
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public <span class="cstat-no" title="statement not covered" >toResourceIdentifiers(resources: Array&lt;StoreResource&gt;)</span>: Array&lt;ResourceIdentifier&gt; {</span>
+<span class="cstat-no" title="statement not covered" >		const results: Array&lt;ResourceIdentifier&gt; = [];</span>
+<span class="cstat-no" title="statement not covered" >		for (<span class="cstat-no" title="statement not covered" >const  resource </span>of resources) {</span>
+<span class="cstat-no" title="statement not covered" >			results.push(this.toResourceIdentifier(resource));</span>
+		}
+<span class="cstat-no" title="statement not covered" >		return results;</span>
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public <span class="cstat-no" title="statement not covered" >applyQueryParams(query: Query, params: QueryParams)</span> {</span>
+<span class="cstat-no" title="statement not covered" >		if (!query.params) {</span>
+<span class="cstat-no" title="statement not covered" >			query.params = {};</span>
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		query.params.limit = params.limit;</span>
+<span class="cstat-no" title="statement not covered" >		query.params.offset = params.offset;</span>
+<span class="cstat-no" title="statement not covered" >		if (!_.isEmpty(params.include)) {</span>
+<span class="cstat-no" title="statement not covered" >			if (!query.params.include) {</span>
+<span class="cstat-no" title="statement not covered" >				query.params.include = [];</span>
+			}
+<span class="cstat-no" title="statement not covered" >			query.params.include.push(...params.include);</span>
+		}
+<span class="cstat-no" title="statement not covered" >		if (!_.isEmpty(params.sorting)) {</span>
+<span class="cstat-no" title="statement not covered" >			if (!query.params.sorting) {</span>
+<span class="cstat-no" title="statement not covered" >				query.params.sorting = [];</span>
+			}
+<span class="cstat-no" title="statement not covered" >			query.params.sorting.push(...params.sorting);</span>
+		}
+<span class="cstat-no" title="statement not covered" >		if (!_.isEmpty(params.filtering)) {</span>
+<span class="cstat-no" title="statement not covered" >			if (!query.params.filtering) {</span>
+<span class="cstat-no" title="statement not covered" >				query.params.filtering = [];</span>
+			}
+<span class="cstat-no" title="statement not covered" >			query.params.filtering.push(...params.filtering);</span>
+		}
+	}
+&nbsp;
+&nbsp;
+<span class="fstat-no" title="function not covered" >	public <span class="cstat-no" title="statement not covered" >toSearchPath(attributePath: string)</span> {</span>
+<span class="cstat-no" title="statement not covered" >		const pathElements = attributePath.split('.');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		const searchPath = [];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		for (let i = 0; i &lt; pathElements.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >			if (pathElements[i] === 'attributes') {</span>
+				// nothing to do
+			}
+			else <span class="cstat-no" title="statement not covered" >if (pathElements[i] === 'relationships' &amp;&amp; i &lt; pathElements.length - 2) {</span>
+<span class="cstat-no" title="statement not covered" >				const relationshipName = pathElements[i + 1];</span>
+<span class="cstat-no" title="statement not covered" >				const dataType = pathElements[i + 2];</span>
+<span class="cstat-no" title="statement not covered" >				if (dataType === 'data' || dataType === 'reference') {</span>
+<span class="cstat-no" title="statement not covered" >					searchPath.push(relationshipName);</span>
+<span class="cstat-no" title="statement not covered" >					i += 2;</span>
+				}
+				else {
+<span class="cstat-no" title="statement not covered" >					throw new Error('cannot map relationship path in ' + attributePath + ', got ' + dataType +</span>
+						' but expected data or reference');
+				}
+			}
+			else {
+<span class="cstat-no" title="statement not covered" >				searchPath.push(pathElements[i]);</span>
+			}
+		}
+<span class="cstat-no" title="statement not covered" >		return _.join(searchPath, '.');</span>
+	}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Aug 26 2017 09:11:32 GMT+0200 (Mitteleuropäische Sommerzeit)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

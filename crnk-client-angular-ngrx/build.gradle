@@ -27,14 +27,15 @@ ClassLoader getClassLoader(Configuration config) {
 }
 
 task generateMetaStubs {
+	def outputDir = file("${projectDir}/src/main/typescript/meta")
 	def genConfig = configurations.getByName("genRuntime")
 	inputs.files genConfig.asFileTree
-	outputs.dir file('src/typescript/meta')
+	outputs.dir outputDir
 	dependsOn tasks.compileGenJava
 	doLast({
 		def genClassLoader = getClassLoader(genConfig)
 		def executor = genClassLoader.loadClass("io.crnk.client.ngrx.gen.GeneratorExecutor").newInstance()
-		executor.run()
+		executor.run(outputDir)
 	})
 }
 
@@ -70,7 +71,8 @@ def inputFileTree = fileTree('.') {
 	include 'package-lock.json'
 	include 'tsconfig.json'
 	include 'tsconfig.dist.json'
-	include 'src/main/typescript**'
+	include 'src/main/typescript/**'
+	include 'src/test/typescript/**'
 }
 
 task npmRunBuild(type: NpmTask) {
@@ -163,9 +165,6 @@ tasks.assemble.dependsOn 'npmRunBuild'
 clean.doFirst {
 	delete "${projectDir}/node_modules/"
 }
-
-
-
 
 task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
 	group = 'publishing'

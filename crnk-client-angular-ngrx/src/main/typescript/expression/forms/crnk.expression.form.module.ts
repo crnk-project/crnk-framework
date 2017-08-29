@@ -2,11 +2,11 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ExpressionDirective} from './crnk.expression.form.model.default';
 import {
-	ExpressionCheckboxRequiredValidator,
-	ExpressionMaxLengthValidator,
-	ExpressionMinLengthValidator,
-	ExpressionPatternValidator,
-	ExpressionRequiredValidator
+	ExpressionCheckboxRequiredValidatorDirective, ExpressionEmailValidatorDirective,
+	ExpressionMaxLengthValidatorDirective,
+	ExpressionMinLengthValidatorDirective,
+	ExpressionPatternValidatorDirective,
+	ExpressionRequiredValidatorDirective
 } from "./crnk.expression.form.validators";
 import {FormExpressionDirective} from "./crnk.expression.form.model.form";
 import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.model.accessor";
@@ -19,14 +19,14 @@ import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.mo
 	exports: [
 		FormsModule, ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
-		ExpressionPatternValidator, ExpressionMaxLengthValidator, ExpressionMinLengthValidator, ExpressionCheckboxRequiredValidator,
-		ExpressionRequiredValidator
+		ExpressionPatternValidatorDirective, ExpressionMaxLengthValidatorDirective, ExpressionMinLengthValidatorDirective, ExpressionCheckboxRequiredValidatorDirective,
+		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective
 	],
 	declarations: [
 		ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
-		ExpressionPatternValidator, ExpressionMaxLengthValidator, ExpressionMinLengthValidator, ExpressionCheckboxRequiredValidator,
-		ExpressionRequiredValidator
+		ExpressionPatternValidatorDirective, ExpressionMaxLengthValidatorDirective, ExpressionMinLengthValidatorDirective, ExpressionCheckboxRequiredValidatorDirective,
+		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective
 	]
 })
 export class CrnkExpressionFormModule {

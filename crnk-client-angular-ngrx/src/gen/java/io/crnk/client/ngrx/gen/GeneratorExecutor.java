@@ -14,18 +14,12 @@ import java.io.IOException;
 
 public class GeneratorExecutor {
 
-	public static void main(String[] args) {
-		new GeneratorExecutor().run();
-	}
-
-	public void run() {
+	public void run(File outputDir) {
 		TSGeneratorExtension config = new TSGeneratorExtension(null, null);
 		config.setGenerateExpressions(true);
 		config.getNpm().setPackagingEnabled(false);
 		config.getNpm().setPackageName("@crnk/ngrx");
 		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/ngrx");
-
-		File outputDir = new File("src/main/typescript/meta");
 
 		MetaModule metaModule = MetaModule.create();
 		metaModule.addMetaProvider(new ResourceMetaProvider());

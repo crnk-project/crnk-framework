@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript.transform;
 
+import io.crnk.gen.typescript.model.TSAny;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -7,13 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
-
-import io.crnk.gen.typescript.model.TSAny;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimitiveType;
 
 public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 
@@ -48,6 +48,11 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		primitiveMapping.put(OffsetDateTime.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(Duration.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(byte[].class, TSPrimitiveType.STRING);
+	}
+
+	@Override
+	public void postTransform(TSElement element, TSMetaTransformationContext context) {
+
 	}
 
 	@Override

@@ -8,12 +8,9 @@ export module MetaType {
 		[key: string]: ResourceRelationship;
 		elementType?: TypedOneResourceRelationship<MetaType>;
 	}
-	export interface Attributes extends MetaElement.Attributes {
-	}
 }
 export interface MetaType extends MetaElement {
 	relationships?: MetaType.Relationships;
-	attributes?: MetaType.Attributes;
 }
 export interface MetaTypeResult extends OneQueryResult {
 	data?: MetaType;
@@ -26,7 +23,7 @@ export class QMetaType extends BeanPath<MetaType> {
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaType.QRelationships = new QMetaType.QRelationships(this, 'relationships');
-	attributes: QMetaType.QAttributes = new QMetaType.QAttributes(this, 'attributes');
+	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaType {
 	export class QRelationships extends BeanPath<MetaType.Relationships> {
@@ -34,16 +31,11 @@ export module QMetaType {
 		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
-	export class QAttributes extends BeanPath<MetaType.Attributes> {
-		name: StringPath = this.createString('name');
-	}
 }
 export let createEmptyMetaType = function(id: string): MetaType {
 	return {
 		id: id,
 		type: 'meta/type',
-		attributes: {
-		},
 		relationships: {
 			elementType: {data: null},
 			parent: {data: null},

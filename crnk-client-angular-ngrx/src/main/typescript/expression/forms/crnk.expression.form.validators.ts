@@ -1,19 +1,17 @@
-import {Directive, forwardRef, Input} from "@angular/core";
+import {Directive, forwardRef} from "@angular/core";
 import {
-	AbstractControl,
 	CheckboxRequiredValidator,
 	EmailValidator,
 	MaxLengthValidator,
 	MinLengthValidator,
 	NG_VALIDATORS,
 	PatternValidator,
-	RequiredValidator, Validator,
-	Validators
+	RequiredValidator
 } from '@angular/forms';
 
 export const EXPRESSION_REQUIRED_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionRequiredValidator),
+	useExisting: forwardRef(() => ExpressionRequiredValidatorDirective),
 	multi: true
 };
 
@@ -23,34 +21,13 @@ export const EXPRESSION_REQUIRED_VALIDATOR: any = {
 	providers: [EXPRESSION_REQUIRED_VALIDATOR],
 	host: {'[attr.required]': 'required ? "" : null'}
 })
-export class ExpressionRequiredValidator extends RequiredValidator {
-
-	private _required1: boolean;
-	private _onChange1: () => void;
-
-	@Input()
-	get required(): boolean /*| string*/ {
-		return this._required1;
-	}
-
-	set required(value: boolean) {
-		this._required1 = value != null && value !== false && `${value}` !== 'false';
-		if (this._onChange1) this._onChange1();
-	}
-
-	validate(c: AbstractControl): { [key: string]: any } {
-		return this.required ? Validators.required(c) : null;
-	}
-
-	registerOnValidatorChange(fn: () => void): void {
-		this._onChange1 = fn;
-	}
+export class ExpressionRequiredValidatorDirective extends RequiredValidator {
 }
 
 
 export const EXPRESSION_EMAIL_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionEmailValidator),
+	useExisting: forwardRef(() => ExpressionEmailValidatorDirective),
 	multi: true
 };
 
@@ -58,12 +35,12 @@ export const EXPRESSION_EMAIL_VALIDATOR: any = {
 	selector: '[email][crnkFormExpression],[email][crnkExpression]',
 	providers: [EXPRESSION_EMAIL_VALIDATOR]
 })
-export class ExpressionEmailValidator extends EmailValidator {
+export class ExpressionEmailValidatorDirective extends EmailValidator {
 }
 
 export const EXPRESSION_CHECKBOX_REQUIRED_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionCheckboxRequiredValidator),
+	useExisting: forwardRef(() => ExpressionCheckboxRequiredValidatorDirective),
 	multi: true
 };
 
@@ -73,12 +50,12 @@ export const EXPRESSION_CHECKBOX_REQUIRED_VALIDATOR: any = {
 	providers: [EXPRESSION_CHECKBOX_REQUIRED_VALIDATOR],
 	host: {'[attr.required]': 'required ? "" : null'}
 })
-export class ExpressionCheckboxRequiredValidator extends CheckboxRequiredValidator {
+export class ExpressionCheckboxRequiredValidatorDirective extends CheckboxRequiredValidator {
 }
 
 export const EXPRESSION_MIN_LENGTH_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionMinLengthValidator),
+	useExisting: forwardRef(() => ExpressionMinLengthValidatorDirective),
 	multi: true
 };
 
@@ -88,12 +65,12 @@ export const EXPRESSION_MIN_LENGTH_VALIDATOR: any = {
 	providers: [EXPRESSION_MIN_LENGTH_VALIDATOR],
 	host: {'[attr.minlength]': 'minlength ? minlength : null'}
 })
-export class ExpressionMinLengthValidator extends MinLengthValidator {
+export class ExpressionMinLengthValidatorDirective extends MinLengthValidator {
 }
 
 export const EXPRESSION_MAX_LENGTH_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionMaxLengthValidator),
+	useExisting: forwardRef(() => ExpressionMaxLengthValidatorDirective),
 	multi: true
 };
 
@@ -102,13 +79,13 @@ export const EXPRESSION_MAX_LENGTH_VALIDATOR: any = {
 	providers: [EXPRESSION_MAX_LENGTH_VALIDATOR],
 	host: {'[attr.maxlength]': 'maxlength ? maxlength : null'}
 })
-export class ExpressionMaxLengthValidator extends MaxLengthValidator {
+export class ExpressionMaxLengthValidatorDirective extends MaxLengthValidator {
 
 }
 
 export const EXPRESSION_PATTERN_VALIDATOR: any = {
 	provide: NG_VALIDATORS,
-	useExisting: forwardRef(() => ExpressionPatternValidator),
+	useExisting: forwardRef(() => ExpressionPatternValidatorDirective),
 	multi: true
 };
 
@@ -118,6 +95,6 @@ export const EXPRESSION_PATTERN_VALIDATOR: any = {
 	providers: [EXPRESSION_PATTERN_VALIDATOR],
 	host: {'[attr.pattern]': 'pattern ? pattern : null'}
 })
-export class ExpressionPatternValidator extends PatternValidator {
+export class ExpressionPatternValidatorDirective extends PatternValidator {
 
 }

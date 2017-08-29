@@ -26,6 +26,8 @@ export class QMetaPrimaryKey extends BeanPath<MetaPrimaryKey> {
 export module QMetaPrimaryKey {
 	export class QAttributes extends BeanPath<MetaPrimaryKey.Attributes> {
 		generated: BooleanPath = this.createBoolean('generated');
+		unique: BooleanPath = this.createBoolean('unique');
+		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaPrimaryKey = function(id: string): MetaPrimaryKey {

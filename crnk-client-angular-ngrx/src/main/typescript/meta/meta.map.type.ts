@@ -9,12 +9,9 @@ export module MetaMapType {
 		[key: string]: ResourceRelationship;
 		keyType?: TypedOneResourceRelationship<MetaType>;
 	}
-	export interface Attributes extends MetaType.Attributes {
-	}
 }
 export interface MetaMapType extends MetaType {
 	relationships?: MetaMapType.Relationships;
-	attributes?: MetaMapType.Attributes;
 }
 export interface MetaMapTypeResult extends OneQueryResult {
 	data?: MetaMapType;
@@ -27,7 +24,7 @@ export class QMetaMapType extends BeanPath<MetaMapType> {
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaMapType.QRelationships = new QMetaMapType.QRelationships(this, 'relationships');
-	attributes: QMetaMapType.QAttributes = new QMetaMapType.QAttributes(this, 'attributes');
+	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaMapType {
 	export class QRelationships extends BeanPath<MetaMapType.Relationships> {
@@ -36,16 +33,11 @@ export module QMetaMapType {
 		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
 	}
-	export class QAttributes extends BeanPath<MetaMapType.Attributes> {
-		name: StringPath = this.createString('name');
-	}
 }
 export let createEmptyMetaMapType = function(id: string): MetaMapType {
 	return {
 		id: id,
 		type: 'meta/mapType',
-		attributes: {
-		},
 		relationships: {
 			keyType: {data: null},
 			elementType: {data: null},

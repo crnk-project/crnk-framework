@@ -14,8 +14,7 @@ import {CrnkExpressionFormModule} from "../expression/forms/crnk.expression.form
 import {Store} from "@ngrx/store";
 import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
 
-export function bingingServiceFactory(service: NgrxJsonApiService, utils: CrnkBindingUtils, store: Store<any>,
-									  injector: Injector) {
+export function bingingServiceFactory(service: NgrxJsonApiService, utils: CrnkBindingUtils, store: Store<any>, injector: Injector) {
 	const operationsService = injector.get(OperationsService, null);
 	const selectors = injector.get(NgrxJsonApiSelectors, null);
 
