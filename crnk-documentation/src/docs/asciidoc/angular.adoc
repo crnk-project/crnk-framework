@@ -44,7 +44,7 @@ crnk-client-ngrx provides a number of different components:
 | Binding of the expression model to Angular form components (a JSON API specific flavor of `ngModel`).
 
 | @crnk/angular-ngrx/binding
-| Helper classes that take care of binding tables or forms to JSON API. Makes use of `@crnk/ngrx/expression`.
+| Helper classes that take care of binding tables or forms to JSON API. Makes use of `@crnk/angular-ngrx/expression`.
 
 | @crnk/angular-ngrx/meta
 | Typescript API for <<meta_module|Meta Module>> generated with crnk-gen-typescript.

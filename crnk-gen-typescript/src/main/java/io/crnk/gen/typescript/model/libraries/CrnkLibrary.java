@@ -24,9 +24,9 @@ public class CrnkLibrary {
 	public static final TSClassType QTYPED_MANY_RESOURCE_RELATIONSHIP;
 
 	static {
-		EXPRESSION_SOURCE.setNpmPackage("@crnk/ngrx");
+		EXPRESSION_SOURCE.setNpmPackage("@crnk/angular-ngrx");
 		EXPRESSION_SOURCE.setDirectory("expression");
-		STUB_SOURCE.setNpmPackage("@crnk/ngrx");
+		STUB_SOURCE.setNpmPackage("@crnk/angular-ngrx");
 		STUB_SOURCE.setDirectory("stub");
 
 		BEAN_PATH = new TSClassType();

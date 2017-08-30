@@ -1,8 +1,8 @@
 import {QTask, Task} from './task';
-import {DefaultPagedLinksInformation} from '@crnk/ngrx/';
-import {BeanPath, BooleanPath, StringPath} from '@crnk/ngrx/expression';
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/ngrx/stub';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {DefaultPagedLinksInformation} from '@crnk/angular-ngrx/';
+import {BeanPath, BooleanPath, StringPath} from '@crnk/angular-ngrx/expression';
+import {CrnkStoreResource, QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/angular-ngrx/stub';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module Schedule {
 	export interface Relationships {
@@ -17,7 +17,7 @@ export module Schedule {
 		delayed?: boolean;
 	}
 }
-export interface Schedule extends StoreResource {
+export interface Schedule extends CrnkStoreResource {
 	relationships?: Schedule.Relationships;
 	attributes?: Schedule.Attributes;
 }
