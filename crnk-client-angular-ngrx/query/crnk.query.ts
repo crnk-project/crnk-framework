@@ -38,7 +38,7 @@ export function generateCrnkIncludedQueryParams(included: Array<string>): string
 };
 
 
-export const ARB_CRNK_URL_BUILDER = {
+export const CRNK_URL_BUILDER = {
 	generateIncludedQueryParams: generateCrnkIncludedQueryParams,
 };
 

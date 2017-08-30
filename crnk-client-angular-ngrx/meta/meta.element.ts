@@ -30,12 +30,12 @@ export class QMetaElement extends BeanPath<MetaElement> {
 	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaElement {
+	export class QAttributes extends BeanPath<MetaElement.Attributes> {
+		name: StringPath = this.createString('name');
+	}
 	export class QRelationships extends BeanPath<MetaElement.Relationships> {
 		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
 		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
-	}
-	export class QAttributes extends BeanPath<MetaElement.Attributes> {
-		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaElement = function(id: string): MetaElement {
