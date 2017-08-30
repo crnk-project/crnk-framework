@@ -27,7 +27,7 @@ ClassLoader getClassLoader(Configuration config) {
 }
 
 task generateMetaStubs {
-	def outputDir = file("${projectDir}/src/main/typescript/meta")
+	def outputDir = file("${projectDir}/meta")
 	def genConfig = configurations.getByName("genRuntime")
 	inputs.files genConfig.asFileTree
 	outputs.dir outputDir
@@ -70,8 +70,12 @@ def inputFileTree = fileTree('.') {
 	include 'package-lock.json'
 	include 'tsconfig.json'
 	include 'tsconfig.dist.json'
-	include 'src/main/typescript/**'
-	include 'src/test/typescript/**'
+	include 'binding/**'
+	include 'expression/**'
+	include 'meta/**'
+	include 'query/**'
+	include 'stub/**'
+	include 'test/**'
 }
 
 task npmRunBuild(type: NpmTask) {

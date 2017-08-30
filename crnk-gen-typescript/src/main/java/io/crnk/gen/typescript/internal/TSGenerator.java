@@ -1,5 +1,17 @@
 package io.crnk.gen.typescript.internal;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,12 +28,6 @@ import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 public class TSGenerator {
 
@@ -176,7 +182,7 @@ public class TSGenerator {
 			}
 		}
 
-		for (TSElement transformedElement : transformedElements) {
+		for (TSElement transformedElement : new ArrayList<>(transformedElements)) {
 			for (TSMetaTransformation transformation : transformations) {
 				transformation.postTransform(transformedElement, createMetaTransformationContext());
 			}

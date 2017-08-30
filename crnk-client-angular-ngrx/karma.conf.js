@@ -5,8 +5,13 @@ module.exports = function(config) {
 
 		files: [
 			{ pattern: "base.spec.ts" },
-			{ pattern: "src/main/typescript/**/*.+(ts|html)" },
-			{ pattern: "src/test/typescript/**/*.+(ts|html)" }
+			{ pattern: "binding/**/*.+(ts|html)" },
+			{ pattern: "expression/**/*.+(ts|html)" },
+			{ pattern: "meta/**/*.+(ts|html)" },
+			{ pattern: "operations/**/*.+(ts|html)" },
+			{ pattern: "query/**/*.+(ts|html)" },
+			{ pattern: "stub/**/*.+(ts|html)" },
+			{ pattern: "test/**/*.+(ts|html)" }
 		],
 
 		preprocessors: {

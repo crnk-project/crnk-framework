@@ -99,7 +99,7 @@ care of that. In this case usage looks like:
 [source]
 .crnk.expression.spec.ts
 ----
-include::../../../../crnk-client-angular-ngrx/src/test/typescript/crnk.expression.spec.ts[tag=docs]
+include::../../../../crnk-client-angular-ngrx/test/crnk.expression.spec.ts[tag=docs]
 ----
 
 Note that:
@@ -155,7 +155,7 @@ There is a `FormBinding` class provided by `CrnkExpressionFormModule` that takes
 [source]
 .crnk.test.editor.component.ts
 ----
-include::../../../../crnk-client-angular-ngrx/src/test/typescript/crnk.test.editor.component.ts[]
+include::../../../../crnk-client-angular-ngrx/test/crnk.test.editor.component.ts[]
 ----
 
 A template then looks like:
@@ -163,7 +163,7 @@ A template then looks like:
 [source]
 .crnk.test.editor.component.html
 ----
-include::../../../../crnk-client-angular-ngrx/src/test/typescript/crnk.test.editor.component.html[]
+include::../../../../crnk-client-angular-ngrx/test/crnk.test.editor.component.html[]
 ----
 
 Note that:
@@ -198,7 +198,7 @@ Similar to `FormBinding` there is a `TableBinding` class that looks like:
 [source]
 .crnk.test.table.component.ts
 ----
-include::../../../../crnk-client-angular-ngrx/src/test/typescript/crnk.test.table.component.ts[]
+include::../../../../crnk-client-angular-ngrx/test/crnk.test.table.component.ts[]
 ----
 
 and
@@ -206,7 +206,7 @@ and
 [source]
 .crnk.test.table.component.html
 ----
-include::../../../../crnk-client-angular-ngrx/src/test/typescript/crnk.test.table.component.html[]
+include::../../../../crnk-client-angular-ngrx/test/crnk.test.table.component.html[]
 ----
 
 Note that:
