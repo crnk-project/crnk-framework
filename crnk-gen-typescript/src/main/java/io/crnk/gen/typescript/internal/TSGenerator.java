@@ -174,6 +174,8 @@ public class TSGenerator {
 		return new File(dir, sourceFile.getName() + ".ts");
 	}
 
+	private boolean postProcessing = false;
+
 	public void transformMetaToTypescript() {
 		Collection<MetaElement> elements = lookup.getMetaById().values();
 		for (MetaElement element : elements) {
@@ -182,10 +184,16 @@ public class TSGenerator {
 			}
 		}
 
-		for (TSElement transformedElement : new ArrayList<>(transformedElements)) {
-			for (TSMetaTransformation transformation : transformations) {
-				transformation.postTransform(transformedElement, createMetaTransformationContext());
+		try {
+			postProcessing = true;
+			for (TSElement transformedElement : new ArrayList<>(transformedElements)) {
+				for (TSMetaTransformation transformation : transformations) {
+					transformation.postTransform(transformedElement, createMetaTransformationContext());
+				}
 			}
+		}
+		finally {
+			postProcessing = false;
 		}
 	}
 
@@ -216,6 +224,9 @@ public class TSGenerator {
 	protected TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
+		}
+		if(postProcessing){
+			throw new IllegalStateException("cannot add further element while post processing: " + element.getId());
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {

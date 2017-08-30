@@ -1,13 +1,26 @@
 package io.crnk.gen.typescript.transform;
 
+import java.util.List;
+
 import io.crnk.gen.typescript.internal.TypescriptUtils;
-import io.crnk.gen.typescript.model.*;
+import io.crnk.gen.typescript.model.TSContainerElement;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSIndexSignature;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSParameterizedType;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSSource;
+import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-
-import java.util.Set;
 
 public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
@@ -44,16 +57,31 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
 		if (options.getParent() == null) {
 			setupParent(context, interfaceType, metaDataObject);
-		} else {
+		}
+		else {
 			options.getParent().addElement(interfaceType);
 		}
+
+		System.out.println(
+				metaDataObject.getName() + " " + metaDataObject.getSuperType() + " " + generateAsResource(metaDataObject));
 
 		if (generateAsResource(metaDataObject)) {
 			if (metaDataObject.getSuperType() == null) {
 				interfaceType.getImplementedInterfaces().add(NgrxJsonApiLibrary.STORE_RESOURCE);
 			}
+			else {
+				// trigger generation of super type, fully attach during post processing
+				MetaDataObject superType = metaDataObject.getSuperType();
+				if(generateAsResource(superType)) {
+					TSElement superInterface = context.transform(superType, TSMetaTransformationOptions.EMPTY);
+					interfaceType.getImplementedInterfaces().add((TSInterfaceType) superInterface);
+				}
+			}
+
+
 			generateResourceFields(context, interfaceType, metaDataObject);
-		} else {
+		}
+		else {
 			if (metaDataObject.getSuperType() != null) {
 				TSInterfaceType superInterface = (TSInterfaceType) context.transform(metaDataObject.getSuperType(),
 						TSMetaTransformationOptions.EMPTY);
@@ -80,7 +108,8 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	public void postTransform(TSElement element, TSMetaTransformationContext context) {
 		if (element instanceof TSInterfaceType) {
 			TSInterfaceType interfaceType = (TSInterfaceType) element;
-			String metaId = interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
+			String metaId =
+					interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
 			MetaElement metaElement = context.getMeta(metaId);
 			if (metaElement instanceof MetaDataObject) {
 
@@ -89,8 +118,6 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 					// link to super type, only available once all fields are initialized
 					MetaDataObject superType = metaDataObject.getSuperType();
 					if (superType != null) {
-						TSInterfaceType superInterface = (TSInterfaceType) context.transform(superType, TSMetaTransformationOptions.EMPTY);
-						interfaceType.getImplementedInterfaces().add(superInterface);
 						setAttributeSuperType(interfaceType, metaDataObject, context);
 						setRelationshipsSuperType(interfaceType, metaDataObject, context);
 					}
@@ -99,17 +126,20 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		}
 	}
 
-	private void setRelationshipsSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject, TSMetaTransformationContext context) {
+	private void setRelationshipsSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject,
+			TSMetaTransformationContext context) {
 		// iterate over super types till (non-empty) one is found with a relationship interface definition
 		MetaDataObject current = metaDataObject;
 		while (current.getSuperType() != null && generateAsResource(current.getSuperType())) {
 			MetaDataObject superType = current.getSuperType();
 			TSInterfaceType superInterface = (TSInterfaceType) context.transform(superType, TSMetaTransformationOptions.EMPTY);
 
-			TSInterfaceType relationshipsType = TypescriptUtils.getNestedInterface(interfaceType, RELATIONSHIPS_CLASS_NAME, false);
+			TSInterfaceType relationshipsType =
+					TypescriptUtils.getNestedInterface(interfaceType, RELATIONSHIPS_CLASS_NAME, false);
 			if (relationshipsType != null) {
-				TSInterfaceType superRelationshipType = TypescriptUtils.getNestedInterface(superInterface, RELATIONSHIPS_CLASS_NAME,
-						false);
+				TSInterfaceType superRelationshipType =
+						TypescriptUtils.getNestedInterface(superInterface, RELATIONSHIPS_CLASS_NAME,
+								false);
 				if (superRelationshipType != null) {
 					relationshipsType.getImplementedInterfaces().add(superRelationshipType);
 					break;
@@ -119,7 +149,8 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		}
 	}
 
-	private void setAttributeSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject, TSMetaTransformationContext context) {
+	private void setAttributeSuperType(TSInterfaceType interfaceType, MetaDataObject metaDataObject,
+			TSMetaTransformationContext context) {
 		// iterate over super types till (non-empty) one is found with a attributes interface definition
 		MetaDataObject current = metaDataObject;
 		while (current.getSuperType() != null && generateAsResource(current.getSuperType())) {
@@ -147,20 +178,20 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		if (metaDataObject instanceof MetaResource) {
 			return true;
 		}
-		Set<MetaDataObject> subTypes = metaDataObject.getSubTypes();
+		List<MetaDataObject> subTypes = metaDataObject.getSubTypes(true, false);
 		if (!subTypes.isEmpty()) {
-			for (MetaDataObject subType : metaDataObject.getSubTypes()) {
-				if (!generateAsResource(subType)) {
-					return false;
+			for (MetaDataObject subType : subTypes) {
+				if (generateAsResource(subType)) {
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 		return false;
 	}
 
 	private static void generateResourceFields(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-											   MetaDataObject meta) {
+			MetaDataObject meta) {
 		TSInterfaceType attributesType = new TSInterfaceType();
 		attributesType.setName(ATTRIBUTES_CLASS_NAME);
 		attributesType.setExported(true);
@@ -210,7 +241,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void generateResourceField(MetaAttribute attr, TSMetaTransformationContext context,
-											  TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
+			TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
 		MetaType metaElementType = attr.getType().getElementType();
 		TSType elementType = (TSType) context.transform(metaElementType, TSMetaTransformationOptions.EMPTY);
 
@@ -225,15 +256,18 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			field.setType(new TSParameterizedType(relationshipType, elementType));
 			relationshipsType.getDeclaredMembers().add(field);
 			field.setParent(relationshipsType);
-		} else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isMeta()) {
+		}
+		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isMeta()) {
 			field.setName("meta");
 			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);
-		} else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isLinks()) {
+		}
+		else if (attr instanceof MetaResourceField && ((MetaResourceField) attr).isLinks()) {
 			field.setName("links");
 			interfaceType.getDeclaredMembers().add(field);
 			field.setParent(interfaceType);
-		} else {
+		}
+		else {
 			attributesType.getDeclaredMembers().add(field);
 			field.setParent(attributesType);
 		}
@@ -245,7 +279,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void generateAttributes(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-										   MetaDataObject element) {
+			MetaDataObject element) {
 		for (MetaAttribute attr : element.getDeclaredAttributes()) {
 			MetaType elementType = attr.getType().getElementType();
 
@@ -258,7 +292,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	}
 
 	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType,
-									MetaDataObject metaDataObject) {
+			MetaDataObject metaDataObject) {
 		TSContainerElement parent = null;
 
 		// move links and meta information to the resource itself
