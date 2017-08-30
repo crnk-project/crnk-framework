@@ -3,7 +3,7 @@ package io.crnk.core.resource.registry;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -40,7 +40,7 @@ public class ResourceRegistryBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		resourceInformationBuilder = new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(), new ResourceFieldNameTransformer());
+		resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider());
 	}
 
 	@Test

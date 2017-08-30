@@ -1,10 +1,15 @@
 package io.crnk.core.boot;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
@@ -13,7 +18,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -21,7 +26,11 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -49,9 +58,6 @@ import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInform
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
  * JAX-RS, etc.).
@@ -63,7 +69,7 @@ public class CrnkBoot {
 
 	private ObjectMapper objectMapper;
 
-	private AttributeSerializationInformationProvider attributeSerializationInformationProvider;
+	private List<ResourceFieldInformationProvider> resourceFieldInformationProviders;
 	
 	private QueryParamsBuilder queryParamsBuilder;
 
@@ -260,7 +266,10 @@ public class CrnkBoot {
 		};
 		module.addRepositoryInformationBuilder(new DefaultResourceRepositoryInformationBuilder());
 		module.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
-		module.addResourceInformationBuilder(new AnnotationResourceInformationBuilder(getAttributeSerializationInformationProvider(), resourceFieldNameTransformer));
+		
+		AnnotationResourceInformationBuilder resourceInformationBuilder = 
+			new AnnotationResourceInformationBuilder(resourceFieldNameTransformer, getResourceFieldInformationProviders());
+		module.addResourceInformationBuilder(resourceInformationBuilder);
 
 		for (JsonApiExceptionMapper<?> exceptionMapper : serviceDiscovery.getInstancesByType(JsonApiExceptionMapper.class)) {
 			module.addExceptionMapper(exceptionMapper);
@@ -447,27 +456,27 @@ public class CrnkBoot {
 	}
 
 	/**
-	 * Return the {@link AttributeSerializationInformationProvider} that will be used during
+	 * Return the {@link ResourceFieldInformationProvider}'s that will be used during
 	 * serialization to make decisions about the serialization output.
 	 * 
 	 * @return
 	 */
-	public AttributeSerializationInformationProvider getAttributeSerializationInformationProvider() {
-		if (attributeSerializationInformationProvider == null) {
-			attributeSerializationInformationProvider = new JacksonAttributeSerializationInformationProvider(getObjectMapper());
+	public List<ResourceFieldInformationProvider> getResourceFieldInformationProviders() {
+		if (resourceFieldInformationProviders == null) {
+			resourceFieldInformationProviders = new LinkedList<>();
+			resourceFieldInformationProviders.add(new JacksonResourceFieldInformationProvider(getObjectMapper()));
 		}
 		
-		return attributeSerializationInformationProvider;
+		return resourceFieldInformationProviders;
 	}
 
 	/**
-	 * Set the {@link AttributeSerializationInformationProvider} that will be used during
+	 * Set the {@link ResourceFieldInformationProvider} that will be used during
 	 * serialization to make decisions about the serialization output.
 	 * 
 	 * @param attributeSerializationInformationProvider
 	 */
-	public void setAttributeSerializationInformationProvider(	AttributeSerializationInformationProvider attributeSerializationInformationProvider) 
-	{	
-		this.attributeSerializationInformationProvider = attributeSerializationInformationProvider;
+	public void setResourceFieldInformationProviders(List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
+		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 	}
 }

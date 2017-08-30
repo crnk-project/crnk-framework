@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
-import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.*;
 import io.crnk.core.mock.models.ShapeResource;
@@ -29,7 +29,7 @@ public class AnnotationResourceInformationBuilderTest {
 
 	private static final String NAME_PROPERTY = "underlyingName";
 	private final ResourceInformationBuilder resourceInformationBuilder =
-			new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(), new ResourceFieldNameTransformer());
+			new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider());
 	private final ResourceInformationBuilderContext context =
 			new DefaultResourceInformationBuilderContext(resourceInformationBuilder, new TypeParser());
 	@Rule

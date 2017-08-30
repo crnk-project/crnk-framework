@@ -20,8 +20,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -57,13 +57,21 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 
 	private final ResourceFieldNameTransformer resourceFieldNameTransformer;
 	private ResourceInformationBuilderContext context;
-	private AttributeSerializationInformationProvider attributeSerializationInformationProvider;
+	private List<ResourceFieldInformationProvider> resourceFieldInformationProviders;
+	
 	
 	public AnnotationResourceInformationBuilder(
-		AttributeSerializationInformationProvider attributeSerializationInformationProvider, 
-		ResourceFieldNameTransformer resourceFieldNameTransformer) 
+		ResourceFieldNameTransformer resourceFieldNameTransformer,
+		ResourceFieldInformationProvider...resourceFieldInformationProviders)
 	{
-		this.attributeSerializationInformationProvider = attributeSerializationInformationProvider;
+		this(resourceFieldNameTransformer, Arrays.asList(resourceFieldInformationProviders));
+	}
+	
+	public AnnotationResourceInformationBuilder(
+		ResourceFieldNameTransformer resourceFieldNameTransformer,
+		List<ResourceFieldInformationProvider> resourceFieldInformationProviders)
+	{
+		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 		this.resourceFieldNameTransformer = resourceFieldNameTransformer;
 	}
 
@@ -296,8 +304,11 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 	private List<AnnotatedResourceField> discardIgnoredField(Class<?> resourceClass, Collection<AnnotatedResourceField> resourceFieldValues) {
 		List<AnnotatedResourceField> resourceFields = new LinkedList<>();
 		for (AnnotatedResourceField resourceField : resourceFieldValues) {
-			if (!attributeSerializationInformationProvider.isIgnored(resourceClass, resourceField)) {
-				resourceFields.add(resourceField);
+			for (ResourceFieldInformationProvider provider : resourceFieldInformationProviders) {
+				Optional<Boolean> ignored = provider.isIgnored(resourceClass, resourceField);
+				if (ignored.isPresent() && !ignored.get()) {
+					resourceFields.add(resourceField);
+				}
 			}
 		}
 

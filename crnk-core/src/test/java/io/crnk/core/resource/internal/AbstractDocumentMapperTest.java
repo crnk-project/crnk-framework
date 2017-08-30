@@ -6,7 +6,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JacksonAttributeSerializationInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -54,7 +54,7 @@ public abstract class AbstractDocumentMapperTest {
 		ConstantServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL);
 
 		ResourceInformationBuilder resourceInformationBuilder =
-				new AnnotationResourceInformationBuilder(new JacksonAttributeSerializationInformationProvider(objectMapper), new ResourceFieldNameTransformer());
+				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider(objectMapper));
 		moduleRegistry = new ModuleRegistry();
 		ResourceRegistryBuilder registryBuilder =
 				new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);

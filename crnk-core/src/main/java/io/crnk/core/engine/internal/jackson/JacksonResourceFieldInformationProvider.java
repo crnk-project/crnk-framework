@@ -10,16 +10,16 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
+import io.crnk.core.utils.Optional;
 
 /**
- * A Jackson-backed implementation of the {@link AttributeSerializationInformationProvider} interface.
+ * A Jackson-backed implementation of the {@link ResourceFieldInformationProvider} interface.
  * 
  * @author Craig Setera
  */
-public class JacksonAttributeSerializationInformationProvider implements AttributeSerializationInformationProvider {
+public class JacksonResourceFieldInformationProvider implements ResourceFieldInformationProvider {
 	/**
 	 * A thin warpper around a Jackson {@link BeanDescription} that provides
 	 * easier access to information important to serialization decisions.
@@ -77,11 +77,11 @@ public class JacksonAttributeSerializationInformationProvider implements Attribu
 	private ObjectMapper objectMapper;
 	private Map<Class<?>, JacksonBeanDescription> classDescriptions;
 
-	public JacksonAttributeSerializationInformationProvider() {
+	public JacksonResourceFieldInformationProvider() {
 		this(new ObjectMapper());
 	}
 	
-	public JacksonAttributeSerializationInformationProvider(ObjectMapper objectMapper) {
+	public JacksonResourceFieldInformationProvider(ObjectMapper objectMapper) {
 		super();
 		this.objectMapper = objectMapper;
 		this.classDescriptions = new HashMap<>();
@@ -92,15 +92,15 @@ public class JacksonAttributeSerializationInformationProvider implements Attribu
 	 * @see io.crnk.core.engine.information.resource.AttributeSerializationInformationProvider#isIgnored(java.lang.Class, io.crnk.core.engine.information.resource.ResourceField)
 	 */
 	@Override
-	public boolean isIgnored(Class<?> resourceClass, ResourceField resourceField) {
+	public Optional<Boolean> isIgnored(Class<?> resourceClass, ResourceField resourceField) {
 		switch (resourceField.getResourceFieldType()) {
 			case ATTRIBUTE:
 			case ID:
 				JacksonBeanDescription jacksonBeanDescription = getJacksonBeanDescription(resourceClass);
-				return !jacksonBeanDescription.hasProperty(resourceField.getJsonName());
+				return Optional.of(!jacksonBeanDescription.hasProperty(resourceField.getJsonName()));
 				
 			default:
-				return false;
+				return Optional.of(false);
 		}
 	}
 	
