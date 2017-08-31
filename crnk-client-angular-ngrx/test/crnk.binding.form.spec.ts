@@ -99,7 +99,7 @@ describe('FormBinding', () => {
 
 		let controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(1);
-		expect(controlErrorElements[0].nativeElement.textContent).toEqual("jsonapi.someCode");
+		expect(controlErrorElements[0].nativeElement.textContent).toEqual("someCode");
 
 		// make a change to clear the errors in the store
 		nameInputElement.nativeElement.value = "UpdatedAttribute";
