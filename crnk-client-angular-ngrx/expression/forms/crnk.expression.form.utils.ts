@@ -18,7 +18,9 @@ import {
 	Validator,
 	ValidatorFn,
 	Validators
-} from "@angular/forms";
+} from '@angular/forms';
+import {CrnkControl} from './crnk.expression.form.model.base';
+import {ExpressionDefaultValueAccessorDirective} from './crnk.expression.form.model.accessor';
 
 
 export function normalizeValidator(validator: ValidatorFn | Validator): ValidatorFn {
@@ -167,7 +169,7 @@ export function selectValueAccessor(dir: NgControl, valueAccessors: ControlValue
 	let builtinAccessor: ControlValueAccessor;
 	let customAccessor: ControlValueAccessor;
 	valueAccessors.forEach((v: ControlValueAccessor) => {
-		if (v.constructor === DefaultValueAccessor) {
+		if (v.constructor === DefaultValueAccessor || v.constructor === ExpressionDefaultValueAccessorDirective) {
 			defaultAccessor = v;
 
 		}
@@ -224,29 +226,4 @@ export class TemplateDrivenErrors {
 		throw new Error(`
       ngModelGroup cannot be used with a parent formGroup directive.`);
 	}
-}
-
-function unimplemented(): any {
-	throw new Error('unimplemented');
-}
-
-export abstract class CrnkControl extends NgControl {
-	/** @internal */
-	_parent: ControlContainer = null;
-	name: string = null;
-	valueAccessor: ControlValueAccessor = null;
-	/** @internal */
-	_rawValidators: Array<Validator | ValidatorFn> = [];
-	/** @internal */
-	_rawAsyncValidators: Array<Validator | ValidatorFn> = [];
-
-	get validator(): ValidatorFn {
-		return <ValidatorFn>unimplemented();
-	}
-
-	get asyncValidator(): AsyncValidatorFn {
-		return <AsyncValidatorFn>unimplemented();
-	}
-
-	abstract viewToModelUpdate(newValue: any): void;
 }

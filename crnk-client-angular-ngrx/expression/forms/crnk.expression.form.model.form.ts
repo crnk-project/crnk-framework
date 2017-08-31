@@ -1,22 +1,9 @@
-import {
-	Directive,
-	EventEmitter,
-	forwardRef,
-	Inject,
-	Input,
-	OnChanges,
-	OnDestroy,
-	Optional,
-	Output,
-	Self,
-	SimpleChanges
-} from "@angular/core";
+import {Directive, EventEmitter, forwardRef, Inject, Input, OnChanges, OnDestroy, Optional, Output, Self} from '@angular/core';
 import {
 	AbstractFormGroupDirective,
 	AsyncValidatorFn,
 	ControlContainer,
 	ControlValueAccessor,
-	FormControl,
 	NG_ASYNC_VALIDATORS,
 	NG_VALIDATORS,
 	NG_VALUE_ACCESSOR,
@@ -25,25 +12,16 @@ import {
 	NgModelGroup,
 	Validator,
 	ValidatorFn
-} from "@angular/forms";
-import {
-	composeAsyncValidators,
-	composeValidators,
-	controlPath,
-	CrnkControl,
-	isPropertyUpdated,
-	selectValueAccessor,
-	TemplateDrivenErrors
-} from "./crnk.expression.form.utils";
-import {ExpressionAccessor, Path} from "../crnk.expression";
+} from '@angular/forms';
+import {controlPath, selectValueAccessor, TemplateDrivenErrors} from './crnk.expression.form.utils';
+import {ExpressionAccessor, Path} from '../crnk.expression';
+import {CrnkControl} from './crnk.expression.form.model.base';
 
 const formExpressionBinding: any = {
 	provide: NgControl,
 	useExisting: forwardRef(() => FormExpressionDirective)
 };
 
-
-const resolvedPromise = Promise.resolve(null);
 
 /**
  * Allows to bind expressions of type {link Expression} to expectForm controls. The directive is very similar to
@@ -57,35 +35,29 @@ const resolvedPromise = Promise.resolve(null);
 })
 export class FormExpressionDirective extends CrnkControl implements OnChanges, OnDestroy {
 
-	private _pathModel: Path<any>;
+	public get pathModel() {
+		return this._pathModel;
+	}
+
 
 	@Input('crnkFormExpression')
 	public set pathModel(pathModel: Path<any>) {
 		this._pathModel = pathModel;
+		this._control['_pathModel'] = pathModel;
 
 		const expressionAccessor = this.valueAccessor as any as ExpressionAccessor;
 		if (!expressionAccessor) {
-			throw new Error("no value accessor found");
+			throw new Error('no value accessor found');
 		}
 		if (expressionAccessor.setExpression) {
 			expressionAccessor.setExpression(pathModel);
 		}
 	}
 
-	public get pathModel() {
-		return this._pathModel;
-	}
-
-
-	/** @internal */
-	_control = new FormControl();
-	/** @internal */
-	_registered = false;
-	viewModel: any;
 
 	name: string;
 
-	@Input('disabled') disabled: false;
+
 	@Output('arbFormExpressionChange') arbFormExpressionChange = new EventEmitter();
 
 	/**
@@ -95,10 +67,12 @@ export class FormExpressionDirective extends CrnkControl implements OnChanges, O
 	 * to expose an existing ControlContainer again with @Component.providers as it would lead to a circular
 	 * dependency (there is no provider for children only, but itself as well).
 	 */
-	constructor(@Optional() parent: ControlContainer,
-				@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator | ValidatorFn>,
-				@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator | AsyncValidatorFn>,
-				@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]) {
+	constructor(
+		@Optional() parent: ControlContainer,
+		@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator | ValidatorFn>,
+		@Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<Validator | AsyncValidatorFn>,
+		@Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]
+	) {
 		super();
 		this._parent = parent;
 		this._rawValidators = validators || [];
@@ -106,21 +80,6 @@ export class FormExpressionDirective extends CrnkControl implements OnChanges, O
 		this.valueAccessor = selectValueAccessor(this, valueAccessors);
 	}
 
-	ngOnChanges(changes: SimpleChanges) {
-		this._checkForErrors();
-		if (!this._registered) {
-			this._setUpControl();
-		}
-		if ('disabled' in changes) {
-			this._updateDisabled(changes);
-		}
-
-		if (isPropertyUpdated(changes, this.viewModel)) {
-			const value = this.pathModel.getValue();
-			this._updateValue(value);
-			this.viewModel = value;
-		}
-	}
 
 	ngOnDestroy(): void {
 		if (this.formDirective) {
@@ -128,37 +87,33 @@ export class FormExpressionDirective extends CrnkControl implements OnChanges, O
 		}
 	}
 
-	get control(): FormControl {
-		return this._control;
-	}
-
 	get path(): string[] {
-		return this._parent ? controlPath(this.pathModel.toFormName(), this._parent) : [this.pathModel.toFormName()];
+		if(!this._pathModel){
+			return [];
+		}
+		if(this._parent){
+			return controlPath(this._pathModel.toFormName(), this._parent);
+		}else{
+			return [this._pathModel.toFormName()];
+		}
 	}
 
 	get formDirective(): any {
 		return this._parent ? this._parent.formDirective : null;
 	}
 
-	get validator(): ValidatorFn {
-		return composeValidators(this._rawValidators);
-	}
-
-	get asyncValidator(): AsyncValidatorFn {
-		return composeAsyncValidators(this._rawAsyncValidators);
-	}
 
 	viewToModelUpdate(newValue: any): void {
 		this.viewModel = newValue;
 		this.arbFormExpressionChange.emit(newValue);
 	}
 
-	private _setUpControl(): void {
-		if (!this.pathModel) {
+	protected _setUpControl(): void {
+		if (!this._pathModel) {
 			throw new Error('Attribute crnkFormExpression is required');
 		}
 
-		this.name = this.pathModel.toFormName();
+		this.name = this._pathModel.toFormName();
 		if (this.formDirective) {
 			this.formDirective.addControl(this);
 			this._registered = true;
@@ -180,28 +135,5 @@ export class FormExpressionDirective extends CrnkControl implements OnChanges, O
 			!(this._parent instanceof NgModelGroup) && !(this._parent instanceof NgForm)) {
 			TemplateDrivenErrors.modelParentException();
 		}
-	}
-
-	private _updateValue(value: any): void {
-		resolvedPromise.then(
-			() => {
-				this.control.setValue(value, {emitViewToModelChange: false});
-			});
-	}
-
-	private _updateDisabled(changes: SimpleChanges) {
-		const disabledValue = changes['disabled'].currentValue;
-
-		const disabled =
-			disabledValue === '' || (disabledValue && disabledValue !== 'false');
-
-		resolvedPromise.then(() => {
-			if (disabled && !this.control.disabled) {
-				this.control.disable();
-			}
-			else if (!disabled && this.control.disabled) {
-				this.control.enable();
-			}
-		});
 	}
 }

@@ -57,8 +57,17 @@ export interface Path<T> extends Expression<T> {
 	 */
 	toFormName(): string;
 
+	/**
+	 * Underlying resource holding the values.
+	 *
+	 * @returns {any}
+	 */
+	getResource(): any;
 
-	getResource();
+	/**
+	 * Pointer of this path from the resource.
+	 */
+	getSourcePointer(): String;
 
 }
 
@@ -215,6 +224,19 @@ export class BooleanConstant extends BooleanExpression implements Constant<boole
 	}
 }
 
+
+
+
+
+function toSourcePointerInternal(path: string, resource: any) {
+	if (resource !== null) {
+		return '/data/' + path.replace(new RegExp('\\.', 'g'), '/');
+	}
+	else {
+		throw new Error('resource not available for ' + path.toString());
+	}
+}
+
 function toFormNameInternal(path: Path<any>, resource: any) {
 	if (resource !== null) {
 		return '//' + resource.type + '//' + resource.id + '//' + path.toString();
@@ -313,6 +335,10 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 	toFormName(): string {
 		return toFormNameInternal(this, this.parent.getResource());
 	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
 }
 
 
@@ -352,6 +378,10 @@ export class StringPath extends StringExpression implements Path<string> {
 
 	getResource() {
 		return this.parent.getResource();
+	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
 	}
 }
 
@@ -419,6 +449,10 @@ export class NumberPath extends NumberExpression implements Path<number> {
 	getResource() {
 		return this.parent.getResource();
 	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
 }
 
 
@@ -458,6 +492,10 @@ export class BooleanPath extends BooleanExpression implements Path<boolean> {
 
 	getResource() {
 		return this.parent.getResource();
+	}
+
+	getSourcePointer(): string {
+		return toSourcePointerInternal(this.toString(), this.parent.getResource());
 	}
 }
 

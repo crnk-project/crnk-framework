@@ -7,9 +7,10 @@ import {
 	ExpressionMinLengthValidatorDirective,
 	ExpressionPatternValidatorDirective,
 	ExpressionRequiredValidatorDirective
-} from "./crnk.expression.form.validators";
+} from "./crnk.expression.form.validators.base";
 import {FormExpressionDirective} from "./crnk.expression.form.model.form";
 import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.model.accessor";
+import {ResourceValidatorDirective} from './crnk.expression.form.validators.jsonapi';
 
 /**
  * Adds support for the {@link FormExpressionDirective} to bind expressions to expectForm controls.
@@ -20,13 +21,13 @@ import {ExpressionDefaultValueAccessorDirective} from "./crnk.expression.form.mo
 		FormsModule, ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
 		ExpressionPatternValidatorDirective, ExpressionMaxLengthValidatorDirective, ExpressionMinLengthValidatorDirective, ExpressionCheckboxRequiredValidatorDirective,
-		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective
+		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective, ResourceValidatorDirective
 	],
 	declarations: [
 		ExpressionDirective, FormExpressionDirective, ExpressionDefaultValueAccessorDirective,
 
 		ExpressionPatternValidatorDirective, ExpressionMaxLengthValidatorDirective, ExpressionMinLengthValidatorDirective, ExpressionCheckboxRequiredValidatorDirective,
-		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective
+		ExpressionRequiredValidatorDirective, ExpressionEmailValidatorDirective, ResourceValidatorDirective
 	]
 })
 export class CrnkExpressionFormModule {
