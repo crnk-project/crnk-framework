@@ -5,20 +5,23 @@ NOTE: this feature is still in incurbation, feedback and contributions welcomed.
 
 This chapter is dedicated to Angular development with Crnk,
 https://github.com/ngrx/platform[ngrx] and
-https://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api]. ngrx brings the redux-style application
+https://github.com/abdulhaq-e/`ngrx-json-api`[`ngrx-json-api`]. ngrx brings the redux-style application
 development from React to Angular. Its motivation is to separate the presentation layer from
 application state for a clean, mockable, debug-friendly, performant and scalable design.
 
 We believe that JSON API and redux can complement each other well. The resource-based nature
 of JSON API and its normalized response document format (trough relationships and inclusions)
-are well suited to be put into an ngrx-based store. ngrx-json-api is a project that does exactly that.
+are well suited to be put into an ngrx-based store. `ngrx-json-api` is a project that does exactly that.
 
-The last piece is how to integrate Angular components like forms and tables with ngrx-json-api.
-Tables need to display JSON API resources with sorting, filtering, paging and error handling.
-While forms need to display a JSON API resource with support to trigger `POST`, `PATCH` and `DELETE`
-methods including validation resp. general error handling. For this purpose crnk provides to tools:
-crnk-gen-typescript and crnk-client-ngrx. crnk-gen-typescript provides the means for  crnk-client-ngrx
-to do compile-time safe development. But crnk-client-ngrx can also be used standalone without crnk-gen-typescript.
+The last piece is how to integrate Angular components like forms and tables with `ngrx-json-api`.
+Tables display JSON API resources and allow sorting, filtering, paging.
+Forms display JSON API resources and allow to trigger `POST`, `PATCH` and `DELETE` requests.
+In case of errors, the errors get displayed to the user, either in a header section or next to the
+input component in question (determined by the user of JSON API source pointers). For this purpose
+crnk provides two tools: `crnk-gen-typescript` and `@crnk/angular-ngrx`. `crnk-gen-typescript`
+generates type-safe Typescript stubs for a backend application. `@crnk/angular-ngrx` takes care
+of the binding of Angular forms and tables (and a few other things) to `ngrx-json-api`.
+`crnk-gen-typescript` and `@crnk/angular-ngrx` can be used together or individually.
 For more information about Typescript generation have a look
 at the <<generation>> chapter.
 
@@ -26,44 +29,44 @@ at the <<generation>> chapter.
 
 ## Feature overview
 
-crnk-client-ngrx provides a number of different components:
+`@crnk/angular-ngrx` provides a number of different components:
 
 [cols="20,80"]
 |===
 | Import
 | Description
 
-| @crnk/angular-ngrx/operations
-| `CrnkOperationsModule` implements JSON PATCH as Angular module. The module hooks into ngrx-json-api and enhances it with
+| `@crnk/angular-ngrx/operations`
+| `CrnkOperationsModule` implements JSON PATCH as Angular module. The module hooks into `ngrx-json-api` and enhances it with
   bulk insert, update, delete capabilities.
 
-| @crnk/angular-ngrx/expression
+| `@crnk/angular-ngrx/expression`
 | A simple QueryDSL-like expression model for Typescript.
 
-| @crnk/angular-ngrx/expression/forms
+| `@crnk/angular-ngrx/expression/forms`
 | Binding of the expression model to Angular form components (a JSON API specific flavor of `ngModel`).
 
-| @crnk/angular-ngrx/binding
+| `@crnk/angular-ngrx/binding`
 | Helper classes that take care of binding tables or forms to JSON API. Makes use of `@crnk/angular-ngrx/expression`.
 
-| @crnk/angular-ngrx/meta
-| Typescript API for <<meta_module|Meta Module>> generated with crnk-gen-typescript.
+| `@crnk/angular-ngrx/meta`
+| Typescript API for <<meta_module,Meta Module>> generated with `crnk-gen-typescript`.
 
-| @crnk/angular-ngrx/stub
+| `@crnk/angular-ngrx/stub`
 | Some minor base classes used by Typescript generator. Not of direct interest.
 |===
 
-All of those components are fairly lightweight and then also be used independently (if not specified otherwise above).
+All of those components are fairly lightweight and can also be used independently (if not specified otherwise above).
 
 
 ## Bulk support with JSON Patch
 
 `CrnkOperationsModule` imported from `@crnk/angular-ngrx/operations` provides client side support
-for JSON PATCH. This enables clients to issue bulk requests. See <<operations_module,Operations module>> for
+for http://jsonpatch.com/[JSON PATCH]. This enables clients to issue bulk requests. See <<operations_module,Operations module>> for
 more information about how it is implemented in Crnk.
 
 `CrnkOperationsModule` integrates into `NgrxJsonApiModule` by providing a new `OperationsInitAction` that is a
-drop-in replacement for `ApiApplyInitAction` of ngrx-json-api. Instead of issuing multiple requests, it will then
+drop-in replacement for `ApiApplyInitAction` of `ngrx-json-api`. Instead of issuing multiple requests, it will then
 issue a single bulk JSON Patch request. The bulk response triggers the usual `ApiApplySuccessAction` resp.
 `ApiApplyFailAction`.
 
@@ -74,7 +77,7 @@ Have a look at `crnk.operations.effects.spec.ts` for a test case demonstrating i
 
 `@crnk/angular-ngrx/expression` provides a QueryDSL-like expression model for Typescript. It is used  to
  address boiler-plate when working with the Angular `FormModule` resp. `ngModel` directly. For example,
- when an input field nees to be bound to a JSON API resource field, a number of things must happen:
+ when an input field needs to be bound to a JSON API resource field, a number of things must happen:
 
  - The input field should display the current store value.
  - The input field must have a unique form name.
@@ -83,9 +86,10 @@ Have a look at `crnk.operations.effects.spec.ts` for a test case demonstrating i
     may contain a source pointer. If the source pointer points to the field in question, it needs to be accounted for
     in the valid state.
  - The input field is usually accompanied by a message field showing any validation issue.
+ - Errors that cannot be mapped to a `FormControl` should be displayed in a editor header or error dialog.
 
-`ngModel` is limited to holding a value, but the use cases here require the full resource, the path to the field and
-the field value. This is achieved with:
+`ngModel` is limited to holding a simple value, but the use cases here require the full resource and the path to the
+field to determine the field value and errors. This is achieved in `@crnk/angular-ngrx/expression` with:
 
 - `Expression` interface that represents any kind of value that can be obtained in some fashion.
 - `Path<T>` implements `Expression` and refers to a property of type `<T>` in an object.
@@ -93,7 +97,7 @@ the field value. This is achieved with:
 - `StringPath`, `NumberPath`, `BooleanPath` and `BeanPath<T>` are type-safe implementations of path.
 - `BeanBinding` implements `Path` and represents the root, usually a resource.
 
-Such expressions and paths can be constructed manually. Or, in most cases, `crnk-gen-typescript` can take
+Such expressions and paths can be constructed manually. Or, in most cases, ``crnk-gen-typescript`` can take
 care of that. In this case usage looks like:
 
 [source]
@@ -118,7 +122,7 @@ Note that:
   a field for a table column where only later multiple records will then be loaded and shown.
 
 The `CrnkBindingFormModule` provides two directives `crnkExpression` and `crnkFormExpression` that
-represent the `ngModel` counter-parts for expressions. While the former is be used standalone,
+represent the `ngModel` counter-parts for expressions. While the former can be used standalone,
 the later is used for forms and registers itself the `ngForm` with the name provided
 by `toFormName`. Usage can look like:
 
@@ -134,21 +138,24 @@ or
 <input id="nameInput" required [crnkFormExpression]="resource.attributes.name"/>
 ----
 
+Notice the `required` validation directive. `crnkExpression` and `crnkFormExpression`
+support validation and `ControlValueAccessor` exactly like `ngModel`.
+
 The use of expressions provides an (optional) foundation for the form and table binding discussed
 in the next sections.
 
 ## Form Binding
 
-Working with forms and JSON API is the same for most use cases:
+Working with forms and JSON API is the same for many use cases:
 
 - components are bound to store values
 - components have to update store values by dispatching appropriate actions
-- components may perform some simple local validation like with the Angular `required` directive.
+- components may perform basic local validation. For example with the Angular `required` directive.
 - components may get server-side validation errors using the JSON API error format.
-- components may perform client-side validation within the store. The JSON API
-  error mechanism is reused for this purpose. The `ModifyStoreResourceErrorsAction`
-  action can be triggered by an effect listing to value changes and makes arbitrarily complex, client-side
-  validation logic possible.
+- components may perform client-side validation within the store with effects. The JSON API
+  error mechanism can reused for this purpose. The `ModifyStoreResourceErrorsAction`
+  action  of `ngrx-json-api` can be triggered by a (validation) effect listing to value changes and makes arbitrarily
+  complex, client-side validation logic possible.
 
 There is a `FormBinding` class provided by `CrnkExpressionFormModule` that takes care of exactly this:
 
@@ -217,7 +224,7 @@ Note that:
 
 ## Meta Model
 
-Typescript API for <<meta_module|Meta Module>> generated with crnk-gen-typescript.
+`@crnk/angular-ngrx/meta` hosts a Typescript API for <<meta_module|Meta Module>> generated by `crnk-gen-typescript`.
 
 
 
