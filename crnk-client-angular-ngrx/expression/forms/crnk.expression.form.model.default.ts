@@ -35,6 +35,7 @@ export class ExpressionDirective extends CrnkControl implements OnChanges, OnDes
 	@Input('crnkExpression')
 	public set pathModel(pathModel: Path<any>) {
 		this._pathModel = pathModel;
+		this._control['_pathModel'] = pathModel;
 
 		const expressionAccessor = this.valueAccessor as any as ExpressionAccessor;
 		if (expressionAccessor.setExpression) {
