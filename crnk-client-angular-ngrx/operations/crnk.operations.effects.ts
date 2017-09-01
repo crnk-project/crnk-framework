@@ -1,30 +1,25 @@
 import * as _ from 'lodash';
 
-import {Injectable} from "@angular/core";
-import {Action, Store} from "@ngrx/store";
-import {Actions, Effect} from "@ngrx/effects";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/catch";
-import "rxjs/add/operator/concatAll";
-import "rxjs/add/operator/do";
-import "rxjs/add/operator/mapTo";
-import "rxjs/add/operator/mergeMap";
-import "rxjs/add/operator/switchMap";
-import "rxjs/add/operator/switchMapTo";
-import "rxjs/add/operator/take";
-import "rxjs/add/operator/toArray";
-import "rxjs/add/operator/withLatestFrom";
-import {Headers, Http, Request, RequestMethod, RequestOptions} from "@angular/http";
+import {Injectable, Injector} from '@angular/core';
+import {Action, Store} from '@ngrx/store';
+import {Actions, Effect} from '@ngrx/effects';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/concatAll';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/mapTo';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/switchMapTo';
+import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/toArray';
+import 'rxjs/add/operator/withLatestFrom';
+import {Headers, Http, Request, RequestMethod, RequestOptions} from '@angular/http';
 import {
-	Document,
-	NgrxJsonApiActionTypes,
-	NgrxJsonApiStore,
-	Query,
-	Resource,
-	ResourceError,
+	Document, NgrxJsonApiActionTypes, NgrxJsonApiService, NgrxJsonApiStore, Query, Resource, ResourceError,
 	StoreResource
-} from "ngrx-json-api";
+} from 'ngrx-json-api';
 
 import {
 	ApiApplyFailAction,
@@ -35,13 +30,12 @@ import {
 	ApiPatchSuccessAction,
 	ApiPostFailAction,
 	ApiPostSuccessAction,
-} from "ngrx-json-api/src/actions";
-
-import {OperationActionTypes} from "./crnk.operations.actions";
+} from 'ngrx-json-api/src/actions';
 
 import {getPendingChanges} from './crnk.operations.utils';
-import {NgrxJsonApi} from "ngrx-json-api/src/api";
-import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
+import {NgrxJsonApi} from 'ngrx-json-api/src/api';
+import {NgrxJsonApiEffects} from 'ngrx-json-api/src/effects';
+import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 
 interface Operation {
@@ -69,13 +63,18 @@ export class OperationsEffects {
 	});
 
 	@Effect() applyResources$ = this.actions$
-		.ofType(OperationActionTypes.OPERATIONS_INIT)
-		.withLatestFrom(this.store.select(it => it['NgrxJsonApi']['api']), (action, ngrxstore: NgrxJsonApiStore) => {
+		.ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
+		.withLatestFrom(this.store.select(it => {
+			let feature = it['NgrxJsonApi'];
+			return feature ? feature['api'] : undefined;
+		}), (action, ngrxstore: NgrxJsonApiStore) => {
 			const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
+			return pending;
+		})
+		.flatMap(pending => {
 			if (pending.length === 0) {
 				return Observable.of(new ApiApplySuccessAction([]));
 			}
-
 
 			const operations: Array<Operation> = [];
 			for (const pendingChange of pending) {
@@ -84,7 +83,7 @@ export class OperationsEffects {
 
 			const requestOptions = new RequestOptions({
 				method: RequestMethod.Patch,
-				url: this.jsonApi.config.apiUrl + '/operations/',
+				url: this.selectors.config.apiUrl + '/operations/',
 				body: JSON.stringify(operations)
 			});
 
@@ -96,7 +95,7 @@ export class OperationsEffects {
 				.map(res => res.json() as Array<OperationResponse>)
 				.map(operationResponses => {
 					if (!_.isArray(operationResponses)) {
-						throw new Error("expected array as operations response");
+						throw new Error('expected array as operations response');
 					}
 
 					const actions: Array<Action> = [];
@@ -128,11 +127,15 @@ export class OperationsEffects {
 		});
 
 
-	constructor(private actions$: Actions,
-				private jsonApi: NgrxJsonApi,
-				private store: Store<any>,
-				private http: Http,
-				private selectors: NgrxJsonApiSelectors<any>) {
+
+	constructor(
+		private actions$: Actions,
+		private store: Store<any>,
+		private http: Http,
+		private selectors: NgrxJsonApiSelectors
+	) {
+		// disable default implementation
+		this.selectors.config.applyEnabled = false;
 	}
 
 	private toOperation(pendingChange: StoreResource): Operation {

@@ -65,12 +65,13 @@ All of those components are fairly lightweight and can also be used independentl
 for http://jsonpatch.com/[JSON PATCH]. This enables clients to issue bulk requests. See <<operations_module,Operations module>> for
 more information about how it is implemented in Crnk.
 
-`CrnkOperationsModule` integrates into `NgrxJsonApiModule` by providing a new `OperationsInitAction` that is a
-drop-in replacement for `ApiApplyInitAction` of `ngrx-json-api`. Instead of issuing multiple requests, it will then
+`CrnkOperationsModule` integrates into `NgrxJsonApiModule` by replacing the implementation
+of `ApiApplyInitAction` in `ngrx-json-api`. Instead of issuing multiple requests, it will then
 issue a single bulk JSON Patch request. The bulk response triggers the usual `ApiApplySuccessAction` resp.
 `ApiApplyFailAction`.
 
 Have a look at `crnk.operations.effects.spec.ts` for a test case demonstrating its use.
+
 
 
 ## Expressions

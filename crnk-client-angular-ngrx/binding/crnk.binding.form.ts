@@ -9,7 +9,6 @@ import "rxjs/add/operator/switch";
 import "rxjs/add/operator/finally";
 import "rxjs/add/operator/share";
 import {AbstractControl, NgForm} from "@angular/forms";
-import {OperationsService} from "../operations";
 import {
 	NgrxJsonApiService, NgrxJsonApiStore,
 	NgrxJsonApiStoreData,
@@ -114,8 +113,8 @@ export class FormBinding {
 
 
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
-				private operationsService: OperationsService, private store: Store<any>,
-				private ngrxJsonApiSelectors: NgrxJsonApiSelectors<any>) {
+				private store: Store<any>,
+				private ngrxJsonApiSelectors: NgrxJsonApiSelectors) {
 
 		if (this.config.form === null) {
 			throw new Error('no forFormElement provided');
@@ -242,14 +241,7 @@ export class FormBinding {
 	}
 
 	public save() {
-		// TODO Collect resources to update
-		if (this.operationsService) {
-			// transactional update of multple resources
-			this.operationsService.apply();
-		}
-		else {
-			this.ngrxJsonApiService.apply();
-		}
+		this.ngrxJsonApiService.apply();
 	}
 
 	public delete() {

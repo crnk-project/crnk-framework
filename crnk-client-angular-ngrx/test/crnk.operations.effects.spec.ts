@@ -4,7 +4,7 @@ import 'rxjs/add/operator/merge';
 import {ActionReducerMap, Store, StoreModule} from '@ngrx/store';
 
 
-import {NgrxJsonApiStore, Resource} from 'ngrx-json-api';
+import {ApiApplyInitAction, NgrxJsonApiStore, Resource} from 'ngrx-json-api';
 
 import {NgrxJsonApiSelectors,} from 'ngrx-json-api/src/selectors';
 
@@ -23,7 +23,6 @@ import {MOCK_JSON_API_PROVIDERS} from './crnk.operations.spec.mock';
 import {OperationsEffects} from '../operations/crnk.operations.effects';
 import {MockBackend, MockConnection} from '@angular/http/testing';
 import {BaseRequestOptions, Http, RequestMethod, Response, ResponseOptions, XHRBackend} from '@angular/http';
-import {OperationsInitAction} from '../operations/crnk.operations.actions';
 import {provideMockActions} from '@ngrx/effects/testing';
 import {EffectsModule} from '@ngrx/effects';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
@@ -56,6 +55,9 @@ let initialState = {
 	providers: [],
 })
 export class TestingModule {
+}
+
+class OperationsInitAction {
 }
 
 describe('OperationsEffects', () => {
@@ -119,7 +121,7 @@ describe('OperationsEffects', () => {
 	it('should do nothing when store in sync', () => {
 		let res;
 		actions = new ReplaySubject(1);
-		actions.next(new OperationsInitAction());
+		actions.next(new ApiApplyInitAction());
 		effects.applyResources$.flatMap(it => it).subscribe(result => {
 			res = result;
 			expect(result).toEqual(new ApiApplySuccessAction([]));
@@ -133,7 +135,7 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'CREATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new OperationsInitAction());
+		actions.next(new ApiApplyInitAction());
 
 		effects.applyResources$.flatMap(it => it).subscribe(result => {
 			res = result;
@@ -155,7 +157,7 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new OperationsInitAction());
+		actions.next(new ApiApplyInitAction());
 
 		effects.applyResources$.flatMap(it => it).subscribe(result => {
 			res = result;
@@ -180,7 +182,7 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new OperationsInitAction());
+		actions.next(new ApiApplyInitAction());
 
 		effects.applyResources$.flatMap(it => it).subscribe(result => {
 			res = result;
@@ -203,7 +205,7 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'DELETED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new OperationsInitAction());
+		actions.next(new ApiApplyInitAction());
 
 		effects.applyResources$.flatMap(it => it).subscribe(result => {
 			res = result;
