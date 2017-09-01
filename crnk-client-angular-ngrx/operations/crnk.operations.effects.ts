@@ -17,6 +17,7 @@ import 'rxjs/add/operator/toArray';
 import 'rxjs/add/operator/withLatestFrom';
 import {Headers, Http, Request, RequestMethod, RequestOptions} from '@angular/http';
 import {
+	ApiApplyInitAction,
 	Document, NgrxJsonApiActionTypes, NgrxJsonApiService, NgrxJsonApiStore, Query, Resource, ResourceError,
 	StoreResource
 } from 'ngrx-json-api';
@@ -68,7 +69,8 @@ export class OperationsEffects {
 			let feature = it['NgrxJsonApi'];
 			return feature ? feature['api'] : undefined;
 		}), (action, ngrxstore: NgrxJsonApiStore) => {
-			const pending: Array<StoreResource> = getPendingChanges(ngrxstore);
+			let payload = (action as ApiApplyInitAction).payload;
+			const pending: Array<StoreResource> = getPendingChanges(ngrxstore, payload.ids, payload.include);
 			return pending;
 		})
 		.flatMap(pending => {
