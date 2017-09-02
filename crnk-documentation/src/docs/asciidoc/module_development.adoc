@@ -47,9 +47,9 @@ field results in a forbidden error with `FORBIDDEN`.
 
 The `SecurityModule` makes use of `ResourceFilter` to perform access control.
 `SecurityResourceFilter` in 'crnk-security` gives an example how it is used. The `MetaModule` and
-`HomeModule` make use of `FilterBehaviorDirectory` obtained with `ModuleContext.getFilterBehaviorDirectory(...)` to
+`HomeModule` make use of `ResourceFilterDirectory` obtained with `ModuleContext.getResourceFilterDirectory(...)` to
 query those `ResourceFilter` and only display information about resources and fields accessible in the context
-of the current re quest. The `FilterBehaviorDirectory` makes use of per-request caching as the information
+of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
 may be accessed repeatedly for a request.
 
 

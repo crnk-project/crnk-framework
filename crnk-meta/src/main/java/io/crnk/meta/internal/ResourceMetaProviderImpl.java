@@ -1,7 +1,7 @@
 package io.crnk.meta.internal;
 
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -76,7 +76,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getName());
 
-		FilterBehaviorDirectory filterBehaviorProvider = moduleContext.getFilterBehaviorProvider();
+		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
 		boolean readable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
 		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.POST) == FilterBehavior.NONE;
 		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
@@ -100,7 +100,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 
-		FilterBehaviorDirectory filterBehaviorProvider = moduleContext.getFilterBehaviorProvider();
+		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
 		boolean readable = metaResource.isReadable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.GET) == FilterBehavior.NONE;
 		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.POST) == FilterBehavior.NONE;
 		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.PATCH) == FilterBehavior.NONE;

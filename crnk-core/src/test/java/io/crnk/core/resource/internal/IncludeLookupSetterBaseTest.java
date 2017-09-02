@@ -269,7 +269,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 				return null;
 			}
 		};
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterBehaviorDirectory);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -296,7 +296,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 				return null;
 			}
 		};
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterBehaviorDirectory);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -327,7 +327,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		Project projectDefault = new Project().setId(3L);
 		task.setProject(projectDefault);
 
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, new EmptyPropertiesProvider(), filterBehaviorDirectory);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, new EmptyPropertiesProvider(), resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.includeRelation(Collections.singletonList("task"));

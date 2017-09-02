@@ -64,7 +64,7 @@ public class HomeModule implements Module {
 					ResourceRegistry resourceRegistry = context.getResourceRegistry();
 					for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
 						RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-						if (repositoryInformation != null && context.getFilterBehaviorProvider().get(resourceEntry.getResourceInformation(), HttpMethod.GET) == FilterBehavior.NONE) {
+						if (repositoryInformation != null && context.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET) == FilterBehavior.NONE) {
 							ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
 							String resourceType = resourceInformation.getResourceType();
 							String tag = "tag:" + resourceType;

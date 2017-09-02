@@ -4,7 +4,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 
-public interface FilterBehaviorDirectory {
+public interface ResourceFilterDirectory {
 
 	/**
 	 * Checks all {@link RepositoryFilter} whether the given type is filtered.

@@ -1,7 +1,7 @@
 package io.crnk.core.module.internal;
 
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
+public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FilterBehaviorDirectoryImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceFilterDirectoryImpl.class);
 
 	private final List<ResourceFilter> filters;
 
@@ -29,7 +29,7 @@ public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
 
 	private final ResourceRegistry resourceRegistry;
 
-	public FilterBehaviorDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider, ResourceRegistry resourceRegistry) {
+	public ResourceFilterDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider, ResourceRegistry resourceRegistry) {
 		this.filters = filters;
 		this.requestContextProvider = requestContextProvider;
 		this.resourceRegistry = resourceRegistry;
@@ -93,7 +93,7 @@ public class FilterBehaviorDirectoryImpl implements FilterBehaviorDirectory {
 	}
 
 	private Map<Object, FilterBehavior> getCache(HttpMethod method) {
-		String key = FilterBehaviorDirectoryImpl.class.getSimpleName() + method;
+		String key = ResourceFilterDirectoryImpl.class.getSimpleName() + method;
 		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
 		if (requestContext == null) {
 			return new HashMap<>(); // e.g. testing
