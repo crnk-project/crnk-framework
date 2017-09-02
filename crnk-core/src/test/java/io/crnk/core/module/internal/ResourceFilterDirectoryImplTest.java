@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterBehaviorDirectoryImplTest {
+public class ResourceFilterDirectoryImplTest {
 
 	private HttpRequestContextProvider requestContextProvider;
 
@@ -28,7 +28,7 @@ public class FilterBehaviorDirectoryImplTest {
 
 	private ResourceFilter filter;
 
-	private FilterBehaviorDirectoryImpl directory;
+	private ResourceFilterDirectoryImpl directory;
 
 	private ResourceInformation resourceInformation;
 
@@ -47,7 +47,7 @@ public class FilterBehaviorDirectoryImplTest {
 		resourceField = Mockito.mock(ResourceField.class);
 		resourceRegistry = Mockito.mock(ResourceRegistry.class);
 
-		directory = new FilterBehaviorDirectoryImpl(filters, requestContextProvider, resourceRegistry);
+		directory = new ResourceFilterDirectoryImpl(filters, requestContextProvider, resourceRegistry);
 	}
 
 

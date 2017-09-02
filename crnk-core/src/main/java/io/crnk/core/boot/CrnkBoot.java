@@ -70,7 +70,7 @@ public class CrnkBoot {
 	private ObjectMapper objectMapper;
 
 	private List<ResourceFieldInformationProvider> resourceFieldInformationProviders;
-	
+
 	private QueryParamsBuilder queryParamsBuilder;
 
 	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
@@ -229,7 +229,7 @@ public class CrnkBoot {
 	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
 		ControllerRegistryBuilder controllerRegistryBuilder =
 				new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider, moduleRegistry.getContext().getFilterBehaviorProvider());
+						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory());
 		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
 		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
 
@@ -266,8 +266,8 @@ public class CrnkBoot {
 		};
 		module.addRepositoryInformationBuilder(new DefaultResourceRepositoryInformationBuilder());
 		module.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
-		
-		AnnotationResourceInformationBuilder resourceInformationBuilder = 
+
+		AnnotationResourceInformationBuilder resourceInformationBuilder =
 			new AnnotationResourceInformationBuilder(resourceFieldNameTransformer, getResourceFieldInformationProviders());
 		module.addResourceInformationBuilder(resourceInformationBuilder);
 
@@ -458,7 +458,7 @@ public class CrnkBoot {
 	/**
 	 * Return the {@link ResourceFieldInformationProvider}'s that will be used during
 	 * serialization to make decisions about the serialization output.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<ResourceFieldInformationProvider> getResourceFieldInformationProviders() {
@@ -466,14 +466,14 @@ public class CrnkBoot {
 			resourceFieldInformationProviders = new LinkedList<>();
 			resourceFieldInformationProviders.add(new JacksonResourceFieldInformationProvider(getObjectMapper()));
 		}
-		
+
 		return resourceFieldInformationProviders;
 	}
 
 	/**
 	 * Set the {@link ResourceFieldInformationProvider} that will be used during
 	 * serialization to make decisions about the serialization output.
-	 * 
+	 *
 	 * @param attributeSerializationInformationProvider
 	 */
 	public void setResourceFieldInformationProviders(List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {

@@ -3,7 +3,7 @@ package io.crnk.core.engine.internal.document.mapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class DocumentMapper {
 
-	private final FilterBehaviorDirectory filterBehaviorDirectory;
+	private final ResourceFilterDirectory resourceFilterDirectory;
 
 	protected PropertiesProvider propertiesProvider;
 	private DocumentMapperUtil util;
@@ -27,28 +27,28 @@ public class DocumentMapper {
 	private IncludeLookupSetter includeLookupSetter;
 	private boolean client;
 
-	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider, FilterBehaviorDirectory filterBehaviorDirectory) {
-		this(resourceRegistry, objectMapper, propertiesProvider, filterBehaviorDirectory, false);
+	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider, ResourceFilterDirectory resourceFilterDirectory) {
+		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, false);
 	}
 
-	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider, FilterBehaviorDirectory filterBehaviorDirectory, boolean client) {
+	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider, ResourceFilterDirectory resourceFilterDirectory, boolean client) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
-		this.filterBehaviorDirectory = filterBehaviorDirectory;
+		this.resourceFilterDirectory = resourceFilterDirectory;
 
-		PreconditionUtil.assertTrue("filterBehavior necessary on server-side", client || filterBehaviorDirectory != null);
+		PreconditionUtil.assertTrue("filterBehavior necessary on server-side", client || resourceFilterDirectory != null);
 
 		this.util = new DocumentMapperUtil(resourceRegistry, objectMapper);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
 		this.includeLookupSetter = new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
 
-	public FilterBehaviorDirectory getFilterBehaviorManager(){
-		return filterBehaviorDirectory;
+	public ResourceFilterDirectory getFilterBehaviorManager(){
+		return resourceFilterDirectory;
 	}
 
 	protected ResourceMapper newResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
-		return new ResourceMapper(util, client, objectMapper, filterBehaviorDirectory);
+		return new ResourceMapper(util, client, objectMapper, resourceFilterDirectory);
 	}
 
 	public Document toDocument(JsonApiResponse response, QueryAdapter queryAdapter) {

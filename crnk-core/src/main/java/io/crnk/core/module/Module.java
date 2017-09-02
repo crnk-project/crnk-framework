@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
@@ -202,6 +202,10 @@ public interface Module {
 
 		void addRegistryEntry(RegistryEntry entry);
 
-		FilterBehaviorDirectory getFilterBehaviorProvider();
+		/**
+		 * @return information about how resources and field get filtered
+		 */
+		ResourceFilterDirectory getResourceFilterDirectory();
+
 	}
 }

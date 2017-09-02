@@ -5,7 +5,7 @@ import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -32,7 +32,7 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
-import io.crnk.core.module.internal.FilterBehaviorDirectoryImpl;
+import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
@@ -78,7 +78,7 @@ public class ModuleRegistry {
 
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
-	private FilterBehaviorDirectory filterBehaviorProvider;
+	private ResourceFilterDirectory filterBehaviorProvider;
 
 	public ModuleRegistry() {
 		this(true);
@@ -233,7 +233,7 @@ public class ModuleRegistry {
 		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
 		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 
-		filterBehaviorProvider = new FilterBehaviorDirectoryImpl(aggregatedModule.getResourceFilters(), httpRequestContextProvider, resourceRegistry);
+		filterBehaviorProvider = new ResourceFilterDirectoryImpl(aggregatedModule.getResourceFilters(), httpRequestContextProvider, resourceRegistry);
 	}
 
 	public HttpRequestContextProvider getHttpRequestContextProvider() {
@@ -721,7 +721,7 @@ public class ModuleRegistry {
 		}
 
 		@Override
-		public FilterBehaviorDirectory getFilterBehaviorProvider() {
+		public ResourceFilterDirectory getResourceFilterDirectory() {
 			return filterBehaviorProvider;
 		}
 	}

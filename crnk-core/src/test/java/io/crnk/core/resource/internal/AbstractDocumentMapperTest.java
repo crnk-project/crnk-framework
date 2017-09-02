@@ -1,7 +1,7 @@
 package io.crnk.core.resource.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
@@ -34,7 +34,7 @@ public abstract class AbstractDocumentMapperTest {
 
 	protected ObjectMapper objectMapper;
 
-	protected FilterBehaviorDirectory filterBehaviorDirectory;
+	protected ResourceFilterDirectory resourceFilterDirectory;
 	private ModuleRegistry moduleRegistry;
 
 	@Before
@@ -65,9 +65,9 @@ public abstract class AbstractDocumentMapperTest {
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.init(objectMapper);
 
-		filterBehaviorDirectory = moduleRegistry.getContext().getFilterBehaviorProvider();
+		resourceFilterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, getPropertiesProvider(), filterBehaviorDirectory);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, getPropertiesProvider(), resourceFilterDirectory);
 	}
 
 	protected PropertiesProvider getPropertiesProvider() {

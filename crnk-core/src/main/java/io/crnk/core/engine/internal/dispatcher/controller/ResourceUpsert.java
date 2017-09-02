@@ -8,7 +8,7 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.FilterBehaviorDirectory;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
@@ -41,7 +41,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected final ObjectMapper objectMapper;
 
-	protected final FilterBehaviorDirectory filterBehaviorDirectory;
+	protected final ResourceFilterDirectory resourceFilterDirectory;
 
 	private PropertiesProvider propertiesProvider;
 
@@ -50,7 +50,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		super(resourceRegistry, typeParser, documentMapper);
 		this.propertiesProvider = propertiesProvider;
 		this.objectMapper = objectMapper;
-		this.filterBehaviorDirectory = documentMapper != null ? documentMapper.getFilterBehaviorManager() : null;
+		this.resourceFilterDirectory = documentMapper != null ? documentMapper.getFilterBehaviorManager() : null;
 	}
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
@@ -135,7 +135,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		ResourceFieldAccess access = field.getAccess();
 		boolean modifiable = method == HttpMethod.POST ? access.isPostable() : access.isPatchable();
 		FilterBehavior filterBehavior = modifiable ? FilterBehavior.NONE : getDefaultFilterBehavior();
-		filterBehavior = filterBehavior.merge(filterBehaviorDirectory.get(field, method));
+		filterBehavior = filterBehavior.merge(resourceFilterDirectory.get(field, method));
 
 		if (filterBehavior == FilterBehavior.NONE) {
 			return true;

@@ -362,10 +362,10 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		private void checkResourceAccess(RepositoryFilterContext context) {
-			FilterBehaviorDirectory filterBehaviorDirectory = moduleRegistry.getContext().getFilterBehaviorProvider();
+			ResourceFilterDirectory resourceFilterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 			RepositoryRequestSpec request = context.getRequest();
 			ResourceInformation resourceInformation = request.getQueryAdapter().getResourceInformation();
-			FilterBehavior filterBehavior = filterBehaviorDirectory.get(resourceInformation, request.getMethod());
+			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod());
 			if (filterBehavior != FilterBehavior.NONE) {
 				String msg = "not allowed to access " + resourceInformation.getResourceType();
 				throw new ForbiddenException(msg);
