@@ -6,6 +6,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -46,20 +47,20 @@ public abstract class AbstractDocumentMapperTest {
 		//boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
 		//boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		//boot.boot();
+		objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JsonApiModuleBuilder().build());
+
 
 		ConstantServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL);
 
 		ResourceInformationBuilder resourceInformationBuilder =
-				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer());
+				new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider(objectMapper));
 		moduleRegistry = new ModuleRegistry();
 		ResourceRegistryBuilder registryBuilder =
 				new ResourceRegistryBuilder(moduleRegistry, new SampleJsonServiceLocator(), resourceInformationBuilder);
 		resourceRegistry = registryBuilder.build(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE, moduleRegistry,
 				serviceUrlProvider);
 
-
-		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JsonApiModuleBuilder().build());
 
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.init(objectMapper);

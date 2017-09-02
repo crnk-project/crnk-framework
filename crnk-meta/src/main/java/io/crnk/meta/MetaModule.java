@@ -8,6 +8,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPartAdapter;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
@@ -137,7 +138,8 @@ public class MetaModule implements Module, InitializingModule {
 
 	protected AnnotationResourceInformationBuilder registerInformationBuilder() {
 		AnnotationResourceInformationBuilder informationBuilder = new AnnotationResourceInformationBuilder(
-				new ResourceFieldNameTransformer());
+				new ResourceFieldNameTransformer(),
+				new JacksonResourceFieldInformationProvider());
 		informationBuilder.init(new DefaultResourceInformationBuilderContext(informationBuilder, context.getTypeParser()));
 		return informationBuilder;
 	}
