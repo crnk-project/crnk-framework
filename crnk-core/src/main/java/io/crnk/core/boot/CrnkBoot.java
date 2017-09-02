@@ -1,14 +1,10 @@
 package io.crnk.core.boot;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
@@ -26,11 +22,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -57,6 +49,10 @@ import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
 import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -132,6 +128,7 @@ public class CrnkBoot {
 	 */
 	public void addModule(Module module) {
 		checkNotConfiguredYet();
+		setupInstance(module);
 		moduleRegistry.addModule(module);
 	}
 
@@ -268,16 +265,16 @@ public class CrnkBoot {
 		module.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
 
 		AnnotationResourceInformationBuilder resourceInformationBuilder =
-			new AnnotationResourceInformationBuilder(resourceFieldNameTransformer, getResourceFieldInformationProviders());
+				new AnnotationResourceInformationBuilder(resourceFieldNameTransformer, getResourceFieldInformationProviders());
 		module.addResourceInformationBuilder(resourceInformationBuilder);
 
-		for (JsonApiExceptionMapper<?> exceptionMapper : serviceDiscovery.getInstancesByType(JsonApiExceptionMapper.class)) {
+		for (JsonApiExceptionMapper<?> exceptionMapper : getInstancesByType(JsonApiExceptionMapper.class)) {
 			module.addExceptionMapper(exceptionMapper);
 		}
-		for (DocumentFilter filter : serviceDiscovery.getInstancesByType(DocumentFilter.class)) {
+		for (DocumentFilter filter : getInstancesByType(DocumentFilter.class)) {
 			module.addFilter(filter);
 		}
-		for (Object repository : serviceDiscovery.getInstancesByType(Repository.class)) {
+		for (Object repository : getInstancesByType(Repository.class)) {
 			setupRepository(module, repository);
 		}
 		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
@@ -293,6 +290,21 @@ public class CrnkBoot {
 		}
 		moduleRegistry.addModule(module);
 		moduleRegistry.setPropertiesProvider(propertiesProvider);
+	}
+
+	private <T> List<T> getInstancesByType(Class<T> clazz) {
+		List<T> instancesByType = serviceDiscovery.getInstancesByType(clazz);
+		for (T instance : instancesByType) {
+			setupInstance(instance);
+		}
+		return instancesByType;
+	}
+
+	private <T> void setupInstance(T instance) {
+		if (instance instanceof HttpRequestContextAware) {
+			HttpRequestContextAware aware = (HttpRequestContextAware) instance;
+			aware.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
+		}
 	}
 
 	private void setupRepository(SimpleModule module, Object repository) {
@@ -319,7 +331,7 @@ public class CrnkBoot {
 	}
 
 	private void addModules() {
-		List<Module> modules = serviceDiscovery.getInstancesByType(Module.class);
+		List<Module> modules = getInstancesByType(Module.class);
 		for (Module module : modules) {
 			moduleRegistry.addModule(module);
 		}
