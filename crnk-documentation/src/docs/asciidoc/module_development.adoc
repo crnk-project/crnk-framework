@@ -52,6 +52,20 @@ query those `ResourceFilter` and only display information about resources and fi
 of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
 may be accessed repeatedly for a request.
 
+## Access to HTTP layer
+
+`HttpRequestContext` resp. `HttpRequestContextProvider` provides access to the HTTP requests. Most
+notably to get and set HTTP request and response headers. In many cases, the underlying
+implementation like JAXRS or Servlet provides that access as well. With `HttpRequestContext`
+there is an implementation that is independent of that implementation. As such it is well suited
+for module development, in particular for request filtering. A typical use case is to set and
+access security headers.
+
+`HttpRequestContextProvider.getRequestContext` returns the request context for the currently
+active request. Modules have access to `HttpRequestContextProvider` trough the `ModuleContext`.
+Repositories, filters and modules can implement `HttpRequestContextAware` to get
+access to `HttpRequestContextProvider`.
+
 
 ## Integrate third-party data stores
 
