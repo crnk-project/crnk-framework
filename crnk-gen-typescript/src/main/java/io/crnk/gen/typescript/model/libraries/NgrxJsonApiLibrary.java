@@ -27,9 +27,11 @@ public class NgrxJsonApiLibrary {
 		ngrxJsonApiSource.setNpmPackage("ngrx-json-api");
 		ngrxJsonApiSource.setDirectory("src/interfaces");
 
+		// TODO for some reason the fields in StoreResource resp. ResourceIdentifier do not get recoginized by
+		// Typescript compiler in application.s
 		STORE_RESOURCE = new TSInterfaceType();
-		STORE_RESOURCE.setName("StoreResource");
-		STORE_RESOURCE.setParent(ngrxJsonApiSource);
+		STORE_RESOURCE.setName("CrnkStoreResource");
+		STORE_RESOURCE.setParent(CrnkLibrary.STUB_SOURCE);
 
 		RESOURCE_RELATIONSHIP = new TSInterfaceType();
 		RESOURCE_RELATIONSHIP.setName("ResourceRelationship");

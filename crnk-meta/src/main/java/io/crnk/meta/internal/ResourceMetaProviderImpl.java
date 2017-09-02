@@ -1,11 +1,26 @@
 package io.crnk.meta.internal;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.FilterBehaviorDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -29,17 +44,15 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.resource.*;
+import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
+import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaProviderBase;
 import io.crnk.meta.provider.MetaProviderContext;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 public class ResourceMetaProviderImpl extends MetaProviderBase {
 
@@ -61,7 +74,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		if (element instanceof MetaResource) {
 			MetaResource metaResource = (MetaResource) element;
 			return adjustResourceForRequest(metaResource);
-		} else if (element instanceof MetaResourceField) {
+		} else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
+			// TODO also cover MetaResourceBase by expending InformationModel accordingly
 			MetaResourceField field = (MetaResourceField) element;
 			return adjustFieldForRequest(field);
 		}

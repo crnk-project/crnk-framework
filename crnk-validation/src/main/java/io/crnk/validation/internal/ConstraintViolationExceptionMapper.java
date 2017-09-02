@@ -298,12 +298,12 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 					appendSourcePointer(node.getName());
 				}
 				else if (isAssociation(nodeObject.getClass(), node.getName())) {
-					appendSourcePointer("data/relationships/");
+					appendSourcePointer("/data/relationships/");
 					appendSourcePointer(node.getName());
 				}
 				else {
 
-					appendSourcePointer("data/attributes/");
+					appendSourcePointer("/data/attributes/");
 					appendSourcePointer(node.getName());
 				}
 			}

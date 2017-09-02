@@ -2,6 +2,8 @@
 
 # Modules
 
+anchor:jpa_module[]
+
 ## JPA Module
 
 The JPA module allows to automatically expose JPA entities as JSON API repositories. No implementation
@@ -203,6 +205,7 @@ are renamed on DTOs, the incoming QuerySpec has to be modified accordingly to
 match again the entity attribute naming.
 
 
+anchor:validation_module[]
 
 ## JSR 303 Validation Module
 
@@ -239,6 +242,8 @@ A translated exception can look like:
 Notice the `422` status code used for such errors.
 
 
+anchor:brave_module[]
+
 ## Tracing with Zipkin/Brave
 
 A `BraveModule` provided by `io.crnk:crnk-brave` provides integration into
@@ -261,6 +266,9 @@ for incoming requests. That is the purpose of the JAX-RS/servlet integration of 
 
 Have a look at the Spring boot example application to see the `BraveModule` in use
 together with a log reporter writing the output to console.
+
+
+anchor:security_module[]
 
 ## Security Module
 
@@ -306,6 +314,8 @@ Future work:
 - Authorized access to fields.
 - Check query parameters.
 
+
+anchor:meta_module[]
 
 ## Meta Module
 
@@ -442,6 +452,7 @@ A `MetaAttribute` looks like:
 ----
 
 
+anchor:home_module[]
 
 ## Home Module
 
@@ -490,6 +501,7 @@ applications it looks like:
 ----
 
 
+anchor:operations_module[]
 
 ## Operations Module
 

@@ -1,24 +1,19 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import groovy.lang.Closure;
-import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
-import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
-import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
-import io.crnk.gen.typescript.processor.TSImportProcessor;
-import io.crnk.gen.typescript.processor.TSIndexFileProcessor;
-import io.crnk.gen.typescript.processor.TSSourceProcessor;
+import io.crnk.gen.typescript.processor.*;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.Project;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TSGeneratorExtension {
 
@@ -111,21 +106,6 @@ public class TSGeneratorExtension {
 
 	public void setIncludes(Set<String> includes) {
 		this.includes = includes;
-	}
-
-	/**
-	 * TODO internal use only, crnk-ngrx frontend library needs to be setup
-	 */
-	@Deprecated
-	public String getExpressionLibrary() {
-		return expressionLibrary;
-	}
-
-	public void setExpressionLibrary(String expressionLibrary) {
-		this.expressionLibrary = expressionLibrary;
-
-		ExpressionLibrary.EXPRESSION_SOURCE.setNpmPackage(expressionLibrary + "/binding/expression");
-		ExpressionLibrary.JSONAPI_SOURCE.setNpmPackage(expressionLibrary + "/binding/jsonapi");
 	}
 
 	/**

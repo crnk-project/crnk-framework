@@ -28,7 +28,7 @@ public class TSNpmConfiguration {
 	private boolean packagingEnabled = true;
 
 	public TSNpmConfiguration() {
-		String crnkNpm = "@crnk/core";
+		String crnkNpm = "@crnk/angular-ngrx";
 		packageMapping.put("io.crnk.meta", crnkNpm);
 		packageMapping.put("io.crnk.meta.resource", crnkNpm);
 		packageMapping.put("io.crnk.jpa", crnkNpm);

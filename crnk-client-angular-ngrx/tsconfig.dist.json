@@ -1,0 +1,18 @@
+{
+	"extends": "./tsconfig.json",
+	"exclude": [
+		"test",
+		"node_modules",
+		"build"
+	],
+	"compilerOptions": {
+		"outDir": "build/npm",
+		"target": "ES5",
+		"sourceMap": true,
+		"module": "es2015"
+	},
+	"angularCompilerOptions": {
+		"genDir": "build/npm",
+		"strictMetadataEmit": true
+	}
+}

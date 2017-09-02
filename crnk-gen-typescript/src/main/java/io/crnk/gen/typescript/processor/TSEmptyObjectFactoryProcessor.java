@@ -47,7 +47,7 @@ public class TSEmptyObjectFactoryProcessor implements TSSourceProcessor {
 
 		@Override
 		public void visit(TSInterfaceType interfaceType) {
-			boolean doGenerate = interfaceType.getImplementedInterfaces().contains(NgrxJsonApiLibrary.STORE_RESOURCE);
+			boolean doGenerate = interfaceType.implementsInterface(NgrxJsonApiLibrary.STORE_RESOURCE);
 			if (doGenerate) {
 				generate(interfaceType);
 			}

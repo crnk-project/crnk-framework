@@ -1,4 +1,8 @@
-package io.crnk.meta;
+package io.crnk.meta.integration;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
 
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
@@ -22,10 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Arrays;
 
 public class MetaFilteringTest extends AbstractMetaJerseyTest {
 

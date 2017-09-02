@@ -1,6 +1,8 @@
 package io.crnk.gen.typescript.processor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,13 +31,24 @@ public class TSIndexFileProcessor implements TSSourceProcessor {
 			directoryIndex.get(dir).add(fileSource);
 		}
 
-		for (Map.Entry<String, List<TSSource>> entry : directoryIndex.entrySet()) {
+		List<String> keys = new ArrayList<>(directoryIndex.keySet());
+		Collections.sort(keys);
+
+		for (String key : keys) {
+			List<TSSource> sourceFiles = new ArrayList<>(directoryIndex.get(key));
+			Collections.sort(sourceFiles, new Comparator<TSSource>() {
+				@Override
+				public int compare(TSSource o1, TSSource o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+
 			TSSource indexSource = new TSSource();
 			indexSource.setName("index");
-			indexSource.setNpmPackage(entry.getValue().get(0).getNpmPackage());
-			indexSource.setDirectory(entry.getKey());
+			indexSource.setNpmPackage(sourceFiles.get(0).getNpmPackage());
+			indexSource.setDirectory(key);
 
-			for (TSSource sourceFile : entry.getValue()) {
+			for (TSSource sourceFile : sourceFiles) {
 				TSExport exportElement = new TSExport();
 				exportElement.setAny(true);
 				exportElement.setPath("./" + sourceFile.getName());
