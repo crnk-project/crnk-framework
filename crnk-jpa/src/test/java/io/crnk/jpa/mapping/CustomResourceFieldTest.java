@@ -5,9 +5,11 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
-import io.crnk.jpa.internal.JpaResourceInformationBuilder;
+import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.CountryEntity;
 import io.crnk.jpa.model.CountryTranslationEntity;
 import io.crnk.jpa.model.CountryTranslationPK;
@@ -16,7 +18,6 @@ import io.crnk.jpa.query.AbstractJpaTest;
 import io.crnk.jpa.util.EntityManagerProducer;
 import io.crnk.jpa.util.SpringTransactionRunner;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.MetaDataObject;
 import io.crnk.rs.type.JsonApiMediaType;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -91,22 +92,22 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 
 		if (server) {
 			MetaLookup metaLookup = module.getJpaMetaLookup();
-			module.setResourceInformationBuilder(new JpaResourceInformationBuilder(metaLookup) {
+			module.setResourceInformationProvider(new JpaResourceInformationProvider(metaLookup) {
 
 				@Override
-				protected List<ResourceField> buildFields(MetaDataObject meta) {
-					List<ResourceField> fields = super.buildFields(meta);
+				protected List<ResourceField> getResourceFields(Class clazz) {
+					List<ResourceField> fields = super.getResourceFields(clazz);
 
-					if (meta.getImplementationClass() == CountryEntity.class) {
+					if (clazz == CountryEntity.class) {
 						List<String> languages = Arrays.asList("en", "de");
 						for (final String language : languages) {
 							ResourceFieldType resourceFieldType = ResourceFieldType.ATTRIBUTE;
 							String name = language + "Text";
 							Class<?> type = String.class;
-							boolean lazy = false;
 							ResourceFieldAccess access = new ResourceFieldAccess(true, true, false, false);
 
-							ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type, null, null, lazy, false, null, access);
+							ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
+									null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access);
 							field.setAccessor(new ResourceFieldAccessor() {
 
 								@Override

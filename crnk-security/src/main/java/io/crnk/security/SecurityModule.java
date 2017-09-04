@@ -107,7 +107,11 @@ public class SecurityModule implements InitializingModule {
 
 	@Override
 	public void init() {
-		if (config != null) {
+
+	}
+
+	private void checkInit() {
+		if (config != null && permissions == null) {
 			reconfigure(config);
 		}
 	}
@@ -173,6 +177,7 @@ public class SecurityModule implements InitializingModule {
 		if (!isEnabled()) {
 			return true;
 		}
+		checkInit();
 		Map<String, ResourcePermission> map = permissions.get(resourceType);
 		ResourcePermission missingPermission = permission;
 		if (map != null) {
@@ -208,6 +213,7 @@ public class SecurityModule implements InitializingModule {
 	 * @return ResourcePermission for the given resource for the current user.
 	 */
 	public ResourcePermission getResourcePermission(String resourceType) {
+		checkInit();
 		if (!isEnabled()) {
 			return ResourcePermission.ALL;
 		}
@@ -234,6 +240,7 @@ public class SecurityModule implements InitializingModule {
 		if (!isEnabled()) {
 			throw new IllegalStateException("security module is disabled");
 		}
+		checkInit();
 		SecurityProvider securityProvider = context.getSecurityProvider();
 		boolean contained = role == ALL_ROLE || securityProvider.isUserInRole(role);
 		LOGGER.debug("isUserInRole returns {} for role {}", contained, role);

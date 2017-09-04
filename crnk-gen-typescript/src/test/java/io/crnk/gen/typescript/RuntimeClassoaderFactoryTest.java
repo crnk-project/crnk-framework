@@ -96,11 +96,6 @@ public class RuntimeClassoaderFactoryTest {
 	@Test
 	public void classLoaderExposesTestConfiguration() throws IOException, ClassNotFoundException {
 		Assert.assertNotEquals(0, classLoader.getURLs().length);
-
-		// Typescript model should be accessible
-		for (URL url : classLoader.getURLs()) {
-			System.out.println(url);
-		}
 	}
 
 	@Test(expected = ClassNotFoundException.class)

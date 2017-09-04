@@ -5,26 +5,25 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.core.utils.Optional;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
-import io.crnk.meta.information.MetaAwareInformation;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
@@ -151,6 +150,11 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 	public MetaElement createElement(Type type) {
 		boolean allowNonResourceBaseClass = type != MetaResource.class;
 		ResourceInformation information = getResourceInformation(ClassUtils.getRawType(type), allowNonResourceBaseClass);
+		if(information == null){
+			// non resource base classes unknown to resource registry and as
+			// such hidden from meta model
+			return null;
+		}
 
 		Class<?> resourceClass = information.getResourceClass();
 
@@ -159,7 +163,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		MetaDataObject superMeta = null;
 		if (superClass != Object.class) {
 			// super type is either MetaResource or MetaResourceBase
-			superMeta = context.getLookup().getMeta(superClass, MetaResourceBase.class);
+			superMeta = context.getLookup().getMeta(superClass, MetaResourceBase.class, true);
 		}
 
 		String resourceType = information.getResourceType();
@@ -292,17 +296,6 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 					context.add(primaryKey);
 				}
 			}
-
-			// enrich with information from underlying meta model if available
-			if (information instanceof MetaAwareInformation
-					&& ((MetaAwareInformation<?>) information).getProjectedMetaElement().isPresent()) {
-				MetaDataObject projectedMeta = ((MetaAwareInformation<MetaDataObject>) information).getProjectedMetaElement()
-						.get();
-				if (metaResource.getPrimaryKey() != null && projectedMeta.getPrimaryKey() != null) {
-					metaResource.getPrimaryKey().setGenerated(projectedMeta.getPrimaryKey().isGenerated());
-				}
-			}
-
 		}
 
 		if (element instanceof MetaAttribute && element.getParent() instanceof MetaResourceBase) {
@@ -323,7 +316,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 
 	}
 
-	private ResourceInformation getResourceInformation(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
+	private ResourceInformation getResourceInformation(Class<?> resourceClass, boolean allowNull) {
 		if (useResourceRegistry) {
 			ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
 			RegistryEntry entry = resourceRegistry.getEntryForClass(resourceClass);
@@ -333,17 +326,13 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			}
 		}
 
-		ResourceInformationBuilder infoBuilder = context.getModuleContext().getResourceInformationBuilder();
+		ResourceInformationProvider infoBuilder = context.getModuleContext().getResourceInformationBuilder();
 		if (infoBuilder.accept(resourceClass)) {
 			return infoBuilder.build(resourceClass);
 		}
 
-		if (allowNonResourceBaseClass) {
-			AnnotationResourceInformationBuilder fallbackBuilder = new AnnotationResourceInformationBuilder(
-					new ResourceFieldNameTransformer(),
-					new JacksonResourceFieldInformationProvider());
-			fallbackBuilder.init(new DefaultResourceInformationBuilderContext(infoBuilder, new TypeParser()));
-			return fallbackBuilder.build(resourceClass, true);
+		if(allowNull){
+			return null;
 		}
 
 		throw new IllegalStateException("failed to get information for " + resourceClass.getName());
@@ -362,7 +351,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		attr.setMeta(field.getResourceFieldType() == ResourceFieldType.META_INFORMATION);
 		attr.setLinks(field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION);
 		attr.setDerived(false);
-		attr.setLazy(field.isLazy());
+
+		attr.setLazy(field.getSerializeType() == SerializeType.LAZY);
 		attr.setSortable(field.getAccess().isSortable());
 		attr.setFilterable(field.getAccess().isFilterable());
 		attr.setInsertable(field.getAccess().isPostable());
@@ -371,21 +361,5 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		boolean isPrimitive = ClassUtils.isPrimitiveType(field.getType());
 		boolean isId = field.getResourceFieldType() == ResourceFieldType.ID;
 		attr.setNullable(!isPrimitive && !isId);
-
-		//PreconditionUtil.assertFalse(resource.getName() + "." + attr.getName(),
-		//		!attr.isAssociation() && MetaElement.class.isAssignableFrom(field.getElementType()));
-
-		// enrich with information not available in the crnk information model
-		if (field instanceof MetaAwareInformation) {
-			MetaAwareInformation<MetaAttribute> metaField = (MetaAwareInformation<MetaAttribute>) field;
-			Optional<MetaAttribute> projectedElement = metaField.getProjectedMetaElement();
-			if (projectedElement.isPresent()) {
-				MetaAttribute projectedAttr = projectedElement.get();
-				attr.setLob(projectedAttr.isLob());
-				attr.setVersion(projectedAttr.isVersion());
-				attr.setNullable(projectedAttr.isNullable());
-				attr.setCascaded(projectedAttr.isCascaded());
-			}
-		}
 	}
 }

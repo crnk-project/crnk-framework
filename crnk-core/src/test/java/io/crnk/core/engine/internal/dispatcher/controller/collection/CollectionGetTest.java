@@ -4,12 +4,15 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.*;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
@@ -256,6 +259,9 @@ public class CollectionGetTest extends BaseControllerTest {
 		assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 
 		// eager loading but no inclusion
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
+		ResourceField projectsField = entry.getResourceInformation().findFieldByUnderlyingName("projects");
+		Assert.assertEquals(SerializeType.ONLY_ID, projectsField.getSerializeType());
 		assertThat(response.getDocument().getSingleData().get().getRelationships().get("projects").getData().isPresent()).isTrue();
 	}
 }

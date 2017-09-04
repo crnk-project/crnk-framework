@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.parser.TypeParser;
@@ -49,6 +49,13 @@ public interface Module {
 	 */
 	interface ModuleContext {
 
+		/**
+		 * Adds the given extension
+		 *
+		 * @param extension
+		 */
+		void addExtension(ModuleExtension extension);
+
 		void addHttpRequestProcessor(HttpRequestProcessor processor);
 
 		ObjectMapper getObjectMapper();
@@ -65,18 +72,18 @@ public interface Module {
 		ServiceDiscovery getServiceDiscovery();
 
 		/**
-		 * Register the given {@link ResourceInformationBuilder} in Crnk.
+		 * Register the given {@link ResourceInformationProvider} in Crnk.
 		 *
-		 * @param resourceInformationBuilder resource information builder
+		 * @param resourceInformationProvider resource information builder
 		 */
-		void addResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder);
+		void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider);
 
 		/**
-		 * Register the given {@link RepositoryInformationBuilder} in Crnk.
+		 * Register the given {@link RepositoryInformationProvider} in Crnk.
 		 *
 		 * @param RepositoryInformationBuilder resource information builder
 		 */
-		void addRepositoryInformationBuilder(RepositoryInformationBuilder repositoryInformationBuilder);
+		void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider);
 
 		/**
 		 * Register the given {@link ResourceLookup} in Crnk.
@@ -192,7 +199,7 @@ public interface Module {
 		/**
 		 * @return combined resource information build registered by all modules
 		 */
-		ResourceInformationBuilder getResourceInformationBuilder();
+		ResourceInformationProvider getResourceInformationBuilder();
 
 		ExceptionMapperRegistry getExceptionMapperRegistry();
 

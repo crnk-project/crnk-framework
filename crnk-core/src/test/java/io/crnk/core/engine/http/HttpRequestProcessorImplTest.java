@@ -22,7 +22,7 @@ import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
@@ -31,7 +31,6 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,7 +65,7 @@ public class HttpRequestProcessorImplTest {
 	@Before
 	public void prepare() {
 		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.addModule(new ActionTestModule());
 		boot.boot();
 
@@ -107,7 +106,7 @@ public class HttpRequestProcessorImplTest {
 
 			context.addFilter(documentFilter);
 			context.addRepository(mockRepository);
-			context.addRepositoryInformationBuilder(new RepositoryInformationBuilder() {
+			context.addRepositoryInformationBuilder(new RepositoryInformationProvider() {
 				@Override
 				public boolean accept(Class<?> repositoryClass) {
 					return false;
@@ -119,7 +118,7 @@ public class HttpRequestProcessorImplTest {
 				}
 
 				@Override
-				public RepositoryInformation build(Object repository, RepositoryInformationBuilderContext context) {
+				public RepositoryInformation build(Object repository, RepositoryInformationProviderContext context) {
 
 					ResourceInformation resourceInformation = context.getResourceInformationBuilder().build(ActionResource
 							.class);
@@ -135,7 +134,7 @@ public class HttpRequestProcessorImplTest {
 				}
 
 				@Override
-				public RepositoryInformation build(Class<?> repositoryClass, RepositoryInformationBuilderContext context) {
+				public RepositoryInformation build(Class<?> repositoryClass, RepositoryInformationProviderContext context) {
 					return null;
 				}
 			});

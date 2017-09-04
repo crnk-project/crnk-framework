@@ -1,30 +1,15 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.jpa.internal.JpaResourceInformationBuilder;
 import io.crnk.jpa.meta.MetaEntityAttribute;
 import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
+
+import javax.persistence.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> extends AbstractJpaDataObjectProvider<T> {
 
@@ -68,8 +53,7 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 					boolean attrGenerated = attr.getAnnotation(GeneratedValue.class) != null;
 					if (pkElements.size() == 1) {
 						generated = attrGenerated;
-					}
-					else if (generated != attrGenerated) {
+					} else if (generated != attrGenerated) {
 						throw new IllegalStateException(
 								"cannot mix generated and not-generated primary key elements for " + meta.getId());
 					}
@@ -121,7 +105,7 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 				manyManyAnnotation != null || manyOneAnnotation != null || oneManyAnnotation != null || oneOneAnnotation !=
 						null);
 
-		attr.setLazy(JpaResourceInformationBuilder.isJpaLazy(attr.getAnnotations()));
+		attr.setLazy(isJpaLazy(attr.getAnnotations(), attr.isAssociation()));
 		attr.setLob(lobAnnotation != null);
 		attr.setFilterable(lobAnnotation == null);
 		attr.setSortable(lobAnnotation == null);
@@ -146,9 +130,31 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 
 	}
 
+	protected boolean isJpaLazy(Collection<Annotation> annotations, boolean isAssociation) {
+		for (Annotation annotation : annotations) {
+			if (annotation instanceof OneToMany) {
+				OneToMany oneToMany = (OneToMany) annotation;
+				return oneToMany.fetch() == FetchType.LAZY;
+			}
+			if (annotation instanceof ManyToOne) {
+				ManyToOne manyToOne = (ManyToOne) annotation;
+				return manyToOne.fetch() == FetchType.LAZY;
+			}
+			if (annotation instanceof ManyToMany) {
+				ManyToMany manyToMany = (ManyToMany) annotation;
+				return manyToMany.fetch() == FetchType.LAZY;
+			}
+			if (annotation instanceof ElementCollection) {
+				ElementCollection elementCollection = (ElementCollection) annotation;
+				return elementCollection.fetch() == FetchType.LAZY;
+			}
+		}
+		return isAssociation;
+	}
+
 
 	private boolean getCascade(ManyToMany manyManyAnnotation, ManyToOne manyOneAnnotation, OneToMany oneManyAnnotation,
-			OneToOne oneOneAnnotation) {
+							   OneToOne oneOneAnnotation) {
 		if (manyManyAnnotation != null) {
 			return getCascade(manyManyAnnotation.cascade());
 		}
@@ -181,8 +187,7 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 				if (!mappedBy.contains(".")) {
 					MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
 					attr.setOppositeAttribute(oppositeAttr);
-				}
-				else {
+				} else {
 					// references within embeddables not yet supported
 				}
 			}

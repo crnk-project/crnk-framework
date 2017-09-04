@@ -296,7 +296,9 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 		String schedules = response.readEntity(String.class);
 		assertThat(schedules)
 				.describedAs("Response content")
-				.startsWith("{\"data\":").contains("\"links\":{").contains("\"meta\":{");
+				.contains("\"data\" :")
+				.contains("\"links\" :")
+				.contains("\"meta\" :");
 	}
 
 	@Test

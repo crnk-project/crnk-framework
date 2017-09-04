@@ -5,8 +5,8 @@ import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
@@ -21,11 +21,11 @@ import java.util.*;
  */
 public class SimpleModule implements Module {
 
-	private List<ResourceInformationBuilder> resourceInformationBuilders = new ArrayList<>();
+	private List<ResourceInformationProvider> resourceInformationProviders = new ArrayList<>();
 
 	private List<HttpRequestProcessor> httpRequestProcessors = new ArrayList<>();
 
-	private List<RepositoryInformationBuilder> repositoryInformationBuilders = new ArrayList<>();
+	private List<RepositoryInformationProvider> repositoryInformationProviders = new ArrayList<>();
 
 	private List<DocumentFilter> documentFilters = new ArrayList<>();
 
@@ -47,6 +47,8 @@ public class SimpleModule implements Module {
 
 	private List<RegistryEntry> registryEntries = new ArrayList<>();
 
+	private List<ModuleExtension> extensions = new ArrayList<>();
+
 	private String moduleName;
 
 	private ModuleContext context;
@@ -65,10 +67,10 @@ public class SimpleModule implements Module {
 	@Override
 	public void setupModule(ModuleContext context) {
 		this.context = context;
-		for (ResourceInformationBuilder resourceInformationBuilder : resourceInformationBuilders) {
-			context.addResourceInformationBuilder(resourceInformationBuilder);
+		for (ResourceInformationProvider resourceInformationProvider : resourceInformationProviders) {
+			context.addResourceInformationBuilder(resourceInformationProvider);
 		}
-		for (RepositoryInformationBuilder resourceInformationBuilder : repositoryInformationBuilders) {
+		for (RepositoryInformationProvider resourceInformationBuilder : repositoryInformationProviders) {
 			context.addRepositoryInformationBuilder(resourceInformationBuilder);
 		}
 		for (ResourceLookup resourceLookup : resourceLookups) {
@@ -98,6 +100,9 @@ public class SimpleModule implements Module {
 		for (HttpRequestProcessor httpRequestProcessor : httpRequestProcessors) {
 			context.addHttpRequestProcessor(httpRequestProcessor);
 		}
+		for (ModuleExtension extension : extensions) {
+			context.addExtension(extension);
+		}
 	}
 
 	private void checkInitialized() {
@@ -107,23 +112,23 @@ public class SimpleModule implements Module {
 	}
 
 	/**
-	 * Registers a new {@link ResourceInformationBuilder} with this module.
+	 * Registers a new {@link ResourceInformationProvider} with this module.
 	 *
-	 * @param resourceInformationBuilder resource information builder
+	 * @param resourceInformationProvider resource information builder
 	 */
-	public void addResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
+	public void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
 		checkInitialized();
-		resourceInformationBuilders.add(resourceInformationBuilder);
+		resourceInformationProviders.add(resourceInformationProvider);
 	}
 
 	/**
-	 * Registers a new {@link RepositoryInformationBuilder} with this module.
+	 * Registers a new {@link RepositoryInformationProvider} with this module.
 	 *
-	 * @param repositoryInformationBuilder repository information builder
+	 * @param repositoryInformationProvider repository information builder
 	 */
-	public void addRepositoryInformationBuilder(RepositoryInformationBuilder repositoryInformationBuilder) {
+	public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
 		checkInitialized();
-		repositoryInformationBuilders.add(repositoryInformationBuilder);
+		repositoryInformationProviders.add(repositoryInformationProvider);
 	}
 
 	public void addExceptionMapperLookup(ExceptionMapperLookup exceptionMapperLookup) {
@@ -137,18 +142,23 @@ public class SimpleModule implements Module {
 		exceptionMapperLookups.add(exceptionMapperLookup);
 	}
 
-	protected List<ResourceInformationBuilder> getResourceInformationBuilders() {
+	protected List<ResourceInformationProvider> getResourceInformationProviders() {
 		checkInitialized();
-		return Collections.unmodifiableList(resourceInformationBuilders);
+		return Collections.unmodifiableList(resourceInformationProviders);
 	}
 
-	protected List<RepositoryInformationBuilder> getRepositoryInformationBuilders() {
+	protected List<RepositoryInformationProvider> getRepositoryInformationProviders() {
 		checkInitialized();
-		return Collections.unmodifiableList(repositoryInformationBuilders);
+		return Collections.unmodifiableList(repositoryInformationProviders);
 	}
 
 	public Map<String, ResourceRegistryPart> getRegistryParts() {
 		return Collections.unmodifiableMap(registryParts);
+	}
+
+	public void addExtension(ModuleExtension extension) {
+		checkInitialized();
+		extensions.add(extension);
 	}
 
 	public void addFilter(DocumentFilter filter) {
@@ -184,6 +194,11 @@ public class SimpleModule implements Module {
 	protected List<ResourceFilter> getResourceFilters() {
 		checkInitialized();
 		return Collections.unmodifiableList(resourceFilters);
+	}
+
+	protected List<ModuleExtension> getExtensions() {
+		checkInitialized();
+		return Collections.unmodifiableList(extensions);
 	}
 
 	protected List<RepositoryDecoratorFactory> getRepositoryDecoratorFactories() {

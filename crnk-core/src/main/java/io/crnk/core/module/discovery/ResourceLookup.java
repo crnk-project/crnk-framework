@@ -9,10 +9,4 @@ public interface ResourceLookup {
 
 	Set<Class<?>> getResourceClasses();
 
-	/**
-	 * Returns the repository classes {@link ResourceRepository}, {@link RelationshipRepository}.
-	 *
-	 * @return repository classes
-	 */
-	Set<Class<?>> getResourceRepositoryClasses();
 }

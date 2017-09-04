@@ -1,16 +1,20 @@
 package io.crnk.core.module;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator.DecoratedScheduleRepository;
@@ -18,6 +22,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
@@ -25,8 +30,25 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.models.*;
-import io.crnk.core.mock.repository.*;
+import io.crnk.core.mock.models.ComplexPojo;
+import io.crnk.core.mock.models.Document;
+import io.crnk.core.mock.models.FancyProject;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.Thing;
+import io.crnk.core.mock.models.User;
+import io.crnk.core.mock.repository.DocumentRepository;
+import io.crnk.core.mock.repository.PojoRepository;
+import io.crnk.core.mock.repository.ProjectRepository;
+import io.crnk.core.mock.repository.ResourceWithoutRepositoryToProjectRepository;
+import io.crnk.core.mock.repository.ScheduleRepository;
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.mock.repository.TaskToProjectRepository;
+import io.crnk.core.mock.repository.TaskWithLookupRepository;
+import io.crnk.core.mock.repository.UserRepository;
+import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -38,15 +60,10 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -65,8 +82,9 @@ public class ModuleRegistryTest {
 		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 
 		testModule = new TestModule();
-		moduleRegistry.addModule(new CoreModule("io.crnk.core.module.mock", new ResourceFieldNameTransformer()));
 		moduleRegistry.addModule(testModule);
+		moduleRegistry.addModule(new CoreModule());
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 		moduleRegistry.init(new ObjectMapper());
 
@@ -75,7 +93,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void getModules() {
-		Assert.assertEquals(2, moduleRegistry.getModules().size());
+		Assert.assertEquals(3, moduleRegistry.getModules().size());
 	}
 
 	@Test
@@ -97,7 +115,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void repositoryInformationBuilderAccept() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 		Assert.assertFalse(builder.accept("no resource"));
 		Assert.assertFalse(builder.accept(String.class));
 		Assert.assertTrue(builder.accept(TaskRepository.class));
@@ -109,13 +127,13 @@ public class ModuleRegistryTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void buildWithInvalidRepositoryClass() {
-		RepositoryInformationBuilderContext context = Mockito.mock(RepositoryInformationBuilderContext.class);
+		RepositoryInformationProviderContext context = Mockito.mock(RepositoryInformationProviderContext.class);
 		moduleRegistry.getRepositoryInformationBuilder().build(String.class, context);
 	}
 
 	@Test
 	public void buildResourceRepositoryInformationFromClass() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
@@ -125,7 +143,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildResourceRepositoryInformationFromInstance() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
@@ -135,7 +153,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildRelationshipRepositoryInformationFromClass() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
@@ -145,7 +163,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildRelationshipRepositoryInformationFromInstance() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
@@ -153,11 +171,11 @@ public class ModuleRegistryTest {
 		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
-	private RepositoryInformationBuilderContext newRepositoryInformationBuilderContext() {
-		return new RepositoryInformationBuilderContext() {
+	private RepositoryInformationProviderContext newRepositoryInformationBuilderContext() {
+		return new RepositoryInformationProviderContext() {
 
 			@Override
-			public ResourceInformationBuilder getResourceInformationBuilder() {
+			public ResourceInformationProvider getResourceInformationBuilder() {
 				return moduleRegistry.getResourceInformationBuilder();
 			}
 
@@ -236,46 +254,45 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void testInformationBuilder() throws Exception {
-		ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
+		ResourceInformationProvider informationProvider = moduleRegistry.getResourceInformationBuilder();
 
-		Assert.assertTrue(informationBuilder.accept(ComplexPojo.class));
-		Assert.assertTrue(informationBuilder.accept(Document.class));
-		Assert.assertTrue(informationBuilder.accept(FancyProject.class));
-		Assert.assertTrue(informationBuilder.accept(Project.class));
-		Assert.assertTrue(informationBuilder.accept(Task.class));
-		Assert.assertTrue(informationBuilder.accept(Thing.class));
-		Assert.assertTrue(informationBuilder.accept(User.class));
-		Assert.assertTrue(informationBuilder.accept(TestResource.class));
+		Assert.assertTrue(informationProvider.accept(ComplexPojo.class));
+		Assert.assertTrue(informationProvider.accept(Document.class));
+		Assert.assertTrue(informationProvider.accept(FancyProject.class));
+		Assert.assertTrue(informationProvider.accept(Project.class));
+		Assert.assertTrue(informationProvider.accept(Task.class));
+		Assert.assertTrue(informationProvider.accept(Thing.class));
+		Assert.assertTrue(informationProvider.accept(User.class));
+		Assert.assertTrue(informationProvider.accept(TestResource.class));
 
-		Assert.assertFalse(informationBuilder.accept(TestRepository.class));
-		Assert.assertFalse(informationBuilder.accept(DocumentRepository.class));
-		Assert.assertFalse(informationBuilder.accept(PojoRepository.class));
-		Assert.assertFalse(informationBuilder.accept(ProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(ResourceWithoutRepositoryToProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(TaskToProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(TaskWithLookupRepository.class));
-		Assert.assertFalse(informationBuilder.accept(UserRepository.class));
-		Assert.assertFalse(informationBuilder.accept(UserToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TestRepository.class));
+		Assert.assertFalse(informationProvider.accept(DocumentRepository.class));
+		Assert.assertFalse(informationProvider.accept(PojoRepository.class));
+		Assert.assertFalse(informationProvider.accept(ProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(ResourceWithoutRepositoryToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TaskToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TaskWithLookupRepository.class));
+		Assert.assertFalse(informationProvider.accept(UserRepository.class));
+		Assert.assertFalse(informationProvider.accept(UserToProjectRepository.class));
 
-		Assert.assertFalse(informationBuilder.accept(Object.class));
-		Assert.assertFalse(informationBuilder.accept(String.class));
+		Assert.assertFalse(informationProvider.accept(Object.class));
+		Assert.assertFalse(informationProvider.accept(String.class));
 
 		try {
-			informationBuilder.build(Object.class);
+			informationProvider.build(Object.class);
 			Assert.fail();
 		} catch (UnsupportedOperationException e) {
 			// ok
 		}
 
-		DefaultResourceInformationBuilderContext context =
-				new DefaultResourceInformationBuilderContext(informationBuilder, moduleRegistry.getTypeParser());
-
-		ResourceInformation userInfo = informationBuilder.build(User.class);
+		ResourceInformation userInfo = informationProvider.build(User.class);
 		Assert.assertEquals("id", userInfo.getIdField().getUnderlyingName());
 
-		ResourceInformation testInfo = informationBuilder.build(TestResource.class);
+		ResourceInformation testInfo = informationProvider.build(TestResource.class);
 		Assert.assertEquals("id", testInfo.getIdField().getUnderlyingName());
-		Assert.assertEquals("id", testInfo.getIdField().getJsonName());
+
+		// setup by TestResourceInformationProvider
+		Assert.assertEquals("testId", testInfo.getIdField().getJsonName());
 	}
 
 	@Test
@@ -285,10 +302,6 @@ public class ModuleRegistryTest {
 		Assert.assertFalse(resourceLookup.getResourceClasses().contains(Object.class));
 		Assert.assertFalse(resourceLookup.getResourceClasses().contains(String.class));
 		Assert.assertTrue(resourceLookup.getResourceClasses().contains(TestResource.class));
-
-		Assert.assertFalse(resourceLookup.getResourceRepositoryClasses().contains(Object.class));
-		Assert.assertFalse(resourceLookup.getResourceRepositoryClasses().contains(String.class));
-		Assert.assertTrue(resourceLookup.getResourceRepositoryClasses().contains(TestRepository.class));
 	}
 
 	@Test
@@ -388,7 +401,7 @@ public class ModuleRegistryTest {
 		public void setupModule(ModuleContext context) {
 			this.context = context;
 			context.addResourceLookup(new TestResourceLookup());
-			context.addResourceInformationBuilder(new TestResourceInformationBuilder());
+			context.addResourceInformationBuilder(new TestResourceInformationProvider());
 
 			context.addJacksonModule(new com.fasterxml.jackson.databind.module.SimpleModule() {
 

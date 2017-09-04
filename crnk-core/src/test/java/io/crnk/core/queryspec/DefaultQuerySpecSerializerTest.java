@@ -1,20 +1,15 @@
 package io.crnk.core.queryspec;
 
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +28,7 @@ public class DefaultQuerySpecSerializerTest {
 	public void setup() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		resourceRegistry = boot.getResourceRegistry();
@@ -44,7 +39,7 @@ public class DefaultQuerySpecSerializerTest {
 	public void testHttpsSchema() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
@@ -55,7 +50,7 @@ public class DefaultQuerySpecSerializerTest {
 	public void testPort() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());

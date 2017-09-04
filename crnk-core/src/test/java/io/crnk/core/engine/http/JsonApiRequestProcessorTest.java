@@ -10,13 +10,13 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class JsonApiRequestProcessorTest {
 			}
 		});
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:8080"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		processor = new JsonApiRequestProcessor(moduleContext);

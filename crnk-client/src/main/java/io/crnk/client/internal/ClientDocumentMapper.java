@@ -22,6 +22,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 
@@ -60,7 +61,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 				else {
 					// TODO for fieldSets handling in the future the lazy
 					// handling must be different
-					includeRelation = relationshipValue != null || !field.isLazy() && !field.isCollection();
+					includeRelation = relationshipValue != null || field.getSerializeType() != SerializeType.LAZY && !field.isCollection();
 				}
 
 				if (includeRelation) {

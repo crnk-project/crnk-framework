@@ -196,6 +196,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 
 	@Test
 	public void testFilterWithComputedAttribute() {
+		// if computeAttribte is not found, module order is wrong
+		// tests setup with information builder must be hardened
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("computedAttribute"), FilterOperator.EQ, 13));
 

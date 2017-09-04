@@ -5,6 +5,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.mock.model.ExtendsBaseResource;
+import io.crnk.meta.mock.model.ExtendsResource;
 import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.*;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
@@ -229,15 +230,39 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
-	public void testInheritance() {
+	public void testInheritanceOnNoneResource() {
 		MetaResource meta = lookup.getMeta(ExtendsBaseResource.class, MetaResource.class);
 
 		Assert.assertNotNull(meta.getAttribute("name"));
 		Assert.assertNotNull(meta.getAttribute("baseName"));
 		Assert.assertNotNull(meta.getAttribute("id"));
 
+		Assert.assertNull(meta.getSuperType());
+
+		MetaKey primaryKey = meta.getPrimaryKey();
+		Assert.assertNotNull("id", primaryKey.getName());
+		Assert.assertEquals(1, primaryKey.getElements().size());
+		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
+		Assert.assertSame(primaryKey.getElements().get(0), meta.getAttribute("id"));
+		Assert.assertTrue(meta.getPrimaryKey().isUnique());
+
+		Assert.assertEquals(primaryKey.getElements().get(0), primaryKey.getUniqueElement());
+
+		Assert.assertEquals("12", primaryKey.toKeyString(12));
+	}
+
+	@Test
+	public void testInheritanceOnResource() {
+		MetaResource meta = lookup.getMeta(ExtendsResource.class, MetaResource.class);
+
+		Assert.assertNotNull(meta.getAttribute("name"));
+		Assert.assertNotNull(meta.getAttribute("childName"));
+		Assert.assertNotNull(meta.getAttribute("baseName"));
+		Assert.assertNotNull(meta.getAttribute("id"));
+
 		MetaDataObject superType = meta.getSuperType();
-		Assert.assertEquals(MetaResourceBase.class, superType.getClass());
+		Assert.assertEquals(MetaResource.class, superType.getClass());
+		Assert.assertFalse(superType.hasAttribute("childName"));
 		Assert.assertNotNull(superType.getAttribute("baseName"));
 		Assert.assertNotNull(superType.getAttribute("id"));
 

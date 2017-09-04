@@ -1,13 +1,18 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.information.resource.*;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
+
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -19,13 +24,11 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private final Type genericType;
 
-	private final boolean lazy;
+	private final SerializeType serializeType;
 
 	private final String oppositeResourceType;
 
 	private final LookupIncludeBehavior lookupIncludeBehavior;
-
-	private final boolean includeByDefault;
 
 	private final ResourceFieldType resourceFieldType;
 
@@ -40,21 +43,20 @@ public class ResourceFieldImpl implements ResourceField {
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 							 Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
-				oppositeResourceType, null, true, false, LookupIncludeBehavior.NONE,
+				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true));
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType, String oppositeName, boolean lazy,
-							 boolean includeByDefault, LookupIncludeBehavior lookupIncludeBehavior,
+							 Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
+							 LookupIncludeBehavior lookupIncludeBehavior,
 							 ResourceFieldAccess access) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
-		this.includeByDefault = includeByDefault;
+		this.serializeType = serializeType;
 		this.type = type;
 		this.genericType = genericType;
-		this.lazy = lazy;
 		this.lookupIncludeBehavior = lookupIncludeBehavior;
 		this.oppositeName = oppositeName;
 		this.oppositeResourceType = oppositeResourceType;
@@ -107,18 +109,8 @@ public class ResourceFieldImpl implements ResourceField {
 		return genericType;
 	}
 
-	/**
-	 * Returns a flag which indicate if a field should not be serialized
-	 * automatically.
-	 *
-	 * @return true if a field is lazy
-	 */
-	public boolean isLazy() {
-		return lazy;
-	}
-
-	public boolean getIncludeByDefault() {
-		return includeByDefault;
+	public SerializeType getSerializeType() {
+		return serializeType;
 	}
 
 	@Override
@@ -181,9 +173,10 @@ public class ResourceFieldImpl implements ResourceField {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
 		sb.append("[jsonName=").append(jsonName);
 		if (parentResourceInformation != null && parentResourceInformation.getResourceType() != null) {
-			sb.append(",resourceType=").append(parentResourceInformation);
+			sb.append(",resourceType=").append(parentResourceInformation.getResourceType());
 		}
 		sb.append("]");
 		return sb.toString();

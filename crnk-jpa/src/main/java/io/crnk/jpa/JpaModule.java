@@ -5,12 +5,12 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.transaction.TransactionRunner;
-import io.crnk.core.module.Module;
+import io.crnk.core.module.InitializingModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -21,10 +21,10 @@ import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.jpa.internal.*;
 import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
-import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.MetaJpaDataObject;
+import io.crnk.jpa.meta.internal.JpaResourceMetaEnricher;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
@@ -32,6 +32,7 @@ import io.crnk.jpa.query.querydsl.QuerydslRepositoryFilter;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaModuleExtension;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
@@ -80,7 +81,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * requests on the relations where necessary.</li>
  * </ul>
  */
-public class JpaModule implements Module {
+public class JpaModule implements InitializingModule {
 
 	private static final String MODULE_NAME = "jpa";
 	private Logger logger = LoggerFactory.getLogger(JpaModule.class);
@@ -90,7 +91,7 @@ public class JpaModule implements Module {
 
 	private JpaQueryFactory queryFactory;
 
-	private ResourceInformationBuilder resourceInformationBuilder;
+	private ResourceInformationProvider resourceInformationProvider;
 
 	private TransactionRunner transactionRunner;
 
@@ -161,8 +162,7 @@ public class JpaModule implements Module {
 	/**
 	 * Creates a new JpaModule for a Crnk server. No entities are by
 	 * default exposed as JSON API resources. Make use of
-	 * {@link #addEntityClass(Class)} andd
-	 * {@link #addMappedEntityClass(Class, Class, JpaMapper)} to add resources.
+	 * {@link #addRepository(JpaRepositoryConfig)} to add resources.
 	 *
 	 * @param em                to use
 	 * @param transactionRunner to use
@@ -243,7 +243,7 @@ public class JpaModule implements Module {
 	/**
 	 * Removes the resource with the given type from this module.
 	 *
-	 * @param <D>           resourse class (entity or mapped dto)
+	 * @param <T>           resourse class (entity or mapped dto)
 	 * @param resourceClass to remove
 	 */
 	public <T> void removeRepository(Class<T> resourceClass) {
@@ -253,8 +253,7 @@ public class JpaModule implements Module {
 
 	/**
 	 * Removes all entity classes registered by default. Use
-	 * {@link #addEntityClass(Class)} or
-	 * {@link #addMappedEntityClass(Class, Class, JpaMapper)} to register
+	 * {@link #addRepository(JpaRepositoryConfig)} (Class)} or
 	 * classes manually.
 	 */
 	public void removeRepositories() {
@@ -280,7 +279,7 @@ public class JpaModule implements Module {
 		this.resourceMetaLookup.setModuleContext(context);
 		this.resourceMetaLookup.initialize();
 
-		context.addResourceInformationBuilder(getResourceInformationBuilder());
+		context.addResourceInformationBuilder(getResourceInformationProvider());
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
 		context.addExceptionMapper(new PersistenceExceptionMapper(context));
 		context.addExceptionMapper(new PersistenceRollbackExceptionMapper(context));
@@ -289,9 +288,20 @@ public class JpaModule implements Module {
 		addTransactionRollbackExceptionMapper();
 		context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
 
+		// enrich resource meta model with JPA information where incomplete
+		MetaModuleExtension metaModuleExtension = new MetaModuleExtension();
+		metaModuleExtension.addProvider(new JpaResourceMetaEnricher(jpaMetaLookup));
+		context.addExtension(metaModuleExtension);
+
+		if (em != null) {
+			setupTransactionMgmt();
+		}
+	}
+
+	@Override
+	public void init() {
 		if (em != null) {
 			setupServerRepositories();
-			setupTransactionMgmt();
 		}
 	}
 
@@ -346,6 +356,7 @@ public class JpaModule implements Module {
 	}
 
 	private void setupServerRepositories() {
+
 		for (JpaRepositoryConfig<?> config : repositoryConfigurationMap.values()) {
 			setupRepository(config);
 		}
@@ -454,24 +465,24 @@ public class JpaModule implements Module {
 	}
 
 	/**
-	 * @return ResourceInformationBuilder used to describe JPA classes.
+	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
-	public ResourceInformationBuilder getResourceInformationBuilder() {
-		if (resourceInformationBuilder == null) {
-			resourceInformationBuilder = new JpaResourceInformationBuilder(jpaMetaLookup);
+	public ResourceInformationProvider getResourceInformationProvider() {
+		if (resourceInformationProvider == null) {
+			resourceInformationProvider = new JpaResourceInformationProvider(jpaMetaLookup);
 		}
-		return resourceInformationBuilder;
+		return resourceInformationProvider;
 	}
 
 	/**
 	 * Sets the information builder to use to read JPA classes. See
-	 * {@link JpaResourceInformationBuilder}}
+	 * {@link JpaResourceInformationProvider}}
 	 *
-	 * @param resourceInformationBuilder
+	 * @param resourceInformationProvider
 	 */
-	public void setResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
-		PreconditionUtil.verify(this.resourceInformationBuilder == null, "already set");
-		this.resourceInformationBuilder = resourceInformationBuilder;
+	public void setResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
+		PreconditionUtil.verify(this.resourceInformationProvider == null, "already set");
+		this.resourceInformationProvider = resourceInformationProvider;
 	}
 
 	/**
