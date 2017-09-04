@@ -1,8 +1,15 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.client.action.ActionStubFactory;
 import io.crnk.client.action.ActionStubFactoryContext;
 import io.crnk.client.http.HttpAdapter;
@@ -22,31 +29,35 @@ import io.crnk.client.module.ClientModule;
 import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ResourceLookup;
-import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
+import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -54,14 +65,6 @@ import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -100,19 +103,15 @@ public class CrnkClient {
 
 		moduleRegistry = new ModuleRegistry(false);
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
-
 		moduleRegistry.addModule(new ClientModule());
+
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 
 		objectMapper = new ObjectMapper();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		// consider use of crnk module in the future
-		JsonApiModuleBuilder moduleBuilder = new JsonApiModuleBuilder();
-		SimpleModule jsonApiModule = moduleBuilder.build();
-		objectMapper.registerModule(jsonApiModule);
+		moduleRegistry.addModule(new JacksonModule(objectMapper));
 
 		documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, null);
 		setProxyFactory(new BasicProxyFactory());
@@ -229,9 +228,9 @@ public class CrnkClient {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, boolean allocateRelated) {
-		ResourceInformationBuilder resourceInformationBuilder = moduleRegistry.getResourceInformationBuilder();
+		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
-		ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
+		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		final ResourceRepositoryStub<T, I> repositoryStub =
 				new ResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
 
@@ -306,10 +305,11 @@ public class CrnkClient {
 
 	@SuppressWarnings("unchecked")
 	public <R extends ResourceRepositoryV2<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
-		RepositoryInformationBuilder informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
+		init();
+		RepositoryInformationProvider informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
 		PreconditionUtil.assertTrue("no a valid repository interface", informationBuilder.accept(repositoryInterfaceClass));
 		ResourceRepositoryInformation repositoryInformation = (ResourceRepositoryInformation) informationBuilder
-				.build(repositoryInterfaceClass, new DefaultRepositoryInformationBuilderContext(moduleRegistry));
+				.build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
 		Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
 
 		Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
@@ -526,7 +526,7 @@ public class CrnkClient {
 		protected synchronized RegistryEntry findEntry(Class<?> clazz, boolean allowNull) {
 			RegistryEntry entry = getEntry(clazz);
 			if (entry == null) {
-				ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
+				ResourceInformationProvider informationBuilder = moduleRegistry.getResourceInformationBuilder();
 				if (!informationBuilder.accept(clazz)) {
 					throw new InvalidResourceException(clazz.getName() + " not recognized as resource class, consider adding "
 							+ "@JsonApiResource annotation");

@@ -16,7 +16,7 @@ import javax.ws.rs.core.SecurityContext;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
 import io.crnk.core.module.Module;
-import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
+import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationProvider;
 
 public class JaxrsModule implements Module {
 
@@ -30,7 +30,7 @@ public class JaxrsModule implements Module {
 
 	@Override
 	public void setupModule(ModuleContext context) {
-		context.addRepositoryInformationBuilder(new JaxrsResourceRepositoryInformationBuilder());
+		context.addRepositoryInformationBuilder(new JaxrsResourceRepositoryInformationProvider());
 		context.addExceptionMapper(new WebApplicationExceptionMapper());
 
 		if (securityContext != null) {
@@ -43,7 +43,7 @@ public class JaxrsModule implements Module {
 		return "jaxrs";
 	}
 
-	public static class JaxrsResourceRepositoryInformationBuilder extends DefaultResourceRepositoryInformationBuilder {
+	public static class JaxrsResourceRepositoryInformationProvider extends DefaultResourceRepositoryInformationProvider {
 
 		@Override
 		protected Map<String, RepositoryAction> buildActions(Class<? extends Object> repositoryClass) {

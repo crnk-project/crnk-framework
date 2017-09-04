@@ -67,6 +67,22 @@ Repositories, filters and modules can implement `HttpRequestContextAware` to get
 access to `HttpRequestContextProvider`.
 
 
+## Module Extensions and dependencies
+
+ModuleExtension is an interface can can be implemented by modules to specify a contract how
+others can extend it. The interface has two mandator properties: targetModule and
+optional. targetModule specifies the module consuming those extensions (and providing
+the implementation for it). optional specifies whether the target module must be registered
+or not. In case of an optional extension without the module being registered, the extension
+is simply ignored. The implementing module is free to add any further, custom methods to
+provide extension hooks to other modules. To get access to this extensions, the
+module can implement ModuleExtensionAware. Extensions must be registered during
+Module.setupModule(...) and will be available to the target module when Module.init() is called.
+
+For an example have a look at MetaModuleExtension and the JpaModule making use of it.
+The ModuleExtension was introduced with Crnk 2.0 and its use is expected to grow heavily
+over time.
+
 ## Integrate third-party data stores
 
 The core of Crnk is quite flexible when it comes to implementing repositories. As such, it is

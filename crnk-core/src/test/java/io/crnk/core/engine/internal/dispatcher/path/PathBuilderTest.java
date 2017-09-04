@@ -3,22 +3,14 @@ package io.crnk.core.engine.internal.dispatcher.path;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,7 +32,7 @@ public class PathBuilderTest {
 	@Before
 	public void prepare() {
 		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		boot.boot();
 

@@ -27,13 +27,4 @@ public class MultiResourceLookup implements ResourceLookup {
 		}
 		return set;
 	}
-
-	@Override
-	public Set<Class<?>> getResourceRepositoryClasses() {
-		Set<Class<?>> set = new HashSet<>();
-		for (ResourceLookup lookup : lookups) {
-			set.addAll(lookup.getResourceRepositoryClasses());
-		}
-		return set;
-	}
 }

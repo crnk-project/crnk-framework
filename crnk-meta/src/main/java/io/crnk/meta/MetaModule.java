@@ -1,33 +1,49 @@
 package io.crnk.meta;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
+import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPartAdapter;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
-import io.crnk.core.module.InitializingModule;
-import io.crnk.core.module.Module;
+import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.utils.Supplier;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
+import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaCollectionType;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaInterface;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaLiteral;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaProvider;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-public class MetaModule implements Module, InitializingModule {
+public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 
 	/**
 	 * Current MetaLookup instance to be used.
@@ -45,11 +61,13 @@ public class MetaModule implements Module, InitializingModule {
 
 	private MetaModuleConfig config;
 
-	// make protected for CDI in the future and remove deprecation
+	private DefaultResourceInformationProvider informationBuilder;
+
 
 	/**
 	 * @deprecated use {@link #createClientModule()} or {@link #createServerModule(MetaModuleConfig)}
 	 */
+	// make protected for CDI in the future and remove deprecation
 	@Deprecated
 	public MetaModule() {
 		this(new MetaModuleConfig());
@@ -108,10 +126,30 @@ public class MetaModule implements Module, InitializingModule {
 	public void setupModule(ModuleContext context) {
 		this.context = context;
 
-		final Set<Class<? extends MetaElement>> metaClasses = collectMetaClasses();
-		AnnotationResourceInformationBuilder informationBuilder = registerInformationBuilder();
+		informationBuilder = registerInformationBuilder();
+
 		if (context.isServer()) {
-			registerRepositories(informationBuilder, metaClasses);
+			context.addFilter(new DocumentFilter() {
+				@Override
+				public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
+					try {
+						return chain.doFilter(filterRequestContext);
+					}
+					finally {
+						lookupRequestLocal.remove();
+					}
+				}
+			});
+		}
+		else {
+			context.addResourceLookup(new ResourceLookup() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public Set<Class<?>> getResourceClasses() {
+					return (Set) collectMetaClasses();
+				}
+			});
 		}
 	}
 
@@ -123,29 +161,25 @@ public class MetaModule implements Module, InitializingModule {
 				currentLookup = null;
 			}
 		});
+	}
 
-		context.addFilter(new DocumentFilter() {
+	protected DefaultResourceInformationProvider registerInformationBuilder() {
+		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser());
+		DefaultResourceInformationProvider informationProvider = new DefaultResourceInformationProvider(
+				new DefaultResourceFieldInformationProvider(),
+				new JacksonResourceFieldInformationProvider());
+		informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,
+				context.getTypeParser(), null) {
 			@Override
-			public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
-				try {
-					return chain.doFilter(filterRequestContext);
-				} finally {
-					lookupRequestLocal.remove();
-				}
+			public ObjectMapper getObjectMapper() {
+				return context.getObjectMapper();
 			}
 		});
+		return informationProvider;
 	}
 
-	protected AnnotationResourceInformationBuilder registerInformationBuilder() {
-		AnnotationResourceInformationBuilder informationBuilder = new AnnotationResourceInformationBuilder(
-				new ResourceFieldNameTransformer(),
-				new JacksonResourceFieldInformationProvider());
-		informationBuilder.init(new DefaultResourceInformationBuilderContext(informationBuilder, context.getTypeParser()));
-		return informationBuilder;
-	}
-
-	protected void registerRepositories(AnnotationResourceInformationBuilder informationBuilder,
-										Set<Class<? extends MetaElement>> metaClasses) {
+	protected void registerRepositories(DefaultResourceInformationProvider informationBuilder,
+			Set<Class<? extends MetaElement>> metaClasses) {
 
 		Supplier<MetaLookup> lookupSupplier = new Supplier<MetaLookup>() {
 			@Override
@@ -190,20 +224,6 @@ public class MetaModule implements Module, InitializingModule {
 		metaClasses.add(MetaType.class);
 
 		collectMetaClasses(metaClasses, config.getProviders());
-
-		context.addResourceLookup(new ResourceLookup() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public Set<Class<?>> getResourceClasses() {
-				return (Set) metaClasses;
-			}
-
-			@Override
-			public Set<Class<?>> getResourceRepositoryClasses() {
-				return Collections.emptySet();
-			}
-		});
 		return metaClasses;
 	}
 
@@ -215,9 +235,20 @@ public class MetaModule implements Module, InitializingModule {
 	}
 
 	@Override
+	public void setExtensions(List<MetaModuleExtension> extensions) {
+		for (MetaModuleExtension extension : extensions) {
+			for (MetaProvider provider : extension.getProviders()) {
+				config.addMetaProvider(provider);
+			}
+		}
+	}
+
+	@Override
 	public void init() {
+		final Set<Class<? extends MetaElement>> metaClasses = collectMetaClasses();
 		if (context.isServer()) {
 			initRefreshListener();
+			registerRepositories(informationBuilder, metaClasses);
 		}
 	}
 
@@ -249,4 +280,5 @@ public class MetaModule implements Module, InitializingModule {
 	protected void reset() {
 		currentLookup = null;
 	}
+
 }

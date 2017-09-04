@@ -9,6 +9,7 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,17 +34,16 @@ public class DefaultInformationBuilderTest {
 		resource.resourceClass(Project.class);
 
 		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
-		idField.lazy(false);
-		idField.setAccess(new ResourceFieldAccess(true, true, false, false));
+		idField.serializeType(SerializeType.EAGER);
+		idField.access(new ResourceFieldAccess(true, true, false, false));
 
 		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
 		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
-		projectField.lazy(true);
-		projectField.setAccess(new ResourceFieldAccess(false, true, false, false));
-		projectField.setOppositeName("tasks");
+		projectField.serializeType(SerializeType.EAGER);
+		projectField.access(new ResourceFieldAccess(false, true, false, false));
+		projectField.oppositeName("tasks");
 		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
-		projectField.includeByDefault(true);
-		projectField.setAccessor(accessor);
+		projectField.accessor(accessor);
 
 		ResourceInformation info = resource.build();
 		Assert.assertEquals("changedTasks", info.getResourceType());
@@ -57,21 +57,20 @@ public class DefaultInformationBuilderTest {
 		Assert.assertFalse(idInfo.getAccess().isSortable());
 		Assert.assertTrue(idInfo.getAccess().isPostable());
 		Assert.assertTrue(idInfo.getAccess().isPatchable());
-		Assert.assertFalse(idInfo.isLazy());
+		Assert.assertEquals(SerializeType.EAGER, idInfo.getSerializeType());
 		Assert.assertFalse(idInfo.isCollection());
 
 		ResourceField projectInfo = info.findFieldByName("project");
 		Assert.assertEquals("project", projectInfo.getUnderlyingName());
 		Assert.assertEquals("tasks", projectInfo.getOppositeName());
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeAutomatically());
-		Assert.assertTrue(projectInfo.getIncludeByDefault());
 		Assert.assertEquals(Project.class, projectInfo.getType());
 		Assert.assertSame(accessor, projectInfo.getAccessor());
 		Assert.assertFalse(projectInfo.getAccess().isFilterable());
 		Assert.assertFalse(projectInfo.getAccess().isSortable());
 		Assert.assertFalse(projectInfo.getAccess().isPostable());
 		Assert.assertTrue(projectInfo.getAccess().isPatchable());
-		Assert.assertTrue(projectInfo.isLazy());
+		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
 		Assert.assertFalse(projectInfo.isCollection());
 	}
 

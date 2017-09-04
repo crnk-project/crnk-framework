@@ -27,6 +27,7 @@ import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -136,8 +137,8 @@ public class IncludeLookupSetter {
 
 		boolean includeRequested = util.isInclusionRequested(queryAdapter, fieldPath);
 
-		boolean includeResources = includeRequested || resourceField.getIncludeByDefault();
-		boolean includeRelationshipData = !resourceField.isLazy() || includeResources || additionalEagerLoadedRootRelations
+		boolean includeResources = includeRequested || resourceField.getSerializeType() == SerializeType.EAGER;
+		boolean includeRelationshipData = resourceField.getSerializeType() != SerializeType.LAZY || includeResources || additionalEagerLoadedRootRelations
 				.contains(resourceField.getJsonName());
 
 		if (includeRelationshipData) {

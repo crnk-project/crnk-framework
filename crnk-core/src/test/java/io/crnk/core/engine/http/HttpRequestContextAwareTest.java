@@ -2,9 +2,9 @@ package io.crnk.core.engine.http;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -22,7 +22,7 @@ public class HttpRequestContextAwareTest {
 
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:8080"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.addModule(testModule);
 		boot.boot();
 

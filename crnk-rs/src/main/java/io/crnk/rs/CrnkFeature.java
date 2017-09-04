@@ -1,19 +1,8 @@
 package io.crnk.rs;
 
-import java.io.Serializable;
-import java.util.Collection;
-import javax.ws.rs.ConstrainedTo;
-import javax.ws.rs.RuntimeType;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -27,6 +16,16 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.internal.JaxrsModule;
 import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistry;
 import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistryBuilder;
+
+import javax.ws.rs.ConstrainedTo;
+import javax.ws.rs.RuntimeType;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Basic Crnk feature that initializes core classes and provides a starting point to use the framework in
@@ -50,14 +49,14 @@ public class CrnkFeature implements Feature {
 	}
 
 	public CrnkFeature(ObjectMapper objectMapper, QueryParamsBuilder queryParamsBuilder,
-			JsonServiceLocator jsonServiceLocator) {
+					   JsonServiceLocator jsonServiceLocator) {
 		boot.setObjectMapper(objectMapper);
 		boot.setQueryParamsBuilds(queryParamsBuilder);
 		boot.setServiceLocator(jsonServiceLocator);
 	}
 
 	public CrnkFeature(ObjectMapper objectMapper, QuerySpecDeserializer querySpecDeserializer,
-			JsonServiceLocator jsonServiceLocator) {
+					   JsonServiceLocator jsonServiceLocator) {
 		boot.setObjectMapper(objectMapper);
 		boot.setQuerySpecDeserializer(querySpecDeserializer);
 		boot.setServiceLocator(jsonServiceLocator);
@@ -76,10 +75,6 @@ public class CrnkFeature implements Feature {
 
 	@Override
 	public boolean configure(final FeatureContext context) {
-		ObjectMapper objectMapper = boot.getObjectMapper();
-		ResourceFieldNameTransformer resourceFieldNameTransformer = new ResourceFieldNameTransformer(
-				objectMapper.getSerializationConfig());
-
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
 
 			@Override
@@ -89,7 +84,6 @@ public class CrnkFeature implements Feature {
 		};
 
 		boot.setPropertiesProvider(propertiesProvider);
-		boot.setResourceFieldNameTransformer(resourceFieldNameTransformer);
 		boot.addModule(new JaxrsModule(securityContext));
 		boot.boot();
 
@@ -107,7 +101,7 @@ public class CrnkFeature implements Feature {
 	 * All repositories with JAX-RS action need to be registered with JAX-RS as singletons.
 	 *
 	 * @param context of jaxrs
-	 * @param boot of crnk
+	 * @param boot    of crnk
 	 */
 	private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();

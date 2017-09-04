@@ -14,12 +14,12 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.repository.mock.NewInstanceRepositoryMethodParameterProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.junit.Assert;
@@ -50,7 +50,7 @@ public class FilterTest {
 	@Before
 	public void prepare() {
 		boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		// GIVEN

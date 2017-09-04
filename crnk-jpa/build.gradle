@@ -43,3 +43,9 @@ sourceSets {
 jar {
 	duplicatesStrategy = 'exclude'
 }
+apply plugin: 'idea'
+idea {
+	module {
+		idea.module.inheritOutputDirs = true
+	}
+}

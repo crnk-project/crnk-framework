@@ -1,10 +1,8 @@
 package io.crnk.spring.boot.v3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -79,11 +77,6 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 
 	@Bean
 	public Filter springBootSampleCrnkFilter(CrnkBoot boot) {
-		JsonApiModuleBuilder jsonApiModuleBuilder = new JsonApiModuleBuilder();
-		SimpleModule parameterNamesModule = jsonApiModuleBuilder.build();
-
-		objectMapper.registerModule(parameterNamesModule);
-
 		return new SpringCrnkFilter(boot);
 	}
 

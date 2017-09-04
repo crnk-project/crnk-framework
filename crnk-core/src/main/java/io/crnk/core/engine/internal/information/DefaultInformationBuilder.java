@@ -11,6 +11,7 @@ import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInf
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,6 +25,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 	public RelationshipRepository createRelationshipRepository(String targetResourceType) {
 		return createRelationshipRepository(null, targetResourceType);
+	}
+
+	@Override
+	public Field createResourceField() {
+		return new DefaultField();
 	}
 
 	@Override
@@ -158,15 +164,13 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private Type genericType;
 
-		private boolean lazy = true;
-
 		private String oppositeResourceType = null;
 
 		private LookupIncludeBehavior lookupIncludeBehavior = LookupIncludeBehavior.NONE;
 
-		private boolean includeByDefault = false;
-
 		private ResourceFieldType fieldType = ResourceFieldType.ATTRIBUTE;
+
+		private SerializeType serializeType = SerializeType.LAZY;
 
 		private String oppositeName;
 
@@ -176,8 +180,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		public ResourceField build() {
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
-					genericType, oppositeResourceType, oppositeName, lazy,
-					includeByDefault, lookupIncludeBehavior,
+					genericType, oppositeResourceType, oppositeName, serializeType,
+					lookupIncludeBehavior,
 					access);
 			if (accessor != null) {
 				impl.setAccessor(accessor);
@@ -206,8 +210,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
-		public DefaultField lazy(boolean lazy) {
-			this.lazy = lazy;
+		public DefaultField serializeType(SerializeType serializeType) {
+			this.serializeType = serializeType;
 			return this;
 		}
 
@@ -221,27 +225,22 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
-		public DefaultField includeByDefault(boolean includeByDefault) {
-			this.includeByDefault = includeByDefault;
-			return this;
-		}
-
 		public DefaultField fieldType(ResourceFieldType fieldType) {
 			this.fieldType = fieldType;
 			return this;
 		}
 
-		public DefaultField setOppositeName(String oppositeName) {
+		public DefaultField oppositeName(String oppositeName) {
 			this.oppositeName = oppositeName;
 			return this;
 		}
 
-		public DefaultField setAccessor(ResourceFieldAccessor accessor) {
+		public DefaultField accessor(ResourceFieldAccessor accessor) {
 			this.accessor = accessor;
 			return this;
 		}
 
-		public DefaultField setAccess(ResourceFieldAccess access) {
+		public DefaultField access(ResourceFieldAccess access) {
 			this.access = access;
 			return this;
 		}

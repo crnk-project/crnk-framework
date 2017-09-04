@@ -5,10 +5,13 @@ import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 
 public interface InformationBuilder {
+
+	Field createResourceField();
 
 	interface RelationshipRepository {
 
@@ -52,21 +55,19 @@ public interface InformationBuilder {
 
 		Field genericType(Type genericType);
 
-		Field lazy(boolean lazy);
+		Field serializeType(SerializeType serializeType);
 
 		Field oppositeResourceType(String oppositeResourceType);
 
 		Field lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		Field includeByDefault(boolean includeByDefault);
-
 		Field fieldType(ResourceFieldType fieldType);
 
-		Field setOppositeName(String oppositeName);
+		Field oppositeName(String oppositeName);
 
-		Field setAccessor(ResourceFieldAccessor accessor);
+		Field accessor(ResourceFieldAccessor accessor);
 
-		Field setAccess(ResourceFieldAccess access);
+		Field access(ResourceFieldAccess access);
 
 	}
 

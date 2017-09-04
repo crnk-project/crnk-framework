@@ -1,13 +1,8 @@
 package io.crnk.core.engine.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
-import io.crnk.core.engine.dispatcher.Response;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -15,6 +10,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
@@ -27,9 +23,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
-import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import org.junit.After;
 import org.junit.Assert;
@@ -38,12 +32,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 public class RepositoryFilterTest {
 
@@ -87,7 +78,7 @@ public class RepositoryFilterTest {
 	public void prepare() {
 
 		boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 
 		SimpleModule filterModule = new SimpleModule("filter");

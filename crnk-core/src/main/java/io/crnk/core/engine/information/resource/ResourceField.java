@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 
@@ -41,15 +42,7 @@ public interface ResourceField {
 
 	Type getGenericType();
 
-	/**
-	 * Returns a flag which indicate if a field should not be serialized
-	 * automatically.
-	 *
-	 * @return true if a field is lazy
-	 */
-	boolean isLazy();
-
-	boolean getIncludeByDefault();
+	SerializeType getSerializeType();
 
 	/**
 	 * @return the non-collection type. Matches {@link #getType()} for

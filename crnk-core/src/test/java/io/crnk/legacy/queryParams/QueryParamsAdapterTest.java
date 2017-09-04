@@ -1,8 +1,10 @@
 package io.crnk.legacy.queryParams;
 
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
@@ -11,7 +13,7 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
+import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,8 +26,8 @@ public class QueryParamsAdapterTest {
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		QueryParams params = new QueryParams();
 
-		AnnotationResourceInformationBuilder builder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider());
-		builder.init(new DefaultResourceInformationBuilderContext(builder, moduleRegistry.getTypeParser()));
+		DefaultResourceInformationProvider builder = new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
+		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
 
 		QueryParamsAdapter adapter = new QueryParamsAdapter(info, params, moduleRegistry);

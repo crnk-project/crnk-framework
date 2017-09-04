@@ -5,17 +5,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
-import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
-import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -46,11 +43,9 @@ import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import io.crnk.legacy.repository.information.DefaultRelationshipRepositoryInformationBuilder;
-import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationBuilder;
 import net.jodah.typetools.TypeResolver;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +59,6 @@ public class CrnkBoot {
 	private final ModuleRegistry moduleRegistry = new ModuleRegistry();
 
 	private ObjectMapper objectMapper;
-
-	private List<ResourceFieldInformationProvider> resourceFieldInformationProviders;
 
 	private QueryParamsBuilder queryParamsBuilder;
 
@@ -81,13 +74,13 @@ public class CrnkBoot {
 
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
-	private ResourceFieldNameTransformer resourceFieldNameTransformer;
-
 	private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
 
 	private ServiceDiscovery serviceDiscovery;
 
 	private DocumentMapper documentMapper;
+
+	private List<Module> registeredModules = new ArrayList<>();
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -113,30 +106,29 @@ public class CrnkBoot {
 	 * Sets a JsonServiceLocator. No longer necessary if a ServiceDiscovery
 	 * implementation is in place.
 	 *
-	 * @param serviceLocator Ask Remmo
+	 * @param serviceLocator
 	 */
 	public void setServiceLocator(JsonServiceLocator serviceLocator) {
 		checkNotConfiguredYet();
 		this.serviceLocator = serviceLocator;
 	}
 
+
 	/**
 	 * Adds a module. No longer necessary if a ServiceDiscovery implementation
 	 * is in place.
-	 *
-	 * @param module Ask Remmo
 	 */
 	public void addModule(Module module) {
 		checkNotConfiguredYet();
 		setupInstance(module);
-		moduleRegistry.addModule(module);
+		registeredModules.add(module);
 	}
 
 	/**
 	 * Sets a ServiceUrlProvider. No longer necessary if a ServiceDiscovery
 	 * implementation is in place.
 	 *
-	 * @param serviceUrlProvider Ask Remmo
+	 * @param serviceUrlProvider
 	 */
 	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
 		checkNotConfiguredYet();
@@ -174,19 +166,24 @@ public class CrnkBoot {
 	private void bootDiscovery() {
 		setupObjectMapper();
 		addModules();
+
 		setupComponents();
-		setupResourceRegistry();
+		ResourceRegistryPart rootPart = setupResourceRegistry();
 
 		moduleRegistry.init(objectMapper);
 
-		JsonApiModuleBuilder jsonApiModuleBuilder = new JsonApiModuleBuilder();
-		objectMapper.registerModule(jsonApiModuleBuilder.build());
+		setupRepositories(rootPart);
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
-
 	}
 
-	private void setupResourceRegistry() {
+	private void setupRepositories(ResourceRegistryPart rootPart) {
+		for (RegistryEntry entry : moduleRegistry.getRegistryEntries()) {
+			rootPart.addEntry(entry);
+		}
+	}
+
+	private ResourceRegistryPart setupResourceRegistry() {
 		Map<String, ResourceRegistryPart> registryParts = moduleRegistry.getRegistryParts();
 
 		ResourceRegistryPart rootPart;
@@ -203,11 +200,8 @@ public class CrnkBoot {
 			rootPart = hierarchialPart;
 		}
 
-		for (RegistryEntry entry : moduleRegistry.getRegistryEntries()) {
-			rootPart.addEntry(entry);
-		}
-
 		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry);
+		return rootPart;
 	}
 
 	private void setupObjectMapper() {
@@ -217,6 +211,8 @@ public class CrnkBoot {
 			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		}
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+		moduleRegistry.setObjectMapper(objectMapper);
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {
@@ -245,10 +241,6 @@ public class CrnkBoot {
 	}
 
 	private void setupComponents() {
-		if (resourceFieldNameTransformer == null) {
-			resourceFieldNameTransformer = new ResourceFieldNameTransformer(objectMapper.getSerializationConfig());
-		}
-
 		// not that the provided default implementation here are added last and
 		// as a consequence,
 		// can be overriden by other modules, like the
@@ -261,12 +253,6 @@ public class CrnkBoot {
 				super.setupModule(context);
 			}
 		};
-		module.addRepositoryInformationBuilder(new DefaultResourceRepositoryInformationBuilder());
-		module.addRepositoryInformationBuilder(new DefaultRelationshipRepositoryInformationBuilder());
-
-		AnnotationResourceInformationBuilder resourceInformationBuilder =
-				new AnnotationResourceInformationBuilder(resourceFieldNameTransformer, getResourceFieldInformationProviders());
-		module.addResourceInformationBuilder(resourceInformationBuilder);
 
 		for (JsonApiExceptionMapper<?> exceptionMapper : getInstancesByType(JsonApiExceptionMapper.class)) {
 			module.addExceptionMapper(exceptionMapper);
@@ -289,6 +275,7 @@ public class CrnkBoot {
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
 		moduleRegistry.addModule(module);
+		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.setPropertiesProvider(propertiesProvider);
 	}
 
@@ -331,8 +318,14 @@ public class CrnkBoot {
 	}
 
 	private void addModules() {
-		List<Module> modules = getInstancesByType(Module.class);
-		for (Module module : modules) {
+
+		for (Module module : registeredModules) {
+			moduleRegistry.addModule(module);
+		}
+		moduleRegistry.addModule(new JacksonModule(objectMapper));
+
+		List<Module> discoveredModules = getInstancesByType(Module.class);
+		for (Module module : discoveredModules) {
 			moduleRegistry.addModule(module);
 		}
 	}
@@ -375,11 +368,6 @@ public class CrnkBoot {
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
 		checkNotConfiguredYet();
 		this.propertiesProvider = propertiesProvider;
-	}
-
-	public void setResourceFieldNameTransformer(ResourceFieldNameTransformer resourceFieldNameTransformer) {
-		checkNotConfiguredYet();
-		this.resourceFieldNameTransformer = resourceFieldNameTransformer;
 	}
 
 	/**
@@ -465,30 +453,5 @@ public class CrnkBoot {
 
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
-	}
-
-	/**
-	 * Return the {@link ResourceFieldInformationProvider}'s that will be used during
-	 * serialization to make decisions about the serialization output.
-	 *
-	 * @return
-	 */
-	public List<ResourceFieldInformationProvider> getResourceFieldInformationProviders() {
-		if (resourceFieldInformationProviders == null) {
-			resourceFieldInformationProviders = new LinkedList<>();
-			resourceFieldInformationProviders.add(new JacksonResourceFieldInformationProvider(getObjectMapper()));
-		}
-
-		return resourceFieldInformationProviders;
-	}
-
-	/**
-	 * Set the {@link ResourceFieldInformationProvider} that will be used during
-	 * serialization to make decisions about the serialization output.
-	 *
-	 * @param attributeSerializationInformationProvider
-	 */
-	public void setResourceFieldInformationProviders(List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
-		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 	}
 }

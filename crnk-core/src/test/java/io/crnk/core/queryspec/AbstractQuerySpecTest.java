@@ -1,32 +1,34 @@
 package io.crnk.core.queryspec;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.module.discovery.DefaultResourceLookup;
+import io.crnk.core.module.SimpleModule;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.legacy.registry.ResourceRegistryBuilder;
 import org.junit.Before;
 
 import java.util.*;
 
 public abstract class AbstractQuerySpecTest {
 
-	protected DefaultQuerySpecConverter parser;
+	protected DefaultQuerySpecConverter querySpecConverter;
 
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
@@ -35,24 +37,30 @@ public abstract class AbstractQuerySpecTest {
 	protected ModuleRegistry moduleRegistry;
 
 	protected static void addParams(Map<String, Set<String>> params, String key, String value) {
-		params.put(key, new HashSet<String>(Arrays.asList(value)));
+		params.put(key, new HashSet<>(Arrays.asList(value)));
 	}
 
 	@Before
 	public void setup() {
-		JsonServiceLocator jsonServiceLocator = new SampleJsonServiceLocator();
-		ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(new ResourceFieldNameTransformer(), new JacksonResourceFieldInformationProvider()) {
+		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
 
 			@Override
-			protected List<AnnotatedResourceField> getResourceFields(Class<?> resourceClass) {
-				List<AnnotatedResourceField> fields = super.getResourceFields(resourceClass);
+			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
+				List<ResourceField> fields = super.getResourceFields(resourceClass);
 
 				if (resourceClass == Task.class) {
 					// add additional field that is not defined on the class
 					String name = "computedAttribute";
 					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
-					AnnotatedResourceField field = new AnnotatedResourceField(name, name, Integer.class, Integer.class, null, (List) Collections.emptyList(), access);
-					field.setAccessor(new ResourceFieldAccessor() {
+
+					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
+
+					InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
+					fieldBuilder.type(Integer.class);
+					fieldBuilder.jsonName(name);
+					fieldBuilder.underlyingName(name);
+					fieldBuilder.access(access);
+					fieldBuilder.accessor(new ResourceFieldAccessor() {
 
 						public Object getValue(Object resource) {
 							return 13;
@@ -62,34 +70,27 @@ public abstract class AbstractQuerySpecTest {
 
 						}
 					});
-					fields.add(field);
+					fields.add(fieldBuilder.build());
 				}
 				return fields;
 			}
 		};
-		moduleRegistry = new ModuleRegistry();
-		ResourceRegistryBuilder resourceRegistryBuilder = new ResourceRegistryBuilder(moduleRegistry, jsonServiceLocator, resourceInformationBuilder);
-		DefaultResourceLookup resourceLookup = newResourceLookup();
-		ServiceUrlProvider serviceUrlProvider = new ConstantServiceUrlProvider("http://127.0.0.1");
-		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
-		resourceRegistry = resourceRegistryBuilder.build(resourceLookup, moduleRegistry, serviceUrlProvider);
-		moduleRegistry.setResourceRegistry(resourceRegistry);
-		moduleRegistry.init(new ObjectMapper());
-		parser = new DefaultQuerySpecConverter(moduleRegistry);
+
+		SimpleModule testModule = new SimpleModule("test");
+		testModule.addResourceInformationProvider(resourceInformationProvider);
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
+		boot.addModule(testModule);
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(getResourceSearchPackage()));
+		boot.boot();
+
+		moduleRegistry = boot.getModuleRegistry();
+		querySpecConverter = new DefaultQuerySpecConverter(moduleRegistry);
+		resourceRegistry = boot.getResourceRegistry();
 	}
 
-	protected DefaultResourceLookup newResourceLookup() {
-		return new DefaultResourceLookup(Task.class.getPackage().getName() + "," + getClass().getPackage().getName()) {
-
-			@Override
-			public Set<Class<?>> getResourceRepositoryClasses() {
-				Set<Class<?>> set = new HashSet<>();
-				set.addAll(super.getResourceRepositoryClasses());
-				set.add(ScheduleRepositoryImpl.class); // not yet recognized by
-				// reflections for some
-				// reason
-				return set;
-			}
-		};
+	public String getResourceSearchPackage() {
+		return getClass().getPackage().getName();
 	}
 }
