@@ -10,8 +10,6 @@ languages like iOS would be very welcomed.
 
 ## Typescript
 
-NOTE: Available soon (ngrx-json-api needs to be released as well)
-
 The Typescript generator allows the generation of:
 
 - interfaces for resources and related objects (like nested objects and enumeration types).
@@ -82,7 +80,7 @@ typescriptGen{
 	excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
 
 	packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
-	peerDependencies['ngrx-json-api'] = '>=1.2.0'
+	peerDependencies['ngrx-json-api'] = '>=2.0.0-beta.6'
 
 	// genDir = ...
 

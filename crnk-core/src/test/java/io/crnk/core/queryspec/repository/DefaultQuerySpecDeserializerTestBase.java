@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.repository;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
 import io.crnk.core.engine.parser.TypeParser;
@@ -9,7 +15,14 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.AbstractQuerySpecTest;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.QuerySpecDeserializerContext;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,14 +30,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.*;
-
 public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuerySpecTest {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
 	protected DefaultQuerySpecDeserializer deserializer;
+
 	protected ResourceInformation taskInformation;
+
 	private QuerySpecDeserializerContext deserializerContext;
 
 	@Before
@@ -131,8 +145,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertEquals(12L, actualSpec.getLimit().longValue());
 		QuerySpec projectQuerySpec = actualSpec.getQuerySpec(Project.class);
 		Assert.assertNotNull(projectQuerySpec);
-		Assert.assertEquals(1L, projectQuerySpec.getOffset());
-		Assert.assertEquals(12L, projectQuerySpec.getLimit().longValue());
+		Assert.assertEquals(0L, projectQuerySpec.getOffset());
+		Assert.assertNull(projectQuerySpec.getLimit());
 	}
 
 	@Test
@@ -272,7 +286,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	@Test
 	public void testFilterByMany() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
-		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, new HashSet<>(Arrays.asList("value1", "value2"))));
+		expectedSpec.addFilter(
+				new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, new HashSet<>(Arrays.asList("value1", "value2"))));
 
 		Map<String, Set<String>> params = new HashMap<>();
 		params.put("filter[tasks][name][EQ]", new HashSet<>(Arrays.asList("value1", "value2")));
@@ -460,7 +475,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "sort[task-with-lookup]", "id");
 
-		ResourceInformation taskWithLookUpInformation = resourceRegistry.getEntryForClass(TaskWithLookup.class).getResourceInformation();
+		ResourceInformation taskWithLookUpInformation =
+				resourceRegistry.getEntryForClass(TaskWithLookup.class).getResourceInformation();
 		QuerySpec actualSpec = deserializer.deserialize(taskWithLookUpInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}

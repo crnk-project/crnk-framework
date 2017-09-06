@@ -33,9 +33,8 @@ import {
 	ApiPostSuccessAction,
 } from 'ngrx-json-api/src/actions';
 
-import {getPendingChanges} from './crnk.operations.utils';
+import {getPendingChanges} from 'ngrx-json-api/src/utils';
 import {NgrxJsonApi} from 'ngrx-json-api/src/api';
-import {NgrxJsonApiEffects} from 'ngrx-json-api/src/effects';
 import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 
@@ -70,7 +69,7 @@ export class OperationsEffects {
 			return feature ? feature['api'] : undefined;
 		}), (action, ngrxstore: NgrxJsonApiStore) => {
 			let payload = (action as ApiApplyInitAction).payload;
-			const pending: Array<StoreResource> = getPendingChanges(ngrxstore, payload.ids, payload.include);
+			const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include, false);
 			return pending;
 		})
 		.flatMap(pending => {

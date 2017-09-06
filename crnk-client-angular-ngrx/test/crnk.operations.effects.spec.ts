@@ -121,8 +121,8 @@ describe('OperationsEffects', () => {
 	it('should do nothing when store in sync', () => {
 		let res;
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction());
-		effects.applyResources$.flatMap(it => it).subscribe(result => {
+		actions.next(new ApiApplyInitAction({}));
+		effects.applyResources$.subscribe(result => {
 			res = result;
 			expect(result).toEqual(new ApiApplySuccessAction([]));
 		});
@@ -135,9 +135,9 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'CREATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction());
+		actions.next(new ApiApplyInitAction({}));
 
-		effects.applyResources$.flatMap(it => it).subscribe(result => {
+		effects.applyResources$.subscribe(result => {
 			res = result;
 
 			expect(result.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_SUCCESS);
@@ -157,9 +157,9 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction());
+		actions.next(new ApiApplyInitAction({}));
 
-		effects.applyResources$.flatMap(it => it).subscribe(result => {
+		effects.applyResources$.subscribe(result => {
 			res = result;
 
 			expect(result.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_SUCCESS);
@@ -182,9 +182,9 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction());
+		actions.next(new ApiApplyInitAction({}));
 
-		effects.applyResources$.flatMap(it => it).subscribe(result => {
+		effects.applyResources$.subscribe(result => {
 			res = result;
 
 			expect(result.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_FAIL);
@@ -205,9 +205,9 @@ describe('OperationsEffects', () => {
 		api.data['Article']['1'].state = 'DELETED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction());
+		actions.next(new ApiApplyInitAction({}));
 
-		effects.applyResources$.flatMap(it => it).subscribe(result => {
+		effects.applyResources$.subscribe(result => {
 			res = result;
 
 			expect(result.type).toEqual(NgrxJsonApiActionTypes.API_APPLY_SUCCESS);
