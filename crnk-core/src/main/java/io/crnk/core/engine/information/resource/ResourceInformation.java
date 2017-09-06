@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
@@ -31,30 +29,30 @@ public class ResourceInformation {
 	 * Found field of the id. Each resource has to contain a field marked by
 	 * JsonApiId annotation.
 	 */
-	private final ResourceField idField;
+	private ResourceField idField;
 
 	/**
 	 * A set of resource's attribute fields.
 	 */
-	private final ResourceAttributesBridge attributeFields;
+	private ResourceAttributesBridge attributeFields;
 
 	/**
 	 * A set of fields that contains non-standard Java types (List, Set, custom
 	 * classes, ...).
 	 */
-	private final List<ResourceField> relationshipFields;
+	private List<ResourceField> relationshipFields;
 
 	/**
 	 * An underlying field's name which contains meta information about for a
 	 * resource
 	 */
-	private final ResourceField metaField;
+	private ResourceField metaField;
 
 	/**
 	 * An underlying field's name which contain links information about for a
 	 * resource
 	 */
-	private final ResourceField linksField;
+	private ResourceField linksField;
 
 	/**
 	 * Type name of the resource. Corresponds to {@link JsonApiResource.type}
@@ -95,6 +93,13 @@ public class ResourceInformation {
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
 
+		initFields();
+		if (this.instanceBuilder == null) {
+			this.instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
+		}
+	}
+
+	private void initFields() {
 		if (fields != null) {
 			List<ResourceField> idFields = ResourceFieldType.ID.filter(fields);
 			if (idFields.size() > 1) {
@@ -122,9 +127,12 @@ public class ResourceInformation {
 			this.linksField = null;
 			this.idField = null;
 		}
-		if (this.instanceBuilder == null) {
-			this.instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
-		}
+	}
+
+	@Deprecated
+	public void setFields(List<ResourceField> fields){
+		this.fields = fields;
+		this.initFields();
 	}
 
 	private static <T> ResourceField getMetaField(Class<T> resourceClass, Collection<ResourceField> classFields) {
@@ -275,7 +283,7 @@ public class ResourceInformation {
 	}
 
 	public List<ResourceField> getFields() {
-		return fields;
+		return Collections.unmodifiableList(fields);
 	}
 
 }

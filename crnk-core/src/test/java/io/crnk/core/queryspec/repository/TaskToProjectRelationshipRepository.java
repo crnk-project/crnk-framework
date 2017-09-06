@@ -31,5 +31,4 @@ public class TaskToProjectRelationshipRepository extends RelationshipRepositoryB
 			public String name = "value";
 		};
 	}
-
 }

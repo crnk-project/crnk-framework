@@ -1,5 +1,13 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -11,7 +19,14 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
-import io.crnk.core.engine.information.repository.*;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
+import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
@@ -27,7 +42,13 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.RegistryEntryBuilder;
+import io.crnk.core.engine.registry.ResourceEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryAware;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
@@ -49,8 +70,6 @@ import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-
-import java.util.*;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -136,7 +155,8 @@ public class ModuleRegistry {
 
 	protected void checkState(InitializedState minState, InitializedState maxState) {
 		PreconditionUtil.verify(initializedState.ordinal() >= minState.ordinal(), "not yet initialized, cannot yet be called");
-		PreconditionUtil.verify(initializedState.ordinal() <= maxState.ordinal(), "already initialized, cannot be called anymore");
+		PreconditionUtil
+				.verify(initializedState.ordinal() <= maxState.ordinal(), "already initialized, cannot be called anymore");
 	}
 
 	/**
@@ -150,7 +170,8 @@ public class ModuleRegistry {
 				new CombinedResourceInformationProvider(aggregatedModule.getResourceInformationProviders());
 		InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 		DefaultResourceInformationProviderContext context =
-				new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser, objectMapper);
+				new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
+						objectMapper);
 		resourceInformationProvider.init(context);
 		return resourceInformationProvider;
 	}
@@ -244,7 +265,9 @@ public class ModuleRegistry {
 		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
 		exceptionMapperRegistry = mapperRegistryBuilder.build(exceptionMapperLookup);
 
-		filterBehaviorProvider = new ResourceFilterDirectoryImpl(aggregatedModule.getResourceFilters(), httpRequestContextProvider, resourceRegistry);
+		filterBehaviorProvider =
+				new ResourceFilterDirectoryImpl(aggregatedModule.getResourceFilters(), httpRequestContextProvider,
+						resourceRegistry);
 		this.initializedState = InitializedState.INITIALIZED;
 	}
 
@@ -265,14 +288,16 @@ public class ModuleRegistry {
 			Optional<? extends Module> optModule = getModule(extension.getTargetModule());
 			if (optModule.isPresent()) {
 				reverseExtensionMap.add(optModule.get(), extension);
-			} else if (!extension.isOptional()) {
+			}
+			else if (!extension.isOptional()) {
 				throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
 			}
 		}
 
 		for (Module extendedModule : reverseExtensionMap.keySet()) {
 			List<ModuleExtension> extensions = reverseExtensionMap.getList(extendedModule);
-			PreconditionUtil.assertTrue("module must extend ModuleExtensionAware", extendedModule instanceof ModuleExtensionAware);
+			PreconditionUtil
+					.assertTrue("module must extend ModuleExtensionAware", extendedModule instanceof ModuleExtensionAware);
 			((ModuleExtensionAware) extendedModule).setExtensions(extensions);
 		}
 	}
@@ -286,7 +311,8 @@ public class ModuleRegistry {
 				List<ModuleExtension> dependencies = extensionMap.getList(module);
 				for (ModuleExtension dependencyExtension : dependencies) {
 					Optional<? extends Module> dependencyModule = getModule(dependencyExtension.getTargetModule());
-					PreconditionUtil.assertTrue("module dependency not available", dependencyModule.isPresent() || dependencyExtension.isOptional());
+					PreconditionUtil.assertTrue("module dependency not available",
+							dependencyModule.isPresent() || dependencyExtension.isOptional());
 					if (dependencyModule.isPresent()) {
 						initializeModule(dependencyModule.get(), initializedModules);
 					}
@@ -319,7 +345,7 @@ public class ModuleRegistry {
 	}
 
 	private void applyRepositoryRegistration(String resourceType,
-											 MultivaluedMap<String, RepositoryInformation> typeInfoMapping, Map<Object, Object> infoRepositoryMapping) {
+			MultivaluedMap<String, RepositoryInformation> typeInfoMapping, Map<Object, Object> infoRepositoryMapping) {
 
 		ResourceInformation resourceInformation = null;
 
@@ -328,15 +354,20 @@ public class ModuleRegistry {
 		ResourceEntry resourceEntry = null;
 		Class resourceClass = null;
 		List<RepositoryInformation> repositoryInformations = typeInfoMapping.getList(resourceType);
+		List<Object> unwrappedRelationshipRepositories = new ArrayList<>();
 		for (RepositoryInformation repositoryInformation : repositoryInformations) {
 			if (repositoryInformation instanceof ResourceRepositoryInformation) {
 				resourceRepositoryInformation = (ResourceRepositoryInformation) repositoryInformation;
 				Object repository = infoRepositoryMapping.get(resourceRepositoryInformation);
 				resourceEntry = setupResourceRepository(repository);
-			} else {
+			}
+			else {
 				RelationshipRepositoryInformation relationshipRepositoryInformation =
 						(RelationshipRepositoryInformation) repositoryInformation;
 				Object repository = infoRepositoryMapping.get(repositoryInformation);
+
+				unwrappedRelationshipRepositories.add(repository);
+
 				setupRelationship(relationshipEntries, relationshipRepositoryInformation, repository);
 
 				if (resourceClass == null) {
@@ -355,13 +386,37 @@ public class ModuleRegistry {
 			resourceInformation = resourceInformationProvider.build(resourceClass);
 		}
 
-		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, resourceRepositoryInformation, resourceEntry, relationshipEntries);
+		contributeFields(resourceInformation, unwrappedRelationshipRepositories);
+
+		RegistryEntry registryEntry =
+				new RegistryEntry(resourceInformation, resourceRepositoryInformation, resourceEntry, relationshipEntries);
 		registryEntry.initialize(this);
 		resourceRegistry.addEntry(registryEntry);
 	}
 
-	private void mapRepositoryRegistrations(List<Object> repositories, MultivaluedMap<String, RepositoryInformation> resourceTypeMap,
-											Map<Object, Object> resourceInformationMap) {
+	private void contributeFields(ResourceInformation resourceInformation, List<Object> unwrappedRelationshipRepositories) {
+
+		for(Object relRepository : unwrappedRelationshipRepositories) {
+			if (relRepository instanceof ResourceFieldContributor) {
+				ResourceFieldContributor contributor = (ResourceFieldContributor) relRepository;
+				List<ResourceField> contributedFields = contributor.getResourceFields(new ResourceFieldContributorContext() {
+					@Override
+					public InformationBuilder getInformationBuilder() {
+						return new DefaultInformationBuilder(typeParser);
+					}
+				});
+				List<ResourceField> fields = new ArrayList<>();
+				fields.addAll(resourceInformation.getFields());
+				fields.addAll(contributedFields);
+				resourceInformation.setFields(fields);
+			}
+		}
+
+	}
+
+	private void mapRepositoryRegistrations(List<Object> repositories,
+			MultivaluedMap<String, RepositoryInformation> resourceTypeMap,
+			Map<Object, Object> resourceInformationMap) {
 
 		RepositoryInformationProvider repositoryInformationProvider = getRepositoryInformationBuilder();
 		RepositoryInformationProviderContext builderContext = new DefaultRepositoryInformationProviderContext(this);
@@ -374,7 +429,8 @@ public class ModuleRegistry {
 					ResourceRepositoryInformation info = (ResourceRepositoryInformation) repositoryInformation;
 					resourceInformationMap.put(info, repository);
 					resourceTypeMap.add(info.getResourceType(), repositoryInformation);
-				} else {
+				}
+				else {
 					RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) repositoryInformation;
 					resourceInformationMap.put(info, repository);
 					resourceTypeMap.add(info.getSourceResourceType(), repositoryInformation);
@@ -397,7 +453,8 @@ public class ModuleRegistry {
 
 		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
 			return new AnnotatedResourceEntry(repositoryInstanceBuilder);
-		} else {
+		}
+		else {
 			return new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		}
 	}
@@ -410,7 +467,8 @@ public class ModuleRegistry {
 			Decorator decorator = null;
 			if (decoratedRepository instanceof RelationshipRepositoryV2) {
 				decorator = repositoryDecorator.decorateRepository((RelationshipRepositoryV2) decoratedRepository);
-			} else if (decoratedRepository instanceof ResourceRepositoryV2) {
+			}
+			else if (decoratedRepository instanceof ResourceRepositoryV2) {
 				decorator = repositoryDecorator.decorateRepository((ResourceRepositoryV2) decoratedRepository);
 			}
 			if (decorator != null) {
@@ -426,21 +484,23 @@ public class ModuleRegistry {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void setupRelationship(List<ResponseRelationshipEntry> relationshipEntries,
-								   final RelationshipRepositoryInformation relationshipRepositoryInformation, final Object relRepository) {
+			final RelationshipRepositoryInformation relationshipRepositoryInformation, final Object relRepository) {
 
 		final Object decoratedRepository = decorateRepository(relRepository);
-		RepositoryInstanceBuilder<Object> relationshipInstanceBuilder = new RepositoryInstanceBuilder<Object>(null, (Class) relRepository.getClass()) {
+		RepositoryInstanceBuilder<Object> relationshipInstanceBuilder =
+				new RepositoryInstanceBuilder<Object>(null, (Class) relRepository.getClass()) {
 
-			@Override
-			public Object buildRepository() {
-				return decoratedRepository;
-			}
-		};
+					@Override
+					public Object buildRepository() {
+						return decoratedRepository;
+					}
+				};
 
 		final String targetResourceType = relationshipRepositoryInformation.getTargetResourceType();
 		if (ClassUtils.getAnnotation(relRepository.getClass(), JsonApiRelationshipRepository.class).isPresent()) {
 			relationshipEntries.add(new AnnotatedRelationshipEntryBuilder(this, relationshipInstanceBuilder));
-		} else {
+		}
+		else {
 			ResponseRelationshipEntry relationshipEntry = new DirectResponseRelationshipEntry(relationshipInstanceBuilder) {
 
 				@Override
