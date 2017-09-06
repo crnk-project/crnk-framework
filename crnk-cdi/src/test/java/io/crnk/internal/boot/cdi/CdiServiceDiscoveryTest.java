@@ -2,6 +2,7 @@ package io.crnk.internal.boot.cdi;
 
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.BeanManager;
 
 import io.crnk.cdi.internal.CdiServiceDiscovery;
 import io.crnk.core.boot.CrnkBoot;
@@ -18,10 +19,24 @@ import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 @RunWith(CdiTestRunner.class)
 @ApplicationScoped
 public class CdiServiceDiscoveryTest {
+
+	@Test
+	public void testSetter() {
+		CdiServiceDiscovery discovery = new CdiServiceDiscovery();
+
+		BeanManager beanManager = discovery.getBeanManager();
+		Assert.assertNotNull(discovery.getBeanManager());
+
+		BeanManager mock = Mockito.mock(BeanManager.class);
+		discovery.setBeanManager(mock);
+		Assert.assertSame(mock, discovery.getBeanManager());
+		Assert.assertNotSame(mock, beanManager);
+	}
 
 	@Test
 	public void testFactory() {
