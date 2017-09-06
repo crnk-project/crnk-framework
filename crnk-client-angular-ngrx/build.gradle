@@ -175,6 +175,6 @@ task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
 	npmCommand = ['publish']
 }
 
-tasks.publish.dependsOn publishNpmPackage
+// tasks.publish.dependsOn publishNpmPackage
 
 
