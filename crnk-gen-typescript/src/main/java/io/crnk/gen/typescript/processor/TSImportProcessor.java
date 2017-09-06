@@ -1,6 +1,5 @@
 package io.crnk.gen.typescript.processor;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.gen.typescript.model.*;
 import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
 
@@ -45,16 +44,22 @@ public class TSImportProcessor implements TSSourceProcessor {
 		}
 	}
 
-	private static void processType(TSSource source, TSType type) {
+	private static void processType(TSSource source, TSNamedElement type) {
 		TSSource refSource = getSource(type);
 
 		// no need for inclusions of primitive types and within same file
 		if (!(type instanceof TSPrimitiveType || source == refSource)) {
-			addImport(refSource, source, type);
+
+			TSNamedElement importedType = type;
+			if (type.getParent() instanceof TSModule) {
+				importedType = (TSNamedElement) type.getParent();
+			}
+
+			addImport(refSource, source, importedType);
 		}
 	}
 
-	private static void addImport(TSSource refSource, TSSource source, TSType type) {
+	private static void addImport(TSSource refSource, TSSource source, TSNamedElement type) {
 		String path = computeImportPath(refSource, source);
 		TSImport element = source.getImport(path);
 		if (element == null) {
@@ -82,7 +87,9 @@ public class TSImportProcessor implements TSSourceProcessor {
 		int shared = computeSharedPrefix(srcDirs, refDirs);
 		appendParentPath(pathBuilder, srcDirs, shared);
 		appendChildPath(pathBuilder, refDirs, shared);
-		pathBuilder.append(refSource.getName());
+		if (refSource.getName() != null) {
+			pathBuilder.append(refSource.getName());
+		}
 	}
 
 	private static void appendChildPath(StringBuilder pathBuilder, String[] refDirs, int shared) {

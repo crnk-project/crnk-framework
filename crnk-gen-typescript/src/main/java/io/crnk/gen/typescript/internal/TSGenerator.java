@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -42,6 +43,8 @@ public class TSGenerator {
 
 	private ArrayList<TSMetaTransformation> transformations;
 
+	private List<TSElement> transformedElements = new ArrayList<>();
+
 	public TSGenerator(File outputDir, MetaLookup lookup, TSGeneratorExtension config) {
 		this.outputDir = outputDir;
 		this.lookup = lookup;
@@ -60,8 +63,10 @@ public class TSGenerator {
 	}
 
 	public void run() throws IOException {
-		writePackaging();
-		writeTypescriptConfig();
+		if (config.getNpm().isPackagingEnabled()) {
+			writePackaging();
+			writeTypescriptConfig();
+		}
 		transformMetaToTypescript();
 		runProcessors();
 		writeSources();
@@ -169,12 +174,26 @@ public class TSGenerator {
 		return new File(dir, sourceFile.getName() + ".ts");
 	}
 
+	private boolean postProcessing = false;
+
 	public void transformMetaToTypescript() {
 		Collection<MetaElement> elements = lookup.getMetaById().values();
 		for (MetaElement element : elements) {
 			if (isRoot(element) && isGenerated(element)) {
 				transform(element, TSMetaTransformationOptions.EMPTY);
 			}
+		}
+
+		try {
+			postProcessing = true;
+			for (TSElement transformedElement : new ArrayList<>(transformedElements)) {
+				for (TSMetaTransformation transformation : transformations) {
+					transformation.postTransform(transformedElement, createMetaTransformationContext());
+				}
+			}
+		}
+		finally {
+			postProcessing = false;
 		}
 	}
 
@@ -201,13 +220,19 @@ public class TSGenerator {
 		}
 	}
 
+
 	protected TSElement transform(MetaElement element, TSMetaTransformationOptions options) {
 		if (elementSourceMap.containsKey(element)) {
 			return elementSourceMap.get(element);
 		}
+		if(postProcessing){
+			throw new IllegalStateException("cannot add further element while post processing: " + element.getId());
+		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				return transformation.transform(element, createMetaTransformationContext(), options);
+				TSElement tsElement = transformation.transform(element, createMetaTransformationContext(), options);
+				transformedElements.add(tsElement);
+				return tsElement;
 			}
 		}
 		throw new IllegalStateException("unexpected element: " + element);
@@ -289,6 +314,11 @@ public class TSGenerator {
 		@Override
 		public MetaElement getMeta(Class<?> implClass) {
 			return lookup.getMeta(implClass);
+		}
+
+		@Override
+		public MetaElement getMeta(String metaId) {
+			return lookup.getMetaById().get(metaId);
 		}
 	}
 

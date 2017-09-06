@@ -42,6 +42,11 @@ public class TSMetaEnumTypeTransformation implements TSMetaTransformation {
 	}
 
 	@Override
+	public void postTransform(TSElement element, TSMetaTransformationContext context) {
+
+	}
+
+	@Override
 	public boolean isRoot(MetaElement element) {
 		return false;
 	}

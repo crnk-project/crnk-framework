@@ -85,4 +85,18 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 		return fields;
 	}
 
+
+	public boolean implementsInterface(TSInterfaceType interfaceType) {
+		if (this.equals(interfaceType)) {
+			return true;
+		}
+
+		for (TSInterfaceType implementedInterface : implementedInterfaces) {
+			if (implementedInterface.implementsInterface(interfaceType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

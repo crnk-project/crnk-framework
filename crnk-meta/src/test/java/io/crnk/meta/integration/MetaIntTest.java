@@ -1,4 +1,4 @@
-package io.crnk.meta;
+package io.crnk.meta.integration;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MetaEndToEndTest extends AbstractMetaJerseyTest {
+public class MetaIntTest extends AbstractMetaJerseyTest {
 
 	private ResourceRepositoryV2<MetaElement, Serializable> repository;
 

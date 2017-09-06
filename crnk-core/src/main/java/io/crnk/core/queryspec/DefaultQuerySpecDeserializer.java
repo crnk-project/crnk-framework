@@ -1,5 +1,13 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -13,9 +21,6 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -85,8 +90,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the default offset if no pagination is used.
-	 *
-	 * @param defaultOffset
 	 */
 	public void setDefaultOffset(long defaultOffset) {
 		this.defaultOffset = defaultOffset;
@@ -98,8 +101,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the default limit if no pagination is used.
-	 *
-	 * @param defaultLimit
 	 */
 	public void setDefaultLimit(Long defaultLimit) {
 		this.defaultLimit = defaultLimit;
@@ -111,8 +112,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the maximum page limit.
-	 *
-	 * @param maxPageLimit
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
 		this.maxPageLimit = maxPageLimit;
@@ -147,7 +146,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
 		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation.getResourceClass());
-		setupDefaults(rootQuerySpec);
+		setupDefaults(rootQuerySpec, true);
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
 		for (Parameter parameter : parameters) {
@@ -156,7 +155,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
 				if (querySpec == null) {
 					querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
-					setupDefaults(querySpec);
+					setupDefaults(querySpec, false);
 				}
 			}
 			switch (parameter.paramType) {
@@ -184,9 +183,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		return rootQuerySpec;
 	}
 
-	private void setupDefaults(QuerySpec querySpec) {
-		querySpec.setOffset(defaultOffset);
-		querySpec.setLimit(defaultLimit);
+	protected void setupDefaults(QuerySpec querySpec, boolean root) {
+		if (root) {
+			querySpec.setOffset(defaultOffset);
+			querySpec.setLimit(defaultLimit);
+		}
 	}
 
 	private void deserializeIncludes(QuerySpec querySpec, Parameter parameter) {
@@ -214,14 +215,18 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	protected void deserializePage(QuerySpec querySpec, Parameter parameter) {
 		if (OFFSET_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
 			querySpec.setOffset(parameter.getLongValue());
-		} else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
+		}
+		else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
 			Long limit = parameter.getLongValue();
 			if (getMaxPageLimit() != null && limit != null && limit > getMaxPageLimit()) {
-				String error = String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER, limit, getMaxPageLimit());
+				String error =
+						String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER,
+								limit, getMaxPageLimit());
 				throw new BadRequestException(error);
 			}
 			querySpec.setLimit(limit);
-		} else {
+		}
+		else {
 			throw new ParametersDeserializationException(parameter.toString());
 		}
 	}
@@ -234,11 +239,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				@SuppressWarnings({"unchecked", "rawtypes"})
 				Object value = typeParser.parse(stringValue, (Class) attributeType);
 				typedValues.add(value);
-			} catch (ParserException e) {
+			}
+			catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				} else {
+				}
+				else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -255,10 +262,12 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				current = getAttributeType(current, propertyName);
 			}
 			return current;
-		} catch (PropertyException e) {
+		}
+		catch (PropertyException e) {
 			if (allowUnknownAttributes) {
 				return String.class;
-			} else {
+			}
+			else {
 				throw e;
 			}
 		}
@@ -310,7 +319,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		RestrictedQueryParamsMembers paramType;
 		try {
 			paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			paramType = RestrictedQueryParamsMembers.unknown;
 		}
 
@@ -324,17 +334,22 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 		if (paramType == RestrictedQueryParamsMembers.filter && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.pageParameter = elements.get(0);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 			param.pageParameter = elements.get(1);
-		} else if (paramType == RestrictedQueryParamsMembers.unknown) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.unknown) {
 			param.resourceInformation = null;
-		} else if (elements.size() == 1) {
+		}
+		else if (elements.size() == 1) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		return param;
@@ -362,27 +377,32 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					+ "([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() > 2) {
-			throw new ParametersDeserializationException("failed to parse " + param.name + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException(
+					"failed to parse " + param.name + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			param.attributePath = Arrays.asList(elements.get(1).split("\\."));
-		} else if (enforceDotPathSeparator && elements.size() == 1) {
+		}
+		else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.attributePath = Arrays.asList(elements.get(0).split("\\."));
-		} else {
+		}
+		else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
-	private void legacyParseFilterParameterName(Parameter param, List<String> elements, ResourceInformation rootResourceInformation) {
+	private void legacyParseFilterParameterName(Parameter param, List<String> elements,
+			ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			elements.remove(0);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		param.attributePath = new ArrayList<>();
@@ -396,7 +416,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		param.operator = findOperator(lastElement);
 		if (param.operator != null) {
 			elements.remove(elements.size() - 1);
-		} else {
+		}
+		else {
 			param.operator = defaultOperator;
 		}
 	}
@@ -459,7 +480,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 			}
 			try {
 				return Long.parseLong(values.iterator().next());
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
 		}

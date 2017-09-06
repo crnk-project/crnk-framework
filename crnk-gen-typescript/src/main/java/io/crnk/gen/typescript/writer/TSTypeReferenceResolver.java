@@ -62,10 +62,6 @@ public class TSTypeReferenceResolver extends TSVisitorBase {
 	}
 
 	private void addReference(TSType type) {
-		if (type.getParent() instanceof TSModule) {
-			return;
-		}
-
 		if (type instanceof TSParameterizedType) {
 			type.accept(this);
 		} else if (type instanceof TSArrayType) {
