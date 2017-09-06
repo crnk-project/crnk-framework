@@ -411,7 +411,7 @@ provides a number of customization options:
 	 `http://.../resource?filter[task][project][name]=myProject` and
 	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
 	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
-	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
+	 to be packagingEnabled and will become the default at some point in the future. Note that without the enforcement,
 	 there is danger of introducing ambiguity with resources and attributes are named equally.
 
 

@@ -17,4 +17,9 @@ public class TSClassType extends TSObjectType {
 		this.superType = superType;
 	}
 
+	public boolean implementsInterface(TSInterfaceType interfaceType) {
+		return super.implementsInterface(interfaceType) || superType instanceof TSObjectType &&
+				((TSObjectType) superType).implementsInterface(interfaceType);
+	}
+
 }

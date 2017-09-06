@@ -18,4 +18,5 @@ public interface TSMetaTransformationContext {
 
 	MetaElement getMeta(Class<?> implClass);
 
+	MetaElement getMeta(String metaId);
 }

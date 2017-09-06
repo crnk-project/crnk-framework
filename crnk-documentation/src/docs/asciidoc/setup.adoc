@@ -305,7 +305,7 @@ provided by `CrnkProperties`:
   ** When performing method matching
   An example of a prefix ``/api/v1``.
 
-* `crnk.config.include.paging.enabled` enables pagination for inclusions. Disabled by default. Be aware this may
+* `crnk.config.include.paging.packagingEnabled` enables pagination for inclusions. Disabled by default. Be aware this may
   inadvertently enable pagination for included resources when doing paging on root resources if data structures
   are cyclic. See `CrnkProperties.INCLUDE_PAGING_ENABLED` fore mor information.
 

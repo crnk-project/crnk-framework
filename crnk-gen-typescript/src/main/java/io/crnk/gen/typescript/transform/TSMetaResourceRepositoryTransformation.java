@@ -78,6 +78,11 @@ public class TSMetaResourceRepositoryTransformation implements TSMetaTransformat
 		return null;
 	}
 
+	@Override
+	public void postTransform(TSElement element, TSMetaTransformationContext context) {
+
+	}
+
 	private TSMember newDataField(TSMetaTransformationContext context, TSType resourceType, boolean isArray) {
 		TSField field = new TSField();
 		field.setName("data");

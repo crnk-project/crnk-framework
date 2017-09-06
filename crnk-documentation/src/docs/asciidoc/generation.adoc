@@ -1,3 +1,4 @@
+anchor:generation[]
 
 # Generation
 
@@ -9,17 +10,16 @@ languages like iOS would be very welcomed.
 
 ## Typescript
 
-NOTE: Available soon (ngrx-json-api needs to be released as well)
-
 The Typescript generator allows the generation of:
 
 - interfaces for resources and related objects (like nested objects and enumeration types).
 - interfaces for result documents (i.e. resources and any linking and meta information).
 - interfaces for links information.
 - interfaces for meta information.
-- method to create an empty object instance.
+- methods to create empty object instances.
+- QueryDSL-like expression classes (see <expressions>)
 
-Currently the generator targets the <a href="https://github.com/abdulhaq-e/ngrx-json-api">ngrx-json-api</a> library.
+Currently the generator targets the http://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api] library.
 Support for other libraries/formats would be straightforward to add, contributions welcomed. A generated resource looks
 like:
 
@@ -29,12 +29,14 @@ include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_wi
 ----
 
 Internally the generator has to make use of the running application to gather the necessary information for generation. This
-approach not only supports the regular resources and repositories manually implemented by the application,
-but also more advanced patterns like resources obtained through third-party modules or derived from JPA entities. To get the
-application to a running state at built-time, the generator makes use of the JUnit setup of the application.
-So far supported are a setup of JUnit with Deltaspike for JEE application. Other non-CDI integrations like Spring to follow soon.
-
-A setup may look like:
+approach not only supports the typical, manual implement resources and repositories manually, but also
+the ones obtained through third-party modules such the JPA entities exposed by the JPA module. There are different
+possibilities to do that. https://github.com/crnk-project/crnk-framework/blob/master/crnk-client-angular-ngrx/build
+.gradle[crnk-client-angular-ngrx]
+does such a setup manually in Gradle. Alternatively, there is a Gradle plugin taking care of the generator setup. It makes use
+of the JUnit to get
+the application to a running state at built-time. So far a JUnit setup with Deltaspike for JEE application.
+Other non-CDI integrations like Spring will soon. Such a setup may look like:
 
 [source]
 ----
@@ -81,7 +83,8 @@ typescriptGen{
 	excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
 
 	packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
-	peerDependencies['ngrx-json-api'] = '>=1.2.0'
+	peerDependencies['ngrx-json-api'] = '>=2.0.0-beta.6'
+	generateExpressions = true
 
 	// genDir = ...
 
@@ -94,26 +97,25 @@ typescriptGen.init()
 - the `moowork` plugin is used to to gain a `node` setup.
 - `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
 - by default the package version matches the npm version.
+- `crnk-meta` is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
+  Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
+  the package resp. class name. But for more advanced use cases those may differ.
 - a mapping of Java package name (resp. `MetaElement.id`) to npm packages must be specified.
   Only resources are generated whose package matches the chosen `npm.packageName`.
   All other resources are imported as external NPM dependency.
 - `includes` and `excludes` allow to include and exclude packages from generation.
-- crnk-meta is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
-  Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
-  the package resp. class name. But for more advanced use cases those may differ.
-- applying `crnk-gen-typescript` results in a new `assembleTypescript` task. It and its dependencies
-  generate, compile and package the Typescript sources. We chose not to add a dependency from `assembleTypescript` to
-  `assemble` has a backend-only
-  develop may not need to run with every `assemble` run. Typically `assembleTypescript` is either hooked
-  into the publishing or added as dependency on a frontend project contained within the same Gradle project.
+- applying `crnk-gen-typescript` results in a new `assembleTypescript` task. Consumers may want to add
+  that task to `assemble` as dependency.
 - `runtime.configuration` sets the Gradle configuration to use to obtain a classpath. In the given example
    `typescriptGenRuntime` is used. You may also use `compile` or anything else.
-- `packagingEnabled` enabled is enabled by default and leads to the generation of a `package.json` and `tsconfig.json` file.
-  With this a fully functional NPM package is generated. This is typically used when a backend application wants to
-  publish its stubs to an NPM repository. Setting it to false will result in the generation of the
-  Typescript files only. This is typically used when the files are directly generated into a frontend project.
-- `genDir` allows to update where the source files are generated to.
-- `npm.outputDirectory` allows to specify where the compiled NPM package should be placed.
+- `packagingEnabled`  triggers the generation of a `package.json` and `tsconfig.json` file (`true` as default).
+  Useful to publish the stubs to an NPM repository for use by other projects.
+  Setting it to false will result in the generation of the Typescript files only. This may be used to generate
+   files directly into an existing frontend project. In this case only the `generateTypescript` task is available, there
+   is no assembly taking place.
+- `genDir` specifies where source files are generated to.
+- `npm.outputDirectory` specifies where the compiled NPM package should be placed (`build/npm` as default).
+- `generateExpressions` specifies whether QueryDSL like classes should be generated (`false` as default).
 
 
 NOTE: the generator plugin is not yet included in any example applications. It is not possible to

@@ -1,8 +1,8 @@
-import {QTask, Task} from './task'
-import {DefaultPagedLinksInformation} from '@crnk/core/'
-import {BeanPath, BooleanExpression, StringExpression} from '@crnk/ngrx/binding/expression'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/ngrx/binding/jsonapi'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {QTask, Task} from './task';
+import {DefaultPagedLinksInformation} from '@crnk/angular-ngrx/';
+import {BeanPath, BooleanPath, StringPath} from '@crnk/angular-ngrx/expression';
+import {CrnkStoreResource, QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/angular-ngrx/stub';
+import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
 
 export module Schedule {
 	export interface Relationships {
@@ -17,7 +17,7 @@ export module Schedule {
 		delayed?: boolean;
 	}
 }
-export interface Schedule extends StoreResource {
+export interface Schedule extends CrnkStoreResource {
 	relationships?: Schedule.Relationships;
 	attributes?: Schedule.Attributes;
 }
@@ -36,7 +36,9 @@ export interface ScheduleListResult extends ManyQueryResult {
 	meta?: ScheduleListResult.ScheduleListMeta;
 }
 export class QSchedule extends BeanPath<Schedule> {
-	metaId: string = 'io.crnk.test.mock.models.Schedule';
+	metaId = 'io.crnk.test.mock.models.Schedule';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
 	relationships: QSchedule.QRelationships = new QSchedule.QRelationships(this, 'relationships');
 	attributes: QSchedule.QAttributes = new QSchedule.QAttributes(this, 'attributes');
 }
@@ -48,8 +50,8 @@ export module QSchedule {
 		tasksList: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', QTask);
 	}
 	export class QAttributes extends BeanPath<Schedule.Attributes> {
-		name: StringExpression = this.createString('name');
-		delayed: BooleanExpression = this.createBoolean('delayed');
+		name: StringPath = this.createString('name');
+		delayed: BooleanPath = this.createBoolean('delayed');
 	}
 }
 export let createEmptySchedule = function(id: string): Schedule {

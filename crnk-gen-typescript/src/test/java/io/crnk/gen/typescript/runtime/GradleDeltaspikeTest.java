@@ -1,16 +1,16 @@
 package io.crnk.gen.typescript.runtime;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 @Ignore // classpath issues somewhere
 public class GradleDeltaspikeTest {
@@ -22,7 +22,6 @@ public class GradleDeltaspikeTest {
 	public void test() throws IOException {
 		testFolder.create();
 		root = testFolder.getRoot();
-		root = new File("temp");
 
 		saveFile("test_build.gradle", "build.gradle");
 		saveFile("test_settings.gradle", "settings.gradle");
