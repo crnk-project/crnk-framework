@@ -1,5 +1,9 @@
 package io.crnk.core.engine.internal.http;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -16,10 +20,6 @@ import io.crnk.core.module.Module;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class JsonApiRequestProcessor implements HttpRequestProcessor {
 
@@ -86,8 +86,8 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			String responseBody = objectMapper.writeValueAsString(crnkResponse.getDocument());
 
-			requestContext.setResponse(crnkResponse.getHttpStatus(), responseBody);
 			requestContext.setResponseHeader("Content-Type", HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
+			requestContext.setResponse(crnkResponse.getHttpStatus(), responseBody);
 		}
 	}
 
