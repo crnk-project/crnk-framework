@@ -62,9 +62,6 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			options.getParent().addElement(interfaceType);
 		}
 
-		System.out.println(
-				metaDataObject.getName() + " " + metaDataObject.getSuperType() + " " + generateAsResource(metaDataObject));
-
 		if (generateAsResource(metaDataObject)) {
 			if (metaDataObject.getSuperType() == null) {
 				interfaceType.getImplementedInterfaces().add(NgrxJsonApiLibrary.STORE_RESOURCE);
