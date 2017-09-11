@@ -4,11 +4,9 @@ import 'rxjs/add/operator/merge';
 import {ActionReducerMap, Store, StoreModule} from '@ngrx/store';
 
 
-import {ApiApplyInitAction, NgrxJsonApiStore, Resource} from 'ngrx-json-api';
+import {ApiApplyInitAction, NgrxJsonApiService, NgrxJsonApiStore, Resource} from 'ngrx-json-api';
 
-import {NgrxJsonApiSelectors,} from 'ngrx-json-api/src/selectors';
-
-import {NGRX_JSON_API_CONFIG, selectorsFactory} from 'ngrx-json-api/src/module';
+import {NGRX_JSON_API_CONFIG, selectorsFactory, serviceFactory} from 'ngrx-json-api/src/module';
 
 import {initialNgrxJsonApiState} from 'ngrx-json-api/src/reducers';
 
@@ -29,6 +27,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 
 export const testReducer: ActionReducerMap<any> = {};
@@ -80,6 +79,11 @@ describe('OperationsEffects', () => {
 					provide: NgrxJsonApiSelectors,
 					useFactory: selectorsFactory,
 					deps: [NGRX_JSON_API_CONFIG]
+				},
+				{
+					provide: NgrxJsonApiService,
+					useFactory: serviceFactory,
+					deps: [Store, NgrxJsonApiSelectors]
 				},
 				{
 					provide: NGRX_JSON_API_CONFIG,

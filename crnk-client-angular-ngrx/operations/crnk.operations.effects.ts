@@ -35,7 +35,6 @@ import {
 
 import {getPendingChanges} from 'ngrx-json-api/src/utils';
 import {NgrxJsonApi} from 'ngrx-json-api/src/api';
-import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 
 interface Operation {
@@ -84,7 +83,7 @@ export class OperationsEffects {
 
 			const requestOptions = new RequestOptions({
 				method: RequestMethod.Patch,
-				url: this.selectors.config.apiUrl + '/operations/',
+				url: this.ngrxJsonApi['selectors']['config']['apiUrl'] + '/operations/',
 				body: JSON.stringify(operations)
 			});
 
@@ -133,10 +132,10 @@ export class OperationsEffects {
 		private actions$: Actions,
 		private store: Store<any>,
 		private http: Http,
-		private selectors: NgrxJsonApiSelectors
+		private ngrxJsonApi: NgrxJsonApiService
 	) {
 		// disable default implementation
-		this.selectors.config.applyEnabled = false;
+		this.ngrxJsonApi['selectors']['config']['applyEnabled'] = false;
 	}
 
 	private toOperation(pendingChange: StoreResource): Operation {
