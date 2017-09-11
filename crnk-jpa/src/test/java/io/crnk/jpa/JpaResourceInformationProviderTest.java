@@ -5,6 +5,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.*;
@@ -35,7 +36,7 @@ public class JpaResourceInformationProviderTest {
 		lookup = new MetaLookup();
 		lookup.addProvider(new JpaMetaProvider());
 		lookup.addProvider(new ResourceMetaProvider(false));
-		builder = new JpaResourceInformationProvider(lookup);
+		builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), lookup);
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper()));
 	}
 

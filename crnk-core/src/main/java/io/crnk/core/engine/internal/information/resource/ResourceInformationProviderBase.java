@@ -4,7 +4,9 @@ import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -20,8 +22,14 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
 	protected List<ResourceFieldInformationProvider> resourceFieldInformationProviders;
 
-	public ResourceInformationProviderBase(List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
+	private LookupIncludeBehavior globalLookupIncludeBehavior;
+
+	public ResourceInformationProviderBase(
+		PropertiesProvider propertiesProvider,
+		List<ResourceFieldInformationProvider> resourceFieldInformationProviders) 
+	{
 		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
+		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider);
 	}
 
 	@Override
@@ -105,13 +113,28 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 	}
 
 	protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
+		LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
+		
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
 			Optional<LookupIncludeBehavior> lookupIncludeBehavior = fieldInformationProvider.getLookupIncludeBehavior(attributeDesc);
 			if (lookupIncludeBehavior.isPresent()) {
-				return lookupIncludeBehavior.get();
+				behavior = lookupIncludeBehavior.get();
+				break;
 			}
 		}
-		return getDefaultLookupIncludeBehavior();
+		
+		// If the field-level behavior is DEFAULT, then look to the global setting
+		if (behavior == LookupIncludeBehavior.DEFAULT) {
+			behavior = globalLookupIncludeBehavior;			
+		}
+		
+		// If the global behavior was also default, fall all they way back to the
+		// information provider's default
+		if (behavior == LookupIncludeBehavior.DEFAULT) {
+			behavior = getDefaultLookupIncludeBehavior();
+		}
+		
+		return behavior;
 	}
 
 	protected LookupIncludeBehavior getDefaultLookupIncludeBehavior() {

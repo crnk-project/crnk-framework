@@ -32,23 +32,28 @@ public class IncludeLookupUtil {
 	}
 
 
-	public static LookupIncludeBehavior getDefaultLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
+	public static LookupIncludeBehavior getGlolbalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
 		if (propertiesProvider == null) {
-			return LookupIncludeBehavior.NONE;
+			return LookupIncludeBehavior.DEFAULT;
 		}
+		
 		// determine system property for include look up
 		String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
-		boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
 		String includeAutomaticallyOverwriteString =
 				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
-		boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-
-		if (includeAutomaticallyOverwrite) {
-			return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-		} else if (includeAutomatically) {
-			return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
+		
+		if ((includeAutomaticallyString != null) || (includeAutomaticallyOverwriteString != null)) {
+			boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
+			boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
+	
+			if (includeAutomaticallyOverwrite) {
+				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
+			} else if (includeAutomatically) {
+				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
+			}
 		}
-		return LookupIncludeBehavior.NONE;
+		
+		return LookupIncludeBehavior.DEFAULT;
 	}
 
 	public static IncludeBehavior getIncludeBehavior(PropertiesProvider propertiesProvider) {

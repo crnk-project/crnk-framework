@@ -7,6 +7,7 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInf
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -26,7 +27,10 @@ public class QueryParamsAdapterTest {
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		QueryParams params = new QueryParams();
 
-		DefaultResourceInformationProvider builder = new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
+		DefaultResourceInformationProvider builder = new DefaultResourceInformationProvider(
+			new NullPropertiesProvider(),
+			new DefaultResourceFieldInformationProvider(), 
+			new JacksonResourceFieldInformationProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
 

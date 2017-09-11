@@ -32,7 +32,10 @@ public class JacksonModule implements Module {
 		ResourceFieldInformationProvider jacksonFieldProvider = new JacksonResourceFieldInformationProvider();
 
 		// TODO move somewhere else and make use of a SerializerExtension
-		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(defaultFieldProvider, jacksonFieldProvider));
+		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(
+			context.getPropertiesProvider(),
+			defaultFieldProvider, 
+			jacksonFieldProvider));
 	}
 
 

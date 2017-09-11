@@ -10,6 +10,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
@@ -38,8 +39,10 @@ public abstract class AbstractQueryParamsTest {
 	public void setup() {
 		JsonServiceLocator jsonServiceLocator = new SampleJsonServiceLocator();
 		ResourceInformationProvider resourceInformationProvider =
-				new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(),
-						new JacksonResourceFieldInformationProvider());
+				new DefaultResourceInformationProvider(
+					new NullPropertiesProvider(),
+					new DefaultResourceFieldInformationProvider(),
+					new JacksonResourceFieldInformationProvider());
 
 		SimpleModule testModule = new SimpleModule("test");
 

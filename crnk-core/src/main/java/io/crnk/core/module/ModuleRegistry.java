@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -886,6 +887,11 @@ public class ModuleRegistry {
 		public ResourceFilterDirectory getResourceFilterDirectory() {
 			checkState(InitializedState.INITIALIZING, InitializedState.INITIALIZED);
 			return filterBehaviorProvider;
+		}
+
+		@Override
+		public PropertiesProvider getPropertiesProvider() {
+			return propertiesProvider;
 		}
 	}
 }
