@@ -113,7 +113,7 @@ public class ResourcePatch extends ResourceUpsert {
 			updatedResource = resourceRepository.update(resourceBody, queryAdapter);
 		} else {
 			setAttributes(resourceBody, resource, bodyRegistryEntry.getResourceInformation());
-			setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
+			setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
 			loadedRelationshipNames = getLoadedRelationshipNames(resourceBody);
 			updatedResource = resourceRepository.update(resource, queryAdapter);
 		}

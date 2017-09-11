@@ -205,11 +205,21 @@ public class ClassUtils {
 	public static Method findSetter(Class<?> beanClass, String fieldName, Class<?> fieldType) {
 		String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
+		String methodName = "set" + upperCaseName;
 		try {
-			return beanClass.getMethod("set" + upperCaseName, fieldType);
+			return beanClass.getMethod(methodName, fieldType);
 		} catch (NoSuchMethodException e1) {
-			return null;
 		}
+
+		Method[] methods = beanClass.getMethods();
+		for(Method method : methods){
+			Class<?>[] params = method.getParameterTypes();
+
+			if(methodName.equals(method.getName()) && params.length == 1 && params[0].isAssignableFrom(fieldType)){
+				return method;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -371,4 +381,14 @@ public class ClassUtils {
 		return type == boolean.class || isInt || isDecimal;
 	}
 
+	public static Type getElementType(Type genericType) {
+		Class rawtype = getRawType(genericType);
+		if (Iterable.class.isAssignableFrom(rawtype) && genericType instanceof Class) {
+			return Object.class;
+		}
+		if (Iterable.class.isAssignableFrom(rawtype)) {
+			return ((ParameterizedType) genericType).getActualTypeArguments()[0];
+		}
+		return genericType;
+	}
 }

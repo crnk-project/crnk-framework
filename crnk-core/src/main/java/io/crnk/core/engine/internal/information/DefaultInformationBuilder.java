@@ -9,7 +9,9 @@ import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -179,6 +181,16 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
 
 		public ResourceField build() {
+
+			if (oppositeResourceType == null && fieldType == ResourceFieldType.RELATIONSHIP) {
+				// TODO consider separating informationBuilder from resourceType extraction
+				Class<?> elementType = ClassUtils.getRawType(ClassUtils.getElementType(genericType));
+				JsonApiResource annotation = elementType.getAnnotation(JsonApiResource.class);
+				if (annotation != null) {
+					oppositeResourceType = annotation.type();
+				}
+			}
+
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
 					genericType, oppositeResourceType, oppositeName, serializeType,
 					lookupIncludeBehavior,
@@ -188,6 +200,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			}
 			return impl;
 		}
+
+
+		public DefaultField name(String name) {
+			this.jsonName = name;
+			this.underlyingName = name;
+			return this;
+		}
+
 
 		public DefaultField jsonName(String jsonName) {
 			this.jsonName = jsonName;
@@ -202,6 +222,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		public DefaultField type(Class<?> type) {
 			this.type = type;
+			if (this.genericType == null) {
+				this.genericType = type;
+			}
 			return this;
 		}
 

@@ -51,6 +51,8 @@ public interface InformationBuilder {
 
 		Field underlyingName(String underlyingName);
 
+		Field name(String name);
+
 		Field type(Class<?> type);
 
 		Field genericType(Type genericType);

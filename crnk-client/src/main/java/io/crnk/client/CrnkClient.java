@@ -1,13 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -46,11 +38,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResponseRelationshipEntry;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
@@ -61,10 +49,19 @@ import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -227,7 +224,7 @@ public class CrnkClient {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, boolean allocateRelated) {
+	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass) {
 		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
@@ -251,22 +248,39 @@ public class CrnkClient {
 		registryEntry.initialize(moduleRegistry);
 		resourceRegistry.addEntry(resourceClass, registryEntry);
 
-		allocateRepositoryRelations(registryEntry, allocateRelated, relationshipEntries);
+		allocateRepositoryRelations(registryEntry);
 
 		return registryEntry;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private void allocateRepositoryRelations(RegistryEntry registryEntry, boolean allocateRelated,
-											 List<ResponseRelationshipEntry> relationshipEntries) {
+	private void allocateRepositoryRelations(RegistryEntry registryEntry) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
 		for (ResourceField relationshipField : relationshipFields) {
 			final Class<?> targetClass = relationshipField.getElementType();
-			final String targetResourceType = relationshipField.getOppositeResourceType();
+			Class sourceClass = resourceInformation.getResourceClass();
+			allocateRepositoryRelation(sourceClass, targetClass);
+		}
+	}
 
+	private void allocateRepositoryRelation(Class sourceClass, Class targetClass) {
+		// allocate relations as well
+		ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
+		if (!clientResourceRegistry.isInitialized(sourceClass)) {
+			allocateRepository(sourceClass);
+		}
+		if (!clientResourceRegistry.isInitialized(targetClass)) {
+			allocateRepository(targetClass);
+		}
+
+		RegistryEntry sourceEntry = resourceRegistry.getEntry(sourceClass);
+		final RegistryEntry targetEntry = resourceRegistry.getEntry(targetClass);
+
+		Optional<ResponseRelationshipEntry> optRelationshipEntry = sourceEntry.getRelationshipEntry(targetEntry.getResourceInformation().getResourceType());
+		if(!optRelationshipEntry.isPresent()) {
 			final RelationshipRepositoryStubImpl relationshipRepositoryStub =
-					new RelationshipRepositoryStubImpl(this, resourceInformation.getResourceClass(), targetClass, resourceInformation, urlBuilder);
+					new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder);
 			RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder =
 					new RepositoryInstanceBuilder<RelationshipRepository>(null, null) {
 
@@ -280,18 +294,10 @@ public class CrnkClient {
 
 						@Override
 						public String getTargetResourceType() {
-							return targetResourceType;
+							return targetEntry.getResourceInformation().getResourceType();
 						}
 					};
-			relationshipEntries.add(relationshipEntry);
-
-			// allocate relations as well
-			if (allocateRelated) {
-				ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
-				if (!clientResourceRegistry.isInitialized(targetClass)) {
-					allocateRepository(targetClass, true);
-				}
-			}
+			sourceEntry.getRelationshipEntries().add(relationshipEntry);
 		}
 	}
 
@@ -415,6 +421,7 @@ public class CrnkClient {
 
 		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
 		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
+		allocateRepositoryRelation(sourceClass, targetClass);
 
 		RelationshipRepositoryAdapter repositoryAdapter = sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
 		return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
@@ -531,7 +538,7 @@ public class CrnkClient {
 					throw new InvalidResourceException(clazz.getName() + " not recognized as resource class, consider adding "
 							+ "@JsonApiResource annotation");
 				}
-				entry = allocateRepository(clazz, true);
+				entry = allocateRepository(clazz);
 			}
 			return entry;
 		}
