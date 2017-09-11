@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -31,16 +34,12 @@ import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IncludeLookupSetter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(IncludeLookupSetter.class);
 
 	private final ResourceRegistry resourceRegistry;
-
-	private final LookupIncludeBehavior globalLookupIncludeBehavior;
 
 	private ResourceMapper resourceMapper;
 
@@ -54,7 +53,6 @@ public class IncludeLookupSetter {
 		this.resourceMapper = resourceMapper;
 		this.resourceRegistry = resourceRegistry;
 
-		this.globalLookupIncludeBehavior = IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider);
 		IncludeBehavior includeBehavior = IncludeLookupUtil.getIncludeBehavior(propertiesProvider);
 		this.util = new IncludeLookupUtil(resourceRegistry, includeBehavior);
 		this.allowPagination = propertiesProvider != null && Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties
@@ -155,15 +153,13 @@ public class IncludeLookupSetter {
 				LookupIncludeBehavior fieldLookupIncludeBehavior = resourceField.getLookupIncludeAutomatically();
 
 				Set<Resource> populatedResources;
-				if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS
-						|| globalLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS) {
+				if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS) {
 					// lookup resources by making repository calls
 					populatedResources =
 							lookupRelationshipField(resourcesWithField, resourceField, queryAdapter, parameterProvider,
 									resourceMap, entityMap);
 				}
-				else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL
-						|| globalLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL) {
+				else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL) {
 					// try to populate from entities
 					Set<Resource> extractedResources =
 							extractRelationshipField(resourcesWithField, resourceField, queryAdapter, resourceMap, entityMap,

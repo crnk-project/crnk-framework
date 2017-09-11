@@ -11,6 +11,8 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInf
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
@@ -42,7 +44,7 @@ public abstract class AbstractQuerySpecTest {
 
 	@Before
 	public void setup() {
-		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
+		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
 
 			@Override
 			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {

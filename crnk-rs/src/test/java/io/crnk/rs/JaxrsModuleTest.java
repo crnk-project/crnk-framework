@@ -39,6 +39,7 @@ public class JaxrsModuleTest {
 		final ModuleRegistry moduleRegistry = new ModuleRegistry();
 		builder = new JaxrsModule.JaxrsResourceRepositoryInformationProvider();
 		final ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
+				moduleRegistry.getPropertiesProvider(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider

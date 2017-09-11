@@ -13,6 +13,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -66,6 +67,13 @@ public interface Module {
 		 */
 		void addRegistryPart(String prefix, ResourceRegistryPart part);
 
+		/**
+		 * Return the {@link PropertiesProvider}.
+		 * 
+		 * @return {@link PropertiesProvider}
+		 */
+		PropertiesProvider getPropertiesProvider();
+		
 		/**
 		 * @return ServiceDiscovery
 		 */

@@ -9,6 +9,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.queryspec.QuerySpec;
@@ -279,7 +280,7 @@ public class JpaModule implements InitializingModule {
 		this.resourceMetaLookup.setModuleContext(context);
 		this.resourceMetaLookup.initialize();
 
-		context.addResourceInformationBuilder(getResourceInformationProvider());
+		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider()));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
 		context.addExceptionMapper(new PersistenceExceptionMapper(context));
 		context.addExceptionMapper(new PersistenceRollbackExceptionMapper(context));
@@ -465,11 +466,12 @@ public class JpaModule implements InitializingModule {
 	}
 
 	/**
+	 * @param propertiesProvider 
 	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
-	public ResourceInformationProvider getResourceInformationProvider() {
+	public ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
 		if (resourceInformationProvider == null) {
-			resourceInformationProvider = new JpaResourceInformationProvider(jpaMetaLookup);
+			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider, jpaMetaLookup);
 		}
 		return resourceInformationProvider;
 	}

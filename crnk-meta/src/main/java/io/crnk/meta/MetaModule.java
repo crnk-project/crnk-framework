@@ -17,6 +17,7 @@ import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPartAdapter;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
@@ -126,7 +127,7 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 	public void setupModule(ModuleContext context) {
 		this.context = context;
 
-		informationBuilder = registerInformationBuilder();
+		informationBuilder = registerInformationBuilder(context.getPropertiesProvider());
 
 		if (context.isServer()) {
 			context.addFilter(new DocumentFilter() {
@@ -163,9 +164,10 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 		});
 	}
 
-	protected DefaultResourceInformationProvider registerInformationBuilder() {
+	protected DefaultResourceInformationProvider registerInformationBuilder(PropertiesProvider propertiesProvider) {
 		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser());
 		DefaultResourceInformationProvider informationProvider = new DefaultResourceInformationProvider(
+				propertiesProvider,
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,

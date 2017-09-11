@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
@@ -11,6 +13,8 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceInformat
 import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.*;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
@@ -22,6 +26,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import java.util.Collection;
 import java.util.concurrent.Future;
@@ -30,9 +35,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultResourceInformationProviderTest {
 
-	private static final String NAME_PROPERTY = "underlyingName";
+	private static final String NAME_PROPERTY = "underlyingName";	
 	private final ResourceInformationProvider resourceInformationProvider =
-			new DefaultResourceInformationProvider(new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
+			new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider, new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
 	@Rule
@@ -274,6 +279,46 @@ public class DefaultResourceInformationProviderTest {
 		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(1).extracting("type").contains(String.class);
 	}
 
+	@Test
+	public void shouldHaveNoneForDefaultLookupBehavior() throws Exception {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
+
+		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior").contains(LookupIncludeBehavior.NONE);
+	}
+	
+	@Test
+	public void shouldInheritGlobalForDefaultLookupBehaviorWhenDefault() throws Exception {
+		ResourceInformationProvider resourceInformationProviderWithProperty = 
+			getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
+		ResourceInformation resourceInformation = resourceInformationProviderWithProperty.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
+
+		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior").contains(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
+	}
+	
+	@Test
+	public void shouldOverrideGlobalLookupBehavior() throws Exception {
+		ResourceInformationProvider resourceInformationProviderWithProperty = 
+			getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
+		ResourceInformation resourceInformation = resourceInformationProviderWithProperty.build(JsonResourceWithOverrideLookupBehaviorRelationship.class);
+
+		// Global says automatically always, but relationship says only when null.
+		// Relationship annotation should win in this case.
+		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior").contains(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
+	}
+	
+	private ResourceInformationProvider getResourceInformationProviderWithProperty(String key, String value) {
+		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
+		Mockito.when(propertiesProvider.getProperty(Mockito.eq(key))).thenReturn(value);
+		
+		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
+			propertiesProvider, 
+			new DefaultResourceFieldInformationProvider(), 
+			new JacksonResourceFieldInformationProvider());
+		resourceInformationProvider.init(context);
+		
+		return resourceInformationProvider;
+	}
+	
 	@Test
 	public void shouldHaveProperTypeWhenFieldAndGetterTypesDifferV2() throws Exception {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(DifferentTypes.class);
@@ -579,5 +624,23 @@ public class DefaultResourceInformationProviderTest {
 		public String getNotIgnoredMember() {
 			return "not ignored";
 		}
+	}
+	
+	@JsonApiResource(type = "jsonResourceWithDefaultLookupBehaviorRelationship")
+	private static class JsonResourceWithDefaultLookupBehaviorRelationship {
+		@JsonApiId
+		public Long id;
+		
+		@JsonApiRelation
+		public AlphabeticResource relationship;
+	}
+	
+	@JsonApiResource(type = "jsonResourceWithOverrideLookupBehaviorRelationship")
+	private static class JsonResourceWithOverrideLookupBehaviorRelationship {
+		@JsonApiId
+		public Long id;
+		
+		@JsonApiRelation(lookUp=LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+		public AlphabeticResource relationship;
 	}
 }

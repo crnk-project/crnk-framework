@@ -13,6 +13,7 @@ import io.crnk.core.engine.internal.information.resource.ResourceInformationProv
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.MetaEntity;
@@ -36,8 +37,10 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	private final MetaLookup metaLookup;
 
-	public JpaResourceInformationProvider(MetaLookup metaLookup) {
-		super(Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()));
+	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider, MetaLookup metaLookup) {
+		super(
+			propertiesProvider, 
+			Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()));
 		this.metaLookup = metaLookup;
 	}
 

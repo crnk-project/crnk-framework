@@ -166,7 +166,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private String oppositeResourceType = null;
 
-		private LookupIncludeBehavior lookupIncludeBehavior = LookupIncludeBehavior.NONE;
+		private LookupIncludeBehavior lookupIncludeBehavior = LookupIncludeBehavior.DEFAULT;
 
 		private ResourceFieldType fieldType = ResourceFieldType.ATTRIBUTE;
 

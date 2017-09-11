@@ -2,7 +2,9 @@ package io.crnk.core.resource.annotations;
 
 import java.lang.annotation.*;
 
-import static io.crnk.core.resource.annotations.LookupIncludeBehavior.NONE;
+import io.crnk.core.boot.CrnkProperties;
+
+import static io.crnk.core.resource.annotations.LookupIncludeBehavior.DEFAULT;
 import static io.crnk.core.resource.annotations.SerializeType.LAZY;
 
 /**
@@ -31,7 +33,11 @@ public @interface JsonApiRelation {
 	 * (Optional) This attribute is used to make automatic value assignment using a defined relationship resource if such resource
 	 * is available.
 	 * <p>
-	 * NONE (Default) - do not automatically call this fields relationship findManyTargets or findOneTarget.
+	 * DEFAULT (Default) - consults the global lookup behavior set by {@link CrnkProperties#INCLUDE_AUTOMATICALLY} and
+	 * {@link CrnkProperties#INCLUDE_AUTOMATICALLY_OVERWRITE} first, using the value set by these global settings.  If not
+	 * set globally, this setting will fall back to {@link LookupIncludeBehavior#NONE}.
+	 * <p>
+	 * NONE - do not automatically call this fields relationship findManyTargets or findOneTarget.
 	 * <p>
 	 * AUTOMATICALLY_WHEN_NULL - automatically perform a relationship findManyTargets or findOneTarget when this field's value
 	 * is null and it is either A. requested in an include query legacy B. SerializeType.ONLY_ID or SerializeType.EAGER
@@ -39,7 +45,7 @@ public @interface JsonApiRelation {
 	 * <p>
 	 * AUTOMATICALLY_ALWAYS - always automatically call a relationship's findManyTargets or findOneTarget and overwrite this field.
 	 */
-	LookupIncludeBehavior lookUp() default NONE;
+	LookupIncludeBehavior lookUp() default DEFAULT;
 
 	/**
 	 * @return opposite attribute name in case of a bidirectional association. Used by {@link io.crnk.core.repository.RelationshipRepositoryBase} to implement

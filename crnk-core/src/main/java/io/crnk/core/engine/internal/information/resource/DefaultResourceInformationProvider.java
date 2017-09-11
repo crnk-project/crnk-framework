@@ -6,6 +6,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -25,13 +26,15 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 
 
 	public DefaultResourceInformationProvider(
+			PropertiesProvider propertiesProvider,
 			ResourceFieldInformationProvider... resourceFieldInformationProviders) {
-		this(Arrays.asList(resourceFieldInformationProviders));
+		this(propertiesProvider, Arrays.asList(resourceFieldInformationProviders));
 	}
 
 	public DefaultResourceInformationProvider(
+			PropertiesProvider propertiesProvider,
 			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
-		super(resourceFieldInformationProviders);
+		super(propertiesProvider, resourceFieldInformationProviders);
 	}
 
 

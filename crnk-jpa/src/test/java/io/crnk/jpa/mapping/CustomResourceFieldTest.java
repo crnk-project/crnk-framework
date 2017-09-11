@@ -5,6 +5,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.AbstractJpaJerseyTest;
@@ -92,7 +93,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 
 		if (server) {
 			MetaLookup metaLookup = module.getJpaMetaLookup();
-			module.setResourceInformationProvider(new JpaResourceInformationProvider(metaLookup) {
+			module.setResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider(), metaLookup) {
 
 				@Override
 				protected List<ResourceField> getResourceFields(Class clazz) {

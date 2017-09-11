@@ -13,24 +13,24 @@ public class IncludeLookupUtilTest extends AbstractDocumentMapperTest {
 
 	@Test
 	public void checkDefaultLookupIncludeBehavior() {
-		Assert.assertEquals(LookupIncludeBehavior.NONE, IncludeLookupUtil.getDefaultLookupIncludeBehavior(null));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(null));
 
 		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
-		Assert.assertEquals(LookupIncludeBehavior.NONE, IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
-				IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider));
+				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.NONE, IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
-				IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider));
+				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.NONE, IncludeLookupUtil.getDefaultLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 	}
 
 }

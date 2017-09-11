@@ -3,6 +3,7 @@ package io.crnk.jpa;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -61,7 +62,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testInformationBuilder() {
 		EntityManager em = null;
-		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(module.getJpaMetaLookup());
+		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), module.getJpaMetaLookup());
 		ResourceInformation info = builder.build(TestEntity.class);
 		List<ResourceField> relationshipFields = info.getRelationshipFields();
 		Assert.assertEquals(0, relationshipFields.size());
