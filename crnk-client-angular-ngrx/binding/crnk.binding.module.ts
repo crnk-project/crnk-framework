@@ -11,12 +11,9 @@ import {ControlErrorsComponent, ResourceErrorsComponent} from "./crnk.binding.er
 import {CommonModule} from "@angular/common";
 import {CrnkExpressionFormModule} from "../expression/forms/crnk.expression.form.module";
 import {Store} from "@ngrx/store";
-import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
 
 export function bingingServiceFactory(service: NgrxJsonApiService, utils: CrnkBindingUtils, store: Store<any>, injector: Injector) {
-	const selectors = injector.get(NgrxJsonApiSelectors, null);
-
-	return new CrnkBindingService(service, utils, store, selectors);
+	return new CrnkBindingService(service, utils, store);
 }
 
 

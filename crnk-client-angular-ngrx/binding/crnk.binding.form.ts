@@ -18,7 +18,7 @@ import {
 	StoreResource
 } from 'ngrx-json-api';
 import {Store} from "@ngrx/store";
-import {NgrxJsonApiSelectors} from "ngrx-json-api/src/selectors";
+import {getNgrxJsonApiStore$, getStoreData$} from './crnk.binding.utils';
 
 
 interface ResourceFieldRef {
@@ -113,8 +113,7 @@ export class FormBinding {
 
 
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
-				private store: Store<any>,
-				private ngrxJsonApiSelectors: NgrxJsonApiSelectors) {
+				private store: Store<any>) {
 
 		if (this.config.form === null) {
 			throw new Error('no forFormElement provided');
@@ -189,8 +188,8 @@ export class FormBinding {
 
 		if (this.storeSubscription != null && this.config.mapNonResultResources) {
 			this.storeSubscription = this.store
-				.let(this.ngrxJsonApiSelectors.getNgrxJsonApiStore$())
-				.let(this.ngrxJsonApiSelectors.getStoreData$())
+				.let(getNgrxJsonApiStore$)
+				.let(getStoreData$)
 				.subscribe(data => {
 					this.mapResourceToControlErrors(data);
 				});

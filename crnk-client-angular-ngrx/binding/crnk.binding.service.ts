@@ -10,14 +10,12 @@ import {SelectorBinding, SelectorBindingConfig} from './crnk.binding.selector';
 import {NgrxJsonApiService} from 'ngrx-json-api';
 import {CrnkBindingUtils} from './crnk.binding.utils';
 import {Store} from '@ngrx/store';
-import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 @Injectable()
 export class CrnkBindingService {
 
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private utils: CrnkBindingUtils,
-				private store: Store<any>,
-				private ngrxJsonApiSelectors: NgrxJsonApiSelectors) {
+				private store: Store<any>) {
 
 	}
 
@@ -26,7 +24,7 @@ export class CrnkBindingService {
 	}
 
 	public bindForm(config: FormBindingConfig): FormBinding {
-		return new FormBinding(this.ngrxJsonApiService, config, this.store, this.ngrxJsonApiSelectors);
+		return new FormBinding(this.ngrxJsonApiService, config, this.store);
 	}
 
 	public bindSelector(config: SelectorBindingConfig): SelectorBinding {

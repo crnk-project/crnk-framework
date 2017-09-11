@@ -5,11 +5,29 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinct';
 import 'rxjs/add/operator/switch';
 import 'rxjs/add/operator/filter';
-import {ResourceIdentifier, StoreResource, Query, QueryParams, ResourceError, QueryResult} from 'ngrx-json-api';
+import {
+	NgrxJsonApiStore,
+	NgrxJsonApiStoreData,
+	Query,
+	QueryParams,
+	QueryResult,
+	ResourceError,
+	ResourceIdentifier,
+	StoreResource
+} from 'ngrx-json-api';
 
 import * as _ from 'lodash';
 import {Observable} from 'rxjs/Observable';
+import {Store} from '@ngrx/store';
 
+
+export const getNgrxJsonApiStore$ = function (state$: Store<any>): Observable<NgrxJsonApiStore> {
+	return state$.select('NgrxJsonApi').map(it => it ? it['api'] : undefined) as  Observable<NgrxJsonApiStore>;
+}
+
+export const getStoreData$ = function (state$: Store<NgrxJsonApiStore>): Observable<NgrxJsonApiStoreData> {
+	return state$.select('data') as  Observable<NgrxJsonApiStoreData>;
+}
 
 export const waitWhileLoading = function () {
 	return (result$: Observable<QueryResult>) => {
@@ -44,7 +62,7 @@ export class CrnkBindingUtils {
 
 	public toResourceIdentifiers(resources: Array<StoreResource>): Array<ResourceIdentifier> {
 		const results: Array<ResourceIdentifier> = [];
-		for (const  resource of resources) {
+		for (const resource of resources) {
 			results.push(this.toResourceIdentifier(resource));
 		}
 		return results;
