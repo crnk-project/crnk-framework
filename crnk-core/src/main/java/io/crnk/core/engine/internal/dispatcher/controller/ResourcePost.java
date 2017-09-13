@@ -65,7 +65,7 @@ public class ResourcePost extends ResourceUpsert {
 			Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
 			setId(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
 			setAttributes(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
-			setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
+			setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
 
 			apiResponse = resourceRepository.create(newResource, queryAdapter);
 		}

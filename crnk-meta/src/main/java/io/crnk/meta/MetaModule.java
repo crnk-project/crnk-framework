@@ -1,10 +1,5 @@
 package io.crnk.meta;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
@@ -27,22 +22,13 @@ import io.crnk.core.utils.Supplier;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.MetaArrayType;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaCollectionType;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.MetaInterface;
-import io.crnk.meta.model.MetaKey;
-import io.crnk.meta.model.MetaListType;
-import io.crnk.meta.model.MetaLiteral;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
 import io.crnk.meta.provider.MetaProvider;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 
@@ -135,14 +121,12 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 				public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
 					try {
 						return chain.doFilter(filterRequestContext);
-					}
-					finally {
+					} finally {
 						lookupRequestLocal.remove();
 					}
 				}
 			});
-		}
-		else {
+		} else {
 			context.addResourceLookup(new ResourceLookup() {
 
 				@SuppressWarnings("unchecked")
@@ -181,7 +165,7 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 	}
 
 	protected void registerRepositories(DefaultResourceInformationProvider informationBuilder,
-			Set<Class<? extends MetaElement>> metaClasses) {
+										Set<Class<? extends MetaElement>> metaClasses) {
 
 		Supplier<MetaLookup> lookupSupplier = new Supplier<MetaLookup>() {
 			@Override

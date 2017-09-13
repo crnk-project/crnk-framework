@@ -171,8 +171,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected void setRelations(Object newResource, RegistryEntry registryEntry, Resource resource, QueryAdapter
-			queryAdapter,
-								RepositoryMethodParameterProvider parameterProvider) {
+			queryAdapter, RepositoryMethodParameterProvider parameterProvider, boolean ignoreMissing) {
 		if (resource.getRelationships() != null) {
 			for (Map.Entry<String, Relationship> property : resource.getRelationships().entrySet()) {
 				String propertyName = property.getKey();
@@ -181,6 +180,9 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 					ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 					ResourceField field = resourceInformation.findRelationshipFieldByName(propertyName);
+					if(field == null && ignoreMissing){
+						continue;
+					}
 					if (field == null) {
 						throw new ResourceException(String.format("Invalid relationship name: %s for %s", property.getKey(),
 								resourceInformation.getResourceType()));

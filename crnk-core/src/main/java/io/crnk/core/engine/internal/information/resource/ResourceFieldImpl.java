@@ -10,6 +10,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -137,13 +138,7 @@ public class ResourceFieldImpl implements ResourceField {
 	 * @return Ask Remmo
 	 */
 	public Class<?> getElementType() {
-		if (Iterable.class.isAssignableFrom(type) && getGenericType() instanceof Class) {
-			return Object.class;
-		}
-		if (Iterable.class.isAssignableFrom(type)) {
-			return (Class<?>) ((ParameterizedType) getGenericType()).getActualTypeArguments()[0];
-		}
-		return type;
+		return ClassUtils.getRawType(ClassUtils.getElementType(genericType));
 	}
 
 	public ResourceInformation getParentResourceInformation() {

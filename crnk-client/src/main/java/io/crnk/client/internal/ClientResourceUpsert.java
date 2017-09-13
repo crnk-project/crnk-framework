@@ -63,7 +63,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 			// no in use on the client side
 			RepositoryMethodParameterProvider parameterProvider = null;
 
-			setRelations(object, registryEntry, resource, queryAdapter, parameterProvider);
+			setRelations(object, registryEntry, resource, queryAdapter, parameterProvider, true);
 		}
 	}
 

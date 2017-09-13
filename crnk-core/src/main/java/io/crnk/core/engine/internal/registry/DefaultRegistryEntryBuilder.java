@@ -31,7 +31,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 	public DefaultRegistryEntryBuilder(ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
-		this.informationBuilder = new DefaultInformationBuilder(moduleRegistry.getTypeParser());
+		this.informationBuilder = moduleRegistry.getInformationBuilder();
 	}
 
 
