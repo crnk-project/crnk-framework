@@ -277,7 +277,8 @@ public class CrnkClient {
 		RegistryEntry sourceEntry = resourceRegistry.getEntry(sourceClass);
 		final RegistryEntry targetEntry = resourceRegistry.getEntry(targetClass);
 
-		Optional<ResponseRelationshipEntry> optRelationshipEntry = sourceEntry.getRelationshipEntry(targetEntry.getResourceInformation().getResourceType());
+		final ResourceInformation targetResourceInformation = targetEntry.getResourceInformation();
+		Optional<ResponseRelationshipEntry> optRelationshipEntry = sourceEntry.getRelationshipEntry(targetResourceInformation.getResourceType());
 		if(!optRelationshipEntry.isPresent()) {
 			final RelationshipRepositoryStubImpl relationshipRepositoryStub =
 					new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder);
@@ -294,7 +295,7 @@ public class CrnkClient {
 
 						@Override
 						public String getTargetResourceType() {
-							return targetEntry.getResourceInformation().getResourceType();
+							return targetResourceInformation.getResourceType();
 						}
 					};
 			sourceEntry.getRelationshipEntries().add(relationshipEntry);
@@ -544,7 +545,7 @@ public class CrnkClient {
 		}
 
 		public boolean isInitialized(Class<?> clazz) {
-			return super.findEntry(clazz, true) != null;
+			return super.getEntry(clazz) != null;
 		}
 	}
 }
