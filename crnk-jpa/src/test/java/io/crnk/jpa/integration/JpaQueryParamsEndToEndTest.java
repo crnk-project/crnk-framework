@@ -1,16 +1,26 @@
-package io.crnk.jpa;
+package io.crnk.jpa.integration;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.OptimisticLockException;
 
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.AbstractJpaJerseyTest;
+import io.crnk.jpa.model.RelatedEntity;
+import io.crnk.jpa.model.TestEmbeddedIdEntity;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.TestIdEmbeddable;
+import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.persistence.OptimisticLockException;
-import java.io.Serializable;
-import java.util.*;
 
 public class JpaQueryParamsEndToEndTest extends AbstractJpaJerseyTest {
 

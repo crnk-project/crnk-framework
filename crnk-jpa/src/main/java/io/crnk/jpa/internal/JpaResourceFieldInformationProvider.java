@@ -1,13 +1,24 @@
 package io.crnk.jpa.internal;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.EmbeddedId;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Version;
+
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProviderBase;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
-
-import javax.persistence.*;
 
 public class JpaResourceFieldInformationProvider extends ResourceFieldInformationProviderBase {
 
@@ -62,10 +73,11 @@ public class JpaResourceFieldInformationProvider extends ResourceFieldInformatio
 
 	@Override
 	public Optional<ResourceFieldType> getFieldType(BeanAttributeInformation attributeDesc) {
+		Optional<OneToOne> oneToOne = attributeDesc.getAnnotation(OneToOne.class);
 		Optional<OneToMany> oneToMany = attributeDesc.getAnnotation(OneToMany.class);
 		Optional<ManyToOne> manyToOne = attributeDesc.getAnnotation(ManyToOne.class);
 		Optional<ManyToMany> manyToMany = attributeDesc.getAnnotation(ManyToMany.class);
-		if (oneToMany.isPresent() || manyToOne.isPresent() || manyToMany.isPresent()) {
+		if (oneToOne.isPresent() || oneToMany.isPresent() || manyToOne.isPresent() || manyToMany.isPresent()) {
 			return Optional.of(ResourceFieldType.RELATIONSHIP);
 		}
 

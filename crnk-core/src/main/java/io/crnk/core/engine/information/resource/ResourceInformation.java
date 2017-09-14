@@ -264,7 +264,7 @@ public class ResourceInformation {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Serializable parseIdString(String id) {
 		Class idType = getIdField().getType();
-		return parser.parse(id, idType);
+		return (Serializable) parser.parse(id, idType);
 	}
 
 	/**

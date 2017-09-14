@@ -1,4 +1,4 @@
-package io.crnk.jpa;
+package io.crnk.jpa.integration;
 
 import java.util.Arrays;
 
@@ -9,6 +9,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.jpa.AbstractJpaJerseyTest;
+import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
 import org.junit.Assert;
