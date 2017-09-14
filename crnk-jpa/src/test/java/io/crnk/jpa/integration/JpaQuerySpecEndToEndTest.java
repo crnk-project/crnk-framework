@@ -1,4 +1,8 @@
-package io.crnk.jpa;
+package io.crnk.jpa.integration;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.client.legacy.ResourceRepositoryStub;
@@ -11,16 +15,18 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.AbstractJpaJerseyTest;
+import io.crnk.jpa.model.OtherRelatedEntity;
+import io.crnk.jpa.model.RelatedEntity;
+import io.crnk.jpa.model.TestEmbeddedIdEntity;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.TestIdEmbeddable;
+import io.crnk.jpa.model.TestMappedSuperclassWithPk;
+import io.crnk.jpa.model.TestSubclassWithSuperclassPk;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import javax.persistence.OptimisticLockException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
@@ -421,38 +427,6 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 				links.asJsonNode().get("prev").asText());
 		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2&page[offset]=4",
 				links.asJsonNode().get("next").asText());
-	}
-
-	@Test
-	public void testOptimisticLocking() {
-		ResourceRepositoryV2<VersionedEntity, Serializable> repo = client
-				.getQuerySpecRepository(VersionedEntity.class);
-		VersionedEntity entity = new VersionedEntity();
-		entity.setId(1L);
-		entity.setLongValue(13L);
-		VersionedEntity saved = repo.create(entity);
-		Assert.assertEquals(0, saved.getVersion());
-
-		saved.setLongValue(14L);
-		saved = repo.save(saved);
-		Assert.assertEquals(1, saved.getVersion());
-
-		saved.setLongValue(15L);
-		saved = repo.save(saved);
-		Assert.assertEquals(2, saved.getVersion());
-
-		saved.setLongValue(16L);
-		saved.setVersion(saved.getVersion() - 1);
-		try {
-			saved = repo.save(saved);
-			Assert.fail();
-		} catch (OptimisticLockException e) {
-			// ok
-		}
-
-		VersionedEntity persisted = repo.findOne(1L, new QuerySpec(VersionedEntity.class));
-		Assert.assertEquals(2, persisted.getVersion());
-		Assert.assertEquals(15L, persisted.getLongValue());
 	}
 
 	@Test

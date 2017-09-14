@@ -1,5 +1,15 @@
 package io.crnk.rs;
 
+import java.io.Serializable;
+import java.util.Collection;
+import javax.ws.rs.ConstrainedTo;
+import javax.ws.rs.RuntimeType;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -16,16 +26,6 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.internal.JaxrsModule;
 import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistry;
 import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistryBuilder;
-
-import javax.ws.rs.ConstrainedTo;
-import javax.ws.rs.RuntimeType;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
-import java.io.Serializable;
-import java.util.Collection;
 
 /**
  * Basic Crnk feature that initializes core classes and provides a starting point to use the framework in
@@ -108,7 +108,7 @@ public class CrnkFeature implements Feature {
 		Collection<RegistryEntry> registryEntries = resourceRegistry.getResources();
 		for (RegistryEntry registryEntry : registryEntries) {
 			ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
-			if (!repositoryInformation.getActions().isEmpty()) {
+			if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {
 				ResourceRepositoryAdapter<?, Serializable> repositoryAdapter = registryEntry.getResourceRepository(null);
 				Object resourceRepository = repositoryAdapter.getResourceRepository();
 				context.register(resourceRepository);

@@ -5,7 +5,6 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.*;
@@ -126,7 +125,59 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testAttributeAnnotations() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testOneToOneRelation() {
+		ResourceInformation info = builder.build(OneToOneTestEntity.class);
+		ResourceField field = info.findRelationshipFieldByName("oneRelatedValue");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("related", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+	}
+
+
+	@Test
+	public void testManyToManyRelation() {
+		ResourceInformation info = builder.build(ManyToManyTestEntity.class);
+		ResourceField field = info.findRelationshipFieldByName("opposites");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("manyToManyOpposite", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+		// TODO consider bidirectiona assignment Assert.assertEquals("tests", field.getOppositeName());
+	}
+
+	@Test
+	public void testManyToManyOppositeRelation() {
+		ResourceInformation info = builder.build(ManyToManyOppositeEntity.class);
+		ResourceField field = info.findRelationshipFieldByName("tests");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("manyToManyTest", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+		Assert.assertEquals("opposites", field.getOppositeName());
+	}
+
+	@Test
+	public void testManyToOneRelation() {
+		ResourceInformation info = builder.build(TestEntity.class);
+		ResourceField field = info.findRelationshipFieldByName("oneRelatedValue");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("related", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+		Assert.assertNull(field.getOppositeName());
+	}
+
+
+	@Test
+	public void testOneToManyRelation() {
+		ResourceInformation info = builder.build(TestEntity.class);
+		ResourceField field = info.findRelationshipFieldByName("manyRelatedValues");
+		Assert.assertEquals(ResourceFieldType.RELATIONSHIP, field.getResourceFieldType());
+		Assert.assertEquals("related", field.getOppositeResourceType());
+		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
+		Assert.assertEquals("testEntity", field.getOppositeName());
+	}
+
+	@Test
+	public void testAttributeAnnotations()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		ResourceInformation info = builder.build(AnnotationTestEntity.class);
 
 		ResourceField lobField = info.findAttributeFieldByName("lobValue");
@@ -160,7 +211,8 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testReadOnlyField() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testReadOnlyField()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		ResourceInformation info = builder.build(AnnotationTestEntity.class);
 
 		ResourceField field = info.findAttributeFieldByName("readOnlyValue");
@@ -176,7 +228,8 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testMappedSuperclass() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testMappedSuperclass()
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		ResourceInformation info = builder.build(AnnotationMappedSuperclassEntity.class);
 
 		Assert.assertNull(info.getResourceType());

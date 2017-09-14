@@ -1,13 +1,14 @@
-package io.crnk.jpa;
+package io.crnk.jpa.integration;
+
+import java.io.Serializable;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.BasicAttributesTestEntity;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.Serializable;
 
 public class BasicAttributesEndToEndTest extends AbstractJpaJerseyTest {
 

@@ -1,5 +1,14 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
@@ -26,14 +35,13 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.RequestBodyException;
+import io.crnk.core.exception.ResourceException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
@@ -219,7 +227,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 				idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
-				Serializable castedRelationshipId = typeParser.parse(resourceId.getId(), idFieldType);
+				Serializable castedRelationshipId = (Serializable) typeParser.parse(resourceId.getId(), idFieldType);
 				Object relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
 				relationships.add(relationObject);
 			}
@@ -247,7 +255,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
-				Serializable castedRelationshipId = typeParser.parse(relationshipId.getId(), idFieldType);
+				Serializable castedRelationshipId = (Serializable) typeParser.parse(relationshipId.getId(), idFieldType);
 
 				relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
 			} else {
