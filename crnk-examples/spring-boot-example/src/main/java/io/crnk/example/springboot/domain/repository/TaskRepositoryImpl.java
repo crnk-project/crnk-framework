@@ -1,50 +1,38 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.crnk.example.springboot.domain.repository;
 
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.example.springboot.domain.model.Task;
-import io.crnk.legacy.repository.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
-
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.example.springboot.domain.model.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
-@JsonApiResourceRepository(Task.class)
-@Validated
-public class TaskRepositoryImpl {
+public class TaskRepositoryImpl implements TaskRepository {
+
 	private static final Map<Long, Task> REPOSITORY = new ConcurrentHashMap<>();
+
 	private static final AtomicLong ID_GENERATOR = new AtomicLong(4);
 
-	private final ProjectRepositoryImpl projectRepository;
+	private final ValidatorFactory validatorFactory;
+
+	private ProjectRepositoryImpl projectRepository;
 
 	@Autowired
-	@Lazy
-	public TaskRepositoryImpl(ProjectRepositoryImpl projectRepository) {
+	public TaskRepositoryImpl(ValidatorFactory validatorFactory, ProjectRepositoryImpl projectRepository) {
 		this.projectRepository = projectRepository;
+		this.validatorFactory = validatorFactory;
 		Task task = new Task(1L, "Create tasks");
 		task.setProjectId(123L);
 		save(task);
@@ -56,8 +44,9 @@ public class TaskRepositoryImpl {
 		save(task);
 	}
 
-	@JsonApiSave
-	public <S extends Task> S save(@Valid S entity) {
+	@Override
+	public <S extends Task> S save(S entity) {
+		validate(entity);
 		if (entity.getId() == null) {
 			entity.setId(ID_GENERATOR.getAndIncrement());
 		}
@@ -65,8 +54,30 @@ public class TaskRepositoryImpl {
 		return entity;
 	}
 
-	@JsonApiFindOne
-	public Task findOne(Long taskId, QuerySpec requestParams) {
+	/**
+	 * @Validated and @Valid to not seem to properly work in Spring with interface for some reason. Doing
+	 * programmatic validation instead.
+	 */
+	private <S extends Task> void validate(S entity) {
+		Validator validator = validatorFactory.getValidator();
+		Set<ConstraintViolation<S>> violations = validator.validate(entity);
+		if (!violations.isEmpty()) {
+			throw new ConstraintViolationException(violations);
+		}
+	}
+
+	@Override
+	public <S extends Task> S create(S entity) {
+		return save(entity);
+	}
+
+	@Override
+	public Class<Task> getResourceClass() {
+		return Task.class;
+	}
+
+	@Override
+	public Task findOne(Long taskId, QuerySpec querySpec) {
 		Task task = REPOSITORY.get(taskId);
 		if (task == null) {
 			throw new ResourceNotFoundException("Project not found!");
@@ -77,13 +88,13 @@ public class TaskRepositoryImpl {
 		return task;
 	}
 
-	@JsonApiFindAll
-	public Iterable<Task> findAll(QuerySpec requestParams) {
-		return REPOSITORY.values();
+	@Override
+	public ResourceList<Task> findAll(QuerySpec querySpec) {
+		return querySpec.apply(REPOSITORY.values());
 	}
 
-	@JsonApiFindAllWithIds
-	public Iterable<Task> findAll(Iterable<Long> taskIds, QuerySpec requestParams) {
+	@Override
+	public ResourceList<Task> findAll(Iterable<Long> taskIds, QuerySpec querySpec) {
 		List<Task> foundTasks = new ArrayList<>();
 		for (Map.Entry<Long, Task> entry : REPOSITORY.entrySet()) {
 			for (Long id : taskIds) {
@@ -92,10 +103,10 @@ public class TaskRepositoryImpl {
 				}
 			}
 		}
-		return foundTasks;
+		return querySpec.apply(foundTasks);
 	}
 
-	@JsonApiDelete
+	@Override
 	public void delete(Long taskId) {
 		REPOSITORY.remove(taskId);
 	}

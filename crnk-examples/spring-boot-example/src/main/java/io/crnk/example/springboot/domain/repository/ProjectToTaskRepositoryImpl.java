@@ -16,83 +16,88 @@
  */
 package io.crnk.example.springboot.domain.repository;
 
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.example.springboot.domain.model.Project;
-import io.crnk.example.springboot.domain.model.Task;
-import io.crnk.legacy.repository.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.example.springboot.domain.model.Project;
+import io.crnk.example.springboot.domain.model.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * Manually-written, annotation-based relationship repository example.
  */
-@JsonApiRelationshipRepository(source = Project.class, target = Task.class)
 @Component
-public class ProjectToTaskRepositoryImpl {
+public class ProjectToTaskRepositoryImpl implements RelationshipRepositoryV2<Project, Long, Task, Long> {
 
-	private final ProjectRepositoryImpl projectRepository;
-	private final TaskRepositoryImpl taskRepository;
+	private final ProjectRepository projectRepository;
+
+	private final TaskRepository taskRepository;
 
 	@Autowired
-	public ProjectToTaskRepositoryImpl(ProjectRepositoryImpl projectRepository, TaskRepositoryImpl taskRepository) {
+	public ProjectToTaskRepositoryImpl(ProjectRepository projectRepository, TaskRepository taskRepository) {
 		this.projectRepository = projectRepository;
 		this.taskRepository = taskRepository;
 	}
 
-	@JsonApiSetRelation
+	@Override
+	public Class<Project> getSourceResourceClass() {
+		return Project.class;
+	}
+
+	@Override
+	public Class<Task> getTargetResourceClass() {
+		return Task.class;
+	}
+
+	@Override
 	public void setRelation(Project project, Long taskId, String fieldName) {
 		Task task = taskRepository.findOne(taskId, null);
 		try {
 			PropertyUtils.setProperty(project, fieldName, task);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		projectRepository.save(project);
 	}
 
-	@JsonApiSetRelations
+	@Override
 	public void setRelations(Project project, Iterable<Long> taskIds, String fieldName) {
 		Iterable<Task> tasks = taskRepository.findAll(taskIds, null);
 		try {
 			PropertyUtils.setProperty(project, fieldName, tasks);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		projectRepository.save(project);
 	}
 
-	@JsonApiAddRelations
+	@Override
 	public void addRelations(Project project, Iterable<Long> taskIds, String fieldName) {
 		List<Task> newTaskList = new LinkedList<>();
 		Iterable<Task> tasksToAdd = taskRepository.findAll(taskIds, null);
 		for (Task task : tasksToAdd) {
 			newTaskList.add(task);
 		}
-		try {
-			if (PropertyUtils.getProperty(project, fieldName) != null) {
-				Iterable<Task> tasks = (Iterable<Task>) PropertyUtils.getProperty(project, fieldName);
-				for (Task task : tasks) {
-					newTaskList.add(task);
-				}
+		if (PropertyUtils.getProperty(project, fieldName) != null) {
+			Iterable<Task> tasks = (Iterable<Task>) PropertyUtils.getProperty(project, fieldName);
+			for (Task task : tasks) {
+				newTaskList.add(task);
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
-		try {
-			PropertyUtils.setProperty(project, fieldName, newTaskList);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		PropertyUtils.setProperty(project, fieldName, newTaskList);
 		projectRepository.save(project);
 
 	}
 
-	@JsonApiRemoveRelations
+	@Override
 	public void removeRelations(Project project, Iterable<Long> taskIds, String fieldName) {
 		try {
 			if (PropertyUtils.getProperty(project, fieldName) != null) {
@@ -114,28 +119,21 @@ public class ProjectToTaskRepositoryImpl {
 				PropertyUtils.setProperty(project, fieldName, newTaskList);
 				projectRepository.save(project);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	@JsonApiFindOneTarget
+	@Override
 	public Task findOneTarget(Long projectId, String fieldName, QuerySpec requestParams) {
 		Project project = projectRepository.findOne(projectId, requestParams);
-		try {
-			return (Task) PropertyUtils.getProperty(project, fieldName);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return (Task) PropertyUtils.getProperty(project, fieldName);
 	}
 
-	@JsonApiFindManyTargets
-	public Iterable<Task> findManyTargets(Long projectId, String fieldName, QuerySpec requestParams) {
+	@Override
+	public ResourceList<Task> findManyTargets(Long projectId, String fieldName, QuerySpec requestParams) {
 		Project project = projectRepository.findOne(projectId, requestParams);
-		try {
-			return (Iterable<Task>) PropertyUtils.getProperty(project, fieldName);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return requestParams.apply((Iterable<Task>) PropertyUtils.getProperty(project, fieldName));
 	}
 }
