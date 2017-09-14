@@ -1,5 +1,11 @@
 package io.crnk.jpa.internal;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -24,7 +30,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
-import java.util.Arrays;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
