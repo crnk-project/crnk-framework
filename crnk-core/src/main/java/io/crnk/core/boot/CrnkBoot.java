@@ -148,6 +148,10 @@ public class CrnkBoot {
 		checkNotConfiguredYet();
 		configured = true;
 
+		// Set the properties provider into the registry early
+		// so that it is available to the modules being bootstrapped
+		moduleRegistry.setPropertiesProvider(propertiesProvider);
+
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		bootDiscovery();
@@ -276,7 +280,6 @@ public class CrnkBoot {
 		}
 		moduleRegistry.addModule(module);
 		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.setPropertiesProvider(propertiesProvider);
 	}
 
 	private <T> List<T> getInstancesByType(Class<T> clazz) {
