@@ -44,10 +44,26 @@ export class QSchedule extends BeanPath<Schedule> {
 }
 export module QSchedule {
 	export class QRelationships extends BeanPath<Schedule.Relationships> {
-		task: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'task', QTask);
-		lazyTask: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'lazyTask', QTask);
-		tasks: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasks', QTask);
-		tasksList: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', QTask);
+		private _task: QTypedOneResourceRelationship<QTask, Task>;
+		get task(): QTypedOneResourceRelationship<QTask, Task> {
+			if(!this._task){this._task= new QTypedOneResourceRelationship<QTask, Task>(this, 'task', QTask);}
+			return this._task
+		};
+		private _lazyTask: QTypedOneResourceRelationship<QTask, Task>;
+		get lazyTask(): QTypedOneResourceRelationship<QTask, Task> {
+			if(!this._lazyTask){this._lazyTask= new QTypedOneResourceRelationship<QTask, Task>(this, 'lazyTask', QTask);}
+			return this._lazyTask
+		};
+		private _tasks: QTypedManyResourceRelationship<QTask, Task>;
+		get tasks(): QTypedManyResourceRelationship<QTask, Task> {
+			if(!this._tasks){this._tasks= new QTypedManyResourceRelationship<QTask, Task>(this, 'tasks', QTask);}
+			return this._tasks
+		};
+		private _tasksList: QTypedManyResourceRelationship<QTask, Task>;
+		get tasksList(): QTypedManyResourceRelationship<QTask, Task> {
+			if(!this._tasksList){this._tasksList= new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', QTask);}
+			return this._tasksList
+		};
 	}
 	export class QAttributes extends BeanPath<Schedule.Attributes> {
 		name: StringPath = this.createString('name');
