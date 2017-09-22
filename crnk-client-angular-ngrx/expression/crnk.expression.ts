@@ -286,7 +286,7 @@ export class StringConstant extends StringExpression implements Constant<string>
 export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 
 
-	constructor(public parent: BeanPath<any>, private property?: string) {
+	constructor(public parentPath: BeanPath<any>, private property?: string) {
 		super();
 	}
 
@@ -307,8 +307,8 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 	}
 
 	toString(): string {
-		if (this.parent) {
-			const parentString = this.parent.toString();
+		if (this.parentPath) {
+			const parentString = this.parentPath.toString();
 			if (parentString !== null) {
 				return ExpressionFactory.concat(parentString, this.property);
 			}
@@ -321,23 +321,23 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 	}
 
 	getValue() {
-		return doGetValue(this.parent, this.property);
+		return doGetValue(this.parentPath, this.property);
 	}
 
 	setValue(newValue) {
-		return doSetValue(this.parent, this.property, newValue);
+		return doSetValue(this.parentPath, this.property, newValue);
 	}
 
 	getResource() {
-		return this.parent.getResource();
+		return this.parentPath.getResource();
 	}
 
 	toFormName(): string {
-		return toFormNameInternal(this, this.parent.getResource());
+		return toFormNameInternal(this, this.parentPath.getResource());
 	}
 
 	getSourcePointer(): string {
-		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+		return toSourcePointerInternal(this.toString(), this.parentPath.getResource());
 	}
 }
 

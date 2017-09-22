@@ -1,8 +1,34 @@
 package io.crnk.gen.typescript.writer;
 
-import io.crnk.gen.typescript.model.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import io.crnk.gen.typescript.model.TSAny;
+import io.crnk.gen.typescript.model.TSArrayType;
+import io.crnk.gen.typescript.model.TSClassType;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSEnumLiteral;
+import io.crnk.gen.typescript.model.TSEnumType;
+import io.crnk.gen.typescript.model.TSExport;
+import io.crnk.gen.typescript.model.TSExportedElement;
+import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSFunction;
+import io.crnk.gen.typescript.model.TSFunctionType;
+import io.crnk.gen.typescript.model.TSImport;
+import io.crnk.gen.typescript.model.TSIndexSignature;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSMember;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSParameter;
+import io.crnk.gen.typescript.model.TSParameterizedType;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSSource;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.gen.typescript.model.TSVisitor;
 
 public class TSWriter implements TSVisitor {
 
@@ -119,7 +145,8 @@ public class TSWriter implements TSVisitor {
 				visitReference(parameters.get(i));
 			}
 			builder.append(">");
-		} else {
+		}
+		else {
 			if (type.getParent() instanceof TSModule) {
 				visitReference((TSModule) type.getParent());
 				builder.append(".");
@@ -132,11 +159,14 @@ public class TSWriter implements TSVisitor {
 	@Override
 	public void visit(TSField element) {
 		appendLine();
+		if (element.isPrivate()) {
+			builder.append("private ");
+		}
 		builder.append(element.getName());
 		if (element.isNullable()) {
 			builder.append("?");
 		}
-		if (element.getInitializer() == null ||!(element.getType() instanceof TSPrimitiveType)) {
+		if (element.getInitializer() == null || !(element.getType() instanceof TSPrimitiveType)) {
 			// primitive types can be trivially inferred and break tslint otherwise
 			builder.append(": ");
 			visitReference(element.getType());
@@ -283,7 +313,8 @@ public class TSWriter implements TSVisitor {
 		builder.append("export ");
 		if (exportElement.getAny()) {
 			builder.append("*");
-		} else {
+		}
+		else {
 			builder.append("{");
 			Iterator<String> iterator = exportElement.getTypeNames().iterator();
 			while (iterator.hasNext()) {
@@ -307,25 +338,35 @@ public class TSWriter implements TSVisitor {
 
 	@Override
 	public void visit(TSFunction function) {
-
 		appendLine();
-		appendExported(function);
 
-		builder.append("let ");
-		builder.append(function.getName());
-		builder.append(" = function(");
-		Iterator<TSParameter> iterator = function.getParameters().iterator();
-		while (iterator.hasNext()) {
-			TSParameter parameter = iterator.next();
-
-			builder.append(parameter.getName());
-			builder.append(": ");
-			visitReference(parameter.getType());
-			if (iterator.hasNext()) {
-				builder.append(", ");
+		if (function.getFunctionType() == TSFunctionType.GETTER) {
+			if (function.isPrivate()) {
+				builder.append("private ");
 			}
+			builder.append("get ");
+			builder.append(function.getName());
+			builder.append("()");
 		}
-		builder.append(")");
+		else {
+			appendExported(function);
+			builder.append("let ");
+			builder.append(function.getName());
+			builder.append(" = function(");
+			Iterator<TSParameter> iterator = function.getParameters().iterator();
+			while (iterator.hasNext()) {
+				TSParameter parameter = iterator.next();
+
+				builder.append(parameter.getName());
+				builder.append(": ");
+				visitReference(parameter.getType());
+				if (iterator.hasNext()) {
+					builder.append(", ");
+				}
+			}
+			builder.append(")");
+		}
+
 		if (function.getType() != null) {
 			builder.append(": ");
 			visitReference(function.getType());

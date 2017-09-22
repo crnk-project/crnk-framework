@@ -11,6 +11,8 @@ public class TSFunction extends TSMember implements TSExportedElement {
 
 	private boolean exported;
 
+	private TSFunctionType functionType;
+
 	@Override
 	public void accept(TSVisitor visitor) {
 		visitor.visit(this);
@@ -45,5 +47,13 @@ public class TSFunction extends TSMember implements TSExportedElement {
 	@Override
 	public TSField asField() {
 		throw new UnsupportedOperationException();
+	}
+
+	public TSFunctionType getFunctionType() {
+		return functionType;
+	}
+
+	public void setFunctionType(TSFunctionType functionType) {
+		this.functionType = functionType;
 	}
 }
