@@ -28,10 +28,26 @@ export class QMetaMapType extends BeanPath<MetaMapType> {
 }
 export module QMetaMapType {
 	export class QRelationships extends BeanPath<MetaMapType.Relationships> {
-		keyType: QTypedOneResourceRelationship<QMetaType, MetaType> = new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'keyType', QMetaType);
-		elementType: QTypedOneResourceRelationship<QMetaType, MetaType> = new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);
-		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
-		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+		private _keyType: QTypedOneResourceRelationship<QMetaType, MetaType>;
+		get keyType(): QTypedOneResourceRelationship<QMetaType, MetaType> {
+			if(!this._keyType){this._keyType= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'keyType', QMetaType);}
+			return this._keyType
+		};
+		private _elementType: QTypedOneResourceRelationship<QMetaType, MetaType>;
+		get elementType(): QTypedOneResourceRelationship<QMetaType, MetaType> {
+			if(!this._elementType){this._elementType= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);}
+			return this._elementType
+		};
+		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
+		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
+			return this._parent
+		};
+		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
+		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
+			return this._children
+		};
 	}
 }
 export let createEmptyMetaMapType = function(id: string): MetaMapType {

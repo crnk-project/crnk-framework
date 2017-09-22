@@ -44,10 +44,26 @@ export class QMetaAttribute extends BeanPath<MetaAttribute> {
 }
 export module QMetaAttribute {
 	export class QRelationships extends BeanPath<MetaAttribute.Relationships> {
-		type: QTypedOneResourceRelationship<QMetaType, MetaType> = new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'type', QMetaType);
-		oppositeAttribute: QTypedOneResourceRelationship<QMetaAttribute, MetaAttribute> = new QTypedOneResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'oppositeAttribute', QMetaAttribute);
-		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
-		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+		private _type: QTypedOneResourceRelationship<QMetaType, MetaType>;
+		get type(): QTypedOneResourceRelationship<QMetaType, MetaType> {
+			if(!this._type){this._type= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'type', QMetaType);}
+			return this._type
+		};
+		private _oppositeAttribute: QTypedOneResourceRelationship<QMetaAttribute, MetaAttribute>;
+		get oppositeAttribute(): QTypedOneResourceRelationship<QMetaAttribute, MetaAttribute> {
+			if(!this._oppositeAttribute){this._oppositeAttribute= new QTypedOneResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'oppositeAttribute', QMetaAttribute);}
+			return this._oppositeAttribute
+		};
+		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
+		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
+			return this._parent
+		};
+		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
+		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
+			return this._children
+		};
 	}
 	export class QAttributes extends BeanPath<MetaAttribute.Attributes> {
 		association: BooleanPath = this.createBoolean('association');

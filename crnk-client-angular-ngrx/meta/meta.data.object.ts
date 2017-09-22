@@ -45,16 +45,56 @@ export class QMetaDataObject extends BeanPath<MetaDataObject> {
 }
 export module QMetaDataObject {
 	export class QRelationships extends BeanPath<MetaDataObject.Relationships> {
-		subTypes: QTypedManyResourceRelationship<QMetaDataObject, MetaDataObject> = new QTypedManyResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'subTypes', QMetaDataObject);
-		superType: QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject> = new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'superType', QMetaDataObject);
-		attributes: QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute> = new QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'attributes', QMetaAttribute);
-		declaredAttributes: QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute> = new QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'declaredAttributes', QMetaAttribute);
-		primaryKey: QTypedOneResourceRelationship<QMetaPrimaryKey, MetaPrimaryKey> = new QTypedOneResourceRelationship<QMetaPrimaryKey, MetaPrimaryKey>(this, 'primaryKey', QMetaPrimaryKey);
-		declaredKeys: QTypedManyResourceRelationship<QMetaKey, MetaKey> = new QTypedManyResourceRelationship<QMetaKey, MetaKey>(this, 'declaredKeys', QMetaKey);
-		interfaces: QTypedManyResourceRelationship<QMetaInterface, MetaInterface> = new QTypedManyResourceRelationship<QMetaInterface, MetaInterface>(this, 'interfaces', QMetaInterface);
-		elementType: QTypedOneResourceRelationship<QMetaType, MetaType> = new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);
-		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
-		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+		private _subTypes: QTypedManyResourceRelationship<QMetaDataObject, MetaDataObject>;
+		get subTypes(): QTypedManyResourceRelationship<QMetaDataObject, MetaDataObject> {
+			if(!this._subTypes){this._subTypes= new QTypedManyResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'subTypes', QMetaDataObject);}
+			return this._subTypes
+		};
+		private _superType: QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>;
+		get superType(): QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject> {
+			if(!this._superType){this._superType= new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'superType', QMetaDataObject);}
+			return this._superType
+		};
+		private _attributes: QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>;
+		get attributes(): QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute> {
+			if(!this._attributes){this._attributes= new QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'attributes', QMetaAttribute);}
+			return this._attributes
+		};
+		private _declaredAttributes: QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>;
+		get declaredAttributes(): QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute> {
+			if(!this._declaredAttributes){this._declaredAttributes= new QTypedManyResourceRelationship<QMetaAttribute, MetaAttribute>(this, 'declaredAttributes', QMetaAttribute);}
+			return this._declaredAttributes
+		};
+		private _primaryKey: QTypedOneResourceRelationship<QMetaPrimaryKey, MetaPrimaryKey>;
+		get primaryKey(): QTypedOneResourceRelationship<QMetaPrimaryKey, MetaPrimaryKey> {
+			if(!this._primaryKey){this._primaryKey= new QTypedOneResourceRelationship<QMetaPrimaryKey, MetaPrimaryKey>(this, 'primaryKey', QMetaPrimaryKey);}
+			return this._primaryKey
+		};
+		private _declaredKeys: QTypedManyResourceRelationship<QMetaKey, MetaKey>;
+		get declaredKeys(): QTypedManyResourceRelationship<QMetaKey, MetaKey> {
+			if(!this._declaredKeys){this._declaredKeys= new QTypedManyResourceRelationship<QMetaKey, MetaKey>(this, 'declaredKeys', QMetaKey);}
+			return this._declaredKeys
+		};
+		private _interfaces: QTypedManyResourceRelationship<QMetaInterface, MetaInterface>;
+		get interfaces(): QTypedManyResourceRelationship<QMetaInterface, MetaInterface> {
+			if(!this._interfaces){this._interfaces= new QTypedManyResourceRelationship<QMetaInterface, MetaInterface>(this, 'interfaces', QMetaInterface);}
+			return this._interfaces
+		};
+		private _elementType: QTypedOneResourceRelationship<QMetaType, MetaType>;
+		get elementType(): QTypedOneResourceRelationship<QMetaType, MetaType> {
+			if(!this._elementType){this._elementType= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);}
+			return this._elementType
+		};
+		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
+		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
+			return this._parent
+		};
+		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
+		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
+			return this._children
+		};
 	}
 	export class QAttributes extends BeanPath<MetaDataObject.Attributes> {
 		insertable: BooleanPath = this.createBoolean('insertable');

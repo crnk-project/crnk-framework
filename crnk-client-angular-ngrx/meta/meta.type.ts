@@ -27,9 +27,21 @@ export class QMetaType extends BeanPath<MetaType> {
 }
 export module QMetaType {
 	export class QRelationships extends BeanPath<MetaType.Relationships> {
-		elementType: QTypedOneResourceRelationship<QMetaType, MetaType> = new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);
-		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
-		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+		private _elementType: QTypedOneResourceRelationship<QMetaType, MetaType>;
+		get elementType(): QTypedOneResourceRelationship<QMetaType, MetaType> {
+			if(!this._elementType){this._elementType= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);}
+			return this._elementType
+		};
+		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
+		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
+			return this._parent
+		};
+		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
+		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
+			return this._children
+		};
 	}
 }
 export let createEmptyMetaType = function(id: string): MetaType {

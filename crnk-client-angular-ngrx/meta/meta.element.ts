@@ -30,12 +30,20 @@ export class QMetaElement extends BeanPath<MetaElement> {
 	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaElement {
-	export class QRelationships extends BeanPath<MetaElement.Relationships> {
-		parent: QTypedOneResourceRelationship<QMetaElement, MetaElement> = new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
-		children: QTypedManyResourceRelationship<QMetaElement, MetaElement> = new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
-	}
 	export class QAttributes extends BeanPath<MetaElement.Attributes> {
 		name: StringPath = this.createString('name');
+	}
+	export class QRelationships extends BeanPath<MetaElement.Relationships> {
+		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
+		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
+			return this._parent
+		};
+		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
+		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
+			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
+			return this._children
+		};
 	}
 }
 export let createEmptyMetaElement = function(id: string): MetaElement {
