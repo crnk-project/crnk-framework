@@ -88,7 +88,7 @@ export class ControlErrorsComponent implements OnDestroy {
 			}
 			else if (!this.formSubscription) {
 				// listen to form till we have a reference to the control
-				this.controlStatusSubscription = this.form.valueChanges.subscribe(() => this.collectErrors());
+				this.formSubscription = this.form.valueChanges.subscribe(() => this.collectErrors());
 			}
 		}
 	}
