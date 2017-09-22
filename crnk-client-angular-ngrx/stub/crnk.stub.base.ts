@@ -42,7 +42,7 @@ export class QTypedOneResourceRelationship<Q extends BeanPath<T>, T extends Stor
 	public get reference(): Q {
 		if (this._reference == null) {
 			this._reference = new this._referenceType(null, 'data');
-			this._reference.parent = this;
+			this._reference.parentPath = this;
 		}
 		return this._reference;
 	}
@@ -60,7 +60,7 @@ export class QTypedManyResourceRelationship<Q extends BeanPath<T>, T extends Sto
 	public get reference(): Q {
 		if (this._reference == null) {
 			this._reference = new this._referenceType(null, 'data');
-			this._reference.parent = this;
+			this._reference.parentPath = this;
 		}
 		return this._reference;
 	}
