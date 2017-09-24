@@ -177,6 +177,9 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 			Assert.assertEquals(deletable, metaResource.isDeletable());
 			Assert.assertEquals(insertable, metaResource.isInsertable());
 			Assert.assertEquals(updatable, metaResource.isUpdatable());
+
+			MetaAttribute idAttr = metaResource.getAttribute("id");
+			Assert.assertNotNull(idAttr);
 		}
 	}
 }

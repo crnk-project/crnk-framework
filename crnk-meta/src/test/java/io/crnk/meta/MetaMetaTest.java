@@ -46,6 +46,12 @@ public class MetaMetaTest {
 		MetaResource dataMeta = lookup.getMeta(MetaDataObject.class, MetaResource.class);
 		Assert.assertFalse(dataMeta.isUpdatable());
 		Assert.assertFalse(dataMeta.isInsertable());
+		Assert.assertFalse(dataMeta.isDeletable());
+
+		for (MetaAttribute attr : dataMeta.getAttributes()) {
+			Assert.assertFalse(attr.isUpdatable());
+			Assert.assertFalse(attr.isInsertable());
+		}
 	}
 
 	@Test
@@ -53,6 +59,7 @@ public class MetaMetaTest {
 		MetaResource dataMeta = lookup.getMeta(Task.class, MetaResource.class);
 		Assert.assertTrue(dataMeta.isUpdatable());
 		Assert.assertTrue(dataMeta.isInsertable());
+		Assert.assertTrue(dataMeta.isDeletable());
 	}
 
 	@Test

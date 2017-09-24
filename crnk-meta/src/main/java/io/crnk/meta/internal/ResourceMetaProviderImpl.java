@@ -1,5 +1,16 @@
 package io.crnk.meta.internal;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -28,17 +39,15 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.resource.*;
+import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
+import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaProviderBase;
 import io.crnk.meta.provider.MetaProviderContext;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 public class ResourceMetaProviderImpl extends MetaProviderBase {
 
@@ -77,7 +86,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getName());
 
 		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
-		boolean readable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
+		boolean readable = metaResource.isReadable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
 		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.POST) == FilterBehavior.NONE;
 		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
 
@@ -186,8 +195,9 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			RegistryEntry entry = resourceRegistry.getEntry(information.getResourceType());
 			if (entry != null) {
 				boolean readOnlyImpl = entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
-				resource.setUpdatable(!readOnlyImpl);
-				resource.setInsertable(!readOnlyImpl);
+				resource.setUpdatable(resource.isUpdatable() && !readOnlyImpl);
+				resource.setInsertable(resource.isInsertable() && !readOnlyImpl);
+				resource.setDeletable(resource.isDeletable() && !readOnlyImpl);
 			}
 		}
 
@@ -366,8 +376,8 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 		attr.setLazy(field.getSerializeType() == SerializeType.LAZY);
 		attr.setSortable(field.getAccess().isSortable());
 		attr.setFilterable(field.getAccess().isFilterable());
-		attr.setInsertable(field.getAccess().isPostable());
-		attr.setUpdatable(field.getAccess().isPatchable());
+		attr.setInsertable(field.getAccess().isPostable() && resource.isInsertable());
+		attr.setUpdatable(field.getAccess().isPatchable() && resource.isUpdatable());
 
 		boolean isPrimitive = ClassUtils.isPrimitiveType(field.getType());
 		boolean isId = field.getResourceFieldType() == ResourceFieldType.ID;
