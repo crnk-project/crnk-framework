@@ -26,10 +26,7 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -38,7 +35,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 	private Map<String, Object> resourceMap = new HashMap<>();
 
 	public ClientResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, ObjectMapper objectMapper, DocumentMapper documentMapper, ClientProxyFactory proxyFactory) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, (List)Collections.emptyList());
 		this.proxyFactory = proxyFactory;
 	}
 

@@ -226,7 +226,7 @@ public class CrnkBoot {
 	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
 		ControllerRegistryBuilder controllerRegistryBuilder =
 				new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory());
+						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
 		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
 		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
 

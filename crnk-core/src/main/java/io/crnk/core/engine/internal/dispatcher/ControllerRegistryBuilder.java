@@ -2,12 +2,13 @@ package io.crnk.core.engine.internal.dispatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseController;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,15 +24,17 @@ public class ControllerRegistryBuilder {
 	private final ObjectMapper objectMapper;
 	private final DocumentMapper documentMapper;
 	private final PropertiesProvider propertiesProvider;
+	private final List<ResourceModificationFilter> modificationFilters;
 
 	public ControllerRegistryBuilder(@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry, @SuppressWarnings("SameParameterValue") TypeParser typeParser,
 									 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-									 ResourceFilterDirectory resourceFilterDirectory) {
+									 ResourceFilterDirectory resourceFilterDirectory, List<ResourceModificationFilter> modificationFilters) {
 		this.resourceRegistry = resourceRegistry;
 		this.typeParser = typeParser;
 		this.propertiesProvider = propertiesProvider;
 		this.objectMapper = objectMapper;
 		this.documentMapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
+		this.modificationFilters = modificationFilters;
 	}
 
 	/**
@@ -52,7 +55,7 @@ public class ControllerRegistryBuilder {
 	 * @return an instance of {@link ControllerRegistry} with initialized controllers
 	 */
 	public ControllerRegistry build() {
-		return build(new DefaultControllerLookup(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper));
+		return build(new DefaultControllerLookup(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters));
 	}
 
 	public DocumentMapper getDocumentMapper() {

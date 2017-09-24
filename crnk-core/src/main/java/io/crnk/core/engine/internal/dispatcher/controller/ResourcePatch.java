@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
@@ -30,8 +30,9 @@ import java.util.concurrent.Callable;
 public class ResourcePatch extends ResourceUpsert {
 
 	public ResourcePatch(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
-						 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+						 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper,
+						 List<ResourceModificationFilter> modificationFilters) {
+		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
 	}
 
 	@Override

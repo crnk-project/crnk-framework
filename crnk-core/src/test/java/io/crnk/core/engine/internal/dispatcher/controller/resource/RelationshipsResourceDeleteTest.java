@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
@@ -23,6 +24,8 @@ import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -40,7 +43,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser);
+		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -54,7 +57,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser);
+		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -72,7 +75,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper, modificationFilters);
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -111,7 +114,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath projectRelationPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN -- adding a relation between task and project
 		Response projectRelationshipResponse = relationshipsResourcePost.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
@@ -125,7 +128,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser);
+		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN -- removing a relation between task and project
 		Response result = sut.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
@@ -145,7 +148,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		newUserDocument.setData(Nullable.of((Object) createUser()));
 
 		JsonPath taskPath = pathBuilder.build("/users");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper, modificationFilters);
 
 		// WHEN -- adding a user
 		Response taskResponse = resourcePost.handle(taskPath, new QuerySpecAdapter(new QuerySpec(User.class), resourceRegistry), null, newUserDocument);
@@ -180,7 +183,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		newProjectDocument2.setData(Nullable.of((Object) createProject(projectId.toString())));
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN -- adding a relation between user and project
 		Response projectRelationshipResponse = relationshipsResourcePost.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);
@@ -194,7 +197,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser);
+		RelationshipsResourceDelete sut = new RelationshipsResourceDelete(resourceRegistry, typeParser, modificationFilters);
 
 		// WHEN -- removing a relation between task and project
 		Response result = sut.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);

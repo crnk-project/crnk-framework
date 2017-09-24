@@ -6,6 +6,9 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatch;
@@ -24,6 +27,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +42,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 	public void onGivenRequestCollectionGetShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -51,7 +55,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 	public void onGivenRequestResourceGetShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/1");
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -63,7 +67,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 	@Test
 	public void onNoBodyResourceShouldThrowException() throws Exception {
 		// GIVEN
-		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost sut = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// THEN
 		expectedException.expect(RuntimeException.class);
@@ -83,7 +87,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		// WHEN
 		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
@@ -95,7 +99,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		taskPatch.setData(Nullable.of((Object) data));
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
@@ -104,6 +108,9 @@ public class ResourcePatchTest extends BaseControllerTest {
 		Assert.assertNotNull(response);
 		assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		assertThat(response.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("task updated");
+
+		Mockito.verify(modificationFilter, Mockito.times(1)).modifyAttribute(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq("name"), Mockito.eq("task updated"));
+
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
@@ -118,7 +125,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		taskPatch.setData(Nullable.of((Object) data));
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/1234567");
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
@@ -132,7 +139,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		requestDocument.setData(Nullable.of((Object) data));
 
 		JsonPath postPath = pathBuilder.build("/tasks");
-		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		post.handle(postPath, emptyTaskQuery, null, requestDocument);
 
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
@@ -146,7 +153,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 			}
 		};
 
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
 		data.getAttributes().put("readOnlyValue", objectMapper.readTree("\"newValue\""));
 
 		// WHEN
@@ -171,7 +178,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		// WHEN
 		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
@@ -184,7 +191,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setType("WRONG_AND_MISSING_TYPE");
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = null;
@@ -212,7 +219,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		JsonPath documentsPath = pathBuilder.build("/documents");
 
 		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response taskResponse = resourcePost.handle(documentsPath, emptyMemorandumQuery, null, memorandumBody);
@@ -232,7 +239,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setAttribute("title", objectMapper.readTree("\"new title\""));
 		data.setAttribute("body", objectMapper.readTree("\"new body\""));
 		JsonPath documentPath = pathBuilder.build("/documents/" + memorandumId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response memorandumResponse = sut.handle(documentPath, emptyMemorandumQuery, null, memorandumBody);
@@ -256,7 +263,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		// WHEN
 		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
@@ -269,7 +276,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.getRelationships().put("project", null);
 		taskPatch.setData(Nullable.of((Object) data));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
@@ -290,7 +297,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response taskResponse = post.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 
@@ -308,7 +315,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 				.hasSize(1);
 
 		// update relationship and availability in response
-		ResourcePatch patch = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch patch = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		Nullable<Object> emptyRelation = Nullable.of((Object) new ArrayList<ResourceIdentifier>());
 		data.getRelationships().get("tasks").setData(emptyRelation);
@@ -334,7 +341,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 
 		// WHEN
 		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, null, newProjectBody);
 		Resource savedProject = projectResponse.getDocument().getSingleData().get();
 		assertThat(savedProject.getType()).isEqualTo("projects");
@@ -351,7 +358,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		Document projectPatch = new Document();
 		projectPatch.setData(Nullable.of((Object) data));
 		JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyProjectQuery, null, projectPatch);
@@ -373,7 +380,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost post = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 		Response taskResponse = post.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		Long taskId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
 
@@ -391,7 +398,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 				.hasSize(1);
 
 		// update relationship and availability in response
-		ResourcePatch patch = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch patch = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		data.getRelationships().remove("tasks");
 		data.getAttributes().put("name", objectMapper.readTree("\"updated project\""));
@@ -431,7 +438,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setAttribute("updateableProperty", objectMapper.readTree("\"wasNullBefore\""));
 
 		JsonPath jsonPath = pathBuilder.build("/complexpojos/" + complexPojoId);
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyComplexPojoQuery, null, complexPojoPatch);
@@ -466,7 +473,7 @@ public class ResourcePatchTest extends BaseControllerTest {
 		data.setType("tasks");
 		data.setAttribute("name", objectMapper.readTree("\"Mary Jane\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
-		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);

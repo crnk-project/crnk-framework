@@ -4,6 +4,7 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.*;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -21,10 +22,7 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,7 +96,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(Long.toString(taskId));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, Document);
@@ -116,7 +114,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		Resource data = createTask();
 		newTaskBody.setData(Nullable.of((Object) data));
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -154,7 +152,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a relation between task and project
 		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
@@ -194,7 +192,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -233,7 +231,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a relation between task and project
 		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);

@@ -4,6 +4,7 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
@@ -88,7 +89,7 @@ public class ResourceGetTest extends BaseControllerTest {
 
 		// WHEN
 		ResourcePost
-				resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+				resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getData().get()).isExactlyInstanceOf(Resource.class);
 		String taskId = ((Resource) taskResponse.getDocument().getData().get()).getId();
@@ -149,7 +150,7 @@ public class ResourceGetTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -186,7 +187,7 @@ public class ResourceGetTest extends BaseControllerTest {
 		data.setId("2");
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + TASK_ID + "/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a relation between task and project
 		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);

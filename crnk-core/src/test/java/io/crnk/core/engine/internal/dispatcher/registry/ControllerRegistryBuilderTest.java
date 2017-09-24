@@ -7,13 +7,16 @@ import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
+import java.util.List;
+
 public class ControllerRegistryBuilderTest {
 
 	@Test
 	public void onBuildShouldAddAllControllers() throws Exception {
 		// GIVEN
 		ResourceFilterDirectory resourceFilterDirectory = Mockito.mock(ResourceFilterDirectory.class);
-		ControllerRegistryBuilder sut = new ControllerRegistryBuilder(null, null, null, null, resourceFilterDirectory);
+		ControllerRegistryBuilder sut = new ControllerRegistryBuilder(null, null, null, null, resourceFilterDirectory, (List) Collections.emptyList());
 
 		// WHEN
 		ControllerRegistry result = sut.build();

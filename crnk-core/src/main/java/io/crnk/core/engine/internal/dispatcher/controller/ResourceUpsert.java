@@ -1,16 +1,9 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -18,14 +11,12 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
+import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
@@ -43,6 +34,12 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.Map.Entry;
+
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -51,12 +48,16 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected final ResourceFilterDirectory resourceFilterDirectory;
 
+	protected final List<ResourceModificationFilter> modificationFilters;
+
 	private PropertiesProvider propertiesProvider;
 
 	public ResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
-						  ObjectMapper objectMapper, DocumentMapper documentMapper) {
+						  ObjectMapper objectMapper, DocumentMapper documentMapper,
+						  List<ResourceModificationFilter> modificationFilters) {
 		super(resourceRegistry, typeParser, documentMapper);
 		this.propertiesProvider = propertiesProvider;
+		this.modificationFilters = modificationFilters;
 		this.objectMapper = objectMapper;
 		this.resourceFilterDirectory = documentMapper != null ? documentMapper.getFilterBehaviorManager() : null;
 	}
@@ -115,17 +116,45 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	protected void setAttributes(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
 		if (dataBody.getAttributes() != null) {
 
-			ResourceAttributesBridge resourceAttributesBridge = resourceInformation.getAttributeFields();
-
 			for (Map.Entry<String, JsonNode> entry : dataBody.getAttributes().entrySet()) {
 				String attributeName = entry.getKey();
 
-				ResourceField field = resourceInformation.findAttributeFieldByName(attributeName);
-				if (canModifyField(resourceInformation, attributeName, field)) {
-					resourceAttributesBridge.setProperty(objectMapper, instance, entry.getValue(), entry.getKey());
-				}
+				setAttribute(resourceInformation, instance, attributeName, entry.getValue());
 			}
 
+		}
+	}
+
+	private void setAttribute(ResourceInformation resourceInformation, Object instance, String attributeName, JsonNode valueNode) {
+		ResourceField field = resourceInformation.findAttributeFieldByName(attributeName);
+		if (canModifyField(resourceInformation, attributeName, field)) {
+			try {
+				if (field != null) {
+					Type valueType = field.getGenericType();
+					Object value;
+					if (valueNode != null) {
+						JavaType jacksonValueType = objectMapper.getTypeFactory().constructType(valueType);
+						ObjectReader reader = objectMapper.reader().forType(jacksonValueType);
+						value = reader.readValue(valueNode);
+					} else {
+						value = null;
+					}
+					for (ResourceModificationFilter filter : modificationFilters) {
+						value = filter.modifyAttribute(instance, field, attributeName, value);
+					}
+					field.getAccessor().setValue(instance, value);
+				} else if (resourceInformation.getAnyFieldAccessor() != null) {
+					AnyResourceFieldAccessor anyFieldAccessor = resourceInformation.getAnyFieldAccessor();
+					Object value = objectMapper.reader().forType(Object.class).readValue(valueNode);
+					for (ResourceModificationFilter filter : modificationFilters) {
+						value = filter.modifyAttribute(instance, field, attributeName, value);
+					}
+					anyFieldAccessor.setValue(instance, attributeName, value);
+				}
+			} catch (IOException e) {
+				throw new ResourceException(
+						String.format("Exception while setting %s.%s=%s due to %s", instance, attributeName, valueNode, e.getMessage()), e);
+			}
 		}
 	}
 
@@ -188,7 +217,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 					ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 					ResourceField field = resourceInformation.findRelationshipFieldByName(propertyName);
-					if(field == null && ignoreMissing){
+					if (field == null && ignoreMissing) {
 						continue;
 					}
 					if (field == null) {
@@ -220,17 +249,23 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			String propertyName = property.getKey();
 			ResourceField relationshipField = registryEntry.getResourceInformation()
 					.findRelationshipFieldByName(propertyName);
-			Class idFieldType = null;
 			List relationships = new LinkedList<>();
-			for (ResourceIdentifier resourceId : relationship.getCollectionData().get()) {
+
+			List<ResourceIdentifier> resourceIds = relationship.getCollectionData().get();
+			for (ResourceModificationFilter filter : modificationFilters) {
+				resourceIds = filter.modifyManyRelationship(newResource, relationshipField, ResourceRelationshipModificationType.SET, resourceIds);
+			}
+
+			for (ResourceIdentifier resourceId : resourceIds) {
 				RegistryEntry entry = resourceRegistry.getEntry(resourceId.getType());
-				idFieldType = entry.getResourceInformation()
+				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
 				Serializable castedRelationshipId = (Serializable) typeParser.parse(resourceId.getId(), idFieldType);
 				Object relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
 				relationships.add(relationObject);
 			}
+
 			PropertyUtils.setProperty(newResource, relationshipField.getUnderlyingName(), relationships);
 		}
 	}
@@ -249,6 +284,10 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 				throw new ResourceException(String.format("Invalid relationship name: %s", relationshipName));
 			}
 
+			for (ResourceModificationFilter filter : modificationFilters) {
+				relationshipId = filter.modifyOneRelationship(newResource, relationshipFieldByName, relationshipId);
+			}
+
 			Object relationObject;
 			if (relationshipId != null) {
 				RegistryEntry entry = resourceRegistry.getEntry(relationshipId.getType());
@@ -261,6 +300,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			} else {
 				relationObject = null;
 			}
+
 			relationshipFieldByName.getAccessor().setValue(newResource, relationObject);
 		}
 	}

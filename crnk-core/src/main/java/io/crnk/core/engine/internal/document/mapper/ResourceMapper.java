@@ -83,7 +83,7 @@ public class ResourceMapper {
 
 	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
 		// fields legacy may further limit the number of fields
-		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields().getFields(), false);
+		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
 
 		// serialize the individual attributes
 		for (ResourceField field : fields) {

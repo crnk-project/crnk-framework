@@ -3,6 +3,8 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.filter.ResourceModificationFilterBase;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.parser.TypeParser;
@@ -23,11 +25,9 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class BaseControllerTest {
 
@@ -52,8 +52,14 @@ public abstract class BaseControllerTest {
 	protected QuerySpecAdapter emptyComplexPojoQuery;
 	protected QuerySpecAdapter emptyMemorandumQuery;
 
+	protected ResourceModificationFilter modificationFilter;
+	protected List<ResourceModificationFilter> modificationFilters;
+
 	@Before
 	public void prepare() {
+		modificationFilter = Mockito.spy(new ResourceModificationFilterBase());
+		modificationFilters = Arrays.asList(modificationFilter);
+
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));

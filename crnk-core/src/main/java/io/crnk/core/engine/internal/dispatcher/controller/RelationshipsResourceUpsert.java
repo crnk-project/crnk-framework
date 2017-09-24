@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -19,16 +20,19 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RequestBodyException;
-import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
-	RelationshipsResourceUpsert(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
+	protected final List<ResourceModificationFilter> modificationFilters;
+
+	RelationshipsResourceUpsert(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper, List<ResourceModificationFilter> modificationFilters) {
 		super(resourceRegistry, typeParser, documentMapper);
+		this.modificationFilters = modificationFilters;
 	}
 
 	/**
@@ -112,7 +116,6 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
 		return new Response(new Document(), HttpStatus.NO_CONTENT_204);
 	}
-
 
 
 	private Serializable getResourceId(PathIds resourceIds, RegistryEntry registryEntry) {
