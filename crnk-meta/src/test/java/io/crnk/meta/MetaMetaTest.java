@@ -8,6 +8,7 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.TestModule;
+import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,20 @@ public class MetaMetaTest {
 
 		Assert.assertSame(elementMeta.getAttribute("id"), dataMeta.getAttribute("id"));
 		Assert.assertSame(elementMeta.getPrimaryKey(), dataMeta.getPrimaryKey());
+	}
+
+	@Test
+	public void testMetaElementImmutable() {
+		MetaResource dataMeta = lookup.getMeta(MetaDataObject.class, MetaResource.class);
+		Assert.assertFalse(dataMeta.isUpdatable());
+		Assert.assertFalse(dataMeta.isInsertable());
+	}
+
+	@Test
+	public void testNonMetaElementMutable() {
+		MetaResource dataMeta = lookup.getMeta(Task.class, MetaResource.class);
+		Assert.assertTrue(dataMeta.isUpdatable());
+		Assert.assertTrue(dataMeta.isInsertable());
 	}
 
 	@Test

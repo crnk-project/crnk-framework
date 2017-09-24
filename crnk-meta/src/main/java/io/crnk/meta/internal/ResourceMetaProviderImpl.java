@@ -1,16 +1,5 @@
 package io.crnk.meta.internal;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -28,6 +17,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -38,15 +28,17 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
-import io.crnk.meta.model.resource.MetaJsonObject;
-import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceAction;
+import io.crnk.meta.model.resource.*;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
-import io.crnk.meta.model.resource.MetaResourceBase;
-import io.crnk.meta.model.resource.MetaResourceField;
-import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaProviderBase;
 import io.crnk.meta.provider.MetaProviderContext;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public class ResourceMetaProviderImpl extends MetaProviderBase {
 
@@ -159,7 +151,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 	public MetaElement createElement(Type type) {
 		boolean allowNonResourceBaseClass = type != MetaResource.class;
 		ResourceInformation information = getResourceInformation(ClassUtils.getRawType(type), allowNonResourceBaseClass);
-		if(information == null){
+		if (information == null) {
 			// non resource base classes unknown to resource registry and as
 			// such hidden from meta model
 			return null;
@@ -187,6 +179,16 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 
 		if (resourceType != null) {
 			((MetaResource) resource).setResourceType(resourceType);
+		}
+
+		if (useResourceRegistry) {
+			ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
+			RegistryEntry entry = resourceRegistry.getEntry(information.getResourceType());
+			if (entry != null) {
+				boolean readOnlyImpl = entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
+				resource.setUpdatable(!readOnlyImpl);
+				resource.setInsertable(!readOnlyImpl);
+			}
 		}
 
 		List<ResourceField> fields = information.getFields();
@@ -340,7 +342,7 @@ public class ResourceMetaProviderImpl extends MetaProviderBase {
 			return infoBuilder.build(resourceClass);
 		}
 
-		if(allowNull){
+		if (allowNull) {
 			return null;
 		}
 
