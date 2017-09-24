@@ -1,14 +1,10 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.filter.ResourceFilter;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.*;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -45,6 +41,7 @@ import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.utils.Optional;
+import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
@@ -77,6 +74,10 @@ public class ModuleRegistry {
 
 	public DefaultInformationBuilder getInformationBuilder() {
 		return new DefaultInformationBuilder(typeParser);
+	}
+
+	public List<ResourceModificationFilter> getResourceModificationFilters() {
+		return prioritze(aggregatedModule.getResourceModificationFilters());
 	}
 
 	enum InitializedState {
@@ -503,14 +504,15 @@ public class ModuleRegistry {
 	 * @return {@link DocumentFilter} added by all modules
 	 */
 	public List<DocumentFilter> getFilters() {
-		return aggregatedModule.getFilters();
+		return prioritze(aggregatedModule.getFilters());
 	}
+
 
 	/**
 	 * @return {@link RepositoryFilter} added by all modules
 	 */
 	public List<RepositoryFilter> getRepositoryFilters() {
-		return aggregatedModule.getRepositoryFilters();
+		return prioritze(aggregatedModule.getRepositoryFilters());
 	}
 
 	/**
@@ -876,8 +878,33 @@ public class ModuleRegistry {
 		}
 
 		@Override
+		public void addResourceModificationFilter(ResourceModificationFilter filter) {
+			aggregatedModule.addResourceModificationFilter(filter);
+		}
+
+		@Override
 		public PropertiesProvider getPropertiesProvider() {
 			return propertiesProvider;
 		}
+	}
+
+	private static <T> List<T> prioritze(List<T> list) {
+		ArrayList<T> results = new ArrayList<>(list);
+		Collections.sort(results, new Comparator<T>() {
+			@Override
+			public int compare(T o1, T o2) {
+				int p1 = getPriority(o1);
+				int p2 = getPriority(o2);
+				return p1 - p2;
+			}
+
+			private int getPriority(T o1) {
+				if (o1 instanceof Prioritizable) {
+					return ((Prioritizable) o1).getPriority();
+				}
+				return 0;
+			}
+		});
+		return results;
 	}
 }

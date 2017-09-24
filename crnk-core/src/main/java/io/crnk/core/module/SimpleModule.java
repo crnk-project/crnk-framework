@@ -4,6 +4,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -32,6 +33,8 @@ public class SimpleModule implements Module {
 	private List<RepositoryFilter> repositoryFilters = new ArrayList<>();
 
 	private List<ResourceFilter> resourceFilters = new ArrayList<>();
+
+	private List<ResourceModificationFilter> resourceModificationFilters = new ArrayList<>();
 
 	private List<RepositoryDecoratorFactory> repositoryDecoratorFactories = new ArrayList<>();
 
@@ -84,6 +87,9 @@ public class SimpleModule implements Module {
 		}
 		for (ResourceFilter filter : resourceFilters) {
 			context.addResourceFilter(filter);
+		}
+		for (ResourceModificationFilter filter : resourceModificationFilters) {
+			context.addResourceModificationFilter(filter);
 		}
 		for (RepositoryDecoratorFactory decorator : repositoryDecoratorFactories) {
 			context.addRepositoryDecoratorFactory(decorator);
@@ -176,6 +182,12 @@ public class SimpleModule implements Module {
 		resourceFilters.add(filter);
 	}
 
+
+	public void addResourceModificationFilter(ResourceModificationFilter filter) {
+		checkInitialized();
+		resourceModificationFilters.add(filter);
+	}
+
 	public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decorator) {
 		checkInitialized();
 		repositoryDecoratorFactories.add(decorator);
@@ -194,6 +206,11 @@ public class SimpleModule implements Module {
 	protected List<ResourceFilter> getResourceFilters() {
 		checkInitialized();
 		return Collections.unmodifiableList(resourceFilters);
+	}
+
+	protected List<ResourceModificationFilter> getResourceModificationFilters() {
+		checkInitialized();
+		return Collections.unmodifiableList(resourceModificationFilters);
 	}
 
 	protected List<ModuleExtension> getExtensions() {

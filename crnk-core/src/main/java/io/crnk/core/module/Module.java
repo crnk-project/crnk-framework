@@ -3,10 +3,7 @@ package io.crnk.core.module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.filter.ResourceFilter;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.*;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -69,11 +66,11 @@ public interface Module {
 
 		/**
 		 * Return the {@link PropertiesProvider}.
-		 * 
+		 *
 		 * @return {@link PropertiesProvider}
 		 */
 		PropertiesProvider getPropertiesProvider();
-		
+
 		/**
 		 * @return ServiceDiscovery
 		 */
@@ -222,5 +219,6 @@ public interface Module {
 		 */
 		ResourceFilterDirectory getResourceFilterDirectory();
 
+		void addResourceModificationFilter(ResourceModificationFilter filter);
 	}
 }
