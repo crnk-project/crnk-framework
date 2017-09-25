@@ -47,7 +47,7 @@ public class MetaMetaTest {
 		Assert.assertFalse(dataMeta.isUpdatable());
 		Assert.assertFalse(dataMeta.isInsertable());
 		Assert.assertFalse(dataMeta.isDeletable());
-
+		Assert.assertNotEquals(0, dataMeta.getAttributes().size());
 		for (MetaAttribute attr : dataMeta.getAttributes()) {
 			Assert.assertFalse(attr.isUpdatable());
 			Assert.assertFalse(attr.isInsertable());
@@ -60,6 +60,10 @@ public class MetaMetaTest {
 		Assert.assertTrue(dataMeta.isUpdatable());
 		Assert.assertTrue(dataMeta.isInsertable());
 		Assert.assertTrue(dataMeta.isDeletable());
+		Assert.assertNotEquals(0, dataMeta.getAttributes().size());
+		for (MetaAttribute attr : dataMeta.getAttributes()) {
+			Assert.assertTrue(attr.isInsertable());
+		}
 	}
 
 	@Test
