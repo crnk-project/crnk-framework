@@ -1,6 +1,9 @@
 package io.crnk.test.mock.repository;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.GET;
@@ -81,10 +84,26 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	@Override
 	public ScheduleList findAll(QuerySpec querySpec) {
 		ScheduleList list = new ScheduleList();
-		list.addAll(querySpec.apply(schedules.values()));
+		list.addAll(querySpec.apply(copyResources(schedules.values())));
 		list.setLinks(new ScheduleListLinks());
 		list.setMeta(new ScheduleListMeta());
 		return list;
+	}
+
+	private List<Schedule> copyResources(Collection<Schedule> values) {
+		ArrayList<Schedule> copiedList = new ArrayList<>();
+		for (Schedule schedule : values) {
+			Schedule copy = new Schedule();
+			copy.setId(schedule.getId());
+			copy.setName(schedule.getName());
+			copy.setTasks(schedule.getTasks());
+			copy.setDelayed(schedule.isDelayed());
+			copy.setLazyTask(schedule.getLazyTask());
+			copy.setTasksList(schedule.getTasksList());
+			copy.setTask(schedule.getTask());
+			copiedList.add(copy);
+		}
+		return copiedList;
 	}
 
 	@Override
