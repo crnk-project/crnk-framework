@@ -48,7 +48,7 @@ if (JavaVersion.current().isJava8Compatible()) {
 gradle.beforeProject { Project project ->
 	project.with {
 		apply plugin: "eclipse"
-	
+
 		apply plugin: 'maven'
 
 		def docs = project.name == 'crnk-documentation'
@@ -58,8 +58,11 @@ gradle.beforeProject { Project project ->
 
 		if (!docs) {
 			apply plugin: 'java'
-			sourceCompatibility = 1.7
-			targetCompatibility = 1.7
+
+			if(project.name != 'crnk-activiti') {
+				sourceCompatibility = 1.7
+				targetCompatibility = 1.7
+			}
 
 			dependencies {
 				testCompile group: 'junit', name: 'junit', version: '4.12'
