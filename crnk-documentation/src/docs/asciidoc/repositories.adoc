@@ -73,6 +73,10 @@ implementation can then look as simple as:
 	}
 ----
 
+There is further a `ReadOnlyResourceRepositoryBase` base class that does not allow to override
+the create, delete and update methods. `crnk-meta` accordingly reports
+insertable, updateable, deltable for such repositories as false.
+
 
 ## RelationshipRepositoryV2
 

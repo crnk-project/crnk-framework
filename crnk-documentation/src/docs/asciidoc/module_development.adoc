@@ -52,6 +52,18 @@ query those `ResourceFilter` and only display information about resources and fi
 of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
 may be accessed repeatedly for a request.
 
+## Filter Modifications
+
+Changes to attributes and relationships can be tracked by implementing
+`ResourceModificationFilter`. The filter is invoked upon an incoming request
+while setting up the resource objects; before the actual repository is called.
+Such filters are useful, for example, to implement auditing functionality.
+
+## Filter Priority
+
+`DocumentFilter`, `RepositoryFilter` and `ResourceModificationFilter` can implement
+`Prioritizable` to introduce a priority among multiple filters.
+
 ## Access to HTTP layer
 
 `HttpRequestContext` resp. `HttpRequestContextProvider` provides access to the HTTP requests. Most
