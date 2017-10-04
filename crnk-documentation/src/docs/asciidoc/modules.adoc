@@ -579,27 +579,28 @@ image:images/crnk_ui.png[]
 
 NOTE: This module is in new and in incubation. Feedback and improvements welcomed.
 
-There is an `ActivitiModule` for the https://www.activiti.org[Activiti] workflow engine that offers an alternative REST.
+There is an `ActivitiModule` for the https://www.activiti.org[Activiti] workflow engine that offers an alternative REST API.
 The motivation of `ActivitiModule` is to:
 
 - have a JSON API compliant REST API to benefit from the resource-oriented architecture, linking, sorting, filtering, paging,
   and client-side tooling of JSON API.
 - have a type-safe, non-generic REST API that is tailored towards the use cases at hand. This means that for each process
   and task definition, there is a dedicated repository and resource type for it. The resource is comprised of
-  both the static fields provided by Activiti (like `name`, `startTime` and `priority`) and the dynamic variables
-  stored by the application. Mapping to static resp. dynamic fields is done automatically by the `ActivitiModule`
-  and hidden from consumers. The repository implementations ensure a proper isolation of different types. And
+  both the static fields provided by Activiti (like `name`, `startTime` and `priority`) and the dynamic fields
+  stored by the application as process/task/form variables. Mapping to static resp. dynamic fields is done
+  automatically by the `ActivitiModule` and hidden from consumers. The repository implementations ensure a proper isolation of different types. And
   the application is enabled, for example, to introduce custom security policies for each resource with
-  the `SecurityModule` or otherwise.
+  the `SecurityModule` or a `ResourceFilter`.
 
-This setup is in stark contrast to the API provided by Activiti that is fully generic.
+This setup differs substantially from the API provided by Activiti that is implemented
+in generic fashion.
 
 ### Setup
 
 The `ActivitiModule` comes within a small example application within the `src/main/test` directory that showcases its use.
 It sets up an approval flow where changes to the `Schedule` resource must be approved by a user.
 
-The `ActivitiModule` comes with four resource base classes that match the equivalent Activiti classes:
+The `ActivitiModule` implements four resource base classes that match the equivalent Activiti classes:
 
 - `ExecutionResource`
 - `FormResource`
@@ -645,6 +646,7 @@ include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/Approv
 
 - `ActivitiModuleConfig` allows to register processes and tasks that then will be exposed as repositories.
 - `ScheduleApprovalProcessInstance`, `ApproveTask` and the `approveTask` relationship are registered.
+- `ApproveTask` is user task that is handled by submitting an `ApproveForm`.
 - `filterByProcessDefinitionKey` and `filterByTaskDefinitionKey` ensure that the two repositories
   are isolated from other repositories for `GET`, `POST`, `PATCH` and `DELETE` operations.
 
@@ -671,8 +673,9 @@ There is a:
 - `approvalExclusiveGateway` checks whether the change was accepted.
 - `scheduleChangeApproved` invokes `${approvalManager.approved(execution)}` whereas `approvalManager` is a Java object
   taking care of the approval handling and registered to `activiti.cfg.xml`.
-  `approvalManager.approved(...)` reconstructs the original request and forwards it to Crnk again to save the approved
-  changes. Real world use cases may also need to save and reconstruct the security context.
+- `approvalManager.approved(...)` reconstructs the original request and forwards it to Crnk again to save the approved
+  changes. This means the regular `ScheduleRepository` implementation will be called in the same fashion as for
+   a typical request. Real world use cases may also need to save and reconstruct the security context.
 
 For the approval-related functionality a second module is registered:
 
@@ -693,12 +696,12 @@ include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/Approv
   (for example there is no control over JPA entities).
 
 
-
-`ApprovalIntTest` showcases the entire example application and `ActivitiModule` as test cases doing a change,
-starting the approval process, submitting a form and then verifying the changes have been saved.
-
 The chosen setup leads to an approval system that is *fully transparent* to the actual repository implementations
 and can be added to any kind of repository.
+
+`ApprovalIntTest` showcases the example workflow by doing a change,
+starting the approval process, submitting a form and then verifying the changes have been saved.
+
 
 ### Limitations
 

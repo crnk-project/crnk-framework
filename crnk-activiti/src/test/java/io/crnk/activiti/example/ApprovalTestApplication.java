@@ -84,9 +84,11 @@ public class ApprovalTestApplication extends ResourceConfig {
 		List<FilterSpec> approvalFilters = Arrays.asList(approvalFilter);
 
 		SimpleModule module = new SimpleModule("approval");
-		module.addRepositoryDecoratorFactory(ApprovalRepositoryDecorator.createFactory(approvalManager));
+		module.addRepositoryDecoratorFactory(
+				ApprovalRepositoryDecorator.createFactory(approvalManager)
+		);
 		module.addRepository(new ApprovalRelationshipRepository(Schedule.class,
-				ScheduleApprovalProcessInstance.class,"approval",
+				ScheduleApprovalProcessInstance.class, "approval",
 				"approval/schedule", approvalFilters)
 		);
 		return module;
