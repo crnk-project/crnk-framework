@@ -1,27 +1,19 @@
 package io.crnk.jpa.meta;
 
-import java.io.Serializable;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.AbstractJpaJerseyTest;
-import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
-import io.crnk.jpa.model.AnnotationTestEntity;
-import io.crnk.jpa.model.RenamedTestEntity;
-import io.crnk.jpa.model.SequenceEntity;
-import io.crnk.jpa.model.TestEntity;
-import io.crnk.jpa.model.VersionedEntity;
-import io.crnk.jpa.model.dto.TestDTO;
+import io.crnk.jpa.model.*;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceBase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 
@@ -36,8 +28,6 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 		MetaLookup lookup = metaModule.getLookup();
 		MetaResource testMeta = lookup.getMeta(TestEntity.class, MetaResource.class);
 		Assert.assertNotNull(testMeta);
-		MetaDataObject superMeta = testMeta.getSuperType();
-		Assert.assertEquals(MetaResourceBase.class, superMeta.getClass());
 
 		MetaAttribute embAttrMeta = testMeta.getAttribute(TestEntity.ATTR_embValue);
 		Assert.assertEquals(MetaJsonObject.class, embAttrMeta.getType().getClass());
@@ -70,7 +60,7 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testProjectedLobOnMappedSuperclass() {
 		MetaLookup lookup = metaModule.getLookup();
-		MetaResourceBase metaResource = lookup.getMeta(AnnotationMappedSuperclassEntity.class, MetaResourceBase.class);
+		MetaResourceBase metaResource = lookup.getMeta(AnnotationMappedSubtypeEntity.class, MetaResourceBase.class);
 		MetaAttribute lobAttr = metaResource.getAttribute("lobValue");
 		Assert.assertTrue(lobAttr.isLob());
 	}
@@ -132,7 +122,7 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertTrue(columnAnnotatedAttr.isSortable());
 		Assert.assertTrue(columnAnnotatedAttr.isFilterable());
 
-		MetaResourceBase superMeta = lookup.getMeta(AnnotationMappedSuperclassEntity.class, MetaResourceBase.class);
+		MetaResourceBase superMeta = lookup.getMeta(AnnotationMappedSubtypeEntity.class, MetaResourceBase.class);
 		fieldAnnotatedAttr = superMeta.getAttribute("fieldAnnotatedValue");
 		columnAnnotatedAttr = superMeta.getAttribute("columnAnnotatedValue");
 		MetaAttribute lobAttr = superMeta.getAttribute("lobValue");
@@ -157,18 +147,4 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 		MetaResource metaResource = lookup.getMeta(SequenceEntity.class, MetaResource.class);
 		Assert.assertTrue(metaResource.getPrimaryKey().isGenerated());
 	}
-
-	@Test
-	public void testDtoMeta() {
-		MetaLookup lookup = metaModule.getLookup();
-		MetaResource meta = lookup.getMeta(TestDTO.class, MetaResource.class);
-		MetaKey primaryKey = meta.getPrimaryKey();
-		Assert.assertNotNull(primaryKey);
-		Assert.assertEquals(1, primaryKey.getElements().size());
-		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
-
-		MetaAttribute oneRelatedAttr = meta.getAttribute("oneRelatedValue");
-		Assert.assertTrue(oneRelatedAttr.isAssociation());
-	}
-
 }

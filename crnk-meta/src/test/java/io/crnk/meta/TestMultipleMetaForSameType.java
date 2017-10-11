@@ -45,7 +45,7 @@ public class TestMultipleMetaForSameType extends AbstractMetaTest {
 		Assert.assertNotNull(meta);
 		Assert.assertEquals(MetaResource.class, meta.getClass());
 		Assert.assertNotNull(meta.getPrimaryKey());
-		Assert.assertEquals("app.resource.Schedule", meta.getId());
+		Assert.assertEquals("resources.schedules", meta.getId());
 	}
 
 	@Test

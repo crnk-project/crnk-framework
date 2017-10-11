@@ -1,8 +1,5 @@
 package io.crnk.meta;
 
-import java.util.Date;
-import java.util.UUID;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
@@ -12,6 +9,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Date;
+import java.util.UUID;
 
 public class MetaLookupTest {
 
@@ -109,7 +109,7 @@ public class MetaLookupTest {
 	@Test
 	public void testStringArray() {
 		MetaType meta = lookup.getArrayMeta(String[].class, MetaType.class);
-		Assert.assertEquals("base.string$Array", meta.getId());
+		Assert.assertEquals("base.string$array", meta.getId());
 		Assert.assertEquals(String[].class, meta.getImplementationClass());
 	}
 

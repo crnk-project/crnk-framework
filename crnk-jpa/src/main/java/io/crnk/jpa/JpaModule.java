@@ -5,6 +5,9 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
@@ -34,16 +37,11 @@ import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModuleExtension;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaType;
-import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceBase;
-import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
@@ -100,8 +98,6 @@ public class JpaModule implements InitializingModule {
 
 	private MetaLookup jpaMetaLookup = new MetaLookup();
 
-	private MetaLookup resourceMetaLookup = new MetaLookup();
-
 	/**
 	 * Maps resource class to its configuration
 	 */
@@ -111,8 +107,6 @@ public class JpaModule implements InitializingModule {
 
 	private List<JpaRepositoryFilter> filters = new CopyOnWriteArrayList<>();
 
-	private ResourceMetaProvider resourceMetaProvider;
-
 	private boolean totalResourceCountUsed = true;
 
 	/**
@@ -121,8 +115,6 @@ public class JpaModule implements InitializingModule {
 	// protected for CDI
 	protected JpaModule() {
 		this.jpaMetaLookup.addProvider(new JpaMetaProvider());
-		this.resourceMetaProvider = new ResourceMetaProvider(false);
-		this.resourceMetaLookup.addProvider(resourceMetaProvider);
 	}
 
 	/**
@@ -277,8 +269,6 @@ public class JpaModule implements InitializingModule {
 
 		this.jpaMetaLookup.setModuleContext(context);
 		this.jpaMetaLookup.initialize();
-		this.resourceMetaLookup.setModuleContext(context);
-		this.resourceMetaLookup.initialize();
 
 		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider()));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
@@ -406,44 +396,45 @@ public class JpaModule implements InitializingModule {
 	 * of a mapper the resource class might not correspond to the entity class.
 	 */
 	private void setupRelationshipRepositories(Class<?> resourceClass, boolean mapped) {
-		MetaLookup metaLookup = mapped ? resourceMetaLookup : jpaMetaLookup;
+		if (context.getResourceInformationBuilder().accept(resourceClass)) {
+			ResourceInformation information = context.getResourceInformationBuilder().build(resourceClass);
 
-		Class<? extends MetaDataObject> metaClass = mapped ? MetaResourceBase.class : MetaJpaDataObject.class;
-		MetaDataObject meta = metaLookup.getMeta(resourceClass, metaClass);
 
-		for (MetaAttribute attr : meta.getAttributes()) {
-			if (!attr.isAssociation()) {
-				continue;
-			}
-			MetaType attrType = attr.getType().getElementType();
+			for (ResourceField field : information.getFields()) {
+				if (field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP) {
+					continue;
+				}
 
-			if (attrType instanceof MetaEntity) {
-				setupRelationshipRepositoryForEntity(resourceClass, attrType);
-			} else {
-				PreconditionUtil.verify(attrType instanceof MetaResource, "unable to process relation: %s, neither a entity nor a mapped entity is referenced", attr.getId());
-				setupRelationshipRepositoryForResource(resourceClass, attr, attrType);
+				Class<?> attrType = field.getElementType();
+				boolean isEntity = attrType.getAnnotation(Entity.class) != null;
+				if (isEntity) {
+					setupRelationshipRepositoryForEntity(resourceClass, field);
+				} else {
+					setupRelationshipRepositoryForResource(resourceClass, field);
+				}
 			}
 		}
 	}
 
-	private void setupRelationshipRepositoryForEntity(Class<?> resourceClass, MetaType attrType) {
+	private void setupRelationshipRepositoryForEntity(Class<?> resourceClass, ResourceField field) {
 		// normal entity association
-		Class<?> attrImplClass = attrType.getImplementationClass();
-		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
+		Class<?> attrType = field.getElementType();
+		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrType);
 
 		// only include relations that are exposed as repositories
 		if (attrConfig != null) {
-			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrImplClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
 			context.addRepository(relationshipRepository);
 		}
 	}
 
-	private void setupRelationshipRepositoryForResource(Class<?> resourceClass, MetaAttribute attr, MetaType attrType) {
-		Class<?> attrImplClass = attrType.getImplementationClass();
+	private void setupRelationshipRepositoryForResource(Class<?> resourceClass, ResourceField field) {
+		Class<?> attrImplClass = field.getElementType();
 		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
 
 		PreconditionUtil.verify(attrConfig != null && attrConfig.getMapper() != null,
-				"no mapped entity for %s reference by %s registered", attrType.getName(), attr.getId());
+				"no mapped entity for %s reference from %s.%s registered", field.getOppositeResourceType(),
+				field.getParentResourceInformation().getResourceType(), field.getUnderlyingName());
 
 		JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
 		Class<?> targetResourceClass = targetConfig.getResourceClass();
@@ -466,7 +457,7 @@ public class JpaModule implements InitializingModule {
 	}
 
 	/**
-	 * @param propertiesProvider 
+	 * @param propertiesProvider
 	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
 	public ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {

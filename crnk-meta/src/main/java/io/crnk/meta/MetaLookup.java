@@ -275,8 +275,8 @@ public class MetaLookup {
 			MetaType elementType = (MetaType) getMeta(elementClass, metaClass, true);
 			if (elementType != null) {
 				MetaArrayType arrayType = new MetaArrayType();
-				arrayType.setName(elementType.getName() + "$Array");
-				arrayType.setId(elementType.getId() + "$Array");
+				arrayType.setName(elementType.getName() + "$array");
+				arrayType.setId(elementType.getId() + "$array");
 				arrayType.setImplementationType(type);
 				arrayType.setElementType(elementType);
 				return arrayType;
@@ -332,12 +332,12 @@ public class MetaLookup {
 				boolean primitiveKey = keyType instanceof MetaPrimitiveType;
 				boolean primitiveValue = valueType instanceof MetaPrimitiveType;
 				if (primitiveKey || !primitiveValue) {
-					mapMeta.setName(valueType.getName() + "$MappedBy$" + keyType.getName());
-					mapMeta.setId(valueType.getId() + "$MappedBy$" + keyType.getName());
+					mapMeta.setName(valueType.getName() + "$mappedBy$" + keyType.getName());
+					mapMeta.setId(valueType.getId() + "$mappedBy$" + keyType.getName());
 				}
 				else {
-					mapMeta.setName(keyType.getName() + "$Map$" + valueType.getName());
-					mapMeta.setId(keyType.getId() + "$Map$" + valueType.getName());
+					mapMeta.setName(keyType.getName() + "$map$" + valueType.getName());
+					mapMeta.setId(keyType.getId() + "$map$" + valueType.getName());
 				}
 
 				mapMeta.setImplementationType(paramType);
@@ -365,8 +365,8 @@ public class MetaLookup {
 		boolean isList = List.class.isAssignableFrom((Class<?>) paramType.getRawType());
 		if (isSet) {
 			MetaSetType metaSet = new MetaSetType();
-			metaSet.setId(elementType.getId() + "$Set");
-			metaSet.setName(elementType.getName() + "$Set");
+			metaSet.setId(elementType.getId() + "$set");
+			metaSet.setName(elementType.getName() + "$set");
 			metaSet.setImplementationType(paramType);
 			metaSet.setElementType(elementType);
 			return metaSet;
@@ -374,8 +374,8 @@ public class MetaLookup {
 		if (isList) {
 			PreconditionUtil.assertTrue("expected a list type", isList);
 			MetaListType metaList = new MetaListType();
-			metaList.setId(elementType.getId() + "$List");
-			metaList.setName(elementType.getName() + "$List");
+			metaList.setId(elementType.getId() + "list");
+			metaList.setName(elementType.getName() + "$list");
 			metaList.setImplementationType(paramType);
 			metaList.setElementType(elementType);
 			return metaList;

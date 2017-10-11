@@ -22,7 +22,7 @@ public class ValidationMetaProviderTest {
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.setServiceDiscovery(
-				new ReflectionsServiceDiscovery("io.crnk.validation.mock.model", new SampleJsonServiceLocator()));
+				new ReflectionsServiceDiscovery("io.crnk.validation.mock", new SampleJsonServiceLocator()));
 		boot.boot();
 
 		lookup = new MetaLookup();

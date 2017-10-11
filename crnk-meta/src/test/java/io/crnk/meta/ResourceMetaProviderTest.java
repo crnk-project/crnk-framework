@@ -3,9 +3,6 @@ package io.crnk.meta;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.meta.mock.model.ExtendsBaseResource;
-import io.crnk.meta.mock.model.ExtendsResource;
 import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.*;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
@@ -16,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
@@ -158,63 +154,6 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(1, idField.getAnnotations().size());
 	}
 
-
-	@Test
-	public void testReadMethodAnnotations() {
-		MetaResource meta = lookup.getMeta(ReadMethodAnnotatedResource.class, MetaResource.class);
-		MetaKey primaryKey = meta.getPrimaryKey();
-		MetaAttribute idField = primaryKey.getElements().get(0);
-		Assert.assertFalse(idField.isNullable());
-
-		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
-		Assert.assertEquals(1, idField.getAnnotations().size());
-	}
-
-	@Test
-	public void testWriteMethodAnnotations() {
-		MetaResource meta = lookup.getMeta(WriteMethodAnnotatedResource.class, MetaResource.class);
-		MetaKey primaryKey = meta.getPrimaryKey();
-		MetaAttribute idField = primaryKey.getElements().get(0);
-		Assert.assertFalse(idField.isNullable());
-
-		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
-		Assert.assertEquals(2, idField.getAnnotations().size()); // nullable + jsonapiid
-	}
-
-	@JsonApiResource(type = "readMethodAnnotatedResource")
-	class ReadMethodAnnotatedResource {
-
-		private String id;
-
-		@JsonApiId
-		public String getId() {
-			return id;
-		}
-
-
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
-
-
-	@JsonApiResource(type = "readMethodAnnotatedResource")
-	class WriteMethodAnnotatedResource {
-
-		private String id;
-
-		@JsonApiId
-		public String getId() {
-			return id;
-		}
-
-		@Nullable
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
-
-
 	@Test
 	public void testRegularFieldNullable() {
 		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
@@ -230,40 +169,17 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
-	public void testInheritanceOnNoneResource() {
-		MetaResource meta = lookup.getMeta(ExtendsBaseResource.class, MetaResource.class);
-
-		Assert.assertNotNull(meta.getAttribute("name"));
-		Assert.assertNotNull(meta.getAttribute("baseName"));
-		Assert.assertNotNull(meta.getAttribute("id"));
-
-		Assert.assertNull(meta.getSuperType());
-
-		MetaKey primaryKey = meta.getPrimaryKey();
-		Assert.assertNotNull("id", primaryKey.getName());
-		Assert.assertEquals(1, primaryKey.getElements().size());
-		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
-		Assert.assertSame(primaryKey.getElements().get(0), meta.getAttribute("id"));
-		Assert.assertTrue(meta.getPrimaryKey().isUnique());
-
-		Assert.assertEquals(primaryKey.getElements().get(0), primaryKey.getUniqueElement());
-
-		Assert.assertEquals("12", primaryKey.toKeyString(12));
-	}
-
-	@Test
 	public void testInheritanceOnResource() {
-		MetaResource meta = lookup.getMeta(ExtendsResource.class, MetaResource.class);
+		MetaResource meta = lookup.getMeta(TaskSubType.class, MetaResource.class);
 
+		Assert.assertNotNull(meta.getAttribute("subTypeValue"));
 		Assert.assertNotNull(meta.getAttribute("name"));
-		Assert.assertNotNull(meta.getAttribute("childName"));
-		Assert.assertNotNull(meta.getAttribute("baseName"));
 		Assert.assertNotNull(meta.getAttribute("id"));
 
 		MetaDataObject superType = meta.getSuperType();
 		Assert.assertEquals(MetaResource.class, superType.getClass());
-		Assert.assertFalse(superType.hasAttribute("childName"));
-		Assert.assertNotNull(superType.getAttribute("baseName"));
+		Assert.assertFalse(superType.hasAttribute("subTypeValue"));
+		Assert.assertNotNull(superType.getAttribute("name"));
 		Assert.assertNotNull(superType.getAttribute("id"));
 
 		MetaKey primaryKey = meta.getPrimaryKey();
@@ -283,8 +199,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
 
 		Assert.assertEquals("schedules", meta.getResourceType());
-		Assert.assertEquals("Schedule", meta.getName());
-		Assert.assertEquals("app.Schedule", meta.getId());
+		Assert.assertEquals("Schedules", meta.getName());
+		Assert.assertEquals("resources.schedules", meta.getId());
 
 		Assert.assertEquals(Schedule.class, meta.getImplementationClass());
 		Assert.assertEquals(Schedule.class, meta.getImplementationType());
@@ -298,7 +214,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("linksInformation");
 		Assert.assertEquals("linksInformation", attr.getName());
-		Assert.assertEquals("app.Task.linksInformation", attr.getId());
+		Assert.assertEquals("resources.tasks.linksInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertTrue(attr.isLinks());
@@ -312,7 +228,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("metaInformation");
 		Assert.assertEquals("metaInformation", attr.getName());
-		Assert.assertEquals("app.Task.metaInformation", attr.getId());
+		Assert.assertEquals("resources.tasks.metaInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertTrue(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
@@ -410,7 +326,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("schedule");
 		Assert.assertEquals("schedule", attr.getName());
-		Assert.assertEquals("app.Task.schedule", attr.getId());
+		Assert.assertEquals("resources.tasks.schedule", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
@@ -431,7 +347,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("tasks");
 		Assert.assertEquals("tasks", attr.getName());
-		Assert.assertEquals("app.Schedule.tasks", attr.getId());
+		Assert.assertEquals("resources.schedules.tasks", attr.getId());
 		Assert.assertTrue(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());

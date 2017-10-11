@@ -37,7 +37,6 @@ public class JpaResourceInformationProviderTest {
 	public void setup() {
 		lookup = new MetaLookup();
 		lookup.addProvider(new JpaMetaProvider());
-		lookup.addProvider(new ResourceMetaProvider(false));
 		builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), lookup);
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper()));
 	}

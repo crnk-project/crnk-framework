@@ -1,23 +1,19 @@
 package io.crnk.meta.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimitiveType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 public class MetaIntTest extends AbstractMetaJerseyTest {
 
@@ -43,14 +39,9 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		for (MetaElement elem : list) {
 			if (elem instanceof MetaPrimitiveType) {
 				Assert.assertTrue(elem.getId(), elem.getId().startsWith("base."));
-			}
-			else {
+			} else {
 				Assert.assertTrue(elem.getId(),
-						elem.getId().startsWith("app.resources.") || elem.getId().startsWith("io.crnk.meta.")
-								|| elem.getId().startsWith("io.crnk.core.repository.")
-								|| elem.getId().startsWith("io.crnk.core.resource.")
-								|| elem.getId().startsWith("base.")
-								|| elem.getId().startsWith("io.crnk.jpa."));
+						elem.getId().startsWith("base.") || elem.getId().startsWith("resources.") || elem.getId().startsWith("app.resources.") || elem.getId().startsWith("io.crnk"));
 			}
 		}
 	}
@@ -167,7 +158,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		querySpec.includeRelation(Arrays.asList("declaredAttributes"));
 		querySpec.includeRelation(Arrays.asList("primaryKey", "elements"));
 		querySpec.includeRelation(Arrays.asList("superType"));
-		String id = "app.resources.Schedule";
+		String id = "resources.schedules";
 		MetaResource resource = (MetaResource) client.getQuerySpecRepository(elementClass).findOne(id, querySpec);
 		Assert.assertNotNull(resource);
 		Assert.assertNotNull(resource.getAttributes());

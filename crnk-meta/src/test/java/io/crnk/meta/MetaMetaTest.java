@@ -5,6 +5,7 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.TestModule;
@@ -55,6 +56,25 @@ public class MetaMetaTest {
 	}
 
 	@Test
+	public void testLinksNaming() {
+		MetaResource taskMeta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaAttribute linksInformation = taskMeta.getAttribute("linksInformation");
+		MetaType type = linksInformation.getType();
+		Assert.assertEquals(type.getId(), "resources.tasks$links");
+		Assert.assertEquals(type.getName(), "TaskLinks");
+	}
+
+
+	@Test
+	public void testMetaNaming() {
+		MetaResource taskMeta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaAttribute metaInformation = taskMeta.getAttribute("metaInformation");
+		MetaType type = metaInformation.getType();
+		Assert.assertEquals(type.getId(), "resources.tasks$meta");
+		Assert.assertEquals(type.getName(), "TaskMeta");
+	}
+
+	@Test
 	public void testNonMetaElementMutable() {
 		MetaResource dataMeta = lookup.getMeta(Task.class, MetaResource.class);
 		Assert.assertTrue(dataMeta.isUpdatable());
@@ -73,13 +93,13 @@ public class MetaMetaTest {
 		MetaAttribute elementTypeAttr = meta.getAttribute("elementType");
 		Assert.assertNotNull(elementTypeAttr);
 		Assert.assertNotNull(elementTypeAttr.getType());
-		Assert.assertEquals("io.crnk.meta.MetaType.elementType", elementTypeAttr.getId());
+		Assert.assertEquals("resources.meta.type.elementType", elementTypeAttr.getId());
 
 		MetaAttribute attrsAttr = meta.getAttribute("attributes");
 		Assert.assertNotNull(attrsAttr.getType());
 
 		MetaAttribute childrenAttr = meta.getAttribute("children");
-		Assert.assertEquals("io.crnk.meta.MetaElement.children", childrenAttr.getId());
-		Assert.assertEquals("io.crnk.meta.MetaElement$List", childrenAttr.getType().getId());
+		Assert.assertEquals("resources.meta.element.children", childrenAttr.getId());
+		Assert.assertEquals("resources.meta.element$list", childrenAttr.getType().getId());
 	}
 }

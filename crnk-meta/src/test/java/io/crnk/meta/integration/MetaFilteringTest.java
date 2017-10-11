@@ -112,7 +112,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 		Mockito.when(filter.filterResource(Mockito.eq(projectResourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
 
 		QuerySpec querySpec = new QuerySpec(MetaResource.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Task"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Tasks"));
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		MetaResource taskMeta = list.get(0);
@@ -132,7 +132,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 		Mockito.when(filter.filterField(Mockito.eq(projectField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.FORBIDDEN);
 
 		QuerySpec querySpec = new QuerySpec(MetaResource.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Task"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Tasks"));
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		MetaResource taskMeta = list.get(0);
@@ -153,7 +153,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 		Mockito.when(filter.filterField(Mockito.eq(projectField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.FORBIDDEN);
 
 		QuerySpec querySpec = new QuerySpec(MetaResource.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Task"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Tasks"));
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		MetaResource taskMeta = list.get(0);
@@ -167,7 +167,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 	private void checkResourceMeta(boolean readable, boolean insertable, boolean updatable, boolean deletable) throws IOException {
 		QuerySpec querySpec = new QuerySpec(MetaResource.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Task"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Tasks"));
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		boolean filtered = !readable && !insertable && !updatable && !deletable;
 		Assert.assertEquals(filtered, list.isEmpty());
