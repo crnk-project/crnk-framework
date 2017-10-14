@@ -1,4 +1,9 @@
-package io.crnk.meta.internal;
+package io.crnk.meta.internal.typed;
+
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.meta.internal.MetaUtils;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -7,12 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.provider.MetaProviderBase;
+public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> implements TypedMetaElementFactory {
 
-public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> extends MetaProviderBase {
+
+	protected TypedMetaElementFactoryContext context;
+
+	public void init(TypedMetaElementFactoryContext context) {
+		this.context = context;
+	}
 
 	protected void createAttributes(T meta) {
 		Class<?> implClass = meta.getImplementationClass();

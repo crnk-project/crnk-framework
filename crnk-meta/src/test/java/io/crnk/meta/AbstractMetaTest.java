@@ -13,6 +13,8 @@ public abstract class AbstractMetaTest {
 
 	protected MetaLookup lookup;
 
+	protected ResourceMetaProvider resourceProvider;
+
 	@Before
 	public void setup() {
 		boot = new CrnkBoot();
@@ -22,8 +24,10 @@ public abstract class AbstractMetaTest {
 		configure();
 		boot.boot();
 
+		resourceProvider = new ResourceMetaProvider();
+
 		lookup = new MetaLookup();
-		lookup.addProvider(new ResourceMetaProvider());
+		lookup.addProvider(resourceProvider);
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
 		lookup.initialize();
 	}

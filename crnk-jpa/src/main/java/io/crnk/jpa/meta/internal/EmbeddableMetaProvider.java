@@ -33,7 +33,7 @@ public class EmbeddableMetaProvider extends AbstractJpaDataObjectProvider<MetaEm
 	}
 
 	@Override
-	public MetaEmbeddable createElement(Type type) {
+	public MetaEmbeddable allocateElement(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
 		MetaElement superMeta = null;

@@ -18,14 +18,18 @@ public class MetaMetaTest {
 
 	private MetaLookup lookup;
 
+	private ResourceMetaProvider resourceProvider;
+
 	@Before
 	public void setup() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.addModule(new TestModule());
 
+		resourceProvider = new ResourceMetaProvider();
+
 		MetaModuleConfig moduleConfig = new MetaModuleConfig();
-		moduleConfig.addMetaProvider(new ResourceMetaProvider());
+		moduleConfig.addMetaProvider(resourceProvider);
 		MetaModule module = MetaModule.createServerModule(moduleConfig);
 		boot.addModule(module);
 		boot.boot();
@@ -35,8 +39,8 @@ public class MetaMetaTest {
 
 	@Test
 	public void testAttributesProperlyDeclaredAndNotInherited() {
-		MetaResource elementMeta = lookup.getMeta(MetaElement.class, MetaResource.class);
-		MetaResource dataMeta = lookup.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource elementMeta = resourceProvider.getMeta(MetaElement.class, MetaResource.class);
+		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
 
 		Assert.assertSame(elementMeta.getAttribute("id"), dataMeta.getAttribute("id"));
 		Assert.assertSame(elementMeta.getPrimaryKey(), dataMeta.getPrimaryKey());
@@ -44,7 +48,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaElementImmutable() {
-		MetaResource dataMeta = lookup.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
 		Assert.assertFalse(dataMeta.isUpdatable());
 		Assert.assertFalse(dataMeta.isInsertable());
 		Assert.assertFalse(dataMeta.isDeletable());
@@ -57,7 +61,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testLinksNaming() {
-		MetaResource taskMeta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource taskMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
 		MetaAttribute linksInformation = taskMeta.getAttribute("linksInformation");
 		MetaType type = linksInformation.getType();
 		Assert.assertEquals(type.getId(), "resources.tasks$links");
@@ -67,7 +71,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaNaming() {
-		MetaResource taskMeta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource taskMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
 		MetaAttribute metaInformation = taskMeta.getAttribute("metaInformation");
 		MetaType type = metaInformation.getType();
 		Assert.assertEquals(type.getId(), "resources.tasks$meta");
@@ -76,7 +80,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testNonMetaElementMutable() {
-		MetaResource dataMeta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource dataMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
 		Assert.assertTrue(dataMeta.isUpdatable());
 		Assert.assertTrue(dataMeta.isInsertable());
 		Assert.assertTrue(dataMeta.isDeletable());
@@ -88,7 +92,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaDataObjectMeta() {
-		MetaResource meta = lookup.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
 
 		MetaAttribute elementTypeAttr = meta.getAttribute("elementType");
 		Assert.assertNotNull(elementTypeAttr);

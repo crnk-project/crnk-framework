@@ -12,7 +12,7 @@ public class MetaKeyTest extends AbstractMetaTest {
 
 	@Test
 	public void parse() {
-		MetaJsonObject metaKeyType = lookup.getMeta(SomePrimaryKey.class, MetaJsonObject.class);
+		MetaJsonObject metaKeyType = resourceProvider.getMeta(SomePrimaryKey.class, MetaJsonObject.class);
 
 		MetaAttribute keyAttr = new MetaAttribute();
 		keyAttr.setType(metaKeyType);

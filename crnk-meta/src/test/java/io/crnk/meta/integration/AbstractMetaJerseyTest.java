@@ -1,9 +1,5 @@
 package io.crnk.meta.integration;
 
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.CrnkClient;
@@ -15,11 +11,14 @@ import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
-import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 
@@ -54,8 +53,6 @@ public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 	public MetaModule createModule() {
 		MetaModule module = MetaModule.create();
 		module.addMetaProvider(new ResourceMetaProvider());
-		module.putIdMapping(Schedule.class.getPackage().getName(), "app.resources");
-		module.putIdMapping(ScheduleRepository.class.getPackage().getName(), "app.resources");
 		return module;
 	}
 

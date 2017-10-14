@@ -11,7 +11,7 @@ import javax.persistence.MappedSuperclass;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.meta.internal.MetaDataObjectProviderBase;
+import io.crnk.meta.internal.typed.MetaDataObjectProviderBase;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;

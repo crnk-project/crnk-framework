@@ -25,8 +25,6 @@ public class MetaResourceRepositoryTest extends AbstractMetaTest {
 		lookup = new MetaLookup();
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
 		lookup.addProvider(provider);
-		lookup.putIdMapping("io.crnk.test.mock.models", "app");
-		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
 		lookup.initialize();
 
 		repo = new MetaResourceRepositoryImpl(new Supplier<MetaLookup>() {

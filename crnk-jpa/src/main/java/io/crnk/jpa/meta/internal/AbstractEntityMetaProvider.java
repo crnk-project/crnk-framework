@@ -14,7 +14,7 @@ import java.util.Collection;
 public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> extends AbstractJpaDataObjectProvider<T> {
 
 	@Override
-	public MetaElement createElement(Type type) {
+	public MetaElement allocateElement(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
 		MetaElement superMeta = getSuperMeta(superClazz);

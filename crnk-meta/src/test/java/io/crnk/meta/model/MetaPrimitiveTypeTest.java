@@ -8,7 +8,6 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.AbstractMetaTest;
 import io.crnk.meta.MetaLookup;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -18,32 +17,23 @@ public class MetaPrimitiveTypeTest extends AbstractMetaTest {
 
 	private MetaLookup lookup;
 
-	@Before
-	public void setup() {
-		super.setup();
-
-		lookup = new MetaLookup();
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
-		lookup.initialize();
-	}
-
 	@Test
 	public void testJson() {
-		MetaElement type = lookup.getMeta(JsonNode.class);
+		MetaElement type = resourceProvider.getMeta(JsonNode.class, MetaElement.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json", type.getId());
 	}
 
 	@Test
 	public void testJsonObject() {
-		MetaElement type = lookup.getMeta(ObjectNode.class);
+		MetaElement type = resourceProvider.getMeta(ObjectNode.class, MetaElement.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json.object", type.getId());
 	}
 
 	@Test
 	public void testJsonArray() {
-		MetaElement type = lookup.getMeta(ArrayNode.class);
+		MetaElement type = resourceProvider.getMeta(ArrayNode.class, MetaElement.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json.array", type.getId());
 	}
