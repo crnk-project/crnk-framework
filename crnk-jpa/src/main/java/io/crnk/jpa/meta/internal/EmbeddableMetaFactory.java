@@ -1,44 +1,32 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.Embeddable;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEmbeddable;
 import io.crnk.jpa.meta.MetaEmbeddableAttribute;
-import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.query.AnyTypeObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 
-public class EmbeddableMetaProvider extends AbstractJpaDataObjectProvider<MetaEmbeddable> {
+import javax.persistence.Embeddable;
+import java.lang.reflect.Type;
+
+public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbeddable> {
 
 	private static final Object VALUE_ANYTYPE_ATTR_NAME = "value";
 
 	@Override
-	public Set<Class<? extends MetaElement>> getMetaTypes() {
-		Set<Class<? extends MetaElement>> set = new HashSet<>();
-		set.add(MetaEmbeddable.class);
-		return set;
+	public boolean accept(Type type) {
+		return ClassUtils.getRawType(type).getAnnotation(Embeddable.class) != null;
 	}
 
 	@Override
-	public boolean accept(Type type, Class<? extends MetaElement> metaClass) {
-		boolean hasAnnotation = ClassUtils.getRawType(type).getAnnotation(Embeddable.class) != null;
-		boolean hasType = metaClass == MetaEmbeddable.class || metaClass == MetaJpaDataObject.class;
-		return hasAnnotation && hasType;
-	}
-
-	@Override
-	public MetaEmbeddable allocateElement(Type type) {
+	public MetaEmbeddable create(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
 		MetaElement superMeta = null;
 		if (superClazz != Object.class) {
-			superMeta = context.getLookup().getMeta(superClazz, MetaJpaDataObject.class);
+			superMeta = context.allocate(superClazz);
 		}
 		MetaEmbeddable meta = new MetaEmbeddable();
 		meta.setElementType(meta);

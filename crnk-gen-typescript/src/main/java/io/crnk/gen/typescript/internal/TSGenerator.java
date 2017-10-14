@@ -15,6 +15,7 @@ import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
 import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.gen.typescript.writer.TSWriter;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.internal.resource.ResourceMetaParitition;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 
@@ -25,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class TSGenerator {
+
+	private ResourceMetaParitition resourveMetaPartition;
 
 	private File outputDir;
 
@@ -44,6 +47,8 @@ public class TSGenerator {
 		this.outputDir = outputDir;
 		this.lookup = lookup;
 		this.config = config;
+
+		this.resourveMetaPartition = lookup.getPartition(ResourceMetaParitition.class);
 
 		transformations = new ArrayList<>();
 		for (final String className : config.getMetaTransformationClassNames()) {
@@ -313,7 +318,7 @@ public class TSGenerator {
 
 		@Override
 		public MetaElement getMeta(Class<?> implClass) {
-			return lookup.getMeta(implClass);
+			return resourveMetaPartition.getMeta(implClass);
 		}
 
 		@Override

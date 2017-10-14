@@ -1,10 +1,14 @@
 package io.crnk.validation.meta;
 
-import javax.validation.constraints.NotNull;
-
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaFilter;
+import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderBase;
+
+import javax.validation.constraints.NotNull;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Provides an integration into crnk-meta. Currently features:
@@ -19,15 +23,23 @@ import io.crnk.meta.provider.MetaProviderBase;
  */
 public class ValidationMetaProvider extends MetaProviderBase {
 
-	@Override
-	public void onInitialized(MetaElement element) {
-		if (element instanceof MetaAttribute) {
-			MetaAttribute attr = (MetaAttribute) element;
 
-			NotNull notNull = attr.getAnnotation(NotNull.class);
-			if (notNull != null) {
-				attr.setNullable(false);
+	@Override
+	public Collection<MetaFilter> getFilters() {
+		return Arrays.asList((MetaFilter) new MetaFilterBase() {
+
+			@Override
+			public void onInitialized(MetaElement element) {
+				if (element instanceof MetaAttribute) {
+					MetaAttribute attr = (MetaAttribute) element;
+
+					NotNull notNull = attr.getAnnotation(NotNull.class);
+					if (notNull != null) {
+						attr.setNullable(false);
+					}
+				}
 			}
-		}
+		});
 	}
+
 }

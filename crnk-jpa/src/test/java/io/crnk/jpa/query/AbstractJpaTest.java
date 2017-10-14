@@ -1,10 +1,5 @@
 package io.crnk.jpa.query;
 
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
@@ -15,40 +10,23 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.meta.JpaMetaProvider;
-import io.crnk.jpa.model.BasicAttributesTestEntity;
-import io.crnk.jpa.model.CountryEntity;
-import io.crnk.jpa.model.CountryTranslationEntity;
-import io.crnk.jpa.model.JoinedTableBaseEntity;
-import io.crnk.jpa.model.JoinedTableChildEntity;
-import io.crnk.jpa.model.LangEntity;
-import io.crnk.jpa.model.ManyToManyOppositeEntity;
-import io.crnk.jpa.model.ManyToManyTestEntity;
-import io.crnk.jpa.model.OneToOneTestEntity;
-import io.crnk.jpa.model.OtherRelatedEntity;
-import io.crnk.jpa.model.RelatedEntity;
-import io.crnk.jpa.model.RenamedTestEntity;
-import io.crnk.jpa.model.SingleTableBaseEntity;
-import io.crnk.jpa.model.SingleTableChildEntity;
-import io.crnk.jpa.model.TablePerClassBaseEntity;
-import io.crnk.jpa.model.TablePerClassChildEntity;
-import io.crnk.jpa.model.TestAnyType;
-import io.crnk.jpa.model.TestEmbeddable;
-import io.crnk.jpa.model.TestEmbeddedIdEntity;
-import io.crnk.jpa.model.TestEntity;
-import io.crnk.jpa.model.TestIdEmbeddable;
-import io.crnk.jpa.model.TestNestedEmbeddable;
-import io.crnk.jpa.model.TestSubclassWithSuperclassPk;
-import io.crnk.jpa.model.UuidTestEntity;
+import io.crnk.jpa.model.*;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.util.JpaTestConfig;
 import io.crnk.jpa.util.SpringTransactionRunner;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.provider.MetaPartition;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JpaTestConfig.class)
@@ -83,10 +61,12 @@ public abstract class AbstractJpaTest {
 			}
 
 			@Override
-			public MetaLookup getMetaLookup() {
+			public MetaPartition getMetaPartition() {
+				JpaMetaProvider jpaMetaProvider = new JpaMetaProvider(em.getEntityManagerFactory());
 				MetaLookup metaLookup = new MetaLookup();
-				metaLookup.addProvider(new JpaMetaProvider());
-				return metaLookup;
+				metaLookup.addProvider(jpaMetaProvider);
+				metaLookup.initialize();
+				return jpaMetaProvider.getPartition();
 			}
 		});
 		clear(em, factory.query(OneToOneTestEntity.class).buildExecutor().getResultList());
@@ -126,6 +106,7 @@ public abstract class AbstractJpaTest {
 
 		queryFactory = createQueryFactory(em);
 		module.setQueryFactory(queryFactory);
+
 
 		clear();
 		for (int i = 0; i < numTestEntities; i++) {

@@ -2,10 +2,8 @@ package io.crnk.jpa;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.model.MethodAnnotatedEntity;
-import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaKey;
 import org.junit.Assert;
@@ -22,9 +20,7 @@ public class MethodAnnotatedEntityTest extends AbstractJpaJerseyTest {
 		entity.setId(13L);
 		entity.setStringValue("test");
 
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		MetaEntity meta = lookup.getMeta(MethodAnnotatedEntity.class, MetaEntity.class);
+		MetaEntity meta = jpaMetaProvider.getMeta(MethodAnnotatedEntity.class);
 		MetaKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);
 		Assert.assertEquals(1, primaryKey.getElements().size());

@@ -12,7 +12,7 @@ export interface MetaEnumTypeListResult extends ManyQueryResult {
 	data?: Array<MetaEnumType>;
 }
 export class QMetaEnumType extends BeanPath<MetaEnumType> {
-	metaId = 'io.crnk.meta.MetaEnumType';
+	metaId = 'resources.meta.enumType';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaType.QRelationships = new QMetaType.QRelationships(this, 'relationships');

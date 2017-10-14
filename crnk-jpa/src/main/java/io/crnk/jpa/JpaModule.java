@@ -27,8 +27,7 @@ import io.crnk.jpa.internal.*;
 import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
-import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.jpa.meta.internal.JpaResourceMetaEnricher;
+import io.crnk.jpa.meta.internal.JpaMetaEnricher;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
@@ -37,7 +36,7 @@ import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModuleExtension;
-import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,6 @@ public class JpaModule implements InitializingModule {
 
 	private ModuleContext context;
 
-	private MetaLookup jpaMetaLookup = new MetaLookup();
 
 	/**
 	 * Maps resource class to its configuration
@@ -109,12 +107,17 @@ public class JpaModule implements InitializingModule {
 
 	private boolean totalResourceCountUsed = true;
 
+	private JpaMetaEnricher metaEnricher;
+
+	private MetaLookup jpaMetaLookup;
+
+	private JpaMetaProvider jpaMetaProvider;
+
 	/**
 	 * Constructor used on client side.
 	 */
 	// protected for CDI
 	protected JpaModule() {
-		this.jpaMetaLookup.addProvider(new JpaMetaProvider());
 	}
 
 	/**
@@ -134,8 +137,7 @@ public class JpaModule implements InitializingModule {
 			Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
 			for (ManagedType<?> managedType : managedTypes) {
 				Class<?> managedJavaType = managedType.getJavaType();
-				MetaElement meta = jpaMetaLookup.getMeta(managedJavaType, MetaJpaDataObject.class);
-				if (meta instanceof MetaEntity) {
+				if (managedJavaType.getAnnotation(Entity.class) != null) {
 					addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
 				}
 			}
@@ -267,8 +269,16 @@ public class JpaModule implements InitializingModule {
 	public void setupModule(ModuleContext context) {
 		this.context = context;
 
-		this.jpaMetaLookup.setModuleContext(context);
-		this.jpaMetaLookup.initialize();
+		Set<Class> jpaTypes = new HashSet<>();
+		for (JpaRepositoryConfig<?> config : repositoryConfigurationMap.values()) {
+			jpaTypes.add(config.getEntityClass());
+		}
+		jpaMetaProvider = new JpaMetaProvider(jpaTypes);
+		jpaMetaLookup = new MetaLookup();
+		jpaMetaLookup.addProvider(jpaMetaProvider);
+		jpaMetaLookup.setModuleContext(context);
+		jpaMetaLookup.initialize();
+
 
 		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider()));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
@@ -279,12 +289,14 @@ public class JpaModule implements InitializingModule {
 		addTransactionRollbackExceptionMapper();
 		context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
 
-		// enrich resource meta model with JPA information where incomplete
-		MetaModuleExtension metaModuleExtension = new MetaModuleExtension();
-		metaModuleExtension.addProvider(new JpaResourceMetaEnricher(jpaMetaLookup));
-		context.addExtension(metaModuleExtension);
-
 		if (em != null) {
+			metaEnricher = new JpaMetaEnricher();
+
+			// enrich resource meta model with JPA information where incomplete
+			MetaModuleExtension metaModuleExtension = new MetaModuleExtension();
+			metaModuleExtension.addProvider(metaEnricher.getProvider());
+			context.addExtension(metaModuleExtension);
+
 			setupTransactionMgmt();
 		}
 	}
@@ -347,6 +359,7 @@ public class JpaModule implements InitializingModule {
 	}
 
 	private void setupServerRepositories() {
+		metaEnricher.setMetaProvider(jpaMetaProvider);
 
 		for (JpaRepositoryConfig<?> config : repositoryConfigurationMap.values()) {
 			setupRepository(config);
@@ -360,7 +373,7 @@ public class JpaModule implements InitializingModule {
 		}
 
 		Class<?> resourceClass = config.getResourceClass();
-		MetaEntity metaEntity = jpaMetaLookup.getMeta(config.getEntityClass(), MetaEntity.class);
+		MetaEntity metaEntity = jpaMetaProvider.getMeta(config.getEntityClass());
 		if (isValidEntity(metaEntity)) {
 			JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this, config);
 
@@ -462,7 +475,7 @@ public class JpaModule implements InitializingModule {
 	 */
 	public ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
 		if (resourceInformationProvider == null) {
-			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider, jpaMetaLookup);
+			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider);
 		}
 		return resourceInformationProvider;
 	}
@@ -497,8 +510,8 @@ public class JpaModule implements InitializingModule {
 			}
 
 			@Override
-			public MetaLookup getMetaLookup() {
-				return jpaMetaLookup;
+			public MetaPartition getMetaPartition() {
+				return jpaMetaProvider.getPartition();
 			}
 		});
 
@@ -558,6 +571,10 @@ public class JpaModule implements InitializingModule {
 	 */
 	public boolean hasRepository(Class<?> resourceClass) {
 		return repositoryConfigurationMap.containsKey(resourceClass);
+	}
+
+	public JpaMetaProvider getJpaMetaProvider() {
+		return jpaMetaProvider;
 	}
 
 	private final class JpaQuerydslTranslationInterceptor implements QuerydslTranslationInterceptor {

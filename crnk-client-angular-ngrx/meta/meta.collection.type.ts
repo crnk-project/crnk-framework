@@ -12,7 +12,7 @@ export interface MetaCollectionTypeListResult extends ManyQueryResult {
 	data?: Array<MetaCollectionType>;
 }
 export class QMetaCollectionType extends BeanPath<MetaCollectionType> {
-	metaId = 'io.crnk.meta.MetaCollectionType';
+	metaId = 'resources.meta.collectionType';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaType.QRelationships = new QMetaType.QRelationships(this, 'relationships');

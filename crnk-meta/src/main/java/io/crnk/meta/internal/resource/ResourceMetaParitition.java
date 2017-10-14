@@ -47,6 +47,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		this.idPrefix = idPrefix;
 		this.idProvider = idProvider;
 
+		this.idProvider.putIdMapping("io.crnk.core.resource.links", idPrefix + "information");
+
 		this.addFactory(new JsonObjectMetaFactory());
 	}
 
@@ -80,9 +82,9 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 			if (entry != null) {
 				String id = getId(entry.getResourceInformation().getResourceType());
 				if (isMeta) {
-					element.setId(id + "$meta");
+					return id + "$meta";
 				} else {
-					element.setId(id + "$links");
+					return id + "$links";
 				}
 			}
 		}
@@ -100,12 +102,19 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 					closedPackageName = resourcePackageName;
 					closedResourceType = resourceInformation.getResourceType();
 				}
+
+				Object resourceRepository = entry.getResourceRepository().getResourceRepository();
+				resourcePackageName = resourceRepository.getClass().getPackage().getName();
+				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null || closedPackageName.length() < resourcePackageName.length())) {
+					closedPackageName = resourcePackageName;
+					closedResourceType = resourceInformation.getResourceType();
+				}
 			}
 			if (closedResourceType != null) {
 				String resourceId = getId(closedResourceType);
 				String basePath = resourceId.substring(0, resourceId.lastIndexOf('.'));
 				String relativePath = packageName.substring(closedPackageName.length());
-				element.setId(basePath + relativePath + "." + element.getName().toLowerCase());
+				return basePath + relativePath + "." + element.getName().toLowerCase();
 			}
 		}
 		return idProvider.computeIdPrefixFromPackage(rawType, element) + element.getName().toLowerCase();
@@ -182,7 +191,10 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 			}
 		}
 
-		context.addElement(resource);
+		Class<?> resourceClass = information.getResourceClass();
+
+		addElement(resourceClass, resource);
+
 		return resource;
 	}
 

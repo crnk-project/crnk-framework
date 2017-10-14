@@ -18,7 +18,6 @@ import io.crnk.jpa.model.LangEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
 import io.crnk.jpa.util.EntityManagerProducer;
 import io.crnk.jpa.util.SpringTransactionRunner;
-import io.crnk.meta.MetaLookup;
 import io.crnk.rs.type.JsonApiMediaType;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -92,8 +91,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 		super.setupModule(module, server);
 
 		if (server) {
-			MetaLookup metaLookup = module.getJpaMetaLookup();
-			module.setResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider(), metaLookup) {
+			module.setResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider()) {
 
 				@Override
 				protected List<ResourceField> getResourceFields(Class clazz) {

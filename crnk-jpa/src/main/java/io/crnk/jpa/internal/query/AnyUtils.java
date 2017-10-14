@@ -1,11 +1,9 @@
 package io.crnk.jpa.internal.query;
 
-import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.query.AnyTypeObject;
-import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaPartition;
 
 public class AnyUtils {
 
@@ -17,15 +15,12 @@ public class AnyUtils {
 	/**
 	 * Sets the value of the given anytype.
 	 *
-	 * @param metaLookup to use to retrieve information
+	 * @param partition to use to retrieve information
 	 * @param dataObject the anytype for which the value is set.
 	 * @param value      the new value
 	 */
-	public static void setValue(MetaLookup metaLookup, AnyTypeObject dataObject, Object value) {
-		MetaDataObject meta = metaLookup.getMeta(dataObject.getClass(), MetaJpaDataObject.class, true);
-		if(meta == null){
-			meta = (MetaDataObject) metaLookup.getMeta(dataObject.getClass(), MetaElement.class);
-		}
+	public static void setValue(MetaPartition partition, AnyTypeObject dataObject, Object value) {
+		MetaDataObject meta = (MetaDataObject) partition.getMeta(dataObject.getClass());
 		if (value == null) {
 			for (MetaAttribute attr : meta.getAttributes()) {
 				attr.setValue(dataObject, null);

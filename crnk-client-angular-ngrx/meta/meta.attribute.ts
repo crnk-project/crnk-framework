@@ -36,7 +36,7 @@ export interface MetaAttributeListResult extends ManyQueryResult {
 	data?: Array<MetaAttribute>;
 }
 export class QMetaAttribute extends BeanPath<MetaAttribute> {
-	metaId = 'io.crnk.meta.MetaAttribute';
+	metaId = 'resources.meta.attribute';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaAttribute.QRelationships = new QMetaAttribute.QRelationships(this, 'relationships');

@@ -95,7 +95,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testDtoMeta() {
 		MetaLookup lookup = metaModule.getLookup();
-		MetaResource meta = lookup.getMeta(TestDTO.class, MetaResource.class);
+		MetaResource meta = (MetaResource) lookup.getMetaById().get("resources.testDTO");
 		MetaKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);
 		Assert.assertEquals(1, primaryKey.getElements().size());

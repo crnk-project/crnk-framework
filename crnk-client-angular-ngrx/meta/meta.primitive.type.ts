@@ -12,7 +12,7 @@ export interface MetaPrimitiveTypeListResult extends ManyQueryResult {
 	data?: Array<MetaPrimitiveType>;
 }
 export class QMetaPrimitiveType extends BeanPath<MetaPrimitiveType> {
-	metaId = 'io.crnk.meta.MetaPrimitiveType';
+	metaId = 'resources.meta.primitiveType';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaType.QRelationships = new QMetaType.QRelationships(this, 'relationships');

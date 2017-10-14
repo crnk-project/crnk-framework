@@ -1,18 +1,20 @@
 package io.crnk.meta.model;
 
-import java.util.Arrays;
-
 import io.crnk.meta.AbstractMetaTest;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class MetaKeyTest extends AbstractMetaTest {
 
 
 	@Test
+	@Ignore // no longer supported to find any kind of object
 	public void parse() {
-		MetaJsonObject metaKeyType = resourceProvider.getMeta(SomePrimaryKey.class, MetaJsonObject.class);
+		MetaJsonObject metaKeyType = resourceProvider.getMeta(SomePrimaryKey.class);
 
 		MetaAttribute keyAttr = new MetaAttribute();
 		keyAttr.setType(metaKeyType);

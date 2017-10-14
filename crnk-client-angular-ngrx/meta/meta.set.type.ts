@@ -13,7 +13,7 @@ export interface MetaSetTypeListResult extends ManyQueryResult {
 	data?: Array<MetaSetType>;
 }
 export class QMetaSetType extends BeanPath<MetaSetType> {
-	metaId = 'io.crnk.meta.MetaSetType';
+	metaId = 'resources.meta.setType';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaType.QRelationships = new QMetaType.QRelationships(this, 'relationships');

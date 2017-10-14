@@ -43,7 +43,7 @@ public class GenerateTypescriptTaskTest {
 		testProjectDir.newFolder("src", "main", "java");
 
 		outputDir = testProjectDir.getRoot();
-		outputDir = new File("temp");
+		outputDir = new File("build/tmp/gen");
 		outputDir.mkdirs();
 
 		File npmrcFile = new File(outputDir, ".npmrc");
@@ -102,11 +102,6 @@ public class GenerateTypescriptTaskTest {
 		String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
 		String actualSource = IOUtils
 				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedules.ts")), utf8);
-
-		System.out.println("---------");
-		System.out.println(actualSource);
-		System.out.println("---------");
-		System.out.println("---------");
 
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');

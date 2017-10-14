@@ -2,12 +2,11 @@ package io.crnk.jpa.internal.query;
 
 import io.crnk.core.queryspec.*;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
-import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.query.JpaQuery;
-import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.provider.MetaPartition;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.JoinType;
@@ -48,21 +47,21 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	private Object privateData;
 
-	protected AbstractJpaQueryImpl(MetaLookup metaLookup, EntityManager em, Class<T> clazz,
+	protected AbstractJpaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<T> clazz,
 								   ComputedAttributeRegistryImpl computedAttrs) {
 		this.em = em;
 		this.clazz = clazz;
-		this.meta = metaLookup.getMeta(clazz, MetaJpaDataObject.class);
+		this.meta = (MetaDataObject) metaPartition.getMeta(clazz);
 		this.computedAttrs = computedAttrs;
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractJpaQueryImpl(MetaLookup metaLookup, EntityManager em, Class<?> entityClass,
+	public AbstractJpaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> entityClass,
 								ComputedAttributeRegistryImpl virtualAttrs, String attrName, List<?> entityIds) {
 		this.em = em;
 		this.computedAttrs = virtualAttrs;
 
-		this.parentMeta = metaLookup.getMeta(entityClass, MetaJpaDataObject.class);
+		this.parentMeta = (MetaDataObject) metaPartition.getMeta(entityClass);
 		MetaAttribute attrMeta = parentMeta.getAttribute(attrName);
 		if (attrMeta.getType().isCollection()) {
 			this.meta = (MetaDataObject) attrMeta.getType().asCollection().getElementType();

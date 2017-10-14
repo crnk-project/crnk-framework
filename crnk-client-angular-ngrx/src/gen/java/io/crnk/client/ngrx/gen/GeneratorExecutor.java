@@ -14,12 +14,20 @@ import io.crnk.meta.provider.resource.ResourceMetaProvider;
 
 public class GeneratorExecutor {
 
+	public static void main(String[] args){
+		GeneratorExecutor executor = new GeneratorExecutor();
+
+		File outputDir = new File("crnk-client-angular-ngrx");
+		executor.run(outputDir);
+
+	}
+
 	public void run(File outputDir) {
 		TSGeneratorExtension config = new TSGeneratorExtension(null, null);
 		config.setGenerateExpressions(true);
 		config.getNpm().setPackagingEnabled(false);
 		config.getNpm().setPackageName("@crnk/angular-ngrx");
-		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/angular-ngrx");
+		config.getNpm().getPackageMapping().put(MetaElement.class.getPackage().getName(), "@crnk/angular-ngrx/meta");
 
 		MetaModule metaModule = MetaModule.create();
 		metaModule.addMetaProvider(new ResourceMetaProvider());

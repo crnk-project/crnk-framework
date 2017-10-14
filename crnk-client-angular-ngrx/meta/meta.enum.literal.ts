@@ -2,22 +2,22 @@ import {BeanPath, StringPath} from '../expression/';
 import {MetaElement, QMetaElement} from './meta.element';
 import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
 
-export interface MetaLiteral extends MetaElement {
+export interface MetaEnumLiteral extends MetaElement {
 }
-export interface MetaLiteralResult extends OneQueryResult {
-	data?: MetaLiteral;
+export interface MetaEnumLiteralResult extends OneQueryResult {
+	data?: MetaEnumLiteral;
 }
-export interface MetaLiteralListResult extends ManyQueryResult {
-	data?: Array<MetaLiteral>;
+export interface MetaEnumLiteralListResult extends ManyQueryResult {
+	data?: Array<MetaEnumLiteral>;
 }
-export class QMetaLiteral extends BeanPath<MetaLiteral> {
-	metaId = 'io.crnk.meta.MetaLiteral';
+export class QMetaEnumLiteral extends BeanPath<MetaEnumLiteral> {
+	metaId = 'resources.meta.enumLiteral';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaElement.QRelationships = new QMetaElement.QRelationships(this, 'relationships');
 	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
-export let createEmptyMetaLiteral = function(id: string): MetaLiteral {
+export let createEmptyMetaEnumLiteral = function(id: string): MetaEnumLiteral {
 	return {
 		id: id,
 		type: 'meta/enumLiteral',

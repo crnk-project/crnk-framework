@@ -39,8 +39,8 @@ public class MetaMetaTest {
 
 	@Test
 	public void testAttributesProperlyDeclaredAndNotInherited() {
-		MetaResource elementMeta = resourceProvider.getMeta(MetaElement.class, MetaResource.class);
-		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource elementMeta = resourceProvider.getMeta(MetaElement.class);
+		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class);
 
 		Assert.assertSame(elementMeta.getAttribute("id"), dataMeta.getAttribute("id"));
 		Assert.assertSame(elementMeta.getPrimaryKey(), dataMeta.getPrimaryKey());
@@ -48,7 +48,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaElementImmutable() {
-		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource dataMeta = resourceProvider.getMeta(MetaDataObject.class);
 		Assert.assertFalse(dataMeta.isUpdatable());
 		Assert.assertFalse(dataMeta.isInsertable());
 		Assert.assertFalse(dataMeta.isDeletable());
@@ -61,7 +61,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testLinksNaming() {
-		MetaResource taskMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource taskMeta = resourceProvider.getMeta(Task.class);
 		MetaAttribute linksInformation = taskMeta.getAttribute("linksInformation");
 		MetaType type = linksInformation.getType();
 		Assert.assertEquals(type.getId(), "resources.tasks$links");
@@ -71,7 +71,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaNaming() {
-		MetaResource taskMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource taskMeta = resourceProvider.getMeta(Task.class);
 		MetaAttribute metaInformation = taskMeta.getAttribute("metaInformation");
 		MetaType type = metaInformation.getType();
 		Assert.assertEquals(type.getId(), "resources.tasks$meta");
@@ -80,7 +80,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testNonMetaElementMutable() {
-		MetaResource dataMeta = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource dataMeta = resourceProvider.getMeta(Task.class);
 		Assert.assertTrue(dataMeta.isUpdatable());
 		Assert.assertTrue(dataMeta.isInsertable());
 		Assert.assertTrue(dataMeta.isDeletable());
@@ -92,7 +92,7 @@ public class MetaMetaTest {
 
 	@Test
 	public void testMetaDataObjectMeta() {
-		MetaResource meta = resourceProvider.getMeta(MetaDataObject.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(MetaDataObject.class);
 
 		MetaAttribute elementTypeAttr = meta.getAttribute("elementType");
 		Assert.assertNotNull(elementTypeAttr);

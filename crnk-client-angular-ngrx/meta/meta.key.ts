@@ -24,7 +24,7 @@ export interface MetaKeyListResult extends ManyQueryResult {
 	data?: Array<MetaKey>;
 }
 export class QMetaKey extends BeanPath<MetaKey> {
-	metaId = 'io.crnk.meta.MetaKey';
+	metaId = 'resources.meta.key';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaKey.QRelationships = new QMetaKey.QRelationships(this, 'relationships');

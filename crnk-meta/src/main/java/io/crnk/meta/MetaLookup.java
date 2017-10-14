@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -38,7 +39,6 @@ public class MetaLookup {
 
 	private Set<Class<? extends MetaElement>> metaTypes = new HashSet<>();
 
-
 	public MetaLookup() {
 		basePartition = new BaseMetaPartition();
 		addPartition(basePartition);
@@ -61,6 +61,11 @@ public class MetaLookup {
 			@Override
 			public void checkInitialized() {
 				MetaLookup.this.checkInitialized();
+			}
+
+			@Override
+			public <T> T runDiscovery(Callable<T> callable) {
+				return discover(callable);
 			}
 		});
 
@@ -116,50 +121,6 @@ public class MetaLookup {
 		return Collections.unmodifiableMap(idElementMap);
 	}
 
-
-		/*
-	public MetaElement getMeta(Type type) {
-		return getMeta(type, MetaElement.class);
-	}
-
-	public MetaArrayType getArrayMeta(Type type, Class<? extends MetaElement> elementMetaClass) {
-		return (MetaArrayType) getMetaInternal(type, elementMetaClass, false);
-	}
-
-
-
-	private MetaElement getMetaInternal(Type type, Class<? extends MetaElement> elementMetaClass, boolean nullable) {
-		PreconditionUtil.assertNotNull("type must not be null", type);
-
-		checkInitialized();
-
-		MetaElement existingElement = getUniqueElementByType(type, elementMetaClass);
-		if (existingElement == null) {
-			synchronized (this) {
-				existingElement = getUniqueElementByType(type, elementMetaClass);
-				if (existingElement == null) {
-
-					boolean wasInitializing = discovering;
-					if (!wasInitializing) {
-						discovering = true;
-					}
-
-					MetaElement allocatedMeta = allocateMeta(type, elementMetaClass, nullable);
-					if (allocatedMeta != null) {
-						add(allocatedMeta);
-					}
-
-					if (!wasInitializing) {
-						initialize();
-					}
-					return allocatedMeta;
-				}
-			}
-		}
-		return existingElement;
-	}
-*/
-
 	public void add(MetaElement element) {
 		PreconditionUtil.assertTrue("no discovering", discovering);
 		PreconditionUtil.assertNotNull("no name provided", element.getName());
@@ -195,15 +156,26 @@ public class MetaLookup {
 	}
 
 	public void initialize() {
+		discover(new Callable<Object>() {
+
+			@Override
+			public Object call() throws Exception {
+				if (!discovered) {
+					for (MetaPartition provider : partitions) {
+						provider.discoverElements();
+					}
+					discovered = true;
+				}
+				return null;
+			}
+		});
+	}
+
+	private <T> T discover(Callable<T> callable) {
 		LOGGER.debug("discovery started");
 		discovering = true;
 		try {
-			if (!discovered) {
-				for (MetaPartition provider : partitions) {
-					provider.discoverElements();
-				}
-				discovered = true;
-			}
+			T result = callable.call();
 
 			while (!initializationQueue.isEmpty()) {
 				MetaElement element = initializationQueue.pollFirst();
@@ -212,6 +184,9 @@ public class MetaLookup {
 					initialize(element);
 				}
 			}
+			return result;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		} finally {
 			LOGGER.debug("discovery completed");
 			discovering = false;
@@ -256,5 +231,14 @@ public class MetaLookup {
 
 	public List<MetaFilter> getFilters() {
 		return filters;
+	}
+
+	public <T extends MetaPartition> T getPartition(Class clazz) {
+		for (MetaPartition partition : partitions) {
+			if (clazz.isInstance(partition)) {
+				return (T) partition;
+			}
+		}
+		throw new IllegalStateException();
 	}
 }

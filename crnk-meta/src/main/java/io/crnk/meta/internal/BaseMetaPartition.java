@@ -48,6 +48,23 @@ public class BaseMetaPartition extends MetaPartitionBase {
 		registerPrimitiveType(float[].class);
 	}
 
+	@Override
+	public MetaElement getMeta(Type type) {
+		if (type instanceof Class) {
+			return super.getMeta(mapPrimitiveType((Class) type));
+		}
+		return super.getMeta(type);
+	}
+
+	protected Optional<MetaElement> addElement(Type type, MetaElement element) {
+		if (type instanceof Class) {
+			Class<?> objectType = mapPrimitiveType((Class) type);
+			return super.addElement(objectType, element);
+		} else {
+			return super.addElement(type, element);
+		}
+	}
+
 	protected Optional<MetaElement> doAllocateMetaElement(Type type) {
 		if (type instanceof Class) {
 			Class clazz = (Class) type;
@@ -118,7 +135,7 @@ public class BaseMetaPartition extends MetaPartitionBase {
 			return Double.class;
 		}
 		if (clazz == boolean.class) {
-			return boolean.class;
+			return Boolean.class;
 		}
 		return clazz;
 	}

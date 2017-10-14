@@ -21,8 +21,6 @@ public class ResourceMetaProvider extends MetaProviderBase {
 
 	private final ResourceMetaParitition partition;
 
-	private String idPrefix;
-
 	private MetaIdProvider idProvider = new MetaIdProvider();
 
 	public ResourceMetaProvider() {
@@ -30,7 +28,6 @@ public class ResourceMetaProvider extends MetaProviderBase {
 	}
 
 	public ResourceMetaProvider(String idPrefix) {
-		this.idPrefix = idPrefix;
 		this.partition = new ResourceMetaParitition(idPrefix, idProvider);
 	}
 
@@ -54,12 +51,12 @@ public class ResourceMetaProvider extends MetaProviderBase {
 				.class, MetaResourceRepository.class, MetaResourceAction.class));
 	}
 
-	public <T extends MetaElement> T getMeta(Type type, Class<T> metaClass) {
+	public <T extends MetaElement> T getMeta(Type type) {
 		context.checkInitialized();
 		return (T) partition.getMeta(type);
 	}
 
-	public <T extends MetaElement> T allocateMeta(Type type, Class<T> metaClass) {
+	public <T extends MetaElement> T allocateMeta(Type type) {
 		context.checkInitialized();
 		return (T) partition.allocateMetaElement(type).get();
 	}

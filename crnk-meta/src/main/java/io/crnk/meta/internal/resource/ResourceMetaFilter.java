@@ -8,11 +8,13 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.*;
+import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
@@ -184,8 +186,13 @@ public class ResourceMetaFilter implements MetaFilter {
 				MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 				attr.setType(metaType.asType());
 			}
+		} else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
+			MetaAttribute attr = (MetaAttribute) element;
+			MetaDataObject parent = attr.getParent();
+			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
+			MetaElement metaType = partition.allocateMetaElement(implementationType).get();
+			attr.setType(metaType.asType());
 		}
-
 	}
 
 	private ResourceInformation getResourceInformation(MetaResourceBase meta, boolean allowNull) {

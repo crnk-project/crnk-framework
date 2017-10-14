@@ -67,7 +67,7 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 	public static void clear(final EntityManager em, JpaQueryFactory factory) {
 		factory.initalize(new JpaQueryFactoryContext() {
 			@Override
-			public MetaLookup getMetaLookup() {
+			public MetaLookup getMetaPartition() {
 				MetaLookup metaLookup = new MetaLookup();
 				metaLookup.addProvider(new JpaMetaProvider());
 				return metaLookup;

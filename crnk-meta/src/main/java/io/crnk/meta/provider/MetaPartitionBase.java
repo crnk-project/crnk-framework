@@ -6,16 +6,15 @@ import io.crnk.meta.model.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class MetaPartitionBase implements MetaPartition {
 
 	protected MetaPartitionContext context;
 
 	protected Map<Type, MetaElement> typeMapping = new HashMap<>();
+
+	protected Set<Type> nonUniqueTypes = new HashSet<>();
 
 	protected MetaPartition parent;
 
@@ -26,20 +25,27 @@ public abstract class MetaPartitionBase implements MetaPartition {
 
 	public MetaElement getMeta(Type type) {
 		MetaElement metaElement = typeMapping.get(type);
-		if(metaElement == null && parent != null){
+		if (metaElement == null && parent != null) {
 			metaElement = parent.getMeta(type);
 		}
 		PreconditionUtil.assertNotNull("should not be null", metaElement);
 		return metaElement;
 	}
 
+	@Override
+	public boolean hasMeta(Type type) {
+		return typeMapping.containsKey(type) || parent != null && parent.hasMeta(type);
+	}
+
 	protected Optional<MetaElement> addElement(Type type, MetaElement element) {
 		context.addElement(element);
-		if (type != null) {
+		if (type != null && !nonUniqueTypes.contains(type)) {
 			if (typeMapping.containsKey(type)) {
-				throw new IllegalStateException(type.toString());
+				nonUniqueTypes.add(type);
+				typeMapping.remove(type);
+			} else {
+				typeMapping.put(type, element);
 			}
-			typeMapping.put(type, element);
 		}
 		return Optional.of(element);
 	}
@@ -56,6 +62,13 @@ public abstract class MetaPartitionBase implements MetaPartition {
 			return Optional.of(typeMapping.get(type));
 		}
 
+		if (type instanceof ParameterizedType) {
+			Optional<MetaElement> element = allocateMap((ParameterizedType) type);
+			if (element.isPresent()) {
+				return element;
+			}
+		}
+
 		Optional<MetaElement> element = allocateCollectionType(type);
 		if (element.isPresent()) {
 			return element;
@@ -66,12 +79,6 @@ public abstract class MetaPartitionBase implements MetaPartition {
 			return element;
 		}
 
-		if (type instanceof ParameterizedType) {
-			element = allocateMap((ParameterizedType) type);
-			if (element.isPresent()) {
-				return element;
-			}
-		}
 
 		Optional<MetaElement> optElement = doAllocateMetaElement(type);
 		PreconditionUtil.assertNotNull("must be not null", optElement);
@@ -117,10 +124,8 @@ public abstract class MetaPartitionBase implements MetaPartition {
 			}
 		}
 
-		if (type instanceof ParameterizedType) {
+		if (type instanceof ParameterizedType && ((ParameterizedType) type).getActualTypeArguments().length == 1) {
 			ParameterizedType paramType = (ParameterizedType) type;
-
-			PreconditionUtil.assertEquals("expected single type argument", 1, paramType.getActualTypeArguments().length);
 			Optional<MetaType> elementType = (Optional) allocateMetaElement(paramType.getActualTypeArguments()[0]);
 			if (!elementType.isPresent()) {
 				return Optional.empty();

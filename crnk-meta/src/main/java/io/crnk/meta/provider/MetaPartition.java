@@ -14,4 +14,6 @@ public interface MetaPartition {
 	Optional<MetaElement> allocateMetaElement(Type type);
 
 	MetaElement getMeta(Type type);
+
+	boolean hasMeta(Type type);
 }

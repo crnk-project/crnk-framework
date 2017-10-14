@@ -65,7 +65,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findOneTargetReturnsResult() {
-		MetaResource resource = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 
 		MetaKey key = (MetaKey) repo.findOneTarget(resource.getId(), "primaryKey", new QuerySpec(MetaElement.class));
 		Assert.assertNotNull(key);
@@ -74,7 +74,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findOneTargetReturnsNull() {
-		MetaResource resource = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 		resource.setPrimaryKey(null);
 
 		MetaKey key = (MetaKey) repo.findOneTarget(resource.getId(), "primaryKey", new QuerySpec(MetaElement.class));
@@ -88,7 +88,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findManyTargetReturnsResult() {
-		MetaResource resource = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 
 		ResourceList<MetaElement> children = repo.findManyTargets(resource.getId(), "children", new QuerySpec(MetaElement
 				.class));
@@ -98,7 +98,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test(expected = ClassCastException.class)
 	public void findManyTargetCannotBeUsedForSingeValuesRelations() {
-		MetaResource resource = resourceProvider.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 		repo.findManyTargets(resource.getId(), "primaryKey", new QuerySpec(MetaElement
 				.class));
 	}

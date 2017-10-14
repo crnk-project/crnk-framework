@@ -19,21 +19,21 @@ public class MetaPrimitiveTypeTest extends AbstractMetaTest {
 
 	@Test
 	public void testJson() {
-		MetaElement type = resourceProvider.getMeta(JsonNode.class, MetaElement.class);
+		MetaElement type = resourceProvider.getMeta(JsonNode.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json", type.getId());
 	}
 
 	@Test
 	public void testJsonObject() {
-		MetaElement type = resourceProvider.getMeta(ObjectNode.class, MetaElement.class);
+		MetaElement type = resourceProvider.getMeta(ObjectNode.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json.object", type.getId());
 	}
 
 	@Test
 	public void testJsonArray() {
-		MetaElement type = resourceProvider.getMeta(ArrayNode.class, MetaElement.class);
+		MetaElement type = resourceProvider.getMeta(ArrayNode.class);
 		Assert.assertEquals(MetaPrimitiveType.class, type.getClass());
 		Assert.assertEquals("base.json.array", type.getId());
 	}

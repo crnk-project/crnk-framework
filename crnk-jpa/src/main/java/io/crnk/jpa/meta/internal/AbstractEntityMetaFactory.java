@@ -3,7 +3,10 @@ package io.crnk.jpa.meta.internal;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEntityAttribute;
 import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimaryKey;
 
 import javax.persistence.*;
 import java.lang.annotation.Annotation;
@@ -11,10 +14,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> extends AbstractJpaDataObjectProvider<T> {
+public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> extends AbstractJpaDataObjectFactory<T> {
 
 	@Override
-	public MetaElement allocateElement(Type type) {
+	public MetaElement create(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
 		MetaElement superMeta = getSuperMeta(superClazz);
@@ -36,7 +39,7 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 
 	private MetaElement getSuperMeta(Class<?> superClazz) {
 		if (superClazz.getAnnotation(Entity.class) != null || superClazz.getAnnotation(MappedSuperclass.class) != null) {
-			return context.getLookup().getMeta(superClazz, MetaJpaDataObject.class);
+			return context.allocate(superClazz);
 		}
 		return null;
 	}
@@ -174,44 +177,4 @@ public abstract class AbstractEntityMetaProvider<T extends MetaJpaDataObject> ex
 		return types.length > 0;
 	}
 
-	@Override
-	public void onInitialized(MetaElement element) {
-		super.onInitialized(element);
-		if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute
-				&& ((MetaAttribute) element).getOppositeAttribute() == null) {
-			MetaAttribute attr = (MetaAttribute) element;
-			String mappedBy = getMappedBy(attr);
-			if (mappedBy != null) {
-				MetaType attrType = attr.getType();
-				MetaDataObject oppositeType = attrType.getElementType().asDataObject();
-				if (!mappedBy.contains(".")) {
-					MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
-					attr.setOppositeAttribute(oppositeAttr);
-				} else {
-					// references within embeddables not yet supported
-				}
-			}
-		}
-	}
-
-	private String getMappedBy(MetaAttribute attr) {
-		ManyToMany manyManyAnnotation = attr.getAnnotation(ManyToMany.class);
-		OneToMany oneManyAnnotation = attr.getAnnotation(OneToMany.class);
-		OneToOne oneOneAnnotation = attr.getAnnotation(OneToOne.class);
-		String mappedBy = null;
-		if (manyManyAnnotation != null) {
-			mappedBy = manyManyAnnotation.mappedBy();
-		}
-		if (oneManyAnnotation != null) {
-			mappedBy = oneManyAnnotation.mappedBy();
-		}
-		if (oneOneAnnotation != null) {
-			mappedBy = oneOneAnnotation.mappedBy();
-		}
-
-		if (mappedBy != null && mappedBy.length() == 0) {
-			mappedBy = null;
-		}
-		return mappedBy;
-	}
 }
