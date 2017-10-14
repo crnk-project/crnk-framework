@@ -1,4 +1,4 @@
-package io.crnk.client.dynamic;
+package io.crnk.test.mock.dynamic;
 
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.queryspec.QuerySpec;
@@ -14,13 +14,16 @@ public class DynamicResourceRepository extends ResourceRepositoryBase<Resource, 
 
 	private static Map<String, Resource> RESOURCES = new HashMap<>();
 
-	public DynamicResourceRepository() {
+	private final String resourceType;
+
+	public DynamicResourceRepository(String resourceType) {
 		super(Resource.class);
+		this.resourceType = resourceType;
 	}
 
 	@Override
 	public String getResourceType() {
-		return "dynamic";
+		return resourceType;
 	}
 
 	@Override

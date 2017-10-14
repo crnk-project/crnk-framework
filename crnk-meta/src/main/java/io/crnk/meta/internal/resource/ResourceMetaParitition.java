@@ -220,8 +220,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);
-		meta.setName(metaResource.getName() + "$Repository");
-		meta.setId(metaResource.getId() + "$Repository");
+		meta.setName(metaResource.getName() + "$repository");
+		meta.setId(metaResource.getId() + "$repository");
 
 		for (RepositoryAction action : repositoryInformation.getActions().values()) {
 			MetaResourceAction metaAction = new MetaResourceAction();

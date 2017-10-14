@@ -1,9 +1,7 @@
-package io.crnk.client.dynamic;
+package io.crnk.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.client.AbstractClientTest;
-import io.crnk.client.CrnkTestFeature;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -32,40 +30,40 @@ public class DynamicClientTest extends AbstractClientTest {
 	}
 
 	protected void setupFeature(CrnkTestFeature feature) {
-		feature.addModule(new DynamicModule());
+		feature.addModule(new io.crnk.test.mock.dynamic.DynamicModule());
 	}
 
 	@Test
 	public void testResource() throws JsonProcessingException, IOException {
-		ResourceRepositoryV2<Resource, String> repository = client.getRepositoryForPath("dynamic");
+		ResourceRepositoryV2<Resource, String> repository = client.getRepositoryForPath("dynamic1");
 		ObjectMapper mapper = new ObjectMapper();
 
 		Resource resource = new Resource();
 		resource.setId("john");
-		resource.setType("dynamic");
+		resource.setType("dynamic1");
 		resource.getAttributes().put("value", mapper.readTree("\"doe\""));
 		repository.create(resource);
 
-		ResourceList<Resource> list = repository.findAll(new QuerySpec("dynamic"));
+		ResourceList<Resource> list = repository.findAll(new QuerySpec("dynamic1"));
 		Assert.assertEquals(1, list.size());
 		Assert.assertEquals("doe", list.get(0).getAttributes().get("value").asText());
 
 		resource.getAttributes().put("value", mapper.readTree("\"joe\""));
 		repository.save(resource);
 
-		list = repository.findAll(new QuerySpec("dynamic"));
+		list = repository.findAll(new QuerySpec("dynamic1"));
 		Assert.assertEquals(1, list.size());
 		Assert.assertEquals("joe", list.get(0).getAttributes().get("value").asText());
 
 		repository.delete(resource.getId());
-		list = repository.findAll(new QuerySpec("dynamic"));
+		list = repository.findAll(new QuerySpec("dynamic1"));
 		Assert.assertEquals(0, list.size());
 	}
 
 	@Test
 	public void testRelationship() throws JsonProcessingException, IOException {
-		ResourceRepositoryV2<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic");
-		RelationshipRepositoryV2<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic", "tasks");
+		ResourceRepositoryV2<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
+		RelationshipRepositoryV2<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
 		ObjectMapper mapper = new ObjectMapper();
 
 
@@ -78,7 +76,7 @@ public class DynamicClientTest extends AbstractClientTest {
 
 		Resource source = new Resource();
 		source.setId("john");
-		source.setType("dynamic");
+		source.setType("dynamic1");
 		source.getAttributes().put("value", mapper.readTree("\"doe\""));
 		resourceRepository.create(source);
 

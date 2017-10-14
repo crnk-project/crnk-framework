@@ -397,7 +397,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	@Test
 	public void testRepository() {
 		MetaResource resourceMeta = resourceProvider.getMeta(Schedule.class);
-		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "$Repository");
+		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "$repository");
 		Assert.assertEquals(resourceMeta, meta.getResourceType());
 		Assert.assertNotNull(meta.getListLinksType());
 		Assert.assertNotNull(meta.getListMetaType());
@@ -422,5 +422,23 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(MetaRepositoryActionType.RESOURCE, resourceActionMeta.getActionType());
 
 	}
+
+	@Test
+	public void testDynamicResources() {
+		for (int i = 0; i < 2; i++) {
+			MetaResource meta = (MetaResource) lookup.getMetaById().get("resources.dynamic" + i);
+			Assert.assertNotNull(meta);
+
+			MetaAttribute parentAttr = meta.getAttribute("parent");
+			Assert.assertNotNull(meta.getAttribute("id"));
+			Assert.assertNotNull(meta.getAttribute("value"));
+			Assert.assertNotNull(parentAttr);
+			Assert.assertNotNull(meta.getAttribute("children"));
+
+			Assert.assertEquals("children", parentAttr.getOppositeAttribute().getName());
+			Assert.assertEquals("dynamic" + i, meta.getResourceType());
+		}
+	}
+
 
 }

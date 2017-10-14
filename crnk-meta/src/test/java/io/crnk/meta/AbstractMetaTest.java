@@ -21,6 +21,7 @@ public abstract class AbstractMetaTest {
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.addModule(new TestModule());
+		boot.addModule(new io.crnk.test.mock.dynamic.DynamicModule());
 		configure();
 		boot.boot();
 
