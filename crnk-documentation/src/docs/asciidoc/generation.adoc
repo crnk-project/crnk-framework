@@ -79,10 +79,10 @@ typescriptGen{
 		// outputDir = ...
 	}
 
-	includes = ['ch.adnovum.moap.movie.somePackage']
-	excludes = ['ch.adnovum.moap.movie.somePackage.otherPackage']
+	includes = ['resources.task']
+	excludes = ['resources.project']
 
-	packageMapping['ch.adnovum.moap.movie.management'] = '@adnovum/moap-movie-management-api'
+	packageMapping['resources.something'] = '@crnk/some-demo-library'
 	peerDependencies['ngrx-json-api'] = '>=2.0.0-beta.6'
 	generateExpressions = true
 
@@ -98,12 +98,9 @@ typescriptGen.init()
 - `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
 - by default the package version matches the npm version.
 - `crnk-meta` is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
-  Important to know is that every object is assigned a string-based meta id. For typical, simpler use cases this matches
-  the package resp. class name. But for more advanced use cases those may differ.
-- a mapping of Java package name (resp. `MetaElement.id`) to npm packages must be specified.
-  Only resources are generated whose package matches the chosen `npm.packageName`.
-  All other resources are imported as external NPM dependency.
-- `includes` and `excludes` allow to include and exclude packages from generation.
+  Important to know is that every object is assigned a string-based meta id. By default the
+  meta id matches `resources.<resourceType>`. For example a Task resource with resource type `task` has a
+  `resources.task` meta id.
 - applying `crnk-gen-typescript` results in a new `assembleTypescript` task. Consumers may want to add
   that task to `assemble` as dependency.
 - `runtime.configuration` sets the Gradle configuration to use to obtain a classpath. In the given example
@@ -116,6 +113,11 @@ typescriptGen.init()
 - `genDir` specifies where source files are generated to.
 - `npm.outputDirectory` specifies where the compiled NPM package should be placed (`build/npm` as default).
 - `generateExpressions` specifies whether QueryDSL like classes should be generated (`false` as default).
+- `packageMapping` allows to specify into which libraries resources belong to. By default all resources have
+  a `resources.` meta id prefix and go into the currently generated package. In the example above, all resources with a
+  `something/*` resource type resp. `resources.something` meta id prefix are included from a `@crnk/some-demo-library`
+  library and no longer get generated manually.
+- `includes` and `excludes` allow to include and exclude resources from generation based on their meta id.
 
 
 NOTE: the generator plugin is not yet included in any example applications. It is not possible to
