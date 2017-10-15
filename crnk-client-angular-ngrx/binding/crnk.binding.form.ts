@@ -8,9 +8,10 @@ import "rxjs/add/operator/distinct";
 import "rxjs/add/operator/switch";
 import "rxjs/add/operator/finally";
 import "rxjs/add/operator/share";
-import {AbstractControl, NgForm} from "@angular/forms";
+import {NgForm} from "@angular/forms";
 import {
-	NgrxJsonApiService, NgrxJsonApiStore,
+	NgrxJsonApiService,
+	NgrxJsonApiStore,
 	NgrxJsonApiStoreData,
 	Resource,
 	ResourceError,
@@ -111,6 +112,8 @@ export class FormBinding {
 
 	private formControlsInitialized = false;
 
+	private _storeDataSnapshot?: NgrxJsonApiStoreData = null;
+
 
 	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
 				private store: Store<any>) {
@@ -135,6 +138,7 @@ export class FormBinding {
 			.do(resource => this.primaryResourceId = {type: resource.type, id: resource.id})
 			.withLatestFrom(this.store, (resource, store) => {
 				let jsonapiState = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
+				this._storeDataSnapshot = jsonapiState.data;
 				this.mapResourceToControlErrors(jsonapiState.data);
 				return resource;
 			})
@@ -213,7 +217,7 @@ export class FormBinding {
 						mapped = true;
 					}
 				}
-				if(!mapped){
+				if (!mapped) {
 					newUnmappedErrors.push(resourceError);
 				}
 			}
@@ -284,16 +288,22 @@ export class FormBinding {
 			const formRef = this.parseResourceFieldRef(formName);
 			if (formRef.path.startsWith('attributes.') || formRef.path.startsWith('relationships.')) {
 				const key = formRef.resourceId.type + '_' + formRef.resourceId.id;
-				let patchedResource = patchedResourceMap[key];
-				if (!patchedResource) {
-					patchedResource = {
-						id: formRef.resourceId.id,
-						type: formRef.resourceId.type,
-						attributes: {}
-					};
-					patchedResourceMap[key] = patchedResource;
+
+				const storeTypeSnapshot = this._storeDataSnapshot[formRef.resourceId.type];
+				const storeResourceSnapshot = storeTypeSnapshot ? storeTypeSnapshot[formRef.resourceId.id] : undefined;
+				const storeValueSnapshot = storeResourceSnapshot ? _.get(storeResourceSnapshot, formRef.path) : undefined;
+				if (!_.isEqual(storeValueSnapshot, value)) {
+					let patchedResource = patchedResourceMap[key];
+					if (!patchedResource) {
+						patchedResource = {
+							id: formRef.resourceId.id,
+							type: formRef.resourceId.type,
+							attributes: {}
+						};
+						patchedResourceMap[key] = patchedResource;
+					}
+					_.set(patchedResource, formRef.path, value);
 				}
-				_.set(patchedResource, formRef.path, value);
 			}
 		}
 
