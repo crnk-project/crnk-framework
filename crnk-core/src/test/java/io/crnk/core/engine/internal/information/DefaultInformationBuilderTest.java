@@ -76,12 +76,16 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void checkResourceRepository() {
-		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository(Task.class, "tasks");
+		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks").build();
+
+		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository();
+		repositoryBuilder.setResourceInformation(resourceInformation);
 		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
 		repositoryBuilder.setAccess(expectedAccess);
 		ResourceRepositoryInformation repositoryInformation = repositoryBuilder.build();
 		RepositoryMethodAccess actualAccess = repositoryInformation.getAccess();
 		Assert.assertEquals(expectedAccess, actualAccess);
+		Assert.assertSame(resourceInformation, repositoryInformation.getResourceInformation().get());
 	}
 
 	@Test
