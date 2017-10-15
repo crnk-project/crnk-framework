@@ -60,6 +60,9 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static void addImport(TSSource refSource, TSSource source, TSNamedElement type) {
+		if (type instanceof TSAny) {
+			return;
+		}
 		String path = computeImportPath(refSource, source);
 		TSImport element = source.getImport(path);
 		if (element == null) {
@@ -72,6 +75,12 @@ public class TSImportProcessor implements TSSourceProcessor {
 
 	private static String computeImportPath(TSSource refSource, TSSource source) {
 		StringBuilder pathBuilder = new StringBuilder();
+		if (refSource.getNpmPackage() == null) {
+			throw new IllegalStateException(refSource.getName());
+		}
+		if (source.getNpmPackage() == null) {
+			throw new IllegalStateException(source.getName());
+		}
 		if (!source.getNpmPackage().equals(refSource.getNpmPackage())) {
 			appendThirdPartyImport(pathBuilder, refSource);
 		} else {
