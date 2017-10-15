@@ -23,6 +23,8 @@ public interface InformationBuilder {
 
 	interface ResourceRepository {
 
+		void setResourceInformation(ResourceInformation resourceInformation);
+
 		void setAccess(RepositoryMethodAccess access);
 
 		ResourceRepositoryInformation build();
@@ -75,7 +77,7 @@ public interface InformationBuilder {
 
 	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
-	ResourceRepository createResourceRepository(Class<?> resourceClass, String resourceType);
+	ResourceRepository createResourceRepository();
 
 	Resource createResource(Class<?> resourceClass, String resourceType);
 

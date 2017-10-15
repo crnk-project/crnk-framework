@@ -42,19 +42,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		return repository;
 	}
 
-	public ResourceRepository createResourceRepository() {
-		return createResourceRepository(null, null);
-	}
-
 	@Override
-	public ResourceRepository createResourceRepository(Class<?> resourceClass, String resourceType) {
-		DefaultResource resource = new DefaultResource();
-		resource.resourceClass(resourceClass);
-		resource.resourceType(resourceType);
-
-		DefaultResourceRepository repository = new DefaultResourceRepository();
-		repository.resource = resource;
-		return repository;
+	public ResourceRepository createResourceRepository() {
+		return new DefaultResourceRepository();
 	}
 
 	@Override
@@ -85,23 +75,23 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 	public class DefaultResourceRepository implements ResourceRepository {
 
-		private DefaultResource resource;
+		private ResourceInformation resourceInformation;
 
 		private Map<String, RepositoryAction> actions = new HashMap<>();
 
 		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
 
-		public DefaultResource resource() {
-			return resource;
+		@Override
+		public void setResourceInformation(ResourceInformation resourceInformation) {
+			this.resourceInformation = resourceInformation;
 		}
 
+		@Override
 		public void setAccess(RepositoryMethodAccess access) {
 			this.access = access;
 		}
 
 		public ResourceRepositoryInformation build() {
-			ResourceInformation resourceInformation = resource.build();
-
 			return new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
 					resourceInformation, actions, access);
 		}
