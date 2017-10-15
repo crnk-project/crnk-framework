@@ -34,7 +34,7 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 
 	public JpaEntityRepository(JpaModule module, JpaRepositoryConfig<T> config) {
 		super(module, config);
-		this.meta = module.getJpaMetaLookup().getMeta(config.getEntityClass(), MetaEntity.class);
+		this.meta = module.getJpaMetaProvider().getMeta(config.getEntityClass());
 		this.primaryKeyAttr = JpaRepositoryUtils.getPrimaryKeyAttr(meta);
 	}
 

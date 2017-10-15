@@ -23,7 +23,7 @@ export interface MetaResourceRepositoryListResult extends ManyQueryResult {
 	data?: Array<MetaResourceRepository>;
 }
 export class QMetaResourceRepository extends BeanPath<MetaResourceRepository> {
-	metaId = 'io.crnk.meta.resource.MetaResourceRepository';
+	metaId = 'resources.meta.resourceRepository';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaResourceRepository.QRelationships = new QMetaResourceRepository.QRelationships(this, 'relationships');

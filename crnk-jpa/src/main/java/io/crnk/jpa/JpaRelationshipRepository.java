@@ -48,7 +48,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		JpaRepositoryConfig<S> sourceMapping = module.getRepositoryConfig(sourceResourceClass);
 		this.sourceEntityClass = sourceMapping.getEntityClass();
 		this.sourceMapper = sourceMapping.getMapper();
-		this.entityMeta = module.getJpaMetaLookup().getMeta(sourceEntityClass, MetaEntity.class);
+		this.entityMeta = module.getJpaMetaProvider().getMeta(sourceEntityClass);
 	}
 
 	@Override

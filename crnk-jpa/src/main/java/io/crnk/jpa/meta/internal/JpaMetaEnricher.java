@@ -1,32 +1,45 @@
 package io.crnk.jpa.meta.internal;
 
+import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.provider.MetaFilter;
+import io.crnk.meta.provider.MetaFilterBase;
+import io.crnk.meta.provider.MetaProvider;
 import io.crnk.meta.provider.MetaProviderBase;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-public class JpaResourceMetaEnricher extends MetaProviderBase {
+public class JpaMetaEnricher extends MetaFilterBase {
 
 
-	private MetaLookup jpaMetaLookup;
+	private JpaMetaProvider metaProvider;
 
-	public JpaResourceMetaEnricher(MetaLookup jpaMetaLookup) {
-		this.jpaMetaLookup = jpaMetaLookup;
+	public JpaMetaEnricher() {
+	}
+
+	public MetaProvider getProvider() {
+		return new MetaProviderBase() {
+
+			@Override
+			public Collection<MetaFilter> getFilters() {
+				return Arrays.asList((MetaFilter) JpaMetaEnricher.this);
+			}
+		};
 	}
 
 	@Override
 	public void onInitialized(MetaElement element) {
-
 		if (element instanceof MetaJsonObject) {
 			MetaJsonObject jsonDataObject = (MetaJsonObject) element;
 			Class<?> implementationClass = jsonDataObject.getImplementationClass();
 
-			MetaJpaDataObject jpaDataObject = jpaMetaLookup.getMeta(implementationClass, MetaJpaDataObject.class, true);
-			if (jpaDataObject != null) {
+			if (metaProvider.hasMeta(implementationClass)) {
+				MetaJpaDataObject jpaDataObject = (MetaJpaDataObject) metaProvider.getMeta(implementationClass);
 
 				if (jpaDataObject.getPrimaryKey() != null && jsonDataObject.getPrimaryKey() != null) {
 					jsonDataObject.getPrimaryKey().setGenerated(jpaDataObject.getPrimaryKey().isGenerated());
@@ -46,5 +59,9 @@ public class JpaResourceMetaEnricher extends MetaProviderBase {
 				}
 			}
 		}
+	}
+
+	public void setMetaProvider(JpaMetaProvider metaProvider) {
+		this.metaProvider = metaProvider;
 	}
 }

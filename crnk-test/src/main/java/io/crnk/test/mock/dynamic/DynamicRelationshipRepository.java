@@ -1,4 +1,4 @@
-package io.crnk.client.dynamic;
+package io.crnk.test.mock.dynamic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Resource;
@@ -17,6 +17,11 @@ public class DynamicRelationshipRepository implements UntypedRelationshipReposit
 
 	private static Map<String, Resource> RESOURCES = new HashMap<>();
 
+	private String resourceType;
+
+	public DynamicRelationshipRepository(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
 	public static void clear() {
 		RESOURCES.clear();
@@ -24,12 +29,12 @@ public class DynamicRelationshipRepository implements UntypedRelationshipReposit
 
 	@Override
 	public String getSourceResourceType() {
-		return "dynamic";
+		return resourceType;
 	}
 
 	@Override
 	public String getTargetResourceType() {
-		return "dynamic";
+		return resourceType;
 	}
 
 	@Override
@@ -83,7 +88,7 @@ public class DynamicRelationshipRepository implements UntypedRelationshipReposit
 		ObjectMapper mapper = new ObjectMapper();
 		Resource resource = new Resource();
 		resource.setId("john");
-		resource.setType("tasks");
+		resource.setType(resourceType);
 		try {
 			resource.getAttributes().put("value", mapper.readTree("\"doe\""));
 		} catch (IOException e) {

@@ -20,7 +20,7 @@ export interface MetaMapTypeListResult extends ManyQueryResult {
 	data?: Array<MetaMapType>;
 }
 export class QMetaMapType extends BeanPath<MetaMapType> {
-	metaId = 'io.crnk.meta.MetaMapType';
+	metaId = 'resources.meta.mapType';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaMapType.QRelationships = new QMetaMapType.QRelationships(this, 'relationships');

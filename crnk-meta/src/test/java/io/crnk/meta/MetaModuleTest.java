@@ -1,10 +1,5 @@
 package io.crnk.meta;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
@@ -23,6 +18,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class MetaModuleTest {
 
@@ -47,14 +47,6 @@ public class MetaModuleTest {
 		boot.addModule(metaModule);
 		boot.boot();
 	}
-
-	@Test
-	public void checkDeprecatedMethods() {
-		metaModule.putIdMapping("package1", "other1");
-		metaModule.putIdMapping("package2", MetaResource.class, "other2");
-		Assert.assertEquals(2, metaModuleConfig.getIdMappings().size());
-	}
-
 
 	@Test
 	public void testTransitiveRegistrationOfProviderDependencies() {

@@ -2,7 +2,7 @@ package io.crnk.meta.internal;
 
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.provider.MetaProvider;
+import io.crnk.meta.provider.MetaFilter;
 
 import java.util.List;
 
@@ -21,9 +21,9 @@ public class MetaUtils {
 
 
 	public static MetaElement adjustForRequest(MetaLookup lookup, MetaElement element) {
-		List<MetaProvider> providers = lookup.getProviders();
-		for (MetaProvider provider : providers) {
-			element = provider.adjustForRequest(element);
+		List<MetaFilter> filters = lookup.getFilters();
+		for (MetaFilter filter : filters) {
+			element = filter.adjustForRequest(element);
 			if (element == null) {
 				break;
 			}

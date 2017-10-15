@@ -11,7 +11,7 @@ export interface MetaInterfaceListResult extends ManyQueryResult {
 	data?: Array<MetaInterface>;
 }
 export class QMetaInterface extends BeanPath<MetaInterface> {
-	metaId = 'io.crnk.meta.MetaInterface';
+	metaId = 'resources.meta.interface';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaDataObject.QRelationships = new QMetaDataObject.QRelationships(this, 'relationships');

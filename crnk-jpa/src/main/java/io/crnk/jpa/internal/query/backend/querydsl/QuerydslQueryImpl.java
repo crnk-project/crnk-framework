@@ -5,7 +5,7 @@ import io.crnk.jpa.internal.query.AbstractJpaQueryImpl;
 import io.crnk.jpa.internal.query.ComputedAttributeRegistryImpl;
 import io.crnk.jpa.query.querydsl.QuerydslQuery;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.provider.MetaPartition;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -17,16 +17,16 @@ public class QuerydslQueryImpl<T> extends AbstractJpaQueryImpl<T, QuerydslQueryB
 
 	private List<QuerydslTranslationInterceptor> translationInterceptors;
 
-	public QuerydslQueryImpl(MetaLookup metaLookup, EntityManager em, Class<T> clazz, ComputedAttributeRegistryImpl computedAttrs,
+	public QuerydslQueryImpl(MetaPartition metaPartition, EntityManager em, Class<T> clazz, ComputedAttributeRegistryImpl computedAttrs,
 							 List<QuerydslTranslationInterceptor> translationInterceptors) {
-		super(metaLookup, em, clazz, computedAttrs);
+		super(metaPartition, em, clazz, computedAttrs);
 		this.translationInterceptors = translationInterceptors;
 		queryFactory = new JPAQueryFactory(em);
 	}
 
-	public QuerydslQueryImpl(MetaLookup metaLookup, EntityManager em, Class<?> clazz, ComputedAttributeRegistryImpl virtualAttrs,
+	public QuerydslQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> clazz, ComputedAttributeRegistryImpl virtualAttrs,
 							 List<QuerydslTranslationInterceptor> translationInterceptors, String attrName, List<?> entityIds) {
-		super(metaLookup, em, clazz, virtualAttrs, attrName, entityIds);
+		super(metaPartition, em, clazz, virtualAttrs, attrName, entityIds);
 		this.translationInterceptors = translationInterceptors;
 		queryFactory = new JPAQueryFactory(em);
 	}

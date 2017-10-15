@@ -160,9 +160,9 @@ In the following example we make use of the second option:
 [source]
 .DynamicResourceRepository.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs1]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicResourceRepository.java[tags=docs1]
 ...
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs2]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicResourceRepository.java[tags=docs2]
 ----
 
 This new repository can be registered to Crnk with a module:
@@ -170,7 +170,7 @@ This new repository can be registered to Crnk with a module:
 [source]
 .DynamicModule
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicModule.java[tags=docs]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicModule.java[tags=docs]
 ----
 
 A new `RegistryEntry` is created and registered with Crnk. It provides information about:
@@ -179,7 +179,9 @@ A new `RegistryEntry` is created and registered with Crnk. It provides informati
 - the repositories and instances thereof.
 
 Have a look at the complete example
-in https://github.com/crnk-project/crnk-framework/tree/master/crnk-client/src/test/java/io/crnk/client/dynamic[`crnk-client`].
+in https://github.com/crnk-project/crnk-framework/tree/master/crnk-client/src/test/java/io/crnk/client/dynamic[`crnk-client`]
+and
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-test/src/main/java/io/crnk/test/mock/dynamic[`crnk-test`]
 There is a further example test case and relationship repository.
 
 ### Registering repositories at runtime

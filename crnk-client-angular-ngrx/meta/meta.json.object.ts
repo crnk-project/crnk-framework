@@ -11,7 +11,7 @@ export interface MetaJsonObjectListResult extends ManyQueryResult {
 	data?: Array<MetaJsonObject>;
 }
 export class QMetaJsonObject extends BeanPath<MetaJsonObject> {
-	metaId = 'io.crnk.meta.resource.MetaJsonObject';
+	metaId = 'resources.meta.jsonObject';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaDataObject.QRelationships = new QMetaDataObject.QRelationships(this, 'relationships');

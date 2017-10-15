@@ -18,7 +18,7 @@ export interface MetaResourceFieldListResult extends ManyQueryResult {
 	data?: Array<MetaResourceField>;
 }
 export class QMetaResourceField extends BeanPath<MetaResourceField> {
-	metaId = 'io.crnk.meta.resource.MetaResourceField';
+	metaId = 'resources.meta.resourceField';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	attributes: QMetaResourceField.QAttributes = new QMetaResourceField.QAttributes(this, 'attributes');

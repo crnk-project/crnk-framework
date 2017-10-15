@@ -16,7 +16,6 @@ import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,13 +31,14 @@ public class JpaResourceInformationProviderTest {
 
 	private JpaResourceInformationProvider builder;
 	private MetaLookup lookup;
+	private JpaMetaProvider jpaMetaProvider;
 
 	@Before
 	public void setup() {
+		jpaMetaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
 		lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.addProvider(new ResourceMetaProvider(false));
-		builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), lookup);
+		lookup.addProvider(jpaMetaProvider);
+		builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper()));
 	}
 
@@ -202,7 +202,7 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertFalse(columnAnnotatedField.getAccess().isPostable());
 		Assert.assertTrue(columnAnnotatedField.getAccess().isPatchable());
 
-		MetaDataObject meta = lookup.getMeta(AnnotationTestEntity.class).asDataObject();
+		MetaDataObject meta = jpaMetaProvider.discoverMeta(AnnotationTestEntity.class).asDataObject();
 		Assert.assertTrue(meta.getAttribute("lobValue").isLob());
 		Assert.assertFalse(meta.getAttribute("fieldAnnotatedValue").isLob());
 	}
@@ -223,7 +223,7 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertFalse(field.getAccess().isPostable());
 		Assert.assertFalse(field.getAccess().isPatchable());
 
-		MetaDataObject meta = lookup.getMeta(AnnotationTestEntity.class).asDataObject();
+		MetaDataObject meta = jpaMetaProvider.discoverMeta(AnnotationTestEntity.class).asDataObject();
 		MetaAttribute attribute = meta.getAttribute("readOnlyValue");
 
 		Assert.assertFalse(attribute.isInsertable());
@@ -256,7 +256,7 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertFalse(columnAnnotatedField.getAccess().isPostable());
 		Assert.assertTrue(columnAnnotatedField.getAccess().isPatchable());
 
-		MetaDataObject meta = lookup.getMeta(AnnotationMappedSuperclassEntity.class).asDataObject();
+		MetaDataObject meta = jpaMetaProvider.discoverMeta(AnnotationMappedSuperclassEntity.class).asDataObject();
 		Assert.assertTrue(meta.getAttribute("lobValue").isLob());
 		Assert.assertFalse(meta.getAttribute("fieldAnnotatedValue").isLob());
 	}

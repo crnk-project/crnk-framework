@@ -27,7 +27,7 @@ ClassLoader getClassLoader(Configuration config) {
 }
 
 task generateMetaStubs {
-	def outputDir = file("${projectDir}/meta")
+	def outputDir = file("${projectDir}")
 	def genConfig = configurations.getByName("genRuntime")
 	inputs.files genConfig.asFileTree
 	outputs.dir outputDir

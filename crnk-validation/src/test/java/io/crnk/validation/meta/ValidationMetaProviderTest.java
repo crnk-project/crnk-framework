@@ -17,17 +17,20 @@ public class ValidationMetaProviderTest {
 
 	private MetaLookup lookup;
 
+	private ResourceMetaProvider resourceMetaProvider;
+
 	private void setup(boolean addValidationProvider) {
 		CrnkBoot boot = new CrnkBoot();
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.setServiceDiscovery(
-				new ReflectionsServiceDiscovery("io.crnk.validation.mock.model", new SampleJsonServiceLocator()));
+				new ReflectionsServiceDiscovery("io.crnk.validation.mock", new SampleJsonServiceLocator()));
 		boot.boot();
 
+		resourceMetaProvider = new ResourceMetaProvider();
 		lookup = new MetaLookup();
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
-		lookup.addProvider(new ResourceMetaProvider());
+		lookup.addProvider(resourceMetaProvider);
 		if (addValidationProvider) {
 			lookup.addProvider(new ValidationMetaProvider());
 		}
@@ -37,7 +40,7 @@ public class ValidationMetaProviderTest {
 	@Test
 	public void testNotNullNotDisabledWithoutValidationProvider() {
 		setup(false);
-		MetaResourceBase meta = lookup.getMeta(Task.class, MetaResourceBase.class);
+		MetaResourceBase meta = resourceMetaProvider.getMeta(Task.class);
 		MetaAttribute attr = meta.getAttribute("name");
 		Assert.assertTrue(attr.isNullable());
 	}
@@ -45,7 +48,7 @@ public class ValidationMetaProviderTest {
 	@Test
 	public void testNotNullDisablesNullablity() {
 		setup(true);
-		MetaResourceBase meta = lookup.getMeta(Task.class, MetaResourceBase.class);
+		MetaResourceBase meta = resourceMetaProvider.getMeta(Task.class);
 		MetaAttribute attr = meta.getAttribute("name");
 		Assert.assertFalse(attr.isNullable());
 	}

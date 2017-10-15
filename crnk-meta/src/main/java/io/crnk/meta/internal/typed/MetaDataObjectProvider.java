@@ -1,24 +1,23 @@
-package io.crnk.meta.internal;
-
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
+package io.crnk.meta.internal.typed;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaFilter;
 
-public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<MetaDataObject> {
+import java.lang.reflect.Type;
+
+public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<MetaDataObject> implements MetaFilter {
 
 	@Override
-	public MetaElement createElement(Type type) {
+	public MetaElement create(Type type) {
 		Class<?> rawClazz = ClassUtils.getRawType(type);
 		Class<?> superClazz = rawClazz.getSuperclass();
 		MetaElement superMeta = null;
 		if (superClazz != Object.class && superClazz != null) {
-			superMeta = context.getLookup().getMeta(superClazz, getMetaClass());
+			superMeta = context.allocate(superClazz);
 		}
 		MetaDataObject meta = newDataObject();
 		meta.setElementType(meta);
@@ -40,21 +39,20 @@ public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
 			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
-			MetaElement metaType = context.getLookup().getMeta(implementationType, getMetaClass(), true);
-			if (metaType == null) {
-				metaType = context.getLookup().getMeta(implementationType);
-			}
+			MetaElement metaType = context.allocate(implementationType);
 			attr.setType(metaType.asType());
 		}
 	}
 
 	protected abstract Class<? extends MetaElement> getMetaClass();
 
+
 	@Override
-	public Set<Class<? extends MetaElement>> getMetaTypes() {
-		Set<Class<? extends MetaElement>> set = new HashSet<>();
-		set.add(getMetaClass());
-		return set;
+	public void onInitializing(MetaElement element) {
 	}
 
+	@Override
+	public MetaElement adjustForRequest(MetaElement element) {
+		return element;
+	}
 }

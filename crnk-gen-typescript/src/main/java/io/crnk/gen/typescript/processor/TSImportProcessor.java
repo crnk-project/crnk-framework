@@ -81,8 +81,8 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static void appendRelativeImport(StringBuilder pathBuilder, TSSource refSource, TSSource source) {
-		String[] srcDirs = source.getDirectory() != null ? source.getDirectory().split("\\/") : new String[0];
-		String[] refDirs = refSource.getDirectory() != null ? refSource.getDirectory().split("\\/") : new String[0];
+		String[] srcDirs = source.getDirectory() != null && source.getDirectory().length() > 0 ? source.getDirectory().split("\\/") : new String[0];
+		String[] refDirs = refSource.getDirectory() != null && source.getDirectory().length() > 0 ? refSource.getDirectory().split("\\/") : new String[0];
 
 		int shared = computeSharedPrefix(srcDirs, refDirs);
 		appendParentPath(pathBuilder, srcDirs, shared);

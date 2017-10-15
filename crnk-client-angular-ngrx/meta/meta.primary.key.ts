@@ -17,7 +17,7 @@ export interface MetaPrimaryKeyListResult extends ManyQueryResult {
 	data?: Array<MetaPrimaryKey>;
 }
 export class QMetaPrimaryKey extends BeanPath<MetaPrimaryKey> {
-	metaId = 'io.crnk.meta.MetaPrimaryKey';
+	metaId = 'resources.meta.primaryKey';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	attributes: QMetaPrimaryKey.QAttributes = new QMetaPrimaryKey.QAttributes(this, 'attributes');

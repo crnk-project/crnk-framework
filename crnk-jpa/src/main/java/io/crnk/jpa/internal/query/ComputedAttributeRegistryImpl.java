@@ -12,6 +12,7 @@ import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaType;
+import io.crnk.meta.provider.MetaPartition;
 
 public class ComputedAttributeRegistryImpl implements ComputedAttributeRegistry {
 
@@ -76,9 +77,9 @@ public class ComputedAttributeRegistryImpl implements ComputedAttributeRegistry 
 
 		public synchronized MetaComputedAttribute getAttribute() {
 			if (attr == null) {
-				MetaLookup metaLookup = context.getMetaLookup();
-				MetaDataObject targetMeta = metaLookup.getMeta(targetClass, MetaJpaDataObject.class).asDataObject();
-				MetaType attrType = metaLookup.getMeta(type).asType();
+				MetaPartition metaPartition = context.getMetaPartition();
+				MetaDataObject targetMeta = metaPartition.getMeta(targetClass).asDataObject();
+				MetaType attrType = metaPartition.getMeta(type).asType();
 				attr = new MetaComputedAttribute();
 				attr.setParent(targetMeta, false);
 				attr.setName(name);

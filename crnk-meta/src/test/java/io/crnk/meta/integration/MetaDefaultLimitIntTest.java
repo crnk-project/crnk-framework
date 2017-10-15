@@ -85,7 +85,7 @@ public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 
 		QuerySpec querySpec = new QuerySpec(MetaElement.class);
 		querySpec.includeRelation(Arrays.asList("attributes"));
-		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "app.resources.Task"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "resources.tasks"));
 
 		ResourceList<MetaElement> list = elementRepository.findAll(querySpec);
 		Assert.assertEquals(1, list.size());

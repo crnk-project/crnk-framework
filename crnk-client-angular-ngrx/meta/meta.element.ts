@@ -23,7 +23,7 @@ export interface MetaElementListResult extends ManyQueryResult {
 	data?: Array<MetaElement>;
 }
 export class QMetaElement extends BeanPath<MetaElement> {
-	metaId = 'io.crnk.meta.MetaElement';
+	metaId = 'resources.meta.element';
 	id: StringPath = this.createString('id');
 	type: StringPath = this.createString('type');
 	relationships: QMetaElement.QRelationships = new QMetaElement.QRelationships(this, 'relationships');

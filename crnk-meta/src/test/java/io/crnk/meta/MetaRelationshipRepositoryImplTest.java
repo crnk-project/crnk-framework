@@ -25,13 +25,11 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 	public void setup() {
 		super.setup();
 
-		ResourceMetaProvider provider = new ResourceMetaProvider();
+		resourceProvider = new ResourceMetaProvider();
 
 		lookup = new MetaLookup();
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
-		lookup.addProvider(provider);
-		lookup.putIdMapping("io.crnk.test.mock.models", "app");
-		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
+		lookup.addProvider(resourceProvider);
 		lookup.initialize();
 
 		repo = new MetaRelationshipRepositoryImpl(new Supplier<MetaLookup>() {
@@ -67,7 +65,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findOneTargetReturnsResult() {
-		MetaResource resource = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 
 		MetaKey key = (MetaKey) repo.findOneTarget(resource.getId(), "primaryKey", new QuerySpec(MetaElement.class));
 		Assert.assertNotNull(key);
@@ -76,7 +74,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findOneTargetReturnsNull() {
-		MetaResource resource = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 		resource.setPrimaryKey(null);
 
 		MetaKey key = (MetaKey) repo.findOneTarget(resource.getId(), "primaryKey", new QuerySpec(MetaElement.class));
@@ -90,7 +88,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test
 	public void findManyTargetReturnsResult() {
-		MetaResource resource = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 
 		ResourceList<MetaElement> children = repo.findManyTargets(resource.getId(), "children", new QuerySpec(MetaElement
 				.class));
@@ -100,7 +98,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 
 	@Test(expected = ClassCastException.class)
 	public void findManyTargetCannotBeUsedForSingeValuesRelations() {
-		MetaResource resource = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource resource = resourceProvider.getMeta(Task.class);
 		repo.findManyTargets(resource.getId(), "primaryKey", new QuerySpec(MetaElement
 				.class));
 	}

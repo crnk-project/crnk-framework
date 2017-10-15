@@ -1,12 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import javax.naming.Context;
-
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -18,12 +11,20 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import javax.naming.Context;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 public class GenerateTypescriptTaskTest {
 
 	@Rule
 	public TemporaryFolder testProjectDir = new TemporaryFolder();
 
 	private File outputDir;
+
 
 	@Test
 	public void testWithExpressions() throws IOException {
@@ -42,7 +43,7 @@ public class GenerateTypescriptTaskTest {
 		testProjectDir.newFolder("src", "main", "java");
 
 		outputDir = testProjectDir.getRoot();
-		outputDir = new File("temp");
+		outputDir = new File("build/tmp/gen");
 		outputDir.mkdirs();
 
 		File npmrcFile = new File(outputDir, ".npmrc");
@@ -78,30 +79,37 @@ public class GenerateTypescriptTaskTest {
 
 		assertExists("build/generated/source/typescript/package.json");
 		assertExists("build/generated/source/typescript/src/index.ts");
-		assertExists("build/generated/source/typescript/src/project.ts");
+		assertExists("build/generated/source/typescript/src/projects.ts");
 		assertExists("build/generated/source/typescript/src/project.data.ts");
-		assertExists("build/generated/source/typescript/src/schedule.ts");
-		assertExists("build/generated/source/typescript/src/task.ts");
-		assertNotExists("build/generated/source/typescript/src/task.links.ts");
-		assertNotExists("build/generated/source/typescript/src/task.meta.ts");
+		assertExists("build/generated/source/typescript/src/schedules.ts");
+		assertExists("build/generated/source/typescript/src/tasks.ts");
+		assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
+		assertNotExists("build/generated/source/typescript/src/tasks.meta.ts");
 
-		assertExists("build/generated/source/typescript/src/meta.key.ts");
-		assertExists("build/generated/source/typescript/src/meta.element.ts");
-		assertExists("build/generated/source/typescript/src/meta.data.object.ts");
+		assertExists("build/generated/source/typescript/src/meta/meta.key.ts");
+		assertExists("build/generated/source/typescript/src/meta/meta.element.ts");
+		assertExists("build/generated/source/typescript/src/meta/meta.data.object.ts");
 
 		// check whether source copied to compile directory for proper source bundling
 		assertExists("build/npm_compile/.npmrc");
 		assertExists("build/npm_compile/package.json");
 		assertExists("build/npm_compile/src/index.ts");
-		assertExists("build/npm_compile/src/meta.element.ts");
+		assertExists("build/npm_compile/src/meta/meta.element.ts");
 
 		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
 				"expected_schedule_without_expressions.ts";
 		String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
 		String actualSource = IOUtils
-				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedule.ts")), utf8);
-		Assert.assertEquals(expectedSource, actualSource);
+				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedules.ts")), utf8);
+
+		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
+		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
+
+		for (int i = 0; i < expectedLines.length; i++) {
+			Assert.assertEquals(expectedLines[i], actualLines[i]);
+		}
+		Assert.assertEquals(expectedLines.length, actualLines.length);
 	}
 
 	private void assertExists(String path) {

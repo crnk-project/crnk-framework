@@ -90,21 +90,6 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 	/**
 	 * @deprecated make use of {@link MetaModuleConfig} and pass to this instance upon creation
 	 */
-	@Deprecated
-	public void putIdMapping(String packageName, String idPrefix) {
-		config.addIdMapping(packageName, idPrefix);
-	}
-
-	/**
-	 * @deprecated make use of {@link MetaModuleConfig} and pass to this instance upon creation
-	 */
-	public void putIdMapping(String packageName, Class<? extends MetaElement> type, String idPrefix) {
-		config.addIdMapping(packageName, type, idPrefix);
-	}
-
-	/**
-	 * @deprecated make use of {@link MetaModuleConfig} and pass to this instance upon creation
-	 */
 	public void addMetaProvider(MetaProvider provider) {
 		config.addMetaProvider(provider);
 	}
