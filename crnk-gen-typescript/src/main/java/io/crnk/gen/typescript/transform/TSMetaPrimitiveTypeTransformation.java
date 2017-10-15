@@ -1,9 +1,9 @@
 package io.crnk.gen.typescript.transform;
 
-import io.crnk.gen.typescript.model.TSAny;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.gen.typescript.model.*;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimitiveType;
 
@@ -21,6 +21,11 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 
 	public TSMetaPrimitiveTypeTransformation() {
 		primitiveMapping = new HashMap<>();
+
+		primitiveMapping.put(ObjectNode.class, TSAny.INSTANCE);
+		primitiveMapping.put(ArrayNode.class, TSAny.INSTANCE);
+		primitiveMapping.put(JsonNode.class, TSAny.INSTANCE);
+
 		primitiveMapping.put(Object.class, TSAny.INSTANCE);
 		primitiveMapping.put(String.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(Boolean.class, TSPrimitiveType.BOOLEAN);
@@ -66,7 +71,7 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		if (primitiveMapping.containsKey(implClass)) {
 			return primitiveMapping.get(implClass);
 		}
-		throw new IllegalStateException("unexpected element: " + element);
+		throw new IllegalStateException("unexpected element: " + element + " of type " + implClass.getName());
 	}
 
 	@Override
