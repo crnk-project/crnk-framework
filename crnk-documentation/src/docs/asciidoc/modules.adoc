@@ -340,6 +340,9 @@ A setup can look as follows:
 		metaModule.addMetaProvider(new ResourceMetaProvider());
 ----
 
+`ResourceMetaProvider` exposes all JSON API resources and repositories as meta data. You may add further provides to
+expose more meta data, such as the `JpaMetaProvider`.
+
 To learn more about the set of available resources, have a look at the `MetaElement` class and all its subclasses. Some of the
 most important classes are:
 
@@ -415,7 +418,7 @@ A `MetaAttribute` looks like:
 [source]
 ----
 {
-    "id" : "io.crnk.example.springboot.domain.model.Project.name",
+    "id" : "resources.project.name",
     "type" : "meta/resourceField",
     "attributes" : {
       "filterable" : true,
@@ -450,6 +453,25 @@ A `MetaAttribute` looks like:
     }
   }
 ----
+
+Of importance is the assignment of IDs to meta elements. For resources the resource type is used to compute the meta
+id and a `resources` prefix is added. In the example above, person gets a `resources.person` meta id.
+Related objects (DTOs, links/meta info) located in the same or a subpackage of a resource gets the same meta id prefix.
+A `ProjectData` sitting in a `dto` subpackage would get a `resources.dto.projectdata` meta id.
+
+The meta ids are used, for example, by the Typescript generator to determine the file structure and dependencies of generated
+source files.
+
+Applications are enabled to adapt the id generator process with:
+
+`new ResourceMetaProvider(idPrefix)`
+
+and
+
+`ResourceMetaProvider.putIdMapping(String packageName, String idPrefix)`
+
+the override the default `resources` prefix and assign a specific prefix for a package.
+
 
 
 anchor:home_module[]
