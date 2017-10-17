@@ -332,6 +332,8 @@ JSON API (meta) repository and data structures matching the standard. Most likel
 any future standard implementation will built up on the information from the
 `MetaModule`.
 
+### Setup
+
 A setup can look as follows:
 
 [source]
@@ -342,6 +344,9 @@ A setup can look as follows:
 
 `ResourceMetaProvider` exposes all JSON API resources and repositories as meta data. You may add further provides to
 expose more meta data, such as the `JpaMetaProvider`.
+
+
+### Examples
 
 To learn more about the set of available resources, have a look at the `MetaElement` class and all its subclasses. Some of the
 most important classes are:
@@ -370,7 +375,7 @@ A `MetaResource` looks like:
 [source]
 ----
 {
-    "id" : "io.crnk.example.springboot.domain.model.Project",
+    "id" : "resources.project",
     "type" : "meta/resource",
     "attributes" : {
       "name" : "Project",
@@ -454,6 +459,8 @@ A `MetaAttribute` looks like:
   }
 ----
 
+### Identifiers for Meta Elements
+
 Of importance is the assignment of IDs to meta elements. For resources the resource type is used to compute the meta
 id and a `resources` prefix is added. In the example above, person gets a `resources.person` meta id.
 Related objects (DTOs, links/meta info) located in the same or a subpackage of a resource gets the same meta id prefix.
@@ -470,11 +477,23 @@ and
 
 `ResourceMetaProvider.putIdMapping(String packageName, String idPrefix)`
 
-the override the default `resources` prefix and assign a specific prefix for a package.
+to override the default `resources` prefix and assign a specific prefix for a package.
 
+
+### Extending the Meta Module
+
+There is a `MetaModuleExtension` extension that allows other Crnk modules contribute `MetaProvider`
+implementation. This allows to:
+
+- add `MetaFilter` implementations to intercept and modify meta elements upon initialization and request.
+- add `MetaPartition` implementations to introduce new, isolated areas in the meta model, like a JPA
+  meta model next to the JSON API one (like for documentation purposes).
+
+For more detailed information have a look at the current `ResourceMetaProvider`.
 
 
 anchor:home_module[]
+
 
 ## Home Module
 
