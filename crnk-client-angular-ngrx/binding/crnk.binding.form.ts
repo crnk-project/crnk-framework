@@ -128,6 +128,7 @@ export class FormBinding {
 		// we make use of share() to keep the this.config.resource$ subscription
 		// as long as there is at least subscriber on this.resource$.
 		this.resource$ = this.ngrxJsonApiService.selectOneResults(this.config.queryId, true)
+			.filter(it => !_.isEmpty(it)) // ignore deletions
 			.filter(it => !it.loading)
 			.map(it => it.data as StoreResource)
 			.filter(it => !_.isEmpty(it)) // ignore deletions
