@@ -423,7 +423,7 @@ export class BrowseComponent {
 	public getUrl(query: any): string {
 		return _.join([this.utils.normalize(this.baseUrl, '/'), this.utils.normalize(query.type, '/'),
 			this.utils.normalize(query.id, '/'), this.utils.normalize(query.relationship, '/'),
-			this.utils.normalize(query.parameters, '?')], '');
+			"?" + query.parameters], '');
 	}
 
 

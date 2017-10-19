@@ -171,7 +171,7 @@ export class BrowseService {
 			// filter attribute suggestion
 			let attrPart = paramNamePart.startsWith("filter[") ? paramNamePart.substr("filter[".length) : "";
 			return this.expandNames(metaResource, paramValuePart)
-				.filter(name => name.startsWith(paramValuePart))
+				.filter(name => name.startsWith(attrPart))
 				.map(name => parameterStartSequence + "filter[" + name + "]");
 		} else if (paramValuePart == null) {
 			// default legacy suggestion
