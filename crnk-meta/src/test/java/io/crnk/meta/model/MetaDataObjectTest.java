@@ -62,7 +62,7 @@ public class MetaDataObjectTest extends AbstractMetaTest {
 	public void checkNestedObject() {
 		MetaJsonObject meta = resourceProvider.getMeta(ProjectData.class);
 		Assert.assertEquals("ProjectData", meta.getName());
-		Assert.assertEquals("resources.projectdata", meta.getId());
+		Assert.assertEquals("resources.types.projectdata", meta.getId());
 		Assert.assertNotNull(meta.getAttribute("data").getType());
 	}
 
