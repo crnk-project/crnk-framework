@@ -4,7 +4,7 @@ import io.crnk.meta.AbstractMetaTest;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.test.mock.models.Project;
-import io.crnk.test.mock.models.ProjectData;
+import io.crnk.test.mock.models.types.ProjectData;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;

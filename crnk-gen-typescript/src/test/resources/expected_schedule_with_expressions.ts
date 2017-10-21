@@ -1,4 +1,4 @@
-import {DefaultPagedLinksInformation} from './default.paged.links.information';
+import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {QTasks, Tasks} from './tasks';
 import {BeanPath, BooleanPath, StringPath} from '@crnk/angular-ngrx/expression';
 import {CrnkStoreResource, QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/angular-ngrx/stub';
