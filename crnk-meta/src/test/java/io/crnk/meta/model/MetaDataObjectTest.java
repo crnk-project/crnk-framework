@@ -4,7 +4,7 @@ import io.crnk.meta.AbstractMetaTest;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.test.mock.models.Project;
-import io.crnk.test.mock.models.ProjectData;
+import io.crnk.test.mock.models.types.ProjectData;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class MetaDataObjectTest extends AbstractMetaTest {
 	public void checkNestedObject() {
 		MetaJsonObject meta = resourceProvider.getMeta(ProjectData.class);
 		Assert.assertEquals("ProjectData", meta.getName());
-		Assert.assertEquals("resources.projectdata", meta.getId());
+		Assert.assertEquals("resources.types.projectdata", meta.getId());
 		Assert.assertNotNull(meta.getAttribute("data").getType());
 	}
 

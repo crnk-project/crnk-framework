@@ -1,4 +1,4 @@
-import {DefaultPagedLinksInformation} from './default.paged.links.information';
+import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {Tasks} from './tasks';
 import {CrnkStoreResource} from '@crnk/angular-ngrx/stub';
 import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';

@@ -241,7 +241,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		MetaResource meta = resourceProvider.getMeta(Project.class);
 		MetaAttribute data = meta.getAttribute("data");
 		MetaType type = data.getType();
-		Assert.assertEquals("resources.projectdata", type.getId());
+		Assert.assertEquals("resources.types.projectdata", type.getId());
 	}
 
 

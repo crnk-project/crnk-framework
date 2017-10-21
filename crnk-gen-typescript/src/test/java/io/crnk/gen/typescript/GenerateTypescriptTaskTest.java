@@ -80,7 +80,7 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/generated/source/typescript/package.json");
 		assertExists("build/generated/source/typescript/src/index.ts");
 		assertExists("build/generated/source/typescript/src/projects.ts");
-		assertExists("build/generated/source/typescript/src/project.data.ts");
+		assertExists("build/generated/source/typescript/src/types/project.data.ts");
 		assertExists("build/generated/source/typescript/src/schedules.ts");
 		assertExists("build/generated/source/typescript/src/tasks.ts");
 		assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
@@ -96,6 +96,18 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/npm_compile/src/index.ts");
 		assertExists("build/npm_compile/src/meta/meta.element.ts");
 
+		checkSchedule(expressions);
+		checkProject();
+	}
+
+	private void checkProject() throws IOException {
+		Charset utf8 = Charset.forName("UTF8");
+		String actualSource = IOUtils
+				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/projects.ts")), utf8);
+		Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
+	}
+
+	private void checkSchedule(boolean expressions) throws IOException {
 		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
 				"expected_schedule_without_expressions.ts";
