@@ -2,7 +2,10 @@ import {async, ComponentFixture, fakeAsync, getTestBed, TestBed, tick} from '@an
 
 import "rxjs/add/operator/merge";
 import {Store} from '@ngrx/store';
-import {LocalQueryInitAction, ModifyStoreResourceErrorsAction, NewStoreResourceAction} from "ngrx-json-api";
+import {
+	LocalQueryInitAction, ModifyStoreResourceErrorsAction, NewStoreResourceAction,
+	NgrxJsonApiService
+} from "ngrx-json-api";
 import {By} from "@angular/platform-browser";
 import {TestEditorComponent} from "./crnk.test.editor.component";
 import {TestingModule} from "./crnk.test.module";
@@ -24,7 +27,6 @@ describe('FormBinding', () => {
 
 	beforeEach(() => {
 		store = getTestBed().get(Store);
-		fixture = TestBed.createComponent(TestEditorComponent);
 	});
 
 	beforeEach(() => {
@@ -34,7 +36,16 @@ describe('FormBinding', () => {
 			attributes: {
 				name: 'SomeAttribute'
 			}
-		}))
+		}));
+
+		// enforce sync
+		const jsonapi = getTestBed().get(NgrxJsonApiService);
+		const resource = jsonapi.getResourceSnapshot({
+			id: 'someBean.someAttribute',
+			type: 'meta/attribute'
+		});
+		resource.state = 'IN_SYNC';
+
 		store.dispatch(new LocalQueryInitAction({
 			queryId: 'editorQuery',
 			type: 'meta/attribute',
@@ -42,26 +53,34 @@ describe('FormBinding', () => {
 		}))
 	});
 
+	beforeEach(() => {
+		fixture = TestBed.createComponent(TestEditorComponent);
+	});
+
 	it('should sync with store', fakeAsync(() => {
 		fixture.detectChanges();
-		tick();
+		tick(100);
 
 		let nameInputElement = fixture.debugElement.query(By.css("#nameInput"));
 		expect(fixture.componentInstance.resource.attributes.name.getValue()).toEqual("SomeAttribute");
 		expect(nameInputElement.nativeElement.value).toEqual("SomeAttribute");
 		const initialResource = fixture.componentInstance.resource;
 
+		let dirtyElement = fixture.debugElement.query(By.css("#dirty"));
+		expect(dirtyElement.nativeElement.textContent).toEqual("false");
+
 		// make a change
 		nameInputElement.nativeElement.value = "UpdatedAttribute";
 		nameInputElement.nativeElement.dispatchEvent(new Event('input'));
+		fixture.detectChanges();
+		tick(200);
 		fixture.detectChanges();
 		tick(200);
 
 		expect(initialResource.attributes.name.getValue()).toEqual("SomeAttribute");
 		expect(fixture.componentInstance.resource.attributes.name.getValue()).toEqual("UpdatedAttribute");
 		expect(fixture.componentInstance.resource).not.toBe(initialResource);
-
-
+		expect(dirtyElement.nativeElement.textContent).toEqual("true");
 	}));
 
 	it('should sync JSON API errors to FormControl errors', fakeAsync(() => {
@@ -101,6 +120,9 @@ describe('FormBinding', () => {
 		expect(controlErrorElements.length).toEqual(1);
 		expect(controlErrorElements[0].nativeElement.textContent).toEqual("someCode");
 
+		let validElement = fixture.debugElement.query(By.css("#valid"));
+		expect(validElement.nativeElement.textContent).toEqual("false");
+
 		// make a change to clear the errors in the store
 		nameInputElement.nativeElement.value = "UpdatedAttribute";
 		nameInputElement.nativeElement.dispatchEvent(new Event('input'));
@@ -115,6 +137,7 @@ describe('FormBinding', () => {
 		expect(resourceErrorElements.length).toEqual(0);
 		controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(0);
+		expect(validElement.nativeElement.textContent).toEqual("true");
 
 		// make an illegal change that triggers the required validation of the FormControl
 		nameInputElement.nativeElement.value = ""; // => illegal
@@ -131,7 +154,7 @@ describe('FormBinding', () => {
 		expect(resourceErrorElements.length).toEqual(0);
 		controlErrorElements = fixture.debugElement.queryAll(By.css("#controlError"));
 		expect(controlErrorElements.length).toEqual(1);
-
+		expect(validElement.nativeElement.textContent).toEqual("false");
 
 	}));
 });

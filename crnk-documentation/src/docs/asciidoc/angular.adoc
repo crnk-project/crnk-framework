@@ -196,6 +196,8 @@ Note that:
   appropriate. The name of form controls can follow to patterns: `//<type>//<id>//path` or just
   `path``. The form allows to modify multiple resources, while the later assumes the primary
   resource loaded by the query is being modified.
+- `FormBinding.dirty` notifies whether bound resource(s) were modified.
+- `FormBinding.valid` notifies whether bound resource(s) are invalid.
 
 The Angular `FormModule` gives a number of restrictions. In the future we expect to also support the use
 `FormBinding` without a `NgForm` instance (for some performance and simplicity benefits). Please
