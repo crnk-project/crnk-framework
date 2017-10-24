@@ -24,9 +24,6 @@ public abstract class TSImportExportBase extends TSElementBase {
 	}
 
 	public void setPath(String path) {
-		if(path.contains("default.paged.links.informati")){
-			System.out.println("WSTF");
-		}
 		this.path = path;
 	}
 }

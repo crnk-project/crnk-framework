@@ -1,4 +1,4 @@
-package io.crnk.test.mock.models;
+package io.crnk.test.mock.models.types;
 
 import java.util.Map;
 

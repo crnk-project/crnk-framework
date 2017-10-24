@@ -3,6 +3,9 @@
 
 		<input id="nameInput" required [crnkFormExpression]="resource.attributes.name"/>
 
+		<div id="valid">{{binding.valid | async}}</div>
+		<div id="dirty">{{binding.dirty | async}}</div>
+
 		<crnk-control-errors [expression]="resource.attributes.name">
 			<ng-template let-errorCode="errorCode">
 				<span id="controlError">{{errorCode}}</span>
