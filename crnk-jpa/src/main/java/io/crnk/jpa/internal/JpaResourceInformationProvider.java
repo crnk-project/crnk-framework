@@ -15,6 +15,7 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
@@ -104,6 +105,12 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		if (annotation != null) {
 			return annotation.type();
 		}
+
+		JsonApiResource jsonApiResourceAnnotation = entityClass.getAnnotation(JsonApiResource.class);
+		if(jsonApiResourceAnnotation != null) {
+			return jsonApiResourceAnnotation.type();
+		}
+
 		if (entityClass.getAnnotation(MappedSuperclass.class) != null) {
 			return null; // super classes do not have a document type
 		}
