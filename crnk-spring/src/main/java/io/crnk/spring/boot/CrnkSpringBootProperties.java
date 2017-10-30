@@ -34,12 +34,12 @@ public class CrnkSpringBootProperties {
 	/**
 	 * Allow unknown attributes in query parameters.
 	 */
-	private String allowUnknownAttributes;
+	private Boolean allowUnknownAttributes;
 
 	/**
 	 * Enable 404 response if null.
 	 */
-	private String return404OnNull;
+	private Boolean return404OnNull;
 
 	public String getResourcePackage() {
 		return resourcePackage;
@@ -81,19 +81,19 @@ public class CrnkSpringBootProperties {
 		this.maxPageLimit = maxPageLimit;
 	}
 
-	public String getAllowUnknownAttributes() {
+	public Boolean getAllowUnknownAttributes() {
 		return allowUnknownAttributes;
 	}
 
-	public void setAllowUnknownAttributes(String allowUnknownAttributes) {
+	public void setAllowUnknownAttributes(Boolean allowUnknownAttributes) {
 		this.allowUnknownAttributes = allowUnknownAttributes;
 	}
 
-	public String getReturn404OnNull() {
+	public Boolean getReturn404OnNull() {
 		return return404OnNull;
 	}
 
-	public void setReturn404OnNull(String return404OnNull) {
+	public void setReturn404OnNull(Boolean return404OnNull) {
 		this.return404OnNull = return404OnNull;
 	}
 }

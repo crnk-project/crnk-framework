@@ -27,8 +27,8 @@ public class CrnkConfigV3Test {
 		properties.setDefaultPageLimit(12L);
 		properties.setMaxPageLimit(20L);
 		properties.setPathPrefix("prefix");
-		properties.setAllowUnknownAttributes("true");
-		properties.setReturn404OnNull("true");
+		properties.setAllowUnknownAttributes(true);
+		properties.setReturn404OnNull(true);
 		properties.setResourcePackage("ch.something");
 
 		ObjectMapper objectMapper = new ObjectMapper();
