@@ -129,5 +129,10 @@ public class CrnkProperties {
 	 */
 	public static final String RETURN_404_ON_NULL = "crnk.config.resource.response.return_404";
 
-
+	/**
+	 * <p>
+	 * Set a boolean whether Crnk should allow unknown attributes in query parameters.
+	 * </p>
+	 */
+	public static final String ALLOW_UNKNOWN_ATTRIBUTES = "crnk.config.resource.request.allowUnknownAttributes";
 }
