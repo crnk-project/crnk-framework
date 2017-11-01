@@ -58,7 +58,7 @@ public class BraveClientModule implements Module, HttpAdapterAware {
 						"io.crnk.monitor.brave.internal.OkHttpBraveIntegration"
 				);
 				Constructor constructor = integrationClass.getConstructor(HttpTracing.class);
-				OkHttpAdapterListener listener = (OkHttpAdapterListener) constructor.newInstance(tragit statcing);
+				OkHttpAdapterListener listener = (OkHttpAdapterListener) constructor.newInstance(tracing);
 				okHttpAdapter.addListener(listener);
 			}
 			else if (adapter instanceof HttpClientAdapter) {
