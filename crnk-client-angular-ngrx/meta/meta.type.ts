@@ -1,7 +1,21 @@
-import {BeanPath, StringPath} from '../expression/';
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
-import {MetaElement, QMetaElement} from './meta.element';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
+import {
+	QTypedManyResourceRelationship,
+	QTypedOneResourceRelationship
+} from '../stub/';
+import {
+	MetaElement,
+	QMetaElement
+} from './meta.element';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api/src/interfaces';
 
 export module MetaType {
 	export interface Relationships extends MetaElement.Relationships {
@@ -29,18 +43,27 @@ export module QMetaType {
 	export class QRelationships extends BeanPath<MetaType.Relationships> {
 		private _elementType: QTypedOneResourceRelationship<QMetaType, MetaType>;
 		get elementType(): QTypedOneResourceRelationship<QMetaType, MetaType> {
-			if(!this._elementType){this._elementType= new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);}
-			return this._elementType
+			if (!this._elementType) {
+				this._elementType =
+					new QTypedOneResourceRelationship<QMetaType, MetaType>(this, 'elementType', QMetaType);
+			}
+			return this._elementType;
 		};
 		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
 		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
-			return this._parent
+			if (!this._parent) {
+				this._parent =
+					new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
+			}
+			return this._parent;
 		};
 		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
 		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
-			return this._children
+			if (!this._children) {
+				this._children =
+					new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+			}
+			return this._children;
 		};
 	}
 }

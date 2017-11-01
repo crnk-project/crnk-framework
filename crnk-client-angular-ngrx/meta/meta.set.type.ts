@@ -1,8 +1,14 @@
-import {BeanPath, StringPath} from '../expression/';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
 import {MetaCollectionType} from './meta.collection.type';
 import {QMetaElement} from './meta.element';
 import {QMetaType} from './meta.type';
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
+import {
+	ManyQueryResult,
+	OneQueryResult
+} from 'ngrx-json-api/src/interfaces';
 
 export interface MetaSetType extends MetaCollectionType {
 }

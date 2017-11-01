@@ -1,6 +1,16 @@
-import {BeanPath, BooleanPath, StringPath} from '../expression/';
-import {MetaKey, QMetaKey} from './meta.key';
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
+import {
+	BeanPath,
+	BooleanPath,
+	StringPath
+} from '../expression/';
+import {
+	MetaKey,
+	QMetaKey
+} from './meta.key';
+import {
+	ManyQueryResult,
+	OneQueryResult
+} from 'ngrx-json-api/src/interfaces';
 
 export module MetaPrimaryKey {
 	export interface Attributes extends MetaKey.Attributes {

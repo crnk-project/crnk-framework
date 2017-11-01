@@ -1,8 +1,25 @@
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
-import {QTasks, Tasks} from './tasks';
-import {BeanPath, BooleanPath, StringPath} from '@crnk/angular-ngrx/expression';
-import {CrnkStoreResource, QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/angular-ngrx/stub';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {
+	QTasks,
+	Tasks
+} from './tasks';
+import {
+	BeanPath,
+	BooleanPath,
+	StringPath
+} from '@crnk/angular-ngrx/expression';
+import {
+	CrnkStoreResource,
+	QTypedManyResourceRelationship,
+	QTypedOneResourceRelationship
+} from '@crnk/angular-ngrx/stub';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedManyResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api/src/interfaces';
 
 export module Schedules {
 	export interface Relationships {
@@ -46,23 +63,35 @@ export module QSchedules {
 	export class QRelationships extends BeanPath<Schedules.Relationships> {
 		private _task: QTypedOneResourceRelationship<QTasks, Tasks>;
 		get task(): QTypedOneResourceRelationship<QTasks, Tasks> {
-			if(!this._task){this._task= new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'task', QTasks);}
-			return this._task
+			if (!this._task) {
+				this._task =
+					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'task', QTasks);
+			}
+			return this._task;
 		};
 		private _lazyTask: QTypedOneResourceRelationship<QTasks, Tasks>;
 		get lazyTask(): QTypedOneResourceRelationship<QTasks, Tasks> {
-			if(!this._lazyTask){this._lazyTask= new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'lazyTask', QTasks);}
-			return this._lazyTask
+			if (!this._lazyTask) {
+				this._lazyTask =
+					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'lazyTask', QTasks);
+			}
+			return this._lazyTask;
 		};
 		private _tasks: QTypedManyResourceRelationship<QTasks, Tasks>;
 		get tasks(): QTypedManyResourceRelationship<QTasks, Tasks> {
-			if(!this._tasks){this._tasks= new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasks', QTasks);}
-			return this._tasks
+			if (!this._tasks) {
+				this._tasks =
+					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasks', QTasks);
+			}
+			return this._tasks;
 		};
 		private _tasksList: QTypedManyResourceRelationship<QTasks, Tasks>;
 		get tasksList(): QTypedManyResourceRelationship<QTasks, Tasks> {
-			if(!this._tasksList){this._tasksList= new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasksList', QTasks);}
-			return this._tasksList
+			if (!this._tasksList) {
+				this._tasksList =
+					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasksList', QTasks);
+			}
+			return this._tasksList;
 		};
 	}
 	export class QAttributes extends BeanPath<Schedules.Attributes> {

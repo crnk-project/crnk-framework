@@ -1,7 +1,13 @@
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {Tasks} from './tasks';
 import {CrnkStoreResource} from '@crnk/angular-ngrx/stub';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedManyResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api/src/interfaces';
 
 export module Schedules {
 	export interface Relationships {
