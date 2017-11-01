@@ -1,9 +1,29 @@
-import {BeanPath, StringPath} from '../expression/';
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
-import {MetaDataObject, QMetaDataObject} from './meta.data.object';
-import {MetaElement, QMetaElement} from './meta.element';
-import {MetaResource, QMetaResource} from './meta.resource';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
+import {
+	QTypedManyResourceRelationship,
+	QTypedOneResourceRelationship
+} from '../stub/';
+import {
+	MetaDataObject,
+	QMetaDataObject
+} from './meta.data.object';
+import {
+	MetaElement,
+	QMetaElement
+} from './meta.element';
+import {
+	MetaResource,
+	QMetaResource
+} from './meta.resource';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceRepository {
 	export interface Relationships extends MetaElement.Relationships {
@@ -33,28 +53,43 @@ export module QMetaResourceRepository {
 	export class QRelationships extends BeanPath<MetaResourceRepository.Relationships> {
 		private _resourceType: QTypedOneResourceRelationship<QMetaResource, MetaResource>;
 		get resourceType(): QTypedOneResourceRelationship<QMetaResource, MetaResource> {
-			if(!this._resourceType){this._resourceType= new QTypedOneResourceRelationship<QMetaResource, MetaResource>(this, 'resourceType', QMetaResource);}
-			return this._resourceType
+			if (!this._resourceType) {
+				this._resourceType =
+					new QTypedOneResourceRelationship<QMetaResource, MetaResource>(this, 'resourceType', QMetaResource);
+			}
+			return this._resourceType;
 		};
 		private _listMetaType: QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>;
 		get listMetaType(): QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject> {
-			if(!this._listMetaType){this._listMetaType= new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'listMetaType', QMetaDataObject);}
-			return this._listMetaType
+			if (!this._listMetaType) {
+				this._listMetaType =
+					new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'listMetaType', QMetaDataObject);
+			}
+			return this._listMetaType;
 		};
 		private _listLinksType: QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>;
 		get listLinksType(): QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject> {
-			if(!this._listLinksType){this._listLinksType= new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'listLinksType', QMetaDataObject);}
-			return this._listLinksType
+			if (!this._listLinksType) {
+				this._listLinksType =
+					new QTypedOneResourceRelationship<QMetaDataObject, MetaDataObject>(this, 'listLinksType', QMetaDataObject);
+			}
+			return this._listLinksType;
 		};
 		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
 		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
-			return this._parent
+			if (!this._parent) {
+				this._parent =
+					new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
+			}
+			return this._parent;
 		};
 		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
 		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
-			return this._children
+			if (!this._children) {
+				this._children =
+					new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+			}
+			return this._children;
 		};
 	}
 }

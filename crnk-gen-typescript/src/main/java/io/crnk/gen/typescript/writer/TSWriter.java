@@ -296,12 +296,21 @@ public class TSWriter implements TSVisitor {
 		builder.append("import {");
 
 		Iterator<String> iterator = importElement.getTypeNames().iterator();
-		while (iterator.hasNext()) {
+		if (importElement.getTypeNames().size() == 1) {
 			builder.append(iterator.next());
-			if (iterator.hasNext()) {
-				builder.append(", ");
+		}
+		else {
+			builder.append("\n");
+			while (iterator.hasNext()) {
+				builder.append("\t");
+				builder.append(iterator.next());
+				if (iterator.hasNext()) {
+					builder.append(",");
+				}
+				builder.append("\n");
 			}
 		}
+
 		builder.append("} from '");
 		builder.append(importElement.getPath());
 		builder.append("';");

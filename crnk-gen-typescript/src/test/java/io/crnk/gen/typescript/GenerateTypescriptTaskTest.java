@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import javax.naming.Context;
+
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -10,13 +17,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.naming.Context;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class GenerateTypescriptTaskTest {
 
@@ -117,7 +117,6 @@ public class GenerateTypescriptTaskTest {
 
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
-
 		for (int i = 0; i < expectedLines.length; i++) {
 			Assert.assertEquals(expectedLines[i], actualLines[i]);
 		}

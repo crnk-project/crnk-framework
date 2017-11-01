@@ -1,6 +1,19 @@
-import {BeanPath, StringPath} from '../expression/';
-import {CrnkStoreResource, QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '../stub/';
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
+import {
+	CrnkStoreResource,
+	QTypedManyResourceRelationship,
+	QTypedOneResourceRelationship
+} from '../stub/';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedManyResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api/src/interfaces';
 
 export module MetaElement {
 	export interface Relationships {
@@ -33,13 +46,19 @@ export module QMetaElement {
 	export class QRelationships extends BeanPath<MetaElement.Relationships> {
 		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
 		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._parent){this._parent= new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);}
-			return this._parent
+			if (!this._parent) {
+				this._parent =
+					new QTypedOneResourceRelationship<QMetaElement, MetaElement>(this, 'parent', QMetaElement);
+			}
+			return this._parent;
 		};
 		private _children: QTypedManyResourceRelationship<QMetaElement, MetaElement>;
 		get children(): QTypedManyResourceRelationship<QMetaElement, MetaElement> {
-			if(!this._children){this._children= new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);}
-			return this._children
+			if (!this._children) {
+				this._children =
+					new QTypedManyResourceRelationship<QMetaElement, MetaElement>(this, 'children', QMetaElement);
+			}
+			return this._children;
 		};
 	}
 	export class QAttributes extends BeanPath<MetaElement.Attributes> {

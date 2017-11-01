@@ -184,7 +184,6 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				initializer.append("(this, \'");
 				initializer.append(qField.getName());
 				initializer.append("\'");
-				//initializer.append(", new " + qElementType.getName() + "(null, 'data')");
 				initializer.append(", " + qElementType.getName());
 				initializer.append(")");
 
@@ -195,8 +194,8 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				getterFunction.setType(new TSParameterizedType(qbaseType, qElementType, elementType));
 				getterFunction.setName(qField.getName());
 				List<String> statements = getterFunction.getStatements();
-				statements.add("if(!" + fieldName + "){" + fieldName + "= " + initializer.toString() + ";" + "}");
-				statements.add("return " + fieldName);
+				statements.add("if (!" + fieldName + ") {\n" + fieldName + " =\n\t" + initializer.toString() + ";" + "\n}");
+				statements.add("return " + fieldName + ";");
 
 				qField.setType(new TSParameterizedType(qbaseType, qElementType, elementType));
 				qField.setPrivate(true);
