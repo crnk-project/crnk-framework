@@ -10,7 +10,16 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.meta.JpaMetaProvider;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
+import io.crnk.jpa.model.AnnotationTestEntity;
+import io.crnk.jpa.model.ManyToManyOppositeEntity;
+import io.crnk.jpa.model.ManyToManyTestEntity;
+import io.crnk.jpa.model.OneToOneTestEntity;
+import io.crnk.jpa.model.RelatedEntity;
+import io.crnk.jpa.model.RenamedTestEntity;
+import io.crnk.jpa.model.TestEmbeddable;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.jpa.util.ResourceFieldComparator;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.MetaLookup;
@@ -261,4 +270,9 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertFalse(meta.getAttribute("fieldAnnotatedValue").isLob());
 	}
 
+	@Test
+	public void testJsonApiResourceAnnotation() {
+		ResourceInformation info = builder.build(AnnotationTestEntity.class);
+		Assert.assertEquals(info.getResourceType(), "annotation-test");
+	}
 }
