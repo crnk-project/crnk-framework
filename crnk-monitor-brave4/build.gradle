@@ -6,12 +6,12 @@ dependencies {
 	compileOnly project(':crnk-client')
 
 	compile group: 'io.zipkin.brave', name: 'brave', version: '4.9.1'
-	compile group: 'io.zipkin.brave', name: 'brave-instrumentation-http', version: '4.9.1'
+	compileOnly group: 'io.zipkin.brave', name: 'brave-instrumentation-http', version: '4.9.1'
 
 	compileOnly group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.0'
 	compileOnly group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.3'
-	compile 'io.zipkin.brave:brave-instrumentation-okhttp3:4.9.1'
-	compile 'io.zipkin.brave:brave-instrumentation-httpclient:4.9.1'
+	compileOnly 'io.zipkin.brave:brave-instrumentation-okhttp3:4.9.1'
+	compileOnly 'io.zipkin.brave:brave-instrumentation-httpclient:4.9.1'
 
 	testCompile project(':crnk-rs')
 	testCompile project(':crnk-test')

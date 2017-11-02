@@ -143,7 +143,8 @@ task lint(type: NpmTask) {
 	}
 }
 
-task coveralls(type: NpmTask) {
+// not yet in use
+task coverallsNpm(type: NpmTask) {
 	group 'verification'
 	dependsOn npmRunBuild
 
@@ -156,7 +157,7 @@ task coveralls(type: NpmTask) {
 
 check.dependsOn testKarma
 check.dependsOn lint
-// check.dependsOn coveralls
+// check.dependsOn coverallsNpm
 
 task npmCacheVerify(type: NpmTask) {
 	npmCommand = ['cache', 'verify']
