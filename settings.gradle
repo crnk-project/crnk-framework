@@ -29,8 +29,6 @@ include ':crnk-examples:spring-boot-example'
 include ':crnk-ui'
 include ':crnk-documentation'
 
-gradle.startParameter.showStacktrace = org.gradle.api.logging.configuration.ShowStacktrace.ALWAYS
-
 gradle.beforeProject { Project project ->
 	project.with {
 
