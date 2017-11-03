@@ -1,5 +1,10 @@
 package io.crnk.jpa.repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -15,11 +20,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 @Transactional
 public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest {
@@ -40,9 +40,42 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 
 	@Test
 	public void testFindOneTarget() throws InstantiationException, IllegalAccessException {
-		RelatedEntity relatedEntity = repo.findOneTarget(1L, TestEntity.ATTR_oneRelatedValue, new QuerySpec(RelatedEntity.class));
+		RelatedEntity relatedEntity = repo.findOneTarget(1L, TestEntity.ATTR_oneRelatedValue, new QuerySpec(RelatedEntity
+				.class));
 		Assert.assertNotNull(relatedEntity);
 		Assert.assertEquals(101L, relatedEntity.getId().longValue());
+	}
+
+
+	@Test
+	public void testFindNulledOneTarget() throws InstantiationException, IllegalAccessException {
+		long nulledEntityId = numTestEntities - 1;
+
+		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
+		RelatedEntity relatedEntity =
+				repo.findOneTarget(nulledEntityId, TestEntity.ATTR_oneRelatedValue, querySpec);
+		Assert.assertNull(relatedEntity);
+	}
+
+	/**
+	 * Note that implementation behaves slightly differently with a LIMIT in place. Does only work for single requests.
+	 */
+	@Test
+	public void testFindNulledOneTargetWithLimit() throws InstantiationException, IllegalAccessException {
+		long nulledEntityId = numTestEntities - 1;
+
+		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
+		querySpec.setLimit(5L);
+		RelatedEntity relatedEntity =
+				repo.findOneTarget(nulledEntityId, TestEntity.ATTR_oneRelatedValue, querySpec);
+		Assert.assertNull(relatedEntity);
+
+		ResourceList<RelatedEntity> list =
+				repo.findManyTargets(nulledEntityId, TestEntity.ATTR_oneRelatedValue, querySpec);
+		Assert.assertEquals(0, list.size());
+		PagedMetaInformation pagedMeta = list.getMeta(PagedMetaInformation.class);
+		Assert.assertNotNull(pagedMeta.getTotalResourceCount());
+		Assert.assertEquals(Long.valueOf(0L), pagedMeta.getTotalResourceCount());
 	}
 
 	@Test
