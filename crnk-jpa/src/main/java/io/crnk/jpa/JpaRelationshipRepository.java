@@ -201,7 +201,8 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			throw new UnsupportedOperationException("page limit not supported for bulk inclusions");
 		}
 		// support paging for non-bulk requests
-		boolean pagedSingleRequest = sourceIdLists.size() == 1 && querySpec.getLimit() != null;
+		boolean singleRequest = sourceIdLists.size() == 1;
+		boolean pagedSingleRequest = singleRequest && querySpec.getLimit() != null;
 		boolean fetchNext = pagedSingleRequest && isNextFetched(querySpec);
 
 		QuerySpec bulkQuerySpec = querySpec.duplicate();
@@ -241,7 +242,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		MultivaluedMap<I, T> map = mapTuples(tuples);
 
-		if (pagedSingleRequest) {
+		if (singleRequest) {
 			I sourceId = sourceIdLists.get(0);
 
 			ResourceList<T> iterable;
@@ -253,14 +254,16 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 				map.set(sourceId, iterable);
 			}
 
-			MetaInformation metaInfo = iterable.getMeta();
-			boolean fetchTotal = isTotalFetched(filteredQuerySpec);
-			if (fetchTotal) {
-				long totalRowCount = executor.getTotalRowCount();
-				((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
-			}
-			if (fetchNext) {
-				((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
+			if (pagedSingleRequest) {
+				MetaInformation metaInfo = iterable.getMeta();
+				boolean fetchTotal = isTotalFetched(filteredQuerySpec);
+				if (fetchTotal) {
+					long totalRowCount = executor.getTotalRowCount();
+					((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+				}
+				if (fetchNext) {
+					((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
+				}
 			}
 		}
 

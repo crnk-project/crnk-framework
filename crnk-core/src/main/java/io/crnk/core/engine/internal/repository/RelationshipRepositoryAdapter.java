@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
@@ -15,9 +22,6 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import io.crnk.legacy.repository.RelationshipRepository;
 
-import java.io.Serializable;
-import java.util.*;
-
 /**
  * A repository adapter for relationship repository.
  */
@@ -26,9 +30,11 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 		extends ResponseRepositoryAdapter {
 
 	private final Object relationshipRepository;
+
 	private final boolean isAnnotated;
 
-	public RelationshipRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry, Object relationshipRepository) {
+	public RelationshipRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry,
+			Object relationshipRepository) {
 		super(resourceInformation, moduleRegistry);
 		this.relationshipRepository = relationshipRepository;
 		this.isAnnotated = relationshipRepository instanceof AnnotatedRelationshipRepositoryAdapter;
@@ -48,15 +54,18 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.setRelation(source, targetId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
-				} else {
+				}
+				else {
 					((RelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
 				}
 				return new JsonApiResponse();
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, Arrays.asList(targetId), field);
+		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
+				.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, Arrays.asList(targetId), field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -74,15 +83,19 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.setRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
-				} else {
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+					((RelationshipRepositoryV2) relationshipRepository)
+							.setRelations(source, targetIds, field.getUnderlyingName());
+				}
+				else {
 					((RelationshipRepository) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
 				}
 				return new JsonApiResponse();
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, targetIds, field);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, targetIds, field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -100,15 +113,19 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.addRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
-				} else {
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+					((RelationshipRepositoryV2) relationshipRepository)
+							.addRelations(source, targetIds, field.getUnderlyingName());
+				}
+				else {
 					((RelationshipRepository) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
 				}
 				return new JsonApiResponse();
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.POST, source, queryAdapter, targetIds, field);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.POST, source, queryAdapter, targetIds, field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -126,15 +143,20 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.removeRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository).removeRelations(source, targetIds, field.getUnderlyingName());
-				} else {
-					((RelationshipRepository) relationshipRepository).removeRelations(source, targetIds, field.getUnderlyingName());
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+					((RelationshipRepositoryV2) relationshipRepository)
+							.removeRelations(source, targetIds, field.getUnderlyingName());
+				}
+				else {
+					((RelationshipRepository) relationshipRepository)
+							.removeRelations(source, targetIds, field.getUnderlyingName());
 				}
 				return new JsonApiResponse();
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.DELETE, source, queryAdapter, targetIds, field);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.DELETE, source, queryAdapter, targetIds, field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -153,19 +175,24 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					resource = ((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.findOneTarget(sourceId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
 					Class<?> targetResourceClass = querySpecRepository.getTargetResourceClass();
-					ResourceInformation targetResourceInformation = moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
-					resource = querySpecRepository.findOneTarget(sourceId, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
-				} else {
+					ResourceInformation targetResourceInformation =
+							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+					resource = querySpecRepository
+							.findOneTarget(sourceId, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
+				}
+				else {
 					resource = ((RelationshipRepository) relationshipRepository)
 							.findOneTarget(sourceId, field.getUnderlyingName(), request.getQueryParams());
 				}
 				return getResponse(relationshipRepository, resource, request);
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -184,19 +211,24 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				if (isAnnotated) {
 					resources = ((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
 							.findManyTargets(sourceId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				}
+				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
 					Class<?> targetResourceClass = querySpecRepository.getTargetResourceClass();
-					ResourceInformation targetResourceInformation = moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
-					resources = querySpecRepository.findManyTargets(sourceId, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
-				} else {
+					ResourceInformation targetResourceInformation =
+							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+					resources = querySpecRepository.findManyTargets(sourceId, field.getUnderlyingName(),
+							request.getQuerySpec(targetResourceInformation));
+				}
+				else {
 					resources = ((RelationshipRepository) relationshipRepository)
 							.findManyTargets(sourceId, field.getUnderlyingName(), request.getQueryParams());
 				}
 				return getResponse(relationshipRepository, resources, request);
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -214,15 +246,18 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 
 					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
 					Class<?> targetResourceClass = bulkRepository.getTargetResourceClass();
-					ResourceInformation targetResourceInformation = moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+					ResourceInformation targetResourceInformation =
+							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
 					QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
 					MultivaluedMap targetsMap = bulkRepository.findTargets(sourceIds, field.getUnderlyingName(), querySpec);
 					return toResponses(targetsMap, true, queryAdapter, field, HttpMethod.GET);
 				}
 			};
-			RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, sourceIds, field);
+			RepositoryRequestSpec requestSpec =
+					RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, sourceIds, field);
 			return chain.doFilter(newRepositoryFilterContext(requestSpec));
-		} else {
+		}
+		else {
 			// fallback to non-bulk operation
 			Map<I, JsonApiResponse> responseMap = new HashMap<>();
 			for (I sourceId : sourceIds) {
@@ -249,14 +284,18 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 
 					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
 					Class targetResourceClass = bulkRepository.getTargetResourceClass();
-					ResourceInformation targetResourceInformation = moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
-					MultivaluedMap<I, D> targetsMap = bulkRepository.findTargets(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
+					ResourceInformation targetResourceInformation =
+							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+					MultivaluedMap<I, D> targetsMap = bulkRepository
+							.findTargets(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
 					return toResponses(targetsMap, false, queryAdapter, field, HttpMethod.GET);
 				}
 			};
-			RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, sourceIds, field);
+			RepositoryRequestSpec requestSpec =
+					RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, sourceIds, field);
 			return chain.doFilter(newRepositoryFilterContext(requestSpec));
-		} else {
+		}
+		else {
 			// fallback to non-bulk operation
 			Map<I, JsonApiResponse> responseMap = new HashMap<>();
 			for (I sourceId : sourceIds) {
@@ -268,11 +307,19 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 	}
 
 
-	private Map<I, JsonApiResponse> toResponses(MultivaluedMap<I, D> targetsMap, boolean isMany, QueryAdapter queryAdapter, ResourceField field, HttpMethod method) {
+	private Map<I, JsonApiResponse> toResponses(MultivaluedMap<I, D> targetsMap, boolean isMany, QueryAdapter queryAdapter,
+			ResourceField field, HttpMethod method) {
 		Map<I, JsonApiResponse> responseMap = new HashMap<>();
 		for (I sourceId : targetsMap.keySet()) {
-			Object targets = isMany ? targetsMap.getList(sourceId) : targetsMap.getUnique(sourceId);
-			RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forRelation(moduleRegistry, method, null, queryAdapter, Collections.singleton(sourceId), field);
+			Object targets;
+			if (isMany) {
+				targets = targetsMap.getList(sourceId);
+			}
+			else {
+				targets = targetsMap.getUnique(sourceId, true);
+			}
+			RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
+					.forRelation(moduleRegistry, method, null, queryAdapter, Collections.singleton(sourceId), field);
 			JsonApiResponse response = getResponse(relationshipRepository, targets, requestSpec);
 			responseMap.put(sourceId, response);
 		}
