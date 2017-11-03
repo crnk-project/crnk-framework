@@ -57,7 +57,7 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 
 		JsonApiResponse result = null;
 		Exception exception = null;
-		try {
+		try (Tracer.SpanInScope ws = tracer.withSpanInScope(span)) {
 			result = chain.doFilter(context);
 			return result;
 		}
