@@ -114,7 +114,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
 		List<Span> serverSpans = serverSpanCaptor.getAllValues();
 		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name);
+		Assert.assertEquals("crnk:post:/tasks/13", repositorySpan.name);
 		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
 		assertBinaryAnnotation(repositorySpan, "lc", "crnk");
@@ -152,7 +152,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
 		List<Span> serverSpans = serverSpanCaptor.getAllValues();
 		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name);
+		Assert.assertEquals("crnk:post:/tasks/13", repositorySpan.name);
 		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
 		assertBinaryAnnotation(repositorySpan, "lc", "crnk");
@@ -188,7 +188,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
 		List<Span> serverSpans = serverSpanCaptor.getAllValues();
 		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:get:/tasks/", repositorySpan.name);
+		Assert.assertEquals("crnk:get:/tasks", repositorySpan.name);
 		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
 		assertBinaryAnnotation(repositorySpan, "lc", "crnk");
@@ -223,7 +223,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		List<Span> serverSpans = serverSpanCaptor.getAllValues();
 
 		Span repositorySpan0 = serverSpans.get(0);
-		Assert.assertEquals("crnk:get:/tasks/", repositorySpan0.name);
+		Assert.assertEquals("crnk:get:/tasks", repositorySpan0.name);
 		Assert.assertTrue(repositorySpan0.toString().contains("\"lc\""));
 
 		assertBinaryAnnotation(repositorySpan0, "lc", "crnk");
@@ -231,7 +231,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		assertBinaryAnnotation(repositorySpan0, "crnk.status", "OK");
 
 		Span repositorySpan1 = serverSpans.get(1);
-		Assert.assertEquals("crnk:get:/projects/123/tasks/", repositorySpan1.name);
+		Assert.assertEquals("crnk:get:/projects/123/tasks", repositorySpan1.name);
 		Assert.assertTrue(repositorySpan1.toString().contains("\"lc\""));
 
 		assertBinaryAnnotation(repositorySpan1, "lc", "crnk");

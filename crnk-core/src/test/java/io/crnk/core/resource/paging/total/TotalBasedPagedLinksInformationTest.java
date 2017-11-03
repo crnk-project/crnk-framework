@@ -45,10 +45,10 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 		querySpec.setLimit(2L);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=2", linksInformation.getFirst());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=2&page[offset]=4", linksInformation.getLast());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=2", linksInformation.getPrev());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=2&page[offset]=4", linksInformation.getNext());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getFirst());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2&page[offset]=4", linksInformation.getLast());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getPrev());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2&page[offset]=4", linksInformation.getNext());
 	}
 
 	@Test
@@ -73,10 +73,10 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 		querySpec.setLimit(3L);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=3", linksInformation.getFirst());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=3&page[offset]=3", linksInformation.getLast());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3", linksInformation.getFirst());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3&page[offset]=3", linksInformation.getLast());
 		Assert.assertNull(linksInformation.getPrev());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=3&page[offset]=3", linksInformation.getNext());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3&page[offset]=3", linksInformation.getNext());
 	}
 
 	@Test
@@ -86,9 +86,9 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 		querySpec.setLimit(4L);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=4", linksInformation.getFirst());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=4&page[offset]=4", linksInformation.getLast());
-		Assert.assertEquals("http://127.0.0.1/tasks/?page[limit]=4", linksInformation.getFirst());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4&page[offset]=4", linksInformation.getLast());
+		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst());
 		Assert.assertNull(linksInformation.getNext());
 	}
 
