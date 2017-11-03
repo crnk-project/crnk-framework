@@ -43,6 +43,9 @@ export class QMetaElement extends BeanPath<MetaElement> {
 	attributes: QMetaElement.QAttributes = new QMetaElement.QAttributes(this, 'attributes');
 }
 export module QMetaElement {
+	export class QAttributes extends BeanPath<MetaElement.Attributes> {
+		name: StringPath = this.createString('name');
+	}
 	export class QRelationships extends BeanPath<MetaElement.Relationships> {
 		private _parent: QTypedOneResourceRelationship<QMetaElement, MetaElement>;
 		get parent(): QTypedOneResourceRelationship<QMetaElement, MetaElement> {
@@ -60,9 +63,6 @@ export module QMetaElement {
 			}
 			return this._children;
 		};
-	}
-	export class QAttributes extends BeanPath<MetaElement.Attributes> {
-		name: StringPath = this.createString('name');
 	}
 }
 export let createEmptyMetaElement = function(id: string): MetaElement {

@@ -242,17 +242,17 @@ public class QuerySpecClientTest extends AbstractClientTest {
 			Assert.assertEquals("GET", methods.get(1));
 			if (pushAlways) {
 				Assert.assertEquals("POST", methods.get(2));
-				Assert.assertEquals("/tasks/", paths.get(2));
+				Assert.assertEquals("/tasks", paths.get(2));
 			}
 			else {
 				Assert.assertEquals("PATCH", methods.get(2));
-				Assert.assertEquals("/tasks/1/", paths.get(2));
+				Assert.assertEquals("/tasks/1", paths.get(2));
 			}
 			Assert.assertEquals("GET", methods.get(3));
 
-			Assert.assertEquals("/tasks/", paths.get(0));
-			Assert.assertEquals("/tasks/1/", paths.get(1));
-			Assert.assertEquals("/tasks/1/", paths.get(3));
+			Assert.assertEquals("/tasks", paths.get(0));
+			Assert.assertEquals("/tasks/1", paths.get(1));
+			Assert.assertEquals("/tasks/1", paths.get(3));
 		}
 	}
 

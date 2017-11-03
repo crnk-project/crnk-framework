@@ -378,10 +378,10 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertNotNull(links);
 
 		String baseUri = getBaseUri().toString();
-		Assert.assertEquals(baseUri + "test/?page[limit]=2", links.asJsonNode().get("first").asText());
-		Assert.assertEquals(baseUri + "test/?page[limit]=2&page[offset]=4", links.asJsonNode().get("last").asText());
-		Assert.assertEquals(baseUri + "test/?page[limit]=2", links.asJsonNode().get("prev").asText());
-		Assert.assertEquals(baseUri + "test/?page[limit]=2&page[offset]=4", links.asJsonNode().get("next").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2", links.asJsonNode().get("first").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2&page[offset]=4", links.asJsonNode().get("last").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2", links.asJsonNode().get("prev").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2&page[offset]=4", links.asJsonNode().get("next").asText());
 	}
 
 	@Test
@@ -419,13 +419,13 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertNotNull(links);
 
 		String baseUri = getBaseUri().toString();
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2",
 				links.asJsonNode().get("first").asText());
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2&page[offset]=4",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2&page[offset]=4",
 				links.asJsonNode().get("last").asText());
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2",
 				links.asJsonNode().get("prev").asText());
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2&page[offset]=4",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2&page[offset]=4",
 				links.asJsonNode().get("next").asText());
 	}
 

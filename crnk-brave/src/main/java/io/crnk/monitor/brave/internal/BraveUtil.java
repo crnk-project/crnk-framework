@@ -55,16 +55,15 @@ public class BraveUtil {
 		else {
 			pathBuilder.append(relationshipField.getParentResourceInformation().getResourceType());
 		}
-		pathBuilder.append("/");
 
 		Iterable<Object> ids = request.getIds();
 		if (ids != null) {
-			pathBuilder.append(StringUtils.join(",", ids));
 			pathBuilder.append("/");
+			pathBuilder.append(StringUtils.join(",", ids));
 		}
 		if (relationshipField != null) {
-			pathBuilder.append(relationshipField.getJsonName());
 			pathBuilder.append("/");
+			pathBuilder.append(relationshipField.getJsonName());
 		}
 		return pathBuilder.toString();
 	}

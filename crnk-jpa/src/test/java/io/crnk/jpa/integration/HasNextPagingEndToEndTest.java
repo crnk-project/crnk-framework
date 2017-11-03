@@ -56,10 +56,10 @@ public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 		JsonLinksInformation links = list.getLinks(JsonLinksInformation.class);
 
 		String baseUri = getBaseUri().toString();
-		Assert.assertEquals(baseUri + "test/?page[limit]=2", links.asJsonNode().get("first").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2", links.asJsonNode().get("first").asText());
 		Assert.assertNull(links.asJsonNode().get("last")); // not available for hasNext
-		Assert.assertEquals(baseUri + "test/?page[limit]=2", links.asJsonNode().get("prev").asText());
-		Assert.assertEquals(baseUri + "test/?page[limit]=2&page[offset]=4", links.asJsonNode().get("next").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2", links.asJsonNode().get("prev").asText());
+		Assert.assertEquals(baseUri + "test?page[limit]=2&page[offset]=4", links.asJsonNode().get("next").asText());
 
 		JsonMetaInformation meta = list.getMeta(JsonMetaInformation.class);
 		Assert.assertNull(meta);
@@ -100,12 +100,12 @@ public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertNotNull(links);
 
 		String baseUri = getBaseUri().toString();
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2",
 				links.asJsonNode().get("first").asText());
 		Assert.assertNull(links.asJsonNode().get("last"));
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2",
 				links.asJsonNode().get("prev").asText());
-		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues/?page[limit]=2&page[offset]=4",
+		Assert.assertEquals(baseUri + "test/1/relationships/manyRelatedValues?page[limit]=2&page[offset]=4",
 				links.asJsonNode().get("next").asText());
 	}
 }
