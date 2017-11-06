@@ -18,7 +18,8 @@ import 'rxjs/add/operator/withLatestFrom';
 import {Headers, Http, Request, RequestMethod, RequestOptions} from '@angular/http';
 import {
 	ApiApplyInitAction,
-	Document, NgrxJsonApiActionTypes, NgrxJsonApiService, NgrxJsonApiStore, Query, Resource, ResourceError,
+	Document, getNgrxJsonApiZone, NgrxJsonApiActionTypes, NgrxJsonApiService, NgrxJsonApiStore, Query, Resource,
+	ResourceError,
 	StoreResource
 } from 'ngrx-json-api';
 
@@ -63,17 +64,15 @@ export class OperationsEffects {
 
 	@Effect() applyResources$ = this.actions$
 		.ofType(NgrxJsonApiActionTypes.API_APPLY_INIT)
-		.withLatestFrom(this.store.select(it => {
-			let feature = it['NgrxJsonApi'];
-			return feature ? feature['api'] : undefined;
-		}), (action, ngrxstore: NgrxJsonApiStore) => {
-			let payload = (action as ApiApplyInitAction).payload;
+		.withLatestFrom(this.store, (action, state: any) => {
+			const initAction = action as ApiApplyInitAction;
+			const zoneId = initAction.zoneId;
+			const ngrxstore = getNgrxJsonApiZone(state, zoneId);
+			let payload = initAction.payload;
 			const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include, false);
-			return pending;
-		})
-		.flatMap(pending => {
+
 			if (pending.length === 0) {
-				return Observable.of(new ApiApplySuccessAction([]));
+				return Observable.of(new ApiApplySuccessAction([], zoneId));
 			}
 
 			const operations: Array<Operation> = [];
@@ -83,7 +82,7 @@ export class OperationsEffects {
 
 			const requestOptions = new RequestOptions({
 				method: RequestMethod.Patch,
-				url: this.ngrxJsonApi['selectors']['config']['apiUrl'] + '/operations/',
+				url: this.ngrxJsonApi['config']['apiUrl'] + '/operations/',
 				body: JSON.stringify(operations)
 			});
 
@@ -102,9 +101,9 @@ export class OperationsEffects {
 					for (const index of Object.keys(operationResponses)) {
 						const operationResponse = operationResponses[index];
 						const pendingChange = pending[index];
-						actions.push(this.toResponseAction(pendingChange, operationResponse));
+						actions.push(this.toResponseAction(pendingChange, operationResponse, zoneId));
 					}
-					return this.toApplyAction(actions);
+					return this.toApplyAction(actions, zoneId);
 				})
 				.catch(errorResponse => {
 					// transform http to json api error
@@ -120,11 +119,12 @@ export class OperationsEffects {
 							errors: errors,
 							status: 500
 						} as OperationResponse;
-						actions.push(this.toResponseAction(pendingChange, operationResponse));
+						actions.push(this.toResponseAction(pendingChange, operationResponse, zoneId));
 					}
-					return Observable.of(new ApiApplyFailAction(actions));
+					return Observable.of(new ApiApplyFailAction(actions, zoneId));
 				});
-		});
+		})
+		.flatMap(actions => actions);
 
 
 
@@ -135,7 +135,7 @@ export class OperationsEffects {
 		private ngrxJsonApi: NgrxJsonApiService
 	) {
 		// disable default implementation
-		this.ngrxJsonApi['selectors']['config']['applyEnabled'] = false;
+		this.ngrxJsonApi['config']['applyEnabled'] = false;
 	}
 
 	private toOperation(pendingChange: StoreResource): Operation {
@@ -174,18 +174,18 @@ export class OperationsEffects {
 		}
 	}
 
-	private toApplyAction(actions: Array<Action>): any {
+	private toApplyAction(actions: Array<Action>, zoneId: string): any {
 		for (const action of actions) {
 			if (action.type === NgrxJsonApiActionTypes.API_POST_FAIL
 				|| action.type === NgrxJsonApiActionTypes.API_PATCH_FAIL
 				|| action.type === NgrxJsonApiActionTypes.API_DELETE_FAIL) {
-				return new ApiApplyFailAction(actions);
+				return new ApiApplyFailAction(actions, zoneId);
 			}
 		}
-		return new ApiApplySuccessAction(actions);
+		return new ApiApplySuccessAction(actions, zoneId);
 	}
 
-	private toResponseAction(pendingChange: StoreResource, operationResponse: OperationResponse): Action {
+	private toResponseAction(pendingChange: StoreResource, operationResponse: OperationResponse, zoneId: string): Action {
 		const success = operationResponse.status >= 200 && operationResponse.status < 300;
 
 		const jsonApiData: Document = _.omit(operationResponse, ['status']) as Document;
@@ -204,13 +204,13 @@ export class OperationsEffects {
 				return new ApiPostSuccessAction({
 					jsonApiData: jsonApiData,
 					query: query
-				});
+				}, zoneId);
 			}
 			else {
 				return new ApiPostFailAction({
 					jsonApiData: jsonApiData,
 					query: query
-				});
+				}, zoneId);
 			}
 		}
 		else if (pendingChange.state === 'UPDATED') {
@@ -218,26 +218,26 @@ export class OperationsEffects {
 				return new ApiPatchSuccessAction({
 					jsonApiData: jsonApiData,
 					query: query
-				});
+				}, zoneId);
 			}
 			else {
 				return new ApiPatchFailAction({
 					jsonApiData: jsonApiData,
 					query: query
-				});
+				}, zoneId);
 			}
 		}
 		else if (pendingChange.state === 'DELETED') {
 			if (success) {
 				return new ApiDeleteSuccessAction({
 					query: query
-				});
+				}, zoneId);
 			}
 			else {
 				return new ApiDeleteFailAction({
 					jsonApiData: jsonApiData,
 					query: query
-				});
+				}, zoneId);
 			}
 		}
 		else {

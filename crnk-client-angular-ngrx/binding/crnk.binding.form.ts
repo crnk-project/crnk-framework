@@ -11,9 +11,11 @@ import "rxjs/add/operator/finally";
 import "rxjs/add/operator/share";
 import {NgForm} from "@angular/forms";
 import {
+	getNgrxJsonApiZone,
+	NGRX_JSON_API_DEFAULT_ZONE,
 	NgrxJsonApiService,
 	NgrxJsonApiStore,
-	NgrxJsonApiStoreData,
+	NgrxJsonApiStoreData, NgrxJsonApiZoneService,
 	Resource,
 	ResourceError,
 	ResourceIdentifier,
@@ -47,6 +49,11 @@ export interface FormBindingConfig {
 	 * resources triggers an update of the FormControl states. Set this flag to true to listen to all store changes.
 	 */
 	mapNonResultResources?: boolean;
+
+	/**
+	 * Zone to use within ngrx-json-api.
+	 */
+	zoneId?: string;
 }
 
 /**
@@ -129,9 +136,13 @@ export class FormBinding {
 
 	public dirty: Observable<boolean>;
 
+	private ngrxJsonApiZone: NgrxJsonApiZoneService;
 
-	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
+	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
 				private store: Store<any>) {
+
+		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId)
 
 		this.dirtySubject.next(false);
 		this.validSubject.next(true);
@@ -148,7 +159,7 @@ export class FormBinding {
 
 		// we make use of share() to keep the this.config.resource$ subscription
 		// as long as there is at least subscriber on this.resource$.
-		this.resource$ = this.ngrxJsonApiService.selectOneResults(this.config.queryId, true)
+		this.resource$ = this.ngrxJsonApiZone.selectOneResults(this.config.queryId, true)
 			.filter(it => !_.isEmpty(it)) // ignore deletions
 			.filter(it => !it.loading)
 			.map(it => it.data as StoreResource)
@@ -159,7 +170,7 @@ export class FormBinding {
 			.do(() => this.checkSubscriptions())
 			.do(resource => this.primaryResourceId = {type: resource.type, id: resource.id})
 			.withLatestFrom(this.store, (resource, store) => {
-				let jsonapiState = store['NgrxJsonApi']['api'] as NgrxJsonApiStore;
+				let jsonapiState = getNgrxJsonApiZone(store, zoneId);
 				this._storeDataSnapshot = jsonapiState.data;
 				this.mapResourceToControlErrors(jsonapiState.data);
 				this.updateDirtyState(jsonapiState.data);
@@ -181,11 +192,6 @@ export class FormBinding {
 		}
 	}
 
-	private get storeDataSnapshot(): NgrxJsonApiStoreData {
-		return this.ngrxJsonApiService['storeSnapshot']['data'] as NgrxJsonApiStoreData;
-	}
-
-
 	protected checkSubscriptions() {
 		if (this.formSubscription === null) {
 			// update store from value changes, for more information see
@@ -200,7 +206,7 @@ export class FormBinding {
 					//
 					// geting notified about new control would be great...
 					if (!this.formControlsInitialized) {
-						this.mapResourceToControlErrors(this.storeDataSnapshot);
+						this.mapResourceToControlErrors(this._storeDataSnapshot);
 					}
 				})
 
@@ -281,11 +287,11 @@ export class FormBinding {
 	}
 
 	public save() {
-		this.ngrxJsonApiService.apply();
+		this.ngrxJsonApiZone.apply();
 	}
 
 	public delete() {
-		this.ngrxJsonApiService.deleteResource({
+		this.ngrxJsonApiZone.deleteResource({
 				resourceId: this.primaryResourceId,
 				toRemote: true
 			}
@@ -353,7 +359,7 @@ export class FormBinding {
 		const patchedResources = _.values(patchedResourceMap);
 		for (const patchedResource of patchedResources) {
 			const cleanedPatchedResource = this.clearPrimeNgMarkers(patchedResource);
-			this.ngrxJsonApiService.patchResource({resource: cleanedPatchedResource});
+			this.ngrxJsonApiZone.patchResource({resource: cleanedPatchedResource});
 		}
 	}
 

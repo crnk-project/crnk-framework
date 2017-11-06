@@ -4,7 +4,7 @@ import 'rxjs/add/operator/merge';
 import {ActionReducerMap, Store, StoreModule} from '@ngrx/store';
 
 
-import {ApiApplyInitAction, NgrxJsonApiService, NgrxJsonApiStore, Resource} from 'ngrx-json-api';
+import {ApiApplyInitAction, NgrxJsonApiService, NgrxJsonApiStore, NgrxJsonApiZone, Resource} from 'ngrx-json-api';
 
 import {NGRX_JSON_API_CONFIG, selectorsFactory, serviceFactory} from 'ngrx-json-api/src/module';
 
@@ -32,17 +32,18 @@ import {NgrxJsonApiSelectors} from 'ngrx-json-api/src/selectors';
 
 export const testReducer: ActionReducerMap<any> = {};
 
-
 let initialState = {
 	NgrxJsonApi: {
-		api: {
-			...{},
-			...initialNgrxJsonApiState,
-			...{
-				data: updateStoreDataFromPayload({}, testPayload),
-			},
-		},
-	},
+		zones: {
+			default: {
+				...{},
+				...initialNgrxJsonApiState,
+				...{
+					data: updateStoreDataFromPayload({}, testPayload),
+				}
+			}
+		}
+	}
 };
 
 @NgModule({
@@ -54,9 +55,6 @@ let initialState = {
 	providers: [],
 })
 export class TestingModule {
-}
-
-class OperationsInitAction {
 }
 
 describe('OperationsEffects', () => {
@@ -125,21 +123,21 @@ describe('OperationsEffects', () => {
 	it('should do nothing when store in sync', () => {
 		let res;
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction({}));
+		actions.next(new ApiApplyInitAction({}, 'default'));
 		effects.applyResources$.subscribe(result => {
 			res = result;
-			expect(result).toEqual(new ApiApplySuccessAction([]));
+			expect(result).toEqual(new ApiApplySuccessAction([], 'default'));
 		});
 		expect(res).toBeDefined();
 	});
 
 	it('should post created resource', () => {
 		let res;
-		let api = store['source']['_value']['NgrxJsonApi']['api'] as NgrxJsonApiStore;
-		api.data['Article']['1'].state = 'CREATED';
+		let zone = store['source']['_value']['NgrxJsonApi']['zones']['default'] as NgrxJsonApiZone;
+		zone.data['Article']['1'].state = 'CREATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction({}));
+		actions.next(new ApiApplyInitAction({}, 'default'));
 
 		effects.applyResources$.subscribe(result => {
 			res = result;
@@ -157,11 +155,11 @@ describe('OperationsEffects', () => {
 	it('should patch updated resource', () => {
 		let res;
 
-		let api = store['source']['_value']['NgrxJsonApi']['api'] as NgrxJsonApiStore;
-		api.data['Article']['1'].state = 'UPDATED';
+		let zone = store['source']['_value']['NgrxJsonApi']['zones']['default'] as NgrxJsonApiZone;
+		zone.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction({}));
+		actions.next(new ApiApplyInitAction({}, 'default'));
 
 		effects.applyResources$.subscribe(result => {
 			res = result;
@@ -182,11 +180,11 @@ describe('OperationsEffects', () => {
 
 		returnError = true;
 
-		let api = store['source']['_value']['NgrxJsonApi']['api'] as NgrxJsonApiStore;
-		api.data['Article']['1'].state = 'UPDATED';
+		let zone = store['source']['_value']['NgrxJsonApi']['zones']['default'] as NgrxJsonApiZone;
+		zone.data['Article']['1'].state = 'UPDATED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction({}));
+		actions.next(new ApiApplyInitAction({}, 'default'));
 
 		effects.applyResources$.subscribe(result => {
 			res = result;
@@ -205,11 +203,11 @@ describe('OperationsEffects', () => {
 	it('should delete resource', () => {
 		let res;
 
-		let api = store['source']['_value']['NgrxJsonApi']['api'] as NgrxJsonApiStore;
-		api.data['Article']['1'].state = 'DELETED';
+		let zone = store['source']['_value']['NgrxJsonApi']['zones']['default'] as NgrxJsonApiZone;
+		zone.data['Article']['1'].state = 'DELETED';
 
 		actions = new ReplaySubject(1);
-		actions.next(new ApiApplyInitAction({}));
+		actions.next(new ApiApplyInitAction({}, 'default'));
 
 		effects.applyResources$.subscribe(result => {
 			res = result;

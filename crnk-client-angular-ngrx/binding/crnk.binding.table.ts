@@ -13,7 +13,8 @@ import {
 	NgrxJsonApiService,
 	Query,
 	Resource,
-	SortingParam
+	SortingParam,
+	NgrxJsonApiZoneService, NGRX_JSON_API_DEFAULT_ZONE
 } from 'ngrx-json-api';
 import {CrnkBindingUtils} from './crnk.binding.utils';
 // TODO get rid of this? or support multiple ones, only dependency to primeng here...
@@ -29,6 +30,11 @@ export interface DataTableBindingConfig {
 	baseQuery?: Query;
 
 	fromServer?: boolean;
+
+	/**
+	 * Zone to use within ngrx-json-api.
+	 */
+	zoneId?: string;
 }
 
 export class DataTableBinding {
@@ -45,9 +51,12 @@ export class DataTableBinding {
 
 	private num = 0;
 
-	constructor(private ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
+	private ngrxJsonApiZone: NgrxJsonApiZoneService;
+
+	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
 				private utils: CrnkBindingUtils) {
 
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE)
 		this.result$ = this.resultSubject$.asObservable();
 
 		if (!this.config.queryId) {
@@ -64,7 +73,7 @@ export class DataTableBinding {
 			this.baseQuery = storeQuerySnapshot['query'];
 		}
 
-		this.result$ = this.ngrxJsonApiService
+		this.result$ = this.ngrxJsonApiZone
 			.selectManyResults(this.config.queryId, true)
 			.do(it => {
 				if (this.baseQuery === null) {
@@ -94,7 +103,7 @@ export class DataTableBinding {
 	}
 
 	public refresh() {
-		this.ngrxJsonApiService.refreshQuery(this.config.queryId);
+		this.ngrxJsonApiZone.refreshQuery(this.config.queryId);
 	}
 
 	public onLazyLoad(event: LazyLoadEvent) {
@@ -146,7 +155,7 @@ export class DataTableBinding {
 		this.num++;
 
 		if (!_.isEqual(query, this.latestQuery)) {
-			this.ngrxJsonApiService.putQuery({
+			this.ngrxJsonApiZone.putQuery({
 					query: query,
 					fromServer: this.config.fromServer
 				}
