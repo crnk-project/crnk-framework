@@ -37,7 +37,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			}
 		};
 
-		final TSGeneratorExtension config = new TSGeneratorExtension(project, initRunner);
+		final TSGeneratorConfig config = new TSGeneratorExtension(project, initRunner);
 		project.getExtensions().add("typescriptGen", config);
 		project.afterEvaluate(new Action<Project>() {
 			@Override
@@ -49,16 +49,16 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 
 
 	protected void init(Project project) {
-		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
-		GenerateTypescriptTask generateTask = setupGenerateTask(project);
+		TSGeneratorConfig config = project.getExtensions().getByType(TSGeneratorConfig.class);
+		Task generateTask = setupGenerateTask(project);
 		if (config.getNpm().isPackagingEnabled()) {
 			setupPackageTasks(project, generateTask);
 		}
 		setupRuntimeDependencies(project, generateTask);
 	}
 
-	private void setupRuntimeDependencies(Project project, GenerateTypescriptTask generateTask) {
-		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+	private void setupRuntimeDependencies(Project project, Task generateTask) {
+		TSGeneratorConfig config = project.getExtensions().getByType(TSGeneratorConfig.class);
 		String runtimeConfiguration = config.getRuntime().getConfiguration();
 		if (runtimeConfiguration != null) {
 			String runtimeConfigurationFirstUpper =
@@ -85,7 +85,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 	}
 
 	private File getNpmOutputDir(Project project) {
-		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		TSGeneratorConfig config = project.getExtensions().getByType(TSGeneratorConfig.class);
 		File typescriptGenDir = config.getNpm().getOutputDir();
 		if (typescriptGenDir == null) {
 			return new File(project.getBuildDir(), "npm");
@@ -93,17 +93,18 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 		return typescriptGenDir;
 	}
 
-	private GenerateTypescriptTask setupGenerateTask(Project project) {
-		return project.getTasks().create(GenerateTypescriptTask.NAME,
-				GenerateTypescriptTask.class);
+	private Task setupGenerateTask(Project project) {
+		TSGeneratorConfig config = project.getExtensions().getByType(TSGeneratorConfig.class);
+		Class taskClass = config.isForked() ? ForkedGenerateTypescriptTask.class : GenerateTypescriptTask.class;
+		return project.getTasks().create(GenerateTypescriptTask.NAME, taskClass);
 	}
 
-	void setupPackageTasks(Project project, GenerateTypescriptTask generateTask) {
+	void setupPackageTasks(Project project, Task generateTask) {
 		final File buildDir = new File(project.getBuildDir(), "npm_compile");
 		final File distDir = getNpmOutputDir(project);
 
 		project.getTasks().create(PublishTypescriptStubsTask.NAME, PublishTypescriptStubsTask.class);
-		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		TSGeneratorConfig config = project.getExtensions().getByType(TSGeneratorConfig.class);
 
 		Copy copySources = project.getTasks().create("processTypescript", Copy.class);
 		copySources.from(config.getGenDir());

@@ -10,4 +10,8 @@ public interface GeneratorTrigger {
 	 * @param lookup of type io.katharsis.meta.MetaLookup. Not that the MetaLookup class is not available here.
 	 */
 	void generate(Object lookup) throws IOException;
+
+	ClassLoader getClassLoader();
+
+	void setClassLoader(ClassLoader classloader);
 }

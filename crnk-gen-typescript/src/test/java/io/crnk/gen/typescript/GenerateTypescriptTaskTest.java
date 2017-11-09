@@ -59,6 +59,7 @@ public class GenerateTypescriptTaskTest {
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
 		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		config.setForked(false);
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getRuntime().setConfiguration("test");
@@ -72,7 +73,7 @@ public class GenerateTypescriptTaskTest {
 		plugin.init(project);
 
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
-		task.runGeneration();
+		task.runGeneration(Thread.currentThread().getContextClassLoader());
 
 		Copy processTask = (Copy) project.getTasks().getByName("processTypescript");
 		processTask.execute();

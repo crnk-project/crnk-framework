@@ -17,10 +17,13 @@ dependencies {
 
 	compileOnly project(':crnk-core')
 	compileOnly project(':crnk-meta')
+
+	compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
+
 	compileOnly 'junit:junit:4.12'
 	compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
 	compileOnly 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.7.1'
-
+	compileOnly 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
 
 	compileOnly 'javax:javaee-api:7.0'
 
@@ -39,6 +42,7 @@ dependencies {
 	testCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.7.1'
 	testCompile 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
 	testCompile 'javax:javaee-api:7.0'
+
 
 
 }

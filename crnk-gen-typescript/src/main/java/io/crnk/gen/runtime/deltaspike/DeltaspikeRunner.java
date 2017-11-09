@@ -39,7 +39,6 @@ public class DeltaspikeRunner {
 					throw new IllegalStateException(exception);
 				}
 			}
-
 		}
 		finally {
 			CdiContainer cdiContainer = CdiContainerLoader.getCdiContainer();
