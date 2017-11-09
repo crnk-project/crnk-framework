@@ -19,7 +19,7 @@ import {
 	ResourceRelationship,
 	TypedManyResourceRelationship,
 	TypedOneResourceRelationship
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module Schedules {
 	export interface Relationships {

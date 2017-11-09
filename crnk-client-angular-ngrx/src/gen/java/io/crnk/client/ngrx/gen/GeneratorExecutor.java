@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
-import io.crnk.gen.typescript.TSGeneratorExtension;
+import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.internal.TSGenerator;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.model.MetaElement;
@@ -14,7 +14,7 @@ import io.crnk.meta.provider.resource.ResourceMetaProvider;
 
 public class GeneratorExecutor {
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		GeneratorExecutor executor = new GeneratorExecutor();
 
 		File outputDir = new File("crnk-client-angular-ngrx");
@@ -23,7 +23,7 @@ public class GeneratorExecutor {
 	}
 
 	public void run(File outputDir) {
-		TSGeneratorExtension config = new TSGeneratorExtension(null, null);
+		TSGeneratorConfig config = new TSGeneratorConfig();
 		config.setGenerateExpressions(true);
 		config.getNpm().setPackagingEnabled(false);
 		config.getNpm().setPackageName("@crnk/angular-ngrx");
@@ -40,7 +40,8 @@ public class GeneratorExecutor {
 		TSGenerator generator = new TSGenerator(outputDir, metaModule.getLookup(), config);
 		try {
 			generator.run();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

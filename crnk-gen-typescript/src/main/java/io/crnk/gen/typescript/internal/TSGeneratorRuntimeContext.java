@@ -2,12 +2,12 @@ package io.crnk.gen.typescript.internal;
 
 import java.io.File;
 
-import io.crnk.gen.typescript.TSGeneratorExtension;
+import io.crnk.gen.typescript.TSGeneratorConfig;
 
 
 public interface TSGeneratorRuntimeContext {
 
 	void setOutputDir(File outputDir);
 
-	void setConfig(TSGeneratorExtension config);
+	void setConfig(TSGeneratorConfig config);
 }

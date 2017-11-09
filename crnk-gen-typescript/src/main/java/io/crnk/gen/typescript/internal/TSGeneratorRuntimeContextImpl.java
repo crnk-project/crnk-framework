@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import io.crnk.gen.runtime.GeneratorTrigger;
-import io.crnk.gen.typescript.TSGeneratorExtension;
+import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.meta.MetaLookup;
 
 
@@ -12,7 +12,9 @@ public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGenera
 
 	private File outputDir;
 
-	private TSGeneratorExtension config;
+	private TSGeneratorConfig config;
+
+	private ClassLoader classloader;
 
 	@Override
 	public void generate(Object meta) throws IOException {
@@ -23,12 +25,25 @@ public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGenera
 	}
 
 	@Override
+	public ClassLoader getClassLoader() {
+		if (classloader == null) {
+			throw new IllegalStateException();
+		}
+		return classloader;
+	}
+
+	@Override
+	public void setClassLoader(ClassLoader classloader) {
+		this.classloader = classloader;
+	}
+
+	@Override
 	public void setOutputDir(File outputDir) {
 		this.outputDir = outputDir;
 	}
 
 	@Override
-	public void setConfig(TSGeneratorExtension config) {
+	public void setConfig(TSGeneratorConfig config) {
 		this.config = config;
 	}
 }
