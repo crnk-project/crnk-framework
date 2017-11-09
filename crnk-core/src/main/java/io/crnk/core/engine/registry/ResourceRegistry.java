@@ -19,7 +19,11 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 	@Deprecated
 	ServiceUrlProvider getServiceUrlProvider();
 
-	@Deprecated
+	/**
+	 * @param resourceInformation
+	 * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
+	 * to invoke this method (to obtain domain/host information).
+	 */
 	String getResourceUrl(ResourceInformation resourceInformation);
 
 	/**
