@@ -5,6 +5,8 @@ package io.crnk.core.engine.information.resource;
  */
 public class ResourceFieldAccess {
 
+	private final boolean readable;
+
 	private final boolean postable;
 
 	private final boolean patchable;
@@ -13,11 +15,19 @@ public class ResourceFieldAccess {
 
 	private final boolean filterable;
 
-	public ResourceFieldAccess(boolean postable, boolean patchable, boolean sortable, boolean filterable) {
+	public ResourceFieldAccess(boolean readable, boolean postable, boolean patchable, boolean sortable, boolean filterable) {
+		this.readable = readable;
 		this.postable = postable;
 		this.patchable = patchable;
 		this.sortable = sortable;
 		this.filterable = filterable;
+	}
+
+	/**
+	 * @return true if the field can be read by a GET request.
+	 */
+	public boolean isReadable() {
+		return readable;
 	}
 
 	/**
@@ -49,17 +59,19 @@ public class ResourceFieldAccess {
 	}
 
 	public ResourceFieldAccess and(ResourceFieldAccess other) {
+		boolean readable = isReadable() && other.isReadable();
 		boolean postable = isPostable() && other.isPostable();
 		boolean patchable = isPatchable() && other.isPatchable();
 		boolean sortable = isSortable() && other.isSortable();
 		boolean filterable = isFilterable() && other.isFilterable();
-		return new ResourceFieldAccess(postable, patchable, sortable, filterable);
+		return new ResourceFieldAccess(readable, postable, patchable, sortable, filterable);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (readable ? 1231 : 1237);
 		result = prime * result + (patchable ? 1231 : 1237);
 		result = prime * result + (postable ? 1231 : 1237);
 		result = prime * result + (sortable ? 1231 : 1237);
@@ -76,8 +88,8 @@ public class ResourceFieldAccess {
 			return false;
 		}
 		ResourceFieldAccess other = (ResourceFieldAccess) obj;
-		return patchable == other.patchable && postable == other.postable && sortable == other.sortable && filterable == other
-				.filterable;
+		return readable == other.readable && patchable == other.patchable && postable == other.postable && sortable == other.sortable
+				&& filterable == other.filterable;
 	}
 
 }

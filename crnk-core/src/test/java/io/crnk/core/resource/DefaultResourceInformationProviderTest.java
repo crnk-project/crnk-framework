@@ -1,11 +1,18 @@
 package io.crnk.core.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
@@ -13,12 +20,24 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
+import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
+import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
+import io.crnk.core.exception.ResourceDuplicateIdException;
+import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,8 +48,6 @@ import org.mockito.Mockito;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultResourceInformationProviderTest {
 
@@ -120,16 +137,22 @@ public class DefaultResourceInformationProviderTest {
 
 	@Test
 	public void checkJsonPropertyAccessPolicy() throws Exception {
-		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonIngoreTestResource.class);
+		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonIgnoreTestResource.class);
 		ResourceField defaultAttribute = resourceInformation.findAttributeFieldByName("defaultAttribute");
 		ResourceField readOnlyAttribute = resourceInformation.findAttributeFieldByName("readOnlyAttribute");
 		ResourceField readWriteAttribute = resourceInformation.findAttributeFieldByName("readWriteAttribute");
+		ResourceField writeOnlyAttribute = resourceInformation.findAttributeFieldByName("writeOnlyAttribute");
 		Assert.assertTrue(defaultAttribute.getAccess().isPatchable());
 		Assert.assertTrue(defaultAttribute.getAccess().isPostable());
 		Assert.assertFalse(readOnlyAttribute.getAccess().isPatchable());
 		Assert.assertFalse(readOnlyAttribute.getAccess().isPostable());
+		Assert.assertTrue(readOnlyAttribute.getAccess().isReadable());
 		Assert.assertTrue(readWriteAttribute.getAccess().isPatchable());
 		Assert.assertTrue(readWriteAttribute.getAccess().isPostable());
+		Assert.assertTrue(readWriteAttribute.getAccess().isReadable());
+		Assert.assertTrue(writeOnlyAttribute.getAccess().isPatchable());
+		Assert.assertTrue(writeOnlyAttribute.getAccess().isPostable());
+		Assert.assertFalse(writeOnlyAttribute.getAccess().isReadable());
 	}
 
 	@Test
@@ -146,6 +169,7 @@ public class DefaultResourceInformationProviderTest {
 		ResourceField field = resourceInformation.getIdField();
 		Assert.assertFalse(field.getAccess().isPatchable());
 		Assert.assertTrue(field.getAccess().isPostable());
+		Assert.assertTrue(field.getAccess().isReadable());
 	}
 
 	@Test
@@ -156,19 +180,21 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldNotBePostableOrPatchableWithoutSetter() throws Exception {
+	public void shouldBeReadableButNotPostableOrPatchableWithoutSetter() throws Exception {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		ResourceField field = resourceInformation.findAttributeFieldByName("readOnlyValue");
+		Assert.assertTrue(field.getAccess().isReadable());
 		Assert.assertFalse(field.getAccess().isPostable());
 		Assert.assertFalse(field.getAccess().isPatchable());
 	}
 
 	@Test
-	public void shouldBePostableAndPatchableWithSetter() throws Exception {
+	public void shouldBeReadableAndPostableAndPatchableWithSetter() throws Exception {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		ResourceField field = resourceInformation.findAttributeFieldByName("name");
+		Assert.assertTrue(field.getAccess().isReadable());
 		Assert.assertTrue(field.getAccess().isPostable());
 		Assert.assertTrue(field.getAccess().isPatchable());
 	}
@@ -354,7 +380,7 @@ public class DefaultResourceInformationProviderTest {
 
 	@JsonApiResource(type = "tasks")
 	@JsonPropertyOrder(alphabetic = true)
-	public static class JsonIngoreTestResource {
+	public static class JsonIgnoreTestResource {
 
 		@JsonApiId
 		public String id;
@@ -366,6 +392,9 @@ public class DefaultResourceInformationProviderTest {
 
 		@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 		public String readWriteAttribute;
+
+		@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+		public String writeOnlyAttribute;
 	}
 
 	@JsonApiResource(type = "duplicatedIdAnnotationResources")

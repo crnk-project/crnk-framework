@@ -87,7 +87,7 @@ public class ResourceMapper {
 
 		// serialize the individual attributes
 		for (ResourceField field : fields) {
-			if (!isIgnored(field)) {
+			if (!isIgnored(field) && field.getAccess().isReadable()) {
 				setAttribute(resource, field, entity);
 			}
 		}

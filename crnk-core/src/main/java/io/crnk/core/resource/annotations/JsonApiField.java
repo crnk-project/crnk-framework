@@ -32,4 +32,8 @@ public @interface JsonApiField {
 	 */
 	boolean patchable() default true;
 
+	/**
+	 * @return true if the attribute can be read with a GET request.
+	 */
+	boolean readable() default true;
 }

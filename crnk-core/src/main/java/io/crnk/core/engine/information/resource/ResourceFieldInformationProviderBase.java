@@ -35,6 +35,11 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
 	}
 
 	@Override
+	public Optional<Boolean> isReadable(final BeanAttributeInformation attributeDesc) {
+		return Optional.empty();
+	}
+
+	@Override
 	public Optional<Boolean> isSortable(BeanAttributeInformation attributeDesc) {
 		return Optional.empty();
 	}
