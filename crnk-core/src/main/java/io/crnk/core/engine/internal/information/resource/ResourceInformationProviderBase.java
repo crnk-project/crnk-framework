@@ -26,7 +26,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
 	public ResourceInformationProviderBase(
 		PropertiesProvider propertiesProvider,
-		List<ResourceFieldInformationProvider> resourceFieldInformationProviders) 
+		List<ResourceFieldInformationProvider> resourceFieldInformationProviders)
 	{
 		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider);
@@ -114,7 +114,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
 	protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
 		LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
-		
+
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
 			Optional<LookupIncludeBehavior> lookupIncludeBehavior = fieldInformationProvider.getLookupIncludeBehavior(attributeDesc);
 			if (lookupIncludeBehavior.isPresent()) {
@@ -122,18 +122,18 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				break;
 			}
 		}
-		
+
 		// If the field-level behavior is DEFAULT, then look to the global setting
 		if (behavior == LookupIncludeBehavior.DEFAULT) {
-			behavior = globalLookupIncludeBehavior;			
+			behavior = globalLookupIncludeBehavior;
 		}
-		
+
 		// If the global behavior was also default, fall all they way back to the
 		// information provider's default
 		if (behavior == LookupIncludeBehavior.DEFAULT) {
 			behavior = getDefaultLookupIncludeBehavior();
 		}
-		
+
 		return behavior;
 	}
 
@@ -146,7 +146,8 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		boolean filterable = isFilterable(attributeDesc);
 		boolean postable = isPostable(attributeDesc);
 		boolean patchable = isPatchable(attributeDesc, resourceFieldType);
-		return new ResourceFieldAccess(postable, patchable, sortable, filterable);
+		boolean readable = isReadable(attributeDesc);
+		return new ResourceFieldAccess(readable, postable, patchable, sortable, filterable);
 	}
 
 	private boolean isSortable(BeanAttributeInformation attributeDesc) {
@@ -190,6 +191,16 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 			Optional<Boolean> postable = fieldInformationProvider.isPostable(attributeDesc);
 			if (postable.isPresent()) {
 				return postable.get();
+			}
+		}
+		return true;
+	}
+
+	private boolean isReadable(BeanAttributeInformation attributeDesc) {
+		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+			Optional<Boolean> readable = fieldInformationProvider.isReadable(attributeDesc);
+			if (readable.isPresent()) {
+				return readable.get();
 			}
 		}
 		return true;

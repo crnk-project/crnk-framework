@@ -9,6 +9,8 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
+
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,6 +29,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("tasks", resource.getType());
 		Assert.assertEquals("sample task", resource.getAttributes().get("name").asText());
+		Assert.assertThat(resource.getAttributes().get("writeOnlyValue"), CoreMatchers.nullValue());
 	}
 
 	@Test

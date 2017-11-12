@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Objects;
-
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
@@ -14,6 +10,9 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -45,7 +44,7 @@ public class ResourceFieldImpl implements ResourceField {
 							 Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
-				new ResourceFieldAccess(true, true, true, true));
+				new ResourceFieldAccess(true, true, true, true, true));
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,

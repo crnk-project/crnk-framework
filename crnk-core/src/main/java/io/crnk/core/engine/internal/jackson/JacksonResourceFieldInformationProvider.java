@@ -48,14 +48,23 @@ public class JacksonResourceFieldInformationProvider extends ResourceFieldInform
 		return isReadOnly(attributeDesc);
 	}
 
+	@Override
+	public Optional<Boolean> isReadable(final BeanAttributeInformation attributeDesc) {
+		return isAccessible(attributeDesc, JsonProperty.Access.WRITE_ONLY);
+	}
+
 	private Optional<Boolean> isReadOnly(BeanAttributeInformation attributeDesc) {
+		return isAccessible(attributeDesc, JsonProperty.Access.READ_ONLY);
+	}
+
+	private Optional<Boolean> isAccessible(BeanAttributeInformation attributeDesc, JsonProperty.Access accessable) {
 		Optional<JsonProperty> annotation = attributeDesc.getAnnotation(JsonProperty.class);
 		if (annotation.isPresent()) {
 			JsonProperty.Access access = annotation.get().access();
 			if (access == JsonProperty.Access.READ_WRITE) {
 				return Optional.of(true);
 			}
-			if (access == JsonProperty.Access.READ_ONLY) {
+			if (access == accessable) {
 				return Optional.of(false);
 			}
 		}

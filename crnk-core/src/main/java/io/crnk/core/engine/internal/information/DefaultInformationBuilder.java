@@ -168,7 +168,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceFieldAccessor accessor;
 
-		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
+		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
 		public ResourceField build() {
 
