@@ -164,7 +164,7 @@ Crnk comes with (partial) support for Jackson annotations. Currently supported a
 | Renames an attribute during serialization.
 
 | `@JsonProperty.access`
-| Specifies whether an object can be read and/or written. `WRITE_ONLY` is not yet supported.
+| Specifies whether an object can be read and/or written.
 
 |===
 

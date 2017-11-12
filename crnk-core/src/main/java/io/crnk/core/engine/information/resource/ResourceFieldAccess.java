@@ -15,6 +15,11 @@ public class ResourceFieldAccess {
 
 	private final boolean filterable;
 
+	@Deprecated
+	public ResourceFieldAccess(boolean postable, boolean patchable, boolean sortable, boolean filterable) {
+		this(true, postable, patchable, sortable, filterable);
+	}
+
 	public ResourceFieldAccess(boolean readable, boolean postable, boolean patchable, boolean sortable, boolean filterable) {
 		this.readable = readable;
 		this.postable = postable;

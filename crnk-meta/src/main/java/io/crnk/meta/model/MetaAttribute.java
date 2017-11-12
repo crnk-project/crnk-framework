@@ -55,6 +55,8 @@ public class MetaAttribute extends MetaElement {
 
 	private boolean cascaded;
 
+	private boolean readable;
+
 	@JsonApiRelation(serialize = SerializeType.LAZY)
 	private MetaAttribute oppositeAttribute;
 
@@ -254,6 +256,14 @@ public class MetaAttribute extends MetaElement {
 
 	public void setUpdatable(boolean updatable) {
 		this.updatable = updatable;
+	}
+
+	public boolean isReadable() {
+		return readable;
+	}
+
+	public void setReadable(final boolean readable) {
+		this.readable = readable;
 	}
 
 	/**
