@@ -6,20 +6,33 @@ import "rxjs/add/operator/do";
 import "rxjs/add/operator/debounceTime";
 import "rxjs/add/operator/distinct";
 import "rxjs/add/operator/switch";
-import {FilteringParam, ManyQueryResult, NgrxJsonApiService, Query, ResourceIdentifier} from "ngrx-json-api";
+import {
+	FilteringParam, ManyQueryResult, NGRX_JSON_API_DEFAULT_ZONE, NgrxJsonApiService, NgrxJsonApiZoneService, Query,
+	ResourceIdentifier
+} from "ngrx-json-api";
 import {CrnkBindingUtils} from "./crnk.binding.utils";
 
 export interface SelectorBindingConfig {
 	query: Query;
 	filterFactory: (string) => FilteringParam;
+
+	/**
+	 * Zone to use within ngrx-json-api.
+	 */
+	zoneId?: string;
 }
 
 export class SelectorBinding {
 
 	private querySubject: Subject<string>;
+
 	public values: Observable<Array<ResourceIdentifier>>;
 
-	constructor(private service: NgrxJsonApiService, private config: SelectorBindingConfig, private utils: CrnkBindingUtils) {
+	private ngrxJsonApiZone: NgrxJsonApiZoneService;
+
+	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: SelectorBindingConfig, private utils: CrnkBindingUtils) {
+
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE)
 
 		const termToQuery = (queryTerm: String): Query => {
 			const query = _.cloneDeep(this.config.query);
@@ -37,10 +50,13 @@ export class SelectorBinding {
 			return query;
 		};
 
-		const executeQuery = (query: Query): Observable<ManyQueryResult> => this.service.findMany({
-			query: query,
-			fromServer: true
-		});
+		const executeQuery = (query: Query): Observable<ManyQueryResult> => {
+			this.ngrxJsonApiZone.putQuery({
+				query: query,
+				fromServer: true
+			});
+			return this.ngrxJsonApiZone.selectManyResults(query.queryId);
+		};
 		const isNotLoading = (result: ManyQueryResult): boolean => !result.loading;
 		const toIdentifiers = (result: ManyQueryResult): Array<ResourceIdentifier> => this.utils.toResourceIdentifiers(result.data);
 

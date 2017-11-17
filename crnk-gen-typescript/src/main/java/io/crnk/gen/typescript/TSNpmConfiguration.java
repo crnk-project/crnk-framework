@@ -34,11 +34,12 @@ public class TSNpmConfiguration {
 		packageMapping.put("io.crnk.jpa", crnkNpm);
 		packageMapping.put("io.crnk.core.resource.links", crnkNpm);
 
-		peerDependencies.put("ngrx-json-api", ">=2.0.0-beta.9");
+		peerDependencies.put("ngrx-json-api", ">=2.0.0-rc.2");
 		peerDependencies.put("rxjs", ">=5.2.0");
 		peerDependencies.put("lodash", ">=4.17.4");
 		peerDependencies.put("@crnk/angular-ngrx", ">=2.0.0");
-		devDependencies.put("@ngrx/store", ">=4.0.0");
+		peerDependencies.put("@ngrx/store", ">=4.0.0");
+		peerDependencies.put("@ngrx/effects", ">=4");
 
 		devDependencies.putAll(peerDependencies);
 		devDependencies.put("typescript", "2.4.0");

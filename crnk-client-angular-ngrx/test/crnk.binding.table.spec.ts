@@ -37,18 +37,18 @@ describe('TableBinding', () => {
 			attributes: {
 				name: 'SomeAttribute1'
 			}
-		}));
+		}, 'default'));
 		store.dispatch(new NewStoreResourceAction({
 			id: 'someBean.someAttribute2',
 			type: 'meta/attribute',
 			attributes: {
 				name: 'SomeAttribute2'
 			}
-		}));
+		}, 'default'));
 		store.dispatch(new LocalQueryInitAction({
 			queryId: 'tableQuery',
 			type: 'meta/attribute'
-		}))
+		}, 'default'))
 	});
 
 	it('should sync with store', fakeAsync(() => {

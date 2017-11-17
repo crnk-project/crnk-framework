@@ -36,7 +36,8 @@ module.exports = function(config) {
 			},
 			compilerOptions: {
 				skipLibCheck: true,
-				lib: ["ES2015", "DOM"]
+				lib: ["ES2015", "DOM"],
+				sourceMap: true
 			}
 		},
 

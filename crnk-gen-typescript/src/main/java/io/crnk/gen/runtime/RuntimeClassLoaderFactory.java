@@ -127,11 +127,13 @@ public class RuntimeClassLoaderFactory {
 
 		SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
 
-		SortedSet<String> availableSourceSetNames = sourceSets.getNames();
-		for (String sourceSetName : Arrays.asList("main", "test", "integrationTest")) {
-			if (availableSourceSetNames.contains(sourceSetName)) {
-				SourceSet sourceSet = sourceSets.getByName(sourceSetName);
-				classpath.add(sourceSet.getOutput().getClassesDir());
+		if (sourceSets != null) {
+			SortedSet<String> availableSourceSetNames = sourceSets.getNames();
+			for (String sourceSetName : Arrays.asList("main", "test", "integrationTest")) {
+				if (availableSourceSetNames.contains(sourceSetName)) {
+					SourceSet sourceSet = sourceSets.getByName(sourceSetName);
+					classpath.add(sourceSet.getOutput().getClassesDir());
+				}
 			}
 		}
 

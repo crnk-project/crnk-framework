@@ -1,4 +1,4 @@
-import {initialNgrxJsonApiState} from "ngrx-json-api/src/reducers";
+import {initialNgrxJsonApiState, initialNgrxJsonApiZone} from "ngrx-json-api/src/reducers";
 import {testPayload} from "./crnk.operations.spec.utils";
 import {ActionReducerMap, StoreModule} from "@ngrx/store";
 import {updateStoreDataFromPayload} from "ngrx-json-api/src/utils";
@@ -17,13 +17,15 @@ export const testReducer: ActionReducerMap<any> = {};
 
 let initialState = {
 	NgrxJsonApi: {
-		api: {
-			...{},
-			...initialNgrxJsonApiState,
-			...{
-				data: updateStoreDataFromPayload({}, testPayload),
+		zones: {
+			default: {
+				...{},
+				...initialNgrxJsonApiZone,
+				...{
+					data: updateStoreDataFromPayload({}, testPayload),
+				},
 			},
-		},
+		}
 	},
 };
 

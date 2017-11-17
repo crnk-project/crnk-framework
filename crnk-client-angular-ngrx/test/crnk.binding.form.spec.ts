@@ -36,7 +36,7 @@ describe('FormBinding', () => {
 			attributes: {
 				name: 'SomeAttribute'
 			}
-		}));
+		}, 'default'));
 
 		// enforce sync
 		const jsonapi = getTestBed().get(NgrxJsonApiService);
@@ -50,7 +50,7 @@ describe('FormBinding', () => {
 			queryId: 'editorQuery',
 			type: 'meta/attribute',
 			id: 'someBean.someAttribute',
-		}))
+		}, 'default'))
 	});
 
 	beforeEach(() => {
@@ -100,7 +100,7 @@ describe('FormBinding', () => {
 					}
 				}
 			]
-		}))
+		}, 'default'))
 
 
 		fixture.detectChanges();
