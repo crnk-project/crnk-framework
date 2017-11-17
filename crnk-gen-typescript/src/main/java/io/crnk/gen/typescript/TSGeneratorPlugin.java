@@ -78,9 +78,11 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			}
 
 			// setup up-to-date checking
-			Configuration compileConfiguration = project.getConfigurations().getByName("compile");
-			generateTask.getInputs().file(compileConfiguration.getFiles());
-			generateTask.getOutputs().dir(config.getGenDir());
+			Configuration compileConfiguration = project.getConfigurations().findByName(runtimeConfiguration);
+			if (compileConfiguration != null) {
+				generateTask.getInputs().file(compileConfiguration.getFiles());
+				generateTask.getOutputs().dir(config.getGenDir());
+			}
 		}
 	}
 
