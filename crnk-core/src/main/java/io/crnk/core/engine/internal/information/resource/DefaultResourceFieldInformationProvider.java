@@ -139,6 +139,15 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 	}
 
 	@Override
+	public Optional<Boolean> isReadable(final BeanAttributeInformation attributeDesc) {
+		Optional<JsonApiField> annotation = attributeDesc.getAnnotation(JsonApiField.class);
+		if (annotation.isPresent()) {
+			return Optional.of(annotation.get().readable());
+		}
+		return Optional.empty();
+	}
+
+	@Override
 	public Optional<Boolean> isSortable(BeanAttributeInformation attributeDesc) {
 		Optional<JsonApiField> annotation = attributeDesc.getAnnotation(JsonApiField.class);
 		if (annotation.isPresent()) {

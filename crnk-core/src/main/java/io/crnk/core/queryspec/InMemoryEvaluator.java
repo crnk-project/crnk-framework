@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
@@ -23,11 +24,14 @@ public class InMemoryEvaluator {
 		List<FilterSpec> expressions = filterSpec.getExpression();
 		if (expressions == null) {
 			return matchesPrimitiveOperator(object, filterSpec);
-		} else if (filterSpec.getOperator() == FilterOperator.OR) {
+		}
+		else if (filterSpec.getOperator() == FilterOperator.OR) {
 			return matchesOr(object, expressions);
-		} else if (filterSpec.getOperator() == FilterOperator.AND) {
+		}
+		else if (filterSpec.getOperator() == FilterOperator.AND) {
 			return matchesAnd(object, expressions);
-		} else if (filterSpec.getOperator() == FilterOperator.NOT) {
+		}
+		else if (filterSpec.getOperator() == FilterOperator.NOT) {
 			return !matches(object, FilterSpec.and(expressions));
 		}
 		throw new UnsupportedOperationException("not implemented " + filterSpec);
@@ -39,7 +43,8 @@ public class InMemoryEvaluator {
 		Object filterValue = filterSpec.getValue();
 		if (value instanceof Collection) {
 			return matchesAny((Collection<?>) value, operator, filterValue);
-		} else {
+		}
+		else {
 			return operator.matches(value, filterValue);
 		}
 	}
@@ -114,6 +119,9 @@ public class InMemoryEvaluator {
 	private <T> void applyPaging(List<T> results, QuerySpec querySpec) {
 		int offset = (int) Math.min(querySpec.getOffset(), Integer.MAX_VALUE);
 		int limit = (int) Math.min(Integer.MAX_VALUE, querySpec.getLimit() != null ? querySpec.getLimit() : Integer.MAX_VALUE);
+		if (offset > results.size()) {
+			throw new BadRequestException("page offset out of range, cannot move beyond data set");
+		}
 		limit = Math.min(results.size() - offset, limit);
 		if (offset > 0 || limit < results.size()) {
 			List<T> subList = new ArrayList<>(results.subList(offset, offset + limit));
@@ -153,19 +161,23 @@ public class InMemoryEvaluator {
 				if (orderSpec.getDirection() == Direction.DESC) {
 					d = -d;
 				}
-				if (d != 0)
+				if (d != 0) {
 					return d;
+				}
 			}
 			return 0;
 		}
 
 		private int compare(Comparable<Object> value1, Comparable<Object> value2) {
-			if (value1 == null && value2 == null)
+			if (value1 == null && value2 == null) {
 				return 0;
-			if (value1 == null)
+			}
+			if (value1 == null) {
 				return -1;
-			if (value2 == null)
+			}
+			if (value2 == null) {
 				return 1;
+			}
 
 			return value1.compareTo(value2);
 		}

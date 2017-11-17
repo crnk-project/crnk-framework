@@ -139,7 +139,7 @@ export class FormBinding {
 	private ngrxJsonApiZone: NgrxJsonApiZoneService;
 
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: FormBindingConfig,
-				private store: Store<any>) {
+		private store: Store<any>) {
 
 		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
 		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId)

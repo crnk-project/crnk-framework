@@ -1,7 +1,16 @@
-import {BeanPath, StringPath} from '../expression/';
-import {MetaElement, QMetaElement} from './meta.element';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
+import {
+	MetaElement,
+	QMetaElement
+} from './meta.element';
 import {MetaRepositoryActionType} from './meta.repository.action.type';
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
+import {
+	ManyQueryResult,
+	OneQueryResult
+} from 'ngrx-json-api/src/interfaces';
 
 export module MetaResourceAction {
 	export interface Attributes extends MetaElement.Attributes {

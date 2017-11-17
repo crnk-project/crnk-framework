@@ -1,11 +1,8 @@
 package io.crnk.activiti.example.approval;
 
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
@@ -25,6 +22,10 @@ import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource> extends ReadOnlyRelationshipRepositoryBase<R,
 		Serializable, P, String> implements ResourceRegistryAware, ResourceFieldContributor {
@@ -71,7 +72,7 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 		fieldBuilder.oppositeResourceType(oppositeResourceType);
 		fieldBuilder.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		fieldBuilder.fieldType(ResourceFieldType.RELATIONSHIP);
-		fieldBuilder.access(new ResourceFieldAccess(false, false, false, false));
+		fieldBuilder.access(new ResourceFieldAccess(false, false, false, false, false));
 		fieldBuilder.accessor(new ResourceFieldAccessor() {
 			@Override
 			public Object getValue(Object resource) {

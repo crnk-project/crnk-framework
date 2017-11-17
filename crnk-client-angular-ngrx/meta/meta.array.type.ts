@@ -1,7 +1,16 @@
-import {BeanPath, StringPath} from '../expression/';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
 import {QMetaElement} from './meta.element';
-import {MetaType, QMetaType} from './meta.type';
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
+import {
+	MetaType,
+	QMetaType
+} from './meta.type';
+import {
+	ManyQueryResult,
+	OneQueryResult
+} from 'ngrx-json-api/src/interfaces';
 
 export interface MetaArrayType extends MetaType {
 }

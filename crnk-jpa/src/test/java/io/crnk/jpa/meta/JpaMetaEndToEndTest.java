@@ -1,9 +1,16 @@
 package io.crnk.jpa.meta;
 
+import java.io.Serializable;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.AbstractJpaJerseyTest;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.model.AnnotationMappedSubtypeEntity;
+import io.crnk.jpa.model.AnnotationTestEntity;
+import io.crnk.jpa.model.RenamedTestEntity;
+import io.crnk.jpa.model.SequenceEntity;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
@@ -11,8 +18,6 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.Serializable;
 
 public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 
@@ -111,6 +116,12 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertTrue(columnAnnotatedAttr.isUpdatable());
 		Assert.assertTrue(columnAnnotatedAttr.isSortable());
 		Assert.assertTrue(columnAnnotatedAttr.isFilterable());
+
+		MetaAttribute embeddableValueAttr = annotationMeta.getAttribute("embeddableValue");
+		Assert.assertFalse(embeddableValueAttr.isInsertable());
+		Assert.assertTrue(embeddableValueAttr.isUpdatable());
+		Assert.assertTrue(embeddableValueAttr.isSortable());
+		Assert.assertFalse(embeddableValueAttr.isFilterable());
 
 		MetaResourceBase superMeta = resourceMetaProvider.getMeta(AnnotationMappedSubtypeEntity.class);
 		fieldAnnotatedAttr = superMeta.getAttribute("fieldAnnotatedValue");

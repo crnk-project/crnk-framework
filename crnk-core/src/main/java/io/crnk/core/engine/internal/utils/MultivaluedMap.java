@@ -38,9 +38,16 @@ public class MultivaluedMap<K, V> {
 	}
 
 	public V getUnique(K key) {
+		return getUnique(key, false);
+	}
+
+	public V getUnique(K key, boolean nullable) {
 		List<V> list = map.get(key);
 		if (list.size() > 1) {
 			throw new IllegalStateException("expected unique key=" + key + ", got=" + list);
+		}
+		if (nullable && list.isEmpty()) {
+			return null;
 		}
 		return list.get(0);
 	}

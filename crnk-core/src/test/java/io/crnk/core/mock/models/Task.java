@@ -1,6 +1,7 @@
 package io.crnk.core.mock.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.resource.annotations.*;
 import io.crnk.core.resource.links.LinksInformation;
@@ -58,6 +59,9 @@ public class Task {
 
 	private String readOnlyValue = "someReadOnlyValue";
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String writeOnlyValue;
+
 	public boolean isCompleted() {
 		return completed;
 	}
@@ -85,6 +89,8 @@ public class Task {
 	public String getReadOnlyValue() {
 		return readOnlyValue;
 	}
+
+	public String getWriteOnlyValue() { return writeOnlyValue; }
 
 	public List<Task> getOtherTasks() {
 		return otherTasks;

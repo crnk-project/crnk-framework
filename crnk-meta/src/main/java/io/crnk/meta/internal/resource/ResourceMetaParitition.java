@@ -282,6 +282,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		attr.setFilterable(field.getAccess().isFilterable());
 		attr.setInsertable(field.getAccess().isPostable() && resource.isInsertable());
 		attr.setUpdatable(field.getAccess().isPatchable() && resource.isUpdatable());
+		attr.setReadable(field.getAccess().isReadable() && resource.isReadable());
 
 		boolean isPrimitive = ClassUtils.isPrimitiveType(field.getType());
 		boolean isId = field.getResourceFieldType() == ResourceFieldType.ID;

@@ -1,15 +1,16 @@
 package io.crnk.client.http.apache;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class HttpClientAdapter implements HttpAdapter {
 
@@ -43,7 +44,7 @@ public class HttpClientAdapter implements HttpAdapter {
 
 	private synchronized void initImpl() {
 		if (impl == null) {
-			HttpClientBuilder builder = HttpClients.custom();
+			HttpClientBuilder builder = createBuilder();
 
 			if (receiveTimeout != null) {
 				RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -56,6 +57,27 @@ public class HttpClientAdapter implements HttpAdapter {
 			}
 			impl = builder.build();
 		}
+	}
+
+	private HttpClientBuilder createBuilder() {
+		// brave enforces this, hopefully can be removed again eventually
+
+		HttpClientBuilder builder = null;
+		for (HttpClientAdapterListener listener : listeners) {
+			if (listener instanceof HttpClientBuilderFactory) {
+				PreconditionUtil
+						.assertNull("only one module can contribute a HttpClientBuilder with HttpClientBuilderFactory", builder);
+				builder = ((HttpClientBuilderFactory) listener).createBuilder();
+			}
+		}
+
+		if (builder != null) {
+			return builder;
+		}
+		else {
+			return HttpClients.custom();
+		}
+
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package io.crnk.test.mock.models;
 import io.crnk.core.resource.annotations.*;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.test.mock.models.types.ProjectData;
 
 import java.util.ArrayList;
 import java.util.List;

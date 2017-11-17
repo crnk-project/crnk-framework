@@ -35,12 +35,12 @@ public class DefaultInformationBuilderTest {
 
 		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
-		idField.access(new ResourceFieldAccess(true, true, false, false));
+		idField.access(new ResourceFieldAccess(true, true, true, false, false));
 
 		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
 		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
 		projectField.serializeType(SerializeType.EAGER);
-		projectField.access(new ResourceFieldAccess(false, true, false, false));
+		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
 		projectField.oppositeName("tasks");
 		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		projectField.accessor(accessor);

@@ -12,21 +12,23 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceInformat
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
-import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
+
 import org.junit.Before;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractQuerySpecTest {
 
@@ -53,7 +55,7 @@ public abstract class AbstractQuerySpecTest {
 				if (resourceClass == Task.class) {
 					// add additional field that is not defined on the class
 					String name = "computedAttribute";
-					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
+					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
 					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
 

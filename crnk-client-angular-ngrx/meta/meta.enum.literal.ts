@@ -1,6 +1,15 @@
-import {BeanPath, StringPath} from '../expression/';
-import {MetaElement, QMetaElement} from './meta.element';
-import {ManyQueryResult, OneQueryResult} from 'ngrx-json-api/src/interfaces';
+import {
+	BeanPath,
+	StringPath
+} from '../expression/';
+import {
+	MetaElement,
+	QMetaElement
+} from './meta.element';
+import {
+	ManyQueryResult,
+	OneQueryResult
+} from 'ngrx-json-api/src/interfaces';
 
 export interface MetaEnumLiteral extends MetaElement {
 }

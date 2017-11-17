@@ -431,6 +431,19 @@ public class CrnkBoot {
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
 	}
 
+	/**
+	 * Sets the allow unknown attributes for API requests.
+	 *
+	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
+	 */
+	public void setAllowUnknownAttributes() {
+		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
+				"it is null.", this.querySpecDeserializer);
+		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
+				.setAllowUnknownAttributes(Boolean
+						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+	}
+
 	public ModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}

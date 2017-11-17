@@ -38,6 +38,11 @@ public interface ResourceFieldInformationProvider {
 	Optional<Boolean> isPatchable(BeanAttributeInformation attributeDesc);
 
 	/**
+	 * Returns whether they field can be read.
+	 */
+	Optional<Boolean> isReadable(BeanAttributeInformation attributeDesc);
+
+	/**
 	 * Returns whether they field can be sorted.
 	 */
 	Optional<Boolean> isSortable(BeanAttributeInformation attributeDesc);

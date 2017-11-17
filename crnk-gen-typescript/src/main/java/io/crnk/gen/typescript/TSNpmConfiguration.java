@@ -35,15 +35,20 @@ public class TSNpmConfiguration {
 		packageMapping.put("io.crnk.core.resource.links", crnkNpm);
 
 		peerDependencies.put("ngrx-json-api", ">=2.0.0-rc.1");
-		peerDependencies.put("@ngrx/core", ">=4");
-		peerDependencies.put("@ngrx/effects", ">=4");
 		peerDependencies.put("rxjs", ">=5.2.0");
 		peerDependencies.put("lodash", ">=4.17.4");
+		peerDependencies.put("@crnk/angular-ngrx", ">=2.0.0");
+		peerDependencies.put("@ngrx/store", ">=4.0.0");
+		peerDependencies.put("@ngrx/effects", ">=4");
 
 		devDependencies.putAll(peerDependencies);
-		devDependencies.put("typescript", "2.2.0");
+		devDependencies.put("typescript", "2.4.0");
 		devDependencies.put("ncp", "2.0.0");
 		devDependencies.put("rimraf", "2.5.4");
+		devDependencies.put("@angular/core", "^4.0.0");
+		devDependencies.put("@angular/forms", "^4.0.0");
+		devDependencies.put("@angular/http", "^4.0.0");
+		devDependencies.put("@angular/common", "^4.0.0");
 	}
 
 	/**

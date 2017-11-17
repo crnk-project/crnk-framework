@@ -1,5 +1,13 @@
 package io.crnk.jpa.internal;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -22,15 +30,11 @@ import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.meta.internal.JpaMetaUtils;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.*;
-
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaType;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -45,7 +49,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider) {
 		super(
 				propertiesProvider,
-				Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()));
+				Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(),
+						new JacksonResourceFieldInformationProvider()));
 
 		metaProvider = new JpaMetaProvider((Set) Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
@@ -69,7 +74,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			} else {
+			}
+			else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -131,8 +137,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		private MetaDataObject jpaMeta;
 
 		public JpaResourceInformation(TypeParser typeParser, MetaDataObject meta, Class<?> resourceClass,
-									  String resourceType, String superResourceType, // NOSONAR
-									  ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+				String resourceType, String superResourceType, // NOSONAR
+				ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
 			super(typeParser, resourceClass, resourceType, superResourceType, instanceBuilder, fields);
 			this.jpaMeta = meta;
 		}
@@ -179,7 +185,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			} else {
+			}
+			else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

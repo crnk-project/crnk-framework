@@ -24,7 +24,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 
 	@OutputDirectory
 	public File getOutputDirectory() {
-		TSGeneratorExtension config = getConfig();
+		TSGeneratorConfig config = getConfig();
 		return config.getGenDir();
 	}
 
@@ -34,11 +34,14 @@ public class GenerateTypescriptTask extends DefaultTask {
 		ClassLoader contextClassLoader = thread.getContextClassLoader();
 
 		RuntimeClassLoaderFactory classLoaderFactory = new RuntimeClassLoaderFactory(getProject());
+
+		TSGeneratorConfig config = getConfig();
+		setupDefaultConfig(config);
+
 		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader);
 		try {
 			thread.setContextClassLoader(classloader);
-
-			runGeneration();
+			runGeneration(classloader);
 		}
 		finally {
 			// make sure to restore the classloader when leaving this task
@@ -47,10 +50,9 @@ public class GenerateTypescriptTask extends DefaultTask {
 			// dispose classloader
 			classloader.close();
 		}
-
 	}
 
-	protected void setupDefaultConfig(TSGeneratorExtension config) {
+	protected void setupDefaultConfig(TSGeneratorConfig config) {
 		String defaultVersion = getProject().getVersion().toString();
 		if (config.getNpm().getPackageVersion() == null) {
 			config.getNpm().setPackageVersion(defaultVersion);
@@ -58,24 +60,22 @@ public class GenerateTypescriptTask extends DefaultTask {
 	}
 
 	protected RuntimeMetaResolver getRuntime() {
-		TSGeneratorExtension config = getConfig();
+		TSGeneratorConfig config = getConfig();
 		String runtimeClass = config.getMetaResolverClassName();
 		return (RuntimeMetaResolver) loadClass(getClass().getClassLoader(), runtimeClass);
 	}
 
-	protected void runGeneration() {
-		TSGeneratorExtension config = getConfig();
-		setupDefaultConfig(config);
-
+	protected void runGeneration(ClassLoader classloader) {
+		TSGeneratorConfig config = getConfig();
 		File outputDir = config.getGenDir();
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-		GeneratorTrigger context = (GeneratorTrigger) loadClass(classLoader, TSGeneratorRuntimeContextImpl.class.getName());
+		GeneratorTrigger context = (GeneratorTrigger) loadClass(classloader, TSGeneratorRuntimeContextImpl.class.getName());
+		context.setClassLoader(classloader);
 		TSGeneratorRuntimeContext genContext = (TSGeneratorRuntimeContext) context;
 		genContext.setOutputDir(outputDir);
 		genContext.setConfig(config);
 		RuntimeMetaResolver runtime = getRuntime();
-		runtime.run(context, classLoader);
+		runtime.run(context, classloader);
 
 
 	}
@@ -90,9 +90,9 @@ public class GenerateTypescriptTask extends DefaultTask {
 		}
 	}
 
-	private TSGeneratorExtension getConfig() {
+	private TSGeneratorConfig getConfig() {
 		Project project = getProject();
-		return project.getExtensions().getByType(TSGeneratorExtension.class);
+		return project.getExtensions().getByType(TSGeneratorConfig.class);
 	}
 
 }

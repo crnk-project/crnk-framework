@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -62,6 +63,13 @@ public class InMemoryEvaluatorTest {
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.setOffset(2L);
 		Assert.assertEquals(3, spec.apply(tasks).size());
+	}
+
+	@Test(expected = BadRequestException.class)
+	public void setOffsetOutOfRange() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.setOffset(10000L);
+		spec.apply(tasks);
 	}
 
 	@Test

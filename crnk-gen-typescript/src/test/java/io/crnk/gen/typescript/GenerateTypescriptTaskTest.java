@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import javax.naming.Context;
+
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -10,13 +17,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import javax.naming.Context;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class GenerateTypescriptTaskTest {
 
@@ -59,6 +59,7 @@ public class GenerateTypescriptTaskTest {
 		project.getPluginManager().apply(TSGeneratorPlugin.class);
 
 		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
+		config.setForked(false);
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getRuntime().setConfiguration("test");
@@ -72,7 +73,7 @@ public class GenerateTypescriptTaskTest {
 		plugin.init(project);
 
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
-		task.runGeneration();
+		task.runGeneration(Thread.currentThread().getContextClassLoader());
 
 		Copy processTask = (Copy) project.getTasks().getByName("processTypescript");
 		processTask.execute();
@@ -80,7 +81,7 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/generated/source/typescript/package.json");
 		assertExists("build/generated/source/typescript/src/index.ts");
 		assertExists("build/generated/source/typescript/src/projects.ts");
-		assertExists("build/generated/source/typescript/src/project.data.ts");
+		assertExists("build/generated/source/typescript/src/types/project.data.ts");
 		assertExists("build/generated/source/typescript/src/schedules.ts");
 		assertExists("build/generated/source/typescript/src/tasks.ts");
 		assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
@@ -96,6 +97,18 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/npm_compile/src/index.ts");
 		assertExists("build/npm_compile/src/meta/meta.element.ts");
 
+		checkSchedule(expressions);
+		checkProject();
+	}
+
+	private void checkProject() throws IOException {
+		Charset utf8 = Charset.forName("UTF8");
+		String actualSource = IOUtils
+				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/projects.ts")), utf8);
+		Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
+	}
+
+	private void checkSchedule(boolean expressions) throws IOException {
 		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
 				"expected_schedule_without_expressions.ts";
@@ -105,7 +118,6 @@ public class GenerateTypescriptTaskTest {
 
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
-
 		for (int i = 0; i < expectedLines.length; i++) {
 			Assert.assertEquals(expectedLines[i], actualLines[i]);
 		}

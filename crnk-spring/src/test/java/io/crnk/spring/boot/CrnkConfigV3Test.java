@@ -27,6 +27,8 @@ public class CrnkConfigV3Test {
 		properties.setDefaultPageLimit(12L);
 		properties.setMaxPageLimit(20L);
 		properties.setPathPrefix("prefix");
+		properties.setAllowUnknownAttributes(true);
+		properties.setReturn404OnNull(true);
 		properties.setResourcePackage("ch.something");
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -41,10 +43,13 @@ public class CrnkConfigV3Test {
 		Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
 		Assert.assertEquals("ch.something", propertiesProvider.getProperty(CrnkProperties.RESOURCE_SEARCH_PACKAGE));
 		Assert.assertEquals("prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
+		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
+		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
 		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
 		Assert.assertEquals(12L, deserializer.getDefaultLimit().longValue());
 		Assert.assertEquals(20L, deserializer.getMaxPageLimit().longValue());
+		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();
 		Assert.assertEquals("testDomainprefix", constantServiceUrlProvider.getUrl());

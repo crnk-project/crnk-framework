@@ -21,16 +21,18 @@ import io.crnk.jpa.util.SpringTransactionRunner;
 import io.crnk.rs.type.JsonApiMediaType;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import javax.persistence.EntityManager;
 
 /**
  * Example of how to add a custom ResourceField and in turn change the from an
@@ -103,7 +105,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 							ResourceFieldType resourceFieldType = ResourceFieldType.ATTRIBUTE;
 							String name = language + "Text";
 							Class<?> type = String.class;
-							ResourceFieldAccess access = new ResourceFieldAccess(true, true, false, false);
+							ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, false, false);
 
 							ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
 									null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access);
