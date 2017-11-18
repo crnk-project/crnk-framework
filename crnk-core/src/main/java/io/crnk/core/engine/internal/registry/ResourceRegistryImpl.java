@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.registry;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
@@ -13,9 +10,13 @@ import io.crnk.core.engine.registry.ResourceRegistryPartBase;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
 import io.crnk.core.engine.registry.ResourceRegistryPartListener;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
+
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
@@ -40,7 +41,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		rootPart.addListener(rootListener);
 	}
 
-
 	/**
 	 * Adds a new resource definition to a registry.
 	 *
@@ -50,7 +50,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	public RegistryEntry addEntry(Class<?> resource, RegistryEntry registryEntry) {
 		return addEntry(registryEntry);
 	}
-
 
 	protected RegistryEntry findEntry(Class<?> clazz, boolean allowNull) {
 		Optional<Class<?>> resourceClazz = getResourceClass(clazz);
@@ -74,7 +73,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return findEntry(clazz, false);
 	}
 
-
 	public Optional<Class<?>> getResourceClass(Class<?> resourceClass) {
 		Class<?> currentClass = resourceClass;
 		while (currentClass != null && currentClass != Object.class) {
@@ -90,7 +88,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
-
 
 	/**
 	 * @deprecated use {@link #getEntry(Class)}
@@ -108,7 +105,18 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		return url + "/" + resourceInformation.getResourceType();
+		return String.format("%s/%s", url, resourceInformation.getResourceType());
+	}
+
+	@Override
+	public String getResourceUrl(final Object resource) {
+		Optional<Class<?>> type = getResourceClass(resource);
+		if (type.isPresent()) {
+			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
+			return String.format("%s/%s", getResourceUrl(resourceInformation), resourceInformation.getId(resource));
+		}
+
+		throw new InvalidResourceException("Not registered resource found: " + resource);
 	}
 
 	@Override

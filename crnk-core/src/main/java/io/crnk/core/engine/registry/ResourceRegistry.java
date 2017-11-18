@@ -9,9 +9,7 @@ import io.crnk.core.engine.url.ServiceUrlProvider;
  */
 public interface ResourceRegistry extends ResourceRegistryPart {
 
-
 	RegistryEntry findEntry(Class<?> resourceClass);
-
 
 	@Deprecated
 	RegistryEntry addEntry(Class<?> clazz, RegistryEntry entry);
@@ -25,6 +23,14 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 	 * to invoke this method (to obtain domain/host information).
 	 */
 	String getResourceUrl(ResourceInformation resourceInformation);
+
+	/**
+	 * Retrieves the url of the resource
+	 *
+	 * @param resource Resource
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Object resource);
 
 	/**
 	 * @deprecated use {{@link #getEntry(Class)}}
