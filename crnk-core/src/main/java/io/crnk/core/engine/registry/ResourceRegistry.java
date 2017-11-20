@@ -33,6 +33,23 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 	String getResourceUrl(Object resource);
 
 	/**
+	 * Retrieves the url of the type
+	 *
+	 * @param clazz Type
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Class<?> clazz);
+
+	/**
+	 * Retrieves the url of the type and identifier
+	 *
+	 * @param clazz Type
+	 * @param id Identifier
+	 * @return Url of provided resource in case it's a registered resource
+	 */
+	String getResourceUrl(Class<?> clazz, String id);
+
+	/**
 	 * @deprecated use {{@link #getEntry(Class)}}
 	 */
 	@Deprecated
