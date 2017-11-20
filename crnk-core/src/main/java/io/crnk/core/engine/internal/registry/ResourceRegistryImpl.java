@@ -120,6 +120,20 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
+	public String getResourceUrl(final Class<?> clazz) {
+		RegistryEntry registryEntry = findEntry(clazz);
+
+		return getResourceUrl(registryEntry.getResourceInformation());
+	}
+
+	@Override
+	public String getResourceUrl(final Class<?> clazz, final String id) {
+		RegistryEntry registryEntry = findEntry(clazz);
+
+		return String.format("%s/%s", getResourceUrl(registryEntry.getResourceInformation()), id);
+	}
+
+	@Override
 	public ResourceInformation getBaseResourceInformation(String resourceType) {
 		ResourceInformation baseInformation = baseTypeCache.get(resourceType);
 		if (baseInformation != null) {

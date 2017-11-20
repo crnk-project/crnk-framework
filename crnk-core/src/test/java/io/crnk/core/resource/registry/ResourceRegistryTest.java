@@ -116,6 +116,13 @@ public class ResourceRegistryTest {
 	}
 
 	@Test
+	public void onExistingTypeAndIdentifierShouldReturnUrl() {
+		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		String resourceUrl = resourceRegistry.getResourceUrl(Task.class, "1");
+		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
+	}
+
+	@Test
 	public void onNonExistingTypeShouldReturnNull() {
 		RegistryEntry entry = resourceRegistry.getEntry("nonExistingType");
 		assertThat(entry).isNull();
