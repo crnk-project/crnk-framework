@@ -1,13 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -19,8 +11,17 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -300,7 +301,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	}
 
 	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
-		throw new ParametersDeserializationException(parameter.paramType.toString());
+		if (ignoreParseExceptions) {
+			querySpec.addQueryParam(parameter.name, parameter.values);
+		} else {
+			throw new ParametersDeserializationException(parameter.paramType.toString());
+		}
 	}
 
 	private List<Parameter> parseParameters(Map<String, Set<String>> params, ResourceInformation rootResourceInformation) {

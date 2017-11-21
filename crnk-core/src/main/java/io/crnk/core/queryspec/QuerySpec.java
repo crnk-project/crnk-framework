@@ -29,6 +29,8 @@ public class QuerySpec {
 
 	private Map<Object, QuerySpec> relatedSpecs = new HashMap<>();
 
+	private Map<String, Set<String>> queryParams = new HashMap<>();
+
 	public QuerySpec(Class<?> resourceClass) {
 		this.resourceClass = resourceClass;
 	}
@@ -270,6 +272,21 @@ public class QuerySpec {
 		return getOrCreateQuerySpec(resourceInformation.getResourceClass());
 	}
 
+	public void addQueryParam(String name, Set<String> value) {
+		this.queryParams.put(name, value);
+	}
+
+	public Map<String, Set<String>> getQueryParams() {
+		return queryParams;
+	}
+
+	public Set<String> getQueryParamValues(String name) {
+		return queryParams.get(name);
+	}
+
+	public String getQueryParamValue(String name) {
+		return queryParams.get(name).iterator().next();
+	}
 
 	@Override
 	public String toString() {
