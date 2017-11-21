@@ -302,7 +302,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
 		if (ignoreParseExceptions) {
-			querySpec.addQueryParam(parameter.name, parameter.values);
+			querySpec.addQueryParams(parameter.name, parameter.values);
 		} else {
 			throw new ParametersDeserializationException(parameter.paramType.toString());
 		}

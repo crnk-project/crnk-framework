@@ -272,7 +272,7 @@ public class QuerySpec {
 		return getOrCreateQuerySpec(resourceInformation.getResourceClass());
 	}
 
-	public void addQueryParam(String name, Set<String> value) {
+	public void addQueryParams(String name, Set<String> value) {
 		this.queryParams.put(name, value);
 	}
 
@@ -280,11 +280,11 @@ public class QuerySpec {
 		return queryParams;
 	}
 
-	public Set<String> getQueryParamValues(String name) {
+	public Set<String> getQueryParams(String name) {
 		return queryParams.get(name);
 	}
 
-	public String getQueryParamValue(String name) {
+	public String getQueryParam(String name) {
 		return queryParams.get(name).iterator().next();
 	}
 

@@ -540,8 +540,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		deserializer.setIgnoreParseExceptions(true);
 		QuerySpec result = deserializer.deserialize(taskInformation, params);
 
-		Assert.assertEquals(ImmutableSet.of("test"), result.getQueryParamValues("group"));
-		Assert.assertEquals("test", result.getQueryParamValue("group"));
+		Assert.assertEquals(ImmutableSet.of("test"), result.getQueryParams("group"));
+		Assert.assertEquals("test", result.getQueryParam("group"));
 	}
 
 	protected void add(Map<String, Set<String>> params, String key, String value) {
