@@ -74,10 +74,14 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
 					return String.valueOf(properties.getReturn404OnNull());
 				}
+				if (CrnkProperties.IGNORE_PARSE_EXCEPTIONS.equals(key)) {
+					return String.valueOf(properties.getIgnoreParseExceptions());
+				}
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
 		boot.setAllowUnknownAttributes();
+		boot.setIgnoreParseExceptions();
 		boot.boot();
 		return boot;
 	}
