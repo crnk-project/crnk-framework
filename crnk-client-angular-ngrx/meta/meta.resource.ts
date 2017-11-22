@@ -11,7 +11,7 @@ import {MetaResourceBase} from './meta.resource.base';
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaResource {
 	export interface Attributes extends MetaDataObject.Attributes {

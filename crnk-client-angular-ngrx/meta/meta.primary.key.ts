@@ -10,7 +10,7 @@ import {
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaPrimaryKey {
 	export interface Attributes extends MetaKey.Attributes {

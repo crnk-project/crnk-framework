@@ -102,7 +102,7 @@ public class TSWriterTest {
 		export.addTypeName("b");
 
 		export.accept(writer);
-		Assert.assertEquals("export {a, b} from '@test'", writer.toString().trim());
+		Assert.assertEquals("export {a, b} from '@test';", writer.toString().trim());
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class TSWriterTest {
 		export.setPath("@test");
 
 		export.accept(writer);
-		Assert.assertEquals("export * from '@test'", writer.toString().trim());
+		Assert.assertEquals("export * from '@test';", writer.toString().trim());
 	}
 
 }

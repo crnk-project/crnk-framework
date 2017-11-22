@@ -37,7 +37,7 @@ import {
 	ResourceRelationship,
 	TypedManyResourceRelationship,
 	TypedOneResourceRelationship
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaDataObject {
 	export interface Relationships extends MetaType.Relationships {

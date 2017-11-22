@@ -68,7 +68,7 @@ export class OperationsEffects {
 			const initAction = action as ApiApplyInitAction;
 			const zoneId = initAction.zoneId;
 			const ngrxstore = getNgrxJsonApiZone(state, zoneId);
-			let payload = initAction.payload;
+			const payload = initAction.payload;
 			const pending: Array<StoreResource> = getPendingChanges(ngrxstore.data, payload.ids, payload.include, false);
 
 			if (pending.length === 0) {
