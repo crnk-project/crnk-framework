@@ -15,6 +15,12 @@ import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.repository.ResourceRepository;
 
 import java.io.Serializable;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 /**
  * A repository adapter for resource repository
@@ -128,6 +134,14 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Object entity = request.getEntity();
+
+				if (context.getRequest().toValidate()) {
+					Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+					Set<ConstraintViolation<Object>> violations = validator.validate(entity);
+					if (!violations.isEmpty()) {
+						throw new ConstraintViolationException(violations);
+					}
+				}
 
 				Object resource;
 				if (isAnnotated) {

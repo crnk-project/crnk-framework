@@ -6,6 +6,7 @@ dependencies {
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.7'
+	compile group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final'
 	compileOnly group: 'org.reflections', name: 'reflections', version: '0.9.9'
 
 	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
