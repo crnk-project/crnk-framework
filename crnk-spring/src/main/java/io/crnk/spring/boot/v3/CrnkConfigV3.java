@@ -8,16 +8,14 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.servlet.internal.ServletModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -92,10 +90,10 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 					return properties.getPathPrefix();
 				}
 				if (CrnkProperties.DEFAULT_PAGE_LIMIT.equals(key)) {
-					return (properties.getDefaultPageLimit() == null) ? null : String.valueOf(properties.getDefaultPageLimit());
+					return String.valueOf(properties.getDefaultPageLimit());
 				}
 				if (CrnkProperties.MAX_PAGE_LIMIT.equals(key)) {
-					return (properties.getMaxPageLimit() == null) ? null : String.valueOf(properties.getMaxPageLimit());
+					return String.valueOf(properties.getMaxPageLimit());
 				}
 				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
 					return String.valueOf(properties.getAllowUnknownAttributes());

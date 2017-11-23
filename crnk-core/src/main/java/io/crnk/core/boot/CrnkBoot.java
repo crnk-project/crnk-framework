@@ -1,11 +1,8 @@
 package io.crnk.core.boot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
@@ -51,7 +48,12 @@ import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import net.jodah.typetools.TypeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -439,7 +441,6 @@ public class CrnkBoot {
 	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
-	@Deprecated
 	public void setDefaultPageLimit(Long defaultPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
@@ -456,7 +457,6 @@ public class CrnkBoot {
 	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
-	@Deprecated
 	public void setMaxPageLimit(Long maxPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
@@ -470,7 +470,6 @@ public class CrnkBoot {
 	 *
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
-	@Deprecated
 	public void setAllowUnknownAttributes() {
 		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
 				"it is null.", this.querySpecDeserializer);
