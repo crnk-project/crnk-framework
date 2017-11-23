@@ -25,13 +25,13 @@ public class QuerydslQueryFactory extends JpaQueryFactoryBase implements JpaQuer
 
 	@Override
 	public <T> QuerydslQuery<T> query(Class<T> entityClass) {
-		return new QuerydslQueryImpl<>(metaLookup, em, entityClass, computedAttrs, interceptors);
+		return new QuerydslQueryImpl<>(context.getMetaPartition(), em, entityClass, computedAttrs, interceptors);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public <T> QuerydslQuery<T> query(Class<?> entityClass, String attrName, List<?> entityIds) {
-		return new QuerydslQueryImpl(metaLookup, em, entityClass, computedAttrs, interceptors, attrName, entityIds);
+		return new QuerydslQueryImpl(context.getMetaPartition(), em, entityClass, computedAttrs, interceptors, attrName, entityIds);
 	}
 
 	public void registerComputedAttribute(Class<?> targetClass, String attributeName, Type attributeType,

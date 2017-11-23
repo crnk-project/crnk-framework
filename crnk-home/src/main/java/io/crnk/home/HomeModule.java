@@ -1,9 +1,8 @@
 package io.crnk.home;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
@@ -13,6 +12,8 @@ import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
+
+import java.io.IOException;
 
 /**
  * Displays a list of available resources in the root directory.
@@ -63,7 +64,7 @@ public class HomeModule implements Module {
 					ResourceRegistry resourceRegistry = context.getResourceRegistry();
 					for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
 						RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-						if (repositoryInformation != null) {
+						if (repositoryInformation != null && context.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET) == FilterBehavior.NONE) {
 							ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
 							String resourceType = resourceInformation.getResourceType();
 							String tag = "tag:" + resourceType;

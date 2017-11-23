@@ -1,21 +1,18 @@
 package io.crnk.core.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Task;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceInformationTest {
 
@@ -54,14 +51,5 @@ public class ResourceInformationTest {
 		sut.setId(task, 13L);
 		Assert.assertEquals(13L, task.getId().longValue());
 		Assert.assertEquals(13L, sut.getId(task));
-	}
-
-	@Test
-	public void checkEqualsContract() {
-		ResourceAttributesBridge b1 = Mockito.mock(ResourceAttributesBridge.class);
-		ResourceAttributesBridge b2 = Mockito.mock(ResourceAttributesBridge.class);
-
-		EqualsVerifier.forClass(ResourceInformation.class).withPrefabValues(ResourceAttributesBridge.class, b1, b2)
-				.usingGetClass().verify();
 	}
 }

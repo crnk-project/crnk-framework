@@ -13,21 +13,14 @@ public abstract class TSContainerElementBase extends TSElementBase implements TS
 	}
 
 	@Override
-	public TSNamedElement getElement(String name) {
-		for (TSElement element : elements) {
-			if (element instanceof TSNamedElement) {
-				TSNamedElement named = (TSNamedElement) element;
-				if (name.equals(named.getName())) {
-					return named;
-				}
-			}
-		}
-		return null;
+	public void addElement(TSElement element) {
+		elements.add(element);
+		element.setParent(this);
 	}
 
 	@Override
-	public void addElement(TSElement element) {
-		elements.add(element);
+	public void addElement(int index, TSElement element) {
+		elements.add(index, element);
 		element.setParent(this);
 	}
 }

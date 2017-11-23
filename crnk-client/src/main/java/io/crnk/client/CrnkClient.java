@@ -2,7 +2,6 @@ package io.crnk.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.client.action.ActionStubFactory;
 import io.crnk.client.action.ActionStubFactoryContext;
 import io.crnk.client.http.HttpAdapter;
@@ -19,18 +18,20 @@ import io.crnk.client.internal.proxy.ClientProxyFactoryContext;
 import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.module.ClientModule;
+import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -44,10 +45,11 @@ import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ResourceLookup;
-import io.crnk.core.module.internal.DefaultRepositoryInformationBuilderContext;
+import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
@@ -57,14 +59,14 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
  */
 public class CrnkClient {
-
-	private final ServiceUrlProvider serviceUrlProvider;
 
 	private HttpAdapter httpAdapter;
 
@@ -97,24 +99,34 @@ public class CrnkClient {
 		this.registerHttpAdapterProvider(new HttpClientAdapterProvider());
 
 		moduleRegistry = new ModuleRegistry(false);
-
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.addModule(new ClientModule());
 
-		this.serviceUrlProvider = serviceUrlProvider;
 
-		resourceRegistry = new ClientResourceRegistry(moduleRegistry, serviceUrlProvider);
+		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 
 		objectMapper = new ObjectMapper();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		// consider use of crnk module in the future
-		JsonApiModuleBuilder moduleBuilder = new JsonApiModuleBuilder();
-		SimpleModule jsonApiModule = moduleBuilder.build();
-		objectMapper.registerModule(jsonApiModule);
+		moduleRegistry.addModule(new JacksonModule(objectMapper));
 
 		documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, null);
 		setProxyFactory(new BasicProxyFactory());
+	}
+
+	/**
+	 * Finds and registers modules on the classpath trough the use of java.util.ServiceLoader.
+	 * Each module can register itself for lookup by registering a ClientModuleFactory.
+	 */
+	public void findModules() {
+		ServiceLoader<ClientModuleFactory> loader = ServiceLoader.load(ClientModuleFactory.class);
+
+		Iterator<ClientModuleFactory> iterator = loader.iterator();
+		while (iterator.hasNext()) {
+			ClientModuleFactory factory = iterator.next();
+			Module module = factory.create();
+			addModule(module);
+		}
 	}
 
 	public void setProxyFactory(ClientProxyFactory proxyFactory) {
@@ -212,10 +224,10 @@ public class CrnkClient {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, boolean allocateRelated) {
-		ResourceInformationBuilder resourceInformationBuilder = moduleRegistry.getResourceInformationBuilder();
+	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass) {
+		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
-		ResourceInformation resourceInformation = resourceInformationBuilder.build(resourceClass);
+		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		final ResourceRepositoryStub<T, I> repositoryStub =
 				new ResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
 
@@ -229,29 +241,47 @@ public class CrnkClient {
 		};
 		ResourceRepositoryInformation repositoryInformation =
 				new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-						resourceInformation);
+						resourceInformation, RepositoryMethodAccess.ALL);
 		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder);
 		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
 		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
 		registryEntry.initialize(moduleRegistry);
 		resourceRegistry.addEntry(resourceClass, registryEntry);
 
-		allocateRepositoryRelations(registryEntry, allocateRelated, relationshipEntries);
+		allocateRepositoryRelations(registryEntry);
 
 		return registryEntry;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private void allocateRepositoryRelations(RegistryEntry registryEntry, boolean allocateRelated,
-											 List<ResponseRelationshipEntry> relationshipEntries) {
+	private void allocateRepositoryRelations(RegistryEntry registryEntry) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
 		for (ResourceField relationshipField : relationshipFields) {
 			final Class<?> targetClass = relationshipField.getElementType();
-			final String targetResourceType = relationshipField.getOppositeResourceType();
+			Class sourceClass = resourceInformation.getResourceClass();
+			allocateRepositoryRelation(sourceClass, targetClass);
+		}
+	}
 
+	private void allocateRepositoryRelation(Class sourceClass, Class targetClass) {
+		// allocate relations as well
+		ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
+		if (!clientResourceRegistry.isInitialized(sourceClass)) {
+			allocateRepository(sourceClass);
+		}
+		if (!clientResourceRegistry.isInitialized(targetClass)) {
+			allocateRepository(targetClass);
+		}
+
+		RegistryEntry sourceEntry = resourceRegistry.getEntry(sourceClass);
+		final RegistryEntry targetEntry = resourceRegistry.getEntry(targetClass);
+
+		final ResourceInformation targetResourceInformation = targetEntry.getResourceInformation();
+		Optional<ResponseRelationshipEntry> optRelationshipEntry = sourceEntry.getRelationshipEntry(targetResourceInformation.getResourceType());
+		if(!optRelationshipEntry.isPresent()) {
 			final RelationshipRepositoryStubImpl relationshipRepositoryStub =
-					new RelationshipRepositoryStubImpl(this, resourceInformation.getResourceClass(), targetClass, resourceInformation, urlBuilder);
+					new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder);
 			RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder =
 					new RepositoryInstanceBuilder<RelationshipRepository>(null, null) {
 
@@ -265,18 +295,10 @@ public class CrnkClient {
 
 						@Override
 						public String getTargetResourceType() {
-							return targetResourceType;
+							return targetResourceInformation.getResourceType();
 						}
 					};
-			relationshipEntries.add(relationshipEntry);
-
-			// allocate relations as well
-			if (allocateRelated) {
-				ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
-				if (!clientResourceRegistry.isInitialized(targetClass)) {
-					allocateRepository(targetClass, true);
-				}
-			}
+			sourceEntry.getRelationshipEntries().add(relationshipEntry);
 		}
 	}
 
@@ -290,10 +312,11 @@ public class CrnkClient {
 
 	@SuppressWarnings("unchecked")
 	public <R extends ResourceRepositoryV2<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
-		RepositoryInformationBuilder informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
+		init();
+		RepositoryInformationProvider informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
 		PreconditionUtil.assertTrue("no a valid repository interface", informationBuilder.accept(repositoryInterfaceClass));
 		ResourceRepositoryInformation repositoryInformation = (ResourceRepositoryInformation) informationBuilder
-				.build(repositoryInterfaceClass, new DefaultRepositoryInformationBuilderContext(moduleRegistry));
+				.build(repositoryInterfaceClass, new DefaultRepositoryInformationProviderContext(moduleRegistry));
 		Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
 
 		Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
@@ -399,6 +422,7 @@ public class CrnkClient {
 
 		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
 		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
+		allocateRepositoryRelation(sourceClass, targetClass);
 
 		RelationshipRepositoryAdapter repositoryAdapter = sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
 		return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
@@ -477,7 +501,7 @@ public class CrnkClient {
 
 				@Override
 				public ServiceUrlProvider getServiceUrlProvider() {
-					return serviceUrlProvider;
+					return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 				}
 
 				@Override
@@ -497,31 +521,31 @@ public class CrnkClient {
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {
-		return serviceUrlProvider;
+		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
 
 	class ClientResourceRegistry extends ResourceRegistryImpl {
 
-		public ClientResourceRegistry(ModuleRegistry moduleRegistry, ServiceUrlProvider serviceUrlProvider) {
-			super(new DefaultResourceRegistryPart(), moduleRegistry, serviceUrlProvider);
+		public ClientResourceRegistry(ModuleRegistry moduleRegistry) {
+			super(new DefaultResourceRegistryPart(), moduleRegistry);
 		}
 
 		@Override
 		protected synchronized RegistryEntry findEntry(Class<?> clazz, boolean allowNull) {
 			RegistryEntry entry = getEntry(clazz);
 			if (entry == null) {
-				ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
+				ResourceInformationProvider informationBuilder = moduleRegistry.getResourceInformationBuilder();
 				if (!informationBuilder.accept(clazz)) {
 					throw new InvalidResourceException(clazz.getName() + " not recognized as resource class, consider adding "
 							+ "@JsonApiResource annotation");
 				}
-				entry = allocateRepository(clazz, true);
+				entry = allocateRepository(clazz);
 			}
 			return entry;
 		}
 
 		public boolean isInitialized(Class<?> clazz) {
-			return super.findEntry(clazz, true) != null;
+			return super.getEntry(clazz) != null;
 		}
 	}
 }

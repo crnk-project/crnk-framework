@@ -1,7 +1,4 @@
 <div class="card-container">
-	<h1 x-large class="sample-content">{{type}}</h1>
-
-
 	<div class="card card-w-title" *ngIf="!embeddedMode">
 		<h3>Endpoint</h3>
 		<input type="string" style="width:100%" [(ngModel)]="baseUrl" pInputText placeholder="JSON API endpoint...">
@@ -79,7 +76,7 @@
 						 *ngIf="documentDisplayType != 'json'">
 				<p-column filter="true" field="key" header="key" [style]="{'width':'250px'}"></p-column>
 				<p-column field="value" header="value">
-					<template pTemplate let-node="rowData" type="body">
+					<ng-template pTemplate let-node="rowData" type="body">
                      <span *ngIf="(node.data.key == 'id' || node.data.type == 'text') && editable">
                         <input pInputText [(ngModel)]="node.data.value" style="width:300px"
 							   (ngModelChange)="clearDocumentText()">
@@ -93,7 +90,7 @@
 						<span *ngIf="node.data.type == 'query' && (!editable || node.data.key != 'id')">
                         <a href="#" (click)="get(node.data.query)">{{node.data.value}}</a>
                     </span>
-					</template>
+					</ng-template>
 				</p-column>
 			</p-treeTable>
 
@@ -150,14 +147,14 @@
 
 				<p-dataTable [value]="response.headers.keys()">
 					<p-column header="Name">
-						<template let-rowData="rowData" pTemplate="body">
+						<ng-template let-rowData="rowData" pTemplate="body">
 							{{rowData}}
-						</template>
+						</ng-template>
 					</p-column>
 					<p-column header="Value">
-						<template let-rowData="rowData" pTemplate="body">
+						<ng-template let-rowData="rowData" pTemplate="body">
 							{{response.headers.get(rowData)}}
-						</template>
+						</ng-template>
 					</p-column>
 				</p-dataTable>
 

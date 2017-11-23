@@ -1,13 +1,14 @@
 package io.crnk.meta.model;
 
-import java.lang.reflect.Type;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Type;
 
 @JsonApiResource(type = "meta/type")
 public class MetaType extends MetaElement {
@@ -15,7 +16,7 @@ public class MetaType extends MetaElement {
 	@JsonIgnore
 	private Type implementationType;
 
-	@JsonApiRelation(serialize = SerializeType.LAZY)
+	@JsonApiRelation(serialize = SerializeType.LAZY, lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaType elementType;
 
 	@JsonIgnore

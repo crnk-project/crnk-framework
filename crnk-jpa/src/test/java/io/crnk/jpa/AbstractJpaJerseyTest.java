@@ -1,15 +1,5 @@
 package io.crnk.jpa;
 
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -18,7 +8,6 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.CountryTranslationEntity;
-import io.crnk.jpa.model.TestEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
 import io.crnk.jpa.util.EntityManagerProducer;
@@ -28,10 +17,7 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.meta.MetaModule;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.resource.MetaJsonObject;
-import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
@@ -42,14 +28,30 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
+
+	protected ResourceMetaProvider resourceMetaProvider;
+
+	protected JpaMetaProvider jpaMetaProvider;
 
 	protected CrnkClient client;
 
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
 	protected AnnotationConfigApplicationContext context;
+
 	protected MetaModule metaModule;
+
 	private boolean useQuerySpec = true;
 
 	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
@@ -72,9 +74,11 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 		setupModule(module, false);
 		client.addModule(module);
 
-		MetaModule metaModule = MetaModule.create();
-		metaModule.addMetaProvider(new ResourceMetaProvider());
-		client.addModule(metaModule);
+		MetaModule clientMetaModule = MetaModule.create();
+		clientMetaModule.addMetaProvider(new ResourceMetaProvider());
+		client.addModule(clientMetaModule);
+
+		metaModule.getLookup().initialize();
 
 		setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
 	}
@@ -98,8 +102,9 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			}
 		});
 
-		if (context != null)
+		if (context != null) {
 			context.destroy();
+		}
 	}
 
 	@Override
@@ -123,9 +128,11 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
 			CrnkFeature feature;
 			if (useQuerySpec) {
-				feature = new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()), new SampleJsonServiceLocator());
+				feature = new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
+						new SampleJsonServiceLocator());
 			} else {
-				feature = new CrnkFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(), new SampleJsonServiceLocator());
+				feature = new CrnkFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(), new SampleJsonServiceLocator
+						());
 			}
 
 			JpaModule module = JpaModule.newServerModule(em, transactionRunner);
@@ -144,17 +151,13 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
 			feature.addModule(module);
 
-			metaModule = MetaModule.create();
-			metaModule.addMetaProvider(new ResourceMetaProvider());
-			metaModule.addMetaProvider(new JpaMetaProvider(emFactory));
+			MetaModuleConfig metaConfig = new MetaModuleConfig();
+			resourceMetaProvider = new ResourceMetaProvider();
+			jpaMetaProvider = new JpaMetaProvider(emFactory);
+			metaConfig.addMetaProvider(resourceMetaProvider);
+			metaConfig.addMetaProvider(jpaMetaProvider);
+			metaModule = MetaModule.createServerModule(metaConfig);
 			feature.addModule(metaModule);
-
-			String managementId = "io.crnk.jpa.resource";
-			String dataId = TestEntity.class.getPackage().getName();
-			metaModule.putIdMapping(dataId, MetaJsonObject.class, managementId);
-			metaModule.putIdMapping(dataId, MetaResourceBase.class, managementId);
-			metaModule.putIdMapping(dataId, MetaResource.class, managementId);
-			metaModule.putIdMapping(dataId, MetaEnumType.class, managementId);
 
 			register(feature);
 

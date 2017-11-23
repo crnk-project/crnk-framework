@@ -13,4 +13,9 @@ public interface HttpRequestContext extends HttpRequestContextBase {
 	boolean acceptsAny();
 
 	<T> T unwrap(Class<T> type);
+
+	Object getRequestAttribute(String name);
+
+	void setRequestAttribute(String name, Object value);
+
 }

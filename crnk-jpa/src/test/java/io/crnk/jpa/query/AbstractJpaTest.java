@@ -1,12 +1,12 @@
 package io.crnk.jpa.query;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.internal.CoreModule;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.CoreModule;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.meta.JpaMetaProvider;
@@ -15,6 +15,7 @@ import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.util.JpaTestConfig;
 import io.crnk.jpa.util.SpringTransactionRunner;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.provider.MetaPartition;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,12 +61,17 @@ public abstract class AbstractJpaTest {
 			}
 
 			@Override
-			public MetaLookup getMetaLookup() {
+			public MetaPartition getMetaPartition() {
+				JpaMetaProvider jpaMetaProvider = new JpaMetaProvider(em.getEntityManagerFactory());
 				MetaLookup metaLookup = new MetaLookup();
-				metaLookup.addProvider(new JpaMetaProvider());
-				return metaLookup;
+				metaLookup.addProvider(jpaMetaProvider);
+				metaLookup.initialize();
+				return jpaMetaProvider.getPartition();
 			}
 		});
+		clear(em, factory.query(OneToOneTestEntity.class).buildExecutor().getResultList());
+		clear(em, factory.query(ManyToManyTestEntity.class).buildExecutor().getResultList());
+		clear(em, factory.query(ManyToManyOppositeEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(TestSubclassWithSuperclassPk.class).buildExecutor().getResultList());
 		clear(em, factory.query(RelatedEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(TestEntity.class).buildExecutor().getResultList());
@@ -88,17 +94,19 @@ public abstract class AbstractJpaTest {
 
 	@Before
 	public void setup() {
-
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost:1234"));
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		module = JpaModule.newServerModule(emFactory, em, transactionRunner);
 		setupModule(module);
-		moduleRegistry.addModule(new CoreModule(new ResourceFieldNameTransformer()));
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
+		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.addModule(module);
 		moduleRegistry.init(new ObjectMapper());
 
 		queryFactory = createQueryFactory(em);
 		module.setQueryFactory(queryFactory);
+
 
 		clear();
 		for (int i = 0; i < numTestEntities; i++) {

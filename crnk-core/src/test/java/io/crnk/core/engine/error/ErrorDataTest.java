@@ -3,7 +3,7 @@ package io.crnk.core.engine.error;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class ErrorDataTest {
 	@Test
 	public void testSerialization() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JsonApiModuleBuilder().build());
+		mapper.registerModule(JacksonModule.createJacksonModule());
 
 		ErrorDataBuilder builder = new ErrorDataBuilder();
 		builder.setAboutLink("about");

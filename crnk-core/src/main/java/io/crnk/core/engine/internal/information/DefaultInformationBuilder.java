@@ -3,13 +3,17 @@ package io.crnk.core.engine.internal.information;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,6 +30,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	}
 
 	@Override
+	public Field createResourceField() {
+		return new DefaultField();
+	}
+
+	@Override
 	public RelationshipRepository createRelationshipRepository(String sourceResourceType, String targetResourceType) {
 		DefaultRelationshipRepository repository = new DefaultRelationshipRepository();
 		repository.sourceResourceType = sourceResourceType;
@@ -33,19 +42,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		return repository;
 	}
 
-	public ResourceRepository createResourceRepository() {
-		return createResourceRepository(null, null);
-	}
-
 	@Override
-	public ResourceRepository createResourceRepository(Class<?> resourceClass, String resourceType) {
-		DefaultResource resource = new DefaultResource();
-		resource.resourceClass(resourceClass);
-		resource.resourceType(resourceType);
-
-		DefaultResourceRepository repository = new DefaultResourceRepository();
-		repository.resource = resource;
-		return repository;
+	public ResourceRepository createResourceRepository() {
+		return new DefaultResourceRepository();
 	}
 
 	@Override
@@ -62,28 +61,39 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private String targetResourceType;
 
+		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
+
+		public void setAccess(RepositoryMethodAccess access) {
+			this.access = access;
+		}
 
 		@Override
 		public RelationshipRepositoryInformation build() {
-			return new RelationshipRepositoryInformationImpl(null, sourceResourceType, targetResourceType);
+			return new RelationshipRepositoryInformationImpl(null, sourceResourceType, targetResourceType, access);
 		}
 	}
 
 	public class DefaultResourceRepository implements ResourceRepository {
 
-		private DefaultResource resource;
+		private ResourceInformation resourceInformation;
 
 		private Map<String, RepositoryAction> actions = new HashMap<>();
 
-		public DefaultResource resource() {
-			return resource;
+		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
+
+		@Override
+		public void setResourceInformation(ResourceInformation resourceInformation) {
+			this.resourceInformation = resourceInformation;
+		}
+
+		@Override
+		public void setAccess(RepositoryMethodAccess access) {
+			this.access = access;
 		}
 
 		public ResourceRepositoryInformation build() {
-			ResourceInformation resourceInformation = resource.build();
-
 			return new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-					resourceInformation, actions);
+					resourceInformation, actions, access);
 		}
 	}
 
@@ -109,16 +119,19 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return field;
 		}
 
-		public void resourceClass(Class<?> resourceClass) {
+		public DefaultResource resourceClass(Class<?> resourceClass) {
 			this.resourceClass = resourceClass;
+			return this;
 		}
 
-		public void resourceType(String resourceType) {
+		public DefaultResource resourceType(String resourceType) {
 			this.resourceType = resourceType;
+			return this;
 		}
 
-		public void superResourceType(String superResourceType) {
+		public DefaultResource superResourceType(String superResourceType) {
 			this.superResourceType = superResourceType;
+			return this;
 		}
 
 		public ResourceInformation build() {
@@ -136,80 +149,113 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	public class DefaultField implements InformationBuilder.Field {
 
 		private String jsonName;
-		private String underlyingName;
-		private Class<?> type;
-		private Type genericType;
 
-		private boolean lazy = true;
+		private String underlyingName;
+
+		private Class<?> type;
+
+		private Type genericType;
 
 		private String oppositeResourceType = null;
 
-		private LookupIncludeBehavior lookupIncludeBehavior = LookupIncludeBehavior.NONE;
-
-		private boolean includeByDefault = false;
+		private LookupIncludeBehavior lookupIncludeBehavior = LookupIncludeBehavior.DEFAULT;
 
 		private ResourceFieldType fieldType = ResourceFieldType.ATTRIBUTE;
+
+		private SerializeType serializeType = SerializeType.LAZY;
 
 		private String oppositeName;
 
 		private ResourceFieldAccessor accessor;
 
-		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true);
+		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
 		public ResourceField build() {
-			return new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
-					genericType, oppositeResourceType, oppositeName, lazy,
-					includeByDefault, lookupIncludeBehavior,
+
+			if (oppositeResourceType == null && fieldType == ResourceFieldType.RELATIONSHIP) {
+				// TODO consider separating informationBuilder from resourceType extraction
+				Class<?> elementType = ClassUtils.getRawType(ClassUtils.getElementType(genericType));
+				JsonApiResource annotation = elementType.getAnnotation(JsonApiResource.class);
+				if (annotation != null) {
+					oppositeResourceType = annotation.type();
+				}
+			}
+
+			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
+					genericType, oppositeResourceType, oppositeName, serializeType,
+					lookupIncludeBehavior,
 					access);
+			if (accessor != null) {
+				impl.setAccessor(accessor);
+			}
+			return impl;
 		}
 
-		public void jsonName(String jsonName) {
+
+		public DefaultField name(String name) {
+			this.jsonName = name;
+			this.underlyingName = name;
+			return this;
+		}
+
+
+		public DefaultField jsonName(String jsonName) {
 			this.jsonName = jsonName;
+			return this;
 		}
 
-		public void underlyingName(String underlyingName) {
+		public DefaultField underlyingName(String underlyingName) {
 			this.underlyingName = underlyingName;
+			return this;
 		}
 
 
-		public void type(Class<?> type) {
+		public DefaultField type(Class<?> type) {
 			this.type = type;
+			if (this.genericType == null) {
+				this.genericType = type;
+			}
+			return this;
 		}
 
-		public void genericType(Type genericType) {
+		public DefaultField genericType(Type genericType) {
 			this.genericType = genericType;
+			return this;
 		}
 
-		public void lazy(boolean lazy) {
-			this.lazy = lazy;
+		public DefaultField serializeType(SerializeType serializeType) {
+			this.serializeType = serializeType;
+			return this;
 		}
 
-		public void oppositeResourceType(String oppositeResourceType) {
+		public DefaultField oppositeResourceType(String oppositeResourceType) {
 			this.oppositeResourceType = oppositeResourceType;
+			return this;
 		}
 
-		public void lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior) {
+		public DefaultField lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior) {
 			this.lookupIncludeBehavior = lookupIncludeBehavior;
+			return this;
 		}
 
-		public void includeByDefault(boolean includeByDefault) {
-			this.includeByDefault = includeByDefault;
-		}
-
-		public void fieldType(ResourceFieldType fieldType) {
+		public DefaultField fieldType(ResourceFieldType fieldType) {
 			this.fieldType = fieldType;
+			return this;
 		}
 
-		public void setOppositeName(String oppositeName) {
+		public DefaultField oppositeName(String oppositeName) {
 			this.oppositeName = oppositeName;
+			return this;
 		}
 
-		public void setAccessor(ResourceFieldAccessor accessor) {
+		public DefaultField accessor(ResourceFieldAccessor accessor) {
 			this.accessor = accessor;
+			return this;
 		}
 
-		public void setAccess(ResourceFieldAccess access) {
+		public DefaultField access(ResourceFieldAccess access) {
 			this.access = access;
+			return this;
 		}
 	}
 

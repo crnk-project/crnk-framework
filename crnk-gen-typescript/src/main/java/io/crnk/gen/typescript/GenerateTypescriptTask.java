@@ -3,22 +3,14 @@ package io.crnk.gen.typescript;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContextImpl;
-import io.crnk.gen.typescript.processor.TSSourceProcessor;
-import io.crnk.gen.typescript.writer.TSCodeStyle;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.SkipWhenEmpty;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 public class GenerateTypescriptTask extends DefaultTask {
@@ -30,33 +22,10 @@ public class GenerateTypescriptTask extends DefaultTask {
 		setDescription("generate Typescript stubs from a Crnk setup");
 	}
 
-	/**
-	 * Register resources directory as input to have incremental builds.
-	 */
-	@InputFiles
-	public FileTree getResourcesInput() {
-		return getMainSourceSet().getResources().getAsFileTree();
-	}
-
-	/**
-	 * Register java sources as input to have incremental builds.
-	 */
-	@InputFiles
-	@SkipWhenEmpty
-	public FileTree getJavaInput() {
-		return getMainSourceSet().getJava().getAsFileTree();
-	}
-
-	private SourceSet getMainSourceSet() {
-		Project project = getProject();
-		SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
-		return sourceSets.getByName("main");
-	}
-
+	@OutputDirectory
 	public File getOutputDirectory() {
-		Project project = getProject();
-		String srcDirectoryPath = "generated/source/typescript/";
-		return new File(project.getBuildDir(), srcDirectoryPath);
+		TSGeneratorConfig config = getConfig();
+		return config.getGenDir();
 	}
 
 	@TaskAction
@@ -64,24 +33,15 @@ public class GenerateTypescriptTask extends DefaultTask {
 		Thread thread = Thread.currentThread();
 		ClassLoader contextClassLoader = thread.getContextClassLoader();
 
-		Map<String, Class<?>> sharedClasses = new HashMap<>();
-		sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
-		sharedClasses.put(TSGeneratorConfiguration.class.getName(), TSGeneratorConfiguration.class);
-		sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
-		sharedClasses.put(RuntimeMetaResolver.class.getName(), RuntimeMetaResolver.class);
-		sharedClasses.put(TSSourceProcessor.class.getName(), TSSourceProcessor.class);
-		sharedClasses.put(TSGeneratorRuntimeContext.class.getName(), TSGeneratorRuntimeContext.class);
-
 		RuntimeClassLoaderFactory classLoaderFactory = new RuntimeClassLoaderFactory(getProject());
-		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader, sharedClasses);
 
-		TSGeneratorConfiguration config = getConfig();
+		TSGeneratorConfig config = getConfig();
 		setupDefaultConfig(config);
 
+		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader);
 		try {
 			thread.setContextClassLoader(classloader);
-
-			runGeneration();
+			runGeneration(classloader);
 		}
 		finally {
 			// make sure to restore the classloader when leaving this task
@@ -90,48 +50,49 @@ public class GenerateTypescriptTask extends DefaultTask {
 			// dispose classloader
 			classloader.close();
 		}
-
 	}
 
-	protected void setupDefaultConfig(TSGeneratorConfiguration config) {
+	protected void setupDefaultConfig(TSGeneratorConfig config) {
 		String defaultVersion = getProject().getVersion().toString();
-		if (config.getNpmPackageVersion() == null) {
-			config.setNpmPackageVersion(defaultVersion);
+		if (config.getNpm().getPackageVersion() == null) {
+			config.getNpm().setPackageVersion(defaultVersion);
 		}
 	}
 
 	protected RuntimeMetaResolver getRuntime() {
-		TSGeneratorConfiguration config = getConfig();
+		TSGeneratorConfig config = getConfig();
 		String runtimeClass = config.getMetaResolverClassName();
-		try {
-			Class<?> clazz = getClass().getClassLoader().loadClass(runtimeClass);
-			return (RuntimeMetaResolver) clazz.newInstance();
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			throw new IllegalStateException("failed to load runtime " + runtimeClass, e);
-		}
+		return (RuntimeMetaResolver) loadClass(getClass().getClassLoader(), runtimeClass);
 	}
 
-	protected void runGeneration() {
-		File outputDir = getOutputDirectory();
-		TSGeneratorConfiguration config = getConfig();
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	protected void runGeneration(ClassLoader classloader) {
+		TSGeneratorConfig config = getConfig();
+		File outputDir = config.getGenDir();
+
+		GeneratorTrigger context = (GeneratorTrigger) loadClass(classloader, TSGeneratorRuntimeContextImpl.class.getName());
+		context.setClassLoader(classloader);
+		TSGeneratorRuntimeContext genContext = (TSGeneratorRuntimeContext) context;
+		genContext.setOutputDir(outputDir);
+		genContext.setConfig(config);
+		RuntimeMetaResolver runtime = getRuntime();
+		runtime.run(context, classloader);
+
+
+	}
+
+	private Object loadClass(ClassLoader classLoader, String name) {
 		try {
-			Class<?> contextClass = classLoader.loadClass(TSGeneratorRuntimeContextImpl.class.getName());
-			GeneratorTrigger context = (GeneratorTrigger) contextClass.newInstance();
-			TSGeneratorRuntimeContext genContext = (TSGeneratorRuntimeContext) context;
-			genContext.setOutputDir(outputDir);
-			genContext.setConfig(config);
-			RuntimeMetaResolver runtime = getRuntime();
-			runtime.run(context, classLoader);
+			Class<?> clazz = classLoader.loadClass(name);
+			return clazz.newInstance();
 		}
 		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException("failed to load class", e);
 		}
 	}
 
-	private TSGeneratorConfiguration getConfig() {
+	private TSGeneratorConfig getConfig() {
 		Project project = getProject();
-		return project.getExtensions().getByType(TSGeneratorConfiguration.class);
+		return project.getExtensions().getByType(TSGeneratorConfig.class);
 	}
+
 }

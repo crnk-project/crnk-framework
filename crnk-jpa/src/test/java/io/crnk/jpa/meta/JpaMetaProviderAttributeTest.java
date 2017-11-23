@@ -9,18 +9,26 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaCollectionType;
 import io.crnk.meta.model.MetaMapType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 public class JpaMetaProviderAttributeTest {
 
+	private JpaMetaProvider metaProvider;
+
+	@Before
+	public void setup() {
+		metaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
+		MetaLookup lookup = new MetaLookup();
+		lookup.addProvider(metaProvider);
+	}
+
 	@Test
 	public void testPrimaryKey() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(TestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 		MetaAttribute attr = meta.getAttribute("id");
 		Assert.assertFalse(attr.isAssociation());
 		Assert.assertEquals("id", attr.getName());
@@ -34,10 +42,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testAttributeOrder() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(TestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 
 		List<? extends MetaAttribute> attributes = meta.getAttributes();
 
@@ -55,10 +60,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testCascaded() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(TestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 
 		MetaAttribute oneRelatedAttr = meta.getAttribute("oneRelatedValue");
 		MetaAttribute eagerRelatedAttr = meta.getAttribute("eagerRelatedValue");
@@ -68,10 +70,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testWriteOnlyAttributesIngoredAsNotYetSupported() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(WriteOnlyAttributeTestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(WriteOnlyAttributeTestEntity.class);
 
 		Assert.assertTrue(meta.hasAttribute("id"));
 
@@ -81,10 +80,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testFirstCharacterOfNameIsLowerCase() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(NamingTestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(NamingTestEntity.class);
 
 		Assert.assertTrue(meta.hasAttribute("id"));
 		Assert.assertTrue(meta.hasAttribute("sEcondUpperCaseValue"));
@@ -93,10 +89,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testMapAttr() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(TestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 		MetaAttribute attr = meta.getAttribute(TestEntity.ATTR_mapValue);
 		Assert.assertFalse(attr.isAssociation());
 		Assert.assertEquals(TestEntity.ATTR_mapValue, attr.getName());
@@ -115,10 +108,7 @@ public class JpaMetaProviderAttributeTest {
 
 	@Test
 	public void testRelationMany() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
-		MetaEntity meta = lookup.getMeta(TestEntity.class, MetaEntity.class);
+		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 		MetaAttribute attr = meta.getAttribute(TestEntity.ATTR_manyRelatedValues);
 		Assert.assertTrue(attr.isAssociation());
 		Assert.assertEquals(TestEntity.ATTR_manyRelatedValues, attr.getName());

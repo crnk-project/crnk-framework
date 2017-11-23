@@ -7,6 +7,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -77,24 +78,28 @@ public class RegistryEntry {
 		return relationshipEntries;
 	}
 
-	@SuppressWarnings("unchecked")
-	public RelationshipRepositoryAdapter getRelationshipRepositoryForType(String targetResourceType, RepositoryMethodParameterProvider parameterProvider) {
-		ResponseRelationshipEntry foundRelationshipEntry = null;
+	public Optional<ResponseRelationshipEntry> getRelationshipEntry(String targetResourceType){
 		for (ResponseRelationshipEntry relationshipEntry : relationshipEntries) {
 			if (relationshipEntry.getTargetResourceType() == null || targetResourceType.equals(relationshipEntry.getTargetResourceType())) {
-				foundRelationshipEntry = relationshipEntry;
-				break;
+				return Optional.of(relationshipEntry);
 			}
 		}
-		if (foundRelationshipEntry == null) {
+		return Optional.empty();
+	}
+
+	@SuppressWarnings("unchecked")
+	public RelationshipRepositoryAdapter getRelationshipRepositoryForType(String targetResourceType, RepositoryMethodParameterProvider parameterProvider) {
+		Optional<ResponseRelationshipEntry> optRelationshipEntry = getRelationshipEntry(targetResourceType);
+		if (!optRelationshipEntry.isPresent()) {
 			throw new RelationshipRepositoryNotFoundException(resourceInformation.getResourceType(), targetResourceType);
 		}
+		ResponseRelationshipEntry relationshipEntry = optRelationshipEntry.get();
 
 		Object repoInstance;
-		if (foundRelationshipEntry instanceof AnnotatedRelationshipEntryBuilder) {
-			repoInstance = ((AnnotatedRelationshipEntryBuilder) foundRelationshipEntry).build(parameterProvider);
+		if (relationshipEntry instanceof AnnotatedRelationshipEntryBuilder) {
+			repoInstance = ((AnnotatedRelationshipEntryBuilder) relationshipEntry).build(parameterProvider);
 		} else {
-			repoInstance = ((DirectResponseRelationshipEntry) foundRelationshipEntry).getRepositoryInstanceBuilder();
+			repoInstance = ((DirectResponseRelationshipEntry) relationshipEntry).getRepositoryInstanceBuilder();
 		}
 
 		if (repoInstance instanceof ResourceRegistryAware) {

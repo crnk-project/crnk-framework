@@ -7,17 +7,26 @@ import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaPrimaryKey;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-//import io.crnk.jpa.model.SequenceEntity;
+import java.util.Collections;
 
 public class MetaEntityTest {
 
+	private JpaMetaProvider metaProvider;
+
+	@Before
+	public void setup() {
+		metaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
+		MetaLookup lookup = new MetaLookup();
+		lookup.addProvider(metaProvider);
+	}
+
 	@Test
 	public void testPrimaryKeyOnParentMappedSuperClass() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		MetaEntity meta = lookup.getMeta(TestSubclassWithSuperclassPk.class, MetaEntity.class);
+
+		MetaEntity meta = metaProvider.discoverMeta(TestSubclassWithSuperclassPk.class);
 		MetaPrimaryKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);
 		Assert.assertEquals(1, primaryKey.getElements().size());
@@ -28,9 +37,7 @@ public class MetaEntityTest {
 
 	@Test
 	public void testPrimaryKeyOnMappedSuperClass() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		MetaMappedSuperclass meta = lookup.getMeta(TestMappedSuperclassWithPk.class, MetaMappedSuperclass.class);
+		MetaMappedSuperclass meta = metaProvider.discoverMeta(TestMappedSuperclassWithPk.class);
 		MetaPrimaryKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);
 		Assert.assertEquals(1, primaryKey.getElements().size());
@@ -41,9 +48,7 @@ public class MetaEntityTest {
 
 	@Test
 	public void testGeneratedPrimaryKey() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		MetaDataObject meta = lookup.getMeta(SequenceEntity.class).asDataObject();
+		MetaDataObject meta = metaProvider.discoverMeta(SequenceEntity.class).asDataObject();
 		MetaPrimaryKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);
 		Assert.assertEquals(1, primaryKey.getElements().size());

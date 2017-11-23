@@ -3,6 +3,7 @@ package io.crnk.jpa.query;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.jpa.model.CollectionAttributesTestEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
 import io.crnk.jpa.model.UuidTestEntity;
@@ -73,6 +74,26 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
+	public void testEqualsInCollectionFilter() {
+		CollectionAttributesTestEntity entity = new CollectionAttributesTestEntity();
+		entity.setId(13L);
+		entity.setLongValues(Arrays.asList(1L, 2L));
+		entity.setStringValues(Arrays.asList("John", "Doe"));
+		em.persist(entity);
+
+		assertEquals((Long) 13L, queryFactory.query(CollectionAttributesTestEntity.class)
+				.addFilter(CollectionAttributesTestEntity.ATTR_stringValues, FilterOperator.EQ, "Doe")
+				.buildExecutor().getUniqueResult(false).getId());
+		assertEquals((Long) 13L, queryFactory.query(CollectionAttributesTestEntity.class)
+				.addFilter(CollectionAttributesTestEntity.ATTR_stringValues, FilterOperator.EQ, "John")
+				.buildExecutor().getUniqueResult(false).getId());
+		assertNull(queryFactory.query(CollectionAttributesTestEntity.class)
+				.addFilter(CollectionAttributesTestEntity.ATTR_stringValues, FilterOperator.EQ, "Jane")
+				.buildExecutor().getUniqueResult(true));
+	}
+
+
+	@Test
 	public void testNotEqualsFilter() {
 		assertEquals(4, builder().addFilter(TestEntity.ATTR_id, FilterOperator.NEQ, 0L).buildExecutor().getResultList().size());
 		assertEquals(4, builder().addFilter(TestEntity.ATTR_id, FilterOperator.NEQ, 1L).buildExecutor().getResultList().size());
@@ -102,6 +123,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals(4, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GT, 0L).buildExecutor().getResultList().size());
 		assertEquals(3, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GT, 1L).buildExecutor().getResultList().size());
 		assertEquals(0, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GT, 4L).buildExecutor().getResultList().size());
+		assertEquals(3, builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.GT, "test1").buildExecutor().getResultList().size());
 	}
 
 	@Test
@@ -109,6 +131,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals(0, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LT, 0L).buildExecutor().getResultList().size());
 		assertEquals(1, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LT, 1L).buildExecutor().getResultList().size());
 		assertEquals(2, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LT, 2L).buildExecutor().getResultList().size());
+		assertEquals(1, builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.LT, "test1").buildExecutor().getResultList().size());
 	}
 
 	@Test
@@ -116,6 +139,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals(5, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GE, 0L).buildExecutor().getResultList().size());
 		assertEquals(4, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GE, 1L).buildExecutor().getResultList().size());
 		assertEquals(3, builder().addFilter(TestEntity.ATTR_id, FilterOperator.GE, 2L).buildExecutor().getResultList().size());
+		assertEquals(4, builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.GE, "test1").buildExecutor().getResultList().size());
 	}
 
 	@Test
@@ -123,6 +147,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals(1, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LE, 0L).buildExecutor().getResultList().size());
 		assertEquals(2, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LE, 1L).buildExecutor().getResultList().size());
 		assertEquals(3, builder().addFilter(TestEntity.ATTR_id, FilterOperator.LE, 2L).buildExecutor().getResultList().size());
+		assertEquals(2, builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.LE, "test1").buildExecutor().getResultList().size());
 	}
 
 	@Test
@@ -179,6 +204,16 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		assertEquals((Long) 2L, builder().addFilter(TestEntity.ATTR_oneRelatedValue + "." + RelatedEntity.ATTR_stringValue, FilterOperator.EQ, "related2").buildExecutor().getUniqueResult(false).getId());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void testThrowExceptionOnNonUnique() {
+		builder().buildExecutor().getUniqueResult(false);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testThrowExceptionOnNonNullableUnique() {
+		builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.EQ, "doesNotExist").buildExecutor().getUniqueResult(false);
+	}
+
 	@Test
 	public void testPrimitiveOrder() {
 		assertEquals(5, builder().addSortBy(Arrays.asList(TestEntity.ATTR_id), Direction.DESC).buildExecutor().getResultList().size());
@@ -198,10 +233,16 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
-	public void testOneRelatedOrder() {
+	public void testOneRelatedEntityOrder() {
 		assertEquals(5, builder().setDefaultJoinType(JoinType.LEFT).addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor().getResultList().size());
 		assertEquals((Long) 0L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.ASC).buildExecutor().getResultList().get(0).getId());
 		assertEquals((Long) 3L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue), Direction.DESC).buildExecutor().getResultList().get(0).getId());
+	}
+
+	@Test
+	public void testOneRelatedAttributeOrder() {
+		assertEquals((Long) 0L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.ASC).buildExecutor().getResultList().get(0).getId());
+		assertEquals((Long) 3L, builder().addSortBy(Arrays.asList(TestEntity.ATTR_oneRelatedValue, RelatedEntity.ATTR_stringValue), Direction.DESC).buildExecutor().getResultList().get(0).getId());
 	}
 
 	@Test

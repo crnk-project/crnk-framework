@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -135,6 +136,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	@Override
 	public void setResponseHeader(String name, String value) {
+		PreconditionUtil.assertFalse("response set, cannot add further headers", hasResponse);
 		response.setHeader(name, value);
 	}
 

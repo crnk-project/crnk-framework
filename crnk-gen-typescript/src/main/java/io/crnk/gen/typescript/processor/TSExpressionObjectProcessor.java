@@ -1,18 +1,31 @@
 package io.crnk.gen.typescript.processor;
 
-import io.crnk.gen.typescript.internal.TypescriptUtils;
-import io.crnk.gen.typescript.model.*;
-import io.crnk.gen.typescript.model.libraries.ExpressionLibrary;
-import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
-import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
-import io.crnk.meta.model.MetaElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import io.crnk.gen.typescript.internal.TypescriptUtils;
+import io.crnk.gen.typescript.model.TSClassType;
+import io.crnk.gen.typescript.model.TSContainerElement;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSEnumType;
+import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSFunction;
+import io.crnk.gen.typescript.model.TSFunctionType;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSParameterizedType;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSSource;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.gen.typescript.model.TSVisitorBase;
+import io.crnk.gen.typescript.model.libraries.CrnkLibrary;
+import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
+import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Computes Type-safe query classes similar to QueryDSL for resource types.
@@ -36,7 +49,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 
 		@Override
 		public void visit(TSInterfaceType interfaceType) {
-			boolean doGenerate = interfaceType.getImplementedInterfaces().contains(NgrxJsonApiLibrary.STORE_RESOURCE);
+			boolean doGenerate = interfaceType.implementsInterface(NgrxJsonApiLibrary.STORE_RESOURCE);
 			if (doGenerate) {
 				generate(interfaceType);
 			}
@@ -54,10 +67,11 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			queryType.setName(name);
 			queryType.setExported(true);
 			queryType.setParent(parent);
-			queryType.setSuperType(new TSParameterizedType(ExpressionLibrary.BEAN_PATH, interfaceType));
+			queryType.setSuperType(new TSParameterizedType(CrnkLibrary.BEAN_PATH, interfaceType));
 			translationMap.put(interfaceType, queryType);
 
-			String metaElementId = interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
+			String metaElementId =
+					interfaceType.getPrivateData(TSMetaDataObjectTransformation.PRIVATE_DATA_META_ELEMENT_ID, String.class);
 			if (metaElementId != null) {
 				TSField metaField = new TSField();
 				metaField.setName("metaId");
@@ -67,8 +81,15 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			}
 
 			if (parent instanceof TSSource) {
-				parent.addElement(queryType);
-			} else {
+
+				TSModule module = TypescriptUtils.getModule(parent, queryType.getName(), -1, false);
+
+				// class must come before module according to Typescript
+				List<TSElement> elements = parent.getElements();
+				int insertIndex = module != null ? elements.indexOf(module) : elements.size();
+				parent.addElement(insertIndex, queryType);
+			}
+			else {
 				TSModule module = (TSModule) parent;
 				TSContainerElement grandParent = (TSContainerElement) module.getParent();
 
@@ -78,44 +99,64 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				queryModule.addElement(queryType);
 			}
 
-			List<TSField> fields = interfaceType.getFields();
+			List<TSField> fields = new ArrayList<>(interfaceType.getFields());
+
+			boolean isResource = interfaceType.implementsInterface(NgrxJsonApiLibrary.STORE_RESOURCE);
+			if (isResource) {
+				TSField idField = new TSField();
+				idField.setName("id");
+				idField.setType(TSPrimitiveType.STRING);
+				fields.add(0, idField);
+
+				TSField typeField = new TSField();
+				typeField.setName("type");
+				typeField.setType(TSPrimitiveType.STRING);
+				fields.add(1, typeField);
+			}
+
 			for (TSField field : fields) {
 				TSField qField = new TSField();
 				qField.setName(field.getName());
-				setupField(interfaceType, qField, field);
-				if (qField.getInitializer() != null) {
-					queryType.addDeclaredMember(qField);
-				}
+				setupField(interfaceType, queryType, qField, field);
 			}
 			return queryType;
 		}
 
-		private void setupField(TSInterfaceType interfaceType, TSField qField, TSField field) {
+		private void setupField(TSInterfaceType interfaceType, TSClassType queryType, TSField qField,
+				TSField field) {
 			TSType fieldType = field.getType();
 			if (fieldType instanceof TSPrimitiveType) {
 				TSPrimitiveType primitiveFieldType = (TSPrimitiveType) fieldType;
 				String primitiveName = TypescriptUtils.firstToUpper(primitiveFieldType.getName());
-				qField.setType(ExpressionLibrary.getExpression(primitiveName));
+				qField.setType(CrnkLibrary.getPrimitiveExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
-			} else if (fieldType instanceof TSEnumType) {
-				qField.setType(ExpressionLibrary.STRING_EXPRESSION);
+				queryType.addDeclaredMember(qField);
+			}
+			else if (fieldType instanceof TSEnumType) {
+				qField.setType(CrnkLibrary.STRING_PATH);
 				qField.setInitializer(setupPrimitiveField("String", qField));
-			} else if (fieldType instanceof TSInterfaceType) {
+				queryType.addDeclaredMember(qField);
+			}
+			else if (fieldType instanceof TSInterfaceType) {
 				setupInterfaceField(qField, field);
-			} else if (isRelationship(fieldType)) {
-				setupRelationshipField(interfaceType, qField, field);
-			} else {
+				queryType.addDeclaredMember(qField);
+			}
+			else if (isRelationship(fieldType)) {
+				setupRelationshipField(interfaceType, queryType, qField, field);
+			}
+			else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}
 
-		private void setupRelationshipField(TSInterfaceType interfaceType, TSField qField, TSField field) {
+		private void setupRelationshipField(TSInterfaceType interfaceType, TSClassType queryType, TSField qField, TSField
+				field) {
 			TSType fieldType = field.getType();
 			TSParameterizedType parameterizedType = (TSParameterizedType) fieldType;
 
 			TSType baseType = parameterizedType.getBaseType();
 			TSType qbaseType = baseType == NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP
-					? ExpressionLibrary.QTYPED_MANY_RESOURCE_RELATIONSHIP : ExpressionLibrary.QTYPED_ONE_RESOURCE_RELATIONSHIP;
+					? CrnkLibrary.QTYPED_MANY_RESOURCE_RELATIONSHIP : CrnkLibrary.QTYPED_ONE_RESOURCE_RELATIONSHIP;
 
 			List<TSType> parameters = parameterizedType.getParameters();
 			if (parameters.size() == 1 && parameters.get(0) instanceof TSInterfaceType) {
@@ -143,12 +184,27 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				initializer.append("(this, \'");
 				initializer.append(qField.getName());
 				initializer.append("\'");
-				//initializer.append(", new " + qElementType.getName() + "(null, 'data')");
 				initializer.append(", " + qElementType.getName());
 				initializer.append(")");
-				qField.setInitializer(initializer.toString());
+
+				String name = qField.getName();
+				String fieldName = "this._" + name;
+				TSFunction getterFunction = new TSFunction();
+				getterFunction.setFunctionType(TSFunctionType.GETTER);
+				getterFunction.setType(new TSParameterizedType(qbaseType, qElementType, elementType));
+				getterFunction.setName(qField.getName());
+				List<String> statements = getterFunction.getStatements();
+				statements.add("if (!" + fieldName + ") {\n" + fieldName + " =\n\t" + initializer.toString() + ";" + "\n}");
+				statements.add("return " + fieldName + ";");
+
 				qField.setType(new TSParameterizedType(qbaseType, qElementType, elementType));
-			} else {
+				qField.setPrivate(true);
+				qField.setName("_" + qField.getName());
+
+				queryType.addDeclaredMember(qField);
+				queryType.addDeclaredMember(getterFunction);
+			}
+			else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}

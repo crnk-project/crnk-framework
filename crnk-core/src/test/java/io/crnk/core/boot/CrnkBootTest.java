@@ -1,14 +1,11 @@
 package io.crnk.core.boot;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.error.ErrorResponse;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -17,6 +14,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
@@ -27,7 +25,6 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
@@ -37,6 +34,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 public class CrnkBootTest {
 
@@ -107,6 +108,15 @@ public class CrnkBootTest {
 	}
 
 	@Test
+	public void getPropertiesProvider() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
+		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.boot();
+		Assert.assertNotNull(boot.getPropertiesProvider());
+	}
+
+	@Test
 	public void setInvalidRepository() {
 		SimpleModule module = new SimpleModule("test");
 		module.addRepository("not a repository");
@@ -170,7 +180,7 @@ public class CrnkBootTest {
 
 		Module module = Mockito.mock(Module.class);
 		DocumentFilter filter = Mockito.mock(DocumentFilter.class);
-		JsonApiExceptionMapper exceptionMapper = Mockito.mock(JsonApiExceptionMapper.class);
+		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(Module.class))).thenReturn(Arrays.asList(module));
 		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(JsonApiExceptionMapper.class)))
@@ -181,6 +191,24 @@ public class CrnkBootTest {
 		Assert.assertTrue(moduleRegistry.getModules().contains(module));
 		Assert.assertTrue(moduleRegistry.getFilters().contains(filter));
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
+	}
+
+	class TestExceptionMapper implements ExceptionMapper<IllegalStateException> {
+
+		@Override
+		public ErrorResponse toErrorResponse(IllegalStateException exception) {
+			return null;
+		}
+
+		@Override
+		public IllegalStateException fromErrorResponse(ErrorResponse errorResponse) {
+			return null;
+		}
+
+		@Override
+		public boolean accepts(ErrorResponse errorResponse) {
+			return false;
+		}
 	}
 
 	@Test
@@ -237,10 +265,6 @@ public class CrnkBootTest {
 	@Test
 	public void boot() {
 		CrnkBoot boot = new CrnkBoot();
-		ObjectMapper objectMapper = boot.getObjectMapper();
-		ResourceFieldNameTransformer resourceFieldNameTransformer = new ResourceFieldNameTransformer(
-				objectMapper.getSerializationConfig());
-
 		boot.setDefaultServiceUrlProvider(new ServiceUrlProvider() {
 
 			@Override
@@ -248,8 +272,7 @@ public class CrnkBootTest {
 				return "http://127.0.0.1";
 			}
 		});
-		boot.setResourceFieldNameTransformer(resourceFieldNameTransformer);
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.addModule(new SimpleModule("test"));
 		boot.boot();
 
@@ -260,7 +283,7 @@ public class CrnkBootTest {
 		Assert.assertNotEquals(0, taskEntry.getRelationshipEntries().size());
 		ResourceRepositoryAdapter<?, ?> repositoryAdapter = taskEntry.getResourceRepository(null);
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
-		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(new QueryParams()));
+		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(), new QueryParams(), boot.getModuleRegistry()));
 		Assert.assertNotNull(response);
 
 		Assert.assertNotNull(requestDispatcher);
@@ -271,7 +294,7 @@ public class CrnkBootTest {
 		Assert.assertNotNull(boot.getExceptionMapperRegistry());
 
 		List<Module> modules = boot.getModuleRegistry().getModules();
-		Assert.assertEquals(2, modules.size());
+		Assert.assertEquals(4, modules.size());
 		boot.setDefaultPageLimit(20L);
 		boot.setMaxPageLimit(100L);
 	}

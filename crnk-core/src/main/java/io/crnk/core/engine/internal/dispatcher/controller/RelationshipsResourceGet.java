@@ -40,9 +40,7 @@ public class RelationshipsResourceGet extends ResourceIncludeField {
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
 		String elementName = jsonPath.getElementName();
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
-		if (relationshipField == null) {
-			throw new ResourceFieldNotFoundException(elementName);
-		}
+		verifyFieldNotNull(relationshipField, elementName);
 
 		boolean isCollection = Iterable.class.isAssignableFrom(relationshipField.getType());
 

@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
@@ -20,12 +19,20 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
+import java.util.List;
 import java.util.Set;
 
 public class ResourcePost extends ResourceUpsert {
 
-	public ResourcePost(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, ObjectMapper objectMapper, DocumentMapper documentMapper) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+	public ResourcePost(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider,
+						TypeParser typeParser, ObjectMapper objectMapper, DocumentMapper documentMapper,
+						List<ResourceModificationFilter> modificationFilters) {
+		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
+	}
+
+	@Override
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.POST;
 	}
 
 	/**
@@ -48,6 +55,7 @@ public class ResourcePost extends ResourceUpsert {
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
+		verifyTypes(HttpMethod.POST, endpointRegistryEntry, bodyRegistryEntry);
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
 
@@ -59,7 +67,7 @@ public class ResourcePost extends ResourceUpsert {
 			Object newResource = newResource(bodyRegistryEntry.getResourceInformation(), resourceBody);
 			setId(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
 			setAttributes(resourceBody, newResource, bodyRegistryEntry.getResourceInformation());
-			setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
+			setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
 
 			apiResponse = resourceRepository.create(newResource, queryAdapter);
 		}
@@ -72,9 +80,4 @@ public class ResourcePost extends ResourceUpsert {
 		return new Response(responseDocument, HttpStatus.CREATED_201);
 	}
 
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// allow dynamic field where field == null
-		return field == null || field.getAccess().isPostable();
-	}
 }

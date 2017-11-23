@@ -31,7 +31,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 	public DefaultRegistryEntryBuilder(ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
-		this.informationBuilder = new DefaultInformationBuilder(moduleRegistry.getTypeParser());
+		this.informationBuilder = moduleRegistry.getInformationBuilder();
 	}
 
 
@@ -109,6 +109,10 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 	@Override
 	public RegistryEntry build() {
+		ResourceInformation resourceInformation = resource.build();
+
+		resourceRepository.information().setResourceInformation(resourceInformation);
+
 		ResourceRepositoryInformation repositoryInformation = resourceRepository.information().build();
 
 		final Object decoratedResourceRepository = moduleRegistry.decorateRepository(resourceRepository.instance);
@@ -143,7 +147,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			relationshipEntries.add(relationshipEntry);
 		}
 
-		ResourceInformation resourceInformation = resource.build();
 		RegistryEntry entry = new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
 		entry.initialize(moduleRegistry);
 		return entry;

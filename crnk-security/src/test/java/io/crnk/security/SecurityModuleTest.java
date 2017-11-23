@@ -1,12 +1,12 @@
 package io.crnk.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
+import io.crnk.core.engine.internal.CoreModule;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.module.CoreModule;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.security.SecurityConfig.Builder;
@@ -56,10 +56,11 @@ public class SecurityModuleTest {
 		Assert.assertSame(config, securityModule.getConfig());
 
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, null));
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(securityModule);
 		moduleRegistry.addModule(appModule);
-		moduleRegistry.addModule(new CoreModule(new ResourceFieldNameTransformer()));
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
+		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.init(new ObjectMapper());
 	}
 

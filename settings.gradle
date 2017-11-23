@@ -3,15 +3,19 @@ include ':crnk-home'
 include ':crnk-test'
 include ':crnk-rs'
 include ':crnk-client'
+include ':crnk-client-angular-ngrx'
 include ':crnk-meta'
 include ':crnk-jpa'
 include ':crnk-validation'
 
 include ':crnk-servlet'
 include ':crnk-cdi'
+include ':crnk-guice'
 include ':crnk-spring'
 include ':crnk-brave'
+include ':crnk-monitor-brave4'
 include ':crnk-security'
+include ':crnk-activiti'
 
 include ':crnk-operations'
 include ':crnk-gen-typescript'
@@ -24,8 +28,6 @@ include ':crnk-examples:spring-boot-example'
 
 include ':crnk-ui'
 include ':crnk-documentation'
-
-gradle.startParameter.showStacktrace = org.gradle.api.logging.configuration.ShowStacktrace.ALWAYS
 
 gradle.beforeProject { Project project ->
 	project.with {

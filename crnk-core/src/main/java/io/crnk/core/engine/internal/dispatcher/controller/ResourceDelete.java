@@ -2,6 +2,7 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
@@ -13,13 +14,17 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ResourceDelete extends BaseController {
 
 	private final ResourceRegistry resourceRegistry;
 
-	public ResourceDelete(ResourceRegistry resourceRegistry) {
+	private final List<ResourceModificationFilter> modificationFilters;
+
+	public ResourceDelete(ResourceRegistry resourceRegistry, List<ResourceModificationFilter> modificationFilters) {
 		this.resourceRegistry = resourceRegistry;
+		this.modificationFilters = modificationFilters;
 	}
 
 	/**

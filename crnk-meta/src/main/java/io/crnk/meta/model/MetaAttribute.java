@@ -1,5 +1,14 @@
 package io.crnk.meta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -7,18 +16,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.SerializeType;
-
 @JsonApiResource(type = "meta/attribute")
 public class MetaAttribute extends MetaElement {
 
-	@JsonApiRelation(serialize = SerializeType.LAZY)
+	@JsonApiRelation(serialize = SerializeType.LAZY, lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaType type;
 
 	private boolean association;
@@ -53,6 +54,8 @@ public class MetaAttribute extends MetaElement {
 	private boolean nullable;
 
 	private boolean cascaded;
+
+	private boolean readable;
 
 	@JsonApiRelation(serialize = SerializeType.LAZY)
 	private MetaAttribute oppositeAttribute;
@@ -253,6 +256,14 @@ public class MetaAttribute extends MetaElement {
 
 	public void setUpdatable(boolean updatable) {
 		this.updatable = updatable;
+	}
+
+	public boolean isReadable() {
+		return readable;
+	}
+
+	public void setReadable(final boolean readable) {
+		this.readable = readable;
 	}
 
 	/**

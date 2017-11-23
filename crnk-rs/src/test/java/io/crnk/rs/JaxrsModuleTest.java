@@ -1,22 +1,23 @@
 package io.crnk.rs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.AnnotationResourceInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
+import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.rs.internal.JaxrsModule;
-import io.crnk.rs.internal.JaxrsModule.JaxrsResourceRepositoryInformationBuilder;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,23 +30,25 @@ import java.util.Map;
 
 public class JaxrsModuleTest {
 
-	private JaxrsResourceRepositoryInformationBuilder builder;
+	private JaxrsModule.JaxrsResourceRepositoryInformationProvider builder;
 
-	private RepositoryInformationBuilderContext context;
+	private RepositoryInformationProviderContext context;
 
 	@Before
 	public void setup() {
 		final ModuleRegistry moduleRegistry = new ModuleRegistry();
-		builder = new JaxrsResourceRepositoryInformationBuilder();
-		final ResourceInformationBuilder resourceInformationBuilder = new AnnotationResourceInformationBuilder(
-				new ResourceFieldNameTransformer());
-		resourceInformationBuilder
-				.init(new DefaultResourceInformationBuilderContext(resourceInformationBuilder, moduleRegistry.getTypeParser()));
-		context = new RepositoryInformationBuilderContext() {
+		builder = new JaxrsModule.JaxrsResourceRepositoryInformationProvider();
+		final ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
+				moduleRegistry.getPropertiesProvider(),
+				new DefaultResourceFieldInformationProvider(),
+				new JacksonResourceFieldInformationProvider());
+		resourceInformationProvider
+				.init(new DefaultResourceInformationProviderContext(resourceInformationProvider, new DefaultInformationBuilder(moduleRegistry.getTypeParser()), moduleRegistry.getTypeParser(), new ObjectMapper()));
+		context = new RepositoryInformationProviderContext() {
 
 			@Override
-			public ResourceInformationBuilder getResourceInformationBuilder() {
-				return resourceInformationBuilder;
+			public ResourceInformationProvider getResourceInformationBuilder() {
+				return resourceInformationProvider;
 			}
 
 			@Override

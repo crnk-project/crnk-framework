@@ -10,7 +10,7 @@ dependencies {
 	compile project(':crnk-spring')
 	compile project(':crnk-jpa')
 	compile project(':crnk-validation')
-	compile project(':crnk-brave')
+	compile project(':crnk-monitor-brave4')
 	compile project(':crnk-home')
 	compile project(':crnk-ui')
 
@@ -21,7 +21,7 @@ dependencies {
 	compile 'org.hibernate:hibernate-core:5.1.0.Final'
 	compile 'org.hibernate:hibernate-entitymanager:5.1.0.Final'
 	compile 'com.h2database:h2:1.4.195'
-	compile 'io.zipkin.brave:brave-apache-http-interceptors:3.14.1'
+	compile 'io.zipkin.brave:brave-instrumentation-okhttp3:4.9.1'
 	compile 'com.squareup.okhttp3:okhttp:3.4.1'
 	compile 'com.jayway.restassured:rest-assured:2.9.0'
 	compile 'com.jayway.restassured:json-schema-validator:2.9.0'

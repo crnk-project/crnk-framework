@@ -1,17 +1,19 @@
 package io.crnk.test.mock.repository;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
-import io.crnk.rs.type.JsonApiMediaType;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -74,7 +76,7 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 
 	@GET
 	@Path("nonInterfaceMethodWithNullResponseJsonApi")
-	@Produces(JsonApiMediaType.APPLICATION_JSON_API)
+	@Produces(HttpHeaders.JSONAPI_CONTENT_TYPE)
 	public String nonInterfaceMethodWithNullResponseJsonApi() {
 		return null;
 	}
@@ -82,10 +84,26 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	@Override
 	public ScheduleList findAll(QuerySpec querySpec) {
 		ScheduleList list = new ScheduleList();
-		list.addAll(querySpec.apply(schedules.values()));
+		list.addAll(querySpec.apply(copyResources(schedules.values())));
 		list.setLinks(new ScheduleListLinks());
 		list.setMeta(new ScheduleListMeta());
 		return list;
+	}
+
+	private List<Schedule> copyResources(Collection<Schedule> values) {
+		ArrayList<Schedule> copiedList = new ArrayList<>();
+		for (Schedule schedule : values) {
+			Schedule copy = new Schedule();
+			copy.setId(schedule.getId());
+			copy.setName(schedule.getName());
+			copy.setTasks(schedule.getTasks());
+			copy.setDelayed(schedule.isDelayed());
+			copy.setLazyTask(schedule.getLazyTask());
+			copy.setTasksList(schedule.getTasksList());
+			copy.setTask(schedule.getTask());
+			copiedList.add(copy);
+		}
+		return copiedList;
 	}
 
 	@Override

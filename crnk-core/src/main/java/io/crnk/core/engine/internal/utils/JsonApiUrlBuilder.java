@@ -60,9 +60,6 @@ public class JsonApiUrlBuilder {
 
 	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
 		String url = resourceRegistry.getResourceUrl(resourceInformation);
-		if (!url.endsWith("/")) {
-			url += "/";
-		}
 
 		if (id instanceof Collection) {
 			Collection<?> ids = (Collection<?>) id;
@@ -71,14 +68,15 @@ public class JsonApiUrlBuilder {
 				String strIdElem = resourceInformation.toIdString(idElem);
 				strIds.add(strIdElem);
 			}
-			url += StringUtils.join(",", strIds) + "/";
+			url += "/";
+			url += StringUtils.join(",", strIds);
 		}
 		else if (id != null) {
 			String strId = resourceInformation.toIdString(id);
-			url += strId + "/";
+			url += "/" + strId;
 		}
 		if (relationshipName != null) {
-			url += "relationships/" + relationshipName + "/";
+			url += "/relationships/" + relationshipName;
 		}
 
 		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);

@@ -22,10 +22,6 @@ public class TSEnumType extends TSTypeBase implements TSExportedElement {
 		return literals;
 	}
 
-	public void setLiterals(List<TSEnumLiteral> literal) {
-		this.literals = literal;
-	}
-
 	@Override
 	public void accept(TSVisitor visitor) {
 		visitor.visit(this);

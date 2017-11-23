@@ -90,8 +90,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the default offset if no pagination is used.
-	 *
-	 * @param defaultOffset
 	 */
 	public void setDefaultOffset(long defaultOffset) {
 		this.defaultOffset = defaultOffset;
@@ -103,8 +101,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the default limit if no pagination is used.
-	 *
-	 * @param defaultLimit
 	 */
 	public void setDefaultLimit(Long defaultLimit) {
 		this.defaultLimit = defaultLimit;
@@ -116,8 +112,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	/**
 	 * Sets the maximum page limit.
-	 *
-	 * @param maxPageLimit
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
 		this.maxPageLimit = maxPageLimit;
@@ -152,14 +146,17 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
 		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation.getResourceClass());
-		setupDefaults(rootQuerySpec);
+		setupDefaults(rootQuerySpec, true);
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
 		for (Parameter parameter : parameters) {
-			QuerySpec querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
-			if (querySpec == null) {
-				querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
-				setupDefaults(querySpec);
+			QuerySpec querySpec = rootQuerySpec;
+			if (parameter.resourceInformation != null) {
+				querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
+				if (querySpec == null) {
+					querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
+					setupDefaults(querySpec, false);
+				}
 			}
 			switch (parameter.paramType) {
 				case sort:
@@ -186,9 +183,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		return rootQuerySpec;
 	}
 
-	private void setupDefaults(QuerySpec querySpec) {
-		querySpec.setOffset(defaultOffset);
-		querySpec.setLimit(defaultLimit);
+	protected void setupDefaults(QuerySpec querySpec, boolean root) {
+		if (root) {
+			querySpec.setOffset(defaultOffset);
+			querySpec.setLimit(defaultLimit);
+		}
 	}
 
 	private void deserializeIncludes(QuerySpec querySpec, Parameter parameter) {
@@ -216,14 +215,18 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	protected void deserializePage(QuerySpec querySpec, Parameter parameter) {
 		if (OFFSET_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
 			querySpec.setOffset(parameter.getLongValue());
-		} else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
+		}
+		else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
 			Long limit = parameter.getLongValue();
 			if (getMaxPageLimit() != null && limit != null && limit > getMaxPageLimit()) {
-				String error = String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER, limit, getMaxPageLimit());
+				String error =
+						String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER,
+								limit, getMaxPageLimit());
 				throw new BadRequestException(error);
 			}
 			querySpec.setLimit(limit);
-		} else {
+		}
+		else {
 			throw new ParametersDeserializationException(parameter.toString());
 		}
 	}
@@ -236,11 +239,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				@SuppressWarnings({"unchecked", "rawtypes"})
 				Object value = typeParser.parse(stringValue, (Class) attributeType);
 				typedValues.add(value);
-			} catch (ParserException e) {
+			}
+			catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				} else {
+				}
+				else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -257,10 +262,12 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				current = getAttributeType(current, propertyName);
 			}
 			return current;
-		} catch (PropertyException e) {
+		}
+		catch (PropertyException e) {
 			if (allowUnknownAttributes) {
 				return String.class;
-			} else {
+			}
+			else {
 				throw e;
 			}
 		}
@@ -293,7 +300,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	}
 
 	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
-		throw new IllegalStateException(parameter.paramType.toString());
+		throw new ParametersDeserializationException(parameter.paramType.toString());
 	}
 
 	private List<Parameter> parseParameters(Map<String, Set<String>> params, ResourceInformation rootResourceInformation) {
@@ -308,26 +315,41 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	private Parameter parseParameter(String parameterName, Set<String> values, ResourceInformation rootResourceInformation) {
 		int typeSep = parameterName.indexOf('[');
 		String strParamType = typeSep != -1 ? parameterName.substring(0, typeSep) : parameterName;
-		RestrictedQueryParamsMembers paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
+
+		RestrictedQueryParamsMembers paramType;
+		try {
+			paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
+		}
+		catch (IllegalArgumentException e) {
+			paramType = RestrictedQueryParamsMembers.unknown;
+		}
 
 		List<String> elements = parseParameterNameArguments(parameterName, typeSep);
 
 		Parameter param = new Parameter();
-		param.fullKey = parameterName;
+		param.name = parameterName;
 		param.paramType = paramType;
+		param.strParamType = strParamType;
 		param.values = values;
 
 		if (paramType == RestrictedQueryParamsMembers.filter && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.pageParameter = elements.get(0);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 			param.pageParameter = elements.get(1);
-		} else if (elements.size() == 1) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.unknown) {
+			param.resourceInformation = null;
+		}
+		else if (elements.size() == 1) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		return param;
@@ -351,31 +373,36 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		parseFilterOperator(param, elements);
 
 		if (elements.isEmpty()) {
-			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected "
+			throw new ParametersDeserializationException("failed to parse " + param.name + ", expected "
 					+ "([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() > 2) {
-			throw new ParametersDeserializationException("failed to parse " + param.fullKey + ", expected ([resourceType])[attr1.attr2]([operator])");
+			throw new ParametersDeserializationException(
+					"failed to parse " + param.name + ", expected ([resourceType])[attr1.attr2]([operator])");
 		}
 		if (enforceDotPathSeparator && elements.size() == 2) {
-			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
+			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			param.attributePath = Arrays.asList(elements.get(1).split("\\."));
-		} else if (enforceDotPathSeparator && elements.size() == 1) {
+		}
+		else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.attributePath = Arrays.asList(elements.get(0).split("\\."));
-		} else {
+		}
+		else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
-	private void legacyParseFilterParameterName(Parameter param, List<String> elements, ResourceInformation rootResourceInformation) {
+	private void legacyParseFilterParameterName(Parameter param, List<String> elements,
+			ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
-			param.resourceInformation = getResourceInformation(elements.get(0), param.fullKey);
+			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			elements.remove(0);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		param.attributePath = new ArrayList<>();
@@ -389,7 +416,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		param.operator = findOperator(lastElement);
 		if (param.operator != null) {
 			elements.remove(elements.size() - 1);
-		} else {
+		}
+		else {
 			param.operator = defaultOperator;
 		}
 	}
@@ -430,34 +458,65 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	public class Parameter {
 
-		String pageParameter;
+		private String pageParameter;
 
-		String fullKey;
+		private String name;
 
-		RestrictedQueryParamsMembers paramType;
+		private RestrictedQueryParamsMembers paramType;
 
-		ResourceInformation resourceInformation;
+		private String strParamType;
 
-		FilterOperator operator;
+		private ResourceInformation resourceInformation;
 
-		List<String> attributePath;
+		private FilterOperator operator;
 
-		Set<String> values;
+		private List<String> attributePath;
 
-		public Long getLongValue() {
+		private Set<String> values;
+
+		private Long getLongValue() {
 			if (values.size() != 1) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
 			try {
 				return Long.parseLong(values.iterator().next());
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
 		}
 
 		@Override
 		public String toString() {
-			return fullKey + "=" + values;
+			return name + "=" + values;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public RestrictedQueryParamsMembers getParamType() {
+			return paramType;
+		}
+
+		public String getStrParamType() {
+			return strParamType;
+		}
+
+		public ResourceInformation getResourceInformation() {
+			return resourceInformation;
+		}
+
+		public FilterOperator getOperator() {
+			return operator;
+		}
+
+		public List<String> getAttributePath() {
+			return attributePath;
+		}
+
+		public Set<String> getValues() {
+			return values;
 		}
 	}
 }

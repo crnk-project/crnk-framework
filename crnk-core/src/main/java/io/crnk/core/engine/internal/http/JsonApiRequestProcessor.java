@@ -1,9 +1,13 @@
 package io.crnk.core.engine.internal.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -14,6 +18,7 @@ import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +72,14 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 				Document document = null;
 				if (requestBody != null && requestBody.length > 0) {
 					ObjectMapper objectMapper = moduleContext.getObjectMapper();
-					document = objectMapper.readerFor(Document.class).readValue(requestBody);
+					try {
+						document = objectMapper.readerFor(Document.class).readValue(requestBody);
+					} catch (JsonProcessingException e ) {
+						final String message = "Json Parsing failed";
+						setResponse(requestContext, buildBadRequestResponse(message, e.getMessage()));
+						LOGGER.error(message, e);
+						return;
+					}
 				}
 
 				RepositoryMethodParameterProvider parameterProvider = requestContext.getRequestParameterProvider();
@@ -80,14 +92,24 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 		}
 	}
 
+	private Response buildBadRequestResponse(final String message, final String detail) {
+		Document responseDocument = new Document();
+		responseDocument.setErrors(Lists.newArrayList(ErrorData.builder()
+				.setStatus(String.valueOf(400))
+				.setTitle(message)
+				.setDetail(detail)
+				.build()));
+		return new Response(responseDocument, 400);
+	}
+
 	private void setResponse(HttpRequestContext requestContext, Response crnkResponse)
 			throws IOException {
 		if (crnkResponse != null) {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			String responseBody = objectMapper.writeValueAsString(crnkResponse.getDocument());
 
-			requestContext.setResponse(crnkResponse.getHttpStatus(), responseBody);
 			requestContext.setResponseHeader("Content-Type", HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
+			requestContext.setResponse(crnkResponse.getHttpStatus(), responseBody);
 		}
 	}
 

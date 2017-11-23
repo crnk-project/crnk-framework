@@ -30,33 +30,6 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onGenericClassShouldReturnFirstParameter() throws Exception {
-		// WHEN
-		Class<?> clazz = ClassUtils
-				.getResourceClass(SampleGenericClass.class.getDeclaredField("strings").getGenericType(), List.class);
-
-		// THEN
-		assertThat(clazz).isEqualTo(String.class);
-	}
-
-	@Test
-	public void onGenericWildcardClassShouldThrowException() throws Exception {
-		// THEN
-		expectedException.expect(RuntimeException.class);
-
-		// WHEN
-		ClassUtils.getResourceClass(SampleGenericClass.class.getDeclaredField("stringsWildcard").getGenericType(),
-				List.class);
-	}
-
-	private static class SampleGenericClass {
-
-		private List<String> strings;
-
-		private List<? extends String> stringsWildcard;
-	}
-
-	@Test
 	public void stringMustExist() {
 		Assert.assertTrue(ClassUtils.existsClass(String.class.getName()));
 	}

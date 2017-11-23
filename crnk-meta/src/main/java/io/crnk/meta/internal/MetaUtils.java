@@ -1,5 +1,11 @@
 package io.crnk.meta.internal;
 
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaFilter;
+
+import java.util.List;
+
 public class MetaUtils {
 
 	private MetaUtils() {
@@ -11,5 +17,17 @@ public class MetaUtils {
 			return Character.toLowerCase(value.charAt(0)) + value.substring(1);
 		}
 		return value;
+	}
+
+
+	public static MetaElement adjustForRequest(MetaLookup lookup, MetaElement element) {
+		List<MetaFilter> filters = lookup.getFilters();
+		for (MetaFilter filter : filters) {
+			element = filter.adjustForRequest(element);
+			if (element == null) {
+				break;
+			}
+		}
+		return element;
 	}
 }

@@ -3,14 +3,16 @@ package io.crnk.core.module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilderContext;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldNameTransformer;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator.DecoratedScheduleRepository;
@@ -18,6 +20,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
@@ -37,8 +40,8 @@ import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import io.crnk.legacy.registry.DefaultResourceInformationBuilderContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,20 +64,95 @@ public class ModuleRegistryTest {
 	@Before
 	public void setup() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider("http://localhost"));
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 
 		testModule = new TestModule();
-		moduleRegistry.addModule(new CoreModule("io.crnk.core.module.mock", new ResourceFieldNameTransformer()));
 		moduleRegistry.addModule(testModule);
+		moduleRegistry.addModule(new CoreModule());
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 		moduleRegistry.init(new ObjectMapper());
 
 		Assert.assertEquals(resourceRegistry, moduleRegistry.getResourceRegistry());
 	}
 
+	interface PrioDocumentFilter extends DocumentFilter, Prioritizable {
+
+	}
+
+	@Test
+	public void checkDocumentFilterPriority() {
+		PrioDocumentFilter filter1 = Mockito.mock(PrioDocumentFilter.class);
+		PrioDocumentFilter filter2 = Mockito.mock(PrioDocumentFilter.class);
+		Mockito.when(filter1.getPriority()).thenReturn(2);
+		Mockito.when(filter2.getPriority()).thenReturn(1);
+
+		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		SimpleModule module = new SimpleModule("test");
+		module.addFilter(filter1);
+		module.addFilter(filter2);
+		moduleRegistry.addModule(module);
+		moduleRegistry.init(new ObjectMapper());
+
+		List<DocumentFilter> filters = moduleRegistry.getFilters();
+		Assert.assertSame(filter2, filters.get(0));
+		Assert.assertSame(filter1, filters.get(1));
+	}
+
+
+	interface PrioResourceModificationFilter extends ResourceModificationFilter, Prioritizable {
+
+	}
+
+
+	@Test
+	public void checkResourceModificationFilterPriority() {
+		PrioResourceModificationFilter filter1 = Mockito.mock(PrioResourceModificationFilter.class);
+		PrioResourceModificationFilter filter2 = Mockito.mock(PrioResourceModificationFilter.class);
+		Mockito.when(filter1.getPriority()).thenReturn(2);
+		Mockito.when(filter2.getPriority()).thenReturn(1);
+
+		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		SimpleModule module = new SimpleModule("test");
+		module.addResourceModificationFilter(filter1);
+		module.addResourceModificationFilter(filter2);
+		moduleRegistry.addModule(module);
+		moduleRegistry.init(new ObjectMapper());
+
+		List<ResourceModificationFilter> filters = moduleRegistry.getResourceModificationFilters();
+		Assert.assertSame(filter2, filters.get(0));
+		Assert.assertSame(filter1, filters.get(1));
+	}
+
+	interface PrioRepositoryFilter extends RepositoryFilter, Prioritizable {
+
+	}
+
+
+	@Test
+	public void checkRepositoryFilterPriority() {
+		PrioRepositoryFilter filter1 = Mockito.mock(PrioRepositoryFilter.class);
+		PrioRepositoryFilter filter2 = Mockito.mock(PrioRepositoryFilter.class);
+		Mockito.when(filter1.getPriority()).thenReturn(2);
+		Mockito.when(filter2.getPriority()).thenReturn(1);
+
+		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		SimpleModule module = new SimpleModule("test");
+		module.addRepositoryFilter(filter1);
+		module.addRepositoryFilter(filter2);
+		moduleRegistry.addModule(module);
+		moduleRegistry.init(new ObjectMapper());
+
+		List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
+		Assert.assertSame(filter2, filters.get(0));
+		Assert.assertSame(filter1, filters.get(1));
+	}
+
+
 	@Test
 	public void getModules() {
-		Assert.assertEquals(2, moduleRegistry.getModules().size());
+		Assert.assertEquals(3, moduleRegistry.getModules().size());
 	}
 
 	@Test
@@ -96,8 +174,9 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void repositoryInformationBuilderAccept() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 		Assert.assertFalse(builder.accept("no resource"));
+		Assert.assertFalse(builder.accept(String.class));
 		Assert.assertTrue(builder.accept(TaskRepository.class));
 		Assert.assertTrue(builder.accept(ProjectRepository.class));
 		Assert.assertTrue(builder.accept(TaskToProjectRepository.class));
@@ -105,9 +184,15 @@ public class ModuleRegistryTest {
 		Assert.assertTrue(builder.accept(new TaskToProjectRepository()));
 	}
 
+	@Test(expected = UnsupportedOperationException.class)
+	public void buildWithInvalidRepositoryClass() {
+		RepositoryInformationProviderContext context = Mockito.mock(RepositoryInformationProviderContext.class);
+		moduleRegistry.getRepositoryInformationBuilder().build(String.class, context);
+	}
+
 	@Test
 	public void buildResourceRepositoryInformationFromClass() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(TaskRepository.class, newRepositoryInformationBuilderContext());
@@ -117,7 +202,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildResourceRepositoryInformationFromInstance() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		ResourceRepositoryInformation info =
 				(ResourceRepositoryInformation) builder.build(new TaskRepository(), newRepositoryInformationBuilderContext());
@@ -127,7 +212,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildRelationshipRepositoryInformationFromClass() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(TaskToProjectRepository.class, newRepositoryInformationBuilderContext());
@@ -137,7 +222,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void buildRelationshipRepositoryInformationFromInstance() {
-		RepositoryInformationBuilder builder = moduleRegistry.getRepositoryInformationBuilder();
+		RepositoryInformationProvider builder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RelationshipRepositoryInformation info = (RelationshipRepositoryInformation) builder
 				.build(new TaskToProjectRepository(), newRepositoryInformationBuilderContext());
@@ -145,11 +230,11 @@ public class ModuleRegistryTest {
 		Assert.assertEquals("projects", info.getTargetResourceType());
 	}
 
-	private RepositoryInformationBuilderContext newRepositoryInformationBuilderContext() {
-		return new RepositoryInformationBuilderContext() {
+	private RepositoryInformationProviderContext newRepositoryInformationBuilderContext() {
+		return new RepositoryInformationProviderContext() {
 
 			@Override
-			public ResourceInformationBuilder getResourceInformationBuilder() {
+			public ResourceInformationProvider getResourceInformationBuilder() {
 				return moduleRegistry.getResourceInformationBuilder();
 			}
 
@@ -228,46 +313,45 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void testInformationBuilder() throws Exception {
-		ResourceInformationBuilder informationBuilder = moduleRegistry.getResourceInformationBuilder();
+		ResourceInformationProvider informationProvider = moduleRegistry.getResourceInformationBuilder();
 
-		Assert.assertTrue(informationBuilder.accept(ComplexPojo.class));
-		Assert.assertTrue(informationBuilder.accept(Document.class));
-		Assert.assertTrue(informationBuilder.accept(FancyProject.class));
-		Assert.assertTrue(informationBuilder.accept(Project.class));
-		Assert.assertTrue(informationBuilder.accept(Task.class));
-		Assert.assertTrue(informationBuilder.accept(Thing.class));
-		Assert.assertTrue(informationBuilder.accept(User.class));
-		Assert.assertTrue(informationBuilder.accept(TestResource.class));
+		Assert.assertTrue(informationProvider.accept(ComplexPojo.class));
+		Assert.assertTrue(informationProvider.accept(Document.class));
+		Assert.assertTrue(informationProvider.accept(FancyProject.class));
+		Assert.assertTrue(informationProvider.accept(Project.class));
+		Assert.assertTrue(informationProvider.accept(Task.class));
+		Assert.assertTrue(informationProvider.accept(Thing.class));
+		Assert.assertTrue(informationProvider.accept(User.class));
+		Assert.assertTrue(informationProvider.accept(TestResource.class));
 
-		Assert.assertFalse(informationBuilder.accept(TestRepository.class));
-		Assert.assertFalse(informationBuilder.accept(DocumentRepository.class));
-		Assert.assertFalse(informationBuilder.accept(PojoRepository.class));
-		Assert.assertFalse(informationBuilder.accept(ProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(ResourceWithoutRepositoryToProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(TaskToProjectRepository.class));
-		Assert.assertFalse(informationBuilder.accept(TaskWithLookupRepository.class));
-		Assert.assertFalse(informationBuilder.accept(UserRepository.class));
-		Assert.assertFalse(informationBuilder.accept(UserToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TestRepository.class));
+		Assert.assertFalse(informationProvider.accept(DocumentRepository.class));
+		Assert.assertFalse(informationProvider.accept(PojoRepository.class));
+		Assert.assertFalse(informationProvider.accept(ProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(ResourceWithoutRepositoryToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TaskToProjectRepository.class));
+		Assert.assertFalse(informationProvider.accept(TaskWithLookupRepository.class));
+		Assert.assertFalse(informationProvider.accept(UserRepository.class));
+		Assert.assertFalse(informationProvider.accept(UserToProjectRepository.class));
 
-		Assert.assertFalse(informationBuilder.accept(Object.class));
-		Assert.assertFalse(informationBuilder.accept(String.class));
+		Assert.assertFalse(informationProvider.accept(Object.class));
+		Assert.assertFalse(informationProvider.accept(String.class));
 
 		try {
-			informationBuilder.build(Object.class);
+			informationProvider.build(Object.class);
 			Assert.fail();
 		} catch (UnsupportedOperationException e) {
 			// ok
 		}
 
-		DefaultResourceInformationBuilderContext context =
-				new DefaultResourceInformationBuilderContext(informationBuilder, moduleRegistry.getTypeParser());
-
-		ResourceInformation userInfo = informationBuilder.build(User.class);
+		ResourceInformation userInfo = informationProvider.build(User.class);
 		Assert.assertEquals("id", userInfo.getIdField().getUnderlyingName());
 
-		ResourceInformation testInfo = informationBuilder.build(TestResource.class);
+		ResourceInformation testInfo = informationProvider.build(TestResource.class);
 		Assert.assertEquals("id", testInfo.getIdField().getUnderlyingName());
-		Assert.assertEquals("id", testInfo.getIdField().getJsonName());
+
+		// setup by TestResourceInformationProvider
+		Assert.assertEquals("testId", testInfo.getIdField().getJsonName());
 	}
 
 	@Test
@@ -277,10 +361,6 @@ public class ModuleRegistryTest {
 		Assert.assertFalse(resourceLookup.getResourceClasses().contains(Object.class));
 		Assert.assertFalse(resourceLookup.getResourceClasses().contains(String.class));
 		Assert.assertTrue(resourceLookup.getResourceClasses().contains(TestResource.class));
-
-		Assert.assertFalse(resourceLookup.getResourceRepositoryClasses().contains(Object.class));
-		Assert.assertFalse(resourceLookup.getResourceRepositoryClasses().contains(String.class));
-		Assert.assertTrue(resourceLookup.getResourceRepositoryClasses().contains(TestRepository.class));
 	}
 
 	@Test
@@ -380,7 +460,7 @@ public class ModuleRegistryTest {
 		public void setupModule(ModuleContext context) {
 			this.context = context;
 			context.addResourceLookup(new TestResourceLookup());
-			context.addResourceInformationBuilder(new TestResourceInformationBuilder());
+			context.addResourceInformationBuilder(new TestResourceInformationProvider());
 
 			context.addJacksonModule(new com.fasterxml.jackson.databind.module.SimpleModule() {
 

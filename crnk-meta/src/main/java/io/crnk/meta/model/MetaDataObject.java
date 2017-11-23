@@ -1,21 +1,14 @@
 package io.crnk.meta.model;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 @JsonApiResource(type = "meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
@@ -36,33 +29,41 @@ public abstract class MetaDataObject extends MetaType {
 		}
 	};
 
-	@JsonApiToMany(opposite = "superType")
+	@JsonApiRelation(opposite = "superType", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private Set<MetaDataObject> subTypes = new HashSet<>();
 
-	@JsonApiRelation(serialize = SerializeType.LAZY, opposite = "subTypes")
+	@JsonApiRelation(serialize = SerializeType.LAZY, opposite = "subTypes", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaDataObject superType;
 
 	@JsonIgnore
 	private Map<String, MetaAttribute> attrMap = null;
 
-	@JsonApiToMany
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private List<MetaAttribute> attributes = null;
 
-	@JsonApiToMany
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private List<MetaAttribute> declaredAttributes = null;
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	private List<MetaDataObject>[] subTypesCache = new List[4];
 
-	@JsonApiRelation(serialize = SerializeType.LAZY)
+	@JsonApiRelation(serialize = SerializeType.LAZY, lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private MetaPrimaryKey primaryKey;
 
-	@JsonApiToMany
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private Set<MetaKey> declaredKeys = new HashSet<>();
 
-	@JsonApiToMany
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private Set<MetaInterface> interfaces = new HashSet<>();
+
+	private boolean insertable = true;
+
+	private boolean updatable = true;
+
+	private boolean deletable = true;
+
+	private boolean readable = true;
 
 	@JsonIgnore
 	// TODO
@@ -141,8 +142,7 @@ public abstract class MetaDataObject extends MetaType {
 				i++;
 				MetaType valueType = mapType.getElementType();
 				currentMdo = nextPathElement(valueType, i, attrPath);
-			}
-			else {
+			} else {
 				list.add(pathElement);
 				currentMdo = nextPathElement(pathElement.getType(), i, attrPath);
 			}
@@ -155,8 +155,7 @@ public abstract class MetaDataObject extends MetaType {
 	private MetaDataObject nextPathElement(MetaType pathElementType, int i, List<String> pathElements) {
 		if (i == pathElements.size() - 1) {
 			return null;
-		}
-		else {
+		} else {
 			if (!(pathElementType instanceof MetaDataObject)) {
 				throw new IllegalArgumentException("failed to resolve path " + pathElements);
 			}
@@ -202,8 +201,7 @@ public abstract class MetaDataObject extends MetaType {
 		List<MetaDataObject> cached = subTypesCache[cacheIndex];
 		if (cached != null) {
 			return cached;
-		}
-		else {
+		} else {
 			ArrayList<MetaDataObject> types = computeSubTypes(transitive, self);
 			List<MetaDataObject> unmodifiableList = Collections.unmodifiableList(types);
 			subTypesCache[cacheIndex] = unmodifiableList;
@@ -311,5 +309,37 @@ public abstract class MetaDataObject extends MetaType {
 			}
 			this.attrMap = Collections.unmodifiableMap(newAttrMap);
 		}
+	}
+
+	public boolean isInsertable() {
+		return insertable;
+	}
+
+	public void setInsertable(boolean insertable) {
+		this.insertable = insertable;
+	}
+
+	public boolean isUpdatable() {
+		return updatable;
+	}
+
+	public void setUpdatable(boolean updatable) {
+		this.updatable = updatable;
+	}
+
+	public boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public boolean isReadable() {
+		return readable;
+	}
+
+	public void setReadable(boolean readable) {
+		this.readable = readable;
 	}
 }

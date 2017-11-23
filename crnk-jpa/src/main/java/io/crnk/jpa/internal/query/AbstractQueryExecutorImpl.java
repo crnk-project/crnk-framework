@@ -1,17 +1,13 @@
 package io.crnk.jpa.internal.query;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.util.*;
 
 public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T> {
 
@@ -34,7 +30,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected Map<String, Integer> selectionBindings;
 
 	public AbstractQueryExecutorImpl(EntityManager em, MetaDataObject meta, int numAutoSelections,
-			Map<String, Integer> selectionBindings) {
+									 Map<String, Integer> selectionBindings) {
 		this.em = em;
 		this.meta = meta;
 		this.numAutoSelections = numAutoSelections;
@@ -54,10 +50,6 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 		}
 
 		return distinctResult;
-	}
-
-	public MetaDataObject getMeta() {
-		return meta;
 	}
 
 	@Override
@@ -114,8 +106,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 				entityList.add((T) values[0]);
 			}
 			resultList = entityList;
-		}
-		else {
+		} else {
 			resultList = (List<T>) list;
 		}
 		return resultList;
@@ -131,11 +122,9 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 		}
 		if (!list.isEmpty()) {
 			return list.get(0);
-		}
-		else if (nullable) {
+		} else if (nullable) {
 			return null;
-		}
-		else {
+		} else {
 			throw new IllegalStateException("no result found");
 		}
 	}
@@ -160,13 +149,13 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected void applyFetchPaths(Query criteriaQuery) {
 		if (!fetchPaths.isEmpty()) {
 			EntityGraphBuilder builder;
-			try {
-				// avoid compile-time dependency
-				builder = (EntityGraphBuilder) Class.forName(ENTITY_GRAPH_BUILDER_IMPL).newInstance();
-			}
-			catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				throw new IllegalStateException(e);
-			}
+
+			// avoid compile-time dependency to support old JPA implementation as long
+			// as no fetch paths are used
+			ClassLoader classLoader = getClass().getClassLoader();
+			Class builderClass = ClassUtils.loadClass(classLoader, ENTITY_GRAPH_BUILDER_IMPL);
+			builder = (EntityGraphBuilder) ClassUtils.newInstance(builderClass);
+
 			Class<T> entityClass = getEntityClass();
 			builder.build(em, criteriaQuery, entityClass, fetchPaths);
 		}

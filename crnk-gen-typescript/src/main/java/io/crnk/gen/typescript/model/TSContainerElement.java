@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface TSContainerElement extends TSElement {
 
-	public List<TSElement> getElements();
+	List<TSElement> getElements();
 
-	public TSNamedElement getElement(String name);
+	void addElement(TSElement element);
 
-	public void addElement(TSElement element);
+	void addElement(int insertIndex, TSElement element);
 }

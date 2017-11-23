@@ -1,8 +1,13 @@
 package io.crnk.jpa.model;
 
-import io.crnk.core.resource.annotations.JsonApiField;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 
-import javax.persistence.*;
+import io.crnk.core.resource.annotations.JsonApiField;
 
 @Entity
 public class AnnotationTestEntity {
@@ -20,6 +25,9 @@ public class AnnotationTestEntity {
 
 	@Column(insertable = false, updatable = true)
 	private String columnAnnotatedValue;
+
+	@JsonApiField(sortable = true, filterable = false, patchable = true, postable = false)
+	private AnnotationEmbeddable embeddableValue;
 
 	@Column(nullable = false)
 	private String notNullableValue;
@@ -41,6 +49,14 @@ public class AnnotationTestEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public AnnotationEmbeddable getEmbeddableValue() {
+		return embeddableValue;
+	}
+
+	public void setEmbeddableValue(AnnotationEmbeddable embeddableValue) {
+		this.embeddableValue = embeddableValue;
 	}
 
 	public String getReadOnlyValue() {

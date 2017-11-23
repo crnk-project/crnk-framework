@@ -36,6 +36,65 @@ can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factor
 notified about every repository registration and is then free do decorate it or not.
 
 
+## Resource Filtering
+
+`ResourceFilter` allows to restrict access to resources and fields. To methods `filterResource` and
+`filterField` can be implemented for this purpose. Both return a `FilterBehavior` which allows to
+distinguish between `NONE`, `IGNORE` and `FORBIDDEN`. For example, a field like a
+lock count can make use of `IGNORE` in order to be ignored for POST and PATCH requests (the current value
+on the server is left untouched). While access to an unauthorized resource or
+field results in a forbidden error with `FORBIDDEN`.
+
+The `SecurityModule` makes use of `ResourceFilter` to perform access control.
+`SecurityResourceFilter` in 'crnk-security` gives an example how it is used. The `MetaModule` and
+`HomeModule` make use of `ResourceFilterDirectory` obtained with `ModuleContext.getResourceFilterDirectory(...)` to
+query those `ResourceFilter` and only display information about resources and fields accessible in the context
+of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
+may be accessed repeatedly for a request.
+
+## Filter Modifications
+
+Changes to attributes and relationships can be tracked by implementing
+`ResourceModificationFilter`. The filter is invoked upon an incoming request
+while setting up the resource objects; before the actual repository is called.
+Such filters are useful, for example, to implement auditing functionality.
+
+## Filter Priority
+
+`DocumentFilter`, `RepositoryFilter` and `ResourceModificationFilter` can implement
+`Prioritizable` to introduce a priority among multiple filters.
+
+## Access to HTTP layer
+
+`HttpRequestContext` resp. `HttpRequestContextProvider` provides access to the HTTP requests. Most
+notably to get and set HTTP request and response headers. In many cases, the underlying
+implementation like JAXRS or Servlet provides that access as well. With `HttpRequestContext`
+there is an implementation that is independent of that implementation. As such it is well suited
+for module development, in particular for request filtering. A typical use case is to set and
+access security headers.
+
+`HttpRequestContextProvider.getRequestContext` returns the request context for the currently
+active request. Modules have access to `HttpRequestContextProvider` trough the `ModuleContext`.
+Repositories, filters and modules can implement `HttpRequestContextAware` to get
+access to `HttpRequestContextProvider`.
+
+
+## Module Extensions and dependencies
+
+ModuleExtension is an interface can can be implemented by modules to specify a contract how
+others can extend it. The interface has two mandator properties: targetModule and
+optional. targetModule specifies the module consuming those extensions (and providing
+the implementation for it). optional specifies whether the target module must be registered
+or not. In case of an optional extension without the module being registered, the extension
+is simply ignored. The implementing module is free to add any further, custom methods to
+provide extension hooks to other modules. To get access to this extensions, the
+module can implement ModuleExtensionAware. Extensions must be registered during
+Module.setupModule(...) and will be available to the target module when Module.init() is called.
+
+For an example have a look at MetaModuleExtension and the JpaModule making use of it.
+The ModuleExtension was introduced with Crnk 2.0 and its use is expected to grow heavily
+over time.
+
 ## Integrate third-party data stores
 
 The core of Crnk is quite flexible when it comes to implementing repositories. As such, it is
@@ -101,9 +160,9 @@ In the following example we make use of the second option:
 [source]
 .DynamicResourceRepository.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs1]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicResourceRepository.java[tags=docs1]
 ...
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicResourceRepository.java[tags=docs2]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicResourceRepository.java[tags=docs2]
 ----
 
 This new repository can be registered to Crnk with a module:
@@ -111,7 +170,7 @@ This new repository can be registered to Crnk with a module:
 [source]
 .DynamicModule
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/dynamic/DynamicModule.java[tags=docs]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/dynamic/DynamicModule.java[tags=docs]
 ----
 
 A new `RegistryEntry` is created and registered with Crnk. It provides information about:
@@ -120,7 +179,9 @@ A new `RegistryEntry` is created and registered with Crnk. It provides informati
 - the repositories and instances thereof.
 
 Have a look at the complete example
-in https://github.com/crnk-project/crnk-framework/tree/master/crnk-client/src/test/java/io/crnk/client/dynamic[`crnk-client`].
+in https://github.com/crnk-project/crnk-framework/tree/master/crnk-client/src/test/java/io/crnk/client/dynamic[`crnk-client`]
+and
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-test/src/main/java/io/crnk/test/mock/dynamic[`crnk-test`]
 There is a further example test case and relationship repository.
 
 ### Registering repositories at runtime
@@ -141,9 +202,28 @@ https://github.com/crnk-project/crnk-framework/tree/master/crnk-core/src/test/ja
 
 
 
+## Discovery of Modules by CrnkClient
 
+If a module does not need configuration, it can provide a `ClientModuleFactory`
+implementation and register it to the `java.util.ServiceLoader` by adding a
+'META-INF/services/io.crnk.client.module.ClientModuleFactory` file
+with the implementation class name. This lets `CrnkClient` discover
+the module automatically when calling `CrnkClient.findModules()`.
+An example looks like:
 
+[source]
+.ValidationClientModuleFactory
+----
+include::../../../../crnk-validation/src/main/java/io/crnk/validation/internal/ValidationClientModuleFactory.java[]
+----
 
+and
+
+[source]
+.META-INF/services/io.crnk.client.module.ClientModuleFactory
+----
+include::../../../../crnk-validation/src/main/resources/META-INF/services/io.crnk.client.module.ClientModuleFactory[]
+----
 
 
 

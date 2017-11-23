@@ -1,11 +1,6 @@
 package io.crnk.gen.typescript.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class TSObjectType extends TSTypeBase implements TSExportedElement {
 
@@ -59,16 +54,8 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 		return members;
 	}
 
-	public void setDeclaredMembers(List<TSMember> members) {
-		this.declaredMembers = members;
-	}
-
 	public Set<TSInterfaceType> getImplementedInterfaces() {
 		return implementedInterfaces;
-	}
-
-	public void setImplementedInterfaces(Set<TSInterfaceType> implementedInterfaces) {
-		this.implementedInterfaces = implementedInterfaces;
 	}
 
 	@Override
@@ -96,6 +83,20 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 			}
 		}
 		return fields;
+	}
+
+
+	public boolean implementsInterface(TSInterfaceType interfaceType) {
+		if (this.equals(interfaceType)) {
+			return true;
+		}
+
+		for (TSInterfaceType implementedInterface : implementedInterfaces) {
+			if (implementedInterface.implementsInterface(interfaceType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

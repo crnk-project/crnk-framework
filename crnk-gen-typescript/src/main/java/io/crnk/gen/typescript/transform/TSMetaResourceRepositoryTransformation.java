@@ -12,8 +12,8 @@ import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceRepository;
+import io.crnk.meta.model.resource.MetaResource;
 
 /**
  * Transforms MetaResourceRepository elements to (One/Many)QueryResult interfaces to gain type-safe access
@@ -76,6 +76,11 @@ public class TSMetaResourceRepositoryTransformation implements TSMetaTransformat
 		}
 
 		return null;
+	}
+
+	@Override
+	public void postTransform(TSElement element, TSMetaTransformationContext context) {
+
 	}
 
 	private TSMember newDataField(TSMetaTransformationContext context, TSType resourceType, boolean isArray) {

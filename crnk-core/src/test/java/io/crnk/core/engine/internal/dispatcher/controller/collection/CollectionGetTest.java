@@ -1,25 +1,19 @@
 package io.crnk.core.engine.internal.dispatcher.controller.collection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.internal.dispatcher.controller.*;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
@@ -27,6 +21,10 @@ import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollectionGetTest extends BaseControllerTest {
 
@@ -67,7 +65,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		CollectionGet sut = new CollectionGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(new QueryParams()), null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -81,7 +79,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		CollectionGet sut = new CollectionGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(new QueryParams()), null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -98,10 +96,10 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(Long.toString(taskId));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(new QueryParams()), null, Document);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, Document);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -116,10 +114,10 @@ public class CollectionGetTest extends BaseControllerTest {
 		Resource data = createTask();
 		newTaskBody.setData(Nullable.of((Object) data));
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -135,7 +133,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -154,15 +152,15 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = sut.handle(savedTaskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskToProjectBody);
+		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
 		TaskToProjectRepository taskToProjectRepository = new TaskToProjectRepository();
-		Project project = taskToProjectRepository.findOneTarget(taskId, "includedProjects", REQUEST_PARAMS);
+		Project project = taskToProjectRepository.findOneTarget(taskId, "includedProjects", new QueryParams());
 		assertThat(project.getId()).isEqualTo(projectId);
 
 		// Given
@@ -173,7 +171,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		QueryParams queryParams1 = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
 
 		// WHEN
-		Response response = responseGetResp.handle(jsonPath, new QueryParamsAdapter(queryParams1), null, null);
+		Response response = responseGetResp.handle(jsonPath, new QueryParamsAdapter(resourceRegistry.getEntry(Task.class).getResourceInformation(), queryParams1, moduleRegistry), null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -194,10 +192,10 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -214,7 +212,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -233,15 +231,15 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, new ArrayList<ResourceModificationFilter>());
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = sut.handle(savedTaskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskToProjectBody);
+		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
 		TaskToProjectRepository taskToProjectRepository = new TaskToProjectRepository();
-		Project project = taskToProjectRepository.findOneTarget(taskId, "projects", REQUEST_PARAMS);
+		Project project = taskToProjectRepository.findOneTarget(taskId, "projects", new QueryParams());
 		assertThat(project.getId()).isNotNull();
 
 		// Given
@@ -252,13 +250,16 @@ public class CollectionGetTest extends BaseControllerTest {
 		QueryParams requestParams = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
 
 		// WHEN
-		Response response = responseGetResp.handle(jsonPath, new QueryParamsAdapter(requestParams), null, null);
+		Response response = responseGetResp.handle(jsonPath, new QueryParamsAdapter(resourceRegistry.getEntry(Task.class).getResourceInformation(), requestParams, moduleRegistry), null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
 		assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 
 		// eager loading but no inclusion
+		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
+		ResourceField projectsField = entry.getResourceInformation().findFieldByUnderlyingName("projects");
+		Assert.assertEquals(SerializeType.ONLY_ID, projectsField.getSerializeType());
 		assertThat(response.getDocument().getSingleData().get().getRelationships().get("projects").getData().isPresent()).isTrue();
 	}
 }

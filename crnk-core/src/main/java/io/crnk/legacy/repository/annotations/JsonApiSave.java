@@ -1,6 +1,5 @@
 package io.crnk.legacy.repository.annotations;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import java.lang.annotation.*;
 
@@ -25,6 +24,5 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@Ignore
 public @interface JsonApiSave {
 }

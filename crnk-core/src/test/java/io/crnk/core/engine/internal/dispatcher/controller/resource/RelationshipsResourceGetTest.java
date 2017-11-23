@@ -14,7 +14,6 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ProjectPolymorphicToObjectRepository;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,7 +90,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 		RelationshipsResourceGet sut = new RelationshipsResourceGet(resourceRegistry, typeParser, documentMapper);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -105,7 +104,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 		new TaskToProjectRepository().setRelation(new Task().setId(1L), 42L, "project");
 
 		// WHEN
-		Response response = sut.handle(jsonPath, new QueryParamsAdapter(REQUEST_PARAMS), null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -130,7 +129,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 
 		// WHEN
 		Response baseResponseContext = resourceGet.handle(jsonPath,
-				new QueryParamsAdapter(REQUEST_PARAMS),
+				emptyTaskQuery,
 				null,
 				null);
 		// THEN
@@ -146,7 +145,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 
 		// WHEN
 		baseResponseContext = resourceGet.handle(jsonPath,
-				new QueryParamsAdapter(REQUEST_PARAMS),
+				emptyTaskQuery,
 				null,
 				null);
 		Assert.assertNotNull(baseResponseContext);

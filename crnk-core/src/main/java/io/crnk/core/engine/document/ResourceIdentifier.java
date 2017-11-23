@@ -4,9 +4,9 @@ import java.util.Objects;
 
 public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 
-	private String id;
+	protected String id;
 
-	private String type;
+	protected String type;
 
 	public ResourceIdentifier() {
 	}

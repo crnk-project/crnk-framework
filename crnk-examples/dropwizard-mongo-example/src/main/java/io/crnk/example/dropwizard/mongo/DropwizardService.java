@@ -3,18 +3,17 @@ package io.crnk.example.dropwizard.mongo;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guice.GuiceBundle;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.example.dropwizard.mongo.domain.repository.ProjectRepository;
 import io.crnk.example.dropwizard.mongo.domain.repository.TaskRepository;
 import io.crnk.example.dropwizard.mongo.domain.repository.TaskToProjectRepository;
 import io.crnk.example.dropwizard.mongo.managed.MongoManaged;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
+import io.crnk.guice.GuiceServiceDiscovery;
 import io.crnk.rs.CrnkFeature;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+
+import java.io.File;
 
 
 public class DropwizardService extends Application<DropwizardConfiguration> {
@@ -29,9 +28,13 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 
 	@Override
 	public void initialize(Bootstrap<DropwizardConfiguration> bootstrap) {
-
 		guiceBundle = GuiceBundle.<DropwizardConfiguration>newBuilder()
 				.addModule(new AbstractModule() {
+
+					@Provides
+					public MongoManaged mongoManaged(DropwizardConfiguration configuration) throws Exception {
+						return new MongoManaged(configuration.mongo);
+					}
 
 					@Override
 					protected void configure() {
@@ -40,10 +43,6 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 						bind(TaskToProjectRepository.class);
 					}
 
-					@Provides
-					public MongoManaged mongoManaged(DropwizardConfiguration configuration) throws Exception {
-						return new MongoManaged(configuration.mongo);
-					}
 				})
 				.setConfigClass(DropwizardConfiguration.class)
 				.build();
@@ -55,18 +54,9 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) throws Exception {
 		environment.lifecycle().manage(guiceBundle.getInjector().getInstance(MongoManaged.class));
 
-
-		environment.jersey().property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.example.dropwizard.domain");
-		environment.jersey().property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://localhost:8080");
-
-		CrnkFeature crnkFeature = new CrnkFeature(environment.getObjectMapper(),
-				new QueryParamsBuilder(new DefaultQueryParamsParser()),
-				new JsonServiceLocator() {
-					@Override
-					public <T> T getInstance(Class<T> aClass) {
-						return guiceBundle.getInjector().getInstance(aClass);
-					}
-				});
+		CrnkFeature crnkFeature = new CrnkFeature();
+		crnkFeature.getBoot().setObjectMapper(environment.getObjectMapper());
+		crnkFeature.getBoot().setServiceDiscovery(new GuiceServiceDiscovery(guiceBundle.getInjector()));
 		environment.jersey().register(crnkFeature);
 	}
 }

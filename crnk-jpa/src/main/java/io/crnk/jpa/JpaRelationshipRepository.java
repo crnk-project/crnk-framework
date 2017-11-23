@@ -10,18 +10,17 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.jpa.internal.JpaRepositoryBase;
 import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
-import io.crnk.jpa.mapping.IdentityMapper;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.query.ComputedAttributeRegistry;
@@ -56,15 +55,9 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		this.sourceResourceClass = sourceResourceClass;
 
 		JpaRepositoryConfig<S> sourceMapping = module.getRepositoryConfig(sourceResourceClass);
-		if (sourceMapping != null) {
-			this.sourceEntityClass = sourceMapping.getEntityClass();
-			this.sourceMapper = sourceMapping.getMapper();
-		}
-		else {
-			this.sourceEntityClass = sourceResourceClass;
-			this.sourceMapper = IdentityMapper.newInstance();
-		}
-		this.entityMeta = module.getJpaMetaLookup().getMeta(sourceEntityClass, MetaEntity.class);
+		this.sourceEntityClass = sourceMapping.getEntityClass();
+		this.sourceMapper = sourceMapping.getMapper();
+		this.entityMeta = module.getJpaMetaProvider().getMeta(sourceEntityClass);
 	}
 
 	@Override
@@ -208,7 +201,8 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			throw new UnsupportedOperationException("page limit not supported for bulk inclusions");
 		}
 		// support paging for non-bulk requests
-		boolean pagedSingleRequest = sourceIdLists.size() == 1 && querySpec.getLimit() != null;
+		boolean singleRequest = sourceIdLists.size() == 1;
+		boolean pagedSingleRequest = singleRequest && querySpec.getLimit() != null;
 		boolean fetchNext = pagedSingleRequest && isNextFetched(querySpec);
 
 		QuerySpec bulkQuerySpec = querySpec.duplicate();
@@ -248,18 +242,28 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		MultivaluedMap<I, T> map = mapTuples(tuples);
 
-		if (pagedSingleRequest) {
+		if (singleRequest) {
 			I sourceId = sourceIdLists.get(0);
-			ResourceList<T> iterable = (ResourceList<T>) map.getList(sourceId);
 
-			MetaInformation metaInfo = iterable.getMeta();
-			boolean fetchTotal = isTotalFetched(filteredQuerySpec);
-			if (fetchTotal) {
-				long totalRowCount = executor.getTotalRowCount();
-				((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+			ResourceList<T> iterable;
+			if (map.containsKey(sourceId)) {
+				iterable = (ResourceList<T>) map.getList(sourceId);
 			}
-			if (fetchNext) {
-				((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
+			else {
+				iterable = repositoryConfig.newResultList();
+				map.set(sourceId, iterable);
+			}
+
+			if (pagedSingleRequest) {
+				MetaInformation metaInfo = iterable.getMeta();
+				boolean fetchTotal = isTotalFetched(filteredQuerySpec);
+				if (fetchTotal) {
+					long totalRowCount = executor.getTotalRowCount();
+					((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
+				}
+				if (fetchNext) {
+					((HasMoreResourcesMetaInformation) metaInfo).setHasMoreResources(hasNext);
+				}
 			}
 		}
 
@@ -287,23 +291,18 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	@Override
 	public T findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
 		MultivaluedMap<I, T> map = findTargets(Arrays.asList(sourceId), fieldName, querySpec);
-		if (map.isEmpty()) {
+		if (!map.containsKey(sourceId)) {
 			return null;
 		}
-		else {
-			return map.getUnique(sourceId);
-		}
+		List<T> list = map.getList(sourceId);
+		return list.isEmpty() ? null : map.getUnique(sourceId);
 	}
 
 	@Override
 	public ResourceList<T> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
 		MultivaluedMap<I, T> map = findTargets(Arrays.asList(sourceId), fieldName, querySpec);
-		if (map.isEmpty()) {
-			return new DefaultResourceList<>();
-		}
-		else {
-			return (ResourceList<T>) map.getList(sourceId);
-		}
+		PreconditionUtil.assertTrue("result must always include request for single element", map.containsKey(sourceId));
+		return (ResourceList<T>) map.getList(sourceId);
 	}
 
 	@Override

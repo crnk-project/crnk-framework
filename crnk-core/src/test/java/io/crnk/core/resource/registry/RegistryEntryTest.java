@@ -1,5 +1,6 @@
 package io.crnk.core.resource.registry;
 
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
@@ -70,7 +71,7 @@ public class RegistryEntryTest {
 	private <T> ResourceRepositoryInformation newRepositoryInformation(Class<T> repositoryClass, String path) {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		TypeParser typeParser = moduleRegistry.getTypeParser();
-		return new ResourceRepositoryInformationImpl( path, new ResourceInformation(typeParser, Task.class, path, null, null));
+		return new ResourceRepositoryInformationImpl( path, new ResourceInformation(typeParser, Task.class, path, null, null), RepositoryMethodAccess.ALL);
 	}
 
 	@Test

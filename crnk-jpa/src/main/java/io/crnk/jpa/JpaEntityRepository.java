@@ -1,30 +1,27 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.EntityManager;
-
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.jpa.internal.JpaRepositoryBase;
 import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.meta.MetaEntity;
-import io.crnk.jpa.query.ComputedAttributeRegistry;
-import io.crnk.jpa.query.JpaQuery;
-import io.crnk.jpa.query.JpaQueryExecutor;
-import io.crnk.jpa.query.JpaQueryFactory;
-import io.crnk.jpa.query.Tuple;
+import io.crnk.jpa.query.*;
 import io.crnk.meta.model.MetaAttribute;
+
+import javax.persistence.EntityManager;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Exposes a JPA entity as ResourceRepository.
@@ -37,7 +34,7 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 
 	public JpaEntityRepository(JpaModule module, JpaRepositoryConfig<T> config) {
 		super(module, config);
-		this.meta = module.getJpaMetaLookup().getMeta(config.getEntityClass(), MetaEntity.class);
+		this.meta = module.getJpaMetaProvider().getMeta(config.getEntityClass());
 		this.primaryKeyAttr = JpaRepositoryUtils.getPrimaryKeyAttr(meta);
 	}
 
@@ -133,9 +130,7 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 
 		// fetch again since we may have to fetch tuple data and do DTO mapping
 		QuerySpec querySpec = new QuerySpec(repositoryConfig.getResourceClass());
-		if (id == null) {
-			throw new IllegalStateException("id not available for entity " + id);
-		}
+		PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
 		return (S) findOne(id, querySpec);
 	}
 

@@ -22,4 +22,9 @@ public abstract class TSTypeBase extends TSElementBase implements TSType {
 	public TSInterfaceType asInterfaceType() {
 		throw new UnsupportedOperationException("not an interface");
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[name=" + name + "]";
+	}
 }

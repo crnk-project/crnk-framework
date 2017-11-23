@@ -3,7 +3,7 @@ package io.crnk.jpa.internal.query.backend.criteria;
 import io.crnk.jpa.internal.query.AbstractJpaQueryImpl;
 import io.crnk.jpa.internal.query.ComputedAttributeRegistryImpl;
 import io.crnk.jpa.query.criteria.JpaCriteriaQuery;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.provider.MetaPartition;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
@@ -13,14 +13,14 @@ import java.util.Map;
 public class JpaCriteriaQueryImpl<T> extends AbstractJpaQueryImpl<T, JpaCriteriaQueryBackend<T>>
 		implements JpaCriteriaQuery<T> {
 
-	public JpaCriteriaQueryImpl(MetaLookup metaLookup, EntityManager em, Class<T> clazz,
+	public JpaCriteriaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<T> clazz,
 								ComputedAttributeRegistryImpl virtualAttrs) {
-		super(metaLookup, em, clazz, virtualAttrs);
+		super(metaPartition, em, clazz, virtualAttrs);
 	}
 
-	public JpaCriteriaQueryImpl(MetaLookup metaLookup, EntityManager em, Class<?> clazz,
+	public JpaCriteriaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> clazz,
 								ComputedAttributeRegistryImpl virtualAttrs, String attrName, List<?> entityIds) {
-		super(metaLookup, em, clazz, virtualAttrs, attrName, entityIds);
+		super(metaPartition, em, clazz, virtualAttrs, attrName, entityIds);
 	}
 
 	public CriteriaQuery<T> buildQuery() {

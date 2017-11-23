@@ -22,7 +22,8 @@ ext {
 }
 
 node {
-	version = '6.9.1'
+	version = '6.10.3'
+	npmVersion = '5.1.0'
 	download = true
 }
 

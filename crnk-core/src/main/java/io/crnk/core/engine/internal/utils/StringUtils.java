@@ -18,8 +18,7 @@ public class StringUtils {
 			Object obj = iterator.next();
 			if (obj == null) {
 				strings.add(null);
-			}
-			else {
+			} else {
 				strings.add(obj.toString());
 			}
 		}
@@ -89,5 +88,9 @@ public class StringUtils {
 		char chars[] = name.toCharArray();
 		chars[0] = Character.toLowerCase(chars[0]);
 		return new String(chars);
+	}
+
+	public static String firstToUpper(String name) {
+		return name.isEmpty() ? name : Character.toUpperCase(name.charAt(0)) + name.substring(1);
 	}
 }

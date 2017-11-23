@@ -1,7 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
@@ -17,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class ClientResourceUpsertTest {
 
@@ -48,6 +48,11 @@ public class ClientResourceUpsertTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void handleNotSupported() {
 		upsert.handle(null, null, null, null);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void testMethodNotSupported() {
+		upsert.getHttpMethod();
 	}
 
 	@Test(expected = ResponseBodyException.class)

@@ -3,8 +3,6 @@ package io.crnk.meta;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.meta.mock.model.ExtendsBaseResource;
 import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.*;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
@@ -15,30 +13,29 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	private MetaLookup lookup;
 
+	private ResourceMetaProvider resourceProvider;
+
 	@Before
 	public void setup() {
 		super.setup();
 
-		ResourceMetaProvider provider = new ResourceMetaProvider();
+		resourceProvider = new ResourceMetaProvider();
 
 		lookup = new MetaLookup();
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
-		lookup.addProvider(provider);
-		lookup.putIdMapping("io.crnk.test.mock.models", "app");
-		lookup.putIdMapping("io.crnk.test.mock.repository", "app");
+		lookup.addProvider(resourceProvider);
 		lookup.initialize();
 	}
 
 	@Test
 	public void testReadWriteMethods() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
 		MetaAttribute idAttr = meta.getAttribute("id");
 		Assert.assertEquals("getId", idAttr.getReadMethod().getName());
@@ -64,13 +61,13 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	@Test
 	public void getVersionAttribute() {
 		// TODO setup versioning concept in json api layer
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		Assert.assertNull(meta.getVersionAttribute());
 	}
 
 	@Test
 	public void resolvePath() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
 		MetaAttributePath metaAttributes = meta.resolvePath(Arrays.asList("task", "name"));
 		Assert.assertEquals(2, metaAttributes.length());
@@ -80,7 +77,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void resolvePathWithSubType() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaAttributePath metaAttributes = meta.resolvePath(Arrays.asList("subTypeValue"), true);
 		Assert.assertEquals(1, metaAttributes.length());
@@ -90,7 +87,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void getSubTypes() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		List<MetaDataObject> subTypes = meta.getSubTypes(true, false);
 		Assert.assertEquals(1, subTypes.size());
@@ -101,7 +98,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void getSubTypesOrSelf() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		List<MetaDataObject> subTypes = meta.getSubTypes(true, true);
 		Assert.assertEquals(2, subTypes.size());
@@ -110,14 +107,14 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testGetAnnotation() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		MetaAttribute idAttr = meta.getAttribute("id");
 		Assert.assertNotNull(idAttr.getAnnotation(JsonApiId.class));
 	}
 
 	@Test
 	public void testGetAnnotations() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		MetaAttribute idAttr = meta.getAttribute("id");
 		Assert.assertEquals(1, idAttr.getAnnotations().size());
 	}
@@ -135,7 +132,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("tasksList", fields.get(5).getUnderlyingName());
 		Assert.assertEquals("delayed", fields.get(6).getUnderlyingName());
 
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		List<? extends MetaAttribute> attributes = meta.getAttributes();
 		Assert.assertEquals("id", attributes.get(0).getName());
 		Assert.assertEquals("name", attributes.get(1).getName());
@@ -148,7 +145,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testPrimaryKeyNotNullable() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		MetaKey primaryKey = meta.getPrimaryKey();
 		MetaAttribute idField = primaryKey.getElements().get(0);
 		Assert.assertFalse(idField.isNullable());
@@ -156,89 +153,33 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
 		Assert.assertEquals(1, idField.getAnnotations().size());
 	}
-
-
-	@Test
-	public void testReadMethodAnnotations() {
-		MetaResource meta = lookup.getMeta(ReadMethodAnnotatedResource.class, MetaResource.class);
-		MetaKey primaryKey = meta.getPrimaryKey();
-		MetaAttribute idField = primaryKey.getElements().get(0);
-		Assert.assertFalse(idField.isNullable());
-
-		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
-		Assert.assertEquals(1, idField.getAnnotations().size());
-	}
-
-	@Test
-	public void testWriteMethodAnnotations() {
-		MetaResource meta = lookup.getMeta(WriteMethodAnnotatedResource.class, MetaResource.class);
-		MetaKey primaryKey = meta.getPrimaryKey();
-		MetaAttribute idField = primaryKey.getElements().get(0);
-		Assert.assertFalse(idField.isNullable());
-
-		Assert.assertNotNull(idField.getAnnotation(JsonApiId.class));
-		Assert.assertEquals(2, idField.getAnnotations().size()); // nullable + jsonapiid
-	}
-
-	@JsonApiResource(type = "readMethodAnnotatedResource")
-	class ReadMethodAnnotatedResource {
-
-		private String id;
-
-		@JsonApiId
-		public String getId() {
-			return id;
-		}
-
-
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
-
-
-	@JsonApiResource(type = "readMethodAnnotatedResource")
-	class WriteMethodAnnotatedResource {
-
-		private String id;
-
-		@JsonApiId
-		public String getId() {
-			return id;
-		}
-
-		@Nullable
-		public void setId(String id) {
-			this.id = id;
-		}
-	}
-
 
 	@Test
 	public void testRegularFieldNullable() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		MetaAttribute taskField = meta.getAttribute("task");
 		Assert.assertTrue(taskField.isNullable());
 	}
 
 	@Test
 	public void testPrimitiveFieldNotNullable() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		MetaAttribute taskField = meta.getAttribute("delayed");
 		Assert.assertFalse(taskField.isNullable());
 	}
 
 	@Test
-	public void testInheritance() {
-		MetaResource meta = lookup.getMeta(ExtendsBaseResource.class, MetaResource.class);
+	public void testInheritanceOnResource() {
+		MetaResource meta = resourceProvider.getMeta(TaskSubType.class);
 
+		Assert.assertNotNull(meta.getAttribute("subTypeValue"));
 		Assert.assertNotNull(meta.getAttribute("name"));
-		Assert.assertNotNull(meta.getAttribute("baseName"));
 		Assert.assertNotNull(meta.getAttribute("id"));
 
 		MetaDataObject superType = meta.getSuperType();
-		Assert.assertEquals(MetaResourceBase.class, superType.getClass());
-		Assert.assertNotNull(superType.getAttribute("baseName"));
+		Assert.assertEquals(MetaResource.class, superType.getClass());
+		Assert.assertFalse(superType.hasAttribute("subTypeValue"));
+		Assert.assertNotNull(superType.getAttribute("name"));
 		Assert.assertNotNull(superType.getAttribute("id"));
 
 		MetaKey primaryKey = meta.getPrimaryKey();
@@ -255,11 +196,11 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testResourceProperties() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
 		Assert.assertEquals("schedules", meta.getResourceType());
-		Assert.assertEquals("Schedule", meta.getName());
-		Assert.assertEquals("app.Schedule", meta.getId());
+		Assert.assertEquals("Schedules", meta.getName());
+		Assert.assertEquals("resources.schedules", meta.getId());
 
 		Assert.assertEquals(Schedule.class, meta.getImplementationClass());
 		Assert.assertEquals(Schedule.class, meta.getImplementationType());
@@ -269,11 +210,11 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testLinksAttribute() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("linksInformation");
 		Assert.assertEquals("linksInformation", attr.getName());
-		Assert.assertEquals("app.Task.linksInformation", attr.getId());
+		Assert.assertEquals("resources.tasks.linksInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertTrue(attr.isLinks());
@@ -283,11 +224,11 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testMetaAttribute() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("metaInformation");
 		Assert.assertEquals("metaInformation", attr.getName());
-		Assert.assertEquals("app.Task.metaInformation", attr.getId());
+		Assert.assertEquals("resources.tasks.metaInformation", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertTrue(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
@@ -296,8 +237,17 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
+	public void testRelatedData() {
+		MetaResource meta = resourceProvider.getMeta(Project.class);
+		MetaAttribute data = meta.getAttribute("data");
+		MetaType type = data.getType();
+		Assert.assertEquals("resources.types.projectdata", type.getId());
+	}
+
+
+	@Test
 	public void testSingleValuedAttribute() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("name");
 		Assert.assertEquals("name", attr.getName());
@@ -314,7 +264,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testArrayAttribute() {
-		MetaResource meta = lookup.getMeta(Project.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Project.class);
 
 		MetaResourceField dataField = (MetaResourceField) meta.getAttribute("data");
 		Assert.assertEquals("data", dataField.getName());
@@ -331,8 +281,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(MetaArrayType.class, keywordField.getType().getClass());
 		Assert.assertTrue(keywordField.getType().getElementType() instanceof MetaPrimitiveType);
 
-		Assert.assertEquals("string$Array", keywordField.getType().getName());
-		Assert.assertEquals("base.string$Array", keywordField.getType().getId());
+		Assert.assertEquals("string$array", keywordField.getType().getName());
+		Assert.assertEquals("base.string$array", keywordField.getType().getId());
 
 		// FIXME support crnk annotations
 		// Assert.assertTrue(dataField.isSortable());
@@ -341,7 +291,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testMapAttribute() {
-		MetaResource meta = lookup.getMeta(Project.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Project.class);
 
 		MetaResourceField dataField = (MetaResourceField) meta.getAttribute("data");
 		Assert.assertEquals("data", dataField.getName());
@@ -368,7 +318,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testEnum() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 		MetaResourceField statusField = (MetaResourceField) meta.getAttribute("status");
 		Assert.assertEquals(TaskStatus.class, statusField.getType().getImplementationClass());
 
@@ -381,11 +331,11 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testSingleValuedRelation() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("schedule");
 		Assert.assertEquals("schedule", attr.getName());
-		Assert.assertEquals("app.Task.schedule", attr.getId());
+		Assert.assertEquals("resources.tasks.schedule", attr.getId());
 		Assert.assertFalse(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
@@ -402,11 +352,11 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testMultiValuedSetRelation() {
-		MetaResource meta = lookup.getMeta(Schedule.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("tasks");
 		Assert.assertEquals("tasks", attr.getName());
-		Assert.assertEquals("app.Schedule.tasks", attr.getId());
+		Assert.assertEquals("resources.schedules.tasks", attr.getId());
 		Assert.assertTrue(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
@@ -415,7 +365,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertNotNull("tasks", attr.getOppositeAttribute().getName());
 		Assert.assertEquals(Set.class, attr.getType().getImplementationClass());
 		Assert.assertEquals(Task.class, attr.getType().getElementType().getImplementationClass());
-		Assert.assertTrue(attr.getType() instanceof MetaSetType);
+		Assert.assertTrue(attr.getType().getClass().getName(), attr.getType() instanceof MetaSetType);
 
 		MetaSetType listType = (MetaSetType) attr.getType();
 		Assert.assertTrue(listType.newInstance() instanceof Set);
@@ -426,7 +376,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testMultiValuedListRelation() {
-		MetaResource meta = lookup.getMeta(Task.class, MetaResource.class);
+		MetaResource meta = resourceProvider.getMeta(Task.class);
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("projects");
 		Assert.assertFalse(attr.isMeta());
@@ -446,8 +396,8 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testRepository() {
-		MetaResource resourceMeta = lookup.getMeta(Schedule.class, MetaResource.class);
-		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "Repository");
+		MetaResource resourceMeta = resourceProvider.getMeta(Schedule.class);
+		MetaResourceRepository meta = (MetaResourceRepository) lookup.getMetaById().get(resourceMeta.getId() + "$repository");
 		Assert.assertEquals(resourceMeta, meta.getResourceType());
 		Assert.assertNotNull(meta.getListLinksType());
 		Assert.assertNotNull(meta.getListMetaType());
@@ -472,5 +422,23 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(MetaRepositoryActionType.RESOURCE, resourceActionMeta.getActionType());
 
 	}
+
+	@Test
+	public void testDynamicResources() {
+		for (int i = 0; i < 2; i++) {
+			MetaResource meta = (MetaResource) lookup.getMetaById().get("resources.dynamic" + i);
+			Assert.assertNotNull(meta);
+
+			MetaAttribute parentAttr = meta.getAttribute("parent");
+			Assert.assertNotNull(meta.getAttribute("id"));
+			Assert.assertNotNull(meta.getAttribute("value"));
+			Assert.assertNotNull(parentAttr);
+			Assert.assertNotNull(meta.getAttribute("children"));
+
+			Assert.assertEquals("children", parentAttr.getOppositeAttribute().getName());
+			Assert.assertEquals("dynamic" + i, meta.getResourceType());
+		}
+	}
+
 
 }

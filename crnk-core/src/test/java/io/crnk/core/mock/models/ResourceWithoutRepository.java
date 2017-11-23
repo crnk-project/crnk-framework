@@ -8,7 +8,7 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 public class ResourceWithoutRepository {
 
 	@JsonApiId
-	private String id;
+	public String id;
 
 	@JsonApiToOne
 	private Project project;

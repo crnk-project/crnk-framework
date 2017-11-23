@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.*;
 import io.crnk.core.engine.http.HttpRequestProcessor;
-import io.crnk.core.engine.information.repository.RepositoryInformationBuilder;
-import io.crnk.core.engine.information.resource.ResourceInformationBuilder;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
 import io.crnk.core.engine.internal.exception.CrnkExceptionMapper;
@@ -18,6 +17,8 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.IllegalStateExceptionMapper;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
@@ -52,8 +53,8 @@ public class SimpleModuleTest {
 
 	@Test
 	public void testResourceInformationBuilder() {
-		module.addResourceInformationBuilder(new TestResourceInformationBuilder());
-		Assert.assertEquals(1, module.getResourceInformationBuilders().size());
+		module.addResourceInformationProvider(new TestResourceInformationProvider());
+		Assert.assertEquals(1, module.getResourceInformationProviders().size());
 		module.setupModule(context);
 
 		Assert.assertEquals(1, context.numResourceInformationBuilds);
@@ -65,8 +66,8 @@ public class SimpleModuleTest {
 
 	@Test
 	public void testRepositoryInformationBuilder() {
-		module.addRepositoryInformationBuilder(Mockito.mock(RepositoryInformationBuilder.class));
-		Assert.assertEquals(1, module.getRepositoryInformationBuilders().size());
+		module.addRepositoryInformationBuilder(Mockito.mock(RepositoryInformationProvider.class));
+		Assert.assertEquals(1, module.getRepositoryInformationProviders().size());
 		module.setupModule(context);
 
 		Assert.assertEquals(1, context.numRepositoryInformationBuilds);
@@ -212,7 +213,7 @@ public class SimpleModuleTest {
 		private int numDecorators = 0;
 
 		@Override
-		public void addResourceInformationBuilder(ResourceInformationBuilder resourceInformationBuilder) {
+		public void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider) {
 			numResourceInformationBuilds++;
 		}
 
@@ -243,7 +244,7 @@ public class SimpleModuleTest {
 
 		@Override
 		public ResourceRegistry getResourceRegistry() {
-			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null, null);
+			return new ResourceRegistryImpl(new DefaultResourceRegistryPart(), null);
 		}
 
 		@Override
@@ -263,6 +264,11 @@ public class SimpleModuleTest {
 
 		@Override
 		public SecurityProvider getSecurityProvider() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addExtension(ModuleExtension extension) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -292,7 +298,12 @@ public class SimpleModuleTest {
 		}
 
 		@Override
-		public void addRepositoryInformationBuilder(RepositoryInformationBuilder repositoryInformationBuilder) {
+		public void addResourceFilter(ResourceFilter filter) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
 			numRepositoryInformationBuilds++;
 		}
 
@@ -317,7 +328,7 @@ public class SimpleModuleTest {
 		}
 
 		@Override
-		public ResourceInformationBuilder getResourceInformationBuilder() {
+		public ResourceInformationProvider getResourceInformationBuilder() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -339,6 +350,21 @@ public class SimpleModuleTest {
 		@Override
 		public void addRegistryEntry(RegistryEntry entry) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ResourceFilterDirectory getResourceFilterDirectory() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addResourceModificationFilter(ResourceModificationFilter filter) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public PropertiesProvider getPropertiesProvider() {
+			return new NullPropertiesProvider();
 		}
 	}
 }

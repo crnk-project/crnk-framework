@@ -1,58 +1,105 @@
-import {QTask, Task} from './task'
-import {DefaultPagedLinksInformation} from '@crnk/core/'
-import {BeanPath, BooleanExpression, StringExpression} from '@crnk/ngrx/binding/expression'
-import {QTypedManyResourceRelationship, QTypedOneResourceRelationship} from '@crnk/ngrx/binding/stub'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
+import {
+	QTasks,
+	Tasks
+} from './tasks';
+import {
+	BeanPath,
+	BooleanPath,
+	StringPath
+} from '@crnk/angular-ngrx/expression';
+import {
+	CrnkStoreResource,
+	QTypedManyResourceRelationship,
+	QTypedOneResourceRelationship
+} from '@crnk/angular-ngrx/stub';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedManyResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api';
 
-export module Schedule {
+export module Schedules {
 	export interface Relationships {
 		[key: string]: ResourceRelationship;
-		task?: TypedOneResourceRelationship<Task>;
-		lazyTask?: TypedOneResourceRelationship<Task>;
-		tasks?: TypedManyResourceRelationship<Task>;
-		tasksList?: TypedManyResourceRelationship<Task>;
+		task?: TypedOneResourceRelationship<Tasks>;
+		lazyTask?: TypedOneResourceRelationship<Tasks>;
+		tasks?: TypedManyResourceRelationship<Tasks>;
+		tasksList?: TypedManyResourceRelationship<Tasks>;
 	}
 	export interface Attributes {
 		name?: string;
 		delayed?: boolean;
 	}
 }
-export interface Schedule extends StoreResource {
-	relationships?: Schedule.Relationships;
-	attributes?: Schedule.Attributes;
+export interface Schedules extends CrnkStoreResource {
+	relationships?: Schedules.Relationships;
+	attributes?: Schedules.Attributes;
 }
-export interface ScheduleResult extends OneQueryResult {
-	data?: Schedule;
+export interface SchedulesResult extends OneQueryResult {
+	data?: Schedules;
 }
-export module ScheduleListResult {
+export module SchedulesListResult {
 	export interface ScheduleListLinks extends DefaultPagedLinksInformation {
 	}
 	export interface ScheduleListMeta {
 	}
 }
-export interface ScheduleListResult extends ManyQueryResult {
-	data?: Array<Schedule>;
-	links?: ScheduleListResult.ScheduleListLinks;
-	meta?: ScheduleListResult.ScheduleListMeta;
+export interface SchedulesListResult extends ManyQueryResult {
+	data?: Array<Schedules>;
+	links?: SchedulesListResult.ScheduleListLinks;
+	meta?: SchedulesListResult.ScheduleListMeta;
 }
-export class QSchedule extends BeanPath<Schedule> {
-	metaId: string = 'io.crnk.test.mock.models.Schedule';
-	relationships: QSchedule.QRelationships = new QSchedule.QRelationships(this, 'relationships');
-	attributes: QSchedule.QAttributes = new QSchedule.QAttributes(this, 'attributes');
+export class QSchedules extends BeanPath<Schedules> {
+	metaId = 'resources.schedules';
+	id: StringPath = this.createString('id');
+	type: StringPath = this.createString('type');
+	relationships: QSchedules.QRelationships = new QSchedules.QRelationships(this, 'relationships');
+	attributes: QSchedules.QAttributes = new QSchedules.QAttributes(this, 'attributes');
 }
-export module QSchedule {
-	export class QRelationships extends BeanPath<Schedule.Relationships> {
-		task: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'task', QTask);
-		lazyTask: QTypedOneResourceRelationship<QTask, Task> = new QTypedOneResourceRelationship<QTask, Task>(this, 'lazyTask', QTask);
-		tasks: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasks', QTask);
-		tasksList: QTypedManyResourceRelationship<QTask, Task> = new QTypedManyResourceRelationship<QTask, Task>(this, 'tasksList', QTask);
+export module QSchedules {
+	export class QRelationships extends BeanPath<Schedules.Relationships> {
+		private _task: QTypedOneResourceRelationship<QTasks, Tasks>;
+		get task(): QTypedOneResourceRelationship<QTasks, Tasks> {
+			if (!this._task) {
+				this._task =
+					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'task', QTasks);
+			}
+			return this._task;
+		};
+		private _lazyTask: QTypedOneResourceRelationship<QTasks, Tasks>;
+		get lazyTask(): QTypedOneResourceRelationship<QTasks, Tasks> {
+			if (!this._lazyTask) {
+				this._lazyTask =
+					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'lazyTask', QTasks);
+			}
+			return this._lazyTask;
+		};
+		private _tasks: QTypedManyResourceRelationship<QTasks, Tasks>;
+		get tasks(): QTypedManyResourceRelationship<QTasks, Tasks> {
+			if (!this._tasks) {
+				this._tasks =
+					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasks', QTasks);
+			}
+			return this._tasks;
+		};
+		private _tasksList: QTypedManyResourceRelationship<QTasks, Tasks>;
+		get tasksList(): QTypedManyResourceRelationship<QTasks, Tasks> {
+			if (!this._tasksList) {
+				this._tasksList =
+					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasksList', QTasks);
+			}
+			return this._tasksList;
+		};
 	}
-	export class QAttributes extends BeanPath<Schedule.Attributes> {
-		name: StringExpression = this.createString('name');
-		delayed: BooleanExpression = this.createBoolean('delayed');
+	export class QAttributes extends BeanPath<Schedules.Attributes> {
+		name: StringPath = this.createString('name');
+		delayed: BooleanPath = this.createBoolean('delayed');
 	}
 }
-export let createEmptySchedule = function(id: string): Schedule {
+export let createEmptySchedules = function(id: string): Schedules {
 	return {
 		id: id,
 		type: 'schedules',

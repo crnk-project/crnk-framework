@@ -1,24 +1,36 @@
 package io.crnk.core.resource.registry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
+import io.crnk.core.engine.registry.ResourceRegistryPartListener;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
+import java.util.Arrays;
 
 public class ResourceRegistryTest {
 
@@ -34,7 +46,8 @@ public class ResourceRegistryTest {
 	@Before
 	public void resetResourceRegistry() {
 		moduleRegistry = new ModuleRegistry();
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry, new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider(TEST_MODELS_URL));
+		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 	}
 
 	@Test
@@ -44,9 +57,19 @@ public class ResourceRegistryTest {
 		assertThat(tasksEntry).isNotNull();
 	}
 
+	@Test
+	public void addEntryShouldFireEvent() {
+		ResourceRegistryPartListener listener = Mockito.mock(ResourceRegistryPartListener.class);
+		resourceRegistry.addListener(listener);
+		resourceRegistry.addEntry(newRegistryEntry(Project.class, "projects"));
+		Mockito.verify(listener, Mockito.times(1)).onChanged(Mockito.any(ResourceRegistryPartEvent.class));
+	}
+
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
-		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
-		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation), null, null);
+		ResourceInformation resourceInformation =
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
+		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL), null,
+				null);
 	}
 
 	@Test
@@ -71,6 +94,32 @@ public class ResourceRegistryTest {
 		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
 		String resourceUrl = resourceRegistry.getResourceUrl(entry.getResourceInformation());
 		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks");
+	}
+
+	@Test
+	public void onExistingResourceShouldReturnUrl() {
+		Task task = new Task();
+		task.setId(1L);
+
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
+		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
+				String.class, "projects");
+		TypeParser typeParser = new TypeParser();
+		ResourceInformation resourceInformation =
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, Arrays.asList(idField, valueField));
+		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl("tasks", resourceInformation, RepositoryMethodAccess.ALL), null,
+				null);
+		resourceRegistry.addEntry(Task.class, registryEntry);
+
+		String resourceUrl = resourceRegistry.getResourceUrl(task);
+		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
+	}
+
+	@Test
+	public void onExistingTypeAndIdentifierShouldReturnUrl() {
+		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		String resourceUrl = resourceRegistry.getResourceUrl(Task.class, "1");
+		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
 	}
 
 	@Test

@@ -10,13 +10,13 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class JsonApiRequestProcessorTest {
 			}
 		});
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:8080"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		processor = new JsonApiRequestProcessor(moduleContext);
@@ -204,5 +204,32 @@ public class JsonApiRequestProcessorTest {
 
 		Document document = boot.getObjectMapper().readerFor(Document.class).readValue(json);
 		Assert.assertTrue(document.getData().isPresent());
+	}
+
+	@Test
+	public void requestWithInvalidJson() throws IOException {
+		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
+				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+		Mockito.when(requestContext.getRequestBody()).thenReturn("{ INVALID }".getBytes());
+
+		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+
+		processor.process(requestContext);
+
+		ArgumentCaptor<byte[]> contentCaptor = ArgumentCaptor.forClass(byte[].class);
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(Mockito.eq(HttpStatus.BAD_REQUEST_400), contentCaptor.capture());
+
+		String json = new String(contentCaptor.getValue());
+
+		Document document = boot.getObjectMapper().readerFor(Document.class).readValue(json);
+		Assert.assertFalse(document.getData().isPresent());
+		Assert.assertEquals(1, document.getErrors().size());
+		ErrorData errorData = document.getErrors().get(0);
+		Assert.assertEquals("400", errorData.getStatus());
+		Assert.assertEquals("Json Parsing failed", errorData.getTitle());
+		Assert.assertNotNull(errorData.getDetail());
 	}
 }

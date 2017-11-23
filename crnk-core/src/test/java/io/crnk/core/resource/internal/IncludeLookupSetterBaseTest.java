@@ -1,13 +1,5 @@
 package io.crnk.core.resource.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -20,16 +12,26 @@ import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.EmptyPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.HierarchicalTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
@@ -43,6 +45,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	private HierarchicalTask h11;
 
 	private PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
+
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
@@ -65,27 +68,31 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		ResourceField includedProjectsField = taskInfo.findRelationshipFieldByName("includedProjects");
 		ResourceField projectField = taskInfo.findRelationshipFieldByName("project");
 
+		QueryAdapter projectQuey = emptyQueryAdapter(Project.class);
+		QueryAdapter taskQuery = emptyQueryAdapter(Task.class);
+		QueryAdapter hierarchicalTaskQuery = emptyQueryAdapter(HierarchicalTask.class);
+
 		Project project = new Project();
 		project.setId(2L);
-		projectRepository.create(project, null);
+		projectRepository.create(project, projectQuey);
 		Task task = new Task();
 		task.setId(1L);
-		taskRepository.create(task, null);
-		relRepositoryTaskToProject.setRelation(task, project.getId(), includedProjectField, null);
-		relRepositoryTaskToProject.setRelation(task, project.getId(), projectField, null);
-		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project.getId()), includedProjectsField, null);
+		taskRepository.create(task, taskQuery);
+		relRepositoryTaskToProject.setRelation(task, project.getId(), includedProjectField, projectQuey);
+		relRepositoryTaskToProject.setRelation(task, project.getId(), projectField, projectQuey);
+		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project.getId()), includedProjectsField, projectQuey);
 
 		// setup deep nested relationship
 		Task includedTask = new Task();
 		includedTask.setId(3L);
-		taskRepository.create(includedTask, null);
-		relRepositoryProjectToTask.setRelation(project, includedTask.getId(), includedTaskField, null);
+		taskRepository.create(includedTask, taskQuery);
+		relRepositoryProjectToTask.setRelation(project, includedTask.getId(), includedTaskField, taskQuery);
 		Project deepIncludedProject = new Project();
 		deepIncludedProject.setId(2L);
-		projectRepository.create(project, null);
-		relRepositoryTaskToProject.setRelation(includedTask, deepIncludedProject.getId(), includedProjectField, null);
+		projectRepository.create(project, projectQuey);
+		relRepositoryTaskToProject.setRelation(includedTask, deepIncludedProject.getId(), includedProjectField, projectQuey);
 		relRepositoryTaskToProject
-				.addRelations(includedTask, Collections.singletonList(project.getId()), includedProjectsField, null);
+				.addRelations(includedTask, Collections.singletonList(project.getId()), includedProjectsField, projectQuey);
 
 		// setup hierarchy of resources
 		h = new HierarchicalTask();
@@ -112,11 +119,16 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		h1.setChildren(Arrays.asList(h11));
 		h11.setChildren(new ArrayList<HierarchicalTask>());
 
-		hierarchicalTaskRepository.create(h, null);
-		hierarchicalTaskRepository.create(h0, null);
-		hierarchicalTaskRepository.create(h1, null);
-		hierarchicalTaskRepository.create(h11, null);
+		hierarchicalTaskRepository.create(h, hierarchicalTaskQuery);
+		hierarchicalTaskRepository.create(h0, hierarchicalTaskQuery);
+		hierarchicalTaskRepository.create(h1, hierarchicalTaskQuery);
+		hierarchicalTaskRepository.create(h11, hierarchicalTaskQuery);
 
+	}
+
+	private QueryAdapter emptyQueryAdapter(Class<?> resourceClass) {
+		QuerySpec querySpec = new QuerySpec(resourceClass);
+		return new QuerySpecAdapter(querySpec, resourceRegistry);
 	}
 
 	@Test
@@ -257,7 +269,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 				return null;
 			}
 		};
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -284,7 +296,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 				return null;
 			}
 		};
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider);
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -315,7 +327,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		Project projectDefault = new Project().setId(3L);
 		task.setProject(projectDefault);
 
-		mapper = new DocumentMapper(resourceRegistry, objectMapper, new EmptyPropertiesProvider());
+		mapper = new DocumentMapper(resourceRegistry, objectMapper, new EmptyPropertiesProvider(), resourceFilterDirectory);
 
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.includeRelation(Collections.singletonList("task"));

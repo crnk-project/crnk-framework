@@ -5,6 +5,7 @@
 :toclevels: 3
 
 
+
 Crnk is an implementation of the JSON API specification and recommendations in Java. It allows you to rapidly
 build REST APIs without having to worry about lower protocol details and lets you instead
 focus on your application. JSON API and Crnk come with support for:
@@ -43,6 +44,7 @@ include::client.adoc[]
 include::modules.adoc[]
 include::module_development.adoc[]
 include::generation.adoc[]
+include::angular.adoc[]
 include::faq.adoc[]
 
 :leveloffset: 0

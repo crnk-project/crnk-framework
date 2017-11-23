@@ -1,17 +1,29 @@
 package io.crnk.jpa.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-
 import io.crnk.jpa.internal.query.AnyUtils;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.TestAnyType;
 import io.crnk.meta.MetaLookup;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
+
 public class AnyTypeUtilsTest {
+
+	private JpaMetaProvider metaProvider;
+
+	@Before
+	public void setup() {
+		metaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
+		MetaLookup lookup = new MetaLookup();
+		lookup.addProvider(metaProvider);
+		metaProvider.discoverMeta(TestAnyType.class);
+	}
 
 	@Test
 	public void testNotInstantiable()
@@ -25,16 +37,13 @@ public class AnyTypeUtilsTest {
 
 	@Test
 	public void testSet() {
-		MetaLookup lookup = new MetaLookup();
-		lookup.addProvider(new JpaMetaProvider());
-		lookup.initialize();
 		TestAnyType anyValue = new TestAnyType();
-		AnyUtils.setValue(lookup, anyValue, "stringValue");
+		AnyUtils.setValue(metaProvider.getPartition(), anyValue, "stringValue");
 		Assert.assertEquals("stringValue", anyValue.getStringValue());
-		AnyUtils.setValue(lookup, anyValue, 12);
+		AnyUtils.setValue(metaProvider.getPartition(), anyValue, 12);
 		Assert.assertEquals(12, anyValue.getIntValue().intValue());
 		Assert.assertNull(anyValue.getStringValue());
-		AnyUtils.setValue(lookup, anyValue, null);
+		AnyUtils.setValue(metaProvider.getPartition(), anyValue, null);
 		Assert.assertNull(anyValue.getIntValue());
 	}
 }

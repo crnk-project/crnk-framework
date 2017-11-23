@@ -1,70 +1,83 @@
 package io.crnk.core.engine.information;
 
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
+	Field createResourceField();
+
 	interface RelationshipRepository {
+
+		void setAccess(RepositoryMethodAccess access);
 
 		RelationshipRepositoryInformation build();
 
 	}
+
 	interface ResourceRepository {
+
+		void setResourceInformation(ResourceInformation resourceInformation);
+
+		void setAccess(RepositoryMethodAccess access);
 
 		ResourceRepositoryInformation build();
 
 	}
+
 	interface Resource {
 
 		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-		void resourceClass(Class<?> resourceClass);
+		Resource resourceClass(Class<?> resourceClass);
 
-		void resourceType(String resourceType);
+		Resource resourceType(String resourceType);
 
-		void superResourceType(String superResourceType);
+		Resource superResourceType(String superResourceType);
 
 		ResourceInformation build();
 
 	}
+
 	interface Field {
 
 		ResourceField build();
 
-		void jsonName(String jsonName);
+		Field jsonName(String jsonName);
 
-		void underlyingName(String underlyingName);
+		Field underlyingName(String underlyingName);
 
-		void type(Class<?> type);
+		Field name(String name);
 
-		void genericType(Type genericType);
+		Field type(Class<?> type);
 
-		void lazy(boolean lazy);
+		Field genericType(Type genericType);
 
-		void oppositeResourceType(String oppositeResourceType);
+		Field serializeType(SerializeType serializeType);
 
-		void lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
+		Field oppositeResourceType(String oppositeResourceType);
 
-		void includeByDefault(boolean includeByDefault);
+		Field lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		void fieldType(ResourceFieldType fieldType);
+		Field fieldType(ResourceFieldType fieldType);
 
-		void setOppositeName(String oppositeName);
+		Field oppositeName(String oppositeName);
 
-		void setAccessor(ResourceFieldAccessor accessor);
+		Field accessor(ResourceFieldAccessor accessor);
 
-		void setAccess(ResourceFieldAccess access);
+		Field access(ResourceFieldAccess access);
 
 	}
 
 	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
-	ResourceRepository createResourceRepository(Class<?> resourceClass, String resourceType);
+	ResourceRepository createResourceRepository();
 
 	Resource createResource(Class<?> resourceClass, String resourceType);
 

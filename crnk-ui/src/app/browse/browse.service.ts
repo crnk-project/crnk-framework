@@ -1,10 +1,9 @@
-import * as _ from "lodash";
-import {Component, Injectable, Inject} from "@angular/core";
-import {TreeNode} from "primeng/primeng";
-import {Http, Response, RequestOptions, Headers} from "@angular/http";
-import {LocalStorageService} from "angular-2-local-storage";
+import * as _ from 'lodash';
+import {Inject, Injectable} from '@angular/core';
+import {Http} from '@angular/http';
+import {LocalStorageService} from 'angular-2-local-storage';
 
-import { DOCUMENT } from '@angular/platform-browser';
+import {DOCUMENT} from '@angular/platform-browser';
 
 @Injectable()
 export class BrowseUtils {
@@ -139,7 +138,7 @@ export class BrowseService {
 	public suggestParameters(metaResource, event) {
 		let current = event.query;
 
-		let sep = Math.max(current.indexOf('?'), current.indexOf('&'));
+		let sep = Math.max(current.indexOf('?'), current.lastIndexOf('&'));
 		let eqSep = current.lastIndexOf("=");
 		let parameterStartSequence;
 		let paramNamePart;
@@ -148,7 +147,7 @@ export class BrowseService {
 		if (eqSep > sep) {
 			parameterStartSequence = current.substr(0, eqSep + 1);
 			paramValuePart = current.substr(eqSep + 1);
-			paramNamePart = current.substr(sep + 1, eqSep);
+			paramNamePart = current.substr(sep + 1, eqSep - sep - 1);
 			if (paramNamePart == 'sort' || paramNamePart == 'include' || paramNamePart == 'fields') {
 				let valueSep = paramValuePart.lastIndexOf(",");
 				if (valueSep != -1) {
@@ -171,11 +170,13 @@ export class BrowseService {
 			// filter attribute suggestion
 			let attrPart = paramNamePart.startsWith("filter[") ? paramNamePart.substr("filter[".length) : "";
 			return this.expandNames(metaResource, paramValuePart)
-				.filter(name => name.startsWith(paramValuePart))
+				.filter(name => name.startsWith(attrPart))
 				.map(name => parameterStartSequence + "filter[" + name + "]");
 		} else if (paramValuePart == null) {
-			// default legacy suggestion
-			return ['filter[', 'sort', 'page[offset]', 'page[limit]', 'include', 'fields'].filter(it => it.startsWith(paramNamePart));
+			// default suggestions
+			return ['filter[', 'sort=', 'page[offset]=', 'page[limit]=', 'include=', 'fields=']
+				.filter(it => it.startsWith(paramNamePart))
+				.map(name => parameterStartSequence + name);
 		} else if (paramValuePart != null && paramNamePart == 'fields') {
 			// field suggestions
 			return this.expandNames(metaResource, paramValuePart)
@@ -189,9 +190,9 @@ export class BrowseService {
 		} else if (paramValuePart != null && paramNamePart == 'sort') {
 			// sort suggestions
 			let ascDesc = this.expandNames(metaResource, paramValuePart)
-				.filter(name => name.startsWith(paramValuePart))
 				.map(name => [name, '-' + name]);
-			return _.concat([], ...ascDesc).filter(name => name.startsWith(paramValuePart))
+			return _.concat([], ...ascDesc)
+				.filter(name => name.startsWith(paramValuePart))
 				.map(it => parameterStartSequence + it);
 		} else {
 			return [];

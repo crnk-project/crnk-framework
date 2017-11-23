@@ -14,9 +14,6 @@ public class TSParameter extends TSElementBase {
 		this.nullable = nullable;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public String getName() {
 		return name;
@@ -26,16 +23,8 @@ public class TSParameter extends TSElementBase {
 		return type;
 	}
 
-	public void setType(TSType type) {
-		this.type = type;
-	}
-
 	public boolean isNullable() {
 		return nullable;
-	}
-
-	public void setNullable(boolean nullable) {
-		this.nullable = nullable;
 	}
 
 	public TSType getElementType() {

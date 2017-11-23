@@ -17,6 +17,7 @@ import io.crnk.gen.typescript.model.TSExport;
 import io.crnk.gen.typescript.model.TSExportedElement;
 import io.crnk.gen.typescript.model.TSField;
 import io.crnk.gen.typescript.model.TSFunction;
+import io.crnk.gen.typescript.model.TSFunctionType;
 import io.crnk.gen.typescript.model.TSImport;
 import io.crnk.gen.typescript.model.TSIndexSignature;
 import io.crnk.gen.typescript.model.TSInterfaceType;
@@ -123,7 +124,7 @@ public class TSWriter implements TSVisitor {
 		}
 	}
 
-	public void visitReference(TSModule module) {
+	private void visitReference(TSModule module) {
 		if (module.getParent() instanceof TSModule) {
 			visitReference((TSModule) module.getParent());
 			builder.append(".");
@@ -158,12 +159,18 @@ public class TSWriter implements TSVisitor {
 	@Override
 	public void visit(TSField element) {
 		appendLine();
+		if (element.isPrivate()) {
+			builder.append("private ");
+		}
 		builder.append(element.getName());
 		if (element.isNullable()) {
 			builder.append("?");
 		}
-		builder.append(": ");
-		visitReference(element.getType());
+		if (element.getInitializer() == null || !(element.getType() instanceof TSPrimitiveType)) {
+			// primitive types can be trivially inferred and break tslint otherwise
+			builder.append(": ");
+			visitReference(element.getType());
+		}
 		if (element.getInitializer() != null) {
 			builder.append(" = ");
 			builder.append(element.getInitializer());
@@ -203,9 +210,9 @@ public class TSWriter implements TSVisitor {
 				builder.append(" | ");
 			}
 			TSEnumLiteral literal = literals.get(i);
-			builder.append('\"');
+			builder.append('\'');
 			builder.append(literal.getValue());
-			builder.append('\"');
+			builder.append('\'');
 		}
 		builder.append(";");
 	}
@@ -289,15 +296,24 @@ public class TSWriter implements TSVisitor {
 		builder.append("import {");
 
 		Iterator<String> iterator = importElement.getTypeNames().iterator();
-		while (iterator.hasNext()) {
+		if (importElement.getTypeNames().size() == 1) {
 			builder.append(iterator.next());
-			if (iterator.hasNext()) {
-				builder.append(", ");
+		}
+		else {
+			builder.append("\n");
+			while (iterator.hasNext()) {
+				builder.append("\t");
+				builder.append(iterator.next());
+				if (iterator.hasNext()) {
+					builder.append(",");
+				}
+				builder.append("\n");
 			}
 		}
+
 		builder.append("} from '");
 		builder.append(importElement.getPath());
-		builder.append("'");
+		builder.append("';");
 		builder.append(codeStyle.getLineSeparator());
 	}
 
@@ -320,7 +336,7 @@ public class TSWriter implements TSVisitor {
 		}
 		builder.append(" from '");
 		builder.append(exportElement.getPath());
-		builder.append("'");
+		builder.append("';");
 		builder.append(codeStyle.getLineSeparator());
 	}
 
@@ -331,25 +347,35 @@ public class TSWriter implements TSVisitor {
 
 	@Override
 	public void visit(TSFunction function) {
-
 		appendLine();
-		appendExported(function);
 
-		builder.append("let ");
-		builder.append(function.getName());
-		builder.append(" = function(");
-		Iterator<TSParameter> iterator = function.getParameters().iterator();
-		while (iterator.hasNext()) {
-			TSParameter parameter = iterator.next();
-
-			builder.append(parameter.getName());
-			builder.append(": ");
-			visitReference(parameter.getType());
-			if (iterator.hasNext()) {
-				builder.append(", ");
+		if (function.getFunctionType() == TSFunctionType.GETTER) {
+			if (function.isPrivate()) {
+				builder.append("private ");
 			}
+			builder.append("get ");
+			builder.append(function.getName());
+			builder.append("()");
 		}
-		builder.append(")");
+		else {
+			appendExported(function);
+			builder.append("let ");
+			builder.append(function.getName());
+			builder.append(" = function(");
+			Iterator<TSParameter> iterator = function.getParameters().iterator();
+			while (iterator.hasNext()) {
+				TSParameter parameter = iterator.next();
+
+				builder.append(parameter.getName());
+				builder.append(": ");
+				visitReference(parameter.getType());
+				if (iterator.hasNext()) {
+					builder.append(", ");
+				}
+			}
+			builder.append(")");
+		}
+
 		if (function.getType() != null) {
 			builder.append(": ");
 			visitReference(function.getType());

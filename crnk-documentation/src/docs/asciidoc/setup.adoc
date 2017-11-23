@@ -1,4 +1,6 @@
 
+anchor:setup[]
+
 # Setup
 
 There are two main, orthogonal aspects of Crnk that need configuration:
@@ -84,12 +86,40 @@ use of the JSON API resp. Crnk exception handling in JAX-RS services, one can ad
 *JsonapiExceptionMapperBridge* to the JAX-RS application. The constructor of `JsonapiExceptionMapperBridge`
 takes `CrnkFeature` as parameter.
 
-### Return resources with JAX-RS services
+For an example have a look at the next section which make use of it together with `JsonApiResponseFilter`.
+
+
+### Use JSON API format with JAX-RS services
 
 Similar to `JsonapiExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
-resources in JSON API format. In order to properly serialize such responses, add
-*JsonApiResponseFilter* to your JAX-RS application. The constructor of `JsonApiResponseFilter`
-takes `CrnkFeature` as parameter.
+resources in JSON API format with *JsonApiResponseFilter*. `JsonApiResponseFilter` wraps primitive
+responses with a `data` object; resource objects with `data` and `included` objects.
+The constructor of `JsonApiResponseFilter` takes `CrnkFeature` as parameter.
+
+
+To determine which JAX-RS services should be wrapped, `JsonApiResponseFilter` checks whether the
+`@Produce` annotation delivers JSON API. The produce
+annotation can be added, for example, to the class:
+
+[source]
+.ScheduleRepository.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/repository/ScheduleRepository.java[tags=annotation]
+----
+
+And the JAX-RS application setup looks like:
+
+[source]
+.JsonApiResponseFilterTestBase.java
+----
+include::../../../../crnk-rs/src/test/java/io/crnk/rs/JsonApiResponseFilterTestBase.java[tags=docs]
+----
+
+Note that:
+
+- `CrnkProperties.NULL_DATA_RESPONSE_ENABLED` determines whether null responses should be wrapped
+   as JSON API responses.
+- Make use of proper service discovery instead of `CrnkProperties.RESOURCE_SEARCH_PACKAGE` in real applications.
 
 
 ### JAX-RS interoperability
@@ -191,6 +221,19 @@ To enable CDI support, add ``io.crnk:crnk-cdi`` to your classpath. Crnk will the
 ``CdiServiceDiscovery`` implementation and use it to discover its modules and repositories. Modules, repositories,
 etc. will then be picked up if they are registered as CDI beans.
 
+By default `Cdi.current()` is used to obtain a `BeanManager`. The application may also make use of
+`CdiServiceDiscovery.setBeanManager(...)` to set a custom one. The various integrations like `CrnkFeature` provide
+a `setServiceDiscovery` method to set a customized instance.
+
+WARN: `Cdi.current()` has shown to be unreliable in some cases when doing EAR deployment. In such cases
+it is highly recommended to set the `BeanManager manually`.
+
+## Discovery with Guice
+
+A `GuiceServiceDiscovery` implementation is provided. The various integrations like `CrnkFeature` provide
+a `setServiceDiscovery` method to set the instance. For an example have a look at the dropwizard example
+application (https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/dropwizard-simple-example).
+
 
 ## Discovery with Spring
 
@@ -275,7 +318,7 @@ provided by `CrnkProperties`:
   ** When performing method matching
   An example of a prefix ``/api/v1``.
 
-* `crnk.config.include.paging.enabled` enables pagination for inclusions. Disabled by default. Be aware this may
+* `crnk.config.include.paging.packagingEnabled` enables pagination for inclusions. Disabled by default. Be aware this may
   inadvertently enable pagination for included resources when doing paging on root resources if data structures
   are cyclic. See `CrnkProperties.INCLUDE_PAGING_ENABLED` fore mor information.
 

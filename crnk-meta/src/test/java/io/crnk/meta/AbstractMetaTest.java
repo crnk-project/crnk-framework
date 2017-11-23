@@ -13,17 +13,22 @@ public abstract class AbstractMetaTest {
 
 	protected MetaLookup lookup;
 
+	protected ResourceMetaProvider resourceProvider;
+
 	@Before
 	public void setup() {
 		boot = new CrnkBoot();
 		boot.addModule(new JaxrsModule(null));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		boot.addModule(new TestModule());
+		boot.addModule(new io.crnk.test.mock.dynamic.DynamicModule());
 		configure();
 		boot.boot();
 
+		resourceProvider = new ResourceMetaProvider();
+
 		lookup = new MetaLookup();
-		lookup.addProvider(new ResourceMetaProvider());
+		lookup.addProvider(resourceProvider);
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
 		lookup.initialize();
 	}

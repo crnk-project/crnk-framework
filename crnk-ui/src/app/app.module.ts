@@ -25,6 +25,7 @@ import {ROUTES} from "./app.routes";
 import {SelectButtonModule} from "primeng/components/selectbutton/selectbutton";
 import {ToggleButtonModule} from "primeng/components/togglebutton/togglebutton";
 import {BrowseService, BrowseUtils, BrowsePreferencesService} from "./browse/browse.service";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 
 @NgModule({
@@ -36,6 +37,7 @@ import {BrowseService, BrowseUtils, BrowsePreferencesService} from "./browse/bro
 		BrowserModule,
 		FormsModule,
 		HttpModule,
+		BrowserAnimationsModule,
 		RouterModule.forRoot(ROUTES, {useHash: true}),
 
 		LocalStorageModule.withConfig({

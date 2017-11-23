@@ -2,6 +2,7 @@ package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
@@ -11,11 +12,16 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -28,7 +34,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -42,7 +48,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -56,7 +62,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
 		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -72,10 +78,10 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskDocument);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -89,10 +95,10 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newProjectDocument.setData(Nullable.of((Object) createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/project");
-		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectDocument);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -103,7 +109,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		assertThat(projectId).isNotNull();
 
 		TaskToProjectRepository taskToProjectRepository = new TaskToProjectRepository();
-		Project project = taskToProjectRepository.findOneTarget(taskId, "project", REQUEST_PARAMS);
+		Project project = taskToProjectRepository.findOneTarget(taskId, "project", new QueryParams());
 		assertThat(project.getId()).isEqualTo(projectId);
 	}
 
@@ -114,10 +120,10 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		ResourcePost resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
-		Response taskResponse = resourcePost.handle(taskPath, new QueryParamsAdapter(new QueryParams()), null, newTaskDocument);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -131,10 +137,10 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newProjectDocument.setData(Nullable.of((Object) createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/projects");
-		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper);
+		FieldResourcePost sut = new FieldResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, new QueryParamsAdapter(new QueryParams()), null, newProjectDocument);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -145,7 +151,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		assertThat(projectId).isNotNull();
 
 		TaskToProjectRepository taskToProjectRepository = new TaskToProjectRepository();
-		Project project = taskToProjectRepository.findOneTarget(taskId, "projects", REQUEST_PARAMS);
+		Project project = taskToProjectRepository.findOneTarget(taskId, "projects", new QueryParams());
 		assertThat(project.getId()).isEqualTo(projectId);
 	}
 }

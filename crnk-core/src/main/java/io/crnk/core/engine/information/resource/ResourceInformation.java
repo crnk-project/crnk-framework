@@ -1,24 +1,18 @@
 package io.crnk.core.engine.information.resource;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
-import io.crnk.core.engine.internal.information.resource.ResourceAttributesBridge;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
-import io.crnk.core.exception.ResourceDuplicateIdException;
+import io.crnk.core.exception.*;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Holds information about the type of the resource.
@@ -31,30 +25,30 @@ public class ResourceInformation {
 	 * Found field of the id. Each resource has to contain a field marked by
 	 * JsonApiId annotation.
 	 */
-	private final ResourceField idField;
+	private ResourceField idField;
 
 	/**
 	 * A set of resource's attribute fields.
 	 */
-	private final ResourceAttributesBridge attributeFields;
+	private List<ResourceField> attributeFields;
 
 	/**
 	 * A set of fields that contains non-standard Java types (List, Set, custom
 	 * classes, ...).
 	 */
-	private final List<ResourceField> relationshipFields;
+	private List<ResourceField> relationshipFields;
 
 	/**
 	 * An underlying field's name which contains meta information about for a
 	 * resource
 	 */
-	private final ResourceField metaField;
+	private ResourceField metaField;
 
 	/**
 	 * An underlying field's name which contain links information about for a
 	 * resource
 	 */
-	private final ResourceField linksField;
+	private ResourceField linksField;
 
 	/**
 	 * Type name of the resource. Corresponds to {@link JsonApiResource.type}
@@ -80,14 +74,16 @@ public class ResourceInformation {
 
 	private List<ResourceField> fields;
 
+	private AnyResourceFieldAccessor anyFieldAccessor;
+
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			List<ResourceField> fields) {
+							   List<ResourceField> fields) {
 		this(parser, resourceClass, resourceType, superResourceType, null, fields);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -95,6 +91,68 @@ public class ResourceInformation {
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
 
+		initFields();
+		if (this.instanceBuilder == null) {
+			this.instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
+		}
+
+		initAny();
+	}
+
+	public AnyResourceFieldAccessor getAnyFieldAccessor() {
+		return anyFieldAccessor;
+	}
+
+	private void initAny() {
+		final Method jsonAnyGetter = ClassUtils.findMethodWith(resourceClass, JsonAnyGetter.class);
+		final Method jsonAnySetter = ClassUtils.findMethodWith(resourceClass, JsonAnySetter.class);
+
+		if (absentAnySetter(jsonAnyGetter, jsonAnySetter)) {
+			throw new InvalidResourceException(
+					String.format("A resource %s has to have both methods annotated with @JsonAnySetter and @JsonAnyGetter",
+							resourceClass.getCanonicalName()));
+		}
+
+		if (jsonAnyGetter != null) {
+			anyFieldAccessor = new AnyResourceFieldAccessor() {
+
+				@Override
+				public Object getValue(Object resource, String name) {
+					try {
+						return jsonAnyGetter.invoke(resource, name);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						throw new ResourceException(
+								String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
+					}
+				}
+
+				@Override
+				public void setValue(Object resource, String name, Object fieldValue) {
+					try {
+						jsonAnySetter.invoke(resource, name, fieldValue);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						throw new ResourceException(
+								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue, e.getMessage()), e);
+					}
+				}
+			};
+		}
+	}
+
+	/**
+	 * The resource has to have both method annotated with {@link JsonAnySetter} and {@link JsonAnyGetter} to allow
+	 * proper handling.
+	 *
+	 * @param jsonAnyGetter
+	 * @param jsonAnySetter
+	 * @return <i>true</i> if resource definition is incomplete, <i>false</i> otherwise
+	 */
+	private static boolean absentAnySetter(Method jsonAnyGetter, Method jsonAnySetter) {
+		return (jsonAnySetter == null && jsonAnyGetter != null) ||
+				(jsonAnySetter != null && jsonAnyGetter == null);
+	}
+
+	private void initFields() {
 		if (fields != null) {
 			List<ResourceField> idFields = ResourceFieldType.ID.filter(fields);
 			if (idFields.size() > 1) {
@@ -103,7 +161,7 @@ public class ResourceInformation {
 
 			this.idField = idFields.isEmpty() ? null : idFields.get(0);
 
-			this.attributeFields = new ResourceAttributesBridge(ResourceFieldType.ATTRIBUTE.filter(fields), resourceClass);
+			this.attributeFields = ResourceFieldType.ATTRIBUTE.filter(fields);
 			this.relationshipFields = ResourceFieldType.RELATIONSHIP.filter(fields);
 
 			this.metaField = getMetaField(resourceClass, fields);
@@ -114,17 +172,19 @@ public class ResourceInformation {
 				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
 				fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
 			}
-		}
-		else {
+		} else {
 			this.relationshipFields = Collections.emptyList();
-			this.attributeFields = new ResourceAttributesBridge(Collections.emptyList(), resourceClass);
+			this.attributeFields = Collections.emptyList();
 			this.metaField = null;
 			this.linksField = null;
 			this.idField = null;
 		}
-		if (this.instanceBuilder == null) {
-			this.instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
-		}
+	}
+
+	@Deprecated
+	public void setFields(List<ResourceField> fields) {
+		this.fields = fields;
+		this.initFields();
 	}
 
 	private static <T> ResourceField getMetaField(Class<T> resourceClass, Collection<ResourceField> classFields) {
@@ -137,8 +197,7 @@ public class ResourceInformation {
 
 		if (metaFields.isEmpty()) {
 			return null;
-		}
-		else if (metaFields.size() > 1) {
+		} else if (metaFields.size() > 1) {
 			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
 		}
 		return metaFields.get(0);
@@ -154,8 +213,7 @@ public class ResourceInformation {
 
 		if (linksFields.isEmpty()) {
 			return null;
-		}
-		else if (linksFields.size() > 1) {
+		} else if (linksFields.size() > 1) {
 			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
 		}
 		return linksFields.get(0);
@@ -181,7 +239,7 @@ public class ResourceInformation {
 		return idField;
 	}
 
-	public ResourceAttributesBridge getAttributeFields() {
+	public List<ResourceField> getAttributeFields() {
 		return attributeFields;
 	}
 
@@ -256,7 +314,7 @@ public class ResourceInformation {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Serializable parseIdString(String id) {
 		Class idType = getIdField().getType();
-		return parser.parse(id, idType);
+		return (Serializable) parser.parse(id, idType);
 	}
 
 	/**
@@ -275,7 +333,7 @@ public class ResourceInformation {
 	}
 
 	public List<ResourceField> getFields() {
-		return fields;
+		return Collections.unmodifiableList(fields);
 	}
 
 }

@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.information.repository;
 
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.utils.Optional;
 
 public class RelationshipRepositoryInformationImpl implements
@@ -10,20 +11,16 @@ public class RelationshipRepositoryInformationImpl implements
 
 	private final String targetResourceType;
 
+	private final RepositoryMethodAccess access;
+
 	private Optional<Class> sourceResourceClass;
 
 	public RelationshipRepositoryInformationImpl(Class sourceResourceClass, String sourceResourceType,
-												 String targetResourceType) {
-		this.sourceResourceClass = Optional.of(sourceResourceClass);
+												 String targetResourceType, RepositoryMethodAccess access) {
+		this.sourceResourceClass = Optional.ofNullable(sourceResourceClass);
 		this.sourceResourceType = sourceResourceType;
 		this.targetResourceType = targetResourceType;
-	}
-
-	public RelationshipRepositoryInformationImpl(String sourceResourceType,
-												 String targetResourceType) {
-		this.sourceResourceClass = Optional.empty();
-		this.sourceResourceType = sourceResourceType;
-		this.targetResourceType = targetResourceType;
+		this.access = access;
 	}
 
 	@Override
@@ -39,5 +36,10 @@ public class RelationshipRepositoryInformationImpl implements
 	@Override
 	public String getTargetResourceType() {
 		return targetResourceType;
+	}
+
+	@Override
+	public RepositoryMethodAccess getAccess() {
+		return access;
 	}
 }

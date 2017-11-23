@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -19,14 +22,17 @@ public class ResourceMapper {
 	private static final String SELF_FIELD_NAME = "self";
 	private static final String RELATED_FIELD_NAME = "related";
 
+	private final ResourceFilterDirectory resourceFilterDirectory;
+
 	private DocumentMapperUtil util;
 	private boolean client;
 	private ObjectMapper objectMapper;
 
-	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
+	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory resourceFilterDirectory) {
 		this.util = util;
 		this.client = client;
 		this.objectMapper = objectMapper;
+		this.resourceFilterDirectory = resourceFilterDirectory;
 	}
 
 	public Resource toData(Object entity, QueryAdapter queryAdapter) {
@@ -77,18 +83,18 @@ public class ResourceMapper {
 
 	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
 		// fields legacy may further limit the number of fields
-		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields().getFields(), false);
+		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
 
 		// serialize the individual attributes
 		for (ResourceField field : fields) {
-			if (!isIgnored(field)) {
+			if (!isIgnored(field) && field.getAccess().isReadable()) {
 				setAttribute(resource, field, entity);
 			}
 		}
 	}
 
 	protected boolean isIgnored(ResourceField field) { // NOSONAR signature is ok since protected
-		return false;
+		return resourceFilterDirectory != null && resourceFilterDirectory.get(field, HttpMethod.GET) != FilterBehavior.NONE;
 	}
 
 	protected void setAttribute(Resource resource, ResourceField field, Object entity) {

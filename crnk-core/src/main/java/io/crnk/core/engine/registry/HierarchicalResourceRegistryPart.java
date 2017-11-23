@@ -1,11 +1,15 @@
 package io.crnk.core.engine.registry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implements a hierarchical {@link ResourceRegistryPart} by maintaining a list of child ResourceRegistryPart.
  */
-public class HierarchicalResourceRegistryPart implements ResourceRegistryPart {
+public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 
 	private static final String PATH_SEPARATOR = "/";
 
@@ -13,12 +17,20 @@ public class HierarchicalResourceRegistryPart implements ResourceRegistryPart {
 
 	private List<ResourceRegistryPart> partList = new ArrayList<>();
 
+	private ResourceRegistryPartListener childListener = new ResourceRegistryPartListener() {
+		@Override
+		public void onChanged(ResourceRegistryPartEvent event) {
+			notifyChange();
+		}
+	};
+
 	public void putPart(String prefix, ResourceRegistryPart part) {
 		if (partMap.containsKey(prefix)) {
 			throw new IllegalStateException("part with prefx " + prefix + " already exists");
 		}
 		partMap.put(prefix, part);
 		partList.add(part);
+		part.addListener(childListener);
 	}
 
 
@@ -66,7 +78,8 @@ public class HierarchicalResourceRegistryPart implements ResourceRegistryPart {
 		String prefix;
 		if (sep == -1) {
 			prefix = "";
-		} else {
+		}
+		else {
 			prefix = resourceType.substring(0, sep);
 		}
 		return partMap.get(prefix);

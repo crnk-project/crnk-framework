@@ -40,23 +40,15 @@ public abstract class BaseController {
 			parameterProvider, Document document);
 
 
-	protected void verifyTypes(HttpMethod methodType, String resourceEndpointName, RegistryEntry endpointRegistryEntry,
+	protected void verifyTypes(HttpMethod methodType, RegistryEntry endpointRegistryEntry,
 							   RegistryEntry bodyRegistryEntry) {
 		if (endpointRegistryEntry.equals(bodyRegistryEntry)) {
 			return;
 		}
 		if (bodyRegistryEntry == null || !bodyRegistryEntry.isParent(endpointRegistryEntry)) {
 			String message = String.format("Inconsistent type definition between path and body: body type: " +
-					"%s, request type: %s", methodType, resourceEndpointName);
-			throw new RequestBodyException(methodType, resourceEndpointName, message);
-		}
-	}
-
-	protected Object extractResource(Object responseOrResource) {
-		if (responseOrResource instanceof JsonApiResponse) {
-			return ((JsonApiResponse) responseOrResource).getEntity();
-		} else {
-			return responseOrResource;
+					"%s, request type: %s", methodType, endpointRegistryEntry.getResourceInformation().getResourceType());
+			throw new RequestBodyException(methodType, endpointRegistryEntry.getResourceInformation().getResourceType(), message);
 		}
 	}
 }

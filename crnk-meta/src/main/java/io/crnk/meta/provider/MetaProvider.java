@@ -2,9 +2,7 @@ package io.crnk.meta.provider;
 
 import io.crnk.meta.model.MetaElement;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 public interface MetaProvider {
@@ -13,18 +11,10 @@ public interface MetaProvider {
 
 	Collection<MetaProvider> getDependencies();
 
+	Collection<MetaPartition> getPartitions();
+
+	Collection<MetaFilter> getFilters();
+
 	Set<Class<? extends MetaElement>> getMetaTypes();
-
-	boolean accept(Type type, Class<? extends MetaElement> requestedMetaClass);
-
-	MetaElement createElement(Type type);
-
-	void discoverElements();
-
-	void onInitializing(MetaElement element);
-
-	void onInitialized(MetaElement element);
-
-	Map<? extends String, ? extends String> getIdMappings();
 
 }

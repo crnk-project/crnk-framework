@@ -3,6 +3,8 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.filter.ResourceModificationFilterBase;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.parser.TypeParser;
@@ -10,30 +12,28 @@ import io.crnk.core.engine.properties.EmptyPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.mock.MockConstants;
+import io.crnk.core.mock.models.*;
 import io.crnk.core.mock.repository.*;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryBuilderTest;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class BaseControllerTest {
 
 	protected static final long TASK_ID = 1;
 
 	protected static final long PROJECT_ID = 2;
-
-	protected static final QueryParams REQUEST_PARAMS = new QueryParams();
 
 	protected static final PropertiesProvider PROPERTIES_PROVIDER = new EmptyPropertiesProvider();
 	@Rule
@@ -46,11 +46,23 @@ public abstract class BaseControllerTest {
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 	protected ModuleRegistry moduleRegistry;
 
+	protected QuerySpecAdapter emptyTaskQuery;
+	protected QuerySpecAdapter emptyProjectQuery;
+	protected QuerySpecAdapter emptyUserQuery;
+	protected QuerySpecAdapter emptyComplexPojoQuery;
+	protected QuerySpecAdapter emptyMemorandumQuery;
+
+	protected ResourceModificationFilter modificationFilter;
+	protected List<ResourceModificationFilter> modificationFilters;
+
 	@Before
 	public void prepare() {
+		modificationFilter = Mockito.spy(new ResourceModificationFilterBase());
+		modificationFilters = Arrays.asList(modificationFilter);
+
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(ResourceRegistryBuilderTest.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
 		objectMapper = boot.getObjectMapper();
@@ -65,6 +77,12 @@ public abstract class BaseControllerTest {
 		UserToProjectRepository.clear();
 		TaskToProjectRepository.clear();
 		ProjectToTaskRepository.clear();
+
+		emptyTaskQuery = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+		emptyProjectQuery = new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry);
+		emptyUserQuery = new QuerySpecAdapter(new QuerySpec(User.class), resourceRegistry);
+		emptyComplexPojoQuery = new QuerySpecAdapter(new QuerySpec(ComplexPojo.class), resourceRegistry);
+		emptyMemorandumQuery = new QuerySpecAdapter(new QuerySpec(Memorandum.class), resourceRegistry);
 	}
 
 	public Resource createTask() {

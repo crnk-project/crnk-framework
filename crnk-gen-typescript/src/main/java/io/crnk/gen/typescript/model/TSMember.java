@@ -8,6 +8,8 @@ public abstract class TSMember extends TSElementBase {
 
 	private boolean nullable;
 
+	private boolean isPrivate;
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -32,18 +34,15 @@ public abstract class TSMember extends TSElementBase {
 		this.nullable = nullable;
 	}
 
-	public TSType getElementType() {
-		if (type instanceof TSArrayType) {
-			return ((TSArrayType) type).getElementType();
-		}
-		return type;
+	public abstract boolean isField();
+
+	public abstract TSField asField();
+
+	public boolean isPrivate() {
+		return isPrivate;
 	}
 
-	public boolean isField() {
-		return false;
-	}
-
-	public TSField asField() {
-		throw new UnsupportedOperationException();
+	public void setPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
 	}
 }

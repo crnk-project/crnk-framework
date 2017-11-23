@@ -1,10 +1,5 @@
 package io.crnk.security;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -12,9 +7,15 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.utils.Supplier;
-import io.crnk.security.internal.SecurityFilter;
+import io.crnk.security.internal.SecurityRepositoryFilter;
+import io.crnk.security.internal.SecurityResourceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class SecurityModule implements InitializingModule {
 
@@ -35,7 +36,7 @@ public class SecurityModule implements InitializingModule {
 	private SecurityConfig config;
 
 	// protected for CDI
-	protected SecurityModule(){
+	protected SecurityModule() {
 	}
 
 	protected SecurityModule(SecurityConfig config) {
@@ -106,7 +107,11 @@ public class SecurityModule implements InitializingModule {
 
 	@Override
 	public void init() {
-		if (config != null) {
+
+	}
+
+	private void checkInit() {
+		if (config != null && permissions == null) {
 			reconfigure(config);
 		}
 	}
@@ -149,7 +154,8 @@ public class SecurityModule implements InitializingModule {
 	@Override
 	public void setupModule(ModuleContext context) {
 		this.context = context;
-		context.addRepositoryFilter(new SecurityFilter(this));
+		context.addRepositoryFilter(new SecurityRepositoryFilter(this));
+		context.addResourceFilter(new SecurityResourceFilter(this));
 	}
 
 	/**
@@ -171,6 +177,7 @@ public class SecurityModule implements InitializingModule {
 		if (!isEnabled()) {
 			return true;
 		}
+		checkInit();
 		Map<String, ResourcePermission> map = permissions.get(resourceType);
 		ResourcePermission missingPermission = permission;
 		if (map != null) {
@@ -206,6 +213,7 @@ public class SecurityModule implements InitializingModule {
 	 * @return ResourcePermission for the given resource for the current user.
 	 */
 	public ResourcePermission getResourcePermission(String resourceType) {
+		checkInit();
 		if (!isEnabled()) {
 			return ResourcePermission.ALL;
 		}
@@ -232,6 +240,7 @@ public class SecurityModule implements InitializingModule {
 		if (!isEnabled()) {
 			throw new IllegalStateException("security module is disabled");
 		}
+		checkInit();
 		SecurityProvider securityProvider = context.getSecurityProvider();
 		boolean contained = role == ALL_ROLE || securityProvider.isUserInRole(role);
 		LOGGER.debug("isUserInRole returns {} for role {}", contained, role);

@@ -17,4 +17,8 @@ public interface ResourceRegistryPart {
 
 	RegistryEntry getEntry(Class<?> clazz);
 
+	void addListener(ResourceRegistryPartListener listener);
+
+	void removeListener(ResourceRegistryPartListener listener);
+
 }

@@ -1,0 +1,30 @@
+{
+	"compileOnSave": false,
+	"compilerOptions": {
+		"baseUrl": ".",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"removeComments": false,
+		"declaration": true,
+		"strictNullChecks": false,
+		"inlineSources": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"lib": [
+			"es2016",
+			"dom"
+		],
+		"types": [
+			"jasmine",
+			"lodash",
+			"node",
+			"source-map"
+		]
+	},
+	"exclude": [
+		"node_modules",
+		"build"
+	]
+}
+
+

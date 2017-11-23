@@ -21,6 +21,10 @@ import io.crnk.jpa.model.dto.TestDTO;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.querydsl.QuerydslExpressionFactory;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +90,19 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 				}
 			});
 		}
+	}
+
+	@Test
+	public void testDtoMeta() {
+		MetaLookup lookup = metaModule.getLookup();
+		MetaResource meta = (MetaResource) lookup.getMetaById().get("resources.testDTO");
+		MetaKey primaryKey = meta.getPrimaryKey();
+		Assert.assertNotNull(primaryKey);
+		Assert.assertEquals(1, primaryKey.getElements().size());
+		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
+
+		MetaAttribute oneRelatedAttr = meta.getAttribute("oneRelatedValue");
+		Assert.assertTrue(oneRelatedAttr.isAssociation());
 	}
 
 	@Test

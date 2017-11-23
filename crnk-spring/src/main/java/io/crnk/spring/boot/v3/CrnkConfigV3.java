@@ -1,12 +1,8 @@
 package io.crnk.spring.boot.v3;
 
-import javax.servlet.Filter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.internal.jackson.JsonApiModuleBuilder;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -21,6 +17,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.Filter;
+
 /**
  * Current crnk configuration with JSON API compliance, QuerySpec and module support.
  * Note that there is no support for QueryParams is this version due to the lack of JSON API compatibility.
@@ -31,11 +29,15 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 
 	private ApplicationContext applicationContext;
 
-	@Autowired
 	private CrnkSpringBootProperties properties;
 
-	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	public CrnkConfigV3(CrnkSpringBootProperties properties, ObjectMapper objectMapper) {
+		this.properties = properties;
+		this.objectMapper = objectMapper;
+	}
 
 	@Bean
 	public SpringServiceDiscovery discovery() {
@@ -66,20 +68,22 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				if (CrnkProperties.WEB_PATH_PREFIX.equals(key)) {
 					return properties.getPathPrefix();
 				}
+				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
+					return String.valueOf(properties.getAllowUnknownAttributes());
+				}
+				if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
+					return String.valueOf(properties.getReturn404OnNull());
+				}
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
+		boot.setAllowUnknownAttributes();
 		boot.boot();
 		return boot;
 	}
 
 	@Bean
 	public Filter springBootSampleCrnkFilter(CrnkBoot boot) {
-		JsonApiModuleBuilder jsonApiModuleBuilder = new JsonApiModuleBuilder();
-		SimpleModule parameterNamesModule = jsonApiModuleBuilder.build();
-
-		objectMapper.registerModule(parameterNamesModule);
-
 		return new SpringCrnkFilter(boot);
 	}
 

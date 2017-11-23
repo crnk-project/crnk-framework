@@ -48,7 +48,7 @@ public class TypeParser {
 		parsers.putAll(DefaultStringParsers.get());
 	}
 
-	private static <T extends Serializable> boolean isEnum(Class<T> clazz) {
+	private static <T> boolean isEnum(Class<T> clazz) {
 		return clazz.isEnum();
 	}
 
@@ -88,7 +88,7 @@ public class TypeParser {
 	 * @param <T>   type of class
 	 * @return instance of parsed value
 	 */
-	public <T extends Serializable> T parse(String input, Class<T> clazz) {
+	public <T> T parse(String input, Class<T> clazz) {
 		try {
 			return parseInput(input, clazz);
 		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException | NumberFormatException | ParserException e) {
@@ -97,7 +97,7 @@ public class TypeParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Serializable> T parseInput(final String input, final Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+	private <T> T parseInput(final String input, final Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (String.class.equals(clazz)) {
 			return (T) input;
 		} else if (parsers.containsKey(clazz)) {

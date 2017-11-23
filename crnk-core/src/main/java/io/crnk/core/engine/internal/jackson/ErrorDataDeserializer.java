@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.error.ErrorResponse;
 
 import java.io.IOException;
 import java.util.Map;
@@ -59,12 +58,7 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 
 	@Override
 	public ErrorData deserialize(JsonParser jp, DeserializationContext context) throws IOException {
-
 		JsonNode errorNode = jp.readValueAsTree();
-		if (errorNode == null) {
-			return null;
-		}
-
 		String id = readStringIfExists(ErrorDataSerializer.ID, errorNode);
 		String aboutLink = readAboutLink(errorNode);
 		String status = readStringIfExists(ErrorDataSerializer.STATUS, errorNode);
@@ -77,8 +71,4 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 		return new ErrorData(id, aboutLink, status, code, title, detail, sourcePointer, sourceParameter, meta);
 	}
 
-	@Override
-	public Class<ErrorResponse> handledType() {
-		return ErrorResponse.class;
-	}
 }

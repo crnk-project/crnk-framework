@@ -17,6 +17,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class FieldResourceGet extends ResourceIncludeField {
@@ -42,9 +43,7 @@ public class FieldResourceGet extends ResourceIncludeField {
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceName);
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
-		if (relationshipField == null) {
-			throw new ResourceFieldNotFoundException(elementName);
-		}
+		verifyFieldNotNull(relationshipField, elementName);
 
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
@@ -58,6 +57,11 @@ public class FieldResourceGet extends ResourceIncludeField {
 			entities = relationshipRepositoryForClass.findOneTarget(castedResourceId, relationshipField, queryAdapter);
 		}
 		Document responseDocument = documentMapper.toDocument(entities, queryAdapter, parameterProvider);
+
+		// return explicit { data : null } if values found
+		if (!responseDocument.getData().isPresent()) {
+			responseDocument.setData(Nullable.nullValue());
+		}
 
 		return new Response(responseDocument, 200);
 	}

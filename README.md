@@ -5,6 +5,8 @@
 [![Build Status](https://travis-ci.org/crnk-project/crnk-framework.svg?branch=master)](https://travis-ci.org/crnk-project/crnk-framework)
 [![Gitter](https://img.shields.io/gitter/room/crkn-io/lobby.svg)](https://gitter.im/crnk-io/Lobby)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://github.com/crnk-project/crnk-framework/blob/master/LICENSE.txt)
+[![Coverage Status](https://coveralls.io/repos/github/crnk-project/crnk-framework/badge.svg?branch=master)](https://coveralls.io/github/crnk-project/crnk-framework?branch=master)
+
 
 ## What is Crnk?
 

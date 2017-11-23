@@ -34,8 +34,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -43,7 +42,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("name", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("null"));
-			Assert.assertEquals("data/attributes/name", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/name", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -59,8 +58,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -71,7 +69,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("0"));
 			Assert.assertTrue(violation.getMessage().contains("3"));
-			Assert.assertEquals("data/attributes/keywords", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/keywords", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -88,14 +86,13 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("data.value", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/attributes/data/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/data/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -112,15 +109,14 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataList[0].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -141,15 +137,14 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataMap[someKey].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -171,8 +166,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -180,13 +174,13 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertTrue(violation.getPropertyPath().toString().startsWith("dataSet["));
 			Assert.assertTrue(violation.getPropertyPath().toString().endsWith("].value"));
 
-			Assert.assertTrue(violation.getErrorData().getSourcePointer().startsWith("data/attributes/dataSet/"));
+			Assert.assertTrue(violation.getErrorData().getSourcePointer().startsWith("/data/attributes/dataSet/"));
 
 			//	TODO attempt to preserver order in Crnk by comparing incoming request, sourcePointer and server Set
 			//  or use of order preserving sets
 			//			List<ProjectData> list = new ArrayList<>(project.getDataSet());
 			//			int index = list.indexOf(corrupedElement);
-			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "data/attributes/dataSet/" + index +
+			//			Assert.assertEquals(violation.getErrorData().getSourcePointer(), "/data/attributes/dataSet/" + index +
 			// "/value");
 		}
 	}
@@ -199,8 +193,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
@@ -219,8 +212,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ValidationException e) {
+		} catch (ValidationException e) {
 			Assert.assertEquals("messageKey", e.getMessage());
 		}
 	}
@@ -240,14 +232,13 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("tasks[0]", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -265,14 +256,13 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		try {
 			projectRepo.create(project);
 			Assert.fail();
-		}
-		catch (ConstraintViolationException e) {
+		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{complex.message}", violation.getMessageTemplate());
 			Assert.assertEquals("task", violation.getPropertyPath().toString());
-			Assert.assertEquals("data/relationships/task", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/relationships/task", violation.getErrorData().getSourcePointer());
 		}
 	}
 

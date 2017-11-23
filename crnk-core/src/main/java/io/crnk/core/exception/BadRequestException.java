@@ -12,6 +12,11 @@ public class BadRequestException extends CrnkMappableException { // NOSONAR igno
 				.setStatus(String.valueOf(HttpStatus.BAD_REQUEST_400)).build());
 	}
 
+	public BadRequestException(String message, Throwable e) {
+		this(HttpStatus.BAD_REQUEST_400, ErrorData.builder().setTitle(TITLE).setDetail(message)
+				.setStatus(String.valueOf(HttpStatus.BAD_REQUEST_400)).build(), e);
+	}
+
 	public BadRequestException(int httpStatus, ErrorData errorData) {
 		this(httpStatus, errorData, null);
 	}

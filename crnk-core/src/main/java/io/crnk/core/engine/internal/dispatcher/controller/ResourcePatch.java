@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
@@ -30,8 +30,14 @@ import java.util.concurrent.Callable;
 public class ResourcePatch extends ResourceUpsert {
 
 	public ResourcePatch(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
-						 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper);
+						 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper,
+						 List<ResourceModificationFilter> modificationFilters) {
+		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
+	}
+
+	@Override
+	protected HttpMethod getHttpMethod() {
+		return HttpMethod.PATCH;
 	}
 
 	@Override
@@ -54,9 +60,11 @@ public class ResourcePatch extends ResourceUpsert {
 		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
+		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, bodyRegistryEntry);
+
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
 		JsonApiResponse resourceFindResponse = resourceRepository.findOne(resourceId, queryAdapter);
-		Object resource = extractResource(resourceFindResponse);
+		Object resource = resourceFindResponse.getEntity();
 		if (resource == null) {
 			throw new ResourceNotFoundException(jsonPath.toString());
 		}
@@ -106,7 +114,7 @@ public class ResourcePatch extends ResourceUpsert {
 			updatedResource = resourceRepository.update(resourceBody, queryAdapter);
 		} else {
 			setAttributes(resourceBody, resource, bodyRegistryEntry.getResourceInformation());
-			setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider);
+			setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
 			loadedRelationshipNames = getLoadedRelationshipNames(resourceBody);
 			updatedResource = resourceRepository.update(resource, queryAdapter);
 		}
@@ -156,11 +164,4 @@ public class ResourcePatch extends ResourceUpsert {
 			source.put(fieldName, updatedValue);
 		}
 	}
-
-	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// allow dynamic field where field == null
-		return field == null || field.getAccess().isPostable();
-	}
-
 }

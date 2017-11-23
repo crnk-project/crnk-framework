@@ -5,6 +5,7 @@ import io.crnk.gen.typescript.writer.TSWriter;
 import org.gradle.internal.impldep.org.testng.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class TSWriterTest {
 
@@ -50,6 +51,26 @@ public class TSWriterTest {
 	}
 
 	@Test
+	public void writeClassWithImplements() {
+		TSInterfaceType interfaceType = new TSInterfaceType();
+		interfaceType.setName("SomeInterface");
+
+		TSClassType classType = new TSClassType();
+		classType.setName("SomeClass");
+		classType.getImplementedInterfaces().add(interfaceType);
+
+		classType.accept(writer);
+		Assert.assertEquals("\nclass SomeClass implements SomeInterface {\n}", writer.toString());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void writeMemberNotSupported() {
+		// must visit subtypes directly
+		TSMember member = Mockito.mock(TSMember.class);
+		writer.visit(member);
+	}
+
+	@Test
 	public void writeClassWithIndex() {
 		TSIndexSignature indexSignature = new TSIndexSignature();
 		indexSignature.setKeyType(TSPrimitiveType.STRING);
@@ -81,7 +102,7 @@ public class TSWriterTest {
 		export.addTypeName("b");
 
 		export.accept(writer);
-		Assert.assertEquals("export {a, b} from '@test'", writer.toString().trim());
+		Assert.assertEquals("export {a, b} from '@test';", writer.toString().trim());
 	}
 
 	@Test
@@ -92,7 +113,7 @@ public class TSWriterTest {
 		export.setPath("@test");
 
 		export.accept(writer);
-		Assert.assertEquals("export * from '@test'", writer.toString().trim());
+		Assert.assertEquals("export * from '@test';", writer.toString().trim());
 	}
 
 }

@@ -1,9 +1,11 @@
 package io.crnk.legacy.queryParams;
 
-import io.crnk.core.engine.information.resource.ResourceInformationBuilderContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.module.TestResource;
-import io.crnk.core.module.TestResourceInformationBuilder;
+import io.crnk.core.module.TestResourceInformationProvider;
 import io.crnk.legacy.queryParams.context.SimpleQueryParamsParserContext;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import org.junit.Before;
@@ -71,8 +73,8 @@ public class JsonApiQueryParamsParserTest {
 	}
 
 	private QueryParams parseQueryParams() {
-		TestResourceInformationBuilder infoBuilder = new TestResourceInformationBuilder();
-		infoBuilder.init(new ResourceInformationBuilderContext() {
+		TestResourceInformationProvider infoBuilder = new TestResourceInformationProvider();
+		infoBuilder.init(new ResourceInformationProviderContext() {
 
 			@Override
 			public String getResourceType(Class<?> clazz) {
@@ -87,6 +89,16 @@ public class JsonApiQueryParamsParserTest {
 			@Override
 			public TypeParser getTypeParser() {
 				return new TypeParser();
+			}
+
+			@Override
+			public InformationBuilder getInformationBuilder() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public ObjectMapper getObjectMapper() {
+				throw new UnsupportedOperationException();
 			}
 		});
 		return parser.parse(new SimpleQueryParamsParserContext(queryParams, infoBuilder.build(TestResource.class)));

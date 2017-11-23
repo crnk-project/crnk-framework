@@ -121,9 +121,6 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QuerySpec getQuerySpec(ResourceInformation targetResourceInformation) {
-		if (queryAdapter == null) {
-			return null;
-		}
 		Class<?> targetResourceClass = targetResourceInformation.getResourceClass();
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
@@ -136,10 +133,6 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QueryParams getQueryParams() {
-		if (queryAdapter == null) {
-			return null;
-		}
-
 		return queryAdapter.toQueryParams();
 	}
 

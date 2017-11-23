@@ -1,17 +1,12 @@
 package io.crnk.gen.typescript.processor;
 
+import io.crnk.gen.typescript.model.*;
+import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSImport;
-import io.crnk.gen.typescript.model.TSParameterizedType;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSSource;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
 
 /**
  * Computes Typescript import statements for the given source model.
@@ -49,23 +44,25 @@ public class TSImportProcessor implements TSSourceProcessor {
 		}
 	}
 
-	private static void processType(TSSource source, TSType type) {
+	private static void processType(TSSource source, TSNamedElement type) {
 		TSSource refSource = getSource(type);
 
 		// no need for inclusions of primitive types and within same file
-		if (type instanceof TSParameterizedType) {
-			TSParameterizedType paramType = (TSParameterizedType) type;
-			processType(source, paramType.getBaseType());
-			for (TSType param : paramType.getParameters()) {
-				processType(source, param);
+		if (!(type instanceof TSPrimitiveType || source == refSource)) {
+
+			TSNamedElement importedType = type;
+			if (type.getParent() instanceof TSModule) {
+				importedType = (TSNamedElement) type.getParent();
 			}
-		}
-		else if (!(type instanceof TSPrimitiveType || source == refSource)) {
-			addImport(refSource, source, type);
+
+			addImport(refSource, source, importedType);
 		}
 	}
 
-	private static void addImport(TSSource refSource, TSSource source, TSType type) {
+	private static void addImport(TSSource refSource, TSSource source, TSNamedElement type) {
+		if (type instanceof TSAny) {
+			return;
+		}
 		String path = computeImportPath(refSource, source);
 		TSImport element = source.getImport(path);
 		if (element == null) {
@@ -77,27 +74,31 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static String computeImportPath(TSSource refSource, TSSource source) {
-		if (refSource == null) {
-			throw new NullPointerException();
-		}
 		StringBuilder pathBuilder = new StringBuilder();
+		if (refSource.getNpmPackage() == null) {
+			throw new IllegalStateException(refSource.getName());
+		}
+		if (source.getNpmPackage() == null) {
+			throw new IllegalStateException(source.getName());
+		}
 		if (!source.getNpmPackage().equals(refSource.getNpmPackage())) {
 			appendThirdPartyImport(pathBuilder, refSource);
-		}
-		else {
+		} else {
 			appendRelativeImport(pathBuilder, refSource, source);
 		}
 		return pathBuilder.toString();
 	}
 
 	private static void appendRelativeImport(StringBuilder pathBuilder, TSSource refSource, TSSource source) {
-		String[] srcDirs = source.getDirectory() != null ? source.getDirectory().split("\\/") : new String[0];
-		String[] refDirs = refSource.getDirectory() != null ? refSource.getDirectory().split("\\/") : new String[0];
+		String[] srcDirs = source.getDirectory() != null && source.getDirectory().length() > 0 ? source.getDirectory().split("\\/") : new String[0];
+		String[] refDirs = refSource.getDirectory() != null && refSource.getDirectory().length() > 0 ? refSource.getDirectory().split("\\/") : new String[0];
 
 		int shared = computeSharedPrefix(srcDirs, refDirs);
 		appendParentPath(pathBuilder, srcDirs, shared);
 		appendChildPath(pathBuilder, refDirs, shared);
-		pathBuilder.append(refSource.getName());
+		if (refSource.getName() != null) {
+			pathBuilder.append(refSource.getName());
+		}
 	}
 
 	private static void appendChildPath(StringBuilder pathBuilder, String[] refDirs, int shared) {
@@ -110,8 +111,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 	private static void appendParentPath(StringBuilder pathBuilder, String[] srcDirs, int shared) {
 		if (shared == srcDirs.length) {
 			pathBuilder.append("./");
-		}
-		else {
+		} else {
 			for (int i = shared; i < srcDirs.length; i++) {
 				pathBuilder.append("../");
 			}
@@ -131,8 +131,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 		for (int i = 0; i < Math.min(srcDirs.length, refDirs.length); i++) {
 			if (srcDirs[i].equals(refDirs[i])) {
 				n++;
-			}
-			else {
+			} else {
 				break;
 			}
 		}

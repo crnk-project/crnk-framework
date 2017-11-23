@@ -1,39 +1,46 @@
-import {Task} from './task'
-import {DefaultPagedLinksInformation} from '@crnk/core/'
-import {ManyQueryResult, OneQueryResult, ResourceRelationship, StoreResource, TypedManyResourceRelationship, TypedOneResourceRelationship} from 'ngrx-json-api/src/interfaces'
+import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
+import {Tasks} from './tasks';
+import {CrnkStoreResource} from '@crnk/angular-ngrx/stub';
+import {
+	ManyQueryResult,
+	OneQueryResult,
+	ResourceRelationship,
+	TypedManyResourceRelationship,
+	TypedOneResourceRelationship
+} from 'ngrx-json-api';
 
-export module Schedule {
+export module Schedules {
 	export interface Relationships {
 		[key: string]: ResourceRelationship;
-		task?: TypedOneResourceRelationship<Task>;
-		lazyTask?: TypedOneResourceRelationship<Task>;
-		tasks?: TypedManyResourceRelationship<Task>;
-		tasksList?: TypedManyResourceRelationship<Task>;
+		task?: TypedOneResourceRelationship<Tasks>;
+		lazyTask?: TypedOneResourceRelationship<Tasks>;
+		tasks?: TypedManyResourceRelationship<Tasks>;
+		tasksList?: TypedManyResourceRelationship<Tasks>;
 	}
 	export interface Attributes {
 		name?: string;
 		delayed?: boolean;
 	}
 }
-export interface Schedule extends StoreResource {
-	relationships?: Schedule.Relationships;
-	attributes?: Schedule.Attributes;
+export interface Schedules extends CrnkStoreResource {
+	relationships?: Schedules.Relationships;
+	attributes?: Schedules.Attributes;
 }
-export interface ScheduleResult extends OneQueryResult {
-	data?: Schedule;
+export interface SchedulesResult extends OneQueryResult {
+	data?: Schedules;
 }
-export module ScheduleListResult {
+export module SchedulesListResult {
 	export interface ScheduleListLinks extends DefaultPagedLinksInformation {
 	}
 	export interface ScheduleListMeta {
 	}
 }
-export interface ScheduleListResult extends ManyQueryResult {
-	data?: Array<Schedule>;
-	links?: ScheduleListResult.ScheduleListLinks;
-	meta?: ScheduleListResult.ScheduleListMeta;
+export interface SchedulesListResult extends ManyQueryResult {
+	data?: Array<Schedules>;
+	links?: SchedulesListResult.ScheduleListLinks;
+	meta?: SchedulesListResult.ScheduleListMeta;
 }
-export let createEmptySchedule = function(id: string): Schedule {
+export let createEmptySchedules = function(id: string): Schedules {
 	return {
 		id: id,
 		type: 'schedules',
