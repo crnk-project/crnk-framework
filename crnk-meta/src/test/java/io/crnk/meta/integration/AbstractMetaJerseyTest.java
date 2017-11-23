@@ -2,23 +2,28 @@ package io.crnk.meta.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.repository.ScheduleRepository;
-import okhttp3.OkHttpClient.Builder;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient.Builder;
 
 public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 
@@ -66,6 +71,7 @@ public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 			feature.addModule(createModule());
 			boot = feature.getBoot();
+			boot.setQuerySpecDeserializer(new DefaultQuerySpecDeserializer());
 			setupFeature(feature);
 			register(feature);
 		}
