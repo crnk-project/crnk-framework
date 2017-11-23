@@ -444,6 +444,19 @@ public class CrnkBoot {
 						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
 	}
 
+	/**
+	 * Sets the ignore parse exceptions while deserializing query parameters.
+	 *
+	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
+	 */
+	public void setIgnoreParseExceptions() {
+		PreconditionUtil.assertNotNull("Ignore parse exceptions using the QuerySpecDeserializer, but " +
+				"it is null.", this.querySpecDeserializer);
+		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
+				.setIgnoreParseExceptions(Boolean
+						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.IGNORE_PARSE_EXCEPTIONS)));
+	}
+
 	public ModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}

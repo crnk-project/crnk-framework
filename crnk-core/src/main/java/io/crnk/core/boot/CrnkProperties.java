@@ -135,4 +135,11 @@ public class CrnkProperties {
 	 * </p>
 	 */
 	public static final String ALLOW_UNKNOWN_ATTRIBUTES = "crnk.config.resource.request.allowUnknownAttributes";
+
+	/**
+	 * <p>
+	 * Set a boolean whether Crnk should allow ignore parse exceptions while deserializing query parameters.
+	 * </p>
+	 */
+	public static final String IGNORE_PARSE_EXCEPTIONS = "crnk.config.resource.request.ignoreParseExceptions";
 }

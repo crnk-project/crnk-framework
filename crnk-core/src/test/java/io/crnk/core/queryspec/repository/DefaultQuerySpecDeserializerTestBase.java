@@ -1,10 +1,6 @@
 package io.crnk.core.queryspec.repository;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -24,11 +20,18 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -523,11 +526,22 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	}
 
 	@Test(expected = ParametersDeserializationException.class)
-	public void testUnknownProperty() {
+	public void testUnknownPropertyAndIgnoreParseExceptionIsFalse() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "group", "test");
 		deserializer.setIgnoreParseExceptions(false);
 		deserializer.deserialize(taskInformation, params);
+	}
+
+	@Test
+	public void testUnknownPropertyAndIgnoreParseExceptionIsTrue() {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "group", "test");
+		deserializer.setIgnoreParseExceptions(true);
+		QuerySpec result = deserializer.deserialize(taskInformation, params);
+
+		Assert.assertEquals(ImmutableSet.of("test"), result.getQueryParams("group"));
+		Assert.assertEquals("test", result.getQueryParam("group"));
 	}
 
 	protected void add(Map<String, Set<String>> params, String key, String value) {

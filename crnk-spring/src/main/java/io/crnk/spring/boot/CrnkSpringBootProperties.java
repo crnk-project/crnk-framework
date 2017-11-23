@@ -41,6 +41,11 @@ public class CrnkSpringBootProperties {
 	 */
 	private Boolean return404OnNull;
 
+	/**
+	 * Ignore parse exceptions while deserializing query parameters.
+	 */
+	private Boolean ignoreParseExceptions;
+
 	public String getResourcePackage() {
 		return resourcePackage;
 	}
@@ -95,5 +100,14 @@ public class CrnkSpringBootProperties {
 
 	public void setReturn404OnNull(Boolean return404OnNull) {
 		this.return404OnNull = return404OnNull;
+	}
+
+	public Boolean getIgnoreParseExceptions() {
+		return ignoreParseExceptions;
+	}
+
+	public CrnkSpringBootProperties setIgnoreParseExceptions(final Boolean ignoreParseExceptions) {
+		this.ignoreParseExceptions = ignoreParseExceptions;
+		return this;
 	}
 }

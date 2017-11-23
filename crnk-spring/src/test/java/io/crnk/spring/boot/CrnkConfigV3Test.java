@@ -30,6 +30,7 @@ public class CrnkConfigV3Test {
 		properties.setAllowUnknownAttributes(true);
 		properties.setReturn404OnNull(true);
 		properties.setResourcePackage("ch.something");
+		properties.setIgnoreParseExceptions(true);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,6 +46,7 @@ public class CrnkConfigV3Test {
 		Assert.assertEquals("prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
+		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.IGNORE_PARSE_EXCEPTIONS));
 
 		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
 		Assert.assertEquals(12L, deserializer.getDefaultLimit().longValue());
