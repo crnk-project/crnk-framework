@@ -39,7 +39,7 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 		return null;
 	}
 
-	private static String readAboutLink(JsonNode errorNode) throws IOException {
+	String readAboutLink(JsonNode errorNode) throws IOException {
 		JsonNode node = errorNode.get(ErrorDataSerializer.LINKS);
 		if (node != null) {
 			return readStringIfExists(ErrorDataSerializer.ABOUT_LINK, node);
@@ -47,7 +47,7 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 		return null;
 	}
 
-	private static String readStringIfExists(String fieldName, JsonNode errorNode) throws IOException {
+	static String readStringIfExists(String fieldName, JsonNode errorNode) throws IOException {
 		JsonNode node = errorNode.get(fieldName);
 		if (node != null) {
 			return node.asText();

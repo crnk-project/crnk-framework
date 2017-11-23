@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+import io.crnk.core.engine.internal.jackson.JacksonObjectLinkModule;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,6 +36,30 @@ public class ErrorDataTest {
 
 		ErrorData errorData = builder.build();
 		String json = mapper.writeValueAsString(errorData);
+		ErrorData copy = mapper.readerFor(ErrorData.class).readValue(json);
+
+		Assert.assertEquals(errorData, copy);
+	}
+
+	@Test
+	public void testObjectLinkSerialization() throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(JacksonObjectLinkModule.createJacksonObjectLinkModule());
+
+		ErrorDataBuilder builder = new ErrorDataBuilder();
+		builder.setAboutLink("about");
+		builder.setCode("code");
+		builder.setDetail("detail");
+		builder.setId("id");
+		builder.setSourcePointer("sourcePointer");
+		builder.setSourceParameter("sourceParameter");
+		builder.setStatus("status");
+		builder.setTitle("title");
+		builder.addMetaField("meta1", "value1");
+
+		ErrorData errorData = builder.build();
+		String json = mapper.writeValueAsString(errorData);
+		Assert.assertTrue(json.contains("{\"about\":{\"href\":\"about\"}}"));
 		ErrorData copy = mapper.readerFor(ErrorData.class).readValue(json);
 
 		Assert.assertEquals(errorData, copy);

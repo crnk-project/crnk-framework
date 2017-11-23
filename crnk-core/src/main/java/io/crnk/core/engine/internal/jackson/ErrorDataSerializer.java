@@ -39,7 +39,7 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 		}
 	}
 
-	private static void writeAboutLink(ErrorData errorData, JsonGenerator gen) throws IOException {
+	void writeAboutLink(ErrorData errorData, JsonGenerator gen) throws IOException {
 		if (errorData.getAboutLink() != null) {
 			gen.writeObjectFieldStart(LINKS);
 			gen.writeStringField(ABOUT_LINK, errorData.getAboutLink());

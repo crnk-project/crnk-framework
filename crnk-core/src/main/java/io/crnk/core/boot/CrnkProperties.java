@@ -135,4 +135,13 @@ public class CrnkProperties {
 	 * </p>
 	 */
 	public static final String ALLOW_UNKNOWN_ATTRIBUTES = "crnk.config.resource.request.allowUnknownAttributes";
+
+	/**
+	 * <p>
+	 * Set a boolean whether Crnk should links should be serialized as JSON objects.
+	 * </p>
+	 */
+	public static final String SERIALIZE_LINKS_AS_OBJECTS = "crnk.config.serialize.object.links";
+
+
 }
