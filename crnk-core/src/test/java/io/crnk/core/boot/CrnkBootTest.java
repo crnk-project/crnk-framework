@@ -22,6 +22,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -138,6 +139,19 @@ public class CrnkBootTest {
 		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
 		QueryAdapterBuilder queryAdapterBuilder = requestDispatcher.getQueryAdapterBuilder();
 		Assert.assertTrue(queryAdapterBuilder instanceof QuerySpecAdapterBuilder);
+	}
+
+	@Test
+	public void setCustomQuerySpecDeserializer() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
+		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+
+		QuerySpecDeserializer deserializer = new TestQuerySpecDeserializer();
+		boot.setQuerySpecDeserializer(deserializer);
+		boot.boot();
+
+		Assert.assertSame(deserializer, boot.getQuerySpecDeserializer());
 	}
 
 	@Test
@@ -297,5 +311,9 @@ public class CrnkBootTest {
 		Assert.assertEquals(4, modules.size());
 		boot.setDefaultPageLimit(20L);
 		boot.setMaxPageLimit(100L);
+	}
+
+	static class TestQuerySpecDeserializer extends DefaultQuerySpecDeserializer {
+
 	}
 }

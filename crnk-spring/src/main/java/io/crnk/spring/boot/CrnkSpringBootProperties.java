@@ -34,7 +34,7 @@ public class CrnkSpringBootProperties {
 	/**
 	 * Allow unknown attributes in query parameters.
 	 */
-	private Boolean allowUnknownAttributes;
+	private Boolean allowUnknownAttributes = false;
 
 	/**
 	 * Enable 404 response if null.

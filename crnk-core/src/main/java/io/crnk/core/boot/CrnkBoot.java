@@ -62,7 +62,7 @@ public class CrnkBoot {
 
 	private QueryParamsBuilder queryParamsBuilder;
 
-	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
+	private QuerySpecDeserializer querySpecDeserializer;
 
 	private boolean configured;
 
@@ -145,6 +145,8 @@ public class CrnkBoot {
 	 * Performs the setup.
 	 */
 	public void boot() {
+		setupQuerySpecDeserializer();
+
 		checkNotConfiguredYet();
 		configured = true;
 
@@ -155,6 +157,17 @@ public class CrnkBoot {
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		bootDiscovery();
+	}
+
+	private void setupQuerySpecDeserializer() {
+		if (this.querySpecDeserializer == null) {
+			DefaultQuerySpecDeserializer deserializer = new DefaultQuerySpecDeserializer();
+			deserializer.setDefaultLimit(Long.getLong(propertiesProvider.getProperty(CrnkProperties.DEFAULT_PAGE_LIMIT)));
+			deserializer.setMaxPageLimit(Long.getLong(propertiesProvider.getProperty(CrnkProperties.MAX_PAGE_LIMIT)));
+			deserializer.setAllowUnknownAttributes(Boolean.getBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+
+			this.querySpecDeserializer = deserializer;
+		}
 	}
 
 	private void setupServiceDiscovery() {
@@ -411,10 +424,13 @@ public class CrnkBoot {
 	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
+	@Deprecated
 	public void setDefaultPageLimit(Long defaultPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		}
 	}
 
 	/**
@@ -425,10 +441,13 @@ public class CrnkBoot {
 	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
+	@Deprecated
 	public void setMaxPageLimit(Long maxPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		}
 	}
 
 	/**
@@ -436,12 +455,14 @@ public class CrnkBoot {
 	 *
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
+	@Deprecated
 	public void setAllowUnknownAttributes() {
 		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
 				"it is null.", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-				.setAllowUnknownAttributes(Boolean
-						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(Boolean
+					.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		}
 	}
 
 	public ModuleRegistry getModuleRegistry() {

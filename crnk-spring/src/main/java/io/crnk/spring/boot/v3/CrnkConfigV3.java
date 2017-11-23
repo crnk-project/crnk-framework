@@ -1,15 +1,21 @@
 package io.crnk.spring.boot.v3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.internal.SpringServiceDiscovery;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +32,8 @@ import javax.servlet.Filter;
 @Configuration
 @EnableConfigurationProperties(CrnkSpringBootProperties.class)
 public class CrnkConfigV3 implements ApplicationContextAware {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkConfigV3.class);
 
 	private ApplicationContext applicationContext;
 
@@ -49,13 +57,22 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setObjectMapper(objectMapper);
 
+		/**
+		 * Try to get an existing `QuerySpecDeserializer` implementation and set it up.
+		 * Otherwise `DefaultQuerySpecDeserializer` instance used.
+		 */
+		try {
+			QuerySpecDeserializer querySpecDeserializer = this.applicationContext.getBean(QuerySpecDeserializer.class);
+			boot.setQuerySpecDeserializer(querySpecDeserializer);
+		} catch (NoSuchBeanDefinitionException e) {
+			LOGGER.info("No external QuerySpecDeserializer implementation found. DefaultQuerySpecDeserializer will be used instead.");
+		}
+
 		if (properties.getDomainName() != null && properties.getPathPrefix() != null) {
 			String baseUrl = properties.getDomainName() + properties.getPathPrefix();
 			boot.setServiceUrlProvider(new ConstantServiceUrlProvider(baseUrl));
 		}
 		boot.setServiceDiscovery(serviceDiscovery);
-		boot.setDefaultPageLimit(properties.getDefaultPageLimit());
-		boot.setMaxPageLimit(properties.getMaxPageLimit());
 		boot.setPropertiesProvider(new PropertiesProvider() {
 			@Override
 			public String getProperty(String key) {
@@ -68,6 +85,12 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				if (CrnkProperties.WEB_PATH_PREFIX.equals(key)) {
 					return properties.getPathPrefix();
 				}
+				if (CrnkProperties.DEFAULT_PAGE_LIMIT.equals(key)) {
+					return String.valueOf(properties.getDefaultPageLimit());
+				}
+				if (CrnkProperties.MAX_PAGE_LIMIT.equals(key)) {
+					return String.valueOf(properties.getMaxPageLimit());
+				}
 				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
 					return String.valueOf(properties.getAllowUnknownAttributes());
 				}
@@ -77,7 +100,6 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
-		boot.setAllowUnknownAttributes();
 		boot.boot();
 		return boot;
 	}

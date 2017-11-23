@@ -1,14 +1,10 @@
 package io.crnk.example.springboot;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-
-import brave.Tracing;
 import io.crnk.core.engine.transaction.TransactionRunner;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.example.springboot.domain.model.ScheduleDto;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
 import io.crnk.home.HomeModule;
@@ -24,11 +20,20 @@ import io.crnk.monitor.brave.BraveServerModule;
 import io.crnk.ui.UIModule;
 import io.crnk.ui.UIModuleConfig;
 import io.crnk.validation.ValidationModule;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+
+import brave.Tracing;
 import zipkin2.Endpoint;
 import zipkin2.reporter.Reporter;
 

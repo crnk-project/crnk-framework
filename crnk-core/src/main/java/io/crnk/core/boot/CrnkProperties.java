@@ -135,4 +135,18 @@ public class CrnkProperties {
 	 * </p>
 	 */
 	public static final String ALLOW_UNKNOWN_ATTRIBUTES = "crnk.config.resource.request.allowUnknownAttributes";
+
+	/**
+	 * <p>
+	 * Set a default page limit for Crnk responses.
+	 * </p>
+	 */
+	public static final String DEFAULT_PAGE_LIMIT = "crnk.config.resource.request.defaultPageLimit";
+
+	/**
+	 * <p>
+	 * Set a maximum allowed page limit for Crnk responses.
+	 * </p>
+	 */
+	public static final String MAX_PAGE_LIMIT = "crnk.config.resource.request.maxPageLimit";
 }
