@@ -10,7 +10,7 @@ import {
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaResourceField {
 	export interface Attributes extends MetaAttribute.Attributes {
@@ -50,6 +50,7 @@ export module QMetaResourceField {
 		lob: BooleanPath = this.createBoolean('lob');
 		nullable: BooleanPath = this.createBoolean('nullable');
 		cascaded: BooleanPath = this.createBoolean('cascaded');
+		readable: BooleanPath = this.createBoolean('readable');
 		name: StringPath = this.createString('name');
 	}
 }

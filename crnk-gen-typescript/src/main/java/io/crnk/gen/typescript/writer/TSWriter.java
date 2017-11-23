@@ -210,9 +210,9 @@ public class TSWriter implements TSVisitor {
 				builder.append(" | ");
 			}
 			TSEnumLiteral literal = literals.get(i);
-			builder.append('\"');
+			builder.append('\'');
 			builder.append(literal.getValue());
-			builder.append('\"');
+			builder.append('\'');
 		}
 		builder.append(";");
 	}
@@ -336,7 +336,7 @@ public class TSWriter implements TSVisitor {
 		}
 		builder.append(" from '");
 		builder.append(exportElement.getPath());
-		builder.append("'");
+		builder.append("';");
 		builder.append(codeStyle.getLineSeparator());
 	}
 

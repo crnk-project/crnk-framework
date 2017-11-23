@@ -56,7 +56,7 @@ export class DataTableBinding {
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
 				private utils: CrnkBindingUtils) {
 
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE)
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE);
 		this.result$ = this.resultSubject$.asObservable();
 
 		if (!this.config.queryId) {

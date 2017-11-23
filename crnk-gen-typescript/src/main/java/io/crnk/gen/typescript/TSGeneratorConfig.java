@@ -12,6 +12,10 @@ import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
 import io.crnk.gen.typescript.processor.TSImportProcessor;
 import io.crnk.gen.typescript.processor.TSIndexFileProcessor;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
+import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
+import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
+import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
+import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
 
 public class TSGeneratorConfig {
@@ -48,6 +52,12 @@ public class TSGeneratorConfig {
 		sourceProcessors.add(new TSImportProcessor());
 		sourceProcessors.add(new TSIndexFileProcessor());
 		sourceProcessors.add(new TSEmptyObjectFactoryProcessor());
+
+		// classes are loaded by the application class loader
+		metaTransformationClassNames.add(TSMetaDataObjectTransformation.class.getName());
+		metaTransformationClassNames.add(TSMetaEnumTypeTransformation.class.getName());
+		metaTransformationClassNames.add(TSMetaPrimitiveTypeTransformation.class.getName());
+		metaTransformationClassNames.add(TSMetaResourceRepositoryTransformation.class.getName());
 	}
 
 	/**

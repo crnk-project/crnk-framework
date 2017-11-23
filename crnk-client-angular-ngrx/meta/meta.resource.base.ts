@@ -7,7 +7,7 @@ import {MetaJsonObject} from './meta.json.object';
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export interface MetaResourceBase extends MetaJsonObject {
 }

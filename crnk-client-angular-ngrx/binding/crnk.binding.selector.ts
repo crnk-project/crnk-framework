@@ -32,7 +32,7 @@ export class SelectorBinding {
 
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: SelectorBindingConfig, private utils: CrnkBindingUtils) {
 
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE)
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE);
 
 		const termToQuery = (queryTerm: String): Query => {
 			const query = _.cloneDeep(this.config.query);

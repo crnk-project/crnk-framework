@@ -23,11 +23,11 @@ import {Store} from '@ngrx/store';
 
 export const getNgrxJsonApiStore$ = function (state$: Store<any>): Observable<NgrxJsonApiStore> {
 	return state$.select('NgrxJsonApi').map(it => it ? it['api'] : undefined) as  Observable<NgrxJsonApiStore>;
-}
+};
 
 export const getStoreData$ = function (state$: Store<NgrxJsonApiStore>): Observable<NgrxJsonApiStoreData> {
 	return state$.select('data') as  Observable<NgrxJsonApiStoreData>;
-}
+};
 
 export const waitWhileLoading = function () {
 	return (result$: Observable<QueryResult>) => {

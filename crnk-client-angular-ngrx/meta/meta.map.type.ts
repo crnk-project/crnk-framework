@@ -19,7 +19,7 @@ import {
 	OneQueryResult,
 	ResourceRelationship,
 	TypedOneResourceRelationship
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaMapType {
 	export interface Relationships extends MetaType.Relationships {
