@@ -1,6 +1,7 @@
 package io.crnk.validation;
 
 import io.crnk.core.module.Module;
+import io.crnk.validation.filter.ValidationRepositoryFilter;
 import io.crnk.validation.internal.ConstraintViolationExceptionMapper;
 import io.crnk.validation.internal.ValidationExceptionMapper;
 
@@ -31,7 +32,7 @@ public class ValidationModule implements Module {
 	public void setupModule(ModuleContext context) {
 		context.addExceptionMapper(new ConstraintViolationExceptionMapper(context));
 		context.addExceptionMapper(new ValidationExceptionMapper());
+
+		context.addRepositoryFilter(new ValidationRepositoryFilter());
 	}
-
-
 }

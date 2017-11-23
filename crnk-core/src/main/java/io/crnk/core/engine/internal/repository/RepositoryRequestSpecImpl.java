@@ -1,23 +1,22 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.QueryParams;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Add some point maybe a more prominent api is necessary for this. But i likely
@@ -157,17 +156,6 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 			return (Iterable<T>) Collections.singleton(resourceInformation.getId(entity));
 		}
 		return (Iterable<T>) ids;
-	}
-
-	@Override
-	public boolean toValidate() {
-		for (Module module: this.moduleRegistry.getModules()) {
-			if (module.getModuleName().equals("validation") && (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	@Override

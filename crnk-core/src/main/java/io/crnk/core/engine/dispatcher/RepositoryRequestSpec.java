@@ -58,8 +58,4 @@ public interface RepositoryRequestSpec {
 	 */
 	<T> Iterable<T> getIds();
 
-	/**
-	 * @return describes whether ValidationModule added to class path enables JSR-303 validation support
-	 */
-	boolean toValidate();
 }
