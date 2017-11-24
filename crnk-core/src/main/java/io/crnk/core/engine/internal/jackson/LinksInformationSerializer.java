@@ -9,16 +9,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.resource.links.LinksInformation;
 
 /**
- *
- *
- * @author AdNovum Informatik AG
+ * Serializes {@link LinksInformation} objects as JSON objects instead of simple JSON attributes.
  */
 public class LinksInformationSerializer extends JsonSerializer<LinksInformation> {
-
-	public static final String HREF = "href";
 
 	@Override
 	public void serialize(LinksInformation value, JsonGenerator gen, SerializerProvider serializers)
@@ -76,7 +73,7 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 	private void writeObjectLink(String fieldName, String value, JsonGenerator gen) throws IOException {
 		if (value != null) {
 			gen.writeObjectFieldStart(fieldName);
-			gen.writeStringField(HREF, value);
+			gen.writeStringField(SerializerUtil.HREF, value);
 			gen.writeEndObject();
 		}
 	}

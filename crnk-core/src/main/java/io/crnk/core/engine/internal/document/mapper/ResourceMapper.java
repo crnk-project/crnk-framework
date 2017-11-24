@@ -12,6 +12,7 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
@@ -19,14 +20,14 @@ import io.crnk.core.resource.meta.MetaInformation;
 
 public class ResourceMapper {
 
-	static final String SELF_FIELD_NAME = "self";
-	static final String RELATED_FIELD_NAME = "related";
+	private static final String SELF_FIELD_NAME = "self";
+	private final String RELATED_FIELD_NAME = "related";
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
-	protected DocumentMapperUtil util;
-	protected boolean client;
-	protected ObjectMapper objectMapper;
+	private DocumentMapperUtil util;
+	private boolean client;
+	private ObjectMapper objectMapper;
 
 	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory resourceFilterDirectory) {
 		this.util = util;
@@ -114,9 +115,13 @@ public class ResourceMapper {
 
 	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
 		{ // NOSONAR signature is ok since protected
+			SerializerUtil serializerUtil = DocumentMapperUtil.getSerializerUtil();
+
 			ObjectNode relationshipLinks = objectMapper.createObjectNode();
-			relationshipLinks.put(SELF_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, false));
-			relationshipLinks.put(RELATED_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, true));
+			String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false);
+			serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+			String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true);
+			serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
 
 			Relationship relationship = new Relationship();
 			relationship.setLinks(relationshipLinks);

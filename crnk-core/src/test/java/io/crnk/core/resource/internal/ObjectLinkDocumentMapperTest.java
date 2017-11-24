@@ -2,7 +2,7 @@ package io.crnk.core.resource.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.internal.jackson.JacksonObjectLinkModule;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.properties.PropertiesProvider;
 
 /**
@@ -13,7 +13,7 @@ public class ObjectLinkDocumentMapperTest extends DocumentMapperTest {
 	@Override
 	public void setup() {
 		super.setup();
-		objectMapper.registerModule(JacksonObjectLinkModule.createJacksonObjectLinkModule());
+		objectMapper.registerModule(JacksonModule.createJacksonModule(true));
 	}
 
 	@Override

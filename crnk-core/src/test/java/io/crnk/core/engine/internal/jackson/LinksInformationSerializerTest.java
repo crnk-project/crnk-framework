@@ -57,7 +57,7 @@ public class LinksInformationSerializerTest {
 	@Test
 	public void testObjectLinkSerialization() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(JacksonObjectLinkModule.createJacksonObjectLinkModule());
+		mapper.registerModule(JacksonModule.createJacksonModule(true));
 
 		String serialized = mapper.writeValueAsString(selfLink);
 		String expected = createSingleLinkJson(OBJECT_LINK, "self", selfLink.getSelf());

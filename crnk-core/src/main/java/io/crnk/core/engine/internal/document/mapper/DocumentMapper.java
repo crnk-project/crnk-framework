@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -39,7 +38,7 @@ public class DocumentMapper {
 
 		PreconditionUtil.assertTrue("filterBehavior necessary on server-side", client || resourceFilterDirectory != null);
 
-		this.util = new DocumentMapperUtil(resourceRegistry, objectMapper);
+		this.util = new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
 		this.includeLookupSetter = new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
@@ -49,13 +48,6 @@ public class DocumentMapper {
 	}
 
 	protected ResourceMapper newResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
-		boolean serializeLinksAsObjects = false;
-		if (propertiesProvider != null) {
-			serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		}
-		if (serializeLinksAsObjects) {
-			return new ObjectLinkResourceMapper(util, client, objectMapper, resourceFilterDirectory);
-		}
 		return new ResourceMapper(util, client, objectMapper, resourceFilterDirectory);
 	}
 

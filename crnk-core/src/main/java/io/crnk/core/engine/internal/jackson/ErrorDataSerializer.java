@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 
 /**
  * Serializes top-level Errors object.
@@ -33,23 +35,19 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 	private static void writeSource(ErrorData errorData, JsonGenerator gen) throws IOException {
 		if (errorData.getSourceParameter() != null || errorData.getSourcePointer() != null) {
 			gen.writeObjectFieldStart(SOURCE);
-			writeStringIfExists(POINTER, errorData.getSourcePointer(), gen);
-			writeStringIfExists(PARAMETER, errorData.getSourceParameter(), gen);
+			SerializerUtil.writeStringIfExists(POINTER, errorData.getSourcePointer(), gen);
+			SerializerUtil.writeStringIfExists(PARAMETER, errorData.getSourceParameter(), gen);
 			gen.writeEndObject();
 		}
 	}
 
-	void writeAboutLink(ErrorData errorData, JsonGenerator gen) throws IOException {
+	private static void writeAboutLink(ErrorData errorData, JsonGenerator gen) throws IOException {
 		if (errorData.getAboutLink() != null) {
-			gen.writeObjectFieldStart(LINKS);
-			gen.writeStringField(ABOUT_LINK, errorData.getAboutLink());
-			gen.writeEndObject();
-		}
-	}
+			SerializerUtil serializerUtil = DocumentMapperUtil.getSerializerUtil();
 
-	private static void writeStringIfExists(String fieldName, String value, JsonGenerator gen) throws IOException {
-		if (value != null) {
-			gen.writeStringField(fieldName, value);
+			gen.writeObjectFieldStart(LINKS);
+			serializerUtil.serializeLink(gen, ABOUT_LINK, errorData.getAboutLink());
+			gen.writeEndObject();
 		}
 	}
 
@@ -58,12 +56,12 @@ public class ErrorDataSerializer extends JsonSerializer<ErrorData> {
 			throws IOException {
 
 		gen.writeStartObject();
-		writeStringIfExists(ID, errorData.getId(), gen);
+		SerializerUtil.writeStringIfExists(ID, errorData.getId(), gen);
 		writeAboutLink(errorData, gen);
-		writeStringIfExists(STATUS, errorData.getStatus(), gen);
-		writeStringIfExists(CODE, errorData.getCode(), gen);
-		writeStringIfExists(TITLE, errorData.getTitle(), gen);
-		writeStringIfExists(DETAIL, errorData.getDetail(), gen);
+		SerializerUtil.writeStringIfExists(STATUS, errorData.getStatus(), gen);
+		SerializerUtil.writeStringIfExists(CODE, errorData.getCode(), gen);
+		SerializerUtil.writeStringIfExists(TITLE, errorData.getTitle(), gen);
+		SerializerUtil.writeStringIfExists(DETAIL, errorData.getDetail(), gen);
 		writeSource(errorData, gen);
 		writeMeta(errorData, gen);
 		gen.writeEndObject();

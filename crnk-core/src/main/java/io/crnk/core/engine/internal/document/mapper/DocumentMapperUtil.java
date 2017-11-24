@@ -11,10 +11,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -35,9 +38,14 @@ public class DocumentMapperUtil {
 
 	private ObjectMapper objectMapper;
 
-	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper) {
+	private static SerializerUtil serializerUtil;
+
+	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider) {
 		this.resourceRegistry = resourceRegistry;
 		this.objectMapper = objectMapper;
+
+		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		serializerUtil = new SerializerUtil(serializeLinksAsObjects);
 	}
 
 	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter, List<ResourceField> fields, boolean relation) {
@@ -148,6 +156,10 @@ public class DocumentMapperUtil {
 	public String getSelfUrl(ResourceInformation resourceInformation, Object entity) {
 		String resourceUrl = resourceRegistry.getResourceUrl(resourceInformation);
 		return resourceUrl + "/" + getIdString(entity, resourceInformation);
+	}
+
+	public static SerializerUtil getSerializerUtil() {
+		return serializerUtil;
 	}
 
 	@JsonInclude(Include.NON_EMPTY)

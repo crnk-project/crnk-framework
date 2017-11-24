@@ -17,7 +17,6 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
-import io.crnk.core.engine.internal.jackson.JacksonObjectLinkModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -332,12 +331,7 @@ public class CrnkBoot {
 		}
 
 		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		if (serializeLinksAsObjects) {
-			moduleRegistry.addModule(new JacksonObjectLinkModule(objectMapper));
-		}
-		else {
-			moduleRegistry.addModule(new JacksonModule(objectMapper));
-		}
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
