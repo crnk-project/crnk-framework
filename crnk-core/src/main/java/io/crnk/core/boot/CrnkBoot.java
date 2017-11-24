@@ -162,9 +162,9 @@ public class CrnkBoot {
 	private void setupQuerySpecDeserializer() {
 		if (this.querySpecDeserializer == null) {
 			DefaultQuerySpecDeserializer deserializer = new DefaultQuerySpecDeserializer();
-			deserializer.setDefaultLimit(Long.getLong(propertiesProvider.getProperty(CrnkProperties.DEFAULT_PAGE_LIMIT)));
-			deserializer.setMaxPageLimit(Long.getLong(propertiesProvider.getProperty(CrnkProperties.MAX_PAGE_LIMIT)));
-			deserializer.setAllowUnknownAttributes(Boolean.getBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+			deserializer.setDefaultLimit(Long.parseLong(propertiesProvider.getProperty(CrnkProperties.DEFAULT_PAGE_LIMIT)));
+			deserializer.setMaxPageLimit(Long.parseLong(propertiesProvider.getProperty(CrnkProperties.MAX_PAGE_LIMIT)));
+			deserializer.setAllowUnknownAttributes(Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
 
 			this.querySpecDeserializer = deserializer;
 		}

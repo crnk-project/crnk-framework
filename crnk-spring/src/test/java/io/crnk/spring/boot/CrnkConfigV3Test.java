@@ -6,11 +6,13 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
@@ -21,6 +23,7 @@ public class CrnkConfigV3Test {
 	public void checkProperties() {
 		ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
 		Mockito.when(applicationContext.getEnvironment()).thenReturn(Mockito.mock(Environment.class));
+		Mockito.when(applicationContext.getBean(QuerySpecDeserializer.class)).thenThrow(new NoSuchBeanDefinitionException("No custom QuerySpecDeserializer"));
 
 		CrnkSpringBootProperties properties = new CrnkSpringBootProperties();
 		properties.setDomainName("testDomain");
