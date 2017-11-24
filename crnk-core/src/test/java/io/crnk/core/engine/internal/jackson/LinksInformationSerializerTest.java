@@ -64,10 +64,10 @@ public class LinksInformationSerializerTest {
 		Assert.assertEquals(expected, serialized);
 
 		serialized = mapper.writeValueAsString(pagedLink);
-		expected = createMultiLinkJson(OBJECT_LINK,
-						Arrays.asList("first", "last", "next"),
-						Arrays.asList(pagedLink.getFirst(), pagedLink.getLast(), pagedLink.getNext()));
-		Assert.assertEquals(expected, serialized);
+		// methods are not ordered when retrieved via reflection -> check individual links
+		Assert.assertTrue(serialized.contains(createSingleLinkJson(OBJECT_LINK, "first", pagedLink.getFirst(), false)));
+		Assert.assertTrue(serialized.contains(createSingleLinkJson(OBJECT_LINK, "last", pagedLink.getLast(), false)));
+		Assert.assertTrue(serialized.contains(createSingleLinkJson(OBJECT_LINK, "next", pagedLink.getNext(), false)));
 
 		serialized = mapper.writeValueAsString(customLink);
 		expected = createSingleLinkJson(OBJECT_LINK, "imdb", customLink.getImdb());
@@ -75,7 +75,11 @@ public class LinksInformationSerializerTest {
 	}
 
 	private String createSingleLinkJson(String template, String title, String url) {
-		return "{" + String.format(template, title, url) + "}";
+		return createSingleLinkJson(template, title, url, true);
+	}
+
+	private String createSingleLinkJson(String template, String title, String url, boolean includeStartEndBraces) {
+		return (includeStartEndBraces ? "{" : "") + String.format(template, title, url) + (includeStartEndBraces ? "}" : "");
 	}
 
 	private String createMultiLinkJson(String template, List<String> titles, List<String> urls) {
