@@ -210,7 +210,7 @@ anchor:validation_module[]
 ## JSR 303 Validation Module
 
 A `ValidationModule` provided by `io.crnk:crnk-validation` implements
-exception mappers for `javax.validation.ValidationException` and `javax.validation.ConstraintViolationException`.
+resource validation and provides exception mappers for `javax.validation.ValidationException` and `javax.validation.ConstraintViolationException`.
 Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON API errors.
 A JSON API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
 display the validation errors next to the corresponding input fields.
@@ -240,6 +240,20 @@ A translated exception can look like:
 ----
 
 Notice the `422` status code used for such errors.
+
+As mentioned above, resource validation mechanism enabled by default will be applied in case of one of the following request
+types: `POST`, `PUT` and `PATCH`. Once described behavior is unwanted,
+module should be defined in the following way:
+
+[source]
+----
+{
+	@Bean
+    ValidationModule validationModule()
+        return ValidationModule.create(false);
+    }
+}
+----
 
 
 anchor:brave_module[]
