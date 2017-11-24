@@ -7,8 +7,15 @@ import io.crnk.validation.internal.ValidationExceptionMapper;
 
 public class ValidationModule implements Module {
 
+	private final boolean enableResourceValidation;
+
 	// protected for CDI
 	protected ValidationModule() {
+		this(true);
+	}
+
+	protected ValidationModule(boolean enableResourceValidation) {
+		this.enableResourceValidation = enableResourceValidation;
 	}
 
 	/**
@@ -16,11 +23,15 @@ public class ValidationModule implements Module {
 	 */
 	@Deprecated
 	public static ValidationModule newInstance() {
-		return new ValidationModule();
+		return new ValidationModule(true);
 	}
 
 	public static ValidationModule create() {
-		return new ValidationModule();
+		return new ValidationModule(true);
+	}
+
+	public static ValidationModule create(boolean enableResourceValidation) {
+		return new ValidationModule(enableResourceValidation);
 	}
 
 	@Override
@@ -33,6 +44,8 @@ public class ValidationModule implements Module {
 		context.addExceptionMapper(new ConstraintViolationExceptionMapper(context));
 		context.addExceptionMapper(new ValidationExceptionMapper());
 
-		context.addRepositoryFilter(new ValidationRepositoryFilter());
+		if (enableResourceValidation) {
+			context.addRepositoryFilter(new ValidationRepositoryFilter());
+		}
 	}
 }
