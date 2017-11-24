@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LinkSerializerTest {
+public class LinksInformationSerializerTest {
 
 	private static final String LINK = "\"%s\":\"%s\"";
 	private static final String OBJECT_LINK = "\"%s\":{\"href\":\"%s\"}";

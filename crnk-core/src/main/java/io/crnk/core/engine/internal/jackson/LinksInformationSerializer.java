@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -44,6 +45,12 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 
 	private String getValue(Object object, Method method) {
 		try {
+			if (method.isAnnotationPresent(JsonIgnore.class)) {
+				return null;
+			}
+			if (!method.isAccessible()) {
+				method.setAccessible(true);
+			}
 			Object value = method.invoke(object);
 			return (String) value;
 		}

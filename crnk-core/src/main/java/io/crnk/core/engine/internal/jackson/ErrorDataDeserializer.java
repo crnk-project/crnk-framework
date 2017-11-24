@@ -1,13 +1,13 @@
 package io.crnk.core.engine.internal.jackson;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.ErrorData;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Serializes top-level Errors object.

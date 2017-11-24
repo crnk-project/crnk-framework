@@ -1,5 +1,9 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -20,7 +24,11 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -45,10 +53,6 @@ import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -326,7 +330,14 @@ public class CrnkBoot {
 		for (Module module : registeredModules) {
 			moduleRegistry.addModule(module);
 		}
-		moduleRegistry.addModule(serializeLinksAsObjects() ? new JacksonObjectLinkModule(objectMapper) : new JacksonModule(objectMapper));
+
+		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		if (serializeLinksAsObjects) {
+			moduleRegistry.addModule(new JacksonObjectLinkModule(objectMapper));
+		}
+		else {
+			moduleRegistry.addModule(new JacksonModule(objectMapper));
+		}
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -466,10 +477,6 @@ public class CrnkBoot {
 
 	public boolean isNullDataResponseEnabled() {
 		return Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.NULL_DATA_RESPONSE_ENABLED));
-	}
-
-	public boolean serializeLinksAsObjects() {
-		return Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
 	}
 
 	public ServiceUrlProvider getServiceUrlProvider() {

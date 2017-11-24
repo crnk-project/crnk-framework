@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,18 +17,16 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
-import java.util.List;
-
 public class ResourceMapper {
 
-	private static final String SELF_FIELD_NAME = "self";
-	private static final String RELATED_FIELD_NAME = "related";
+	static final String SELF_FIELD_NAME = "self";
+	static final String RELATED_FIELD_NAME = "related";
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
-	private DocumentMapperUtil util;
-	private boolean client;
-	private ObjectMapper objectMapper;
+	protected DocumentMapperUtil util;
+	protected boolean client;
+	protected ObjectMapper objectMapper;
 
 	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory resourceFilterDirectory) {
 		this.util = util;

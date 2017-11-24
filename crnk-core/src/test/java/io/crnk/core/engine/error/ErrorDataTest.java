@@ -1,5 +1,7 @@
 package io.crnk.core.engine.error;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
@@ -8,8 +10,6 @@ import io.crnk.core.engine.internal.jackson.JacksonObjectLinkModule;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.IOException;
 
 public class ErrorDataTest {
 

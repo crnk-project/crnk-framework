@@ -1,6 +1,14 @@
 package io.crnk.core.resource.internal;
 
-import io.crnk.core.engine.document.*;
+import java.util.Arrays;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.document.Relationship;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
@@ -9,14 +17,10 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.utils.Nullable;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
@@ -47,7 +51,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		response.setLinksInformation(links);
 
 		Document document = mapper.toDocument(response, createAdapter(Task.class));
-		Assert.assertEquals("linksValue", document.getLinks().get("value").asText());
+		Assert.assertEquals("linksValue", getLinkText(document.getLinks().get("value")));
 		Assert.assertEquals("metaValue", document.getMeta().get("value").asText());
 	}
 
@@ -65,7 +69,7 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		Document document = mapper.toDocument(toResponse(task), createAdapter(Task.class));
 		Resource resource = document.getSingleData().get();
-		Assert.assertEquals("linksValue", resource.getLinks().get("value").asText());
+		Assert.assertEquals("linksValue", getLinkText(resource.getLinks().get("value")));
 		Assert.assertEquals("metaValue", resource.getMeta().get("value").asText());
 	}
 
@@ -227,8 +231,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		Relationship relationship = resource.getRelationships().get("project");
 		Assert.assertNotNull(relationship);
-		Assert.assertEquals("https://service.local/tasks/2/relationships/project", relationship.getLinks().get("self").asText());
-		Assert.assertEquals("https://service.local/tasks/2/project", relationship.getLinks().get("related").asText());
+		Assert.assertEquals("https://service.local/tasks/2/relationships/project", getLinkText(relationship.getLinks().get("self")));
+		Assert.assertEquals("https://service.local/tasks/2/project", getLinkText(relationship.getLinks().get("related")));
 		ResourceIdentifier relationshipData = relationship.getSingleData().get();
 		Assert.assertNotNull(relationshipData);
 		Assert.assertEquals("3", relationshipData.getId());
@@ -254,8 +258,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		Relationship relationship = resource.getRelationships().get("lazyProject");
 		Assert.assertNotNull(relationship);
-		Assert.assertEquals("https://service.local/lazy_tasks/2/relationships/lazyProject", relationship.getLinks().get("self").asText());
-		Assert.assertEquals("https://service.local/lazy_tasks/2/lazyProject", relationship.getLinks().get("related").asText());
+		Assert.assertEquals("https://service.local/lazy_tasks/2/relationships/lazyProject", getLinkText(relationship.getLinks().get("self")));
+		Assert.assertEquals("https://service.local/lazy_tasks/2/lazyProject", getLinkText(relationship.getLinks().get("related")));
 		Nullable<ResourceIdentifier> relationshipData = relationship.getSingleData();
 		Assert.assertFalse(relationshipData.isPresent());
 		Assert.assertTrue(document.getIncluded().isEmpty());
@@ -303,10 +307,24 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 	class TestLinksInformation implements LinksInformation {
 		public String value;
+
+		public String getValue() {
+			return value;
+		}
+
+		// used to test the LinksInformationSerializer -> should not be serialized
+		@JsonIgnore
+		public String getOtherValue() {
+			return null;
+		}
 	}
 
 	class TestMetaInformation implements MetaInformation {
 		public String value;
+
+		public String getValue() {
+			return value;
+		}
 	}
 
 }
