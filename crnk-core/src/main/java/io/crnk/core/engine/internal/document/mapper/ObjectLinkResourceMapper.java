@@ -9,11 +9,11 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 
-public class LinkObjectResourceMapper extends ResourceMapper {
+public class ObjectLinkResourceMapper extends ResourceMapper {
 
 	private static final String HREF_FIELD_NAME = "href";
 
-	public LinkObjectResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory
+	public ObjectLinkResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory
 			resourceFilterDirectory) {
 
 		super(util, client, objectMapper, resourceFilterDirectory);

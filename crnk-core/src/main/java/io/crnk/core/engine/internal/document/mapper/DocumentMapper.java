@@ -54,7 +54,7 @@ public class DocumentMapper {
 			serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
 		}
 		if (serializeLinksAsObjects) {
-			return new LinkObjectResourceMapper(util, client, objectMapper, resourceFilterDirectory);
+			return new ObjectLinkResourceMapper(util, client, objectMapper, resourceFilterDirectory);
 		}
 		return new ResourceMapper(util, client, objectMapper, resourceFilterDirectory);
 	}
