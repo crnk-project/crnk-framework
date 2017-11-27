@@ -3,34 +3,38 @@ package io.crnk.core.engine.error;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
-import nl.jqno.equalsverifier.EqualsVerifier;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ErrorDataTest {
-
-	protected DocumentMapperUtil util;
+/**
+ * @author AdNovum Informatik AG
+ */
+public class ObjectLinkErrorDataTest extends ErrorDataTest {
 
 	@Before
 	public void setup() {
-		util = new DocumentMapperUtil(null, null, new NullPropertiesProvider());
+		util = new DocumentMapperUtil(null, null, new PropertiesProvider() {
+			@Override
+			public String getProperty(String key) {
+				if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS))
+					return "true";
+				return null;
+			}
+		});
 	}
 
 	@Test
-	public void shouldFulfillEqualsHashCodeContract() throws Exception {
-		EqualsVerifier.forClass(ErrorData.class).allFieldsShouldBeUsed().verify();
-	}
-
-	@Test
+	@Override
 	public void testSerialization() throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(JacksonModule.createJacksonModule());
+		mapper.registerModule(JacksonModule.createJacksonModule(true));
 
 		ErrorDataBuilder builder = new ErrorDataBuilder();
 		builder.setAboutLink("about");
@@ -45,22 +49,9 @@ public class ErrorDataTest {
 
 		ErrorData errorData = builder.build();
 		String json = mapper.writeValueAsString(errorData);
+		Assert.assertTrue(json.contains("{\"about\":{\"href\":\"about\"}}"));
 		ErrorData copy = mapper.readerFor(ErrorData.class).readValue(json);
 
 		Assert.assertEquals(errorData, copy);
 	}
-
-	@Test
-	public void testToString() {
-		ErrorDataBuilder builder = new ErrorDataBuilder();
-		builder.setTitle("title");
-		builder.setCode("code");
-		builder.setStatus("status");
-		builder.setDetail("detail");
-		builder.setSourcePointer("sourcePointer");
-		builder.setSourceParameter("sourceParameter");
-		String actual = builder.build().toString();
-		Assert.assertEquals("ErrorData{id='null', aboutLink='null', status='status', code='code', title='title', detail='detail', sourcePointer='sourcePointer', sourceParameter='sourceParameter', meta=null}", actual);
-	}
-
 }

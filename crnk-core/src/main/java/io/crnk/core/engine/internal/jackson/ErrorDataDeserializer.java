@@ -1,13 +1,14 @@
 package io.crnk.core.engine.internal.jackson;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.ErrorData;
-
-import java.io.IOException;
-import java.util.Map;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 
 /**
  * Serializes top-level Errors object.
@@ -26,7 +27,7 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 	private static String readSourcePointer(JsonNode errorNode) throws IOException {
 		JsonNode node = errorNode.get(ErrorDataSerializer.SOURCE);
 		if (node != null) {
-			return readStringIfExists(ErrorDataSerializer.POINTER, node);
+			return SerializerUtil.readStringIfExists(ErrorDataSerializer.POINTER, node);
 		}
 		return null;
 	}
@@ -34,7 +35,7 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 	private static String readSourceParameter(JsonNode errorNode) throws IOException {
 		JsonNode node = errorNode.get(ErrorDataSerializer.SOURCE);
 		if (node != null) {
-			return readStringIfExists(ErrorDataSerializer.PARAMETER, node);
+			return SerializerUtil.readStringIfExists(ErrorDataSerializer.PARAMETER, node);
 		}
 		return null;
 	}
@@ -42,29 +43,20 @@ public class ErrorDataDeserializer extends JsonDeserializer<ErrorData> {
 	private static String readAboutLink(JsonNode errorNode) throws IOException {
 		JsonNode node = errorNode.get(ErrorDataSerializer.LINKS);
 		if (node != null) {
-			return readStringIfExists(ErrorDataSerializer.ABOUT_LINK, node);
+			return SerializerUtil.deserializeLink(ErrorDataSerializer.ABOUT_LINK, node);
 		}
 		return null;
-	}
-
-	private static String readStringIfExists(String fieldName, JsonNode errorNode) throws IOException {
-		JsonNode node = errorNode.get(fieldName);
-		if (node != null) {
-			return node.asText();
-		} else {
-			return null;
-		}
 	}
 
 	@Override
 	public ErrorData deserialize(JsonParser jp, DeserializationContext context) throws IOException {
 		JsonNode errorNode = jp.readValueAsTree();
-		String id = readStringIfExists(ErrorDataSerializer.ID, errorNode);
+		String id = SerializerUtil.readStringIfExists(ErrorDataSerializer.ID, errorNode);
 		String aboutLink = readAboutLink(errorNode);
-		String status = readStringIfExists(ErrorDataSerializer.STATUS, errorNode);
-		String code = readStringIfExists(ErrorDataSerializer.CODE, errorNode);
-		String title = readStringIfExists(ErrorDataSerializer.TITLE, errorNode);
-		String detail = readStringIfExists(ErrorDataSerializer.DETAIL, errorNode);
+		String status = SerializerUtil.readStringIfExists(ErrorDataSerializer.STATUS, errorNode);
+		String code = SerializerUtil.readStringIfExists(ErrorDataSerializer.CODE, errorNode);
+		String title = SerializerUtil.readStringIfExists(ErrorDataSerializer.TITLE, errorNode);
+		String detail = SerializerUtil.readStringIfExists(ErrorDataSerializer.DETAIL, errorNode);
 		Map<String, Object> meta = readMeta(errorNode, jp);
 		String sourcePointer = readSourcePointer(errorNode);
 		String sourceParameter = readSourceParameter(errorNode);

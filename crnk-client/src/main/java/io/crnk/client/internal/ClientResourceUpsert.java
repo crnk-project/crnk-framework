@@ -1,5 +1,13 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -17,16 +25,13 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceUpsert;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -165,7 +170,16 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 				JsonNode relatedNode = links.get("related");
 				if (relatedNode != null) {
-					String url = relatedNode.asText().trim();
+					String url = null;
+					if (relatedNode.has(SerializerUtil.HREF)) {
+						JsonNode hrefNode = relatedNode.get(SerializerUtil.HREF);
+						if (hrefNode != null) {
+							url = hrefNode.asText().trim();
+						}
+					}
+					else {
+						url = relatedNode.asText().trim();
+					}
 					Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
 					field.getAccessor().setValue(newResource, proxy);
 				}

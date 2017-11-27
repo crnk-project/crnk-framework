@@ -1,5 +1,6 @@
 package io.crnk.core.resource.internal;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -71,6 +72,10 @@ public abstract class AbstractDocumentMapperTest {
 		JsonApiResponse response = new JsonApiResponse();
 		response.setEntity(entity);
 		return response;
+	}
+
+	protected String getLinkText(JsonNode link) {
+		return link.asText();
 	}
 
 }

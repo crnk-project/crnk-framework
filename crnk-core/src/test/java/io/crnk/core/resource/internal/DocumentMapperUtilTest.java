@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +18,7 @@ public class DocumentMapperUtilTest extends AbstractDocumentMapperTest {
 	@Before
 	public void setup() {
 		super.setup();
-		util = new DocumentMapperUtil(resourceRegistry, objectMapper);
+		util = new DocumentMapperUtil(resourceRegistry, objectMapper, new NullPropertiesProvider());
 	}
 
 	@Test
