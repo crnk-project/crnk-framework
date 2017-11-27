@@ -17,6 +17,7 @@
 package io.crnk.servlet;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
@@ -43,9 +44,12 @@ public class CrnkServlet extends HttpServlet {
 
 	protected final transient CrnkBoot boot = new CrnkBoot();
 
+	private boolean acceptPlainJson;
+
 	@Override
 	public void init() throws ServletException {
 		boot.setPropertiesProvider(new ServletPropertiesProvider(getServletConfig()));
+		acceptPlainJson = !Boolean.parseBoolean(boot.getPropertiesProvider().getProperty(CrnkProperties.REJECT_PLAIN_JSON));
 
 		HttpRequestContextProvider provider = boot.getModuleRegistry().getHttpRequestContextProvider();
 		boot.addModule(new ServletModule(provider));
@@ -66,7 +70,8 @@ public class CrnkServlet extends HttpServlet {
 		requestDispatcher.process(context);
 
 		if (!context.checkAbort()) {
-			boolean jsonApiRequest = JsonApiRequestProcessor.isJsonApiRequest(new HttpRequestContextBaseAdapter(context));
+			HttpRequestContextBaseAdapter requestContext = new HttpRequestContextBaseAdapter(context);
+			boolean jsonApiRequest = JsonApiRequestProcessor.isJsonApiRequest(requestContext, acceptPlainJson);
 			response.setStatus(jsonApiRequest ? HttpStatus.NOT_FOUND_404 : HttpStatus.UNSUPPORTED_MEDIA_TYPE_415);
 		}
 	}
