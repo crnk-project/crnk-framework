@@ -86,10 +86,10 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 					return properties.getPathPrefix();
 				}
 				if (CrnkProperties.DEFAULT_PAGE_LIMIT.equals(key)) {
-					return String.valueOf(properties.getDefaultPageLimit());
+					return (properties.getDefaultPageLimit() == null) ? null : String.valueOf(properties.getDefaultPageLimit());
 				}
 				if (CrnkProperties.MAX_PAGE_LIMIT.equals(key)) {
-					return String.valueOf(properties.getMaxPageLimit());
+					return (properties.getMaxPageLimit() == null) ? null : String.valueOf(properties.getMaxPageLimit());
 				}
 				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
 					return String.valueOf(properties.getAllowUnknownAttributes());
