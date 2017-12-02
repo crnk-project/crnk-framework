@@ -1,5 +1,13 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -20,6 +28,7 @@ import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.module.ClientModule;
 import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
@@ -38,7 +47,13 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
@@ -54,14 +69,6 @@ import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -90,11 +97,20 @@ public class CrnkClient {
 
 	private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
-	public CrnkClient(String serviceUrl) {
-		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)));
+	public enum ClientType {
+		SIMPLE_lINKS,
+		OBJECT_LINKS
 	}
 
-	public CrnkClient(ServiceUrlProvider serviceUrlProvider) {
+	public CrnkClient(String serviceUrl) {
+		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)), ClientType.SIMPLE_lINKS);
+	}
+
+	public CrnkClient(String serviceUrl, ClientType clientType) {
+		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)), clientType);
+	}
+
+	public CrnkClient(ServiceUrlProvider serviceUrlProvider, ClientType clientType) {
 		this.registerHttpAdapterProvider(new OkHttpAdapterProvider());
 		this.registerHttpAdapterProvider(new HttpClientAdapterProvider());
 
@@ -108,9 +124,24 @@ public class CrnkClient {
 
 		objectMapper = new ObjectMapper();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-		moduleRegistry.addModule(new JacksonModule(objectMapper));
 
-		documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, null);
+		switch (clientType) {
+			case OBJECT_LINKS:
+				moduleRegistry.addModule(new JacksonModule(objectMapper, true));
+				documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new PropertiesProvider() {
+					@Override
+					public String getProperty(String key) {
+						if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS))
+							return "true";
+						return null;
+					}
+				});
+				break;
+			default:
+				moduleRegistry.addModule(new JacksonModule(objectMapper));
+				documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
+		}
+
 		setProxyFactory(new BasicProxyFactory());
 	}
 

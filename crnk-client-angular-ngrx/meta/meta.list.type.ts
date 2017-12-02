@@ -8,7 +8,7 @@ import {QMetaType} from './meta.type';
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export interface MetaListType extends MetaCollectionType {
 }

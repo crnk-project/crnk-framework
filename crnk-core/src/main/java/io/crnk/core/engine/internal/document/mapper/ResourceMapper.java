@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,17 +12,16 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
-import java.util.List;
-
 public class ResourceMapper {
 
 	private static final String SELF_FIELD_NAME = "self";
-	private static final String RELATED_FIELD_NAME = "related";
+	private final String RELATED_FIELD_NAME = "related";
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
@@ -114,9 +115,13 @@ public class ResourceMapper {
 
 	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
 		{ // NOSONAR signature is ok since protected
+			SerializerUtil serializerUtil = DocumentMapperUtil.getSerializerUtil();
+
 			ObjectNode relationshipLinks = objectMapper.createObjectNode();
-			relationshipLinks.put(SELF_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, false));
-			relationshipLinks.put(RELATED_FIELD_NAME, util.getRelationshipLink(resourceInformation, entity, field, true));
+			String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false);
+			serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+			String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true);
+			serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
 
 			Relationship relationship = new Relationship();
 			relationship.setLinks(relationshipLinks);

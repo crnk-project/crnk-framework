@@ -38,26 +38,34 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 
 	@Before
 	public void setup() {
+		createClient();
+		setupClient(client);
+
+		cleanRepositories();
+
+		Assert.assertNotNull(client.getActionStubFactory());
+		Assert.assertNotNull(client.getModuleRegistry());
+	}
+
+	protected void createClient() {
 		client = new CrnkClient(getBaseUri().toString());
 		client.addModule(new TestModule());
 		// tag::jerseyStubFactory[]
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		// end::jerseyStubFactory[]
 		client.getHttpAdapter().setReceiveTimeout(10000000, TimeUnit.MILLISECONDS);
-		setupClient(client);
+	}
 
+	protected void setupClient(CrnkClient client) {
+
+	}
+
+	protected void cleanRepositories() {
 		TaskRepository.clear();
 		ProjectRepository.clear();
 		TaskToProjectRepository.clear();
 		ProjectToTaskRepository.clear();
 		ScheduleRepositoryImpl.clear();
-
-		Assert.assertNotNull(client.getActionStubFactory());
-		Assert.assertNotNull(client.getModuleRegistry());
-	}
-
-	protected void setupClient(CrnkClient client) {
-
 	}
 
 	@Override
@@ -113,11 +121,12 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 		private CrnkTestFeature feature;
 
 		public TestApplication(boolean querySpec) {
-			this(querySpec, false);
+			this(querySpec, false, false);
 		}
 
-		public TestApplication(boolean querySpec, boolean jsonApiFilter) {
+		public TestApplication(boolean querySpec, boolean jsonApiFilter, boolean serializeLinksAsObjects) {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.test.mock");
+			property(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS, Boolean.toString(serializeLinksAsObjects));
 
 			if (!querySpec) {
 				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),

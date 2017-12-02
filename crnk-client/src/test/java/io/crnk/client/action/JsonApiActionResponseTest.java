@@ -50,7 +50,7 @@ public class JsonApiActionResponseTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true, true);
+		return new TestApplication(true, true, false);
 	}
 
 	@Test

@@ -23,7 +23,7 @@ import {
 	OneQueryResult,
 	ResourceRelationship,
 	TypedOneResourceRelationship
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export module MetaResourceRepository {
 	export interface Relationships extends MetaElement.Relationships {

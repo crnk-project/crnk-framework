@@ -142,7 +142,7 @@ export class FormBinding {
 		private store: Store<any>) {
 
 		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId)
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId);
 
 		this.dirtySubject.next(false);
 		this.validSubject.next(true);
@@ -169,8 +169,8 @@ export class FormBinding {
 			})
 			.do(() => this.checkSubscriptions())
 			.do(resource => this.primaryResourceId = {type: resource.type, id: resource.id})
-			.withLatestFrom(this.store, (resource, store) => {
-				let jsonapiState = getNgrxJsonApiZone(store, zoneId);
+			.withLatestFrom(this.store, (resource, state) => {
+				const jsonapiState = getNgrxJsonApiZone(state, zoneId);
 				this._storeDataSnapshot = jsonapiState.data;
 				this.mapResourceToControlErrors(jsonapiState.data);
 				this.updateDirtyState(jsonapiState.data);
@@ -261,9 +261,9 @@ export class FormBinding {
 			return resource && resource.state !== 'IN_SYNC';
 		}
 
-		var newDirty = isDirty(this.primaryResourceId);
+		let newDirty = isDirty(this.primaryResourceId);
 		for (const editedResourceId of _.values(this.editResourceIds)) {
-			newDirty = newDirty || isDirty(editedResourceId)
+			newDirty = newDirty || isDirty(editedResourceId);
 		}
 		this.dirtySubject.next(newDirty);
 	}

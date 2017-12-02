@@ -1,22 +1,18 @@
 package io.crnk.example.springboot.domain.repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.Task;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class TaskRepositoryImpl implements TaskRepository {
@@ -25,14 +21,11 @@ public class TaskRepositoryImpl implements TaskRepository {
 
 	private static final AtomicLong ID_GENERATOR = new AtomicLong(4);
 
-	private final ValidatorFactory validatorFactory;
-
 	private ProjectRepositoryImpl projectRepository;
 
 	@Autowired
-	public TaskRepositoryImpl(ValidatorFactory validatorFactory, ProjectRepositoryImpl projectRepository) {
+	public TaskRepositoryImpl(ProjectRepositoryImpl projectRepository) {
 		this.projectRepository = projectRepository;
-		this.validatorFactory = validatorFactory;
 		Task task = new Task(1L, "Create tasks");
 		task.setProjectId(123L);
 		save(task);
@@ -46,24 +39,11 @@ public class TaskRepositoryImpl implements TaskRepository {
 
 	@Override
 	public <S extends Task> S save(S entity) {
-		validate(entity);
 		if (entity.getId() == null) {
 			entity.setId(ID_GENERATOR.getAndIncrement());
 		}
 		REPOSITORY.put(entity.getId(), entity);
 		return entity;
-	}
-
-	/**
-	 * @Validated and @Valid to not seem to properly work in Spring with interface for some reason. Doing
-	 * programmatic validation instead.
-	 */
-	private <S extends Task> void validate(S entity) {
-		Validator validator = validatorFactory.getValidator();
-		Set<ConstraintViolation<S>> violations = validator.validate(entity);
-		if (!violations.isEmpty()) {
-			throw new ConstraintViolationException(violations);
-		}
 	}
 
 	@Override

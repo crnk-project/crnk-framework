@@ -138,6 +138,29 @@ public class CrnkProperties {
 
 	/**
 	 * <p>
+	 * Set a boolean whether Crnk should links should be serialized as JSON objects.
+	 * </p>
+	 */
+	public static final String SERIALIZE_LINKS_AS_OBJECTS = "crnk.config.serialize.object.links";
+
+	/**
+	 * <p>Set a boolean whether Crnk should reject <code>application/json</code> requests to JSON-API endpoints.
+	 * Defaults to <code>false</code>.
+	 * </p><p>The
+	 * JSON-API specification mandates the use of the <code>application/vnd.api+json</code> MIME-Type. In cases where frontends or
+	 * intermediate proxies prefer the <code>application/json</code> MIME-Type, that type can be sent in the <code>Accept</code>
+	 * header instead.</p>
+	 * <p>If an application wants to serve a different response depending on whether the client's <code>Accept</code> header
+	 * contains <code>application/vnd.api+json</code> or <code>application/json</code>, this option can be enabled.</p>
+	 * <p>This <strong>does not affect the <em>payload</em> <code>Content-Type</code></strong>. This means that the response will
+	 * still have <code>Content-Type: application/vnd.api+json</code> and that <code>POST/PATCH</code> requests, too, need to set
+	 * <code>Content-Type: application/vnd.api+json</code> to describe their request body.</p>
+	 * @since 2.4
+	 */
+	public static final String REJECT_PLAIN_JSON = "crnk.config.resource.request.rejectPlainJson";
+
+	/**
+	 * <p>
 	 * Set a default page limit for Crnk responses.
 	 * </p>
 	 */

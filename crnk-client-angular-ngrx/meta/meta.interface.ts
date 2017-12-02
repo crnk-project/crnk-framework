@@ -9,7 +9,7 @@ import {
 import {
 	ManyQueryResult,
 	OneQueryResult
-} from 'ngrx-json-api/src/interfaces';
+} from 'ngrx-json-api';
 
 export interface MetaInterface extends MetaDataObject {
 }

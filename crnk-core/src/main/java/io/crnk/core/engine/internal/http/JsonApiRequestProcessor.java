@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -32,12 +33,32 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 
 
 	private Module.ModuleContext moduleContext;
+	private Boolean acceptingPlainJson;
 
 	public JsonApiRequestProcessor(Module.ModuleContext moduleContext) {
 		this.moduleContext = moduleContext;
 	}
 
+	/**
+	 * Determines whether the supplied HTTP request is considered a JSON-API request. Accepts plain JSON requests by default.
+	 * @see #isJsonApiRequest(HttpRequestContext, boolean)
+	 * @param requestContext The HTTP request
+	 * @return <code>true</code> if it is a JSON-API request; <code>false</code> otherwise
+	 */
+	@Deprecated
 	public static boolean isJsonApiRequest(HttpRequestContext requestContext) {
+		return isJsonApiRequest(requestContext, true);
+	}
+
+	/**
+	 * Determines whether the supplied HTTP request is considered a JSON-API request.
+	 * @param requestContext The HTTP request
+	 * @param acceptPlainJson Whether a plain JSON request should also be considered a JSON-API request
+	 * @return <code>true</code> if it is a JSON-API request; <code>false</code> otherwise
+	 * @since 2.4
+	 */
+	@SuppressWarnings("UnnecessaryLocalVariable")
+	public static boolean isJsonApiRequest(HttpRequestContext requestContext, boolean acceptPlainJson) {
 		if (requestContext.getMethod().equalsIgnoreCase(HttpMethod.PATCH.toString()) || requestContext.getMethod()
 				.equalsIgnoreCase(HttpMethod.POST.toString())) {
 			String contentType = requestContext.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE);
@@ -45,14 +66,25 @@ public class JsonApiRequestProcessor implements HttpRequestProcessor {
 				return false;
 			}
 		}
+
+		// short-circuit each of the possible Accept MIME type checks, so that we don't keep comparing after we have already
+		// found a match. Intentionally kept as separate statements (instead of a big, chained ||) to ease debugging/maintenance.
 		boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		boolean acceptsAny = requestContext.acceptsAny();
-		return acceptsJsonApi || acceptsAny;
+		boolean acceptsAny = acceptsJsonApi || requestContext.acceptsAny();
+		boolean acceptsPlainJson = acceptsAny || (acceptPlainJson && requestContext.accepts("application/json"));
+		return acceptsPlainJson;
+	}
+
+	private boolean isAcceptingPlainJson() {
+		if(acceptingPlainJson == null){
+			acceptingPlainJson = !Boolean.parseBoolean(moduleContext.getPropertiesProvider().getProperty(CrnkProperties.REJECT_PLAIN_JSON));
+		}
+		return acceptingPlainJson;
 	}
 
 	@Override
 	public void process(HttpRequestContext requestContext) throws IOException {
-		if (isJsonApiRequest(requestContext)) {
+		if (isJsonApiRequest(requestContext, isAcceptingPlainJson())) {
 
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 			RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();

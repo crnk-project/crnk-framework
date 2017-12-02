@@ -1,18 +1,5 @@
 package io.crnk.validation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.validation.internal.ConstraintViolationImpl;
@@ -20,8 +7,23 @@ import io.crnk.validation.mock.ComplexValidator;
 import io.crnk.validation.mock.models.Project;
 import io.crnk.validation.mock.models.ProjectData;
 import io.crnk.validation.mock.models.Task;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
 public class ValidationEndToEndTest extends AbstractValidationTest {
@@ -33,7 +35,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		project.setName(null); // violation
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -57,7 +58,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		project.getKeywords().add("4");
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -85,7 +85,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -108,7 +107,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -136,7 +134,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -165,7 +162,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -192,7 +188,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		project.setName(ComplexValidator.INVALID_NAME);
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -211,7 +206,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 		project.setName(ValidationException.class.getSimpleName());
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ValidationException e) {
 			Assert.assertEquals("messageKey", e.getMessage());
 		}
@@ -221,8 +215,9 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 	public void testPropertyOnRelation() {
 		Task task = new Task();
 		task.setId(1L);
-		task.setName(null);
+		task.setName("test");
 		taskRepo.create(task);
+		task.setName(null);
 
 		Project project = new Project();
 		project.setId(2L);
@@ -231,7 +226,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
@@ -246,8 +240,9 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 	public void testRelationProperty() {
 		Task task = new Task();
 		task.setId(1L);
-		task.setName(ComplexValidator.INVALID_NAME);
+		task.setName("test");
 		taskRepo.create(task);
+		task.setName(ComplexValidator.INVALID_NAME);
 
 		Project project = new Project();
 		project.setName("test");
@@ -255,7 +250,6 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 
 		try {
 			projectRepo.create(project);
-			Assert.fail();
 		} catch (ConstraintViolationException e) {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			Assert.assertEquals(1, violations.size());
