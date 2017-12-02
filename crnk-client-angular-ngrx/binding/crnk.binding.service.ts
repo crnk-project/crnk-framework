@@ -20,7 +20,7 @@ export class CrnkBindingService {
 	}
 
 	public bindDataTable(config: DataTableBindingConfig): DataTableBinding {
-		return new DataTableBinding(this.ngrxJsonApiService, config, this.utils);
+		return new DataTableBinding(this.ngrxJsonApiService, config, this.utils, this.store);
 	}
 
 	public bindForm(config: FormBindingConfig): FormBinding {

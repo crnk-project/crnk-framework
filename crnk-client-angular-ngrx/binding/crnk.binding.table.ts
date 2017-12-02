@@ -14,11 +14,12 @@ import {
 	Query,
 	Resource,
 	SortingParam,
-	NgrxJsonApiZoneService, NGRX_JSON_API_DEFAULT_ZONE
+	NgrxJsonApiZoneService, NGRX_JSON_API_DEFAULT_ZONE, getNgrxJsonApiZone, selectNgrxJsonApiZone
 } from 'ngrx-json-api';
 import {CrnkBindingUtils} from './crnk.binding.utils';
 // TODO get rid of this? or support multiple ones, only dependency to primeng here...
 import {LazyLoadEvent} from 'primeng/primeng';
+import {Store} from '@ngrx/store';
 
 export interface DataTableBindingConfig {
 
@@ -54,9 +55,11 @@ export class DataTableBinding {
 	private ngrxJsonApiZone: NgrxJsonApiZoneService;
 
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
-				private utils: CrnkBindingUtils) {
+		private utils: CrnkBindingUtils, store: Store<any>
+	) {
 
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(config.zoneId || NGRX_JSON_API_DEFAULT_ZONE);
+		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
+		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId);
 		this.result$ = this.resultSubject$.asObservable();
 
 		if (!this.config.queryId) {
@@ -67,10 +70,17 @@ export class DataTableBinding {
 		}
 		this.baseQuery = this.config.baseQuery;
 
-		const storeQuerySnapshot = ngrxJsonApiService['storeSnapshot'].queries[this.config.queryId];
-		if (storeQuerySnapshot) {
-			this.latestQuery = storeQuerySnapshot.query;
-			this.baseQuery = storeQuerySnapshot['query'];
+		store.let(selectNgrxJsonApiZone(zoneId)).take(1)
+			.map(it => it.queries[this.config.queryId])
+			.subscribe(storeQuery => {
+				if (storeQuery != null) {
+					this.latestQuery = storeQuery.query;
+					this.baseQuery = storeQuery.query;
+				}
+			});
+
+		if (!this.baseQuery) {
+			throw new Error('baseQuery not available');
 		}
 
 		this.result$ = this.ngrxJsonApiZone
