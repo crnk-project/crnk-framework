@@ -158,6 +158,33 @@ public class CrnkServletTest {
 		assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
 	}
 
+
+	@Test
+	public void testAcceptPlainJson() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.setMethod("GET");
+		request.setContextPath("");
+		request.setServletPath("/api");
+		request.setPathInfo("/tasks/1");
+		request.setRequestURI("/api/tasks/1");
+		request.addHeader("Accept", "application/json");
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		servlet.service(request, response);
+
+		String responseContent = response.getContentAsString();
+
+		log.debug("responseContent: {}", responseContent);
+		assertNotNull(responseContent);
+
+		assertJsonPartEquals("tasks", responseContent, "data.type");
+		assertJsonPartEquals("\"1\"", responseContent, "data.id");
+		assertJsonPartEquals(SOME_TASK_ATTRIBUTES, responseContent, "data.attributes");
+		assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data.links");
+		assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
+	}
+
 	@Test
 	public void onCollectionRequestWithParamsGetShouldReturnCollection() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);

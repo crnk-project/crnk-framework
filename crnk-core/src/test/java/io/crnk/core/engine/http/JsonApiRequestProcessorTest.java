@@ -67,10 +67,23 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept"))
 				.thenReturn("*");
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 		Mockito.when(requestContextBase.getRequestHeader("Accept"))
 				.thenReturn("something");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+	}
+
+
+	@Test
+	public void acceptPlainJsonDependingOnFlag() throws IOException {
+		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+		Mockito.when(requestContextBase.getRequestHeader("Accept"))
+				.thenReturn("application/json");
+		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, true));
+		Mockito.when(requestContextBase.getRequestHeader("Accept"))
+				.thenReturn("application/json");
+		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 	}
 
 	@Test
@@ -78,7 +91,7 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 	}
 
 	@Test
@@ -86,7 +99,7 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("PATCH");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 
 		processor.process(requestContext);
 		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.any(byte[].class));
@@ -97,7 +110,7 @@ public class JsonApiRequestProcessorTest {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 
 		processor.process(requestContext);
 		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.any(byte[].class));
@@ -215,7 +228,7 @@ public class JsonApiRequestProcessorTest {
 				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		Mockito.when(requestContext.getRequestBody()).thenReturn("{ INVALID }".getBytes());
 
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext));
+		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 
 		processor.process(requestContext);
 
