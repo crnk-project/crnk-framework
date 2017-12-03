@@ -100,7 +100,7 @@ describe('FormBinding', () => {
 					}
 				}
 			]
-		}, 'default'))
+		}, 'default'));
 
 
 		fixture.detectChanges();
