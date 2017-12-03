@@ -82,6 +82,8 @@ typescriptGen{
 	includes = ['resources.task']
 	excludes = ['resources.project']
 
+	forked = true
+
 	packageMapping['resources.something'] = '@crnk/some-demo-library'
 	peerDependencies['ngrx-json-api'] = '>=2.0.0-beta.6'
 	generateExpressions = true
@@ -118,7 +120,10 @@ typescriptGen.init()
   `something/*` resource type resp. `resources.something` meta id prefix are included from a `@crnk/some-demo-library`
   library and no longer get generated manually.
 - `includes` and `excludes` allow to include and exclude resources from generation based on their meta id.
-
+- by default the generation takes place in a forked process. Since the generator typically
+  runs the application and that may not properly cleanup, it is recommended to let the
+  generator fork a new process to avoid resource leakage in Gradle daemons and
+  have more stable builds.
 
 NOTE: the generator plugin is not yet included in any example applications. It is not possible to
 include a plugin from within the same project. At some point an external example application will be
