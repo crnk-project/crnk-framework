@@ -5,6 +5,9 @@
 			 xmlns="http://java.sun.com/xml/ns/persistence">
 
 	<persistence-unit name="TEST_SPRING" transaction-type="RESOURCE_LOCAL">
+
+		<class>io.crnk.spring.app.model.ScheduleEntity</class>
+
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>

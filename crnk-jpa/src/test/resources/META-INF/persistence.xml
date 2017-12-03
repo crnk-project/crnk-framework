@@ -7,12 +7,13 @@
 
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
+
+		<class>io.crnk.jpa.model.AnnotationMappedSubtypeEntity</class>
+		<class>io.crnk.jpa.model.AnnotationMappedSuperclassEntity</class>
 		<class>io.crnk.jpa.model.OneToOneTestEntity</class>
 		<class>io.crnk.jpa.model.RelatedEntity</class>
 		<class>io.crnk.jpa.model.TestEntity</class>
 		<class>io.crnk.jpa.model.OtherRelatedEntity</class>
-		<class>io.crnk.jpa.model.AnnotationMappedSubtypeEntity</class>
-		<class>io.crnk.jpa.model.AnnotationMappedSuperclassEntity</class>
 		<class>io.crnk.jpa.model.AnnotationTestEntity</class>
 		<class>io.crnk.jpa.model.BasicAttributesTestEntity</class>
 		<class>io.crnk.jpa.model.CollectionAttributesTestEntity</class>
@@ -38,6 +39,8 @@
 		<class>io.crnk.jpa.model.UuidTestEntity</class>
 		<class>io.crnk.jpa.model.VersionedEntity</class>
 		<class>io.crnk.jpa.model.WriteOnlyAttributeTestEntity</class>
+		<class>io.crnk.jpa.model.TestEmbeddedIdEntity</class>
+		<class>io.crnk.jpa.model.MethodAnnotatedEntity</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />

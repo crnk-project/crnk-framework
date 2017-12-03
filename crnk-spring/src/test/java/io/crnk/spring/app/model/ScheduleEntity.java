@@ -1,4 +1,4 @@
-package io.crnk.spring.boot.model;
+package io.crnk.spring.app.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -31,7 +31,9 @@ public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 	@Override
 	protected void setupModule(JpaModule module, boolean server) {
 		super.setupModule(module, server);
-		module.setTotalResourceCountUsed(false);
+		if (server) {
+			module.setTotalResourceCountUsed(false);
+		}
 	}
 
 

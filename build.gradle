@@ -32,7 +32,8 @@ ext {
 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
 if (ext.timestampedVersion) {
 	version = BUILD_VERSION_PREFIX + "." + format.format(new Date())
-} else {
+}
+else {
 	version = '0.0.0-SNAPSHOT'
 }
 group = GROUP_ID
@@ -59,10 +60,8 @@ gradle.beforeProject { Project project ->
 		if (!docs) {
 			apply plugin: 'java'
 
-			if(project.name != 'crnk-activiti') {
-				sourceCompatibility = 1.7
-				targetCompatibility = 1.7
-			}
+			sourceCompatibility = 1.8
+			targetCompatibility = 1.8
 
 			dependencies {
 				testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -100,7 +99,8 @@ gradle.beforeProject { Project project ->
 				rootProject.tasks.jacocoRootReport.sourceDirectories = files(sourceSets.main.allSource.srcDirs)
 				rootProject.tasks.jacocoRootReport.classDirectories = mainOutput
 
-			} else {
+			}
+			else {
 				rootProject.tasks.jacocoRootReport.sourceDirectories = sourceDirs.plus(files(sourceSets.main.allSource.srcDirs))
 				rootProject.tasks.jacocoRootReport.classDirectories = classDirs.plus(mainOutput)
 			}
@@ -209,7 +209,8 @@ gradle.beforeProject { Project project ->
 				}
 
 				tasks.publish.dependsOn(tasks.uploadArchives)
-			} else {
+			}
+			else {
 				apply plugin: 'maven-publish'
 
 				task sourcesJar(type: Jar) {

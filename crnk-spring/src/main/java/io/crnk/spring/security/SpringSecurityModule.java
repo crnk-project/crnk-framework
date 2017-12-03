@@ -17,7 +17,7 @@ public class SpringSecurityModule implements Module {
 
 	@Override
 	public String getModuleName() {
-		return "springSecurity";
+		return "spring.security";
 	}
 
 	@Override

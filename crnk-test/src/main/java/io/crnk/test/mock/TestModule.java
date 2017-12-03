@@ -23,4 +23,12 @@ public class TestModule implements Module {
 		context.addRepository(new PrimitiveAttributeRepository());
 		context.addExceptionMapper(new TestExceptionMapper());
 	}
+
+	public static void clear() {
+		TaskRepository.clear();
+		ProjectRepository.clear();
+		TaskToProjectRepository.clear();
+		ProjectToTaskRepository.clear();
+		ScheduleRepositoryImpl.clear();
+	}
 }

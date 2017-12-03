@@ -1,4 +1,4 @@
-apply plugin: 'war'
+apply plugin: 'java'
 
 apply plugin: 'application'
 
@@ -10,13 +10,17 @@ dependencies {
 	compile project(':crnk-spring')
 	compile project(':crnk-jpa')
 	compile project(':crnk-validation')
-	compile project(':crnk-monitor-brave4')
 	compile project(':crnk-home')
 	compile project(':crnk-ui')
+	compile project(':crnk-operations')
+	compile project(':crnk-security')
 
-	compile 'org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE'
-	compile 'org.springframework.boot:spring-boot-starter-test:1.4.2.RELEASE'
-	compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.4.2.RELEASE'
+	compile project(':crnk-client')
+
+	compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.8.RELEASE'
+	compile 'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'
+	compile 'org.springframework.boot:spring-boot-starter-actuator:1.5.8.RELEASE'
+	compile 'org.springframework.cloud:spring-cloud-starter-sleuth:1.3.0.RELEASE'
 
 	compile 'org.hibernate:hibernate-core:5.1.0.Final'
 	compile 'org.hibernate:hibernate-entitymanager:5.1.0.Final'
@@ -27,7 +31,6 @@ dependencies {
 	compile 'com.jayway.restassured:json-schema-validator:2.9.0'
 	compile 'commons-io:commons-io:1.3.2'
 
-	compile project(':crnk-client')
-	compile 'org.springframework:spring-test:4.2.1.RELEASE'
+	compile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
 
 }

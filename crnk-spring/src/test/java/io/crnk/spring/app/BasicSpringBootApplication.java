@@ -1,4 +1,4 @@
-package io.crnk.spring.boot;
+package io.crnk.spring.app;
 
 import io.crnk.spring.boot.autoconfigure.CrnkJpaAutoConfiguration;
 import io.crnk.spring.boot.v3.CrnkConfigV3;

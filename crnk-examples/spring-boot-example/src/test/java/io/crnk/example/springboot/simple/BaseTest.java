@@ -17,13 +17,13 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SpringBootExampleApplication.class)
-@WebIntegrationTest("server.port:0")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = SpringBootExampleApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public abstract class BaseTest {
 
 	@Value("${local.server.port}")
@@ -51,7 +51,8 @@ public abstract class BaseTest {
 	private void loadJsonApiSchema() {
 		try {
 			jsonApiSchema = loadFile("json-api-schema.json");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}

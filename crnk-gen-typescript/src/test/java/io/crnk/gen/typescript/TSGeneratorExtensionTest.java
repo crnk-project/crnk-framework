@@ -57,9 +57,5 @@ public class TSGeneratorExtensionTest {
 		Map devDep = new HashMap();
 		config.getNpm().setDevDependencies(devDep);
 		Assert.assertSame(devDep, config.getNpm().getDevDependencies());
-
-		Closure closure = Mockito.mock(Closure.class);
-		config.npm(closure);
-		Mockito.verify(project, Mockito.times(1)).configure(Mockito.anyObject(), Mockito.eq(closure));
 	}
 }

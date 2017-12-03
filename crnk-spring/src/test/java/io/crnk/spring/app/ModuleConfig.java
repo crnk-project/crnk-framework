@@ -1,6 +1,5 @@
-package io.crnk.spring.boot;
+package io.crnk.spring.app;
 
-import io.crnk.spring.security.SpringSecurityModule;
 import io.crnk.test.mock.TestModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +13,7 @@ public class ModuleConfig {
 	}
 
 	@Bean
-	public SpringSecurityModule securityModule() {
-		return  SpringSecurityModule.create();
+	public TestSpanReporter spanReporter() {
+		return new TestSpanReporter();
 	}
 }
