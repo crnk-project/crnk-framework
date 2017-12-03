@@ -1,2 +1,2 @@
 
-export type MetaRepositoryActionType = "REPOSITORY" | "RESOURCE";
+export type MetaRepositoryActionType = 'REPOSITORY' | 'RESOURCE';
