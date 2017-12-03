@@ -43,12 +43,10 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Crnk module that adds support to expose JPA entities as repositories. It
@@ -82,12 +80,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class JpaModule implements InitializingModule {
 
 	private static final String MODULE_NAME = "jpa";
+
 	private Logger logger = LoggerFactory.getLogger(JpaModule.class);
+
 	private EntityManagerFactory emFactory;
 
 	private EntityManager em;
-
-	private JpaQueryFactory queryFactory;
 
 	private ResourceInformationProvider resourceInformationProvider;
 
@@ -96,16 +94,7 @@ public class JpaModule implements InitializingModule {
 	private ModuleContext context;
 
 
-	/**
-	 * Maps resource class to its configuration
-	 */
-	private Map<Class<?>, JpaRepositoryConfig<?>> repositoryConfigurationMap = new HashMap<>();
-
-	private JpaRepositoryFactory repositoryFactory;
-
-	private List<JpaRepositoryFilter> filters = new CopyOnWriteArrayList<>();
-
-	private boolean totalResourceCountUsed = true;
+	private JpaModuleConfig config;
 
 	private JpaMetaEnricher metaEnricher;
 
@@ -123,26 +112,14 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * Constructor used on server side.
 	 */
-	private JpaModule(EntityManagerFactory emFactory, EntityManager em, TransactionRunner transactionRunner) {
+	private JpaModule(JpaModuleConfig config, EntityManagerFactory emFactory, EntityManager em, TransactionRunner
+			transactionRunner) {
 		this();
 
+		this.config = config;
 		this.emFactory = emFactory;
 		this.em = em;
 		this.transactionRunner = transactionRunner;
-
-		QueryFactoryDiscovery queryFactoryDiscovery = new QueryFactoryDiscovery();
-		setQueryFactory(queryFactoryDiscovery.discoverDefaultFactory());
-
-		if (emFactory != null) {
-			Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
-			for (ManagedType<?> managedType : managedTypes) {
-				Class<?> managedJavaType = managedType.getJavaType();
-				if (managedJavaType.getAnnotation(Entity.class) != null) {
-					addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
-				}
-			}
-		}
-		this.setRepositoryFactory(new DefaultJpaRepositoryFactory());
 	}
 
 	/**
@@ -159,12 +136,14 @@ public class JpaModule implements InitializingModule {
 	 * default exposed as JSON API resources. Make use of
 	 * {@link #addRepository(JpaRepositoryConfig)} to add resources.
 	 *
-	 * @param em                to use
+	 * @param em to use
 	 * @param transactionRunner to use
 	 * @return created module
+	 * @deprecated use with JpaModuleConfig
 	 */
+	@Deprecated
 	public static JpaModule newServerModule(EntityManager em, TransactionRunner transactionRunner) {
-		return new JpaModule(null, em, transactionRunner);
+		return new JpaModule(new JpaModuleConfig(), null, em, transactionRunner);
 	}
 
 	/**
@@ -172,13 +151,31 @@ public class JpaModule implements InitializingModule {
 	 * the provided EntityManagerFactory are registered to the module and
 	 * exposed as JSON API resources if not later configured otherwise.
 	 *
-	 * @param emFactory         to retrieve the managed entities.
-	 * @param em                to use
+	 * @param emFactory to retrieve the managed entities.
+	 * @param em to use
+	 * @param transactionRunner to use
+	 * @return created module
+	 * @deprecated use with JpaModuleConfig
+	 */
+	@Deprecated
+	public static JpaModule newServerModule(EntityManagerFactory emFactory, EntityManager em,
+			TransactionRunner transactionRunner) {
+		JpaModuleConfig config = new JpaModuleConfig();
+		config.exposeAllEntities(emFactory);
+		return new JpaModule(config, emFactory, em, transactionRunner);
+	}
+
+	/**
+	 * Creates a new JpaModule for a Crnk server. No entities are by
+	 * default exposed as JSON API resources. Make use of
+	 * {@link #addRepository(JpaRepositoryConfig)} to add resources.
+	 *
+	 * @param em to use
 	 * @param transactionRunner to use
 	 * @return created module
 	 */
-	public static JpaModule newServerModule(EntityManagerFactory emFactory, EntityManager em, TransactionRunner transactionRunner) {
-		return new JpaModule(emFactory, em, transactionRunner);
+	public static JpaModule createServerModule(JpaModuleConfig config, EntityManager em, TransactionRunner transactionRunner) {
+		return new JpaModule(config, null, em, transactionRunner);
 	}
 
 	/**
@@ -186,64 +183,64 @@ public class JpaModule implements InitializingModule {
 	 * repositories managed by this module.
 	 *
 	 * @param filter to add
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
+	@Deprecated
 	public void addFilter(JpaRepositoryFilter filter) {
-		filters.add(filter);
+		config.addFilter(filter);
 	}
 
 	/**
-	 * Removes the given filter to this module.
-	 *
-	 * @param filter to remove
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
+	@Deprecated
 	public void removeFilter(JpaRepositoryFilter filter) {
-		filters.remove(filter);
+		config.removeFilter(filter);
 	}
 
 	/**
-	 * @return all filters
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
+	@Deprecated
 	public List<JpaRepositoryFilter> getFilters() {
-		return filters;
+		return config.getFilters();
 	}
 
+	/**
+	 * @deprecated use {@link JpaModuleConfig}
+	 */
+	@Deprecated
 	public void setRepositoryFactory(JpaRepositoryFactory repositoryFactory) {
 		checkNotInitialized();
-		this.repositoryFactory = repositoryFactory;
+		this.config.setRepositoryFactory(repositoryFactory);
 	}
 
 	/**
-	 * @return set of resource classes made available as resource (entity or
-	 * dto).
-	 * @Deprecated use getResourceClasses
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
+	@Deprecated
 	public Set<Class<?>> getResourceClasses() {
-		return Collections.unmodifiableSet(repositoryConfigurationMap.keySet());
+		return config.getResourceClasses();
 	}
 
 	/**
-	 * Adds the resource to this module.
-	 *
-	 * @param config to use
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
+	@Deprecated
 	public <T> void addRepository(JpaRepositoryConfig<T> config) {
 		checkNotInitialized();
-		Class<?> resourceClass = config.getResourceClass();
-		if (repositoryConfigurationMap.containsKey(resourceClass)) {
-			throw new IllegalStateException(resourceClass.getName() + " is already registered");
-		}
-		repositoryConfigurationMap.put(resourceClass, config);
+		this.config.addRepository(config);
 	}
 
 	/**
 	 * Removes the resource with the given type from this module.
 	 *
-	 * @param <T>           resourse class (entity or mapped dto)
+	 * @param <T> resourse class (entity or mapped dto)
 	 * @param resourceClass to remove
 	 */
 	public <T> void removeRepository(Class<T> resourceClass) {
 		checkNotInitialized();
-		repositoryConfigurationMap.remove(resourceClass);
+		config.removeRepository(resourceClass);
 	}
 
 	/**
@@ -253,7 +250,7 @@ public class JpaModule implements InitializingModule {
 	 */
 	public void removeRepositories() {
 		checkNotInitialized();
-		repositoryConfigurationMap.clear();
+		config.removeRepositories();
 	}
 
 	@Override
@@ -270,8 +267,10 @@ public class JpaModule implements InitializingModule {
 		this.context = context;
 
 		Set<Class> jpaTypes = new HashSet<>();
-		for (JpaRepositoryConfig<?> config : repositoryConfigurationMap.values()) {
-			jpaTypes.add(config.getEntityClass());
+		if (config != null) {
+			for (JpaRepositoryConfig<?> config : config.getRepositories()) {
+				jpaTypes.add(config.getEntityClass());
+			}
 		}
 		jpaMetaProvider = new JpaMetaProvider(jpaTypes);
 		jpaMetaLookup = new MetaLookup();
@@ -279,6 +278,9 @@ public class JpaModule implements InitializingModule {
 		jpaMetaLookup.setModuleContext(context);
 		jpaMetaLookup.initialize();
 
+		if (config != null) {
+			initQueryFactory();
+		}
 
 		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider()));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
@@ -298,6 +300,27 @@ public class JpaModule implements InitializingModule {
 			context.addExtension(metaModuleExtension);
 
 			setupTransactionMgmt();
+		}
+	}
+
+	private void initQueryFactory() {
+		JpaQueryFactory queryFactory = config.getQueryFactory();
+		queryFactory.initalize(new JpaQueryFactoryContext() {
+
+			@Override
+			public EntityManager getEntityManager() {
+				return em;
+			}
+
+			@Override
+			public MetaPartition getMetaPartition() {
+				return jpaMetaProvider.getPartition();
+			}
+		});
+
+		if (queryFactory instanceof QuerydslQueryFactory) {
+			QuerydslQueryFactory querydslFactory = (QuerydslQueryFactory) queryFactory;
+			querydslFactory.addInterceptor(new JpaQuerydslTranslationInterceptor());
 		}
 	}
 
@@ -361,32 +384,35 @@ public class JpaModule implements InitializingModule {
 	private void setupServerRepositories() {
 		metaEnricher.setMetaProvider(jpaMetaProvider);
 
-		for (JpaRepositoryConfig<?> config : repositoryConfigurationMap.values()) {
+		for (JpaRepositoryConfig<?> config : config.getRepositories()) {
 			setupRepository(config);
 		}
 	}
 
-	private void setupRepository(JpaRepositoryConfig<?> config) {
-		if (config.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()) {
+	private void setupRepository(JpaRepositoryConfig<?> repositoryConfig) {
+		if (repositoryConfig.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()) {
 			// TODO not that nice...
-			config.setListMetaClass(DefaultHasMoreResourcesMetaInformation.class);
+			repositoryConfig.setListMetaClass(DefaultHasMoreResourcesMetaInformation.class);
 		}
 
-		Class<?> resourceClass = config.getResourceClass();
-		MetaEntity metaEntity = jpaMetaProvider.getMeta(config.getEntityClass());
+		Class<?> resourceClass = repositoryConfig.getResourceClass();
+		MetaEntity metaEntity = jpaMetaProvider.getMeta(repositoryConfig.getEntityClass());
 		if (isValidEntity(metaEntity)) {
-			JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this, config);
+			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
+			JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this,
+					repositoryConfig);
 
 			ResourceRepositoryV2<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
 
 			context.addRepository(repository);
-			setupRelationshipRepositories(resourceClass, config.getResourceClass() != config.getEntityClass());
+			setupRelationshipRepositories(resourceClass,
+					repositoryConfig.getResourceClass() != repositoryConfig.getEntityClass());
 		}
 	}
 
 	private ResourceRepositoryV2<?, ?> filterResourceCreation(Class<?> resourceClass, JpaEntityRepository<?, ?> repository) {
 		JpaEntityRepository<?, ?> filteredRepository = repository;
-		for (JpaRepositoryFilter filter : filters) {
+		for (JpaRepositoryFilter filter : config.getFilters()) {
 			if (filter.accept(resourceClass)) {
 				filteredRepository = filter.filterCreation(filteredRepository);
 			}
@@ -394,9 +420,10 @@ public class JpaModule implements InitializingModule {
 		return filteredRepository;
 	}
 
-	private RelationshipRepositoryV2<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass, JpaRelationshipRepository<?, ?, ?, ?> repository) {
+	private RelationshipRepositoryV2<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass,
+			JpaRelationshipRepository<?, ?, ?, ?> repository) {
 		JpaRelationshipRepository<?, ?, ?, ?> filteredRepository = repository;
-		for (JpaRepositoryFilter filter : filters) {
+		for (JpaRepositoryFilter filter : config.getFilters()) {
 			if (filter.accept(resourceClass)) {
 				filteredRepository = filter.filterCreation(filteredRepository);
 			}
@@ -422,7 +449,8 @@ public class JpaModule implements InitializingModule {
 				boolean isEntity = attrType.getAnnotation(Entity.class) != null;
 				if (isEntity) {
 					setupRelationshipRepositoryForEntity(resourceClass, field);
-				} else {
+				}
+				else {
 					setupRelationshipRepositoryForResource(resourceClass, field);
 				}
 			}
@@ -436,7 +464,9 @@ public class JpaModule implements InitializingModule {
 
 		// only include relations that are exposed as repositories
 		if (attrConfig != null) {
-			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
+			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType,
+					repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
 			context.addRepository(relationshipRepository);
 		}
 	}
@@ -452,7 +482,9 @@ public class JpaModule implements InitializingModule {
 		JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
 		Class<?> targetResourceClass = targetConfig.getResourceClass();
 
-		RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass, repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+		JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
+		RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
+				repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
 		context.addRepository(relationshipRepository);
 	}
 
@@ -470,7 +502,6 @@ public class JpaModule implements InitializingModule {
 	}
 
 	/**
-	 * @param propertiesProvider
 	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
 	public ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
@@ -483,8 +514,6 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * Sets the information builder to use to read JPA classes. See
 	 * {@link JpaResourceInformationProvider}}
-	 *
-	 * @param resourceInformationProvider
 	 */
 	public void setResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
 		PreconditionUtil.verify(this.resourceInformationProvider == null, "already set");
@@ -494,30 +523,21 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * @return {@link JpaQueryFactory}} implementation used to create JPA
 	 * queries.
+	 * @deprecated use JpaModuleConfig
 	 */
+	@Deprecated
 	public JpaQueryFactory getQueryFactory() {
-		return queryFactory;
+		return config.getQueryFactory();
 	}
 
+	/**
+	 * @deprecated use JpaModuleConfig
+	 */
+	@Deprecated
 	public void setQueryFactory(JpaQueryFactory queryFactory) {
-		this.queryFactory = queryFactory;
-
-		queryFactory.initalize(new JpaQueryFactoryContext() {
-
-			@Override
-			public EntityManager getEntityManager() {
-				return em;
-			}
-
-			@Override
-			public MetaPartition getMetaPartition() {
-				return jpaMetaProvider.getPartition();
-			}
-		});
-
-		if (queryFactory instanceof QuerydslQueryFactory) {
-			QuerydslQueryFactory querydslFactory = (QuerydslQueryFactory) queryFactory;
-			querydslFactory.addInterceptor(new JpaQuerydslTranslationInterceptor());
+		config.setQueryFactory(queryFactory);
+		if (context != null) {
+			initQueryFactory();
 		}
 	}
 
@@ -536,41 +556,39 @@ public class JpaModule implements InitializingModule {
 	}
 
 	/**
-	 * @param resourceClass
 	 * @return config
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
-	@SuppressWarnings("unchecked")
+	@Deprecated
 	public <T> JpaRepositoryConfig<T> getRepositoryConfig(Class<T> resourceClass) {
-		return (JpaRepositoryConfig<T>) repositoryConfigurationMap.get(resourceClass);
+		return config.getRepository(resourceClass);
 	}
 
 	public MetaLookup getJpaMetaLookup() {
 		return jpaMetaLookup;
 	}
 
+	/**
+	 * @deprecated use {@link JpaModuleConfig}
+	 */
+	@Deprecated
 	public boolean isTotalResourceCountUsed() {
-		return totalResourceCountUsed;
+		return config.isTotalResourceCountUsed();
 	}
 
 	/**
-	 * Computing the totalResourceCount can be expensive. Internally it is used to compute the last page link.
-	 * This flag allows enable (default) or disable totalResourceCount computation. If it is disabled,
-	 * limit + 1 resources are fetched and the presence of the last one determines whether a pagination next
-	 * link will be provided.
-	 *
-	 * @param totalResourceCountUsed
+	 * @deprecated use {@link JpaModuleConfig}
 	 */
 	public void setTotalResourceCountUsed(boolean totalResourceCountUsed) {
-		this.totalResourceCountUsed = totalResourceCountUsed;
+		config.setTotalResourceCountUsed(totalResourceCountUsed);
 	}
 
 	/**
-	 * @param resourceClass
 	 * @return true if a resource for the given resourceClass is managed by
 	 * this module.
 	 */
 	public boolean hasRepository(Class<?> resourceClass) {
-		return repositoryConfigurationMap.containsKey(resourceClass);
+		return config.hasRepository(resourceClass);
 	}
 
 	public JpaMetaProvider getJpaMetaProvider() {
@@ -584,13 +602,14 @@ public class JpaModule implements InitializingModule {
 
 			JpaRequestContext requestContext = (JpaRequestContext) query.getPrivateData();
 			if (requestContext != null) {
-				for (JpaRepositoryFilter filter : filters) {
+				for (JpaRepositoryFilter filter : config.getFilters()) {
 					invokeFilter(filter, requestContext, translationContext);
 				}
 			}
 		}
 
-		private <T> void invokeFilter(JpaRepositoryFilter filter, JpaRequestContext requestContext, QuerydslTranslationContext<T> translationContext) {
+		private <T> void invokeFilter(JpaRepositoryFilter filter, JpaRequestContext requestContext,
+				QuerydslTranslationContext<T> translationContext) {
 			if (filter instanceof QuerydslRepositoryFilter) {
 				Object repository = requestContext.getRepository();
 				QuerySpec querySpec = requestContext.getQuerySpec();
@@ -602,7 +621,8 @@ public class JpaModule implements InitializingModule {
 	class JpaRepositoryDecoratorFactory implements RepositoryDecoratorFactory {
 
 		@Override
-		public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepositoryV2<T, I> repository) {
+		public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
+				ResourceRepositoryV2<T, I> repository) {
 			JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
 			if (config != null) {
 				return config.getRepositoryDecorator();
@@ -611,7 +631,9 @@ public class JpaModule implements InitializingModule {
 		}
 
 		@Override
-		public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepositoryV2<T, I, D, J> repository) {
+		public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J>
+		decorateRepository(
+				RelationshipRepositoryV2<T, I, D, J> repository) {
 			JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getSourceResourceClass());
 			if (config != null) {
 				return config.getRepositoryDecorator(repository.getTargetResourceClass());

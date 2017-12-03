@@ -40,7 +40,7 @@ public class ClassUtils {
 
 		while (i$.hasNext()) {
 			Class primitiveClass = (Class) i$.next();
-			Class wrapperClass = (Class) primitiveWrapperMap.get(primitiveClass);
+			Class wrapperClass = primitiveWrapperMap.get(primitiveClass);
 			if (!primitiveClass.equals(wrapperClass)) {
 				wrapperPrimitiveMap.put(wrapperClass, primitiveClass);
 			}

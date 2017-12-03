@@ -34,7 +34,7 @@ public class DynamicClientTest extends AbstractClientTest {
 	}
 
 	@Test
-	public void testResource() throws JsonProcessingException, IOException {
+	public void testResource() throws IOException {
 		ResourceRepositoryV2<Resource, String> repository = client.getRepositoryForPath("dynamic1");
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -61,7 +61,7 @@ public class DynamicClientTest extends AbstractClientTest {
 	}
 
 	@Test
-	public void testRelationship() throws JsonProcessingException, IOException {
+	public void testRelationship() throws IOException {
 		ResourceRepositoryV2<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
 		RelationshipRepositoryV2<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
 		ObjectMapper mapper = new ObjectMapper();

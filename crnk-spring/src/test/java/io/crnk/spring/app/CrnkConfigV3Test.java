@@ -1,4 +1,4 @@
-package io.crnk.spring.boot;
+package io.crnk.spring.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
@@ -6,6 +6,7 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 import org.junit.Assert;

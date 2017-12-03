@@ -18,6 +18,11 @@ public class CrnkJpaProperties {
 	 */
 	private Boolean enabled = true;
 
+	/**
+	 * Whether to expose all entities as resources.
+	 */
+	private Boolean exposeAll = true;
+
 	public JpaQueryFactoryType getQueryFactory() {
 		return queryFactory;
 	}
@@ -32,6 +37,14 @@ public class CrnkJpaProperties {
 
 	public void setEnabled(Boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public Boolean getExposeAll() {
+		return exposeAll;
+	}
+
+	public void setExposeAll(Boolean exposeAll) {
+		this.exposeAll = exposeAll;
 	}
 
 	public enum JpaQueryFactoryType {

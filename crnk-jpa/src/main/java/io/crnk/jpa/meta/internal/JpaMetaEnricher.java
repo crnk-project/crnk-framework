@@ -39,7 +39,7 @@ public class JpaMetaEnricher extends MetaFilterBase {
 			Class<?> implementationClass = jsonDataObject.getImplementationClass();
 
 			if (metaProvider.hasMeta(implementationClass)) {
-				MetaJpaDataObject jpaDataObject = (MetaJpaDataObject) metaProvider.getMeta(implementationClass);
+				MetaJpaDataObject jpaDataObject = metaProvider.getMeta(implementationClass);
 
 				if (jpaDataObject.getPrimaryKey() != null && jsonDataObject.getPrimaryKey() != null) {
 					jsonDataObject.getPrimaryKey().setGenerated(jpaDataObject.getPrimaryKey().isGenerated());

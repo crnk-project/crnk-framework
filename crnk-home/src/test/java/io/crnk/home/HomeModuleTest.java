@@ -82,8 +82,8 @@ public class HomeModuleTest {
 		JsonNode response = boot.getObjectMapper().reader().readTree(json);
 
 		JsonNode resourcesNode = response.get("resources");
-		JsonNode usersNode = resourcesNode.get("tag:tasks");
-		Assert.assertEquals("/tasks/", usersNode.get("href").asText());
+		JsonNode usersNode = resourcesNode.get("tag:/tasks");
+		Assert.assertEquals("/tasks", usersNode.get("href").asText());
 	}
 
 	@Test

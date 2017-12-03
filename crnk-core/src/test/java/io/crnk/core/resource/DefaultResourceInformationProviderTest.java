@@ -631,11 +631,11 @@ public class DefaultResourceInformationProviderTest {
 		}
 	}
 
-	private static interface JsonIgnoreMethodInterface {
+	private interface JsonIgnoreMethodInterface {
 		@JsonIgnore
-		public String getIgnoredMember();
+		String getIgnoredMember();
 
-		public String getNotIgnoredMember();
+		String getNotIgnoredMember();
 	}
 
 	@JsonApiResource(type = "jsonIgnoredInterfaceMethod")

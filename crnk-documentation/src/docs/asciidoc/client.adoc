@@ -9,11 +9,15 @@ anchor:client[]
 There is a client implementation for Java and Android projects to allow
 communicating with JSON-API compliant servers. Two http client libraries are supported:
 
-* `OkHttp <http://square.github.io/okhttp>`
+* ` <http://square.github.io/>`
   Library has been used to allow usage in both Android and server applications and services.
 
 * `Apache Http Client <https://hc.apache.org/httpcomponents-client-ga/index.html>`
   Library widely used in the Java community.
+
+* `RestTemplate` from Spring that provides a Spring abstraction for `` and other HTTP libraries.
+  Spring application benefit from using this over the underlying native implementation to share
+  the setup configuration setup. It is used by default if the presence of Spring is detected.
 
 Add one of those library to the classpath and Crnk will pick it up automatically.
 
@@ -145,9 +149,9 @@ request headers (like security), as it has to be done in two places (unfortunate
 
 ## HTTP customization
 
-It is possible to hook into the HTTP implementation used by Crnk (OkHttp or Apache).
+It is possible to hook into the HTTP implementation used by Crnk ( or Apache).
 Make use of `CrnkClient#getHttpAdapter()` and cast it to either
-`HttpClientAdapter` or `OkHttpAdapter`. Both implementations provide a
+`HttpClientAdapter` or `Adapter`. Both implementations provide a
 `addListener` method, which in turn gives access to the native builder used to construct
 the respective HTTP client implementation. This allows to cover various use cases:
 

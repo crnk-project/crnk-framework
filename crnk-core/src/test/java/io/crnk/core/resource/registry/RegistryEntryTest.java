@@ -58,7 +58,7 @@ public class RegistryEntryTest {
 	public void onInvalidRelationshipClassShouldThrowException() throws Exception {
 		// GIVEN
 		ResourceRepositoryInformation repositoryInformation = newRepositoryInformation(Task.class, "tasks");
-		List relRepos =	(List) Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class)));
+		List relRepos = Collections.singletonList(new DirectResponseRelationshipEntry(new RepositoryInstanceBuilder(new SampleJsonServiceLocator(), TaskToProjectRepository.class)));
 		RegistryEntry sut = new RegistryEntry(repositoryInformation.getResourceInformation().get(), repositoryInformation, null, relRepos);
 
 		// THEN

@@ -769,3 +769,61 @@ starting the approval process, submitting a form and then verifying the changes 
 - Multi-tenancy is not yet done out-of-the-box.
 
 
+
+anchor:spring_modules[]
+
+## Spring Modules and Auto Configuration
+
+All Spring modules are hosted in the `crnk-spring` modules without explicit runtime-time dependency.
+Each module comes with an auto configuration that is enabled if the presence of the particular Spring
+component is detected. Each module comes with an enabled property to disable the auto configuration.
+
+
+### Spring MVC Module
+
+Makes Spring MVC services available in the Crnk Home Module next to the json api repositories to have a list of all offered
+services. Auto configuration is provided by `CrnkSpringMvcAutoConfiguration`.
+
+Further integration similar to the JAX-RS one is expected in the future.
+
+### Spring Cloud Sleuth Module
+
+Integrates in the same fashion as the Crnk Brave module to trace calls from a request to the individual repositories.
+Auto configuration is provided by `CrnkSpringCloudSleuthAutoConfiguration`.
+
+### Spring Security Module
+
+`SpringSecurityModule` provides a mapping of Spring Security exception types to JSON API errors that complements
+the Spring-independent `SecurityModule`.
+
+Auto configuration is provided by `CrnkSecurityAutoConfiguration`. It sets up `SecurityModule` and
+`SpringSecurityModule`. By default access to all repositories is blocked. A bean of type `SecurityModuleConfigurer`
+can be added to grant access to repositories.
+
+
+### JPA Module Auto Configuration
+
+`CrnkJpaAutoConfiguration` setups the `JpaModule` and `SpringTransactionRunner`. `SpringTransactionRunner` let
+all requests run in a transaction that is automatically rolled back in case of an error. The `JpaModule` is
+by default setup to expose all entities as JSON API repositories. This can be disabled by setting
+`crnk.jpa.exposeAll=false`. The setup of the JPA module can be customized by providing a bean
+implementing `JpaModuleConfigurer`. See `ExampleJpaModuleConfigurer` for an example.
+
+### Validation Module Auto Configuration
+
+`CrnkValidationAutoConfiguration` sets up the `ValidationModule`. This will given validation exception to
+JSON API error mapping. And by default all incoming resources are validated. The later can be disabled by setting
+`crnk.validation.validateResources=false`.
+
+### UI Module Auto Configuration
+
+`CrnkUIAutoConfiguration` sets up the `UIModule`.
+
+### Operations Module Auto Configuration
+
+`CrnkOperationsAutoConfiguration` sets up the `OperationsModule`.
+
+### Meta Module Auto Configuration
+
+`CrnkMetaAutoConfiguration` sets up the `MetaModule` and exposes meta data for all JSON API repositories.
+The `MetaModule` can be customized by providing a bean of type `MetaModuleConfigurer`.

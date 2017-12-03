@@ -199,13 +199,14 @@ A code below shows a sample ``web.xml`` file with properly defined and configure
   </web-app>
 ----
 
-## Integration with Spring
+## Integration with Spring and String Boot
 
-Crnk provides a simple Spring Boot integration using the ``@Configuration`` annotated class ``CrnkConfigV3``.
-Using this class, the only thing needed to allow Crnk process requests is parameter configuration.
-An example ``application.properties`` file is presented below.
+Crnk provides with `crnk-spring` a number of utilities to seamlessly integrate with Spring and Spring Boot.
+First and foremost, there is a ``CrnkConfigV3`` configuration class to hook Crnk into Spring Web to serve requests.
+The web integration can be customized with the subsequent properties:
 
 [source]
+.application.properties
 ----
   crnk.domainName=http://localhost:8080
   crnk.pathPrefix=/api
@@ -213,6 +214,10 @@ An example ``application.properties`` file is presented below.
 
 Spring integration uses crnk-servlet ``AbstractCrnkFilter`` to fetch the requests. Similar to CDI, repositories
 and modules are picked up from the Spring ApplicationContext with  ``SpringServiceDiscovery``.
+
+Next to the Spring Web integration, `crnk-spring` provides a number modules to hook into other Spring components.
+For a detailed overview see <<spring_modules,Spring modules>>.
+
 
 
 ## Discovery with CDI
