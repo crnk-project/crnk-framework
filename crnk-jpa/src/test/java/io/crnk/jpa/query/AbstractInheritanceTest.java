@@ -74,7 +74,7 @@ public abstract class AbstractInheritanceTest<B, C> extends AbstractJpaTest {
 		Assert.assertEquals(10, list.size());
 		for (int i = 0; i < 10; i++) {
 			B entity = list.get(i);
-			MetaEntity meta = (MetaEntity) module.getJpaMetaProvider().getMeta(entity.getClass());
+			MetaEntity meta = module.getJpaMetaProvider().getMeta(entity.getClass());
 
 			if (i < 5) {
 				Assert.assertTrue(childClass.isInstance(entity));

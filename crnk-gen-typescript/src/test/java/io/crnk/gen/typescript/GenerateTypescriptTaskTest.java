@@ -116,6 +116,8 @@ public class GenerateTypescriptTaskTest {
 		String actualSource = IOUtils
 				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedules.ts")), utf8);
 
+		expectedSource = expectedSource.replace("\r\n", "\n");
+
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
 		for (int i = 0; i < expectedLines.length; i++) {

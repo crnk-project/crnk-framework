@@ -1,5 +1,8 @@
 package io.crnk.example.springboot;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
@@ -12,13 +15,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 @RestController
 @SpringBootApplication
-@Import({CrnkConfigV3.class, JpaConfig.class, ModuleConfig.class, CorsConfig.class, TestDataLoader.class})
+@Import({ CrnkConfigV3.class, ExampleJpaModuleConfigurer.class, CorsConfig.class, TestDataLoader.class })
 public class SpringBootExampleApplication {
 
 	@Autowired

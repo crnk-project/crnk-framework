@@ -78,11 +78,11 @@ public class HomeResourceFilteringTest {
 		JsonNode response = boot.getObjectMapper().reader().readTree(json);
 
 		JsonNode resourcesNode = response.get("resources");
-		JsonNode tasksNode = resourcesNode.get("tag:tasks");
+		JsonNode tasksNode = resourcesNode.get("tag:/tasks");
 		if (filtered) {
 			Assert.assertNull(tasksNode);
 		} else {
-			Assert.assertEquals("/tasks/", tasksNode.get("href").asText());
+			Assert.assertEquals("/tasks", tasksNode.get("href").asText());
 		}
 	}
 }

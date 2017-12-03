@@ -13,5 +13,5 @@ public interface RuntimeMetaResolver { // NOSONAR, not a functional interface
 	 * @param trigger to call once the MetaLookup is obtained to trigger the actual generation.
 	 * @param runtimeClassLoader to use giving access to application classes.
 	 */
-	public void run(GeneratorTrigger trigger, ClassLoader runtimeClassLoader);
+	void run(GeneratorTrigger trigger, ClassLoader runtimeClassLoader);
 }

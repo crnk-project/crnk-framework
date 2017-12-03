@@ -4,6 +4,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("crnk")
 public class CrnkSpringBootProperties {
+
+	private boolean enabled = true;
+
+	@Deprecated
 	private String resourcePackage;
 
 	/**
@@ -45,6 +49,18 @@ public class CrnkSpringBootProperties {
 		return resourcePackage;
 	}
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	/**
+	 * @deprecated use dependency injection
+	 */
+	@Deprecated
 	public void setResourcePackage(String resourcePackage) {
 		this.resourcePackage = resourcePackage;
 	}

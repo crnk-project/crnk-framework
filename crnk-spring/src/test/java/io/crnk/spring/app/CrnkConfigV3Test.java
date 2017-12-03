@@ -7,6 +7,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.internal.SpringServiceDiscovery;
 import org.junit.Assert;

@@ -5,20 +5,21 @@ import static org.junit.Assert.assertEquals;
 
 import javax.security.auth.message.config.AuthConfigFactory;
 
+import io.crnk.spring.app.BasicSpringBootApplication;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = BasicSpringBootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 public class BasicSpringBootTest {
 
@@ -35,7 +36,7 @@ public class BasicSpringBootTest {
 
 	@Test
 	public void testTestEndpointWithQueryParams() throws Exception {
-		TestRestTemplate testRestTemplate = new TestRestTemplate();
+		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/tasks?filter[tasks][name]=John", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -45,7 +46,7 @@ public class BasicSpringBootTest {
 
 	@Test
 	public void testJpa() throws Exception {
-		TestRestTemplate testRestTemplate = new TestRestTemplate();
+		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/schedule", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -54,7 +55,7 @@ public class BasicSpringBootTest {
 
 	@Test
 	public void testTestCustomEndpoint() throws Exception {
-		TestRestTemplate testRestTemplate = new TestRestTemplate();
+		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/custom", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());

@@ -17,7 +17,9 @@ public class OptimisticLockingEndToEndTest extends AbstractJpaJerseyTest {
 
 	@Override
 	protected void setupModule(JpaModule module, boolean server) {
-		module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+		if (server) {
+			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+		}
 	}
 
 	@Test

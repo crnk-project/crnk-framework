@@ -1,5 +1,7 @@
 package io.crnk.spring.boot.v3;
 
+import javax.servlet.Filter;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.crnk.core.boot.CrnkBoot;
@@ -17,19 +19,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.servlet.Filter;
-
 /**
  * Current crnk configuration with JSON API compliance, QuerySpec and module support.
  * Note that there is no support for QueryParams is this version due to the lack of JSON API compatibility.
  */
 @Configuration
+@ConditionalOnProperty(prefix = "crnk", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnMissingBean(CrnkBoot.class)
 @EnableConfigurationProperties(CrnkSpringBootProperties.class)
 public class CrnkConfigV3 implements ApplicationContextAware {
 
