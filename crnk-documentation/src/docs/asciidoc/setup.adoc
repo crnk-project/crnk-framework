@@ -307,7 +307,7 @@ Some possiblities:
    your servers depending on the datasize.
 
 
-## Parameters
+## Properties
 
 Any of the integrations allows API access to customize Crnk. There are also a number of configuration flags
 provided by `CrnkProperties`:
@@ -347,5 +347,8 @@ provided by `CrnkProperties`:
   not strictly mandated by the JSON API specification. In general it is recommended for
   repository to throw `ResourceNotFoundException`.
 
+* `crnk.config.serialize.object.links` to serialize links as objects. See
+  http://jsonapi.org/format/#document-links. Disabled by default.
 
-
+* `crnk.config.resource.request.rejectPlainJson` whether to reject GET requests with
+  `application/json` accept headers and enforce `application/vnd.api+json`. Disabled by default.

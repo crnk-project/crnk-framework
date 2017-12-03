@@ -147,6 +147,27 @@ See http://jsonapi.org/format/#document-links for more information about linking
 	}
 ----
 
+By default links are serialized as:
+
+----
+"links": {
+  "self": "http://example.com/posts"
+}
+----
+
+With `crnk.config.serialize.object.links=true` links get serialized as:
+
+----
+"links": {
+  "self": {
+    "href": "http://example.com/posts",
+  }
+}
+----
+
+
+
+
 anchor:jackson_annotations[]
 
 ## Jackson annotations
