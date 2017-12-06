@@ -56,5 +56,7 @@ public class CrnkConfigV3Test {
 		Assert.assertEquals("testDomainprefix", constantServiceUrlProvider.getUrl());
 
 		Assert.assertSame(objectMapper, boot.getObjectMapper());
+
+		Assert.assertNotNull(boot.getModuleRegistry().getSecurityProvider());
 	}
 }
