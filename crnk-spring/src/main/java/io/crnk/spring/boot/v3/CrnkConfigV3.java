@@ -1,7 +1,5 @@
 package io.crnk.spring.boot.v3;
 
-import javax.servlet.Filter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.crnk.core.boot.CrnkBoot;
@@ -10,10 +8,12 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.servlet.internal.ServletModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.internal.SpringServiceDiscovery;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.servlet.Filter;
 
 /**
  * Current crnk configuration with JSON API compliance, QuerySpec and module support.
@@ -104,6 +106,8 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
+		boot.setAllowUnknownAttributes();
+		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.boot();
 		return boot;
 	}
