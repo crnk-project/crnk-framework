@@ -5,9 +5,14 @@ import io.crnk.validation.filter.ValidationRepositoryFilter;
 import io.crnk.validation.internal.ConstraintViolationExceptionMapper;
 import io.crnk.validation.internal.ValidationExceptionMapper;
 
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
+
 public class ValidationModule implements Module {
 
 	private final boolean enableResourceValidation;
+
+	private final ValidatorFactory validatorFactory;
 
 	// protected for CDI
 	protected ValidationModule() {
@@ -15,7 +20,12 @@ public class ValidationModule implements Module {
 	}
 
 	protected ValidationModule(boolean enableResourceValidation) {
+		this(enableResourceValidation, Validation.buildDefaultValidatorFactory());
+	}
+
+	protected ValidationModule(boolean enableResourceValidation, ValidatorFactory validatorFactory) {
 		this.enableResourceValidation = enableResourceValidation;
+		this.validatorFactory = validatorFactory;
 	}
 
 	/**
@@ -23,15 +33,19 @@ public class ValidationModule implements Module {
 	 */
 	@Deprecated
 	public static ValidationModule newInstance() {
-		return new ValidationModule(true);
+		return create(true);
 	}
 
 	public static ValidationModule create() {
-		return new ValidationModule(true);
+		return create(true);
 	}
 
 	public static ValidationModule create(boolean enableResourceValidation) {
 		return new ValidationModule(enableResourceValidation);
+	}
+
+	public static ValidationModule create(boolean enableResourceValidation, ValidatorFactory validatorFactory) {
+		return new ValidationModule(enableResourceValidation, validatorFactory);
 	}
 
 	@Override
@@ -45,7 +59,7 @@ public class ValidationModule implements Module {
 		context.addExceptionMapper(new ValidationExceptionMapper());
 
 		if (enableResourceValidation) {
-			context.addRepositoryFilter(new ValidationRepositoryFilter());
+			context.addRepositoryFilter(new ValidationRepositoryFilter(validatorFactory));
 		}
 	}
 }
