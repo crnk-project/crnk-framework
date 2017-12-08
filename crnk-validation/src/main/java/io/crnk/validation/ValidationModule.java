@@ -6,13 +6,13 @@ import io.crnk.validation.internal.ConstraintViolationExceptionMapper;
 import io.crnk.validation.internal.ValidationExceptionMapper;
 
 import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
+import javax.validation.Validator;
 
 public class ValidationModule implements Module {
 
 	private final boolean enableResourceValidation;
 
-	private final ValidatorFactory validatorFactory;
+	private final Validator validator;
 
 	// protected for CDI
 	protected ValidationModule() {
@@ -20,12 +20,12 @@ public class ValidationModule implements Module {
 	}
 
 	protected ValidationModule(boolean enableResourceValidation) {
-		this(enableResourceValidation, Validation.buildDefaultValidatorFactory());
+		this(enableResourceValidation, Validation.buildDefaultValidatorFactory().getValidator());
 	}
 
-	protected ValidationModule(boolean enableResourceValidation, ValidatorFactory validatorFactory) {
+	protected ValidationModule(boolean enableResourceValidation, Validator validator) {
 		this.enableResourceValidation = enableResourceValidation;
-		this.validatorFactory = validatorFactory;
+		this.validator = validator;
 	}
 
 	/**
@@ -44,8 +44,8 @@ public class ValidationModule implements Module {
 		return new ValidationModule(enableResourceValidation);
 	}
 
-	public static ValidationModule create(boolean enableResourceValidation, ValidatorFactory validatorFactory) {
-		return new ValidationModule(enableResourceValidation, validatorFactory);
+	public static ValidationModule create(boolean enableResourceValidation, Validator validator) {
+		return new ValidationModule(enableResourceValidation, validator);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ValidationModule implements Module {
 		context.addExceptionMapper(new ValidationExceptionMapper());
 
 		if (enableResourceValidation) {
-			context.addRepositoryFilter(new ValidationRepositoryFilter(validatorFactory));
+			context.addRepositoryFilter(new ValidationRepositoryFilter(validator));
 		}
 	}
 }
