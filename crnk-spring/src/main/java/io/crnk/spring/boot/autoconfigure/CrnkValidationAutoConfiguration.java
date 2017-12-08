@@ -14,6 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' Validation module.
@@ -37,7 +38,13 @@ public class CrnkValidationAutoConfiguration {
 	private CrnkValidationProperties validationProperties;
 
 	@Bean
-	public ValidationModule validationModule() {
-		return ValidationModule.create(validationProperties.getValidateResources());
+	public LocalValidatorFactoryBean validatorFactoryBean() {
+		final LocalValidatorFactoryBean localValidatorFactoryBean = new LocalValidatorFactoryBean();
+		return localValidatorFactoryBean;
+	}
+
+	@Bean
+	public ValidationModule validationModule(LocalValidatorFactoryBean validatorFactoryBean) {
+		return ValidationModule.create(validationProperties.getValidateResources(), validatorFactoryBean.getValidator());
 	}
 }
