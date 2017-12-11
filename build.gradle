@@ -55,6 +55,7 @@ gradle.beforeProject { Project project ->
 		def docs = project.name == 'crnk-documentation'
 		def ui = project.name == 'crnk-ui'
 		def testProject = project.name == 'crnk-test'
+		def legacyBraveProject = project.name == 'crnk-brave'
 		def examples = project.name.contains('example')
 
 		if (!docs) {
@@ -76,7 +77,7 @@ gradle.beforeProject { Project project ->
 			}
 		}
 
-		if (!docs && !examples && !testProject) {
+		if (!docs && !examples && !testProject && !legacyBraveProject) {
 			// https://about.sonarqube.com/get-started/
 			apply plugin: "org.sonarqube"
 			apply plugin: "jacoco"
