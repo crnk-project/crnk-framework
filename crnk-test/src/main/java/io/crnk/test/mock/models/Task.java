@@ -14,6 +14,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
 @JsonApiResource(type = "tasks")
@@ -48,10 +49,21 @@ public class Task {
 	@JsonApiLinksInformation
 	private TaskLinks linksInformation;
 
-	public static class TaskLinks implements LinksInformation {
+	public static class TaskLinks implements LinksInformation, SelfLinksInformation {
 
 		public String value = "test";
 
+		public String self;
+
+		@Override
+		public String getSelf() {
+			return self;
+		}
+
+		@Override
+		public void setSelf(String self) {
+			this.self = self;
+		}
 	}
 
 	public static class TaskMeta implements MetaInformation {

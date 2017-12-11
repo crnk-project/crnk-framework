@@ -40,21 +40,26 @@ public class DocumentMapperUtil {
 
 	private static SerializerUtil serializerUtil;
 
-	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider) {
+	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
+			PropertiesProvider propertiesProvider) {
 		this.resourceRegistry = resourceRegistry;
 		this.objectMapper = objectMapper;
 
-		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		boolean serializeLinksAsObjects =
+				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
 		serializerUtil = new SerializerUtil(serializeLinksAsObjects);
 	}
 
-	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter, List<ResourceField> fields, boolean relation) {
+	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+			List<ResourceField> fields, boolean relation) {
 		TypedParams<IncludedFieldsParams> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
-		IncludedFieldsParams includedFields = includedFieldsSet != null ? includedFieldsSet.getParams().get(resourceInformation.getResourceType()) : null;
+		IncludedFieldsParams includedFields =
+				includedFieldsSet != null ? includedFieldsSet.getParams().get(resourceInformation.getResourceType()) : null;
 
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
-		} else {
+		}
+		else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
 		}
 	}
@@ -66,7 +71,9 @@ public class DocumentMapperUtil {
 		if (relation) {
 			// for relations consider both "include" and "fields"
 			TypedParams<IncludedRelationsParams> includedRelationsSet = queryAdapter.getIncludedRelations();
-			IncludedRelationsParams includedRelations = includedRelationsSet != null ? includedRelationsSet.getParams().get(resourceInformation.getResourceType()) : null;
+			IncludedRelationsParams includedRelations =
+					includedRelationsSet != null ? includedRelationsSet.getParams().get(resourceInformation.getResourceType())
+							: null;
 			if (includedRelations != null) {
 				includedFieldNames = new HashSet<>(includedFieldNames);
 				for (Inclusion include : includedRelations.getParams()) {
@@ -92,21 +99,25 @@ public class DocumentMapperUtil {
 	public static <T> List<T> toList(Object entity) {
 		if (entity instanceof List) {
 			return (List) entity;
-		} else if (entity instanceof Iterable) {
+		}
+		else if (entity instanceof Iterable) {
 			ArrayList<T> result = new ArrayList<>();
 			for (Object element : (Iterable) entity) {
 				result.add((T) element);
 			}
 			return result;
-		} else {
+		}
+		else {
 			return Collections.singletonList((T) entity);
 		}
 	}
 
-	public String getRelationshipLink(ResourceInformation resourceInformation, Object entity, ResourceField field, boolean related) {
+	public String getRelationshipLink(ResourceInformation resourceInformation, Object entity, ResourceField field,
+			boolean related) {
 		String resourceUrl = resourceRegistry.getResourceUrl(resourceInformation);
 		String resourceId = getIdString(entity, resourceInformation);
-		return resourceUrl + "/" + resourceId + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field.getJsonName();
+		return resourceUrl + "/" + resourceId + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field
+				.getJsonName();
 	}
 
 	public List<ResourceIdentifier> toResourceIds(Collection<?> entities) {
@@ -133,9 +144,19 @@ public class DocumentMapperUtil {
 		return resourceInformation.toIdString(sourceId);
 	}
 
-	public void setLinks(LinksContainer container, LinksInformation linksInformation) {
+	public void setLinks(LinksContainer container, LinksInformation linksInformation, QueryAdapter queryAdapter) {
 		if (linksInformation != null) {
 			container.setLinks((ObjectNode) objectMapper.valueToTree(linksInformation));
+		}
+		if (queryAdapter != null && queryAdapter.getCompactMode()) {
+			ObjectNode links = container.getLinks();
+			if (links != null) {
+				links.remove("self");
+				if (!links.fieldNames().hasNext()) {
+					container.setLinks(null);
+				}
+			}
+
 		}
 	}
 

@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.internal;
 
+import java.util.Map;
+import java.util.Set;
+
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -9,10 +15,10 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 
-import java.util.Map;
-import java.util.Set;
-
 public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
+
+	private final HttpRequestContextProvider requestContextProvider;
+
 
 	private QuerySpecDeserializer querySpecDeserializer;
 
@@ -21,6 +27,8 @@ public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
 	public QuerySpecAdapterBuilder(QuerySpecDeserializer querySpecDeserializer, final ModuleRegistry moduleRegistry) {
 		this.querySpecDeserializer = querySpecDeserializer;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
+		this.requestContextProvider = moduleRegistry.getHttpRequestContextProvider();
+
 		this.querySpecDeserializer.init(new QuerySpecDeserializerContext() {
 
 			@Override
@@ -37,7 +45,12 @@ public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
 
 	@Override
 	public QueryAdapter build(ResourceInformation resourceInformation, Map<String, Set<String>> parameters) {
-
-		return new QuerySpecAdapter(querySpecDeserializer.deserialize(resourceInformation, parameters), resourceRegistry);
+		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpecDeserializer.deserialize(resourceInformation, parameters),
+				resourceRegistry);
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		if (requestContext != null) {
+			adapter.setCompactMode(Boolean.parseBoolean(requestContext.getRequestHeader(HttpHeaders.HTTP_HEADER_CRNK_COMPACT)));
+		}
+		return adapter;
 	}
 }

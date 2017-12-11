@@ -1,6 +1,7 @@
 package io.crnk.core.engine.http;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.boot.CrnkBoot;
@@ -12,11 +13,14 @@ import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.TaskLinks;
+import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +42,8 @@ public class JsonApiRequestProcessorTest {
 
 	@Before
 	public void setup() {
+		TaskRepository.clear();
+
 		boot = new CrnkBoot();
 		boot.addModule(new Module() {
 			@Override
@@ -54,11 +60,26 @@ public class JsonApiRequestProcessorTest {
 		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
 		boot.boot();
 
+		Task task = new Task();
+		task.setId(1L);
+		task.setName("SomeTask");
+		task.setLinksInformation(new TaskLinks());
+		TaskRepository tasks = new TaskRepository();
+		tasks.save(task);
+
 		processor = new JsonApiRequestProcessor(moduleContext);
 
 
 		requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 		requestContext = new HttpRequestContextBaseAdapter(requestContextBase);
+
+		HttpRequestContextProvider requestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
+		requestContextProvider.onRequestStarted(requestContext);
+	}
+
+	@After
+	public void teardown() {
+		TaskRepository.clear();
 	}
 
 	@Test
@@ -132,7 +153,37 @@ public class JsonApiRequestProcessorTest {
 
 		Document document = boot.getObjectMapper().readerFor(Document.class).readValue(json);
 		Assert.assertTrue(document.getData().isPresent());
+
+		List<Resource> resources = document.getCollectionData().get();
+		Assert.assertEquals(1, resources.size());
+		Resource resource = resources.get(0);
+		Assert.assertEquals("http://localhost:8080/tasks/1", resource.getLinks().get("self").asText());
+		Assert.assertNotNull(resource.getLinks().get("value"));
 	}
+
+	@Test
+	public void getTasksWithCompactHeader() throws IOException {
+		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_HEADER_CRNK_COMPACT)).thenReturn("true");
+
+		processor.process(requestContext);
+
+		ArgumentCaptor<byte[]> contentCaptor = ArgumentCaptor.forClass(byte[].class);
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(Mockito.eq(200), contentCaptor.capture());
+
+		String json = new String(contentCaptor.getValue());
+
+		Document document = boot.getObjectMapper().readerFor(Document.class).readValue(json);
+		Assert.assertTrue(document.getData().isPresent());
+		List<Resource> resources = document.getCollectionData().get();
+		Assert.assertEquals(1, resources.size());
+		Resource resource = resources.get(0);
+		Assert.assertNull(resource.getLinks().get("self"));
+		Assert.assertNotNull(resource.getLinks().get("value"));
+	}
+
 
 	private String createRequestBody(String name) throws JsonProcessingException {
 		Task task = new Task();
@@ -233,7 +284,8 @@ public class JsonApiRequestProcessorTest {
 		processor.process(requestContext);
 
 		ArgumentCaptor<byte[]> contentCaptor = ArgumentCaptor.forClass(byte[].class);
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(Mockito.eq(HttpStatus.BAD_REQUEST_400), contentCaptor.capture());
+		Mockito.verify(requestContextBase, Mockito.times(1))
+				.setResponse(Mockito.eq(HttpStatus.BAD_REQUEST_400), contentCaptor.capture());
 
 		String json = new String(contentCaptor.getValue());
 

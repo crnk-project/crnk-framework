@@ -24,7 +24,9 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	private ObjectMapper objectMapper;
 
 	private JacksonResourceFieldInformationProvider sut;
+
 	private ResourceInformationProviderContext context;
+
 	private BeanInformation beanDesc;
 
 	@Before
@@ -37,7 +39,7 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 		sut = new JacksonResourceFieldInformationProvider();
 		sut.init(context);
 
-		beanDesc = new BeanInformation(TestClass.class);
+		beanDesc = BeanInformation.get(TestClass.class);
 	}
 
 	@Test

@@ -1,11 +1,16 @@
 package io.crnk.core.engine.information.bean;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.crnk.core.engine.internal.utils.ClassUtils;
 
 public class BeanInformation {
 
@@ -19,6 +24,10 @@ public class BeanInformation {
 
 	private List<BeanInformation> implementedInterfaces = new ArrayList<>();
 
+	@Deprecated
+	/**
+	 * @deprecated make use of cached get(...)
+	 */
 	public BeanInformation(Class implementationClass) {
 		this.implementationClass = implementationClass;
 
@@ -55,7 +64,8 @@ public class BeanInformation {
 			BeanAttributeInformation attributeInformation = attributeMap.get(name);
 			Field field = attributeInformation.getField();
 			Method getter = attributeInformation.getGetter();
-			if ((field == null || !Modifier.isPublic(field.getModifiers())) && (getter == null || !Modifier.isPublic(getter.getModifiers()))) {
+			if ((field == null || !Modifier.isPublic(field.getModifiers())) && (getter == null || !Modifier
+					.isPublic(getter.getModifiers()))) {
 				// no public accessor
 				iterator.remove();
 				attributeMap.remove(name);
@@ -95,5 +105,16 @@ public class BeanInformation {
 
 	public Class getImplementationClass() {
 		return implementationClass;
+	}
+
+	private static final ConcurrentHashMap<Class, BeanInformation> cache = new ConcurrentHashMap<>();
+
+	public static BeanInformation get(Class<?> clazz) {
+		BeanInformation info = cache.get(clazz);
+		if (info == null) {
+			info = new BeanInformation(clazz);
+			cache.put(clazz, info);
+		}
+		return info;
 	}
 }

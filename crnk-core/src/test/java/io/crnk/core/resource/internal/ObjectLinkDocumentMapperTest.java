@@ -21,8 +21,9 @@ public class ObjectLinkDocumentMapperTest extends DocumentMapperTest {
 		return new PropertiesProvider() {
 			@Override
 			public String getProperty(String key) {
-				if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS))
+				if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
 					return "true";
+				}
 				return null;
 			}
 		};

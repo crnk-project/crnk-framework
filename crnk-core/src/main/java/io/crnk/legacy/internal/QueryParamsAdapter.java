@@ -96,4 +96,9 @@ public class QueryParamsAdapter implements QueryAdapter {
 		DefaultQuerySpecConverter converter = new DefaultQuerySpecConverter(moduleRegistry);
 		return converter.fromParams(getResourceInformation().getResourceClass(), getQueryParams());
 	}
+
+	@Override
+	public boolean getCompactMode() {
+		return false;
+	}
 }
