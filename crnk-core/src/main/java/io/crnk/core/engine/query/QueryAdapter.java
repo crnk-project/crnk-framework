@@ -48,4 +48,6 @@ public interface QueryAdapter {
 	 */
 	QuerySpec toQuerySpec();
 
+	boolean getCompactMode();
+
 }
