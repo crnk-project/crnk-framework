@@ -520,3 +520,12 @@ It contains a single method `LinksInformation getLinksInformation(Iterable<T> re
 If you want to add meta information along with the responses, all repositories (those that implement `ResourceRepository` and `RelationshipRepository`), must implement `LinksRepository`.
 
 When using annotated versions of repositories, a method that returns a `LinksInformation` object should be annotated with `JsonApiLinks` and the first parameter of the method has to be a list of resources.
+
+
+### Payload Size Optimizations
+
+Self and related links can make up to 60% of the response payload size and not always are those links of use.
+Crnk offers a `Crnk-Compact: true` header that can be sent along with the request. In this case the computation
+of those links is omitted. Further relationships without data are completely omitted.
+
+

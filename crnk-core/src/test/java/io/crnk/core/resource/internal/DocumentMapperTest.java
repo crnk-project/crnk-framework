@@ -13,6 +13,7 @@ import io.crnk.core.mock.models.LazyTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -35,6 +36,65 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals("sample task", resource.getAttributes().get("name").asText());
 		Assert.assertThat(resource.getAttributes().get("writeOnlyValue"), CoreMatchers.nullValue());
 	}
+
+	public static class TaskLinks implements LinksInformation {
+
+		public String self = "something";
+
+		public String someLink = "link";
+
+	}
+
+	@Test
+	public void testCompactMode() {
+		LinksInformation links = new TaskLinks();
+		Task task = createTask(2, "sample task");
+		task.setLinksInformation(links);
+
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Task.class));
+		queryAdapter.setCompactMode(true);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter);
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		Assert.assertNull(resource.getLinks().get("self"));
+		Assert.assertNotNull(resource.getLinks().get("someLink"));
+
+		Relationship project = resource.getRelationships().get("project");
+		Assert.assertNull(project.getLinks());
+	}
+
+	@Test
+	public void testCompactModeWithInclusion() {
+		Project project = new Project();
+		project.setName("someProject");
+		project.setId(3L);
+		LinksInformation links = new TaskLinks();
+		Task task = createTask(2, "sample task");
+		task.setLinksInformation(links);
+		task.setProject(project);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeRelation(Arrays.asList("project"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+		queryAdapter.setCompactMode(true);
+
+		Document document = mapper.toDocument(toResponse(task), queryAdapter);
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		Assert.assertNull(resource.getLinks().get("self"));
+		Assert.assertNotNull(resource.getLinks().get("someLink"));
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		Assert.assertNull(projectRel.getLinks());
+
+		Assert.assertEquals(1, document.getIncluded().size());
+		Resource projectResource = document.getIncluded().get(0);
+		Assert.assertNull(projectResource.getRelationships().get("tasks"));
+	}
+
 
 	@Test
 	public void testDocumentInformation() {
@@ -231,7 +291,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		Relationship relationship = resource.getRelationships().get("project");
 		Assert.assertNotNull(relationship);
-		Assert.assertEquals("https://service.local/tasks/2/relationships/project", getLinkText(relationship.getLinks().get("self")));
+		Assert.assertEquals("https://service.local/tasks/2/relationships/project",
+				getLinkText(relationship.getLinks().get("self")));
 		Assert.assertEquals("https://service.local/tasks/2/project", getLinkText(relationship.getLinks().get("related")));
 		ResourceIdentifier relationshipData = relationship.getSingleData().get();
 		Assert.assertNotNull(relationshipData);
@@ -258,8 +319,10 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
 		Relationship relationship = resource.getRelationships().get("lazyProject");
 		Assert.assertNotNull(relationship);
-		Assert.assertEquals("https://service.local/lazy_tasks/2/relationships/lazyProject", getLinkText(relationship.getLinks().get("self")));
-		Assert.assertEquals("https://service.local/lazy_tasks/2/lazyProject", getLinkText(relationship.getLinks().get("related")));
+		Assert.assertEquals("https://service.local/lazy_tasks/2/relationships/lazyProject",
+				getLinkText(relationship.getLinks().get("self")));
+		Assert.assertEquals("https://service.local/lazy_tasks/2/lazyProject",
+				getLinkText(relationship.getLinks().get("related")));
 		Nullable<ResourceIdentifier> relationshipData = relationship.getSingleData();
 		Assert.assertFalse(relationshipData.isPresent());
 		Assert.assertTrue(document.getIncluded().isEmpty());
@@ -305,7 +368,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		return task;
 	}
 
-	class TestLinksInformation implements LinksInformation {
+	public static class TestLinksInformation implements LinksInformation {
+
 		public String value;
 
 		public String getValue() {
@@ -319,7 +383,8 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		}
 	}
 
-	class TestMetaInformation implements MetaInformation {
+	public static class TestMetaInformation implements MetaInformation {
+
 		public String value;
 
 		public String getValue() {

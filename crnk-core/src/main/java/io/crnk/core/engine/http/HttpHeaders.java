@@ -7,6 +7,8 @@ public class HttpHeaders {
 
 	public static final String HTTP_HEADER_ACCEPT = "Accept";
 
+	public static final String HTTP_HEADER_CRNK_COMPACT = "Crnk-Compact";
+
 	public static final String HTTP_CONTENT_TYPE = "Content-Type";
 
 	public static final String JSONAPI_CONTENT_TYPE = "application/vnd.api+json";

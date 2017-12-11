@@ -1,5 +1,10 @@
 package io.crnk.core.queryspec.internal;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -15,16 +20,13 @@ import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 public class QuerySpecAdapter implements QueryAdapter {
 
 	private QuerySpec querySpec;
 
 	private ResourceRegistry resourceRegistry;
+
+	private boolean compactMode;
 
 	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry) {
 		this.querySpec = querySpec;
@@ -111,7 +113,9 @@ public class QuerySpecAdapter implements QueryAdapter {
 
 	@Override
 	public QueryAdapter duplicate() {
-		return new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
+		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
+		adapter.setCompactMode(compactMode);
+		return adapter;
 	}
 
 	@Override
@@ -123,5 +127,14 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public QuerySpec toQuerySpec() {
 		return getQuerySpec();
+	}
+
+	@Override
+	public boolean getCompactMode() {
+		return compactMode;
+	}
+
+	public void setCompactMode(boolean compactMode) {
+		this.compactMode = compactMode;
 	}
 }

@@ -94,7 +94,7 @@ public class LinksInformationSerializerTest {
 		return "{" + links.toString() + "}";
 	}
 
-	private class TestSelfLinksInformation implements SelfLinksInformation {
+	public static class TestSelfLinksInformation implements SelfLinksInformation {
 
 		private String self;
 
@@ -113,7 +113,7 @@ public class LinksInformationSerializerTest {
 		}
 	}
 
-	private class TestCustomLinksInformation implements LinksInformation {
+	public static class TestCustomLinksInformation implements LinksInformation {
 
 		private String imdb;
 

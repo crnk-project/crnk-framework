@@ -1,18 +1,22 @@
 package io.crnk.core.engine.information.bean;
 
-import io.crnk.core.utils.Optional;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.crnk.core.utils.Optional;
+
 public class BeanAttributeInformation {
 
 	private String name;
+
 	private Field field;
+
 	private Method getter;
+
 	private Method setter;
 
 	private BeanInformation beanInformation;
@@ -102,5 +106,26 @@ public class BeanAttributeInformation {
 		annotations.put(annotationClass, annotation);
 
 		return annotation;
+	}
+
+	public boolean isReadable() {
+		return getter != null || field != null;
+	}
+
+	public Object getValue(Object bean) {
+		try {
+			if (getter != null) {
+				return getter.invoke(bean);
+			}
+			else {
+				return field.get(bean);
+			}
+		}
+		catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		catch (InvocationTargetException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

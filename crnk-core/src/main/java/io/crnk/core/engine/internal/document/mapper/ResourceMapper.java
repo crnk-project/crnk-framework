@@ -21,15 +21,19 @@ import io.crnk.core.resource.meta.MetaInformation;
 public class ResourceMapper {
 
 	private static final String SELF_FIELD_NAME = "self";
+
 	private final String RELATED_FIELD_NAME = "related";
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
 	private DocumentMapperUtil util;
+
 	private boolean client;
+
 	private ObjectMapper objectMapper;
 
-	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper, ResourceFilterDirectory resourceFilterDirectory) {
+	public ResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper,
+			ResourceFilterDirectory resourceFilterDirectory) {
 		this.util = util;
 		this.client = client;
 		this.objectMapper = objectMapper;
@@ -40,7 +44,8 @@ public class ResourceMapper {
 		if (entity instanceof Resource) {
 			// Resource and ResourceId
 			return (Resource) entity;
-		} else {
+		}
+		else {
 			// map resource objects
 			Class<?> dataClass = entity.getClass();
 
@@ -50,7 +55,7 @@ public class ResourceMapper {
 			resource.setId(util.getIdString(entity, resourceInformation));
 			resource.setType(resourceInformation.getResourceType());
 			if (!client) {
-				util.setLinks(resource, getResourceLinks(entity, resourceInformation));
+				util.setLinks(resource, getResourceLinks(entity, resourceInformation), queryAdapter);
 				util.setMeta(resource, getResourceMeta(entity, resourceInformation));
 			}
 			setAttributes(resource, entity, resourceInformation, queryAdapter);
@@ -70,7 +75,8 @@ public class ResourceMapper {
 		LinksInformation info;
 		if (resourceInformation.getLinksField() != null) {
 			info = (LinksInformation) resourceInformation.getLinksField().getAccessor().getValue(entity);
-		} else {
+		}
+		else {
 			info = new DocumentMapperUtil.DefaultSelfRelatedLinksInformation();
 		}
 		if (info instanceof SelfLinksInformation) {
@@ -82,9 +88,11 @@ public class ResourceMapper {
 		return info;
 	}
 
-	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation,
+			QueryAdapter queryAdapter) {
 		// fields legacy may further limit the number of fields
-		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
+		List<ResourceField> fields = DocumentMapperUtil
+				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
 
 		// serialize the individual attributes
 		for (ResourceField field : fields) {
@@ -104,8 +112,10 @@ public class ResourceMapper {
 		resource.getAttributes().put(field.getJsonName(), valueNode);
 	}
 
-	protected void setRelationships(Resource resource, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
-		List<ResourceField> fields = DocumentMapperUtil.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getRelationshipFields(), true);
+	protected void setRelationships(Resource resource, Object entity, ResourceInformation resourceInformation,
+			QueryAdapter queryAdapter) {
+		List<ResourceField> fields = DocumentMapperUtil
+				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getRelationshipFields(), true);
 		for (ResourceField field : fields) {
 			if (!isIgnored(field)) {
 				setRelationship(resource, field, entity, resourceInformation, queryAdapter);
@@ -113,18 +123,21 @@ public class ResourceMapper {
 		}
 	}
 
-	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation
+			resourceInformation,
+			QueryAdapter queryAdapter) {
 		{ // NOSONAR signature is ok since protected
 			SerializerUtil serializerUtil = DocumentMapperUtil.getSerializerUtil();
 
-			ObjectNode relationshipLinks = objectMapper.createObjectNode();
-			String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false);
-			serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
-			String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true);
-			serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
-
 			Relationship relationship = new Relationship();
-			relationship.setLinks(relationshipLinks);
+			if (queryAdapter == null || !queryAdapter.getCompactMode()) {
+				ObjectNode relationshipLinks = objectMapper.createObjectNode();
+				String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false);
+				serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);
+				String relatedUrl = util.getRelationshipLink(resourceInformation, entity, field, true);
+				serializerUtil.serializeLink(objectMapper, relationshipLinks, RELATED_FIELD_NAME, relatedUrl);
+				relationship.setLinks(relationshipLinks);
+			}
 			resource.getRelationships().put(field.getJsonName(), relationship);
 		}
 	}

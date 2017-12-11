@@ -1,19 +1,28 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
-
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
@@ -25,9 +34,8 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 	private LookupIncludeBehavior globalLookupIncludeBehavior;
 
 	public ResourceInformationProviderBase(
-		PropertiesProvider propertiesProvider,
-		List<ResourceFieldInformationProvider> resourceFieldInformationProviders)
-	{
+			PropertiesProvider propertiesProvider,
+			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider);
 	}
@@ -42,7 +50,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 	}
 
 	protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
-		BeanInformation beanDesc = new BeanInformation(resourceClass);
+		BeanInformation beanDesc = BeanInformation.get(resourceClass);
 		List<String> attributeNames = beanDesc.getAttributeNames();
 		List<ResourceField> fields = new ArrayList<>();
 		for (String attributeName : attributeNames) {
@@ -71,7 +79,8 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		if (useFieldType(attributeDesc)) {
 			fieldBuilder.type(attributeDesc.getField().getType());
 			genericType = attributeDesc.getField().getGenericType();
-		} else {
+		}
+		else {
 			fieldBuilder.type(attributeDesc.getGetter().getReturnType());
 			genericType = attributeDesc.getGetter().getGenericReturnType();
 		}
@@ -116,7 +125,8 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
 
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
-			Optional<LookupIncludeBehavior> lookupIncludeBehavior = fieldInformationProvider.getLookupIncludeBehavior(attributeDesc);
+			Optional<LookupIncludeBehavior> lookupIncludeBehavior =
+					fieldInformationProvider.getLookupIncludeBehavior(attributeDesc);
 			if (lookupIncludeBehavior.isPresent()) {
 				behavior = lookupIncludeBehavior.get();
 				break;
