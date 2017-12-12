@@ -31,7 +31,7 @@ dependencies {
 	testCompile(group: 'com.querydsl', name: 'querydsl-apt', version: '4.1.3', classifier: 'jpa')
 }
 
-/*
+
 // e.g. CDI expects those directories to be equal
 sourceSets {
 	main {
@@ -49,4 +49,4 @@ idea {
 	module {
 		idea.module.inheritOutputDirs = true
 	}
-}*/
+}
