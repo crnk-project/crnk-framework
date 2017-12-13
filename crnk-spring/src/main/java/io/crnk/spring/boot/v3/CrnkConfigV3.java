@@ -68,7 +68,7 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 		try {
 			QuerySpecDeserializer querySpecDeserializer = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class).get(0);
 			boot.setQuerySpecDeserializer(querySpecDeserializer);
-		} catch (NoSuchBeanDefinitionException e) {
+		} catch (Exception e) {
 			LOGGER.info("No external QuerySpecDeserializer implementation found. DefaultQuerySpecDeserializer will be used instead.");
 		}
 
