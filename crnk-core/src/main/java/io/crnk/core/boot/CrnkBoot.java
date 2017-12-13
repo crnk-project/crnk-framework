@@ -446,6 +446,8 @@ public class CrnkBoot {
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
 			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
 		}
 	}
 
@@ -462,6 +464,8 @@ public class CrnkBoot {
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
 			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
 		}
 	}
 
@@ -476,6 +480,8 @@ public class CrnkBoot {
 		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
 			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(Boolean
 					.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
 		}
 	}
 

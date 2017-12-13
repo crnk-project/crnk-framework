@@ -8,7 +8,6 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.servlet.internal.ServletModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.SpringCrnkFilter;
@@ -91,13 +90,13 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 					return properties.getPathPrefix();
 				}
 				if (CrnkProperties.DEFAULT_PAGE_LIMIT.equals(key)) {
-					return String.valueOf(properties.getDefaultPageLimit());
+					return properties.getDefaultPageLimit() != null ? String.valueOf(properties.getDefaultPageLimit()) : null;
 				}
 				if (CrnkProperties.MAX_PAGE_LIMIT.equals(key)) {
-					return String.valueOf(properties.getMaxPageLimit());
+					return properties.getMaxPageLimit() != null ? String.valueOf(properties.getMaxPageLimit()) : null;
 				}
 				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
-					return String.valueOf(properties.getAllowUnknownAttributes());
+					return properties.getAllowUnknownAttributes() != null ? String.valueOf(properties.getAllowUnknownAttributes()) : null;
 				}
 				if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
 					return String.valueOf(properties.getReturn404OnNull());
@@ -105,9 +104,9 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
-		boot.setAllowUnknownAttributes();
 		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.boot();
+		boot.setAllowUnknownAttributes();
 		return boot;
 	}
 
