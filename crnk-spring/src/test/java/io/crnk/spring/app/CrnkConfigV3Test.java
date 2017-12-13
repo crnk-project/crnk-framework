@@ -1,4 +1,4 @@
-package io.crnk.spring.boot;
+package io.crnk.spring.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
