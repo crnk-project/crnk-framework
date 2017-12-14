@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.http;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -30,11 +35,6 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs
@@ -109,6 +109,7 @@ public class HttpRequestProcessorImpl implements RequestDispatcher {
 			Optional<JsonApiExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 			if (exceptionMapper.isPresent()) {
 				//noinspection unchecked
+				logger.debug("dispatching exception to mapper", e);
 				return exceptionMapper.get().toErrorResponse(e).toResponse();
 			} else {
 				logger.error("failed to process request", e);
