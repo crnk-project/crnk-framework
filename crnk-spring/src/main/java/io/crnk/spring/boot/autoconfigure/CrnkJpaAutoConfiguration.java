@@ -3,6 +3,7 @@ package io.crnk.spring.boot.autoconfigure;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.JpaModuleConfig;
@@ -42,13 +43,13 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnClass(JpaModule.class)
 @ConditionalOnMissingBean(JpaModule.class)
 
-@EnableConfigurationProperties({ CrnkJpaProperties.class, CrnkSpringBootProperties.class })
+@EnableConfigurationProperties({CrnkJpaProperties.class, CrnkSpringBootProperties.class})
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @AutoConfigureBefore
-@Import({ CrnkConfigV3.class })
+@Import({CrnkConfigV3.class})
 public class CrnkJpaAutoConfiguration {
 
-	@Autowired
+	@PersistenceContext
 	private EntityManager em;
 
 	@Autowired
@@ -62,16 +63,19 @@ public class CrnkJpaAutoConfiguration {
 
 
 	@Bean
+	@ConditionalOnMissingBean
 	public SpringTransactionRunner transactionRunner() {
 		return new SpringTransactionRunner();
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public JpaModuleConfig jpaModuleConfig() {
 		return new JpaModuleConfig();
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public JpaModule jpaModule(JpaModuleConfig config) {
 		if (configurers != null) {
 			for (JpaModuleConfigurer configurer : configurers) {
@@ -79,7 +83,7 @@ public class CrnkJpaAutoConfiguration {
 			}
 		}
 
-		if(jpaProperties.getExposeAll()){
+		if (jpaProperties.getExposeAll()) {
 			config.exposeAllEntities(emf);
 		}
 
