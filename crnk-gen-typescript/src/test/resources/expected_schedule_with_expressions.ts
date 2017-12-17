@@ -6,13 +6,11 @@ import {
 import {
 	BeanPath,
 	BooleanPath,
-	StringPath
-} from '@crnk/angular-ngrx/expression';
-import {
 	CrnkStoreResource,
 	QTypedManyResourceRelationship,
-	QTypedOneResourceRelationship
-} from '@crnk/angular-ngrx/stub';
+	QTypedOneResourceRelationship,
+	StringPath
+} from '@crnk/angular-ngrx';
 import {
 	ManyQueryResult,
 	OneQueryResult,

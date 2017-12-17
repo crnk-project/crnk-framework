@@ -67,7 +67,8 @@
 			"check-whitespace"
 		],
 		"prefer-const": true,
-		"quotemark": false, // TODO not the adn default?
+		"quotemark": false,
+		// TODO not the adn default?
 		"radix": true,
 		"semicolon": [
 			"always"
@@ -117,9 +118,6 @@
 		"use-life-cycle-interface": true,
 		"use-pipe-transform-interface": true,
 		"component-class-suffix": true,
-		"directive-class-suffix": true,
-		"no-access-missing-member": true,
-		"templates-use-public": true,
-		"invoke-injectable": true
+		"directive-class-suffix": true
 	}
 }

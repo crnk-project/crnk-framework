@@ -16,38 +16,44 @@ export function extractType(it) {
 		};
 	}
 }
-export function getType(it) {
+
+function getType(it) {
 	return it.type;
 }
-export function getPath(it) {
+
+function getPath(it) {
 	return it.path;
 }
-export function getIncludePath(it) {
-	return 'include' + (it[0] !== '' ? '[' + it[0] + ']' : '') + '=' + it[1].map(getPath).join(',');
+
+function getUrlPath(paramName, it) {
+	return paramName + (it[0] !== '' ? '[' + it[0] + ']' : '') + '=' + it[1].map(getPath).join(',');
 }
 
-export function generateCrnkIncludedQueryParams(included: Array<string>): string {
+function generateCrnkQueryParams(paramName, included: Array<string>) {
 	if (_.isEmpty(included)) {
 		return '';
 	}
-
-	const typedIncludes = included.map(extractType);
-	const includeGroups = _.toPairs(_.groupBy(typedIncludes, getType));
-	const include = includeGroups.map(getIncludePath).join('&');
-	return include;
+	const includeGroups = _.toPairs(_.groupBy(included.map(extractType), getType));
+	return includeGroups.map(it => getUrlPath(paramName, it)).join('&');
 }
+
+export function generateCrnkIncludedQueryParams(included: Array<string>): string {
+	return generateCrnkQueryParams('include', included);
+}
+
+export function generateCrnkFieldsQueryParams(fields: Array<string>): string {
+	return generateCrnkQueryParams('fields', fields);
+}
+
+
 export const CRNK_URL_BUILDER = {
 	generateIncludedQueryParams: generateCrnkIncludedQueryParams,
+	generateFieldsQueryParams: generateCrnkFieldsQueryParams,
 };
 
 /* TODO
  generateFilteringQueryParams: generateCrnkFilteringQueryParams,
- generateFieldsQueryParams: generateCrnkFieldsQueryParams,
- generateIncludedQueryParams: generateIncludedQueryParams
-
  generateFilteringQueryParams?: (params: Array<FilteringParam>) => string;
- generateFieldsQueryParams?: (params: Array<string>) => string;
- generateIncludedQueryParams?: (params: Array<string>) => string;
  generateSortingQueryParams?: (params: Array<SortingParam>) => string;
  generateQueryParams?: (...params: Array<string>) => string;
  */

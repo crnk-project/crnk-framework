@@ -43,6 +43,10 @@ export abstract class CrnkControl extends NgControl {
 		return this._control;
 	}
 
+	set control(control: FormControl) {
+		this._control = control;
+	}
+
 	get validator(): ValidatorFn {
 		return composeValidators(this._rawValidators);
 	}
