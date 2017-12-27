@@ -54,6 +54,15 @@ public class BasicSpringBootTest {
 	}
 
 	@Test
+	public void testUiModuleRunning() throws Exception {
+		RestTemplate testRestTemplate = new RestTemplate();
+		ResponseEntity<String> response = testRestTemplate
+				.getForEntity("http://localhost:" + this.port + "/api/browse/index.html", String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+
+	@Test
 	public void testTestCustomEndpoint() throws Exception {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
