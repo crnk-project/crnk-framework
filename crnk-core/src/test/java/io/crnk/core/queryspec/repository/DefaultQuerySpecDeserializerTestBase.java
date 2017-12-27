@@ -361,7 +361,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 				Assert.assertEquals("doesNotExist", parameter.getStrParamType());
 				Assert.assertEquals("doesNotExist[something]", parameter.getName());
 				Assert.assertNull(parameter.getResourceInformation());
-				Assert.assertNull(parameter.getOperator());
+				Assert.assertEquals(FilterOperator.EQ, parameter.getOperator());
 				Assert.assertNull(parameter.getAttributePath());
 				Assert.assertEquals(1, parameter.getValues().size());
 				deserialized[0] = true;
