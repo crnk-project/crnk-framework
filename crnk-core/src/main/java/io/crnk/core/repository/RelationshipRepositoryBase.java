@@ -51,13 +51,20 @@ import java.util.*;
  * @param <D> target resource type
  * @param <J> target identity type
  */
-public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable> implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
+public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
+		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
 
 	private ResourceRegistry resourceRegistry;
 
 	private Class<D> targetResourceClass;
 
 	private Class<T> sourceResourceClass;
+
+	/**
+	 * default constructor for CDI an other DI libraries
+	 */
+	protected RelationshipRepositoryBase() {
+	}
 
 	protected RelationshipRepositoryBase(Class<T> sourceResourceClass, Class<D> targetResourceClass) {
 		this.sourceResourceClass = sourceResourceClass;
@@ -128,7 +135,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		sourceAdapter.update(source, getSaveQueryAdapter(fieldName));
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Collection<D> getOrCreateCollection(Object source, String fieldName) {
 		Object property = PropertyUtils.getProperty(source, fieldName);
 		if (property == null) {
@@ -168,7 +175,9 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 		String oppositeName = getOppositeName(fieldName);
 		QuerySpec idQuerySpec = querySpec.duplicate();
-		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getJsonName()), FilterOperator.EQ, sourceIds));
+		idQuerySpec.addFilter(
+				new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getJsonName()), FilterOperator.EQ,
+						sourceIds));
 		idQuerySpec.includeRelation(Arrays.asList(oppositeName));
 
 		ResourceRepositoryAdapter<D, J> targetAdapter = getTargetAdapter();
@@ -195,10 +204,12 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, String oppositeName, ResourceInformation sourceInformation) {
+	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, String oppositeName,
+			ResourceInformation sourceInformation) {
 		Object property = PropertyUtils.getProperty(result, oppositeName);
 		if (property == null) {
-			throw new IllegalStateException("field " + oppositeName + " is null for " + result + ", make sure to properly implement relationship inclusions");
+			throw new IllegalStateException("field " + oppositeName + " is null for " + result
+					+ ", make sure to properly implement relationship inclusions");
 		}
 		if (property instanceof Iterable) {
 			for (T potentialSource : (Iterable<T>) property) {
@@ -212,7 +223,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 					bulkResult.add(sourceId, result);
 				}
 			}
-		} else {
+		}
+		else {
 			T source = (T) property;
 			I sourceId = (I) sourceInformation.getId(source);
 			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains
@@ -233,7 +245,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		}
 		String oppositeName = field.getOppositeName();
 		if (oppositeName == null) {
-			throw new IllegalStateException("no opposite specified for field " + sourceResourceClass.getSimpleName() + "." + fieldName);
+			throw new IllegalStateException(
+					"no opposite specified for field " + sourceResourceClass.getSimpleName() + "." + fieldName);
 		}
 		return oppositeName;
 	}
