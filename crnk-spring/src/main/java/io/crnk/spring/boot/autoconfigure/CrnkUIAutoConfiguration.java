@@ -22,11 +22,9 @@ import org.springframework.context.annotation.Import;
  * Disable with the property <code>crnk.ui.enabled = false</code>
  */
 @Configuration
-
 @ConditionalOnProperty(prefix = "crnk.ui", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(UIModule.class)
 @ConditionalOnMissingBean(UIModule.class)
-
 @EnableConfigurationProperties({ CrnkUiProperties.class })
 @Import({ CrnkConfigV3.class })
 public class CrnkUIAutoConfiguration {
