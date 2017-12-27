@@ -16,7 +16,20 @@ public class CoreClassTestUtils {
 		try {
 			constructors[0].setAccessible(true);
 			Assert.assertNotNull(constructors[0].newInstance());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public static void assertProtectedConstructor(Class<?> clazz) {
+		try {
+			Constructor constructor = clazz.getDeclaredConstructor();
+			Assert.assertTrue(Modifier.isProtected(constructor.getModifiers()));
+			constructor.setAccessible(true);
+			Assert.assertNotNull(constructor.newInstance());
+		}
+		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
