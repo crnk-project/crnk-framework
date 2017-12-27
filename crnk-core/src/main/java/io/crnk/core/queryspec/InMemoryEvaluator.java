@@ -38,6 +38,9 @@ public class InMemoryEvaluator {
 	}
 
 	private static boolean matchesPrimitiveOperator(Object object, FilterSpec filterSpec) {
+		if (filterSpec.getAttributePath() == null) {
+			throw new BadRequestException("no attribute specified for filter parameter");
+		}
 		Object value = PropertyUtils.getProperty(object, filterSpec.getAttributePath());
 		FilterOperator operator = filterSpec.getOperator();
 		Object filterValue = filterSpec.getValue();

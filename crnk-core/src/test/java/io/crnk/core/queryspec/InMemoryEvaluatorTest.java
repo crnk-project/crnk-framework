@@ -52,6 +52,19 @@ public class InMemoryEvaluatorTest {
 	}
 
 	@Test
+	public void testNoAttributePathGivesError() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addFilter(new FilterSpec(null, FilterOperator.EQ, "test"));
+		try {
+			spec.apply(tasks).size();
+			Assert.fail();
+		}
+		catch (BadRequestException e) {
+			// ok
+		}
+	}
+
+	@Test
 	public void setLimit() {
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.setLimit(2L);
