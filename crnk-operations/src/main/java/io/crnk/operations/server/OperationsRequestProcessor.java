@@ -37,7 +37,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OperationsRequestProcessor.class);
 
-	private static final String JSONPATCH_CONTENT_TYPE = "application/json-patch+json";
+	public static final String JSONPATCH_CONTENT_TYPE = "application/json-patch+json";
 
 	private Module.ModuleContext moduleContext;
 

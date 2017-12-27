@@ -32,7 +32,7 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	public boolean accepts(String contentType) {
 		String accept = getRequestHeader(HttpHeaders.HTTP_HEADER_ACCEPT);
 		if (accept == null) {
-			return true;
+			return false;
 		}
 		for (String acceptElement : accept.split("\\,")) {
 			acceptElement = acceptElement.trim();
@@ -83,7 +83,8 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
 	@Override
 	public boolean acceptsAny() {
-		return accepts("*") || accepts("*/*");
+		String accept = getRequestHeader(HttpHeaders.HTTP_HEADER_ACCEPT);
+		return accept == null || accepts("*") || accepts("*/*");
 	}
 
 	@Override

@@ -50,8 +50,9 @@ public class HttpRequestContextBaseAdapterTest {
 	@Test
 	public void testAcceptsAllIfNoHeader() throws IOException {
 		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(null);
-		Assert.assertTrue(adapter.accepts("text/html"));
-		Assert.assertTrue(adapter.accepts("application/json"));
+		Assert.assertFalse(adapter.accepts("text/html"));
+		Assert.assertFalse(adapter.accepts("application/json"));
+		Assert.assertTrue(adapter.acceptsAny());
 	}
 
 	@Test
