@@ -13,6 +13,7 @@ import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.client.internal.ClientDocumentMapper;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -22,6 +23,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
+import io.crnk.operations.server.OperationsRequestProcessor;
 
 public class OperationsCall {
 
@@ -90,6 +92,8 @@ public class OperationsCall {
 
 			String url = client.getCrnk().getServiceUrlProvider().getUrl() + "/operations";
 			HttpAdapterRequest request = adapter.newRequest(url, HttpMethod.PATCH, operationsJson);
+			request.header(HttpHeaders.HTTP_CONTENT_TYPE, OperationsRequestProcessor.JSONPATCH_CONTENT_TYPE);
+			request.header(HttpHeaders.HTTP_HEADER_ACCEPT, OperationsRequestProcessor.JSONPATCH_CONTENT_TYPE);
 			HttpAdapterResponse response = request.execute();
 
 			int status = response.code();
@@ -99,7 +103,8 @@ public class OperationsCall {
 			}
 			String json = response.body();
 			responses = Arrays.asList(mapper.readValue(json, OperationResponse[].class));
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
