@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * A builder class which holds all of the Crnk controllers, which must be placed in
- * {@link io.crnk.core.engine.http.internal.dispatcher.controller} package.
+ * {@link io.crnk.core.engine.internal.dispatcher.controller} package.
  */
 public class ControllerRegistryBuilder {
 
@@ -33,8 +33,13 @@ public class ControllerRegistryBuilder {
 		this.typeParser = typeParser;
 		this.propertiesProvider = propertiesProvider;
 		this.objectMapper = objectMapper;
-		this.documentMapper = new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
+		this.documentMapper = newDocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 		this.modificationFilters = modificationFilters;
+	}
+
+	protected DocumentMapper newDocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
+							 ResourceFilterDirectory resourceFilterDirectory) {
+		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory);
 	}
 
 	/**
