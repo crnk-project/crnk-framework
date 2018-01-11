@@ -370,13 +370,12 @@ public class JpaModule implements InitializingModule {
 
 			@Override
 			public Response filter(final DocumentFilterContext context, final DocumentFilterChain chain) {
-				return transactionRunner.doInTransaction(new Callable<Response>() {
-
-					@Override
-					public Response call() throws Exception {
-						return chain.doFilter(context);
-					}
-				});
+				try {
+					return transactionRunner.doInTransaction(() -> chain.doFilter(context));
+				} catch (Exception e) {
+					 logger.error("failed to execute operation", e);
+					 return null;
+				}
 			}
 		});
 	}
