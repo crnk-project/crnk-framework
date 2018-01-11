@@ -64,7 +64,7 @@ public class RestTemplateClientTest {
 
 	@Before
 	public void setupClient() {
-		client = new CrnkClient("http://127.0.0.1:" + port);
+		client = new CrnkClient("http://127.0.0.1:" + port + "/api");
 		client.findModules();
 
 		RestTemplateAdapter adapter = RestTemplateAdapter.newInstance();
