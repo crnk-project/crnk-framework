@@ -7,6 +7,7 @@ import javax.security.auth.message.config.AuthConfigFactory;
 
 import io.crnk.spring.app.BasicSpringBootApplication;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
@@ -35,7 +37,7 @@ public class BasicSpringBootTest {
 	}
 
 	@Test
-	public void testTestEndpointWithQueryParams() throws Exception {
+	public void testTestEndpointWithQueryParams() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/tasks?filter[tasks][name]=John", String.class);
@@ -43,9 +45,8 @@ public class BasicSpringBootTest {
 		assertThatJson(response.getBody()).node("data").isPresent();
 	}
 
-
 	@Test
-	public void testJpa() throws Exception {
+	public void testJpa() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/schedule", String.class);
@@ -54,16 +55,28 @@ public class BasicSpringBootTest {
 	}
 
 	@Test
-	public void testUiModuleRunning() throws Exception {
+	public void testUiModuleRunning() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/browse/index.html", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
+	@Test
+	public void testNonApiPathIsIgnored() {
+		RestTemplate testRestTemplate = new RestTemplate();
+		try {
+			testRestTemplate
+					.getForEntity("http://localhost:" + this.port + "/tasks", String.class);
+			Assert.fail();
+		}
+		catch (HttpStatusCodeException e) {
+			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
+		}
+	}
 
 	@Test
-	public void testTestCustomEndpoint() throws Exception {
+	public void testTestCustomEndpoint() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
 				.getForEntity("http://localhost:" + this.port + "/api/custom", String.class);
