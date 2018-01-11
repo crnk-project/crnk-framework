@@ -1,14 +1,17 @@
 package io.crnk.spring.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.internal.SpringServiceDiscovery;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -22,6 +25,9 @@ public class CrnkConfigV3Test {
 	public void checkProperties() {
 		ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
 		Mockito.when(applicationContext.getEnvironment()).thenReturn(Mockito.mock(Environment.class));
+
+		SpringServiceDiscovery serviceDiscovery = Mockito.mock(SpringServiceDiscovery.class);
+		Mockito.when(serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class)).thenReturn(null);
 
 		CrnkSpringBootProperties properties = new CrnkSpringBootProperties();
 		properties.setDomainName("testDomain");
@@ -37,7 +43,6 @@ public class CrnkConfigV3Test {
 		CrnkConfigV3 config = new CrnkConfigV3(properties, objectMapper);
 		config.setApplicationContext(applicationContext);
 
-		SpringServiceDiscovery serviceDiscovery = Mockito.mock(SpringServiceDiscovery.class);
 		CrnkBoot boot = config.crnkBoot(serviceDiscovery);
 
 		PropertiesProvider propertiesProvider = boot.getPropertiesProvider();

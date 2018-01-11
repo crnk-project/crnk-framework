@@ -158,4 +158,18 @@ public class CrnkProperties {
 	 * @since 2.4
 	 */
 	public static final String REJECT_PLAIN_JSON = "crnk.config.resource.request.rejectPlainJson";
+
+	/**
+	 * <p>
+	 * Set a default page limit for Crnk responses.
+	 * </p>
+	 */
+	public static final String DEFAULT_PAGE_LIMIT = "crnk.config.resource.request.defaultPageLimit";
+
+	/**
+	 * <p>
+	 * Set a maximum allowed page limit for Crnk responses.
+	 * </p>
+	 */
+	public static final String MAX_PAGE_LIMIT = "crnk.config.resource.request.maxPageLimit";
 }

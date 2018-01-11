@@ -1,6 +1,8 @@
 package io.crnk.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
@@ -36,15 +38,21 @@ public class CrnkFeatureTest {
 	@Test
 	public void setDefaultPageLimit() {
 		CrnkFeature feature = new CrnkFeature();
+		CrnkBoot boot = feature.getBoot();
+		boot.boot();
+
 		feature.setDefaultPageLimit(12L);
 
-		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) feature.getBoot().getQuerySpecDeserializer();
+		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
 		Assert.assertEquals(12L, deserializer.getDefaultLimit().longValue());
 	}
 
 	@Test
 	public void getQuerySpecDeserializer() {
 		CrnkFeature feature = new CrnkFeature();
+		CrnkBoot boot = feature.getBoot();
+		boot.boot();
+
 		Assert.assertNotNull(feature.getQuerySpecDeserializer());
 	}
 }

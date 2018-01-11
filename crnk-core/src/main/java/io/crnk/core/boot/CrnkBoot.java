@@ -2,6 +2,7 @@ package io.crnk.core.boot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -50,6 +51,7 @@ import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import net.jodah.typetools.TypeResolver;
 
 import java.util.ArrayList;
@@ -69,7 +71,7 @@ public class CrnkBoot {
 
 	private QueryParamsBuilder queryParamsBuilder;
 
-	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
+	private QuerySpecDeserializer querySpecDeserializer;
 
 	private boolean configured;
 
@@ -152,6 +154,8 @@ public class CrnkBoot {
 	 * Performs the setup.
 	 */
 	public void boot() {
+		setupQuerySpecDeserializer();
+
 		checkNotConfiguredYet();
 		configured = true;
 
@@ -162,6 +166,26 @@ public class CrnkBoot {
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		bootDiscovery();
+	}
+
+	private void setupQuerySpecDeserializer() {
+		if (this.querySpecDeserializer == null) {
+			DefaultQuerySpecDeserializer deserializer = new DefaultQuerySpecDeserializer();
+			String defaultPageLimit = propertiesProvider.getProperty(CrnkProperties.DEFAULT_PAGE_LIMIT);
+			if (defaultPageLimit != null) {
+				deserializer.setDefaultLimit(Long.parseLong(defaultPageLimit));
+			}
+			String maxPageLimit = propertiesProvider.getProperty(CrnkProperties.MAX_PAGE_LIMIT);
+			if (maxPageLimit != null) {
+				deserializer.setMaxPageLimit(Long.parseLong(maxPageLimit));
+			}
+			String allowUnknownAttributes = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
+			if (allowUnknownAttributes != null) {
+				deserializer.setAllowUnknownAttributes(Boolean.parseBoolean(allowUnknownAttributes));
+			}
+
+			this.querySpecDeserializer = deserializer;
+		}
 	}
 
 	private void setupServiceDiscovery() {
@@ -430,7 +454,11 @@ public class CrnkBoot {
 	public void setDefaultPageLimit(Long defaultPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
+		}
 	}
 
 	/**
@@ -444,7 +472,11 @@ public class CrnkBoot {
 	public void setMaxPageLimit(Long maxPageLimit) {
 		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
+		}
 	}
 
 	/**
@@ -455,9 +487,12 @@ public class CrnkBoot {
 	public void setAllowUnknownAttributes() {
 		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
 				"it is null.", this.querySpecDeserializer);
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-				.setAllowUnknownAttributes(Boolean
-						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		if (this.querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(Boolean
+					.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+		} else {
+			throw new IllegalStateException("Could not set the property of custom QuerySpecDeserializer instance");
+		}
 	}
 
 	public ModuleRegistry getModuleRegistry() {
