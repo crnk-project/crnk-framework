@@ -4,15 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
+import io.crnk.jpa.JpaModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import java.util.concurrent.Callable;
 
 @Configuration
 public class TestDataLoader {
+
+	private Logger logger = LoggerFactory.getLogger(TestDataLoader.class);
 
 	@Autowired
 	private EntityManager em;
@@ -25,19 +29,20 @@ public class TestDataLoader {
 
 	@PostConstruct
 	public void setup() {
-		transactionRunner.doInTransaction(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				for (int i = 0; i < 10; i++) {
-					ScheduleEntity scheduleEntity = new ScheduleEntity();
-					scheduleEntity.setId((long) i);
-					scheduleEntity.setName("schedule" + i);
-					em.persist(scheduleEntity);
-				}
-				em.flush();
-				return null;
-			}
-		});
+		try {
+			transactionRunner.doInTransaction(() -> {
+                for (int i = 0; i < 10; i++) {
+                    ScheduleEntity scheduleEntity = new ScheduleEntity();
+                    scheduleEntity.setId((long) i);
+                    scheduleEntity.setName("schedule" + i);
+                    em.persist(scheduleEntity);
+                }
+                em.flush();
+                return null;
+            });
+		} catch (Exception e) {
+			logger.error("failed to execute operation", e);
+		}
 	}
 
 	@PostConstruct
