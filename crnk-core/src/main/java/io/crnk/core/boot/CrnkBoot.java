@@ -1,13 +1,11 @@
 package io.crnk.core.boot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
@@ -20,6 +18,7 @@ import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
@@ -52,6 +51,10 @@ import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -229,7 +232,7 @@ public class CrnkBoot {
 
 	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
 		ControllerRegistryBuilder controllerRegistryBuilder =
-				new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
+				newControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
 						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
 		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
 		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
@@ -242,6 +245,13 @@ public class CrnkBoot {
 		}
 
 		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
+	}
+
+	protected ControllerRegistryBuilder newControllerRegistryBuilder(@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry, @SuppressWarnings("SameParameterValue") TypeParser typeParser,
+																  @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
+																  ResourceFilterDirectory resourceFilterDirectory, List<ResourceModificationFilter> modificationFilters) {
+		return new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
+				propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
 	}
 
 	public DocumentMapper getDocumentMapper() {

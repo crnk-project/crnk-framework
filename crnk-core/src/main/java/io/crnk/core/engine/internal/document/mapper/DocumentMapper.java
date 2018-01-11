@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -19,6 +13,12 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class DocumentMapper {
 
@@ -47,13 +47,23 @@ public class DocumentMapper {
 
 		PreconditionUtil.assertTrue("filterBehavior necessary on server-side", client || resourceFilterDirectory != null);
 
-		this.util = new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
+		this.util = newDocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
-		this.includeLookupSetter = new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
+		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
 
 	public ResourceFilterDirectory getFilterBehaviorManager() {
 		return resourceFilterDirectory;
+	}
+
+	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
+								  PropertiesProvider propertiesProvider) {
+		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
+	}
+
+	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
+								 PropertiesProvider propertiesProvider) {
+		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 	}
 
 	protected ResourceMapper newResourceMapper(DocumentMapperUtil util, boolean client, ObjectMapper objectMapper) {
