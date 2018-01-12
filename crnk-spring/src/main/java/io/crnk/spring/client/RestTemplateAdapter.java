@@ -20,8 +20,18 @@ public class RestTemplateAdapter implements HttpAdapter {
 
 	private Long networkTimeout;
 
+	private boolean initialized = false;
+
 	public static RestTemplateAdapter newInstance() {
 		return new RestTemplateAdapter();
+	}
+
+	public RestTemplateAdapter() {
+		this(null);
+	}
+
+	public RestTemplateAdapter(RestTemplate template) {
+		this.impl = template;
 	}
 
 	public void addListener(RestTemplateAdapterListener listener) {
@@ -30,25 +40,28 @@ public class RestTemplateAdapter implements HttpAdapter {
 	}
 
 	private void checkNotInitialized() {
-		if (impl != null) {
+		if (initialized) {
 			throw new IllegalStateException("already initialized");
 		}
 	}
 
 	public RestTemplate getImplementation() {
-		if (impl == null) {
+		if (!initialized) {
 			initImpl();
 		}
 		return impl;
 	}
 
 	private synchronized void initImpl() {
-		if (impl == null) {
-			impl = new RestTemplate();
+		if (!initialized) {
+			initialized = true;
+			if (impl == null) {
+				impl = new RestTemplate();
+			}
 
 			if (networkTimeout != null) {
 				ClientHttpRequestFactory requestFactory = impl.getRequestFactory();
-				if (requestFactory instanceof ClientHttpRequestFactory) {
+				if (requestFactory instanceof SimpleClientHttpRequestFactory) {
 					SimpleClientHttpRequestFactory simpleRequestFactory =
 							(SimpleClientHttpRequestFactory) impl.getRequestFactory();
 					simpleRequestFactory.setReadTimeout(networkTimeout.intValue());
