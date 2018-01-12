@@ -784,6 +784,9 @@ component is detected. Each module comes with an enabled property to disable the
 Makes Spring MVC services available in the Crnk Home Module next to the json api repositories to have a list of all offered
 services. Auto configuration is provided by `CrnkSpringMvcAutoConfiguration`.
 
+With `CrnkErrorController` configured by `CrnkErrorControllerAutoConfiguration` additionally a new error controller is
+provided that returns errors in JSON API format. `crnk.spring.mvc.errorController=false` allows to disable the controller.
+
 Further integration similar to the JAX-RS one is expected in the future.
 
 ### Spring Cloud Sleuth Module
