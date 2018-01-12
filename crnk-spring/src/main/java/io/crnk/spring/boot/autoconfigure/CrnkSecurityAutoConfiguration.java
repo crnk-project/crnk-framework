@@ -2,15 +2,10 @@ package io.crnk.spring.boot.autoconfigure;
 
 import java.util.List;
 
-import io.crnk.meta.MetaModule;
-import io.crnk.meta.MetaModuleConfig;
-import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.operations.server.OperationsModule;
 import io.crnk.security.SecurityConfig;
 import io.crnk.security.SecurityModule;
-import io.crnk.spring.boot.CrnkOperationsProperties;
 import io.crnk.spring.boot.CrnkSecurityProperties;
-import io.crnk.spring.boot.MetaModuleConfigurer;
 import io.crnk.spring.boot.SecurityModuleConfigurer;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.security.SpringSecurityModule;
@@ -18,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +28,7 @@ import org.springframework.context.annotation.Import;
  * Disable with the property <code>crnk.security.enabled = false</code>
  */
 @Configuration
+@ConditionalOnWebApplication
 @ConditionalOnProperty(prefix = "crnk.security", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(SecurityModule.class)
 @ConditionalOnMissingBean(SecurityModule.class)
