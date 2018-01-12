@@ -3,8 +3,13 @@ package io.crnk.spring.boot;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import javax.security.auth.message.config.AuthConfigFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.spring.app.BasicSpringBootApplication;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
 import org.junit.Assert;
@@ -17,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -82,5 +88,29 @@ public class BasicSpringBootTest {
 				.getForEntity("http://localhost:" + this.port + "/api/custom", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(response.getBody(), "hello");
+	}
+
+	@Test
+	public void testErrorsSerializedAsJsonApi() throws IOException {
+		RestTemplate testRestTemplate = new RestTemplate();
+		try {
+			testRestTemplate
+					.getForEntity("http://localhost:" + this.port + "/doesNotExist", String.class);
+			Assert.fail();
+		}
+		catch (HttpClientErrorException e) {
+			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
+
+			String body = e.getResponseBodyAsString();
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.registerModule(JacksonModule.createJacksonModule());
+			Document document = mapper.readerFor(Document.class).readValue(body);
+
+			Assert.assertEquals(1, document.getErrors().size());
+			ErrorData errorData = document.getErrors().get(0);
+			Assert.assertEquals("404", errorData.getStatus());
+			Assert.assertEquals("Not Found", errorData.getTitle());
+			Assert.assertEquals("No message available", errorData.getDetail());
+		}
 	}
 }
