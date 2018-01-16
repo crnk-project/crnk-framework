@@ -13,22 +13,22 @@ gradlePlugin {
 
 dependencies {
 	compile gradleApi()
-	testCompile gradleTestKit()
+
+	compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
+	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 
 	compileOnly project(':crnk-core')
 	compileOnly project(':crnk-meta')
-
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
 
 	compileOnly 'junit:junit:4.12'
 	compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
 	compileOnly 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-api:1.7.1'
 	compileOnly 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
-
+	compileOnly 'org.springframework:spring-context:4.3.13.RELEASE'
+	compileOnly 'org.springframework.boot:spring-boot:1.5.8.RELEASE'
 	compileOnly 'javax:javaee-api:7.0'
 
-	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
-
+	testCompile gradleTestKit()
 	testCompile project(':crnk-core')
 	testCompile project(':crnk-meta')
 	testCompile project(':crnk-test')
@@ -42,9 +42,8 @@ dependencies {
 	testCompile 'org.apache.deltaspike.cdictrl:deltaspike-cdictrl-weld:1.7.1'
 	testCompile 'org.jboss.weld.se:weld-se-core:2.4.0.Final'
 	testCompile 'javax:javaee-api:7.0'
-
-
-
+	testCompile 'org.springframework:spring-context:4.3.13.RELEASE'
+	testCompile 'org.springframework.boot:spring-boot:1.5.8.RELEASE'
 }
 
 // e.g. CDI expects those directories to be equal

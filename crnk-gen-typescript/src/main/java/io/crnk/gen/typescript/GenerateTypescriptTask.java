@@ -61,7 +61,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 
 	protected RuntimeMetaResolver getRuntime() {
 		TSGeneratorConfig config = getConfig();
-		String runtimeClass = config.getMetaResolverClassName();
+		String runtimeClass = config.computeMetaResolverClassName();
 		return (RuntimeMetaResolver) loadClass(getClass().getClassLoader(), runtimeClass);
 	}
 

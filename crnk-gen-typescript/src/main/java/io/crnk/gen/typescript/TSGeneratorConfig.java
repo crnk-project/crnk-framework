@@ -24,7 +24,7 @@ public class TSGeneratorConfig {
 
 	protected List<String> metaTransformationClassNames = new ArrayList<>();
 
-	private String metaResolverClassName = "io.crnk.gen.runtime.cdi.CdiMetaResolver";
+	private String metaResolverClassName = null;
 
 	private boolean generateExpressions = false;
 
@@ -36,7 +36,7 @@ public class TSGeneratorConfig {
 
 	private TSNpmConfiguration npm = new TSNpmConfiguration();
 
-	private TSRuntimeConfiguration runtime = new TSRuntimeConfiguration();
+	protected TSRuntimeConfiguration runtime = new TSRuntimeConfiguration();
 
 	private String sourceDirectoryName = "src";
 
@@ -175,5 +175,15 @@ public class TSGeneratorConfig {
 
 	public void setBuildDir(File buildDir) {
 		this.buildDir = buildDir;
+	}
+
+	protected String computeMetaResolverClassName() {
+		if (metaResolverClassName != null) {
+			return metaResolverClassName;
+		}
+		if (runtime.getSpring().getConfiguration() != null) {
+			return "io.crnk.gen.runtime.spring.SpringMetaResolver";
+		}
+		return "io.crnk.gen.runtime.cdi.CdiMetaResolver";
 	}
 }

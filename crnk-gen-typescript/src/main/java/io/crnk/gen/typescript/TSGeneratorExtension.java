@@ -1,6 +1,7 @@
 package io.crnk.gen.typescript;
 
 import groovy.lang.Closure;
+import io.crnk.gen.typescript.internal.TSRuntimeExtension;
 import org.gradle.api.Project;
 
 public class TSGeneratorExtension extends TSGeneratorConfig {
@@ -13,6 +14,7 @@ public class TSGeneratorExtension extends TSGeneratorConfig {
 	public TSGeneratorExtension(Project project, Runnable initMethod) {
 		this.project = project;
 		this.initMethod = initMethod;
+		this.runtime = new TSRuntimeExtension(project);
 
 		setForked(true);
 

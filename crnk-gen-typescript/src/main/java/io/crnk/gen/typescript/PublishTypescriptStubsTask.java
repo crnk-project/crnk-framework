@@ -12,7 +12,7 @@ public class PublishTypescriptStubsTask extends NpmTask {
 
 		setNpmCommand("publish");
 		getInputs().dir("src");
-		getInputs().file("package.json");
+		getInputs().files("package.json");
 		getOutputs().dir("dist");
 	}
 
