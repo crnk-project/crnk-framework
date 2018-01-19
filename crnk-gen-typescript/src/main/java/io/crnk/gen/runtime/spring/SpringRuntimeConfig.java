@@ -4,7 +4,7 @@ public class SpringRuntimeConfig {
 
 	private String profile;
 
-	private String configurationClassName;
+	private String configuration;
 
 	public String getProfile() {
 		return profile;
@@ -15,10 +15,10 @@ public class SpringRuntimeConfig {
 	}
 
 	public String getConfiguration() {
-		return configurationClassName;
+		return configuration;
 	}
 
 	public void setConfiguration(String configurationClassName) {
-		this.configurationClassName = configurationClassName;
+		this.configuration = configurationClassName;
 	}
 }
