@@ -11,6 +11,7 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
+import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.jpa.JpaRepositoryConfig;
 import io.crnk.jpa.JpaRepositoryFilterBase;
 import io.crnk.jpa.model.QTestEntity;

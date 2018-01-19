@@ -48,8 +48,23 @@ to Crnk. For example in the case of JAX-RS:
 [source]
 ----
 	TransactionRunner transactionRunner = ...;
-	JpaModule jpaModule = JpaModule.newServerModule(entityManagerFactory, entityManager, transactionRunner);
-	jpaModule.setRepositoryFactory(new ValidatedJpaRepositoryFactory());
+
+	JpaModuleConfig config = new JpaModuleConfig();
+
+	// expose all entitities from provided EntityManagerFactory
+	config.exposeAllEntities(entityManagerFactory);
+
+	// expose single entity
+    config.addRepository(JpaRepositoryConfig.builder(TaskEntity.class).build());
+
+    // expose single entity with additional interface declaration. Interface is used to
+    // extract the list, meta and link information types.
+    config.addRepository(
+      JpaRepositoryConfig.builder(PersonEntity.class)
+           .setInterfaceClass(PersonRepository.class).build()
+    );
+
+	JpaModule jpaModule = JpaModule.createServerModule(config, em, transactionRunner());
 
 	CrnkFeature feature = new CrnkFeature(...);
 	feature.addModule(jpaModule);
@@ -59,18 +74,57 @@ to Crnk. For example in the case of JAX-RS:
 The JPA modules by default looks up the entityManagerFactory and obtains a list
 of registered JPA entities. For each entity a instance of `JpaEntityRepository`
 is registered to Crnk using the module API. Accordingly, every relation
-is registered as `JpaRelationshipRepository`. `JpaModule.setRepositoryFactory`
-allows to provide a factory to change or customized the used repositories.
-To manually select the entities exposed to Crnk use `JpaModule.addEntityClass(...)`
-and `JpaModule.removeEntityClass(...)`. If no `entityManagerFactory` is provided
-to newServerModule, then the registration of entities is omitted and can be done
-manually.
+is registered as `JpaRelationshipRepository`.
 
-The transactionRunner needs to be implemented by the application to hook into the
-transaction processing of the used environment (Spring, JEE, etc.). This might be
-as simple as a Spring bean implementing `TransactionRunner` and adding a
-`@Transactional` annotation. The JPA module makes sure that every call to a
-repository happens within such a transaction boundary.
+- `JpaModuleConfig.setRepositoryFactory` allows to provide a factory to change or customized the used repositories.
+- `exposeAllEntities` takes an `EntityManagerFactory` and exposes all registered entities as
+  JSON API repository.
+- To manually select the entities exposed to Crnk use `JpaModuleConfig.addRepository(...)`.
+ `JpaRepositoryConfig` provides a number of customization options for the exposed entity.
+  `setListClass`, `setListMetaClass` and `setListLinksClass` allow to set the type information and will
+  then return resources having lists, links and meta data of the given type.  `setInterfaceClass`
+  is a shortcut that allows to extract those three types from a repository interface definition
+  (see `TaskRepository` below for an example).
+- `JpaRepositoryConfig.Builder.setRepositoryDecorator` allows to setup a repository decorator that allows to intercept
+  the request and responses and perform changes, like setting up additional links and meta information.
+- `JpaRepositoryConfig` allows to specify DTO mapping, have a look at the later section to this topic.
+- Internally the JpaModule will create instances of `JpaResourceRepository` and  `JpaRelationshipRepository`
+  to register them
+- The transactionRunner needs to be implemented by the application to hook into the transaction processing of the used
+  environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and adding a
+  `@Transactional` annotation. The JPA module makes sure that every call to a repository happens within such a transaction
+  boundary. Crnk comes with two default implementations: `SpringTransactionRunner` and
+  `CdiTransactionRunner` that come are included in `crnk-spring` and `crnk-cdi`.
+
+For crnk-client it might be worthwhile to have an interface definition of the otherwise fully generic
+JSON API entity repositories. The interface has the benefit of providing proper typing of meta information,
+link information and list return type. An example can look like:
+
+[source]
+----
+public interface TaskRepository extends ResourceRepositoryV2<TaskEntity, UUID> {
+
+    static class TaskListLinks implements LinksInformation, SelfLinksInformation {
+
+		public String someLink = "test";
+
+	}
+
+	public static class TaskListMeta implements MetaInformation {
+
+		public String someMeta = "test";
+
+	}
+
+	public class TaskList extends ResourceListBase<TaskEntity, TaskListMeta, TaskListLinks> {
+
+	}
+
+	@Override
+	public TaskList findAll(QuerySpec querySpec);
+}
+----
+
 
 To setup a Crnk client with the JPA module use:
 
@@ -82,12 +136,21 @@ To setup a Crnk client with the JPA module use:
 	JpaModule module = JpaModule.newClientModule();
 	setupModule(module, false);
 	client.addModule(module);
+
+	ResourceRepositoryV2<TaskEntity, UUID> genericRepo = client.getRepositoryForType(TypeEntity.class)
+	TaskRepository typedRepo = client.getRepositoryForInterface(TaskRepository.class)
 ----
 
 Have a look at https://github.com/crnk-project/crnk-framework/blob/develop/crnk-jpa/src/test/java/io/crnk/jpa/JpaQuerySpecEndToEndTest.java within the `crnk-jpa`
 test cases to see how everything is used together with `crnk-client`.
 The JPA modules further has a number of more advanced customization options that
 are discussed in the subsequent sections.
+
+
+### JPA Setup with Spring
+
+Have a look at <<jpa_spring,JPA Module Auto Configuration>>. For Spring Boot an auto configuration is
+available that already takes care of some defaults.
 
 
 ### Pagination
@@ -162,7 +225,8 @@ attributes like in the example depicted here:
 	QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) module.getQueryFactory();
 	queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_UPPER_STRING_VALUE,
 		 String.class, basicComputedValueFactory);
-	module.addMappedEntityClass(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager));
+	module.addRepository(JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager)).build())
+
 ----
 
 and
@@ -804,13 +868,24 @@ Auto configuration is provided by `CrnkSecurityAutoConfiguration`. It sets up `S
 can be added to grant access to repositories.
 
 
+anchor:jpa_spring[]
+
 ### JPA Module Auto Configuration
 
 `CrnkJpaAutoConfiguration` setups the `JpaModule` and `SpringTransactionRunner`. `SpringTransactionRunner` let
 all requests run in a transaction that is automatically rolled back in case of an error. The `JpaModule` is
 by default setup to expose all entities as JSON API repositories. This can be disabled by setting
 `crnk.jpa.exposeAll=false`. The setup of the JPA module can be customized by providing a bean
-implementing `JpaModuleConfigurer`. See `ExampleJpaModuleConfigurer` for an example.
+implementing `JpaModuleConfigurer`. See `ExampleJpaModuleConfigurer` for an example:
+
+[source]
+.ExampleJpaModuleConfigurer.java
+----
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/ExampleJpaModuleConfigurer.java[]
+----
+
+
+
 
 ### Validation Module Auto Configuration
 
