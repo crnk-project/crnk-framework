@@ -429,7 +429,9 @@ allow to replace the implementation.
 
 One can get access to `DefaultQuerySpecDeserializer` trough the various integrations, e.g.
 `CrnkFeature.getQuerySpecDeserializer()`. For more information have a look at the
-<<setup,setup chapter>>.
+<<setup,setup chapter>>. Next to the setters in the various integrations, it is also possible
+to provide a custom  `QuerySpecDeserializer` trough the
+service discovery mechanism (like specifying a Spring or CDI bean).
 
 
 

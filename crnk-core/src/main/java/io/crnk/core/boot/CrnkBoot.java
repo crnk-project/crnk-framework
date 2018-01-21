@@ -90,12 +90,20 @@ public class CrnkBoot {
 
 	private List<Module> registeredModules = new ArrayList<>();
 
+	private Long defaultPageLimit = null;
+
+	private Long maxPageLimit = null;
+
+	private Boolean allowUnknownAttributes;
+
+
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
 	}
 
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {
 		checkNotConfiguredYet();
+		PreconditionUtil.assertNull("serviceDiscovery already initialized", serviceDiscovery);
 		this.serviceDiscoveryFactory = factory;
 	}
 
@@ -423,6 +431,7 @@ public class CrnkBoot {
 	}
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
+		PreconditionUtil.assertNull("already set", this.serviceDiscovery);
 		this.serviceDiscovery = serviceDiscovery;
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 	}
@@ -439,8 +448,7 @@ public class CrnkBoot {
 	public void setDefaultPageLimit(Long defaultPageLimit) {
 		PreconditionUtil.assertNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
-		setupQuerySpecDeserializer();
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+		this.defaultPageLimit = defaultPageLimit;
 	}
 
 	/**
@@ -454,8 +462,7 @@ public class CrnkBoot {
 	public void setMaxPageLimit(Long maxPageLimit) {
 		PreconditionUtil.assertNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
-		setupQuerySpecDeserializer();
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+		this.maxPageLimit = maxPageLimit;
 	}
 
 	/**
@@ -466,10 +473,8 @@ public class CrnkBoot {
 	public void setAllowUnknownAttributes() {
 		PreconditionUtil.assertNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
 				"it is null.", this.queryParamsBuilder);
-		setupQuerySpecDeserializer();
-		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-				.setAllowUnknownAttributes(Boolean
-						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
+
+		this.allowUnknownAttributes = true;
 	}
 
 	public ModuleRegistry getModuleRegistry() {
@@ -491,6 +496,26 @@ public class CrnkBoot {
 			}
 			else {
 				querySpecDeserializer = list.get(0);
+			}
+		}
+
+
+		if (querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+			if (defaultPageLimit != null) {
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
+			}
+			if (maxPageLimit != null) {
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
+			}
+			if (allowUnknownAttributes == null) {
+				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
+				if (strAllow != null) {
+					allowUnknownAttributes = Boolean.parseBoolean(strAllow);
+				}
+			}
+			if (allowUnknownAttributes != null) {
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
+						.setAllowUnknownAttributes(allowUnknownAttributes);
 			}
 		}
 	}
