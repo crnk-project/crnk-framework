@@ -63,8 +63,8 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 				List<OperationResponse> responses = chain.doFilter(new DefaultOperationFilterContext(orderedOperations));
 
 				String responseJson = mapper.writeValueAsString(responses);
-				context.setResponse(200, responseJson);
 				context.setContentType(JSONPATCH_CONTENT_TYPE);
+				context.setResponse(200, responseJson);
 			}
 			catch (Exception e) {
 				LOGGER.error("failed to execute operations", e);
