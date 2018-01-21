@@ -6,7 +6,6 @@ import io.crnk.spring.cloud.sleuth.SpringCloudSleuthModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Import;
  * Disable with the property <code>crnk.spring.mvc.enabled = false</code>
  */
 @Configuration
-@ConditionalOnWebApplication
 @ConditionalOnProperty(prefix = "crnk.spring.sleuth", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnBean(Tracer.class)
 @ConditionalOnMissingBean(SpringCloudSleuthModule.class)

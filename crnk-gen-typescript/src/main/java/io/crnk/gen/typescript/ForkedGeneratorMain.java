@@ -26,7 +26,7 @@ public class ForkedGeneratorMain {
 			genContext.setOutputDir(outputDir);
 			genContext.setConfig(config);
 
-			RuntimeMetaResolver runtime = (RuntimeMetaResolver) Class.forName(config.getMetaResolverClassName()).newInstance();
+			RuntimeMetaResolver runtime = (RuntimeMetaResolver) Class.forName(config.computeMetaResolverClassName()).newInstance();
 			runtime.run(context, classLoader);
 			System.exit(0);
 		}

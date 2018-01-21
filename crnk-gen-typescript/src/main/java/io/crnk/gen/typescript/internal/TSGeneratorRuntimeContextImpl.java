@@ -38,6 +38,11 @@ public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGenera
 	}
 
 	@Override
+	public TSGeneratorConfig getConfig() {
+		return config;
+	}
+
+	@Override
 	public void setOutputDir(File outputDir) {
 		this.outputDir = outputDir;
 	}

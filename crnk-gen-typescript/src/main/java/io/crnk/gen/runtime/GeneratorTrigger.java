@@ -2,6 +2,8 @@ package io.crnk.gen.runtime;
 
 import java.io.IOException;
 
+import io.crnk.gen.typescript.TSGeneratorConfig;
+
 public interface GeneratorTrigger {
 
 	/**
@@ -14,4 +16,6 @@ public interface GeneratorTrigger {
 	ClassLoader getClassLoader();
 
 	void setClassLoader(ClassLoader classloader);
+
+	TSGeneratorConfig getConfig();
 }

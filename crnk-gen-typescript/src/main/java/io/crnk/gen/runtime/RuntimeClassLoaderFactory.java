@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import io.crnk.gen.runtime.spring.SpringRuntimeConfig;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.TSNpmConfiguration;
@@ -74,6 +75,7 @@ public class RuntimeClassLoaderFactory {
 			sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
 			sharedClasses.put(TSGeneratorConfig.class.getName(), TSGeneratorConfig.class);
 			sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
+			sharedClasses.put(SpringRuntimeConfig.class.getName(), SpringRuntimeConfig.class);
 			sharedClasses.put(TSRuntimeConfiguration.class.getName(), TSRuntimeConfiguration.class);
 			sharedClasses.put(TSCodeStyle.class.getName(), TSCodeStyle.class);
 			sharedClasses.put(io.crnk.gen.typescript.RuntimeMetaResolver.class.getName(), RuntimeMetaResolver.class);

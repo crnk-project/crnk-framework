@@ -20,7 +20,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,14 +38,13 @@ import org.springframework.context.annotation.Import;
  * This configuration class will activate <em>after</em> the Hibernate auto-configuration.
  */
 @Configuration
-@ConditionalOnWebApplication
 @ConditionalOnProperty(prefix = "crnk.jpa", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(JpaModule.class)
 @ConditionalOnMissingBean(JpaModule.class)
-@EnableConfigurationProperties({CrnkJpaProperties.class, CrnkSpringBootProperties.class})
+@EnableConfigurationProperties({ CrnkJpaProperties.class, CrnkSpringBootProperties.class })
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @AutoConfigureBefore
-@Import({CrnkConfigV3.class})
+@Import({ CrnkConfigV3.class })
 public class CrnkJpaAutoConfiguration {
 
 	@PersistenceContext

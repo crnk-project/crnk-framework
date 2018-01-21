@@ -35,6 +35,7 @@ public class ForkedGenerateTypescriptTask extends JavaExec {
 
 	private void initConfigFile() {
 		File configFile = new File(getProject().getBuildDir(), "crnk.gen.typescript.json");
+		configFile.getParentFile().mkdirs();
 
 		TSGeneratorConfig config = getConfig();
 		setupDefaultConfig(config);

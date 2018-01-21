@@ -80,7 +80,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			// setup up-to-date checking
 			Configuration compileConfiguration = project.getConfigurations().findByName(runtimeConfiguration);
 			if (compileConfiguration != null) {
-				generateTask.getInputs().file(compileConfiguration.getFiles());
+				generateTask.getInputs().files(compileConfiguration.getFiles());
 				generateTask.getOutputs().dir(config.getGenDir());
 			}
 		}
@@ -133,7 +133,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			NpmInstallTask npmInstall = (NpmInstallTask) project.getTasks().getByName("npmInstall");
 			npmInstall.setWorkingDir(buildDir);
 			npmInstall.dependsOn(copySources);
-			npmInstall.getInputs().file(new File(buildDir, "package.json"));
+			npmInstall.getInputs().files(new File(buildDir, "package.json"));
 			npmInstall.getOutputs().dir(new File(buildDir, "node_modules"));
 			compileTypescriptTask.dependsOn(npmInstall);
 		}

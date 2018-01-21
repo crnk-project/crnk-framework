@@ -2,9 +2,6 @@ anchor:generation[]
 
 # Generation
 
-NOTE: this feature is still in incurbation, feedback and contributions welcomed. In particular further frameworks like
-Spring must be supported.
-
 Crnk allows the generation of Typescript stubs for type-safe, client-side web development. Contributions for other
 languages like iOS would be very welcomed.
 
@@ -35,8 +32,8 @@ possibilities to do that. https://github.com/crnk-project/crnk-framework/blob/ma
 .gradle[crnk-client-angular-ngrx]
 does such a setup manually in Gradle. Alternatively, there is a Gradle plugin taking care of the generator setup. It makes use
 of the JUnit to get
-the application to a running state at built-time. So far a JUnit setup with Deltaspike for JEE application.
-Other non-CDI integrations like Spring will soon. Such a setup may look like:
+the application to a running state at built-time. Currently supported are CDI and Spring-based applications.
+Such a setup may look like:
 
 [source]
 ----
@@ -67,6 +64,10 @@ typescriptGen{
 
 	runtime {
 		configuration = 'typescriptGenRuntime'
+        spring {
+        	profile = 'test'
+        	configuration = 'ch.adnovum.arch.demo.management.service.ManagementApplication'
+        }
 	}
 
 	npm {
@@ -107,6 +108,8 @@ typescriptGen.init()
   that task to `assemble` as dependency.
 - `runtime.configuration` sets the Gradle configuration to use to obtain a classpath. In the given example
    `typescriptGenRuntime` is used. You may also use `compile` or anything else.
+- `runtime.spring` is used to configure the Spring profile and configuration class to use to setup the spring application.
+  For CDI application is can be omitted.
 - `packagingEnabled`  triggers the generation of a `package.json` and `tsconfig.json` file (`true` as default).
   Useful to publish the stubs to an NPM repository for use by other projects.
   Setting it to false will result in the generation of the Typescript files only. This may be used to generate
