@@ -437,9 +437,9 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
+		PreconditionUtil.assertNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
+				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
 		setupQuerySpecDeserializer();
-		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
 	}
 
@@ -452,9 +452,9 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
+		PreconditionUtil.assertNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
+				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
 		setupQuerySpecDeserializer();
-		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
 	}
 
@@ -464,9 +464,9 @@ public class CrnkBoot {
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
 	public void setAllowUnknownAttributes() {
+		PreconditionUtil.assertNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
+				"it is null.", this.queryParamsBuilder);
 		setupQuerySpecDeserializer();
-		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
-				"it is null.", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
 				.setAllowUnknownAttributes(Boolean
 						.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES)));
