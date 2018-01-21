@@ -9,6 +9,9 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
@@ -45,12 +48,14 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean(ServiceDiscovery.class)
 	public SpringServiceDiscovery discovery() {
 		return new SpringServiceDiscovery();
 	}
 
 	@Bean
-	public CrnkBoot crnkBoot(SpringServiceDiscovery serviceDiscovery) {
+	@ConditionalOnMissingBean(CrnkBoot.class)
+	public CrnkBoot crnkBoot(ServiceDiscovery serviceDiscovery) {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setObjectMapper(objectMapper);
 
@@ -89,7 +94,13 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 	}
 
 	@Bean
-	public Filter springBootSampleCrnkFilter(CrnkBoot boot) {
+	@ConditionalOnMissingBean(QuerySpecDeserializer.class)
+	public QuerySpecDeserializer querySpecDeserializer() {
+		return new DefaultQuerySpecDeserializer();
+	}
+
+	@Bean
+	public SpringCrnkFilter springBootSampleCrnkFilter(CrnkBoot boot) {
 		return new SpringCrnkFilter(boot, properties);
 	}
 

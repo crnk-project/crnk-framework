@@ -7,15 +7,18 @@ import java.io.IOException;
 import javax.security.auth.message.config.AuthConfigFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.spring.app.BasicSpringBootApplication;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -33,6 +36,13 @@ public class BasicSpringBootTest {
 
 	@Value("${local.server.port}")
 	private int port;
+
+	@Autowired
+	private QuerySpecDeserializer deserializer;
+
+	@Autowired
+	private CrnkBoot boot;
+
 
 	@Before
 	public void setup() {
@@ -59,6 +69,12 @@ public class BasicSpringBootTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
 	}
+
+	@Test
+	public void testDeserializerInjected() {
+		Assert.assertSame(boot.getQuerySpecDeserializer(), deserializer);
+	}
+
 
 	@Test
 	public void testUiModuleRunning() {

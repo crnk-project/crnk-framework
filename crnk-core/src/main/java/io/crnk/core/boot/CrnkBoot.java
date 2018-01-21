@@ -51,6 +51,7 @@ import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class CrnkBoot {
 
 	private QueryParamsBuilder queryParamsBuilder;
 
-	private QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
+	private QuerySpecDeserializer querySpecDeserializer;
 
 	private boolean configured;
 
@@ -112,8 +113,6 @@ public class CrnkBoot {
 	/**
 	 * Sets a JsonServiceLocator. No longer necessary if a ServiceDiscovery
 	 * implementation is in place.
-	 *
-	 * @param serviceLocator
 	 */
 	public void setServiceLocator(JsonServiceLocator serviceLocator) {
 		checkNotConfiguredYet();
@@ -134,8 +133,6 @@ public class CrnkBoot {
 	/**
 	 * Sets a ServiceUrlProvider. No longer necessary if a ServiceDiscovery
 	 * implementation is in place.
-	 *
-	 * @param serviceUrlProvider
 	 */
 	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
 		checkNotConfiguredYet();
@@ -161,6 +158,7 @@ public class CrnkBoot {
 
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
+		setupQuerySpecDeserializer();
 		bootDiscovery();
 	}
 
@@ -200,7 +198,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -233,25 +232,30 @@ public class CrnkBoot {
 	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
 		ControllerRegistryBuilder controllerRegistryBuilder =
 				newControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
+						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(),
+						moduleRegistry.getResourceModificationFilters());
 		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
 		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
 
 		QueryAdapterBuilder queryAdapterBuilder;
 		if (queryParamsBuilder != null) {
 			queryAdapterBuilder = new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		}
 
 		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
 	}
 
-	protected ControllerRegistryBuilder newControllerRegistryBuilder(@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry, @SuppressWarnings("SameParameterValue") TypeParser typeParser,
-																  @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-																  ResourceFilterDirectory resourceFilterDirectory, List<ResourceModificationFilter> modificationFilters) {
+	protected ControllerRegistryBuilder newControllerRegistryBuilder(
+			@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry,
+			@SuppressWarnings("SameParameterValue") TypeParser typeParser,
+			@SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
+			ResourceFilterDirectory resourceFilterDirectory, List<ResourceModificationFilter> modificationFilters) {
 		return new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-				propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(), moduleRegistry.getResourceModificationFilters());
+				propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(),
+				moduleRegistry.getResourceModificationFilters());
 	}
 
 	public DocumentMapper getDocumentMapper() {
@@ -317,19 +321,23 @@ public class CrnkBoot {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, resRepository.getClass());
 			Class resourceClass = typeArgs[0];
 			module.addRepository(resourceClass, resRepository);
-		} else if (repository instanceof RelationshipRepository) {
+		}
+		else if (repository instanceof RelationshipRepository) {
 			RelationshipRepository relRepository = (RelationshipRepository) repository;
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, relRepository.getClass());
 			Class sourceResourceClass = typeArgs[0];
 			Class targetResourceClass = typeArgs[2];
 			module.addRepository(sourceResourceClass, targetResourceClass, relRepository);
-		} else if (repository instanceof ResourceRepositoryV2) {
+		}
+		else if (repository instanceof ResourceRepositoryV2) {
 			ResourceRepositoryV2<?, ?> resRepository = (ResourceRepositoryV2<?, ?>) repository;
 			module.addRepository(resRepository.getResourceClass(), resRepository);
-		} else if (repository instanceof RelationshipRepositoryV2) {
+		}
+		else if (repository instanceof RelationshipRepositoryV2) {
 			RelationshipRepositoryV2<?, ?, ?, ?> relRepository = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
 			module.addRepository(relRepository.getSourceResourceClass(), relRepository.getTargetResourceClass(), relRepository);
-		} else {
+		}
+		else {
 			throw new IllegalStateException(repository.toString());
 		}
 	}
@@ -340,7 +348,8 @@ public class CrnkBoot {
 			moduleRegistry.addModule(module);
 		}
 
-		boolean serializeLinksAsObjects = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		boolean serializeLinksAsObjects =
+				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
 		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
@@ -428,6 +437,7 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
+		setupQuerySpecDeserializer();
 		PreconditionUtil.assertNotNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
@@ -442,6 +452,7 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
+		setupQuerySpecDeserializer();
 		PreconditionUtil.assertNotNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
 				"it is null. Are you using QueryParams instead?", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
@@ -449,10 +460,11 @@ public class CrnkBoot {
 
 	/**
 	 * Sets the allow unknown attributes for API requests.
-	 *
+	 * <p>
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
 	public void setAllowUnknownAttributes() {
+		setupQuerySpecDeserializer();
 		PreconditionUtil.assertNotNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
 				"it is null.", this.querySpecDeserializer);
 		((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
@@ -465,7 +477,22 @@ public class CrnkBoot {
 	}
 
 	public QuerySpecDeserializer getQuerySpecDeserializer() {
+		setupQuerySpecDeserializer();
 		return querySpecDeserializer;
+	}
+
+	private void setupQuerySpecDeserializer() {
+		if (querySpecDeserializer == null) {
+			setupServiceDiscovery();
+
+			List<QuerySpecDeserializer> list = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
+			if (list.isEmpty()) {
+				querySpecDeserializer = new DefaultQuerySpecDeserializer();
+			}
+			else {
+				querySpecDeserializer = list.get(0);
+			}
+		}
 	}
 
 	/**
