@@ -1,14 +1,14 @@
 package io.crnk.jpa.internal;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import javax.persistence.OptimisticLockException;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
-
-import javax.persistence.OptimisticLockException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class OptimisticLockExceptionMapper implements ExceptionMapper<OptimisticLockException> {
 
@@ -17,12 +17,19 @@ public class OptimisticLockExceptionMapper implements ExceptionMapper<Optimistic
 	// assign ID do identity among different CONFLICT_409 results
 	private static final String JPA_OPTIMISTIC_LOCK_EXCEPTION_TYPE = "OptimisticLockException";
 
+	private static final String ERROR_TYPE = "conflict";
+
 	@Override
 	public ErrorResponse toErrorResponse(OptimisticLockException cve) {
 		HashMap<String, Object> meta = new HashMap<>();
 		meta.put(META_TYPE_KEY, JPA_OPTIMISTIC_LOCK_EXCEPTION_TYPE);
 
-		ErrorData error = ErrorData.builder().setMeta(meta).setDetail(cve.getMessage()).build();
+		ErrorData error = ErrorData.builder()
+				.setMeta(meta)
+				.setCode(ERROR_TYPE)
+				.setStatus(Integer.toString(HttpStatus.CONFLICT_409))
+				.setDetail(cve.getMessage())
+				.build();
 		return ErrorResponse.builder().setStatus(HttpStatus.CONFLICT_409).setSingleErrorData(error).build();
 	}
 
@@ -42,8 +49,9 @@ public class OptimisticLockExceptionMapper implements ExceptionMapper<Optimistic
 
 		Iterable<ErrorData> errors = errorResponse.getErrors();
 		Iterator<ErrorData> iterator = errors.iterator();
-		if (!iterator.hasNext())
+		if (!iterator.hasNext()) {
 			return false;
+		}
 		ErrorData errorData = iterator.next();
 
 		Map<String, Object> meta = errorData.getMeta();
