@@ -22,6 +22,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -58,6 +59,18 @@ public class CrnkBootTest {
 		ObjectMapper mapper = new ObjectMapper();
 		boot.setObjectMapper(mapper);
 		Assert.assertSame(mapper, boot.getObjectMapper());
+	}
+
+	@Test
+	public void testDiscoverDeserializer() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(serviceDiscovery);
+
+		DefaultQuerySpecDeserializer instance = new DefaultQuerySpecDeserializer();
+		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(QuerySpecDeserializer.class))).thenReturn(Arrays.asList
+				(instance));
+		boot.boot();
+		Assert.assertSame(instance, boot.getQuerySpecDeserializer());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -283,7 +296,9 @@ public class CrnkBootTest {
 		Assert.assertNotEquals(0, taskEntry.getRelationshipEntries().size());
 		ResourceRepositoryAdapter<?, ?> repositoryAdapter = taskEntry.getResourceRepository(null);
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
-		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(), new QueryParams(), boot.getModuleRegistry()));
+		JsonApiResponse response = repositoryAdapter
+				.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(), new QueryParams(), boot.getModuleRegistry
+						()));
 		Assert.assertNotNull(response);
 
 		Assert.assertNotNull(requestDispatcher);
