@@ -27,7 +27,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Configuration
 @ConditionalOnProperty(prefix = "crnk.spring.mvc", name = "errorController", havingValue = "true", matchIfMissing = true)
 @ConditionalOnWebApplication
-@ConditionalOnClass({ Servlet.class, DispatcherServlet.class })
+@ConditionalOnClass({ Servlet.class, DispatcherServlet.class, ErrorMvcAutoConfiguration.class })
 // Load before the main ErrorMvcAutoConfiguration so that we override it
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @EnableConfigurationProperties({ CrnkSpringMvcProperties.class })
