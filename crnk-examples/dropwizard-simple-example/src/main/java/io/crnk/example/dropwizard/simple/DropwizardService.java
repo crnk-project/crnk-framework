@@ -1,6 +1,7 @@
 package io.crnk.example.dropwizard.simple;
 
-import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.module.SimpleModule;
+import io.crnk.example.dropwizard.simple.domain.repository.ProjectRepository;
 import io.crnk.rs.CrnkFeature;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
@@ -15,9 +16,13 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 
 	@Override
 	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) throws Exception {
-		environment.jersey().property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, dropwizardConfiguration.crnk.searchPackage);
+		// here we make use of a module as example instead of using service discovery (CDI, Spring, etc.)
+		SimpleModule module = new SimpleModule("example");
+		module.addRepository(new ProjectRepository());
 
 		CrnkFeature crnkFeature = new CrnkFeature();
+		crnkFeature.addModule(module);
+
 		environment.jersey().register(crnkFeature);
 	}
 }
