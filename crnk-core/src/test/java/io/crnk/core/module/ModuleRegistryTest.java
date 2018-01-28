@@ -340,7 +340,8 @@ public class ModuleRegistryTest {
 		try {
 			informationProvider.build(Object.class);
 			Assert.fail();
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (UnsupportedOperationException e) {
 			// ok
 		}
 
@@ -484,6 +485,7 @@ public class ModuleRegistryTest {
 			context.addRepositoryDecoratorFactory(new RepositoryDecoratorFactoryBase());
 			context.addFilter(new TestFilter());
 			context.addRepository(new ScheduleRepositoryImpl());
+			context.addRepository(new RelationIdTestRepository());
 			context.addRepository(TestResource2.class, new TestRepository2());
 			context.addRepository(TestResource2.class, TestResource2.class, new TestRelationshipRepository2());
 

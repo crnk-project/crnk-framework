@@ -1,5 +1,9 @@
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {
+	Projects,
+	QProjects
+} from './projects';
+import {
 	QTasks,
 	Tasks
 } from './tasks';
@@ -26,6 +30,8 @@ export module Schedules {
 		lazyTask?: TypedOneResourceRelationship<Tasks>;
 		tasks?: TypedManyResourceRelationship<Tasks>;
 		tasksList?: TypedManyResourceRelationship<Tasks>;
+		project?: TypedOneResourceRelationship<Projects>;
+		projects?: TypedManyResourceRelationship<Projects>;
 	}
 	export interface Attributes {
 		name?: string;
@@ -91,6 +97,22 @@ export module QSchedules {
 			}
 			return this._tasksList;
 		};
+		private _project: QTypedOneResourceRelationship<QProjects, Projects>;
+		get project(): QTypedOneResourceRelationship<QProjects, Projects> {
+			if (!this._project) {
+				this._project =
+					new QTypedOneResourceRelationship<QProjects, Projects>(this, 'project', QProjects);
+			}
+			return this._project;
+		};
+		private _projects: QTypedManyResourceRelationship<QProjects, Projects>;
+		get projects(): QTypedManyResourceRelationship<QProjects, Projects> {
+			if (!this._projects) {
+				this._projects =
+					new QTypedManyResourceRelationship<QProjects, Projects>(this, 'projects', QProjects);
+			}
+			return this._projects;
+		};
 	}
 	export class QAttributes extends BeanPath<Schedules.Attributes> {
 		name: StringPath = this.createString('name');
@@ -108,6 +130,8 @@ export let createEmptySchedules = function(id: string): Schedules {
 			lazyTask: {data: null},
 			tasks: {data: []},
 			tasksList: {data: []},
+			project: {data: null},
+			projects: {data: []},
 		},
 	};
 };

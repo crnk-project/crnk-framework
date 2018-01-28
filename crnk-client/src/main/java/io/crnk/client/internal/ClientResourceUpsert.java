@@ -3,6 +3,7 @@ package io.crnk.client.internal;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +40,9 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 	private Map<String, Object> resourceMap = new HashMap<>();
 
-	public ClientResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, ObjectMapper objectMapper, DocumentMapper documentMapper, ClientProxyFactory proxyFactory) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, (List)Collections.emptyList());
+	public ClientResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
+			ObjectMapper objectMapper, DocumentMapper documentMapper, ClientProxyFactory proxyFactory) {
+		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, (List) Collections.emptyList());
 		this.proxyFactory = proxyFactory;
 	}
 
@@ -73,7 +75,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 	 * Get relations from includes section or create a remote proxy
 	 */
 	@Override
-	protected Object fetchRelatedObject(RegistryEntry entry, Serializable relationId, RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
+	protected Object fetchRelatedObject(RegistryEntry entry, Serializable relationId,
+			RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
 
 		String uid = getUID(entry, relationId);
 		Object relatedResource = resourceMap.get(uid);
@@ -83,6 +86,16 @@ class ClientResourceUpsert extends ResourceUpsert {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Class<?> resourceClass = resourceInformation.getResourceClass();
 		return proxyFactory.createResourceProxy(resourceClass, relationId);
+	}
+
+	@Override
+	protected boolean decideSetRelationObjectField(RegistryEntry entry, Serializable relationId, ResourceField field) {
+		return !field.hasIdField() || resourceMap.containsKey(getUID(entry, relationId));
+	}
+
+	@Override
+	protected boolean decideSetRelationObjectsField(ResourceField relationshipField) {
+		return true;
 	}
 
 	public List<Object> allocateResources(List<Resource> resources) {
@@ -115,7 +128,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 			try {
 				Object links = linksMapper.readValue(linksNode);
 				linksField.getAccessor().setValue(instance, links);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new ResponseBodyException("failed to parse links information", e);
 			}
 		}
@@ -132,7 +146,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 			try {
 				Object meta = metaMapper.readValue(metaNode);
 				metaField.getAccessor().setValue(instance, meta);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new ResponseBodyException("failed to parse links information", e);
 			}
 
@@ -147,14 +162,16 @@ class ClientResourceUpsert extends ResourceUpsert {
 	}
 
 	@Override
-	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document document) {
+	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider,
+			Document document) {
 		// no in use on client side, consider refactoring ResourceUpsert to
 		// separate from controllers
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected void setRelationsField(Object newResource, RegistryEntry registryEntry, Map.Entry<String, Relationship> property, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+	protected void setRelationsField(Object newResource, RegistryEntry registryEntry, Map.Entry<String, Relationship> property,
+			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
 
 		Relationship relationship = property.getValue();
 
@@ -184,7 +201,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 					field.getAccessor().setValue(newResource, proxy);
 				}
 			}
-		} else {
+		}
+		else {
 			// set elements
 			super.setRelationsField(newResource, registryEntry, property, queryAdapter, parameterProvider);
 		}

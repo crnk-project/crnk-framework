@@ -6,7 +6,10 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
@@ -20,6 +23,9 @@ import io.crnk.core.engine.information.resource.ResourceInformationProviderConte
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -53,19 +59,38 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		BeanInformation beanDesc = BeanInformation.get(resourceClass);
 		List<String> attributeNames = beanDesc.getAttributeNames();
 		List<ResourceField> fields = new ArrayList<>();
+		Set<String> relationIdFields = new HashSet<>();
 		for (String attributeName : attributeNames) {
 			BeanAttributeInformation attributeDesc = beanDesc.getAttribute(attributeName);
 			if (!isIgnored(attributeDesc)) {
 				InformationBuilder informationBuilder = context.getInformationBuilder();
 				InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
-				buildResourceField(attributeDesc, fieldBuilder);
+				buildResourceField(beanDesc, attributeDesc, fieldBuilder);
 				fields.add(fieldBuilder.build());
 			}
+			else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
+				relationIdFields.add(attributeDesc.getName());
+			}
 		}
+		verifyRelationIdFields(resourceClass, relationIdFields, fields);
 		return fields;
 	}
 
-	protected void buildResourceField(BeanAttributeInformation attributeDesc, InformationBuilder.Field fieldBuilder) {
+	private void verifyRelationIdFields(Class resourceClass, Set<String> relationIdFields, List<ResourceField> fields) {
+		for (ResourceField field : fields) {
+			if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP && field.hasIdField()) {
+				relationIdFields.remove(field.getIdName());
+			}
+		}
+
+		if (!relationIdFields.isEmpty()) {
+			throw new InvalidResourceException(resourceClass.getName() + " annotated " + relationIdFields + " with "
+					+ "@JsonApiRelationId but no matching relationship found");
+		}
+	}
+
+	protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.Field
+			fieldBuilder) {
 		fieldBuilder.underlyingName(attributeDesc.getName());
 		fieldBuilder.jsonName(getJsonName(attributeDesc));
 
@@ -88,6 +113,29 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		if (fieldType == ResourceFieldType.RELATIONSHIP) {
 			fieldBuilder.oppositeResourceType(getResourceType(genericType, context));
 			fieldBuilder.oppositeName(getOppositeName(attributeDesc));
+
+			Optional<JsonApiRelation> relationAnnotation = attributeDesc.getAnnotation(JsonApiRelation.class);
+			if (relationAnnotation.isPresent()) {
+				boolean multiValued = Collection.class.isAssignableFrom(attributeDesc.getImplementationClass());
+				String suffix = multiValued ? "Ids" : "Id";
+				String idFieldName;
+				if (relationAnnotation.get().idField().length() > 0) {
+					idFieldName = relationAnnotation.get().idField();
+				}
+				else {
+					idFieldName = attributeDesc.getName() + suffix;
+				}
+				BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);
+				if (idAttribute == null && multiValued && attributeDesc.getName().endsWith("s")) {
+					// also try to correlate by removing ending s
+					idFieldName = attributeDesc.getName().substring(0, attributeDesc.getName().length() - 1) + suffix;
+					idAttribute = beanDesc.getAttribute(idFieldName);
+				}
+				if (idAttribute != null) {
+					fieldBuilder.idName(idFieldName);
+					fieldBuilder.idType(idAttribute.getImplementationClass());
+				}
+			}
 		}
 	}
 

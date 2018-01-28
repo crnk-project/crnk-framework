@@ -1,5 +1,7 @@
 package io.crnk.core.resource;
 
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -38,6 +40,25 @@ public class ResourceInformationTest {
 	public void toIdString() {
 		Assert.assertNull(sut.toIdString(null));
 		Assert.assertEquals("13", sut.toIdString(13));
+	}
+
+	@Test
+	public void toResourceIdentifier() {
+		Resource resource = new Resource();
+		resource.setId("13");
+		resource.setType("tasks");
+
+		Task task = new Task();
+		task.setId(13L);
+
+		ResourceIdentifier expected = new ResourceIdentifier("13", "tasks");
+		Assert.assertSame(expected, sut.toResourceIdentifier(expected));
+		Assert.assertNull(sut.toResourceIdentifier(null));
+		Assert.assertEquals(expected, sut.toResourceIdentifier("13"));
+		Assert.assertEquals(expected, sut.toResourceIdentifier(13L));
+		Assert.assertEquals(expected, sut.toResourceIdentifier(task));
+		Assert.assertEquals(expected, sut.toResourceIdentifier(resource));
+		Assert.assertNotSame(resource, sut.toResourceIdentifier(resource));
 	}
 
 	@Test

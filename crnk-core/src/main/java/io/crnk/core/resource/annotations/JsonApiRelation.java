@@ -18,6 +18,12 @@ import static io.crnk.core.resource.annotations.SerializeType.LAZY;
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface JsonApiRelation {
 
+
+	/**
+	 * Name of the idField annotated with @JsonApiRelationId.
+	 */
+	String idField() default "";
+
 	/**
 	 * (Optional) Defines whether the data associated to the relationship should be serialized when making a request.
 	 * <p>

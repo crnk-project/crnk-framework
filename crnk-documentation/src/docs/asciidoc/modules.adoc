@@ -665,6 +665,107 @@ There is further an operations client implementation that works along the regula
 include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
 ----
 
+An example request in JSON looks like:
+
+[source]
+----
+[ {
+  "op" : "POST",
+  "path" : "movie",
+  "value" : {
+    "id" : "43e7903e-9b14-4610-96f5-69d6f2fa347d",
+    "type" : "movie",
+    "attributes" : {
+      "title" : "test",
+      ...
+    },
+    "relationships" : {
+      ...
+    }
+  }
+}, {
+  "op" : "POST",
+  "path" : "person",
+  "value" : {
+    "id" : "b25bfdbd-8dd6-4abd-a859-f1dedf85246b",
+    "type" : "person",
+    "attributes" : {
+      "name" : "1",
+      "version" : null
+    }
+  }
+}, {
+  "op" : "POST",
+  "path" : "person",
+  "value" : {
+    "id" : "f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6",
+    "type" : "person",
+    "attributes" : {
+      "name" : "2",
+      "version" : null
+    }
+  }
+} ]
+----
+
+and an example response JSON looks as follows:
+
+[source]
+----
+[ {
+  "data" : {
+    "id" : "43e7903e-9b14-4610-96f5-69d6f2fa347d",
+    "type" : "movie",
+    "attributes" : {
+      "title" : "test",
+      ...
+    },
+    "relationships" : {
+      ..
+    },
+    "links" : {
+      "self" : "http://localhost:58367/movie/43e7903e-9b14-4610-96f5-69d6f2fa347d"
+    }
+  },
+  "status" : 201
+}, {
+  "data" : {
+    "id" : "b25bfdbd-8dd6-4abd-a859-f1dedf85246b",
+    "type" : "person",
+    "attributes" : {
+      "name" : "1",
+      "version" : 0
+    },
+    "relationships" : {
+      ...
+    },
+    "links" : {
+      "self" : "http://localhost:58367/person/b25bfdbd-8dd6-4abd-a859-f1dedf85246b"
+    }
+  },
+  "status" : 201
+}, {
+  "data" : {
+    "id" : "f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6",
+    "type" : "person",
+    "attributes" : {
+      "name" : "2",
+      "version" : 0
+    },
+    "relationships" : {
+      ...
+    },
+    "links" : {
+      "self" : "http://localhost:58367/person/f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6"
+    }
+  },
+  "status" : 201
+} ]
+----
+
+Notice in the response a status code for each request. It is import for the `Content-Type` and `Accept` HTTP headers
+to have `application/json-patch+json`, otherwise the `OperationsModule` will ignore such requests.
+
 The current limitations of the implementation are:
 
 - So far does not support bulk `GET` operations.

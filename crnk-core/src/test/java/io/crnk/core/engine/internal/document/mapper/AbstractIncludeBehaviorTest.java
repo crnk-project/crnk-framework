@@ -1,7 +1,6 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper;
 
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.internal.document.mapper.IncludeBehavior;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;

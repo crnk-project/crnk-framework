@@ -1,4 +1,4 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper.lookup;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
@@ -18,6 +18,7 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

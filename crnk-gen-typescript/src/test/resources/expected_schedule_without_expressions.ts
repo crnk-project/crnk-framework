@@ -1,4 +1,5 @@
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
+import {Projects} from './projects';
 import {Tasks} from './tasks';
 import {CrnkStoreResource} from '@crnk/angular-ngrx';
 import {
@@ -16,6 +17,8 @@ export module Schedules {
 		lazyTask?: TypedOneResourceRelationship<Tasks>;
 		tasks?: TypedManyResourceRelationship<Tasks>;
 		tasksList?: TypedManyResourceRelationship<Tasks>;
+		project?: TypedOneResourceRelationship<Projects>;
+		projects?: TypedManyResourceRelationship<Projects>;
 	}
 	export interface Attributes {
 		name?: string;
@@ -51,6 +54,8 @@ export let createEmptySchedules = function(id: string): Schedules {
 			lazyTask: {data: null},
 			tasks: {data: []},
 			tasksList: {data: []},
+			project: {data: null},
+			projects: {data: []},
 		},
 	};
 };

@@ -1,13 +1,18 @@
 package io.crnk.test.mock.models;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "schedules")
 public class Schedule {
@@ -28,6 +33,19 @@ public class Schedule {
 
 	@JsonApiToMany(opposite = "schedule")
 	private List<Task> tasksList = Collections.emptyList();
+
+	@JsonApiRelationId
+	private Long projectId;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
+	private Project project;
+
+	@JsonApiRelationId
+	private List<Long> projectIds = new ArrayList<>();
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
+	private List<Project> projects = new ArrayList<>();
+
 
 	private boolean delayed;
 
@@ -87,4 +105,48 @@ public class Schedule {
 		this.tasksList = tasksList;
 	}
 
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
+
+	public List<Long> getProjectIds() {
+		return projectIds;
+	}
+
+	public void setProjectIds(List<Long> projectIds) {
+		this.projectIds = projectIds;
+		this.projects = null;
+	}
+
+	public List<Project> getProjects() {
+		return projects;
+	}
+
+	public void setProjects(List<Project> projects) {
+		this.projects = projects;
+
+		if (projects != null) {
+			List<Long> ids = new ArrayList<>();
+			for (Project project : projects) {
+				ids.add(project.getId());
+			}
+			this.projectIds = ids;
+		}
+		else {
+			projectIds = null;
+		}
+
+	}
 }

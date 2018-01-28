@@ -11,16 +11,20 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 
 	private static Map<Long, Schedule> schedules = new HashMap<>();
 
+	private static int numFindAll = 0;
+
 	public ScheduleRepositoryImpl() {
 		super(Schedule.class);
 	}
 
 	public static void clear() {
+		numFindAll = 0;
 		schedules.clear();
 	}
 
 	@Override
 	public ScheduleList findAll(QuerySpec querySpec) {
+		numFindAll++;
 		ScheduleList list = new ScheduleList();
 		list.addAll(querySpec.apply(schedules.values()));
 		list.setLinks(new ScheduleListLinks());
@@ -37,5 +41,9 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	@Override
 	public void delete(Long id) {
 		schedules.remove(id);
+	}
+
+	public int getNumFindAll(){
+		return numFindAll;
 	}
 }

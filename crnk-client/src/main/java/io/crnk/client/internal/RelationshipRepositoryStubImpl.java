@@ -31,7 +31,7 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	private ResourceInformation sourceResourceInformation;
 
 	public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass,
-										  ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
+			ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder, targetClass);
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;
@@ -104,17 +104,15 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		Document document = new Document();
 		ArrayList<ResourceIdentifier> resourceIdentifiers = new ArrayList<>();
 		for (Object targetId : targetIds) {
-			String strTargetId = sourceResourceInformation.toIdString(targetId);
-			resourceIdentifiers.add(new ResourceIdentifier(strTargetId, sourceResourceInformation.getResourceType()));
+			resourceIdentifiers.add(sourceResourceInformation.toResourceIdentifier(targetId));
 		}
 		document.setData(Nullable.of((Object) resourceIdentifiers));
 		doExecute(requestUrl, method, document);
 	}
 
-	private void executeWithId(String requestUrl, HttpMethod method, Object targetIds) {
+	private void executeWithId(String requestUrl, HttpMethod method, Object targetId) {
 		Document document = new Document();
-		String strTargetId = sourceResourceInformation.toIdString(targetIds);
-		ResourceIdentifier resourceIdentifier = new ResourceIdentifier(strTargetId, sourceResourceInformation.getResourceType());
+		ResourceIdentifier resourceIdentifier = sourceResourceInformation.toResourceIdentifier(targetId);
 		document.setData(Nullable.of((Object) resourceIdentifier));
 		doExecute(requestUrl, method, document);
 	}

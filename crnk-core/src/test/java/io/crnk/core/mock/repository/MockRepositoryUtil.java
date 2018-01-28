@@ -8,6 +8,11 @@ public class MockRepositoryUtil {
 		TaskToProjectRepository.clear();
 		HierarchicalTaskRepository.clear();
 		ScheduleRepositoryImpl.clear();
+		RelationIdTestRepository.clear();
+
+		UserRepository.clear();
+		UserToProjectRepository.clear();
+		ProjectToTaskRepository.clear();
 	}
 
 

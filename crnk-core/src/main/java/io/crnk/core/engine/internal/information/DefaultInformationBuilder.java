@@ -168,6 +168,12 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceFieldAccessor accessor;
 
+		private String idName;
+
+		private Class idType;
+
+		private ResourceFieldAccessor idAccessor;
+
 		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
 		public ResourceField build() {
@@ -184,32 +190,33 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
 					genericType, oppositeResourceType, oppositeName, serializeType,
 					lookupIncludeBehavior,
-					access);
+					access, idName, idType, idAccessor);
 			if (accessor != null) {
 				impl.setAccessor(accessor);
 			}
 			return impl;
 		}
 
-
+		@Override
 		public DefaultField name(String name) {
 			this.jsonName = name;
 			this.underlyingName = name;
 			return this;
 		}
 
-
+		@Override
 		public DefaultField jsonName(String jsonName) {
 			this.jsonName = jsonName;
 			return this;
 		}
 
+		@Override
 		public DefaultField underlyingName(String underlyingName) {
 			this.underlyingName = underlyingName;
 			return this;
 		}
 
-
+		@Override
 		public DefaultField type(Class<?> type) {
 			this.type = type;
 			if (this.genericType == null) {
@@ -218,41 +225,68 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
+		@Override
 		public DefaultField genericType(Type genericType) {
 			this.genericType = genericType;
 			return this;
 		}
 
+		@Override
 		public DefaultField serializeType(SerializeType serializeType) {
 			this.serializeType = serializeType;
 			return this;
 		}
 
+		@Override
 		public DefaultField oppositeResourceType(String oppositeResourceType) {
 			this.oppositeResourceType = oppositeResourceType;
 			return this;
 		}
 
+		@Override
 		public DefaultField lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior) {
 			this.lookupIncludeBehavior = lookupIncludeBehavior;
 			return this;
 		}
 
+		@Override
 		public DefaultField fieldType(ResourceFieldType fieldType) {
 			this.fieldType = fieldType;
 			return this;
 		}
 
+		@Override
 		public DefaultField oppositeName(String oppositeName) {
 			this.oppositeName = oppositeName;
 			return this;
 		}
 
+		@Override
 		public DefaultField accessor(ResourceFieldAccessor accessor) {
 			this.accessor = accessor;
 			return this;
 		}
 
+		@Override
+		public DefaultField idAccessor(ResourceFieldAccessor idAccessor) {
+			this.idAccessor = idAccessor;
+			return this;
+		}
+
+		@Override
+		public DefaultField idName(String idName) {
+			this.idName = idName;
+			return this;
+		}
+
+		@Override
+		public DefaultField idType(Class idType) {
+			this.idType = idType;
+			return this;
+		}
+
+
+		@Override
 		public DefaultField access(ResourceFieldAccess access) {
 			this.access = access;
 			return this;

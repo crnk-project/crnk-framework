@@ -3,6 +3,8 @@ package io.crnk.core.engine.information.resource;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
@@ -77,13 +79,13 @@ public class ResourceInformation {
 	private AnyResourceFieldAccessor anyFieldAccessor;
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-							   List<ResourceField> fields) {
+			List<ResourceField> fields) {
 		this(parser, resourceClass, resourceType, superResourceType, null, fields);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -120,7 +122,8 @@ public class ResourceInformation {
 				public Object getValue(Object resource, String name) {
 					try {
 						return jsonAnyGetter.invoke(resource, name);
-					} catch (IllegalAccessException | InvocationTargetException e) {
+					}
+					catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
 					}
@@ -130,9 +133,11 @@ public class ResourceInformation {
 				public void setValue(Object resource, String name, Object fieldValue) {
 					try {
 						jsonAnySetter.invoke(resource, name, fieldValue);
-					} catch (IllegalAccessException | InvocationTargetException e) {
+					}
+					catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
-								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue, e.getMessage()), e);
+								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue,
+										e.getMessage()), e);
 					}
 				}
 			};
@@ -143,8 +148,6 @@ public class ResourceInformation {
 	 * The resource has to have both method annotated with {@link JsonAnySetter} and {@link JsonAnyGetter} to allow
 	 * proper handling.
 	 *
-	 * @param jsonAnyGetter
-	 * @param jsonAnySetter
 	 * @return <i>true</i> if resource definition is incomplete, <i>false</i> otherwise
 	 */
 	private static boolean absentAnySetter(Method jsonAnyGetter, Method jsonAnySetter) {
@@ -172,7 +175,8 @@ public class ResourceInformation {
 				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
 				fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
 			}
-		} else {
+		}
+		else {
 			this.relationshipFields = Collections.emptyList();
 			this.attributeFields = Collections.emptyList();
 			this.metaField = null;
@@ -197,7 +201,8 @@ public class ResourceInformation {
 
 		if (metaFields.isEmpty()) {
 			return null;
-		} else if (metaFields.size() > 1) {
+		}
+		else if (metaFields.size() > 1) {
 			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
 		}
 		return metaFields.get(0);
@@ -213,7 +218,8 @@ public class ResourceInformation {
 
 		if (linksFields.isEmpty()) {
 			return null;
-		} else if (linksFields.size() > 1) {
+		}
+		else if (linksFields.size() > 1) {
 			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
 		}
 		return linksFields.get(0);
@@ -306,12 +312,40 @@ public class ResourceInformation {
 	}
 
 	/**
+	 * @param resourceOrId resource or id object
+	 * @return ResourceIdentifier of that resource
+	 */
+	public ResourceIdentifier toResourceIdentifier(Object resourceOrId) {
+		if (resourceOrId == null) {
+			return null;
+		}
+		if (resourceOrId instanceof Resource) {
+			return ((Resource) resourceOrId).toIdentifier();
+		}
+		if (resourceClass.isInstance(resourceOrId)) {
+			resourceOrId = getId(resourceOrId);
+		}
+		if (resourceOrId instanceof ResourceIdentifier) {
+			return (ResourceIdentifier) resourceOrId;
+		}
+		String strId;
+		if (resourceOrId instanceof String) {
+			strId = (String) resourceOrId;
+		}
+		else {
+			strId = toIdString(resourceOrId);
+		}
+		return new ResourceIdentifier(strId, getResourceType());
+
+	}
+
+	/**
 	 * Converts the given id string into its object representation.
 	 *
 	 * @param id stringified id
 	 * @return id
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Serializable parseIdString(String id) {
 		Class idType = getIdField().getType();
 		return (Serializable) parser.parse(id, idType);

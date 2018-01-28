@@ -16,8 +16,13 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IncludeLookupUtil {
 
@@ -36,23 +41,24 @@ public class IncludeLookupUtil {
 		if (propertiesProvider == null) {
 			return LookupIncludeBehavior.DEFAULT;
 		}
-		
+
 		// determine system property for include look up
 		String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
 		String includeAutomaticallyOverwriteString =
 				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
-		
+
 		if ((includeAutomaticallyString != null) || (includeAutomaticallyOverwriteString != null)) {
 			boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
 			boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-	
+
 			if (includeAutomaticallyOverwrite) {
 				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			} else if (includeAutomatically) {
+			}
+			else if (includeAutomatically) {
 				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 			}
 		}
-		
+
 		return LookupIncludeBehavior.DEFAULT;
 	}
 
@@ -142,7 +148,8 @@ public class IncludeLookupUtil {
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		} else {
+		}
+		else {
 			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
 		}
 	}
@@ -151,7 +158,8 @@ public class IncludeLookupUtil {
 		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
 		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
 			return contains(querySpec, toPathList(fieldPath, 0));
-		} else {
+		}
+		else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
 				List<String> path = toPathList(fieldPath, i);
 
@@ -270,14 +278,37 @@ public class IncludeLookupUtil {
 		return new HashSet<>(map.values());
 	}
 
-	public List<Resource> findResourcesWithoutRelationshipData(List<Resource> resources, ResourceField resourceField) {
+	public List<Resource> findResourcesWithoutRelationshipToLoad(List<Resource> resources, ResourceField resourceField,
+			Map<ResourceIdentifier, Resource> resourceMap) {
 		List<Resource> results = new ArrayList<>();
 		for (Resource resource : resources) {
 			Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
-			if (!relationship.getData().isPresent()) {
+			if (!relationship.getData().isPresent() || !isLoaded(relationship, resourceMap)) {
 				results.add(resource);
 			}
 		}
 		return results;
+	}
+
+	private boolean isLoaded(Relationship relationship, Map<ResourceIdentifier, Resource> resourceMap) {
+		for (ResourceIdentifier id : relationship.getCollectionData().get()) {
+			if (!resourceMap.containsKey(id)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public ResourceIdentifier idToResourceId(ResourceInformation resourceInformation, Object objectId) {
+		if (objectId == null) {
+			return null;
+		}
+		if (objectId instanceof ResourceIdentifier) {
+			return (ResourceIdentifier) objectId;
+		}
+		else {
+			String strId = resourceInformation.toIdString(objectId);
+			return new ResourceIdentifier(strId, resourceInformation.getResourceType());
+		}
 	}
 }
