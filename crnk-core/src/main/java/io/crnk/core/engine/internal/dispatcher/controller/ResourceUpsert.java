@@ -53,8 +53,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	private PropertiesProvider propertiesProvider;
 
 	public ResourceUpsert(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
-						  ObjectMapper objectMapper, DocumentMapper documentMapper,
-						  List<ResourceModificationFilter> modificationFilters) {
+			ObjectMapper objectMapper, DocumentMapper documentMapper,
+			List<ResourceModificationFilter> modificationFilters) {
 		super(resourceRegistry, typeParser, documentMapper);
 		this.propertiesProvider = propertiesProvider;
 		this.modificationFilters = modificationFilters;
@@ -125,7 +125,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		}
 	}
 
-	private void setAttribute(ResourceInformation resourceInformation, Object instance, String attributeName, JsonNode valueNode) {
+	private void setAttribute(ResourceInformation resourceInformation, Object instance, String attributeName,
+			JsonNode valueNode) {
 		ResourceField field = resourceInformation.findAttributeFieldByName(attributeName);
 		if (canModifyField(resourceInformation, attributeName, field)) {
 			try {
@@ -136,14 +137,16 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						JavaType jacksonValueType = objectMapper.getTypeFactory().constructType(valueType);
 						ObjectReader reader = objectMapper.reader().forType(jacksonValueType);
 						value = reader.readValue(valueNode);
-					} else {
+					}
+					else {
 						value = null;
 					}
 					for (ResourceModificationFilter filter : modificationFilters) {
 						value = filter.modifyAttribute(instance, field, attributeName, value);
 					}
 					field.getAccessor().setValue(instance, value);
-				} else if (resourceInformation.getAnyFieldAccessor() != null) {
+				}
+				else if (resourceInformation.getAnyFieldAccessor() != null) {
 					AnyResourceFieldAccessor anyFieldAccessor = resourceInformation.getAnyFieldAccessor();
 					Object value = objectMapper.reader().forType(Object.class).readValue(valueNode);
 					for (ResourceModificationFilter filter : modificationFilters) {
@@ -151,9 +154,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					}
 					anyFieldAccessor.setValue(instance, attributeName, value);
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new ResourceException(
-						String.format("Exception while setting %s.%s=%s due to %s", instance, attributeName, valueNode, e.getMessage()), e);
+						String.format("Exception while setting %s.%s=%s due to %s", instance, attributeName, valueNode,
+								e.getMessage()), e);
 			}
 		}
 	}
@@ -176,9 +181,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 		if (filterBehavior == FilterBehavior.NONE) {
 			return true;
-		} else if (filterBehavior == FilterBehavior.FORBIDDEN) {
+		}
+		else if (filterBehavior == FilterBehavior.FORBIDDEN) {
 			throw new ForbiddenException("field '" + fieldName + "' cannot be modified");
-		} else {
+		}
+		else {
 			PreconditionUtil.assertEquals("unknown behavior", FilterBehavior.IGNORED, filterBehavior);
 			return false;
 		}
@@ -198,7 +205,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	Object buildNewResource(RegistryEntry registryEntry, Resource dataBody, String resourceName) {
 		PreconditionUtil.verify(dataBody != null, "No data field in the body.");
-		PreconditionUtil.verify(resourceName.equals(dataBody.getType()), "Inconsistent type definition between path and body: body type: " +
+		PreconditionUtil.verify(resourceName.equals(dataBody.getType()),
+				"Inconsistent type definition between path and body: body type: " +
 						"%s, request type: %s",
 				dataBody.getType(),
 				resourceName);
@@ -231,7 +239,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 								property,
 								queryAdapter,
 								parameterProvider);
-					} else {
+					}
+					else {
 						//noinspection unchecked
 						setRelationField(newResource, registryEntry, propertyName, relationship, queryAdapter,
 								parameterProvider);
@@ -242,8 +251,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected void setRelationsField(Object newResource, RegistryEntry registryEntry,
-									 Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
-									 RepositoryMethodParameterProvider parameterProvider) {
+			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
+			RepositoryMethodParameterProvider parameterProvider) {
 		Relationship relationship = property.getValue();
 		if (relationship.getData().isPresent()) {
 			String propertyName = property.getKey();
@@ -253,7 +262,9 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
 			List<ResourceIdentifier> resourceIds = relationship.getCollectionData().get();
 			for (ResourceModificationFilter filter : modificationFilters) {
-				resourceIds = filter.modifyManyRelationship(newResource, relationshipField, ResourceRelationshipModificationType.SET, resourceIds);
+				resourceIds =
+						filter.modifyManyRelationship(newResource, relationshipField, ResourceRelationshipModificationType.SET,
+								resourceIds);
 			}
 
 			for (ResourceIdentifier resourceId : resourceIds) {
@@ -261,53 +272,70 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
-				Serializable castedRelationshipId = (Serializable) typeParser.parse(resourceId.getId(), idFieldType);
-				Object relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
-				relationships.add(relationObject);
+				Serializable typedRelationshipId = (Serializable) typeParser.parse(resourceId.getId(), idFieldType);
+
+				if (relationshipField.hasIdField()) {
+					relationships.add(typedRelationshipId);
+				}
+				else {
+					Object relationObject = fetchRelatedObject(entry, typedRelationshipId, parameterProvider, queryAdapter);
+					relationships.add(relationObject);
+				}
 			}
 
-			PropertyUtils.setProperty(newResource, relationshipField.getUnderlyingName(), relationships);
+			if (relationshipField.hasIdField()) {
+				relationshipField.getIdAccessor().setValue(newResource, relationships);
+			}
+			else {
+				relationshipField.getAccessor().setValue(newResource, relationships);
+			}
 		}
 	}
 
 	protected void setRelationField(Object newResource, RegistryEntry registryEntry,
-									String relationshipName, Relationship relationship, QueryAdapter queryAdapter,
-									RepositoryMethodParameterProvider parameterProvider) {
+			String relationshipName, Relationship relationship, QueryAdapter queryAdapter,
+			RepositoryMethodParameterProvider parameterProvider) {
 
 		if (relationship.getData().isPresent()) {
 			ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
 
-			ResourceField relationshipFieldByName = registryEntry.getResourceInformation()
+			ResourceField field = registryEntry.getResourceInformation()
 					.findRelationshipFieldByName(relationshipName);
 
-			if (relationshipFieldByName == null) {
+			if (field == null) {
 				throw new ResourceException(String.format("Invalid relationship name: %s", relationshipName));
 			}
 
 			for (ResourceModificationFilter filter : modificationFilters) {
-				relationshipId = filter.modifyOneRelationship(newResource, relationshipFieldByName, relationshipId);
+				relationshipId = filter.modifyOneRelationship(newResource, field, relationshipId);
 			}
 
+
 			Object relationObject;
-			if (relationshipId != null) {
+			if (relationshipId == null) {
+				relationObject = null;
+				field.getAccessor().setValue(newResource, relationObject);
+			}
+			else {
 				RegistryEntry entry = resourceRegistry.getEntry(relationshipId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
-				Serializable castedRelationshipId = (Serializable) typeParser.parse(relationshipId.getId(), idFieldType);
-
-				relationObject = fetchRelatedObject(entry, castedRelationshipId, parameterProvider, queryAdapter);
-			} else {
-				relationObject = null;
+				Serializable typedRelationshipId = (Serializable) typeParser.parse(relationshipId.getId(), idFieldType);
+				if (field.hasIdField()) {
+					field.getIdAccessor().setValue(newResource, typedRelationshipId);
+				}
+				else {
+					relationObject = fetchRelatedObject(entry, typedRelationshipId, parameterProvider, queryAdapter);
+					field.getAccessor().setValue(newResource, relationObject);
+				}
 			}
-
-			relationshipFieldByName.getAccessor().setValue(newResource, relationObject);
 		}
 	}
 
 	protected Object fetchRelatedObject(RegistryEntry entry, Serializable relationId,
-										RepositoryMethodParameterProvider parameterProvider,
-										QueryAdapter queryAdapter) {
+			RepositoryMethodParameterProvider parameterProvider,
+			QueryAdapter queryAdapter) {
 		return entry.getResourceRepository(parameterProvider).findOne(relationId, queryAdapter).getEntity();
 	}
 

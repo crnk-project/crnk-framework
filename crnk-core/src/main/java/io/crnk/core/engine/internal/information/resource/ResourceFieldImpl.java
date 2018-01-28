@@ -40,17 +40,24 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private final ResourceFieldAccess access;
 
+	private String idName;
+
+	private ResourceFieldAccessor idAccessor;
+
+	private Class idType;
+
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType) {
+			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
-				new ResourceFieldAccess(true, true, true, true, true));
+				new ResourceFieldAccess(true, true, true, true, true),
+				null, null, null);
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
-							 LookupIncludeBehavior lookupIncludeBehavior,
-							 ResourceFieldAccess access) {
+			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
+			LookupIncludeBehavior lookupIncludeBehavior,
+			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -61,6 +68,9 @@ public class ResourceFieldImpl implements ResourceField {
 		this.oppositeName = oppositeName;
 		this.oppositeResourceType = oppositeResourceType;
 		this.access = access;
+		this.idName = idName;
+		this.idType = idType;
+		this.idAccessor = idAccessor;
 	}
 
 	public ResourceFieldType getResourceFieldType() {
@@ -150,6 +160,41 @@ public class ResourceFieldImpl implements ResourceField {
 		return accessor;
 	}
 
+	@Override
+	public boolean hasIdField() {
+		assertRelationship();
+		return idName != null;
+	}
+
+	@Override
+	public String getIdName() {
+		assertRelationship();
+		return idName;
+	}
+
+	@Override
+	public Class getIdType() {
+		assertRelationship();
+		return idType;
+	}
+
+	@Override
+	public ResourceFieldAccessor getIdAccessor() {
+		assertRelationship();
+		return idAccessor;
+	}
+
+	public void setIdAccessor(ResourceFieldAccessor idAccessor) {
+		assertRelationship();
+		// TODO to be eliminated by a builder pattern soon
+		this.idAccessor = idAccessor;
+	}
+
+	private void assertRelationship() {
+		PreconditionUtil.assertEquals("not available for non-relationship fields", ResourceFieldType.ID, getResourceFieldType());
+	}
+
+
 	public void setAccessor(ResourceFieldAccessor accessor) {
 		// TODO to be eliminated by a builder pattern soon
 		this.accessor = accessor;
@@ -158,8 +203,12 @@ public class ResourceFieldImpl implements ResourceField {
 	public void setResourceInformation(ResourceInformation resourceInformation) {
 		if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
 			this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
-		} else if (this.accessor == null) {
+		}
+		else if (this.accessor == null) {
 			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
+		}
+		if (this.idAccessor == null && idName != null) {
+			this.idAccessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), idName, idType);
 		}
 		this.parentResourceInformation = resourceInformation;
 	}

@@ -16,6 +16,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
+import jdk.management.resource.ResourceId;
 
 import java.util.*;
 
@@ -36,23 +37,24 @@ public class IncludeLookupUtil {
 		if (propertiesProvider == null) {
 			return LookupIncludeBehavior.DEFAULT;
 		}
-		
+
 		// determine system property for include look up
 		String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
 		String includeAutomaticallyOverwriteString =
 				propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
-		
+
 		if ((includeAutomaticallyString != null) || (includeAutomaticallyOverwriteString != null)) {
 			boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
 			boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-	
+
 			if (includeAutomaticallyOverwrite) {
 				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			} else if (includeAutomatically) {
+			}
+			else if (includeAutomatically) {
 				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 			}
 		}
-		
+
 		return LookupIncludeBehavior.DEFAULT;
 	}
 
@@ -142,7 +144,8 @@ public class IncludeLookupUtil {
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		} else {
+		}
+		else {
 			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
 		}
 	}
@@ -151,7 +154,8 @@ public class IncludeLookupUtil {
 		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
 		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
 			return contains(querySpec, toPathList(fieldPath, 0));
-		} else {
+		}
+		else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
 				List<String> path = toPathList(fieldPath, i);
 
@@ -279,5 +283,15 @@ public class IncludeLookupUtil {
 			}
 		}
 		return results;
+	}
+
+	public ResourceIdentifier idToResourceId(ResourceInformation resourceInformation, Object objectId) {
+		if (objectId instanceof ResourceIdentifier) {
+			return (ResourceIdentifier) objectId;
+		}
+		else {
+			String strId = resourceInformation.toIdString(objectId);
+			return new ResourceIdentifier(strId, resourceInformation.getResourceType());
+		}
 	}
 }

@@ -20,6 +20,8 @@ import io.crnk.core.engine.information.resource.ResourceInformationProviderConte
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -58,14 +60,15 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 			if (!isIgnored(attributeDesc)) {
 				InformationBuilder informationBuilder = context.getInformationBuilder();
 				InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
-				buildResourceField(attributeDesc, fieldBuilder);
+				buildResourceField(beanDesc, attributeDesc, fieldBuilder);
 				fields.add(fieldBuilder.build());
 			}
 		}
 		return fields;
 	}
 
-	protected void buildResourceField(BeanAttributeInformation attributeDesc, InformationBuilder.Field fieldBuilder) {
+	protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.Field
+			fieldBuilder) {
 		fieldBuilder.underlyingName(attributeDesc.getName());
 		fieldBuilder.jsonName(getJsonName(attributeDesc));
 
@@ -88,6 +91,17 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		if (fieldType == ResourceFieldType.RELATIONSHIP) {
 			fieldBuilder.oppositeResourceType(getResourceType(genericType, context));
 			fieldBuilder.oppositeName(getOppositeName(attributeDesc));
+
+			Optional<JsonApiRelation> relationAnnotation = attributeDesc.getAnnotation(JsonApiRelation.class);
+			if (relationAnnotation.isPresent()) {
+				String idFieldName = relationAnnotation.get().idField().length() > 0 ? relationAnnotation.get().idField()
+						: attributeDesc.getName() + "Id";
+				BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);
+				if (idAttribute != null) {
+					fieldBuilder.idName(idFieldName);
+					fieldBuilder.idType(idAttribute.getImplementationClass());
+				}
+			}
 		}
 	}
 
