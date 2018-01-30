@@ -4,6 +4,7 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 @JsonApiResource(type = "schedules")
 public class Schedule {
@@ -16,7 +17,7 @@ public class Schedule {
 	@JsonApiRelationId
 	private Long projectId;
 
-	@JsonApiRelation
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
 	public Long getId() {

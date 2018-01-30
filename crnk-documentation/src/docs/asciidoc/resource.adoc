@@ -83,6 +83,78 @@ is controlled by the optional `lookUp` parameter. There are three options:
 - 'AUTOMATICALLY_ALWAYS' will force Crnk to always lookup related resource regardless whether it is already done by the requested repository.
 
 
+anchor:jsonApiRelationId[]
+
+## JsonApiRelationId
+
+Fields annotated with `@JsonApiRelation` hold fully-realized related resources. There are situations
+where the id of a related resource is available for free or can be obtained much more cheaply then
+fetching the entire related resource. In this case resources can make use of fields annotated with
+`@JsonApiRelationId`. The complement `@JsonApiRelation` fields by holding there ID only.
+An example looks like:
+
+[source]
+----
+@JsonApiResource(type = "schedules")
+public class Schedule {
+  ...
+
+  @JsonApiRelationId
+  private Long projectId;
+
+  @JsonApiRelation
+  private Project project;
+
+  public Long getProjectId() {
+    return projectId;
+  }
+
+  public void setProjectId(Long projectId) {
+    this.projectId = projectId;
+    this.project = null;
+  }
+
+  public Project getProject() {
+    return project;
+  }
+
+  public void setProject(Project project) {
+    this.projectId = project != null ? project.getId() : null;
+    this.project = project;
+  }
+}
+----
+
+Notice that:
+- `Schedule` resource holds both a `project` and `projectId` field that point to the same related resource.
+- setters must set both properties to make sure they stay in sync. If only the ID is set, the object must be nulled.
+- `propertyId` will never show in requests and responses. It can be considered to be `transient`.
+
+By default, the naming convention for `@JsonApiRelationId` field is to end with a `Id` suffix. Crnk will the
+pair those two objects automatically. But it is also possible to specify a custom name, for example:
+
+[source]
+----
+@JsonApiRelationId
+private Long projectFk;
+
+@JsonApiRelation(idField = "projectFk")
+private Project project;
+----
+
+If a `@JsonApiRelationId` field cannot be matched to a `@JsonApiRelation` field, an exception will be thrown.
+
+`@JsonApiRelationId` fields are used for:
+
+- `GET` requests to fill-in the `data` section of a relationship.
+- `POST` and `PATCH` requests to fill-in the new value without having to fetch and set the entire related resource.
+
+*Further (substantial) benefit for `@JsonApiRelationId` fields is that no `RelationshipRepository`
+must be implemented*. Instead Crnk will automatically dispatch relationship requests to the owning and
+opposite `ResourceRepository`. This allows to focus on the development of `ResourceRepository`.
+See <<relationshipRepository,RelationshipRepository>> for more information.
+
+
 
 ## JsonApiMetaInformation
 

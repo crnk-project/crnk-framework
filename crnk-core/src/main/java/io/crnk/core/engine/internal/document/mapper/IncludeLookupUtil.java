@@ -274,15 +274,25 @@ public class IncludeLookupUtil {
 		return new HashSet<>(map.values());
 	}
 
-	public List<Resource> findResourcesWithoutRelationshipData(List<Resource> resources, ResourceField resourceField) {
+	public List<Resource> findResourcesWithoutRelationshipToLoad(List<Resource> resources, ResourceField resourceField,
+			Map<ResourceIdentifier, Resource> resourceMap) {
 		List<Resource> results = new ArrayList<>();
 		for (Resource resource : resources) {
 			Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
-			if (!relationship.getData().isPresent()) {
+			if (!relationship.getData().isPresent() || isLoaded(relationship, resourceMap)) {
 				results.add(resource);
 			}
 		}
 		return results;
+	}
+
+	private boolean isLoaded(Relationship relationship, Map<ResourceIdentifier, Resource> resourceMap) {
+		for (ResourceIdentifier id : relationship.getCollectionData().get()) {
+			if (!resourceMap.containsKey(id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public ResourceIdentifier idToResourceId(ResourceInformation resourceInformation, Object objectId) {

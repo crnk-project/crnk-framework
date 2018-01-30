@@ -168,7 +168,6 @@ public class ResourceFieldImpl implements ResourceField {
 
 	@Override
 	public String getIdName() {
-		assertRelationship();
 		return idName;
 	}
 
@@ -191,7 +190,9 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	private void assertRelationship() {
-		PreconditionUtil.assertEquals("not available for non-relationship fields", ResourceFieldType.ID, getResourceFieldType());
+		PreconditionUtil
+				.assertEquals("not available for non-relationship fields", ResourceFieldType.RELATIONSHIP, getResourceFieldType
+						());
 	}
 
 

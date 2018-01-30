@@ -78,12 +78,14 @@ the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
+anchor:relationshipRepository[]
+
 ## RelationshipRepositoryV2
 
-Each relationship defined in Crnk (annotation @JsonApiToOne and @JsonApiToMany) must have a relationship repository defined.
-
-Base unidirectional repository responsible for operations on relations.
-All of the methods in this interface have fieldName field as their last parameter to solve the problem of many relationships between the same resources.
+Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
+defined implementing `RelationshipRepositoryV2`. `RelationshipRepositoryV2` implements the methods
+necessary to work with a relationship. It provides methods for both single-valued and multi-valued
+relationships:
 
 * `setRelation(T source, D_ID targetId, String fieldName)`
   Sets a resource defined by targetId to a field fieldName in an instance source. If no value is to be set, null value is passed.
@@ -103,13 +105,21 @@ All of the methods in this interface have fieldName field as their last paramete
 * `findManyTargets(T_ID sourceId, String fieldName, QuerySpec querySpec)`
   Finds an Iterable of field's values defined by fieldName in a source defined by sourceId .
 
+All of the methods in this interface have fieldName field as their last parameter in case there
+are multiple relationships between two resources.
 
-This interface must be implemented to let Crnk work correctly, some of the requests are processed using only this kind of repository.
-As it can be seen above, there are two kinds of methods: for multiple and single relationships and it is possible to implement only one type of methods, e.g. singular methods.
-Nevertheless, it should be avoided because of potential future problems when adding new fields of other sizes.
+INFO: Relationships that are backed by a further <<jsonApiRelationId,`@JsonApiRelationId`>> field
+do not have to implement a relationship repository. If not, Crnk will automatically provide a
+default implementation that dispatches requests to the owning and opposite `ResourceRepository`, which
+in turn allows to focus the development to resource repositories.
+
+
+## RelationshipRepositoryBase
 
 In many cases, relationship operations can be mapped back to resource repository operations. Making the need
-for a custom relationship repository implementation redundant. A findManyTargets request might can be
+for a custom relationship repository implementation redundant. `@JsonApiRelationId` fields is one example
+where Crnk will take care of this automatically. But there are many other scenarios where application apply
+similar techniques. A findManyTargets request might can be
 served by filtering the target repository. Or a relationship can be set by invoking the save operation
 on either the source or target resource repository (usually you want to save on the single-valued side).
 The ResourceRepositoryBase is a base class that takes care of exactly this. A repository
@@ -150,8 +160,6 @@ It is recommended to make use of this implementation if a relationship is loaded
 (either by a eager declaration or trough the `include` parameter) and it is costly to
 fetch that relation. RelationshipRepositoryBase provides a default implementation where
 `findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
-
-
 
 
 ## ResourceList
