@@ -16,9 +16,14 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-import jdk.management.resource.ResourceId;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IncludeLookupUtil {
 
@@ -126,8 +131,7 @@ public class IncludeLookupUtil {
 		}
 
 		// TODO proper ResourceInformation API
-		ResourceInformation actualResourceInformation = resourceRegistry.getEntry(resource.getType()).getResourceInformation();
-		ResourceInformation superInformation = actualResourceInformation;
+		ResourceInformation superInformation = resourceRegistry.getEntry(resource.getType()).getResourceInformation();
 		while ((superInformation = getSuperInformation(superInformation)) != null) {
 			if (superInformation.equals(desiredResourceInformation)) {
 				return true;
@@ -222,8 +226,7 @@ public class IncludeLookupUtil {
 	}
 
 	private List<String> toPathList(List<ResourceField> fieldPath, int offset) {
-		List<String> builder = new ArrayList<>();
-		List<String> result = builder;
+		List<String> result = new ArrayList<>();
 		for (int i = offset; i < fieldPath.size(); i++) {
 			ResourceField field = fieldPath.get(i);
 			result.add(field.getJsonName());
