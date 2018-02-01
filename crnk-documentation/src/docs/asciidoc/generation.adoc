@@ -72,9 +72,9 @@ typescriptGen{
 
 	npm {
 		packageVersion = '0.0.1'
-		packageName = '@adnovum/moap-movie-management-api'
-		description = 'movie management API to access backend'
-		gitRepository = 'https://.../bitbucket/scm/moap/moap-movie.git'
+		packageName = '@crnk/example-api'
+		description = 'example API to access example backend'
+		gitRepository = 'https://.../bitbucket/scm/crnk/example.git'
 		license = 'MIT'
 		// packagingEnabled = false
 		// outputDir = ...
