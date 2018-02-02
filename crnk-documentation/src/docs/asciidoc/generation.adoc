@@ -25,6 +25,8 @@ like:
 include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_without_expressions.ts[]
 ----
 
+For an example have a look at the Crnk example application, see https://github.com/crnk-project/crnk-example[crnk-project/crnk-example].
+
 Internally the generator has to make use of the running application to gather the necessary information for generation. This
 approach not only supports the typical, manual implement resources and repositories manually, but also
 the ones obtained through third-party modules such the JPA entities exposed by the JPA module. There are different
@@ -67,6 +69,8 @@ typescriptGen{
         spring {
         	profile = 'test'
         	configuration = 'ch.adnovum.arch.demo.management.service.ManagementApplication'
+        	initializerMethod = 'someInitMethod'
+        	defaultProperties['someKey'] = 'someValue'
         }
 	}
 
@@ -85,8 +89,8 @@ typescriptGen{
 
 	forked = true
 
-	packageMapping['resources.something'] = '@crnk/some-demo-library'
-	peerDependencies['ngrx-json-api'] = '>=2.0.0-beta.6'
+	packageMapping['resources.something'] = '@crnk/some-other-library'
+	peerDependencies['ngrx-json-api'] = '>=2.2.0'
 	generateExpressions = true
 
 	// genDir = ...
@@ -97,19 +101,34 @@ typescriptGen.init()
 
 ----
 
+The basic Gradle setup makes use of:
+
 - the `moowork` plugin is used to to gain a `node` setup.
-- `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
-- by default the package version matches the npm version.
-- `crnk-meta` is used to gather a meta model of the underlying resources (or a any other type of object like JPA entities).
-  Important to know is that every object is assigned a string-based meta id. By default the
+- `crnk-meta` is used as dependency to gather a meta model of the underlying resources (or a any other type of object
+  like JPA entities). Important to know is that every object is assigned a string-based meta id. By default the
   meta id matches `resources.<resourceType>`. For example a Task resource with resource type `task` has a
   `resources.task` meta id.
 - applying `crnk-gen-typescript` results in a new `assembleTypescript` task. Consumers may want to add
   that task to `assemble` as dependency.
-- `runtime.configuration` sets the Gradle configuration to use to obtain a classpath. In the given example
+
+
+The plugin is in need for a running application to extract the set of available resources. The `runtime` section provides
+a number of possibilities how this can be achieved. Typically the simplest way to have a running application is to
+run in the same manner as for testing. This can be achieved, for example, by replicating the classpath, configuration,
+environment, Spring profiles, etc. Currently supported are Spring and CDI to achieve this. Please open up a ticket
+if you desire to work in another environment. There are a number of properties to do that:
+
+- `runtime.configuration` sets the Gradle configuration to use to construct a classpath. In the given example
    `typescriptGenRuntime` is used. You may also use `compile` or anything else.
-- `runtime.spring` is used to configure the Spring profile and configuration class to use to setup the spring application.
-  For CDI application is can be omitted.
+- for CDI it will work out-of-the-box if Weld is found on the classpath.
+- for Spring properties allow to set the Spring profile, default properties and configuration
+  class to use. Optionally an `initializerMethod` can be specified that is invoked before the
+  Spring application to perform further customization.
+
+The plugin allows various further customization options:
+
+- `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
+- by default the package version matches the npm version.
 - `packagingEnabled`  triggers the generation of a `package.json` and `tsconfig.json` file (`true` as default).
   Useful to publish the stubs to an NPM repository for use by other projects.
   Setting it to false will result in the generation of the Typescript files only. This may be used to generate
@@ -128,7 +147,7 @@ typescriptGen.init()
   generator fork a new process to avoid resource leakage in Gradle daemons and
   have more stable builds.
 
-NOTE: the generator plugin is not yet included in any example applications. It is not possible to
-include a plugin from within the same project. At some point an external example application will be
-setup to showcase the use of the plugin.
+
+
+
 

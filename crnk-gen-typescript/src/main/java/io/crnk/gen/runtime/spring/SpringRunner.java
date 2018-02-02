@@ -1,6 +1,8 @@
 package io.crnk.gen.runtime.spring;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
@@ -22,9 +24,17 @@ public class SpringRunner {
 		try {
 			Class configurationClass = getClass().getClassLoader().loadClass(springConfig.getConfiguration());
 
+			String initializerMethodName = springConfig.getInitializerMethod();
+			if (initializerMethodName != null) {
+				Method initializerMethod = configurationClass.getMethod(initializerMethodName);
+				initializerMethod.invoke(configurationClass);
+			}
+
 			SpringApplication application = new SpringApplication(configurationClass);
 			application.setWebEnvironment(false);
 			application.setAdditionalProfiles(springConfig.getProfile());
+			application.setDefaultProperties(springConfig.getDefaultProperties());
+
 			applicationContext = application.run();
 
 			MetaModule metaModule = applicationContext.getBean(MetaModule.class);
@@ -35,6 +45,15 @@ public class SpringRunner {
 			throw new IllegalStateException(e);
 		}
 		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+		catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		catch (NoSuchMethodException e) {
+			throw new IllegalStateException(e);
+		}
+		catch (InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 		finally {

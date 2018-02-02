@@ -1,10 +1,16 @@
 package io.crnk.gen.runtime.spring;
 
+import java.util.Properties;
+
 public class SpringRuntimeConfig {
 
 	private String profile;
 
 	private String configuration;
+
+	private String initializerMethod;
+
+	private Properties defaultProperties = new Properties();
 
 	public String getProfile() {
 		return profile;
@@ -20,5 +26,21 @@ public class SpringRuntimeConfig {
 
 	public void setConfiguration(String configurationClassName) {
 		this.configuration = configurationClassName;
+	}
+
+	public String getInitializerMethod() {
+		return initializerMethod;
+	}
+
+	public void setInitializerMethod(String initializerMethod) {
+		this.initializerMethod = initializerMethod;
+	}
+
+	public Properties getDefaultProperties() {
+		return defaultProperties;
+	}
+
+	public void setDefaultProperties(Properties defaultProperties) {
+		this.defaultProperties = defaultProperties;
 	}
 }
