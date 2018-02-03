@@ -63,6 +63,15 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 	}
 
 	@Override
+	public Optional<RelationshipRepositoryBehavior> getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
+		Optional<JsonApiRelation> jsonApiRelation = attributeDesc.getAnnotation(JsonApiRelation.class);
+		if (jsonApiRelation.isPresent()) {
+			return Optional.of(jsonApiRelation.get().repositoryBehavior());
+		}
+		return Optional.empty();
+	}
+
+	@Override
 	public Optional<LookupIncludeBehavior> getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
 		Optional<JsonApiRelation> jsonApiRelation = attributeDesc.getAnnotation(JsonApiRelation.class);
 		if (jsonApiRelation.isPresent()) {

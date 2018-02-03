@@ -15,7 +15,7 @@ import static io.crnk.core.resource.annotations.SerializeType.LAZY;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ ElementType.FIELD, ElementType.METHOD })
 public @interface JsonApiRelation {
 
 
@@ -36,7 +36,8 @@ public @interface JsonApiRelation {
 	SerializeType serialize() default LAZY;
 
 	/**
-	 * (Optional) This attribute is used to make automatic value assignment using a defined relationship resource if such resource
+	 * (Optional) This attribute is used to make automatic value assignment using a defined relationship resource if such
+	 * resource
 	 * is available.
 	 * <p>
 	 * DEFAULT (Default) - consults the global lookup behavior set by {@link CrnkProperties#INCLUDE_AUTOMATICALLY} and
@@ -49,14 +50,25 @@ public @interface JsonApiRelation {
 	 * is null and it is either A. requested in an include query legacy B. SerializeType.ONLY_ID or SerializeType.EAGER
 	 * is present.
 	 * <p>
-	 * AUTOMATICALLY_ALWAYS - always automatically call a relationship's findManyTargets or findOneTarget and overwrite this field.
+	 * AUTOMATICALLY_ALWAYS - always automatically call a relationship's findManyTargets or findOneTarget and overwrite this
+	 * field.
 	 */
 	LookupIncludeBehavior lookUp() default DEFAULT;
 
 	/**
-	 * @return opposite attribute name in case of a bidirectional association. Used by {@link io.crnk.core.repository.RelationshipRepositoryBase} to implement
-	 * its findOneTarget and findManyTarget functions by directly searching in the related resource repository with a filter in the opposite direction.
+	 * @return opposite attribute name in case of a bidirectional association. Used by
+	 * {@link io.crnk.core.repository.RelationshipRepositoryBase} to implement
+	 * its findOneTarget and findManyTarget functions by directly searching in the related resource repository with a filter in
+	 * the opposite direction.
 	 * Allow to work with relations with only implementing resource repositories!
 	 */
 	String opposite() default "";
+
+
+	/**
+	 * @return behavior of the relationship repository. From providing a manual implementation to reusing an implicit
+	 * implementation that forwards calls to resource repositories. See {@link RelationshipRepositoryBehavior} for more
+	 * information.
+	 */
+	RelationshipRepositoryBehavior repositoryBehavior() default RelationshipRepositoryBehavior.DEFAULT;
 }

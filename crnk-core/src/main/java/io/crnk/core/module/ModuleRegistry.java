@@ -21,7 +21,8 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
-import io.crnk.core.engine.internal.repository.ImplicitIdBasedRelationshipRepository;
+import io.crnk.core.repository.RelationshipRepositoryBase;
+import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -42,6 +43,8 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
@@ -330,7 +333,6 @@ public class ModuleRegistry {
 	private void applyRepositoryRegistrations() {
 		List<Object> repositories = aggregatedModule.getRepositories();
 
-
 		MultivaluedMap<String, RepositoryInformation> typeInfoMapping = new MultivaluedMap<>();
 		Map<Object, Object> infoRepositoryMapping = new HashMap<>();
 		mapRepositoryRegistrations(repositories, typeInfoMapping, infoRepositoryMapping);
@@ -400,8 +402,20 @@ public class ModuleRegistry {
 			List<RepositoryInformation> repositoryInformations,
 			List<ResponseRelationshipEntry> relationshipEntries) {
 		for (ResourceField relationshipField : resourceInformation.getRelationshipFields()) {
-			if (resourceRepositoryInformation != null && relationshipField.hasIdField() && !hasRepository(relationshipField,
-					repositoryInformations)) {
+
+			RelationshipRepositoryBehavior behavior = relationshipField.getRelationshipRepositoryBehavior();
+			if (behavior == RelationshipRepositoryBehavior.DEFAULT) {
+				if (resourceRepositoryInformation != null && relationshipField.hasIdField()
+						|| relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
+					behavior = RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER;
+				}
+				else {
+					behavior = RelationshipRepositoryBehavior.CUSTOM;
+				}
+			}
+
+
+			if (behavior != RelationshipRepositoryBehavior.CUSTOM && !hasRepository(relationshipField, repositoryInformations)) {
 				ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
 				RepositoryMethodAccess access = resourceRepositoryInformation.getAccess();
 
@@ -410,8 +424,18 @@ public class ModuleRegistry {
 								sourceInformation.getResourceType(), relationshipField.getOppositeResourceType(), access);
 
 				repositoryInformations.add(implicitRepoInformation);
-				ImplicitIdBasedRelationshipRepository repository = new ImplicitIdBasedRelationshipRepository(resourceRegistry,
-						sourceInformation, relationshipField.getElementType());
+				RelationshipRepositoryBase repository;
+				if (behavior == RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER) {
+					repository = new ImplicitOwnerBasedRelationshipRepository(
+							sourceInformation.getResourceType(), relationshipField.getOppositeResourceType());
+				}
+				else {
+					PreconditionUtil.assertEquals("unknown behavior", RelationshipRepositoryBehavior
+							.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER, behavior);
+					repository = new RelationshipRepositoryBase(
+							sourceInformation.getResourceType(), relationshipField.getOppositeResourceType());
+				}
+				repository.setResourceRegistry(resourceRegistry);
 				setupRelationship(relationshipEntries, implicitRepoInformation, repository);
 			}
 		}
@@ -423,9 +447,10 @@ public class ModuleRegistry {
 				RelationshipRepositoryInformation relInformation = (RelationshipRepositoryInformation) repositoryInformation;
 
 				// TODO add field matching: boolean fieldMatch =
-				boolean targetMatch = relationshipField.getParentResourceInformation().getResourceType()
-						.equals(relInformation.getSourceResourceType());
-				boolean sourceMatch = relationshipField.getOppositeResourceType().equals(relInformation.getTargetResourceType());
+				boolean targetMatch = Objects.equals(relationshipField.getParentResourceInformation().getResourceType(),
+						relInformation.getSourceResourceType());
+				boolean sourceMatch = Objects.equals(relationshipField.getOppositeResourceType(), relInformation
+						.getTargetResourceType());
 				if (sourceMatch && targetMatch) {
 					return true;
 				}

@@ -9,6 +9,7 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,6 +43,7 @@ public class DefaultInformationBuilderTest {
 		projectField.serializeType(SerializeType.EAGER);
 		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
 		projectField.oppositeName("tasks");
+		projectField.relationshipRepositoryBehavior(RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER);
 		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		projectField.accessor(accessor);
 
@@ -71,6 +73,7 @@ public class DefaultInformationBuilderTest {
 		Assert.assertFalse(projectInfo.getAccess().isPostable());
 		Assert.assertTrue(projectInfo.getAccess().isPatchable());
 		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
+		Assert.assertEquals(RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER, projectInfo.getRelationshipRepositoryBehavior());
 		Assert.assertFalse(projectInfo.isCollection());
 	}
 

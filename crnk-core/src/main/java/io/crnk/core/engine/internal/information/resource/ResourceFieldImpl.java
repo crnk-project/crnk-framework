@@ -10,11 +10,11 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
-import sun.reflect.FieldAccessor;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -36,6 +36,8 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private final String oppositeName;
 
+	private final RelationshipRepositoryBehavior relationshipRepositoryBehavior;
+
 	private ResourceInformation parentResourceInformation;
 
 	private ResourceFieldAccessor accessor;
@@ -53,13 +55,14 @@ public class ResourceFieldImpl implements ResourceField {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true, true),
-				null, null, null);
+				null, null, null, RelationshipRepositoryBehavior.DEFAULT);
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
 			LookupIncludeBehavior lookupIncludeBehavior,
-			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor) {
+			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
+			RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -73,10 +76,15 @@ public class ResourceFieldImpl implements ResourceField {
 		this.idName = idName;
 		this.idType = idType;
 		this.idAccessor = idAccessor;
+		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
 	}
 
 	public ResourceFieldType getResourceFieldType() {
 		return resourceFieldType;
+	}
+
+	public RelationshipRepositoryBehavior getRelationshipRepositoryBehavior() {
+		return relationshipRepositoryBehavior;
 	}
 
 	/**

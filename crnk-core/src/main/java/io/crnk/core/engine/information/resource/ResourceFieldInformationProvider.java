@@ -2,6 +2,7 @@ package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
 
@@ -16,9 +17,6 @@ public interface ResourceFieldInformationProvider {
 
 	/**
 	 * Return a boolean indicating whether the specified field should be ignored when doing serialization.
-	 *
-	 * @param attributeDesc
-	 * @return
 	 */
 	Optional<Boolean> isIgnored(BeanAttributeInformation attributeDesc);
 
@@ -77,4 +75,9 @@ public interface ResourceFieldInformationProvider {
 	 * Returns the SerializeType to use.
 	 */
 	Optional<SerializeType> getSerializeType(BeanAttributeInformation attributeDesc);
+
+	/**
+	 * Returns the RelationshipRepositoryBehavior to use.
+	 */
+	Optional<RelationshipRepositoryBehavior> getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc);
 }

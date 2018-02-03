@@ -13,6 +13,7 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
@@ -176,6 +177,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
+		private RelationshipRepositoryBehavior relationshipRepositoryBehavior = RelationshipRepositoryBehavior.DEFAULT;
+
 		public ResourceField build() {
 
 			if (oppositeResourceType == null && fieldType == ResourceFieldType.RELATIONSHIP) {
@@ -190,7 +193,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
 					genericType, oppositeResourceType, oppositeName, serializeType,
 					lookupIncludeBehavior,
-					access, idName, idType, idAccessor);
+					access, idName, idType, idAccessor, relationshipRepositoryBehavior);
 			if (accessor != null) {
 				impl.setAccessor(accessor);
 			}
@@ -203,6 +206,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			this.underlyingName = name;
 			return this;
 		}
+
+		@Override
+		public DefaultField relationshipRepositoryBehavior(
+				RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
+			this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+			return this;
+		}
+
 
 		@Override
 		public DefaultField jsonName(String jsonName) {
