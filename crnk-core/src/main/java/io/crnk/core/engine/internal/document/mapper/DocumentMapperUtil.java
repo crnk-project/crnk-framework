@@ -95,7 +95,7 @@ public class DocumentMapperUtil {
 		return typeIncludedFields == null || typeIncludedFields.getParams().isEmpty();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> List<T> toList(Object entity) {
 		if (entity instanceof List) {
 			return (List) entity;
@@ -134,8 +134,7 @@ public class DocumentMapperUtil {
 		}
 		RegistryEntry entry = resourceRegistry.findEntry(entity.getClass());
 		ResourceInformation resourceInformation = entry.getResourceInformation();
-		String strId = this.getIdString(entity, resourceInformation);
-		return new ResourceIdentifier(strId, resourceInformation.getResourceType());
+		return resourceInformation.toResourceIdentifier(entity);
 	}
 
 	public String getIdString(Object entity, ResourceInformation resourceInformation) {

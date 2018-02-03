@@ -53,7 +53,7 @@ public class DefaultQueryParamsConverter implements QueryParamsConverter {
 	private String getResourceType(Class<?> resourceClass) {
 		RegistryEntry registryEntry = resourceRegistry.getEntryForClass(resourceClass);
 		if (registryEntry == null) {
-			throw new IllegalArgumentException("resourceType for class " + resourceClass.getName() + " not found");
+			throw new IllegalArgumentException("resourceType for class " + resourceClass + " not found");
 		}
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		return resourceInformation.getResourceType();
@@ -113,7 +113,8 @@ public class DefaultQueryParamsConverter implements QueryParamsConverter {
 		List<IncludeRelationSpec> includedRelations = spec.getIncludedRelations();
 		Map<String, IncludedRelationsParams> decodedSparseMap = new LinkedHashMap<>();
 		if (includedRelations != null && !includedRelations.isEmpty()) {
-			String resourceType = getResourceType(spec.getResourceClass());
+			String resourceType = spec.getResourceType() != null
+					? spec.getResourceType() : getResourceType(spec.getResourceClass());
 			Set<Inclusion> inclusions = new LinkedHashSet<>();
 			for (IncludeRelationSpec relationSpec : includedRelations) {
 				for (String attrPath : relationSpec.getAttributePath()) {

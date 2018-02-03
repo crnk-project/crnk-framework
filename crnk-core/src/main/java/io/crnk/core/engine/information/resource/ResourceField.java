@@ -60,7 +60,21 @@ public interface ResourceField {
 
 	boolean isCollection();
 
+	/**
+	 * Allows to get and set the value of this field.
+	 */
 	ResourceFieldAccessor getAccessor();
+
+	/**
+	 * @return whether this relationship field is backed by an id Field.
+	 */
+	boolean hasIdField();
+
+	String getIdName();
+
+	Class getIdType();
+
+	ResourceFieldAccessor getIdAccessor();
 
 	/**
 	 * @return access information for this resource (postable, patchable)

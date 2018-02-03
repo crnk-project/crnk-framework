@@ -21,6 +21,7 @@ public class TestModule implements Module {
 		context.addRepository(new TaskToProjectRepository());
 		context.addRepository(new TaskToScheduleRepo());
 		context.addRepository(new PrimitiveAttributeRepository());
+		context.addRepository(new RelationIdTestRepository());
 		context.addExceptionMapper(new TestExceptionMapper());
 	}
 
@@ -30,5 +31,6 @@ public class TestModule implements Module {
 		TaskToProjectRepository.clear();
 		ProjectToTaskRepository.clear();
 		ScheduleRepositoryImpl.clear();
+		RelationIdTestRepository.clear();
 	}
 }

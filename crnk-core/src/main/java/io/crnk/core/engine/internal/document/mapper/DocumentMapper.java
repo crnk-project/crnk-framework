@@ -57,12 +57,12 @@ public class DocumentMapper {
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-								  PropertiesProvider propertiesProvider) {
+			PropertiesProvider propertiesProvider) {
 		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-								 PropertiesProvider propertiesProvider) {
+			PropertiesProvider propertiesProvider) {
 		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 	}
 

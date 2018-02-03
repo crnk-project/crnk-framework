@@ -20,7 +20,7 @@ import io.crnk.test.mock.models.Task;
 
 public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Long> implements ScheduleRepository {
 
-	private static Map<Long, Schedule> schedules = new HashMap<>();
+	public static Map<Long, Schedule> schedules = new HashMap<>();
 
 	private AtomicLong nextId = new AtomicLong(1000);
 
@@ -100,6 +100,18 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 			copy.setDelayed(schedule.isDelayed());
 			copy.setLazyTask(schedule.getLazyTask());
 			copy.setTasksList(schedule.getTasksList());
+			if (schedule.getProject() != null) {
+				copy.setProject(schedule.getProject());
+			}
+			else {
+				copy.setProjectId(schedule.getProjectId());
+			}
+			if (schedule.getProjects() != null) {
+				copy.setProjects(schedule.getProjects());
+			}
+			else {
+				copy.setProjectIds(schedule.getProjectIds());
+			}
 			copy.setTask(schedule.getTask());
 			copiedList.add(copy);
 		}

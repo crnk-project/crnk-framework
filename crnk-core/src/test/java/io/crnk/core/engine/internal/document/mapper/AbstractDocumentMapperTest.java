@@ -1,4 +1,4 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

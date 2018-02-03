@@ -1,4 +1,4 @@
-package io.crnk.core.internal;
+package io.crnk.core.resource.field;
 
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;

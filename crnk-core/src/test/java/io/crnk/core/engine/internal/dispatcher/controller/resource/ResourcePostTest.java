@@ -292,14 +292,14 @@ public class ResourcePostTest extends BaseControllerTest {
 		Response taskResponse = sut.handle(taskPath, emptyUserQuery, null, newUserBody);
 
 		// THEN
-		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("users");
-		Long userId = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
+		Resource task = taskResponse.getDocument().getSingleData().get();
+		assertThat(task.getType()).isEqualTo("users");
+		Long userId = Long.parseLong(task.getId());
 		assertThat(userId).isNotNull();
-		assertThat(taskResponse.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("some user");
-
-		assertThat(taskResponse.getDocument().getSingleData().get().getRelationships().get("assignedProjects").getCollectionData().get()).hasSize(1);
-		assertThat(taskResponse.getDocument().getSingleData().get().getRelationships().get("assignedProjects").getCollectionData().get().get(0).getId()).isEqualTo(projectId.toString());
-
+		assertThat(task.getAttributes().get("name").asText()).isEqualTo("some user");
+		assertThat(task.getRelationships().get("assignedProjects").getCollectionData().get()).hasSize(1);
+		assertThat(
+				task.getRelationships().get("assignedProjects").getCollectionData().get().get(0).getId()).isEqualTo(projectId.toString());
 		Mockito.verify(modificationFilter, Mockito.times(1)).modifyManyRelationship(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq(ResourceRelationshipModificationType.SET), Mockito.eq(projectIds));
 	}
 

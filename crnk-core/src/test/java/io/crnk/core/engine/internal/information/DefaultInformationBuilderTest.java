@@ -74,6 +74,53 @@ public class DefaultInformationBuilderTest {
 		Assert.assertFalse(projectInfo.isCollection());
 	}
 
+
+	@Test
+	public void checkRelationIdFieldCreation() {
+		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		resource.superResourceType("superTask");
+		resource.resourceType("changedTasks");
+		resource.resourceClass(Project.class);
+
+		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
+		idField.serializeType(SerializeType.EAGER);
+		idField.access(new ResourceFieldAccess(true, true, true, false, false));
+
+		ResourceFieldAccessor idAccessor = Mockito.mock(ResourceFieldAccessor.class);
+		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
+		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
+		projectField.idName("taskId");
+		projectField.idAccessor(idAccessor);
+		projectField.idType(Long.class);
+		projectField.serializeType(SerializeType.EAGER);
+		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
+		projectField.oppositeName("tasks");
+		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
+		projectField.accessor(accessor);
+
+		ResourceInformation info = resource.build();
+		Assert.assertEquals("changedTasks", info.getResourceType());
+		Assert.assertEquals(Project.class, info.getResourceClass());
+		Assert.assertEquals("superTask", info.getSuperResourceType());
+
+		ResourceField projectInfo = info.findFieldByName("project");
+		Assert.assertEquals("project", projectInfo.getUnderlyingName());
+		Assert.assertEquals("tasks", projectInfo.getOppositeName());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeAutomatically());
+		Assert.assertEquals(Project.class, projectInfo.getType());
+		Assert.assertSame(accessor, projectInfo.getAccessor());
+		Assert.assertFalse(projectInfo.getAccess().isFilterable());
+		Assert.assertFalse(projectInfo.getAccess().isSortable());
+		Assert.assertFalse(projectInfo.getAccess().isPostable());
+		Assert.assertTrue(projectInfo.getAccess().isPatchable());
+		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
+		Assert.assertTrue(projectInfo.hasIdField());
+		Assert.assertEquals("taskId", projectInfo.getIdName());
+		Assert.assertEquals(Long.class, projectInfo.getIdType());
+		Assert.assertSame(idAccessor, projectInfo.getIdAccessor());
+		Assert.assertFalse(projectInfo.isCollection());
+	}
+
 	@Test
 	public void checkResourceRepository() {
 		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks").build();

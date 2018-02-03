@@ -176,7 +176,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		String oppositeName = getOppositeName(fieldName);
 		QuerySpec idQuerySpec = querySpec.duplicate();
 		idQuerySpec.addFilter(
-				new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getJsonName()), FilterOperator.EQ,
+				new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getUnderlyingName()), FilterOperator.EQ,
 						sourceIds));
 		idQuerySpec.includeRelation(Arrays.asList(oppositeName));
 

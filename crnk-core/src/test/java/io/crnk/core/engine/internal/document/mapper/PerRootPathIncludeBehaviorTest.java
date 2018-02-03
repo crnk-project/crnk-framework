@@ -1,11 +1,10 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.internal.document.mapper.IncludeBehavior;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.mock.models.HierarchicalTask;
 import io.crnk.core.queryspec.QuerySpec;

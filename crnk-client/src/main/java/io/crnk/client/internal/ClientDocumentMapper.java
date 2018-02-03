@@ -1,5 +1,6 @@
 package io.crnk.client.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
@@ -38,7 +40,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
 			propertiesProvider) {
-		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null,true);
+		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, true);
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();
 		this.objectMapper = objectMapper;
@@ -54,24 +56,54 @@ public class ClientDocumentMapper extends DocumentMapper {
 				// we also include relationship data if it is not null and not a
 				// unloaded proxy
 				boolean includeRelation = true;
-				Object relationshipValue = field.getAccessor().getValue(entity);
-				if (relationshipValue instanceof ObjectProxy) {
-					includeRelation = ((ObjectProxy) relationshipValue).isLoaded();
+
+				Object relationshipId = null;
+
+				if (field.hasIdField()) {
+					Object relationshipValue = field.getIdAccessor().getValue(entity);
+
+					ResourceInformation oppositeInformation =
+							resourceRegistry.getEntry(field.getOppositeResourceType()).getResourceInformation();
+
+					if (relationshipValue instanceof Collection) {
+						List ids = new ArrayList();
+						for (Object elem : (Collection<?>) relationshipValue) {
+							ids.add(oppositeInformation.toResourceIdentifier(elem));
+						}
+						relationshipId = ids;
+					}
+					else if (relationshipValue != null) {
+						relationshipId = oppositeInformation.toResourceIdentifier(relationshipValue);
+					}
+
+					includeRelation = relationshipId != null || field.getSerializeType() != SerializeType.LAZY;
 				}
 				else {
-					// TODO for fieldSets handling in the future the lazy
-					// handling must be different
-					includeRelation = relationshipValue != null || field.getSerializeType() != SerializeType.LAZY && !field.isCollection();
+					Object relationshipValue = field.getAccessor().getValue(entity);
+					if (relationshipValue instanceof ObjectProxy) {
+						includeRelation = ((ObjectProxy) relationshipValue).isLoaded();
+					}
+					else {
+						// TODO for fieldSets handling in the future the lazy
+						// handling must be different
+						includeRelation = relationshipValue != null || field.getSerializeType() != SerializeType.LAZY && !field
+								.isCollection();
+					}
+
+					if (relationshipValue != null && includeRelation) {
+						if (relationshipValue instanceof Collection) {
+							relationshipId = util.toResourceIds((Collection<?>) relationshipValue);
+						}
+						else {
+							relationshipId = util.toResourceId(relationshipValue);
+						}
+					}
 				}
+
 
 				if (includeRelation) {
 					Relationship relationship = new Relationship();
-					if (relationshipValue instanceof Collection) {
-						relationship.setData(Nullable.of((Object) util.toResourceIds((Collection<?>) relationshipValue)));
-					}
-					else {
-						relationship.setData(Nullable.of((Object) util.toResourceId(relationshipValue)));
-					}
+					relationship.setData(Nullable.of((Object) relationshipId));
 					resource.getRelationships().put(field.getJsonName(), relationship);
 				}
 			}

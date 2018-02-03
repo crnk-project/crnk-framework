@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.mockito.internal.util.MockUtil;
 
 import java.util.*;
 
@@ -71,12 +72,8 @@ public abstract class BaseControllerTest {
 		pathBuilder = new PathBuilder(resourceRegistry);
 		typeParser = moduleRegistry.getTypeParser();
 		documentMapper = boot.getDocumentMapper();
-		UserRepository.clear();
-		ProjectRepository.clear();
-		TaskRepository.clear();
-		UserToProjectRepository.clear();
-		TaskToProjectRepository.clear();
-		ProjectToTaskRepository.clear();
+
+		MockRepositoryUtil.clear();
 
 		emptyTaskQuery = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
 		emptyProjectQuery = new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry);
@@ -89,7 +86,6 @@ public abstract class BaseControllerTest {
 		Resource data = new Resource();
 		data.setType("tasks");
 		data.setId("1");
-
 		try {
 			data.setAttribute("name", objectMapper.readTree("\"sample task\""));
 			data.setAttribute("data", objectMapper.readTree("\"asd\""));

@@ -1,4 +1,4 @@
-package io.crnk.core.internal.resource;
+package io.crnk.core.resource.field;
 
 import io.crnk.core.engine.internal.information.resource.ReflectionFieldAccessor;
 import io.crnk.core.engine.internal.utils.PropertyException;

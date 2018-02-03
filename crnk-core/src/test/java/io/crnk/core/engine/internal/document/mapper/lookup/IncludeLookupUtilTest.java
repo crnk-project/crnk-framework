@@ -1,9 +1,10 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper.lookup;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -16,21 +17,24 @@ public class IncludeLookupUtilTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(null));
 
 		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+				(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
 				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+				(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+				(propertiesProvider));
 	}
 
 }

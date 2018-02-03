@@ -1,4 +1,4 @@
-package io.crnk.core.resource.internal;
+package io.crnk.core.engine.internal.document.mapper;
 
 import java.util.Arrays;
 import java.util.List;

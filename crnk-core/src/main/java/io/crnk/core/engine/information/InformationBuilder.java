@@ -1,13 +1,17 @@
 package io.crnk.core.engine.information;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
@@ -72,6 +76,12 @@ public interface InformationBuilder {
 		Field accessor(ResourceFieldAccessor accessor);
 
 		Field access(ResourceFieldAccess access);
+
+		Field idAccessor(ResourceFieldAccessor idAccessor);
+
+		Field idName(String idName);
+
+		Field idType(Class idType);
 
 	}
 
