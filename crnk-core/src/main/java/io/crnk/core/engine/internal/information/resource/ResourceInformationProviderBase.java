@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -99,6 +100,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		fieldBuilder.access(getAccess(attributeDesc, fieldType));
 		fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
 		fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc));
+		fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
 
 		Type genericType;
 		if (useFieldType(attributeDesc)) {
@@ -137,6 +139,17 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				}
 			}
 		}
+	}
+
+	protected RelationshipRepositoryBehavior getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
+		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+			Optional<RelationshipRepositoryBehavior> behavior =
+					fieldInformationProvider.getRelationshipRepositoryBehavior(attributeDesc);
+			if (behavior.isPresent()) {
+				return behavior.get();
+			}
+		}
+		return RelationshipRepositoryBehavior.DEFAULT;
 	}
 
 	private static String getResourceType(Type genericType, ResourceInformationProviderContext context) {

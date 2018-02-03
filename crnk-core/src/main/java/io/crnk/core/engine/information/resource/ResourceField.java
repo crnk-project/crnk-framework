@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.reflect.Type;
@@ -80,4 +81,6 @@ public interface ResourceField {
 	 * @return access information for this resource (postable, patchable)
 	 */
 	ResourceFieldAccess getAccess();
+
+	RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
 }

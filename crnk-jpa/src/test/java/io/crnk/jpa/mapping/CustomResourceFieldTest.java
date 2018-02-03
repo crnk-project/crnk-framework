@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
@@ -108,7 +109,8 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 							ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, false, false);
 
 							ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
-									null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access, null, null, null);
+									null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access, null, null, null,
+									RelationshipRepositoryBehavior.DEFAULT);
 							field.setAccessor(new ResourceFieldAccessor() {
 
 								@Override

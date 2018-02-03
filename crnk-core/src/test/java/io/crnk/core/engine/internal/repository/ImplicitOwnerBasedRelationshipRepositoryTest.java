@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -16,17 +13,19 @@ import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.resource.list.ResourceList;
+import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImplicitIdBasedRelationshipRepositoryTest {
+public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 
-	private ImplicitIdBasedRelationshipRepository relRepository;
+	private ImplicitOwnerBasedRelationshipRepository relRepository;
 
 	private ScheduleRepositoryImpl scheduleRepository;
 
@@ -48,12 +47,13 @@ public class ImplicitIdBasedRelationshipRepositoryTest {
 		boot.boot();
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		RegistryEntry sourceEntry = resourceRegistry.getEntry(RelationIdTestResource.class);
-		relRepository = new ImplicitIdBasedRelationshipRepository(resourceRegistry,
-				sourceEntry.getResourceInformation(), Schedule.class);
 
+		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
+		relRepository =
+				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepositoryForType("schedules", null)
+						.getRelationshipRepository();
 
-		testRepository = new RelationIdTestRepository();
+		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
 		testRepository.setResourceRegistry(resourceRegistry);
 		resource = new RelationIdTestResource();
 		resource.setId(2L);

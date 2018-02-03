@@ -1,5 +1,7 @@
 package io.crnk.core.engine.information;
 
+import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import java.lang.reflect.Type;
 
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
@@ -52,6 +54,9 @@ public interface InformationBuilder {
 	interface Field {
 
 		ResourceField build();
+
+		Field relationshipRepositoryBehavior(
+				RelationshipRepositoryBehavior relationshipRepositoryBehavior);
 
 		Field jsonName(String jsonName);
 

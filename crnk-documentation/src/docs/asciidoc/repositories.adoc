@@ -82,6 +82,12 @@ anchor:relationshipRepository[]
 
 ## RelationshipRepositoryV2
 
+
+IMPORTANT: Before getting started with the development of relationship repositories, may sure you have familiarized yourself
+with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation might not
+be necessary!
+
+
 Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
 defined implementing `RelationshipRepositoryV2`. `RelationshipRepositoryV2` implements the methods
 necessary to work with a relationship. It provides methods for both single-valued and multi-valued
@@ -108,13 +114,12 @@ relationships:
 All of the methods in this interface have fieldName field as their last parameter in case there
 are multiple relationships between two resources.
 
-INFO: Relationships that are backed by a further <<jsonApiRelationId,`@JsonApiRelationId`>> field
-do not have to implement a relationship repository. If not, Crnk will automatically provide a
-default implementation that dispatches requests to the owning and opposite `ResourceRepository`, which
-in turn allows to focus the development to resource repositories.
 
 
 ## RelationshipRepositoryBase
+
+NOTE: Also have a look at <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>> before getting started to use
+this base class.
 
 In many cases, relationship operations can be mapped back to resource repository operations. Making the need
 for a custom relationship repository implementation redundant. `@JsonApiRelationId` fields is one example

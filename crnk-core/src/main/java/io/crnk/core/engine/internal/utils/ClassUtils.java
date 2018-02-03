@@ -56,7 +56,8 @@ public class ClassUtils {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			loadClass(classLoader, className);
 			return true;
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			return false;
 		}
 	}
@@ -64,7 +65,8 @@ public class ClassUtils {
 	public static Class<?> loadClass(ClassLoader classLoader, String className) {
 		try {
 			return classLoader.loadClass(className);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new IllegalStateException(className);
 		}
 	}
@@ -100,9 +102,9 @@ public class ClassUtils {
 	/**
 	 * Returns an instance of bean's annotation
 	 *
-	 * @param beanClass       class to be searched for
+	 * @param beanClass class to be searched for
 	 * @param annotationClass type of an annotation
-	 * @param <T>             type of an annotation
+	 * @param <T> type of an annotation
 	 * @return an instance of an annotation
 	 */
 	public static <T extends Annotation> Optional<T> getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
@@ -208,14 +210,15 @@ public class ClassUtils {
 		String methodName = "set" + upperCaseName;
 		try {
 			return beanClass.getMethod(methodName, fieldType);
-		} catch (NoSuchMethodException e1) {
+		}
+		catch (NoSuchMethodException e1) {
 		}
 
 		Method[] methods = beanClass.getMethods();
-		for(Method method : methods){
+		for (Method method : methods) {
 			Class<?>[] params = method.getParameterTypes();
 
-			if(methodName.equals(method.getName()) && params.length == 1 && params[0].isAssignableFrom(fieldType)){
+			if (methodName.equals(method.getName()) && params.length == 1 && params[0].isAssignableFrom(fieldType)) {
 				return method;
 			}
 		}
@@ -251,7 +254,7 @@ public class ClassUtils {
 	}
 
 	private static void getDeclaredClassGetters(Class<?> currentClass, Map<String, Method> resultMap,
-												LinkedList<Method> results) {
+			LinkedList<Method> results) {
 		for (Method method : currentClass.getDeclaredMethods()) {
 			if (!method.isSynthetic() && isGetter(method)) {
 				Method v = resultMap.get(method.getName());
@@ -293,7 +296,7 @@ public class ClassUtils {
 	/**
 	 * Return a first occurrence of a method annotated with specified annotation
 	 *
-	 * @param searchClass     class to be searched
+	 * @param searchClass class to be searched
 	 * @param annotationClass annotation class
 	 * @return annotated method or null
 	 */
@@ -313,13 +316,14 @@ public class ClassUtils {
 	 * Create a new instance of a object using a default constructor
 	 *
 	 * @param clazz new instance class
-	 * @param <T>   new instance class
+	 * @param <T> new instance class
 	 * @return new instance
 	 */
 	public static <T> T newInstance(Class<T> clazz) {
 		try {
 			return clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+		}
+		catch (InstantiationException | IllegalAccessException e) {
 			throw new ResourceException(String.format("couldn't create a new instance of %s", clazz));
 		}
 	}
@@ -368,9 +372,11 @@ public class ClassUtils {
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
-		} else if (type instanceof ParameterizedType) {
+		}
+		else if (type instanceof ParameterizedType) {
 			return getRawType(((ParameterizedType) type).getRawType());
-		} else {
+		}
+		else {
 			throw new IllegalStateException("unknown type: " + type);
 		}
 	}
