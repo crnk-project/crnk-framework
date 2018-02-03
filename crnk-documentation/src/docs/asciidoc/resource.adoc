@@ -2,9 +2,9 @@
 # Resource
 
 A resource as defined by JSON API holds the actual data. The engine part of `crnk-core` is agnostic to how such resources are
-actually
-implemented (see the architecture and modules chapters). This chapter gives information of the most common way using
-annotations provided by `crnk-core`.
+actually implemented (see the <<architecture>> and <<modules>> chapters). This chapter describes the most common
+way Java Beans and annotations. See <<runtimerepository,here>> for more information how setup resources and repositories
+programmatically at runtime.
 
 
 ## JsonApiResource

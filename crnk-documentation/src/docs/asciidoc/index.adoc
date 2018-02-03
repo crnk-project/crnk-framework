@@ -5,10 +5,14 @@
 :toclevels: 3
 
 
+Crnk is a native resource-oriented rest library where resources and their relationship take the center stage. With this
+inner workings of Crnk differ quite dramatically from most REST library out there. Usually, resources and
+relationships are not more than just path mappings specified by class and method annotations. This fact opens up powerful new
+possibilities.
 
-Crnk is an implementation of the JSON API specification and recommendations in Java. It allows you to rapidly
+Crnk follows the JSON API specification and recommendations. It allows you to rapidly
 build REST APIs without having to worry about lower protocol details and lets you instead
-focus on your application. JSON API and Crnk come with support for:
+focus on what matters: your application. JSON API and Crnk come with support for:
 
 - client and server implementation (with a focus on the later).
 - standardized url handling such as `/api/persons?filter[title]=John` and `/api/persons/{id}`
@@ -23,16 +27,21 @@ focus on your application. JSON API and Crnk come with support for:
 - repositories providing runtime/meta information about Crnk to implement, for example, documentation
   and UI automation.
 - generation of type-safe client stubs (currently Typescript as target language implemented)
+- binding of Angular components with https://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api] to Crnk endpoints.
 
-Next to that Crnk supports many popular frameworks and APIs:
+Crnk is small, modular and lightweight. It integrates well with many popular frameworks and APIs:
 
 - CDI: resolve repositories and extensions with CDI.
-- Spring: run Crnk with Spring, including support for Spring Boot, Spring ORM and Spring Security.
+- Spring: run Crnk with Spring, including support for Spring Boot, ORM, Security and Sleuth.
 - Servlet API: run Crnk as servlet.
 - JAXRS: run Crnk as feature.
 - JPA: expose entities as JSON API resources.
 - bean validation: properly marshal validation and constraints exceptions.
 - Zipkin: trace all your calls.
+
+While Crnk follows the JSON API specification, it is not limited to that. Have a look at the
+http://www.crnk.io/[roadmap> for more information.
+
 
 :leveloffset: 1
 

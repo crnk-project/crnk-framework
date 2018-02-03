@@ -24,6 +24,7 @@ public class CrnkProperties {
 	 *
 	 * @since 0.9.0
 	 */
+	@Deprecated
 	public static final String RESOURCE_SEARCH_PACKAGE = "crnk.config.core.resource.package";
 
 	/**
