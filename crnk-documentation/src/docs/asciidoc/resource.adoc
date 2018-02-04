@@ -1,4 +1,6 @@
 
+anchor:resource[]
+
 # Resource
 
 A resource as defined by JSON API holds the actual data. The engine part of `crnk-core` is agnostic to how such resources are

@@ -54,20 +54,20 @@ public interface ResourceRepositoryV2<T, I extends Serializable> extends Reposit
 	/**
 	 * Saves a resource. A Returning resource must include assigned identifier created for the instance of resource.
 	 *
-	 * @param entity resource to be saved
+	 * @param resource resource to be saved
 	 * @param <S>    type of the resource
 	 * @return saved resource. Must include set identifier.
 	 */
-	<S extends T> S save(S entity);
+	<S extends T> S save(S resource);
 
 	/**
 	 * Creates a resource. A Returning resource must include assigned identifier created for the instance of resource.
 	 *
-	 * @param entity resource to be saved
+	 * @param resource resource to be saved
 	 * @param <S>    type of the resource
 	 * @return saved resource. Must include set identifier.
 	 */
-	<S extends T> S create(S entity);
+	<S extends T> S create(S resource);
 
 	/**
 	 * Removes a resource identified by id legacy.

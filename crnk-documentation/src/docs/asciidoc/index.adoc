@@ -45,6 +45,7 @@ http://www.crnk.io/[roadmap> for more information.
 
 :leveloffset: 1
 
+include::examples.adoc[]
 include::architecture.adoc[]
 include::setup.adoc[]
 include::resource.adoc[]

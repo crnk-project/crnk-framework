@@ -1,29 +1,15 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.crnk.example.springboot.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import java.util.ArrayList;
 import java.util.List;
 
+// tag::doc[]
 @JsonApiResource(type = "projects")
 public class Project {
 
@@ -33,14 +19,13 @@ public class Project {
 	@JsonProperty
 	private String name;
 
-	@JsonApiToMany(opposite = "project")
+	@JsonApiRelation(opposite = "project", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER)
 	private List<Task> tasks = new ArrayList<>();
 
-	public Project() {
-	}
+	// end::doc[]
 
-	public Project(Long id) {
-		this.id = id;
+	public Project() {
 	}
 
 	public Project(Long id, String name) {
@@ -71,4 +56,6 @@ public class Project {
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
 	}
+	// tag::doc[]
 }
+// end::doc[]
