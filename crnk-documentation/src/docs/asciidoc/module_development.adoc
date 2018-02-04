@@ -1,4 +1,6 @@
 
+anchor:moduledev[]
+
 # Module Development
 
 Crnk has a module API that allows to extend the core functionality by third-party contributions.
@@ -12,6 +14,7 @@ The `JpaModule` in `crnk-jpa` provides a good, more advanced example of using th
 module API.
 
 
+anchor:requestfilter[]
 
 ## Request Filtering
 
@@ -36,6 +39,8 @@ can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factor
 notified about every repository registration and is then free do decorate it or not.
 
 
+anchor:resourcefilter[]
+
 ## Resource Filtering
 
 `ResourceFilter` allows to restrict access to resources and fields. To methods `filterResource` and
@@ -52,6 +57,9 @@ query those `ResourceFilter` and only display information about resources and fi
 of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
 may be accessed repeatedly for a request.
 
+
+anchor:modificationfilter[]
+
 ## Filter Modifications
 
 Changes to attributes and relationships can be tracked by implementing
@@ -63,6 +71,9 @@ Such filters are useful, for example, to implement auditing functionality.
 
 `DocumentFilter`, `RepositoryFilter` and `ResourceModificationFilter` can implement
 `Prioritizable` to introduce a priority among multiple filters.
+
+
+anchor:accesshttp[]
 
 ## Access to HTTP layer
 
@@ -78,6 +89,8 @@ active request. Modules have access to `HttpRequestContextProvider` trough the `
 Repositories, filters and modules can implement `HttpRequestContextAware` to get
 access to `HttpRequestContextProvider`.
 
+
+anchor:moduleextensions[]
 
 ## Module Extensions and dependencies
 
@@ -95,6 +108,9 @@ For an example have a look at MetaModuleExtension and the JpaModule making use o
 The ModuleExtension was introduced with Crnk 2.0 and its use is expected to grow heavily
 over time.
 
+
+anchor:thirdpartystores[]
+
 ## Integrate third-party data stores
 
 The core of Crnk is quite flexible when it comes to implementing repositories. As such, it is
@@ -108,12 +124,27 @@ Such a module can then register additional (usually dynamic) repositories with
 `ModuleContext.addRepository`.
 
 
+anchor:customdiscovery[]
+
 ## Implement a custom discovery mechanism
 
 Crnk comes with out-of-the-box support for Spring and CDI. Both of them implement
 `ServiceDiscovery`. You may provide your own implementation which can be hooked into the
-various Crnk integrations, like the CrnkFeature. Modules have access to that
-`ServiceDiscovery` trough the `ModuleContext`.
+various Crnk integrations, like the CrnkFeature. Alternatively, it can be auto-detected
+through the Java service mechanism. For example, `crnk-cdi` makes use of:
+
+[source]
+.META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery
+----
+include::../../../../crnk-cdi/src/main/resources/META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery[]
+----
+
+
+
+Modules have access to that `ServiceDiscovery` trough the `ModuleContext.getServiceDiscovery()`.
+
+
+
 
 
 ## Let a module hook into the Crnk HTTP client implementation
@@ -121,6 +152,8 @@ various Crnk integrations, like the CrnkFeature. Modules have access to that
 Modules for the Crnk client can additionally implement `HttpAdapterAware`. It gives
 the module access to the underlying HTTP client implementation and allows arbitrary
 customizations of it. Have a look at the Crnk client documentation for more information.
+
+anchor:customintegration[]
 
 ## Implement a custom integration
 
@@ -136,6 +169,8 @@ necessary is already be provided by `crnk-core`. The steps include:
 - you may want to further implement `SecurityProvider`, `TransactionRunner`
   and `PropertiesProvider` to interface with that particular systems.
 
+
+anchor:runtimerepository[]
 
 ## Create repositories at runtime
 
@@ -201,6 +236,7 @@ An example can be found at
 https://github.com/crnk-project/crnk-framework/tree/master/crnk-core/src/test/java/io/crnk/core/engine/registry/CustomResourceRegistryTest.java[CustomResourceRegistryTest.java]
 
 
+anchor:clientmodulediscovery[]
 
 ## Discovery of Modules by CrnkClient
 

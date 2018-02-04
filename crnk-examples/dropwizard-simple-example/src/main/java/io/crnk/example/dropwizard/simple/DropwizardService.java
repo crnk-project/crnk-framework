@@ -17,6 +17,7 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 	@Override
 	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) throws Exception {
 		// here we make use of a module as example instead of using service discovery (CDI, Spring, etc.)
+		// tag::docs[]
 		SimpleModule module = new SimpleModule("example");
 		module.addRepository(new ProjectRepository());
 
@@ -24,5 +25,6 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 		crnkFeature.addModule(module);
 
 		environment.jersey().register(crnkFeature);
+		// end::docs[]
 	}
 }

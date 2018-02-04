@@ -1,0 +1,26 @@
+:basedir: ../../../..
+
+anchor:examples[]
+
+# Examples
+
+Crnk comes with various examples. There is a main example application in a dedicated repository
+available from https://github.com/crnk-project/crnk-example[crnk-example]. It *shows an end-to-end example*
+with Crnk, Angular, Spring Boot and ngrx-json-api.
+
+And there are various simpler example applications that show the integration of Crnk into various frameworks like:
+
+- `spring-boot-example`
+- `wildfly-example`
+- `dropwizard-mongo-example`
+- `dropwizard-simple-example`
+- `jersey-example`
+
+available from https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/[crnk-examples].
+
+The impatient may also directly want to jump to <<resource_repository,ResourceRepositoryV2>>, but it is highly recommended to
+familiarize one self with the architecture and annotations as well. Unlike traditional REST libraries, Crnk comes with a lot of
+built-in semantics that allow to automate otherwise laborious tasks.
+
+
+

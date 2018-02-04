@@ -1,77 +1,119 @@
 
 # Repositories
 
-The modelled resources must be complemented by a corresponding
+The modelled resources and relationships must be complemented by a corresponding
 repository implementation. This is achieved by implementing
 one of those two repository interfaces:
 
-  * ResourceRepositoryV2 for a resource
-  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for resource relationships
+  * ResourceRepositoryV2 for resources.
+  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for relationships.
 
-
+anchor:resource_repository[]
 
 ## ResourceRepositoryV2
 
-Base repository which is used to operate on resources.
-Each resource should have a corresponding repository implementation.
-It consist of five basic methods which provide a CRUD for a resource and two parameters: the first is a type of a resource and the second is a type of the resource’s identifier.
+`ResourceRepositoryV2` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
+The interface takes two generic arguments:
 
-The methods are as follows:
+1. The type of a resource. Typically this is a plain Java Bean making use of the JSON API annotations. But may also be something
+  entirely different (see <<architectures> and <<modules>>). One other example is the
+  `io.crnk.core.engine.document.Resource` class used to setup dynamically types repositories.
+2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
+  can also be a more complex type that serializes to a URL-friendly String.
+
+The methods of `ResourceRepositoryV2` look as follows:
 
 * `findOne(ID id, QuerySpec querySpec)`
-  Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown.
-  It should return an entity with associated relationships.
-
-* `findAll(QuerySpec querySpec)`
-  Search for all of the resources. An instance of QuerySpec can be used if necessary.
-  If no resources can be found an empty Iterable or null must be returned.
-  It should return entities with associated relationships.
+  Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown
+  that translates into a `404` HTTP error status. The returned resource must adhere to the behavior as specifies by
+  the various annotations (more details in the <<resource>> chapter), most notably the inclusion of relationships as requested
+  by the passed `querySpec` as long as `LookupIncludeBehavior` does not specify otherwise. More details about `QuerySpec`
+  follow in subsequent sections.
 
 * `findAll(Iterable<ID>ids, QuerySpec querySpec)`
-  Search for resources constrained by a list of identifiers. An instance of QuerySpec can be used if necessary.
-  If no resources can be found an empty Iterable or null must be returned.
-  It should return entities with associated relationships.
+  Allows to bulk request multiple resources, but otherwise work exactly like the preceding `findOne` method.
 
-* `save(S entity)`
-  Saves a resource. It should not save relating relationships. A Returning resource must include assigned identifier created for the instance of resource.
-  This method should be able to both create a new resource and update existing one.
+* `findAll(QuerySpec querySpec)`
+  Search for all resources according to the passed `querySpec` including sorting, filtering, paging, field sets and inclusions.
+  A `ResourceList` must be returned that carries the result resources, links information and meta information.
+
+* `create(S resource)`
+  Called by `POST` requests. The request body is deserialized and passed as `resource` parameter. The method may or may
+  not have to generate an ID for the newly created resource. The request body may specify relationship data to point to
+  other resources. During deserialization, those resources are looked up and the `@JsonApiRelation` annotated fields set
+  accordingly. For relationships making use of `@JsonApiRelationId` annotation, only the identifier will be set without
+  the resource annotation, allowing to improve for performance. The `create` method has to save those relationships, but
+  it does and must not perform any changes on the related resources. For bulk inserting and updating resources, have a look
+  at the <<operations_module, operations module>>. The method must return the updated resource, most notably with a valid
+  identifier.
+
+
+* `save(S resource)`
+  Saves a resource upon a `PATCH` request. The general semantics is identical to the `create(...)` method, with two
+  notable exceptions. First, resources are updated but are not allowed to be inserted.
+  A `ResourceNotFoundException` must be thrown if the resource does not exist. Second, the `PATCH` request
+  allows for partial updates. Internally Crnk will get the current state of a resource, patch it and pass it to this `save`
+  method. API to distinguish patched from un-patched fields is not yet (directly) available, feel free to open a ticket.
+
+
 
 * `delete(ID id)`
-  Removes a resource identified by id parameter.
+  Removes a resource identified by id parameter. A `ResourceNotFoundException` must be thrown if the resource does not exist.
 
 The ResourceRepositoryBase is a base class that takes care of some boiler-plate, like implementing findOne with findAll. An
 implementation can then look as simple as:
 
 [source]
+.Task.java
 ----
-	public class ProjectRepository extends ResourceRepositoryBase<Project, String> {
-
-		private Map<Long, Project> projects = new HashMap<>();
-
-		public ProjectRepository() {
-			super(Project.class);
-			save(new Project(1L, "Project A"));
-			save(new Project(2L, "Project B"));
-			save(new Project(3L, "Project C"));
-		}
-
-		@Override
-		public synchronized void delete(String id) {
-			projects.remove(id);
-		}
-
-		@Override
-		public synchronized <S extends Project> S save(S project) {
-			projects.put(project.getId(), project);
-			return project;
-		}
-
-		@Override
-		public synchronized ResourceList<Project> findAll(QuerySpec querySpec) {
-			return querySpec.apply(projects.values());
-		}
-	}
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc1]
+   ...
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc2]
 ----
+
+and
+
+[source]
+.TaskRepositoryImpl.java
+----
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/TaskRepositoryImpl.java[tag=doc]
+----
+
+The example is taken from
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository[crnk-examples/spring-boot-example].
+(the basic Spring boot example from crnk-framework, not the dedicated full-blown one from crnk-example).
+
+Together with matching project repository, some URLs to checkout:
+
+[source]
+----
+http://127.0.0.1:8080/api/tasks
+http://127.0.0.1:8080/api/tasks/1
+http://127.0.0.1:8080/api/tasks/1
+http://127.0.0.1:8080/api/tasks/1/project
+http://127.0.0.1:8080/api/tasks/1/relationships/project
+http://127.0.0.1:8080/api/tasks?sort=-name
+http://127.0.0.1:8080/api/tasks?sort=-id,name
+http://127.0.0.1:8080/api/tasks?sort=-id,name
+http://127.0.0.1:8080/api/tasks?sort=id&page[offset]=0&page[limit]=2
+http://127.0.0.1:8080/api/tasks?filter[name]=Do things
+http://127.0.0.1:8080/api/tasks?filter[name][EQ]=Do things
+http://127.0.0.1:8080/api/tasks?filter[name][LIKE]=Do
+http://127.0.0.1:8080/api/tasks?fields=name
+http://127.0.0.1:8080/api/projects
+http://127.0.0.1:8080/api/tasks?include=project
+----
+
+You may notice that:
+
+- links get automatically created.
+- `totalResourceCount` and pagination links are added to the response if the `page` parameter is applied.
+- related `project` gets automatically resolved from `projectId`. No relationship repository is implemented here
+  due to the use of `@JsonApiRelationId` (see below).
+- the response gets automatically truncated with the `fields` parameter, ideally suited for bandwidth sensitive applications.
+
+This is one small example that *shows the power of native resource-oriented REST libraries*. Implementing a similar API with more
+classical REST libraries can be a substantial amount of work.
 
 There is further a `ReadOnlyResourceRepositoryBase` base class that does not allow to override
 the create, delete and update methods. `crnk-meta` accordingly reports
@@ -83,8 +125,8 @@ anchor:relationshipRepository[]
 ## RelationshipRepositoryV2
 
 
-IMPORTANT: Before getting started with the development of relationship repositories, may sure you have familiarized yourself
 with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation might not
+IMPORTANT: Before getting started with the development of relationship repositories, may sure you have familiarized yourself
 be necessary!
 
 
@@ -166,6 +208,9 @@ It is recommended to make use of this implementation if a relationship is loaded
 fetch that relation. RelationshipRepositoryBase provides a default implementation where
 `findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
 
+Note that in contrast to `RelationshipRepositoryV2` and `RelationshipRepositoryV2` that are symmetric
+and applicable to Crnk servers and client, `BulkRelationshipRepositoryV2` is applicable on the server-side only.
+
 
 ## ResourceList
 
@@ -234,6 +279,8 @@ NOTE: Not everything is specified by JSON API. For some request parameters only 
 are provided as different applications are likely to be in need of different semantics and
 implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
 QuerySpec (like the legacy `QueryParams`).
+
+For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
 
 
 ### Filtering

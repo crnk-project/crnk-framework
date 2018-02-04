@@ -1,5 +1,8 @@
 :basedir: ../../../..
 
+anchor:modules[]
+
+
 # Modules
 
 anchor:jpa_module[]
