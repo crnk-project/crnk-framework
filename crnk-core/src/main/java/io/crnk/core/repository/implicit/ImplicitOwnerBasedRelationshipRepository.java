@@ -14,6 +14,7 @@ import io.crnk.core.repository.RelationshipRepositoryBase;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,28 +53,55 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		List sources = (List) sourceEntry.getResourceRepository().findAll(sourceIds, getSaveQueryAdapter(fieldName)).getEntity();
 
-		Set targetIds = new HashSet();
-		for (Object source : sources) {
-			Object targetId = field.getIdAccessor().getValue(source);
-			if (field.isCollection()) {
-				targetIds.addAll((Collection) targetId);
-			}
-			else {
-				targetIds.add(targetId);
-			}
-		}
-
 		ResourceInformation targetInformation = getTargetInformation(field);
 
-		QuerySpec idQuerySpec = new QuerySpec(targetInformation.getResourceType());
-		idQuerySpec.addFilter(
-				new FilterSpec(Arrays.asList(targetInformation.getIdField().getUnderlyingName()), FilterOperator.EQ, targetIds));
+		List<D> targets;
+		if (field.hasIdField()) {
+			Set targetIds = new HashSet();
+			for (Object source : sources) {
+				Object targetId = field.getIdAccessor().getValue(source);
+				if (field.isCollection()) {
+					targetIds.addAll((Collection) targetId);
+				}
+				else {
+					targetIds.add(targetId);
+				}
+			}
 
-		ResourceRepositoryAdapter<D, J> targetAdapter = getTargetEntry(field).getResourceRepository();
-		JsonApiResponse response = targetAdapter.findAll(new QuerySpecAdapter(idQuerySpec, resourceRegistry));
-		List<D> targets = (List<D>) response.getEntity();
 
-		return toResult(fieldName, targetInformation, sources, targets);
+			QuerySpec idQuerySpec = new QuerySpec(targetInformation.getResourceType());
+			idQuerySpec.addFilter(
+					new FilterSpec(Arrays.asList(targetInformation.getIdField().getUnderlyingName()), FilterOperator.EQ,
+							targetIds));
+
+			ResourceRepositoryAdapter<D, J> targetAdapter = getTargetEntry(field).getResourceRepository();
+			JsonApiResponse response = targetAdapter.findAll(new QuerySpecAdapter(idQuerySpec, resourceRegistry));
+			targets = (List<D>) response.getEntity();
+			return toResult(fieldName, targetInformation, sources, targets);
+		}
+		else {
+			MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
+
+				@Override
+				protected List<D> newList() {
+					return new DefaultResourceList<>();
+				}
+			};
+			for (Object source : sources) {
+				Object sourceId = sourceInformation.getId(source);
+
+				Object target = field.getAccessor().getValue(source);
+				if (target != null) {
+					if (field.isCollection()) {
+						bulkResult.addAll(sourceId, (Collection) target);
+					}
+					else {
+						bulkResult.add(sourceId, target);
+					}
+				}
+			}
+			return bulkResult;
+		}
 	}
 
 	private MultivaluedMap<I, D> toResult(String fieldName, ResourceInformation targetInformation,
