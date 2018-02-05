@@ -6,11 +6,15 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
+import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
@@ -37,6 +41,16 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	private Schedule schedule4;
 
+	private ProjectRepository projectRepository;
+
+	private Project project;
+
+	private TaskRepository taskRepository;
+
+	private Task task;
+
+	private ImplicitOwnerBasedRelationshipRepository taskProjectRepository;
+
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
@@ -52,6 +66,9 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		relRepository =
 				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepositoryForType("schedules", null)
 						.getRelationshipRepository();
+
+		taskProjectRepository = new ImplicitOwnerBasedRelationshipRepository(Task.class, Project.class);
+		taskProjectRepository.setResourceRegistry(resourceRegistry);
 
 		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
 		testRepository.setResourceRegistry(resourceRegistry);
@@ -71,11 +88,23 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		schedule4.setId(4L);
 		schedule4.setName("schedule");
 		scheduleRepository.create(schedule4);
+
+		projectRepository = new ProjectRepository();
+		project = new Project();
+		project.setId(42L);
+		project.setName("project");
+		projectRepository.save(project);
+
+		taskRepository = new TaskRepository();
+		task = new Task();
+		task.setId(13L);
+		task.setName("task");
+		taskRepository.save(task);
 	}
 
 
 	@Test
-	public void checkSetRelation() {
+	public void checkSetRelationId() {
 		relRepository.setRelation(resource, 3L, "testSerializeEager");
 		Assert.assertEquals(3L, resource.getTestSerializeEagerId().longValue());
 		Assert.assertNull(resource.getTestSerializeEager());
@@ -95,7 +124,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 	}
 
 	@Test
-	public void checkSetRelations() {
+	public void checkSetRelationIds() {
 		relRepository.setRelations(resource, Arrays.asList(3L, 4L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(3L, 4L), resource.getTestMultipleValueIds());
 
@@ -115,7 +144,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 	}
 
 	@Test
-	public void checkAddRemoveRelations() {
+	public void checkAddRemoveRelationIds() {
 		relRepository.addRelations(resource, Arrays.asList(3L, 4L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(3L, 4L), resource.getTestMultipleValueIds());
 
@@ -124,6 +153,28 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 		relRepository.removeRelations(resource, Arrays.asList(3L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(4L, 5L), resource.getTestMultipleValueIds());
+	}
+
+	@Test
+	public void checkSetRelation() {
+		taskProjectRepository.setRelation(task, 42L, "project");
+		Assert.assertEquals(42L, task.getProject().getId().longValue());
+
+		Assert.assertSame(project,
+				taskProjectRepository.findOneTarget(task.getId(), "project", new QuerySpec(Task.class)));
+	}
+
+	@Test
+	public void checkSetRelations() {
+		taskProjectRepository.setRelations(task, Arrays.asList(42L), "projects");
+		Assert.assertEquals(1, task.getProjects().size());
+		Assert.assertEquals(42L, task.getProjects().iterator().next().getId().longValue());
+
+		MultivaluedMap targets =
+				taskProjectRepository.findTargets(Arrays.asList(task.getId()), "projects", new QuerySpec(Task.class));
+		Assert.assertEquals(1, targets.keySet().size());
+		Assert.assertEquals(13L, targets.keySet().iterator().next());
+		Assert.assertEquals(project, targets.getUnique(13L));
 	}
 
 
