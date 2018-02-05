@@ -1,7 +1,9 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -30,11 +32,24 @@ public class QuerySpec {
 	private Map<Object, QuerySpec> relatedSpecs = new HashMap<>();
 
 	public QuerySpec(Class<?> resourceClass) {
-		this.resourceClass = resourceClass;
+		this(resourceClass, null);
 	}
 
 	public QuerySpec(String resourceType) {
+		this(null, resourceType);
+	}
+
+
+	public QuerySpec(Class<?> resourceClass, String resourceType) {
+		verifyNotNull(resourceClass, resourceType);
+		if (resourceClass != Resource.class) {
+			this.resourceClass = resourceClass;
+		}
 		this.resourceType = resourceType;
+	}
+
+	public QuerySpec(ResourceInformation resourceInformation) {
+		this(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
 	}
 
 	public String getResourceType() {
@@ -52,7 +67,7 @@ public class QuerySpec {
 	 * TODO currently ignores relations and inclusions, has room for
 	 * improvements
 	 *
-	 * @param <T>       the type of resources in this Iterable
+	 * @param <T> the type of resources in this Iterable
 	 * @param resources resources
 	 * @return sorted, filtered list.
 	 */
@@ -71,8 +86,8 @@ public class QuerySpec {
 	 * <p>
 	 * TODO currently ignores relations and inclusions
 	 *
-	 * @param <T>        resource type
-	 * @param resources  to apply the querySpec to
+	 * @param <T> resource type
+	 * @param resources to apply the querySpec to
 	 * @param resultList used to return the result (including paging meta information)
 	 */
 	public <T> void apply(Iterable<T> resources, ResourceList<T> resultList) {
@@ -175,7 +190,8 @@ public class QuerySpec {
 		for (QuerySpec spec : specs) {
 			if (spec.getResourceClass() != null) {
 				relatedSpecs.put(spec.getResourceClass(), spec);
-			} else {
+			}
+			else {
 				relatedSpecs.put(spec.getResourceType(), spec);
 			}
 		}
@@ -203,18 +219,10 @@ public class QuerySpec {
 	}
 
 	public QuerySpec getQuerySpec(String resourceType) {
-		if (resourceType.equals(this.resourceType))
+		if (resourceType.equals(this.resourceType)) {
 			return this;
-		return relatedSpecs.get(resourceType);
-	}
-
-	public QuerySpec getOrCreateQuerySpec(String resourceType) {
-		QuerySpec querySpec = getQuerySpec(resourceType);
-		if (querySpec == null) {
-			querySpec = new QuerySpec(resourceType);
-			relatedSpecs.put(resourceType, querySpec);
 		}
-		return querySpec;
+		return relatedSpecs.get(resourceType);
 	}
 
 	/**
@@ -229,14 +237,57 @@ public class QuerySpec {
 		return relatedSpecs.get(resourceClass);
 	}
 
-	public QuerySpec getOrCreateQuerySpec(Class<?> resourceClass) {
-		QuerySpec querySpec = getQuerySpec(resourceClass);
+
+	public QuerySpec getQuerySpec(ResourceInformation resourceInformation) {
+		QuerySpec querySpec = getQuerySpec(resourceInformation.getResourceType());
 		if (querySpec == null) {
-			querySpec = new QuerySpec(resourceClass);
-			relatedSpecs.put(resourceClass, querySpec);
+			querySpec = getQuerySpec(resourceInformation.getResourceClass());
 		}
 		return querySpec;
 	}
+
+	public QuerySpec getOrCreateQuerySpec(String resourceType) {
+		return getOrCreateQuerySpec(null, resourceType);
+	}
+
+	public QuerySpec getOrCreateQuerySpec(ResourceInformation resourceInformation) {
+		return getOrCreateQuerySpec(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
+	}
+
+	public QuerySpec getOrCreateQuerySpec(Class<?> targetResourceClass) {
+		return getOrCreateQuerySpec(targetResourceClass, null);
+	}
+
+	public QuerySpec getOrCreateQuerySpec(Class<?> targetResourceClass, String targetResourceType) {
+		verifyNotNull(targetResourceClass, targetResourceType);
+
+		QuerySpec querySpec = null;
+		if (querySpec == null && targetResourceType != null) {
+			querySpec = getQuerySpec(targetResourceType);
+		}
+		if (targetResourceClass != null) {
+			querySpec = getQuerySpec(targetResourceClass);
+		}
+		if (querySpec == null) {
+			querySpec = new QuerySpec(targetResourceClass, targetResourceType);
+			if (targetResourceClass != null) {
+				relatedSpecs.put(targetResourceClass, querySpec);
+			}
+			if (targetResourceType != null) {
+				relatedSpecs.put(targetResourceType, querySpec);
+			}
+		}
+		return querySpec;
+	}
+
+	private static void verifyNotNull(Class<?> targetResourceClass, String targetResourceType) {
+		PreconditionUtil.assertNotNull("at least one parameter must not be null",
+				targetResourceClass == null && targetResourceType == null);
+		if (targetResourceClass == Resource.class && targetResourceType == null) {
+			throw new IllegalArgumentException("must specify resourceType if io.crnk.core.engine.document.Resource is used");
+		}
+	}
+
 
 	public void putRelatedSpec(Class<?> relatedResourceClass, QuerySpec relatedSpec) {
 		if (relatedResourceClass.equals(resourceClass)) {
@@ -260,14 +311,6 @@ public class QuerySpec {
 			copy.relatedSpecs.put(entry.getKey(), entry.getValue().duplicate());
 		}
 		return copy;
-	}
-
-	public QuerySpec getQuerySpec(ResourceInformation resourceInformation) {
-		return getQuerySpec(resourceInformation.getResourceClass());
-	}
-
-	public QuerySpec getOrCreateQuerySpec(ResourceInformation resourceInformation) {
-		return getOrCreateQuerySpec(resourceInformation.getResourceClass());
 	}
 
 

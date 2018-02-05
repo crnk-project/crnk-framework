@@ -165,7 +165,7 @@ public class IncludeLookupUtil {
 
 				// TODO subtyping not properly supported
 				ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
-				QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation.getResourceClass());
+				QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation);
 				if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
 					return true;
 				}
