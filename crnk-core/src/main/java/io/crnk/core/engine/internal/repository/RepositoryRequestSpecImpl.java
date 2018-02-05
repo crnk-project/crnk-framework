@@ -121,11 +121,11 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QuerySpec getQuerySpec(ResourceInformation targetResourceInformation) {
-		Class<?> targetResourceClass = targetResourceInformation.getResourceClass();
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
-			return querySpec.getOrCreateQuerySpec(targetResourceClass);
+			return querySpec.getOrCreateQuerySpec(targetResourceInformation);
 		}
+		Class<?> targetResourceClass = targetResourceInformation.getResourceClass();
 		QueryParams queryParams = getQueryParams();
 		DefaultQuerySpecConverter converter = new DefaultQuerySpecConverter(moduleRegistry);
 		return converter.fromParams(targetResourceClass, queryParams);

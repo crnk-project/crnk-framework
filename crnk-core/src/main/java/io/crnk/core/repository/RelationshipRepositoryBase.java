@@ -191,11 +191,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	private QuerySpec newSourceQuerySpec() {
-		return sourceResourceType != null ? new QuerySpec(sourceResourceType) : new QuerySpec(sourceResourceClass);
-	}
-
-	private QuerySpec newTargetQuerySpec(ResourceField field) {
-		return new QuerySpec(field.getOppositeResourceType());
+		return new QuerySpec(sourceResourceClass, sourceResourceType);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -228,9 +224,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		if (targetId == null) {
 			return null;
 		}
-		String resourceType = entry.getResourceInformation().getResourceType();
 		ResourceRepositoryAdapter<D, J> targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(resourceType), resourceRegistry);
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
 		D target = (D) targetAdapter.findOne(targetId, queryAdapter).getEntity();
 		if (target == null) {
 			throw new IllegalStateException(targetId + " not found");
@@ -240,9 +235,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 	@SuppressWarnings("unchecked")
 	protected Iterable<D> getTargets(RegistryEntry entry, Iterable<J> targetIds) {
-		String resourceType = entry.getResourceInformation().getResourceType();
 		ResourceRepositoryAdapter<D, J> targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(resourceType), resourceRegistry);
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
 		return (Iterable<D>) targetAdapter.findAll(targetIds, queryAdapter).getEntity();
 	}
 

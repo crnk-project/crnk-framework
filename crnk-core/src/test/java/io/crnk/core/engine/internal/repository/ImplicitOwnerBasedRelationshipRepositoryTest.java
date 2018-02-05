@@ -39,7 +39,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	private RelationIdTestResource resource;
 
-	private Schedule schedule4;
+	private Schedule schedule;
 
 	private ProjectRepository projectRepository;
 
@@ -84,22 +84,24 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		schedule3.setName("schedule");
 		scheduleRepository.create(schedule3);
 
-		schedule4 = new Schedule();
-		schedule4.setId(4L);
-		schedule4.setName("schedule");
-		scheduleRepository.create(schedule4);
+		for (int i = 0; i < 10; i++) {
+			schedule = new Schedule();
+			schedule.setId(4L + i);
+			schedule.setName("schedule");
+			scheduleRepository.create(schedule);
 
-		projectRepository = new ProjectRepository();
-		project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		projectRepository.save(project);
+			projectRepository = new ProjectRepository();
+			project = new Project();
+			project.setId(42L + i);
+			project.setName("project");
+			projectRepository.save(project);
 
-		taskRepository = new TaskRepository();
-		task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		taskRepository.save(task);
+			taskRepository = new TaskRepository();
+			task = new Task();
+			task.setId(13L + i);
+			task.setName("task");
+			taskRepository.save(task);
+		}
 	}
 
 
@@ -128,19 +130,19 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		relRepository.setRelations(resource, Arrays.asList(3L, 4L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(3L, 4L), resource.getTestMultipleValueIds());
 
-		List targets =
+		List<Schedule> targets =
 				relRepository.findManyTargets(resource.getId(), "testMultipleValues", new QuerySpec(Schedule.class));
 		Assert.assertEquals(2, targets.size());
 		Assert.assertSame(schedule3, targets.get(0));
-		Assert.assertSame(schedule4, targets.get(1));
+		Assert.assertSame(4L, targets.get(1).getId().longValue());
 
 		MultivaluedMap targetsMap =
 				relRepository.findTargets(Arrays.asList(resource.getId()), "testMultipleValues", new QuerySpec(Schedule.class));
 		Assert.assertEquals(1, targetsMap.keySet().size());
 		targets = targetsMap.getList(resource.getId());
 		Assert.assertEquals(2, targets.size());
-		Assert.assertSame(schedule3, targets.get(0));
-		Assert.assertSame(schedule4, targets.get(1));
+		Assert.assertSame(3L, targets.get(0).getId().longValue());
+		Assert.assertSame(4L, targets.get(1).getId().longValue());
 	}
 
 	@Test
@@ -160,8 +162,8 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		taskProjectRepository.setRelation(task, 42L, "project");
 		Assert.assertEquals(42L, task.getProject().getId().longValue());
 
-		Assert.assertSame(project,
-				taskProjectRepository.findOneTarget(task.getId(), "project", new QuerySpec(Task.class)));
+		Project target = (Project) taskProjectRepository.findOneTarget(task.getId(), "project", new QuerySpec(Task.class));
+		Assert.assertSame(42L, target.getId().longValue());
 	}
 
 	@Test
@@ -173,8 +175,9 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		MultivaluedMap targets =
 				taskProjectRepository.findTargets(Arrays.asList(task.getId()), "projects", new QuerySpec(Task.class));
 		Assert.assertEquals(1, targets.keySet().size());
-		Assert.assertEquals(13L, targets.keySet().iterator().next());
-		Assert.assertEquals(project, targets.getUnique(13L));
+		Assert.assertEquals(task.getId(), targets.keySet().iterator().next());
+		Project target = (Project) targets.getUnique(task.getId());
+		Assert.assertEquals(42L, target.getId().longValue());
 	}
 
 
