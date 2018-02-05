@@ -5,19 +5,16 @@
 :toclevels: 3
 
 
-Crnk is a native resource-oriented rest library where resources and their relationship take the center stage. With this
-inner workings of Crnk differ quite dramatically from most REST library out there. Usually, resources and
-relationships are not more than just path mappings specified by class and method annotations. This fact opens up powerful new
-possibilities.
+Crnk is a native resource-oriented rest library where resources, their relationships and repositories are the main building
+blocks. In that regard Crnk differ quite dramatically from most REST library out there and opens up many new possibilities.
+It allows you to rapidly build REST APIs without having to worry about lower protocol details and lets you instead
+focus on what matters: your application. On the HTTP/REST layer it follows the JSON API specification and recommendations.
+JSON API and Crnk come with support for:
 
-Crnk follows the JSON API specification and recommendations. It allows you to rapidly
-build REST APIs without having to worry about lower protocol details and lets you instead
-focus on what matters: your application. JSON API and Crnk come with support for:
-
-- client and server implementation (with a focus on the later).
+- client and server implementation.
 - standardized url handling such as `/api/persons?filter[title]=John` and `/api/persons/{id}`
 - sorting, filtering, paging of resources
-- attaching link and meta information to data.
+- attaching link and meta information to resources.
 - inserting, updating and deleting of resources.
 - support to request complex object graphs in a single request with JSON API inclusions.
 - support for partial objects with sparse field sets.
@@ -28,6 +25,10 @@ focus on what matters: your application. JSON API and Crnk come with support for
   and UI automation.
 - generation of type-safe client stubs (currently Typescript as target language implemented)
 - binding of Angular components with https://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api] to Crnk endpoints.
+- filters and decorates to intercept and modify all aspects of an application and Crnk.
+- a module API to build and plugin-in reusable Crnk modules. Crnk comes with number of such (optional) modules to integrate with
+  third-party libraries and frameworks.
+
 
 Crnk is small, modular and lightweight. It integrates well with many popular frameworks and APIs:
 
@@ -37,7 +38,7 @@ Crnk is small, modular and lightweight. It integrates well with many popular fra
 - JAXRS: run Crnk as feature.
 - JPA: expose entities as JSON API resources.
 - bean validation: properly marshal validation and constraints exceptions.
-- Zipkin: trace all your calls.
+- Zipkin, Brave, Spring Sleuth: trace all your calls.
 
 While Crnk follows the JSON API specification, it is not limited to that. Have a look at the
 http://www.crnk.io/[roadmap> for more information.

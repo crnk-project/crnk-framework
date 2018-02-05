@@ -18,7 +18,7 @@ all the essential building blocks like sorting, filtering, paging, document form
 resources and relationships. But other implementations, such as GraphQL or different kinds of REST/JSON APIs, are possible as
 well. With JSON API, an incoming request is processed as follows:
 
-- A Crnk interceptor is called from the underlying used framework. This might be, for example, from a Servlet environment,
+- A Crnk interceptor is called from the underlying framework. This might be, for example, from a Servlet environment,
  JAX-RS or Spring MVC.
 - The request is deserialized to Crnk data structures like `Document`, `Resource`, `ResourceIdentifier` or `ErrorData`.
 - The type of request is determined: whether it is a `POST`, `PATCH`, `GET` or `DELETE` request and whether it is a resource or
