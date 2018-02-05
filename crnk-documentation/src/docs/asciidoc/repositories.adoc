@@ -102,6 +102,7 @@ http://127.0.0.1:8080/api/tasks?filter[name][LIKE]=Do
 http://127.0.0.1:8080/api/tasks?fields=name
 http://127.0.0.1:8080/api/projects
 http://127.0.0.1:8080/api/tasks?include=project
+http://127.0.0.1:8080/api/browse/
 ----
 
 You may notice that:
