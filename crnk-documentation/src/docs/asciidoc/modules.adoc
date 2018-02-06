@@ -580,8 +580,13 @@ anchor:home_module[]
 
 ## Home Module
 
-The `HomeModule` provides an implementation for https://tools.ietf.org/html/draft-nottingham-json-home-06[JSON Home]. It allows
-you to obtain a list of available repositories when accessing the parent page of your repositories (typically `/api`).
+The `HomeModule` provides a listing of available resources in each directory (such as the root `/api/`). Note that
+directory paths always end with a '/' and the `HomeModule` will process the request if there is no resource or
+relationship repository serving that particular path.
+
+The `HomeModule` supports two kinds of formats that can be choosen upon creation. A JSON API-style format where a
+links node holds all links to child directories and repositories. And a JSON HOME format as specified by
+https://tools.ietf.org/html/draft-nottingham-json-home-06[JSON Home].
 
 
 [source]
@@ -590,36 +595,36 @@ you to obtain a list of available repositories when accessing the parent page of
 		...
 ----
 
-The module is currently in an incubator stage. In the Spring Boot example
-applications it looks like:
+In the Spring Boot example applications it looks like:
 
 
 [source]
 ----
 {
-  "resources" : {
-    "tag:schedule" : {
-      "href" : "/schedule/"
-    },
-    "tag:tasks" : {
-      "href" : "/tasks/"
-    },
-    "tag:scheduleDto" : {
-      "href" : "/scheduleDto/"
-    },
-    "tag:meta/collectionType" : {
-      "href" : "/meta/collectionType/"
-    },
-    "tag:projects" : {
-      "href" : "/projects/"
-    },
-     "tag:meta/resource" : {
-	  "href" : "/meta/resource/"
-	},
-	"tag:meta/attribute" : {
-	  "href" : "/meta/attribute/"
-	},
-	...
+  "links" : {
+    "meta" : "http://localhost:8080/api/meta/",
+    "projects" : "http://localhost:8080/api/projects",
+    "resourcesInfo" : "http://localhost:8080/api/resourcesInfo",
+    "schedule" : "http://localhost:8080/api/schedule",
+    "scheduleDto" : "http://localhost:8080/api/scheduleDto",
+    "tasks" : "http://localhost:8080/api/tasks"
+  }
+}
+----
+
+Notice the `meta` entry with a trailing '/' that allows to move to subdirectory `http://localhost:8080/api/meta/`:
+
+[source]
+----
+{
+  "links" : {
+    "arrayType" : "http://localhost:8080/api/meta/arrayType",
+    "attribute" : "http://localhost:8080/api/meta/attribute",
+    "dataObject" : "http://localhost:8080/api/meta/dataObject",
+    "element" : "http://localhost:8080/api/meta/element",
+    "resource" : "http://localhost:8080/api/meta/resource",
+    "type" : "http://localhost:8080/api/meta/type"
+    ...
   }
 }
 ----
