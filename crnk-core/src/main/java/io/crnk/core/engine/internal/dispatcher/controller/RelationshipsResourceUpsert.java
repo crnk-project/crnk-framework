@@ -100,7 +100,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
 		@SuppressWarnings("unchecked")
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
-				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+				.getRelationshipRepository(relationshipField, parameterProvider);
 		if (Iterable.class.isAssignableFrom(relationshipField.getType())) {
 			Iterable<ResourceIdentifier> dataBodies = (Iterable<ResourceIdentifier>) (requestBody.isMultiple() ? requestBody.getData().get() : Collections.singletonList(requestBody.getData().get()));
 			processToManyRelationship(resource, targetInformation, relationshipField, dataBodies, queryAdapter,

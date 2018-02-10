@@ -1,5 +1,6 @@
 package io.crnk.jpa;
 
+import io.crnk.jpa.internal.JpaRepositoryBase;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
@@ -472,7 +473,7 @@ public class JpaModule implements InitializingModule {
 		if (attrConfig != null) {
 			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
 			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType,
-					repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+					repositoryFactory.createRelationshipRepository(this, field, attrConfig));
 			context.addRepository(relationshipRepository);
 		}
 	}
@@ -491,7 +492,7 @@ public class JpaModule implements InitializingModule {
 
 			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
 			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
-					repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+					repositoryFactory.createRelationshipRepository(this, field, attrConfig));
 			context.addRepository(relationshipRepository);
 		}
 	}
@@ -631,9 +632,11 @@ public class JpaModule implements InitializingModule {
 		@Override
 		public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
 				ResourceRepositoryV2<T, I> repository) {
-			JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
-			if (config != null) {
-				return config.getRepositoryDecorator();
+			if (repository instanceof JpaRepositoryBase) {
+				JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
+				if (config != null) {
+					return config.getRepositoryDecorator();
+				}
 			}
 			return null;
 		}
@@ -642,9 +645,11 @@ public class JpaModule implements InitializingModule {
 		public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J>
 		decorateRepository(
 				RelationshipRepositoryV2<T, I, D, J> repository) {
-			JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getSourceResourceClass());
-			if (config != null) {
-				return config.getRepositoryDecorator(repository.getTargetResourceClass());
+			if (repository instanceof JpaRepositoryBase) {
+				JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getSourceResourceClass());
+				if (config != null) {
+					return config.getRepositoryDecorator(repository.getTargetResourceClass());
+				}
 			}
 			return null;
 		}

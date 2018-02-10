@@ -64,7 +64,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
-				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepositoryForType("schedules", null)
+				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepository("testSerializeEager", null)
 						.getRelationshipRepository();
 
 		taskProjectRepository = new ImplicitOwnerBasedRelationshipRepository(Task.class, Project.class);

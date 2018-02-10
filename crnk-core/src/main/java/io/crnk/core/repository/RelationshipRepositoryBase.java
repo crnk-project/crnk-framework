@@ -59,13 +59,14 @@ import java.util.Set;
 public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
 		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
 
-	protected ResourceRegistry resourceRegistry;
 
-	private Class<D> targetResourceClass;
+	protected ResourceRegistry resourceRegistry;
 
 	private Class<T> sourceResourceClass;
 
 	private String sourceResourceType;
+
+	private Class targetResourceClass;
 
 	private String targetResourceType;
 
@@ -77,13 +78,29 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	public RelationshipRepositoryBase(Class<T> sourceResourceClass, Class<D> targetResourceClass) {
-		this.sourceResourceClass = sourceResourceClass;
+		this(sourceResourceClass);
 		this.targetResourceClass = targetResourceClass;
 	}
 
 	public RelationshipRepositoryBase(String sourceResourceType, String targetResourceType) {
-		this.sourceResourceType = sourceResourceType;
+		this(sourceResourceType);
 		this.targetResourceType = targetResourceType;
+	}
+
+	public RelationshipRepositoryBase(Class<T> sourceResourceClass) {
+		this.sourceResourceClass = sourceResourceClass;
+	}
+
+	public RelationshipRepositoryBase(String sourceResourceType) {
+		this.sourceResourceType = sourceResourceType;
+	}
+
+	@Override
+	public RelationshipMatcher getMatcher() {
+		RelationshipMatcher matcher = new RelationshipMatcher();
+		matcher.rule().source(sourceResourceType).source(sourceResourceClass).target(targetResourceType)
+				.target(targetResourceClass).add();
+		return matcher;
 	}
 
 
@@ -345,10 +362,6 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 	@Override
 	public Class<D> getTargetResourceClass() {
-		if (targetResourceClass == null) {
-			RegistryEntry targetEntry = resourceRegistry.getEntry(targetResourceType);
-			return (Class) targetEntry.getResourceInformation().getResourceClass();
-		}
 		return targetResourceClass;
 	}
 

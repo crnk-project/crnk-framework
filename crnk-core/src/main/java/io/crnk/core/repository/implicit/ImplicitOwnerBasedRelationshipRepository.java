@@ -1,5 +1,6 @@
 package io.crnk.core.repository.implicit;
 
+import io.crnk.core.repository.RelationshipMatcher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +42,15 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType, String targetResourceType) {
 		super(sourceResourceType, targetResourceType);
 	}
+
+	public ImplicitOwnerBasedRelationshipRepository(Class sourceResourceClass) {
+		super(sourceResourceClass);
+	}
+
+	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType) {
+		super(sourceResourceType);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {

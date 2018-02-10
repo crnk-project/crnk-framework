@@ -1,5 +1,6 @@
 package io.crnk.jpa.repository;
 
+import io.crnk.core.engine.information.resource.ResourceField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -32,9 +33,16 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	@Before
 	public void setup() {
 		super.setup();
-		repo = new JpaRelationshipRepository<TestEntity, Long, RelatedEntity, Long>(module, TestEntity.class,
+
+		ResourceField resourceField = this.resourceRegistry.getEntry(TestEntity.class).getResourceInformation()
+				.findFieldByUnderlyingName("oneRelatedValue");
+
+		ResourceField relatedField = this.resourceRegistry.getEntry(RelatedEntity.class).getResourceInformation()
+				.findFieldByUnderlyingName("testEntity");
+
+		repo = new JpaRelationshipRepository<TestEntity, Long, RelatedEntity, Long>(module, resourceField,
 				JpaRepositoryConfig.create(RelatedEntity.class));
-		relatedRepo = new JpaRelationshipRepository<RelatedEntity, Long, TestEntity, Long>(module, RelatedEntity.class,
+		relatedRepo = new JpaRelationshipRepository<RelatedEntity, Long, TestEntity, Long>(module, relatedField,
 				JpaRepositoryConfig.create(TestEntity.class));
 	}
 

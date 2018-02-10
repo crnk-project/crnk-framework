@@ -224,22 +224,23 @@ new RelationshipMatcher().rule().oppositeField("project").add().matches(field)
 [source]
 ----
 
-One example might be a history relationship repository that introduces a history for every other resource.
-There would match against `target`. Such an example is available in
-https://github.com/crnk-project/crnk-example[crnk-example].
+One can implement, for example, a history relationship repository that introduces a history relationship for every other resource.
+In this example, `RelationshipMatcher` would match against the history resource as target. Such an example is
+depicated in the next section.
 
 
 ## ResourceFieldContributor
 
-`ResourceFieldContributor` allows to dynamically introduce new fields to resources without actually
+The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
 touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
-want to add further fields like that mentioned history relationship from the previous section.
+want to add further fields like that mentioned history relationship from the previous section. It can be implemented
+by a repository or obtained from the regular service discovery mechanism.
 
 Any type of field can be added: meta, links, attribute and relationship fields. For relationship fields
 an application may make use of `RelationshipMatcher` to provide repository serving those fields.
 Notice the `accessor` property that is used to obtain the value of that field
-(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in https://github
-.com/crnk-project/crnk-example[crnk-example]:
+(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example[crnk-examples/spring-boot-example]:
 
 [source]
 .HistoryRelationshipRepository

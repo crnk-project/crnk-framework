@@ -48,6 +48,13 @@ public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extend
 
 
 	default RelationshipMatcher getMatcher() {
+		if (this instanceof UntypedRelationshipRepository) {
+			UntypedRelationshipRepository untyped = (UntypedRelationshipRepository) this;
+			RelationshipMatcher matcher = new RelationshipMatcher();
+			matcher.rule().source(untyped.getSourceResourceType()).target(untyped.getTargetResourceType()).add();
+			return matcher;
+		}
+
 		Class<T> sourceResourceClass = getSourceResourceClass();
 		Class<D> targetResourceClass = getTargetResourceClass();
 		if (sourceResourceClass != null && targetResourceClass != null) {

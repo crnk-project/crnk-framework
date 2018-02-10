@@ -23,6 +23,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,8 +69,8 @@ public class ResourceRegistryTest {
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
 		ResourceInformation resourceInformation =
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
-		return new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL), null,
-				null);
+		return new RegistryEntry(new DirectResponseResourceEntry(null,
+				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
 	}
 
 	@Test
@@ -104,11 +105,12 @@ public class ResourceRegistryTest {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
-		TypeParser typeParser = new TypeParser();
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, Arrays.asList(idField, valueField));
-		RegistryEntry registryEntry = new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl("tasks", resourceInformation, RepositoryMethodAccess.ALL), null,
-				null);
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null,
+						Arrays.asList(idField, valueField));
+		RegistryEntry registryEntry = new RegistryEntry(new DirectResponseResourceEntry(null, new
+				ResourceRepositoryInformationImpl
+				("tasks", resourceInformation, RepositoryMethodAccess.ALL)));
 		resourceRegistry.addEntry(Task.class, registryEntry);
 
 		String resourceUrl = resourceRegistry.getResourceUrl(task);

@@ -108,8 +108,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		ResourceRepositoryAdapter projectRepo = resourceRegistry.getEntry(Project.class).getResourceRepository(null);
 		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
 
-		RelationshipRepositoryAdapter relRepositoryUserToProject = resourceRegistry.getEntry(User.class).getRelationshipRepositoryForType("projects", null);
-		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.getEntry(Project.class).getRelationshipRepositoryForType("tasks", null);
+		RelationshipRepositoryAdapter relRepositoryUserToProject = resourceRegistry.getEntry(User.class).getRelationshipRepository("assignedProjects", null);
+		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.getEntry(Project.class).getRelationshipRepository("tasks", null);
 
 		ResourceInformation userInfo = resourceRegistry.getEntry(User.class).getResourceInformation();
 		ResourceInformation projectInfo = resourceRegistry.getEntry(Project.class).getResourceInformation();

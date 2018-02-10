@@ -119,7 +119,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		Assert.assertTrue(relationship.getData().isPresent());
 		Assert.assertEquals(schedule3Id, relationship.getData().get());
 
-		// verify relationship not accessed, only id set => performance
+		// validate relationship not accessed, only id set => performance
 		RelationIdTestResource entity = repository.findOne(1L, new QuerySpec(RelationIdTestResource.class));
 		Assert.assertEquals(schedule3.getId(), entity.getTestLookupAlwaysId());
 		Assert.assertNull(entity.getTestLookupAlways());
@@ -152,7 +152,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		Assert.assertTrue(relationship.getData().isPresent());
 		Assert.assertEquals(schedule2Id, relationship.getData().get());
 
-		// verify relationship not accessed, only id set => performance
+		// validate relationship not accessed, only id set => performance
 		RelationIdTestResource entity = repository.findOne(1L, new QuerySpec(RelationIdTestResource.class));
 		Assert.assertEquals(schedule2.getId(), entity.getTestLookupAlwaysId());
 		Assert.assertNull(entity.getTestLookupAlways());
@@ -173,7 +173,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		// THEN PATCH
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
-		// verify relationship not accessed, only id set => performance
+		// validate relationship not accessed, only id set => performance
 		RelationIdTestResource entity = repository.findOne(1L, new QuerySpec(RelationIdTestResource.class));
 		Assert.assertEquals(scheduleId != null ? Long.parseLong(scheduleId.getId()) : null, entity.getTestLookupAlwaysId());
 		Assert.assertNull(entity.getTestLookupAlways());

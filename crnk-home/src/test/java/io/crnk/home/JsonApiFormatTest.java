@@ -6,11 +6,10 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.TestModule;
 import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,9 +33,8 @@ public class JsonApiFormatTest {
 		boot = new CrnkBoot();
 		boot.addModule(module);
 		boot.addModule(metaModule);
+		boot.addModule(new TestModule());
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
-				()));
 		boot.boot();
 	}
 

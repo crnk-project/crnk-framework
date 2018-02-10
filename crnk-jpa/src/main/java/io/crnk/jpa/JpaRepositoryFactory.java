@@ -1,5 +1,6 @@
 package io.crnk.jpa;
 
+import io.crnk.core.engine.information.resource.ResourceField;
 import java.io.Serializable;
 
 /**
@@ -30,11 +31,11 @@ public interface JpaRepositoryFactory {
 	 * @param <T>                 target document type
 	 * @param <J>                 target identifier type
 	 * @param module              managing the document
-	 * @param sourceResourceClass representing the source of the relation (entity or mapped dto)
+	 * @param resourceField       representing the source field of the relation (entity or mapped dto)
 	 * @param config              for this document
 	 * @return created document
 	 */
 	<S, I extends Serializable, T, J extends Serializable> JpaRelationshipRepository<S, I, T, J> createRelationshipRepository(
-			JpaModule module, Class<S> sourceResourceClass, JpaRepositoryConfig<T> config);
+			JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T> config);
 
 }

@@ -1,5 +1,6 @@
 package io.crnk.example.springboot.domain.repository;
 
+import com.google.common.reflect.TypeToken;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,8 @@ public class HistoryRelationshipRepository extends ReadOnlyRelationshipRepositor
 		// simpler and recommended, but may not always be possible. Here we demonstrate doing it dynamically.
 		InformationBuilder.Field fieldBuilder = context.getInformationBuilder().createResourceField();
 		fieldBuilder.name("history");
-		fieldBuilder.type(History.class);
+		fieldBuilder.genericType(new TypeToken<List<History>>() {
+		}.getType());
 		fieldBuilder.oppositeResourceType("history");
 		fieldBuilder.fieldType(ResourceFieldType.RELATIONSHIP);
 
