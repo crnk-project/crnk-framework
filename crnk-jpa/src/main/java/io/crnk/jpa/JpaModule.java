@@ -1,5 +1,15 @@
 package io.crnk.jpa;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
@@ -23,7 +33,11 @@ import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
-import io.crnk.jpa.internal.*;
+import io.crnk.jpa.internal.JpaRequestContext;
+import io.crnk.jpa.internal.JpaResourceInformationProvider;
+import io.crnk.jpa.internal.OptimisticLockExceptionMapper;
+import io.crnk.jpa.internal.PersistenceExceptionMapper;
+import io.crnk.jpa.internal.PersistenceRollbackExceptionMapper;
 import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
@@ -39,14 +53,6 @@ import io.crnk.meta.MetaModuleExtension;
 import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Crnk module that adds support to expose JPA entities as repositories. It
@@ -475,17 +481,19 @@ public class JpaModule implements InitializingModule {
 		Class<?> attrImplClass = field.getElementType();
 		JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
 
-		PreconditionUtil.verify(attrConfig != null && attrConfig.getMapper() != null,
-				"no mapped entity for %s reference from %s.%s registered", field.getOppositeResourceType(),
-				field.getParentResourceInformation().getResourceType(), field.getUnderlyingName());
+		if (attrConfig != null) {
+			PreconditionUtil.verify(attrConfig.getMapper() != null,
+					"no mapped entity %s referenced from %s.%s registered", attrImplClass.getName(),
+					field.getParentResourceInformation().getResourceType(), field.getUnderlyingName());
 
-		JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
-		Class<?> targetResourceClass = targetConfig.getResourceClass();
+			JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
+			Class<?> targetResourceClass = targetConfig.getResourceClass();
 
-		JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
-		RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
-				repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
-		context.addRepository(relationshipRepository);
+			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
+			RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
+					repositoryFactory.createRelationshipRepository(this, resourceClass, attrConfig));
+			context.addRepository(relationshipRepository);
+		}
 	}
 
 
