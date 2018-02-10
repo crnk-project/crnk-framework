@@ -10,6 +10,16 @@ public abstract class ReadOnlyRelationshipRepositoryBase<S, I extends Serializab
 
 
 	@Override
+	public Class<S> getSourceResourceClass() {
+		throw new UnsupportedOperationException("implement getMatcher() or this method");
+	}
+
+	@Override
+	public Class<T> getTargetResourceClass() {
+		throw new UnsupportedOperationException("implement getMatcher() or this method");
+	}
+
+	@Override
 	public T findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
 		throw new UnsupportedOperationException();
 	}
