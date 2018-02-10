@@ -7,6 +7,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.RestrictedPaginationKeys;
 import io.crnk.legacy.queryParams.RestrictedSortingValues;
@@ -34,6 +35,7 @@ public class DefaultQuerySpecConverter implements QuerySpecConverter {
 	@Override
 	public QuerySpec fromParams(Class<?> rootType, QueryParams params) {
 		QuerySpec querySpec = new QuerySpec(rootType);
+		querySpec.setPagingSpec(new OffsetLimitPagingSpec());
 		applyIncludedFields(querySpec, params);
 		applySorting(querySpec, params);
 		applyFiltering(querySpec, params);

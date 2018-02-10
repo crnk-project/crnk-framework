@@ -23,6 +23,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import org.junit.After;
@@ -88,6 +89,7 @@ public class RepositoryFilterTest {
 		resourceRegistry = boot.getResourceRegistry();
 
 		querySpec = new QuerySpec(User.class);
+		querySpec.setPagingSpec(new OffsetLimitPagingSpec());
 		queryAdapter = new QuerySpecAdapter(querySpec, resourceRegistry);
 
 		scheduleInfo = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
@@ -125,6 +127,7 @@ public class RepositoryFilterTest {
 		ResourceRepositoryAdapter<Schedule, Serializable> scheduleResourceAdapter = scheduleRegistry.getResourceRepository(null);
 
 		querySpec = new QuerySpec(Schedule.class);
+		querySpec.setPagingSpec(new OffsetLimitPagingSpec());
 		queryAdapter = new QuerySpecAdapter(querySpec, resourceRegistry);
 		scheduleResourceAdapter.findAll(queryAdapter);
 

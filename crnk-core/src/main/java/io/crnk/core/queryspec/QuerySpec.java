@@ -45,6 +45,7 @@ public class QuerySpec {
 			this.resourceClass = resourceClass;
 		}
 		this.resourceType = resourceType;
+		this.pagingSpec = new OffsetLimitPagingSpec();
 	}
 
 	public QuerySpec(ResourceInformation resourceInformation) {
@@ -136,9 +137,9 @@ public class QuerySpec {
 	public void setLimit(Long limit) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
+		} else {
+			throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
 		}
-
-		throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
 	}
 
 	public long getOffset() {
@@ -153,9 +154,9 @@ public class QuerySpec {
 	public void setOffset(long offset) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);
+		} else {
+			throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 		}
-
-		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 	}
 
 	public PagingSpec getPagingSpec() {
@@ -303,6 +304,7 @@ public class QuerySpec {
 				relatedSpecs.put(targetResourceType, querySpec);
 			}
 		}
+		querySpec.setPagingSpec(pagingSpec);
 		return querySpec;
 	}
 

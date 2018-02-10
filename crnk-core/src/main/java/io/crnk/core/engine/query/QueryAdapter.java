@@ -16,10 +16,6 @@ public interface QueryAdapter {
 
 	ResourceInformation getResourceInformation();
 
-	PagingSpec getPagingSpec();
-
-	void setPagingSpec(PagingSpec pagingSpec);
-
 	/**
 	 * @return duplicate of this instance
 	 */
@@ -42,4 +38,7 @@ public interface QueryAdapter {
 
 	boolean getCompactMode();
 
+	void setPagingSpec(PagingSpec pagingSpec);
+
+	PagingSpec getPagingSpec();
 }

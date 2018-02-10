@@ -150,8 +150,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertEquals(12L, actualSpec.getLimit().longValue());
 		QuerySpec projectQuerySpec = actualSpec.getQuerySpec(Project.class);
 		Assert.assertNotNull(projectQuerySpec);
-		Assert.assertEquals(0L, projectQuerySpec.getOffset());
-		Assert.assertNull(projectQuerySpec.getLimit());
+		Assert.assertEquals(1L, projectQuerySpec.getOffset());
+		Assert.assertEquals(12L, projectQuerySpec.getLimit().longValue());
 	}
 
 	@Test
@@ -362,7 +362,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	@Test
 	public void testPaging() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
-		expectedSpec.setPagingSpec(new OffsetLimitPagingSpec(2L, 1L));
+		expectedSpec.setPagingSpec(new OffsetLimitPagingSpec(1L, 2L));
 
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "page[offset]", "1");

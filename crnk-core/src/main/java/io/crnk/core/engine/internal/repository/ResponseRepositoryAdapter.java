@@ -15,11 +15,13 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.LinksRepositoryV2;
 import io.crnk.core.repository.MetaRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -164,11 +166,10 @@ public abstract class ResponseRepositoryAdapter {
 													RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
-		//todo undo / victor
-//		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.gePagingStrategy().requirePaging(queryAdapter.getPagingSpec())) {
-//			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
-//					requestSpec);
-//		}
+		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.getPagingSpec().isPagingRequired()) {
+			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
+					requestSpec);
+		}
 		return enrichedLinksInformation;
 	}
 
@@ -179,11 +180,10 @@ public abstract class ResponseRepositoryAdapter {
 			// provided by resource
 			linksInformation = new DefaultPagedLinksInformation();
 		}
-		//todo undo / victor
-//		if (linksInformation instanceof PagedLinksInformation) {
-//			queryAdapter.gePagingStrategy().buildPaging((PagedLinksInformation) linksInformation, resources,
-//					queryAdapter, requestSpec, moduleRegistry.getResourceRegistry());
-//		}
+		if (linksInformation instanceof PagedLinksInformation) {
+			queryAdapter.getPagingSpec().buildPaging((PagedLinksInformation) linksInformation, resources,
+					queryAdapter, requestSpec, moduleRegistry.getResourceRegistry());
+		}
 		return linksInformation;
 	}
 

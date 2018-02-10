@@ -18,6 +18,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -96,5 +97,16 @@ public abstract class AbstractQuerySpecTest {
 
 	public String getResourceSearchPackage() {
 		return getClass().getPackage().getName();
+	}
+
+	protected QuerySpec querySpec(Long offset, Long limit) {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
+
+		return querySpec;
+	}
+
+	protected QuerySpec querySpec() {
+		return querySpec(0L, null);
 	}
 }

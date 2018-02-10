@@ -93,16 +93,6 @@ public class QuerySpecAdapter implements QueryAdapter {
 	}
 
 	@Override
-	public PagingSpec getPagingSpec() {
-		return querySpec.getPagingSpec();
-	}
-
-	@Override
-	public void setPagingSpec(final PagingSpec pagingSpec) {
-		this.querySpec.setPagingSpec(pagingSpec);
-	}
-
-	@Override
 	public QueryAdapter duplicate() {
 		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
 		adapter.setCompactMode(compactMode);
@@ -123,6 +113,16 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public boolean getCompactMode() {
 		return compactMode;
+	}
+
+	@Override
+	public void setPagingSpec(final PagingSpec pagingSpec) {
+		querySpec.setPagingSpec(pagingSpec);
+	}
+
+	@Override
+	public PagingSpec getPagingSpec() {
+		return querySpec.getPagingSpec();
 	}
 
 	public void setCompactMode(boolean compactMode) {

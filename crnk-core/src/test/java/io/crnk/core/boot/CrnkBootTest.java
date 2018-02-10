@@ -1,6 +1,11 @@
 package io.crnk.core.boot;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -25,12 +30,15 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,8 +56,8 @@ public class CrnkBootTest {
 
 	@Before
 	public void setup() {
-		serviceDiscoveryFactory = Mockito.mock(ServiceDiscoveryFactory.class);
-		serviceDiscovery = Mockito.mock(ServiceDiscovery.class);
+		serviceDiscoveryFactory = mock(ServiceDiscoveryFactory.class);
+		serviceDiscovery = mock(ServiceDiscovery.class);
 		Mockito.when(serviceDiscoveryFactory.getInstance()).thenReturn(serviceDiscovery);
 	}
 
@@ -67,10 +75,24 @@ public class CrnkBootTest {
 		boot.setServiceDiscovery(serviceDiscovery);
 
 		DefaultQuerySpecDeserializer instance = new DefaultQuerySpecDeserializer();
-		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(QuerySpecDeserializer.class))).thenReturn(Arrays.asList
-				(instance));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(QuerySpecDeserializer.class)))
+				.thenReturn(Arrays.asList(instance));
 		boot.boot();
 		Assert.assertSame(instance, boot.getQuerySpecDeserializer());
+	}
+
+	@Test
+	public void testDiscoverPagingSpecDeserializer() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(serviceDiscovery);
+		boot.setQuerySpecDeserializer(new DefaultQuerySpecDeserializer());
+
+		PagingSpecDeserializer instance = new OffsetLimitPagingSpecDeserializer();
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(PagingSpecDeserializer.class)))
+				.thenReturn(Arrays.asList(instance));
+		boot.boot();
+
+		Assert.assertSame(instance, boot.getQuerySpecDeserializer().getPagingSpecDeserializer());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -90,20 +112,20 @@ public class CrnkBootTest {
 	@Test
 	public void setServiceDiscovery() {
 		CrnkBoot boot = new CrnkBoot();
-		ServiceDiscovery serviceDiscovery = Mockito.mock(ServiceDiscovery.class);
+		ServiceDiscovery serviceDiscovery = mock(ServiceDiscovery.class);
 		boot.setServiceDiscovery(serviceDiscovery);
 		Assert.assertSame(serviceDiscovery, boot.getServiceDiscovery());
 	}
 
 	@Test
 	public void setServiceLocator() {
-		JsonServiceLocator locator = Mockito.mock(JsonServiceLocator.class);
-		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
-		Mockito.when(propertiesProvider.getProperty(Mockito.eq(CrnkProperties.RESOURCE_SEARCH_PACKAGE))).thenReturn("a.b.c");
+		JsonServiceLocator locator = mock(JsonServiceLocator.class);
+		PropertiesProvider propertiesProvider = mock(PropertiesProvider.class);
+		Mockito.when(propertiesProvider.getProperty(eq(CrnkProperties.RESOURCE_SEARCH_PACKAGE))).thenReturn("a.b.c");
 		CrnkBoot boot = new CrnkBoot();
 		boot.setPropertiesProvider(propertiesProvider);
 		boot.setServiceLocator(locator);
-		boot.setServiceDiscoveryFactory(Mockito.mock(ServiceDiscoveryFactory.class));
+		boot.setServiceDiscoveryFactory(mock(ServiceDiscoveryFactory.class));
 		boot.boot();
 
 		ReflectionsServiceDiscovery serviceDiscovery = (ReflectionsServiceDiscovery) boot.getServiceDiscovery();
@@ -114,7 +136,7 @@ public class CrnkBootTest {
 	public void setServiceDiscoveryFactory() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
 		boot.boot();
 		Mockito.verify(serviceDiscoveryFactory, Mockito.times(1)).getInstance();
 		Assert.assertNotNull(boot.getServiceDiscovery());
@@ -124,7 +146,7 @@ public class CrnkBootTest {
 	public void getPropertiesProvider() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
 		boot.boot();
 		Assert.assertNotNull(boot.getPropertiesProvider());
 	}
@@ -141,9 +163,10 @@ public class CrnkBootTest {
 	public void setQuerySpecDeserializer() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
 
-		QuerySpecDeserializer deserializer = Mockito.mock(QuerySpecDeserializer.class);
+		QuerySpecDeserializer deserializer = mock(QuerySpecDeserializer.class);
+		when(deserializer.getPagingSpecDeserializer()).thenReturn(mock(PagingSpecDeserializer.class));
 		boot.setQuerySpecDeserializer(deserializer);
 		Assert.assertSame(deserializer, boot.getQuerySpecDeserializer());
 		boot.boot();
@@ -157,9 +180,9 @@ public class CrnkBootTest {
 	public void setQueryParamsBuilder() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setDefaultServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
 
-		QueryParamsBuilder deserializer = Mockito.mock(QueryParamsBuilder.class);
+		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
 		boot.setQueryParamsBuilds(deserializer);
 		boot.boot();
 
@@ -168,11 +191,10 @@ public class CrnkBootTest {
 		Assert.assertTrue(queryAdapterBuilder instanceof QueryParamsAdapterBuilder);
 	}
 
-
 	@Test(expected = IllegalStateException.class)
 	public void setQueryParamsBuilderErrorsWhenSettingMaxPage() {
 		CrnkBoot boot = new CrnkBoot();
-		QueryParamsBuilder deserializer = Mockito.mock(QueryParamsBuilder.class);
+		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
 		boot.setQueryParamsBuilds(deserializer);
 		boot.setMaxPageLimit(10L);
 	}
@@ -180,7 +202,7 @@ public class CrnkBootTest {
 	@Test(expected = IllegalStateException.class)
 	public void setQueryParamsBuilderErrorsWhenSettingDefaultPage() {
 		CrnkBoot boot = new CrnkBoot();
-		QueryParamsBuilder deserializer = Mockito.mock(QueryParamsBuilder.class);
+		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
 		boot.setQueryParamsBuilds(deserializer);
 		boot.setDefaultPageLimit(10L);
 	}
@@ -189,14 +211,14 @@ public class CrnkBootTest {
 	public void testServiceDiscovery() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setServiceUrlProvider(Mockito.mock(ServiceUrlProvider.class));
+		boot.setServiceUrlProvider(mock(ServiceUrlProvider.class));
 
-		Module module = Mockito.mock(Module.class);
-		DocumentFilter filter = Mockito.mock(DocumentFilter.class);
+		Module module = mock(Module.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
 		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
-		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
-		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(Module.class))).thenReturn(Arrays.asList(module));
-		Mockito.when(serviceDiscovery.getInstancesByType(Mockito.eq(JsonApiExceptionMapper.class)))
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(Module.class))).thenReturn(Arrays.asList(module));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(JsonApiExceptionMapper.class)))
 				.thenReturn(Arrays.asList(exceptionMapper));
 		boot.boot();
 
@@ -228,7 +250,7 @@ public class CrnkBootTest {
 	public void setDefaultServiceUrlProvider() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		ServiceUrlProvider serviceUrlProvider = Mockito.mock(ServiceUrlProvider.class);
+		ServiceUrlProvider serviceUrlProvider = mock(ServiceUrlProvider.class);
 		boot.setDefaultServiceUrlProvider(serviceUrlProvider);
 		boot.boot();
 		Assert.assertEquals(serviceUrlProvider, boot.getDefaultServiceUrlProvider());
@@ -240,7 +262,7 @@ public class CrnkBootTest {
 	public void setServiceUrlProvider() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		ServiceUrlProvider serviceUrlProvider = Mockito.mock(ServiceUrlProvider.class);
+		ServiceUrlProvider serviceUrlProvider = mock(ServiceUrlProvider.class);
 		boot.setServiceUrlProvider(serviceUrlProvider);
 		boot.boot();
 		Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());

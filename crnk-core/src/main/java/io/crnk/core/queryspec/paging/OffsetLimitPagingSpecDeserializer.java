@@ -18,7 +18,7 @@ public class OffsetLimitPagingSpecDeserializer implements PagingSpecDeserializer
 
 	@Override
 	public PagingSpec init() {
-		return new OffsetLimitPagingSpec(defaultLimit, defaultOffset);
+		return new OffsetLimitPagingSpec(defaultOffset, defaultLimit);
 	}
 
 	@Override
