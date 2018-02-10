@@ -29,7 +29,7 @@ public class QueryParamsAdapterTest {
 
 		DefaultResourceInformationProvider builder = new DefaultResourceInformationProvider(
 			new NullPropertiesProvider(),
-			new DefaultResourceFieldInformationProvider(), 
+			new DefaultResourceFieldInformationProvider(),
 			new JacksonResourceFieldInformationProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
@@ -58,33 +58,5 @@ public class QueryParamsAdapterTest {
 		QueryParams params = new QueryParams();
 		QueryParamsAdapter adapter = new QueryParamsAdapter(params);
 		adapter.duplicate();
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetLimit() {
-		QueryParams params = new QueryParams();
-		QueryParamsAdapter adapter = new QueryParamsAdapter(params);
-		adapter.getLimit();
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testGetOffset() {
-		QueryParams params = new QueryParams();
-		QueryParamsAdapter adapter = new QueryParamsAdapter(params);
-		adapter.getOffset();
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testSetLimit() {
-		QueryParams params = new QueryParams();
-		QueryParamsAdapter adapter = new QueryParamsAdapter(params);
-		adapter.setLimit(0L);
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testSetOffset() {
-		QueryParams params = new QueryParams();
-		QueryParamsAdapter adapter = new QueryParamsAdapter(params);
-		adapter.setOffset(0L);
 	}
 }

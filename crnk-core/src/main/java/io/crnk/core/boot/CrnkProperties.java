@@ -139,6 +139,13 @@ public class CrnkProperties {
 
 	/**
 	 * <p>
+	 * Set a boolean whether Crnk should allow unknown parameters in query parameters.
+	 * </p>
+	 */
+	public static final String ALLOW_UNKNOWN_PARAMETERS = "crnk.config.resource.request.allowUnknownParameters";
+
+	/**
+	 * <p>
 	 * Set a boolean whether Crnk should links should be serialized as JSON objects.
 	 * </p>
 	 */

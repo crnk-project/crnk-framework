@@ -1,8 +1,7 @@
 package io.crnk.spring.boot.v3;
 
-import javax.servlet.Filter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -12,10 +11,13 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.SpringCrnkFilter;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.internal.SpringServiceDiscovery;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -81,6 +83,9 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				if (CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES.equals(key)) {
 					return String.valueOf(properties.getAllowUnknownAttributes());
 				}
+				if (CrnkProperties.ALLOW_UNKNOWN_PARAMETERS.equals(key)) {
+					return String.valueOf(properties.getAllowUnknownParameters());
+				}
 				if (CrnkProperties.RETURN_404_ON_NULL.equals(key)) {
 					return String.valueOf(properties.getReturn404OnNull());
 				}
@@ -97,6 +102,12 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 	@ConditionalOnMissingBean(QuerySpecDeserializer.class)
 	public QuerySpecDeserializer querySpecDeserializer() {
 		return new DefaultQuerySpecDeserializer();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(PagingSpecDeserializer.class)
+	public PagingSpecDeserializer pagingSpecDeserializer() {
+		return new OffsetLimitPagingSpecDeserializer();
 	}
 
 	@Bean

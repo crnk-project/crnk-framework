@@ -16,6 +16,7 @@ import io.crnk.legacy.queryParams.params.*;
 import java.util.*;
 import java.util.Map.Entry;
 
+@Deprecated
 public class DefaultQuerySpecConverter implements QuerySpecConverter {
 
 	private ResourceRegistry resourceRegistry;

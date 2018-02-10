@@ -1,5 +1,34 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Relationship;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.utils.Nullable;
+import io.crnk.legacy.internal.QueryParamsAdapter;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,34 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.document.Relationship;
-import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.InternalServerErrorException;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class IncludeLookupSetter {
 
@@ -69,8 +70,7 @@ public class IncludeLookupSetter {
 		if (!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && queryAdapter != null) {
 			// offset/limit cannot properly work for nested inclusions if becomes cyclic
 			inclusionQueryAdapter = queryAdapter.duplicate();
-			inclusionQueryAdapter.setOffset(0);
-			inclusionQueryAdapter.setLimit(null);
+			inclusionQueryAdapter.setPagingSpec(new OffsetLimitPagingSpec());
 		}
 
 		List<Object> entityList = DocumentMapperUtil.toList(entity);

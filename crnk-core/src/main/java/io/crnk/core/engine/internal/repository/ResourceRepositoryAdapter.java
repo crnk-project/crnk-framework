@@ -27,7 +27,8 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 	private final boolean isAnnotated;
 	private boolean return404OnNull;
 
-	public ResourceRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry, Object resourceRepository) {
+	public ResourceRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry,
+									 Object resourceRepository) {
 		super(resourceInformation, moduleRegistry);
 		this.resourceRepository = resourceRepository;
 		this.isAnnotated = resourceRepository instanceof AnnotatedResourceRepositoryAdapter;

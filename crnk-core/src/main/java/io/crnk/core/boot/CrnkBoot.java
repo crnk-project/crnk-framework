@@ -2,6 +2,7 @@ package io.crnk.core.boot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -39,6 +40,8 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -50,8 +53,8 @@ import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import net.jodah.typetools.TypeResolver;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +99,7 @@ public class CrnkBoot {
 
 	private Boolean allowUnknownAttributes;
 
+	private Boolean allowUnknownParameters;
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -477,6 +481,17 @@ public class CrnkBoot {
 		this.allowUnknownAttributes = true;
 	}
 
+	/**
+	 * Sets the allow unknown query parameters for API requests.
+	 * <p>
+	 */
+	public void setAllowUnknownParameters() {
+		PreconditionUtil.assertNull("Allow unknown parameters requires using the QuerySpecDeserializer, but " +
+				"it is null.", this.queryParamsBuilder);
+
+		this.allowUnknownParameters = true;
+	}
+
 	public ModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}
@@ -499,14 +514,13 @@ public class CrnkBoot {
 			}
 		}
 
+		if (querySpecDeserializer.getPagingSpecDeserializer() == null) {
+			List<PagingSpecDeserializer> list = serviceDiscovery.getInstancesByType(PagingSpecDeserializer.class);
+			querySpecDeserializer.setPagingSpecDeserializer(list.isEmpty()
+					? new OffsetLimitPagingSpecDeserializer() : list.get(0));
+		}
 
 		if (querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
-			if (defaultPageLimit != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
-			}
-			if (maxPageLimit != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
-			}
 			if (allowUnknownAttributes == null) {
 				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
 				if (strAllow != null) {
@@ -514,8 +528,25 @@ public class CrnkBoot {
 				}
 			}
 			if (allowUnknownAttributes != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-						.setAllowUnknownAttributes(allowUnknownAttributes);
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(allowUnknownAttributes);
+			}
+			if (allowUnknownParameters == null) {
+				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_PARAMETERS);
+				if (strAllow != null) {
+					allowUnknownParameters = Boolean.parseBoolean(strAllow);
+				}
+			}
+			if (allowUnknownParameters != null) {
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownParameters(allowUnknownParameters);
+			}
+		}
+
+		if (querySpecDeserializer.getPagingSpecDeserializer() instanceof OffsetLimitPagingSpecDeserializer) {
+			if (defaultPageLimit != null) {
+				((OffsetLimitPagingSpecDeserializer) this.querySpecDeserializer.getPagingSpecDeserializer()).setDefaultLimit(defaultPageLimit);
+			}
+			if (maxPageLimit != null) {
+				((OffsetLimitPagingSpecDeserializer) this.querySpecDeserializer.getPagingSpecDeserializer()).setMaxPageLimit(maxPageLimit);
 			}
 		}
 	}
