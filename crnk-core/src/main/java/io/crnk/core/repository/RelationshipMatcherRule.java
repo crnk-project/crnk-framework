@@ -9,23 +9,23 @@ import io.crnk.core.engine.information.resource.ResourceField;
  */
 public class RelationshipMatcherRule {
 
-	private final RelationshipMatcher matcher;
+	protected final RelationshipMatcher matcher;
 
-	private String sourceResourceType;
+	protected String sourceResourceType;
 
-	private Class<?> sourceResourceClass;
+	protected Class<?> sourceResourceClass;
 
-	private boolean sourceMatchSubTypes;
+	protected boolean sourceMatchSubTypes;
 
-	private String sourceField;
+	protected String sourceField;
 
-	private String targetResourceType;
+	protected String targetResourceType;
 
-	private Class<?> targetResourceClass;
+	protected Class<?> targetResourceClass;
 
-	private boolean targetMatchSubTypes;
+	protected boolean targetMatchSubTypes;
 
-	private String targetField;
+	protected String targetField;
 
 
 	protected RelationshipMatcherRule(RelationshipMatcher matcher) {

@@ -135,8 +135,11 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}
 			}
-			else {
+			else if (targetId != null) {
 				addResult(bulkResult, field, sourceId, targetId, targetMap);
+			}
+			else {
+				bulkResult.add(sourceId, null);
 			}
 		}
 		return bulkResult;

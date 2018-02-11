@@ -35,6 +35,8 @@ public class ApprovalIntTest extends JerseyTest {
 
 	protected CrnkClient client;
 
+	private RelationshipRepositoryV2<ScheduleApprovalProcessInstance, Serializable, ApproveTask, Serializable> processTaskRepo;
+
 	@Override
 	protected ApprovalTestApplication configure() {
 		return new ApprovalTestApplication();
@@ -53,6 +55,7 @@ public class ApprovalIntTest extends JerseyTest {
 
 		scheduleRepo = client.getRepositoryForInterface(ScheduleRepository.class);
 		approvalRepo = client.getRepositoryForType(ScheduleApprovalProcessInstance.class);
+		processTaskRepo = client.getRepositoryForType(ScheduleApprovalProcessInstance.class, ApproveTask.class);
 		taskRepo = client.getRepositoryForType(ApproveTask.class);
 		approvalRelRepo = client.getRepositoryForType(Schedule.class, ScheduleApprovalProcessInstance.class);
 		formRepo = client.getRepositoryForType(ApproveForm.class);
@@ -110,10 +113,15 @@ public class ApprovalIntTest extends JerseyTest {
 		Assert.assertEquals(1, scheduleApprovals.size());
 		checkOpenApproval(schedule, scheduleApprovals.get(0));
 
-		// check relationship
+		// check relationship from resource to approval process
 		ScheduleApprovalProcessInstance scheduleApproval = approvalRelRepo
 				.findOneTarget(schedule.getId().toString(), "approval", new QuerySpec(ScheduleApprovalProcessInstance.class));
 		checkOpenApproval(schedule, scheduleApproval);
+
+		// check relationship from approval process to task
+		ApproveTask approveTask =
+				processTaskRepo.findOneTarget(scheduleApprovals.get(0).getId(), "approveTask", new QuerySpec(ApproveTask.class));
+		Assert.assertNotNull(approveTask);
 
 		// check task created
 		QuerySpec taskQuery = new QuerySpec(ApproveTask.class);

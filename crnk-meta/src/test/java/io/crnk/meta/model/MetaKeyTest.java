@@ -39,6 +39,12 @@ public class MetaKeyTest extends AbstractMetaTest {
 	}
 
 
+	@Test
+	public void testToKeyStringWithNull() {
+		MetaKey key = new MetaKey();
+		Assert.assertNull(key.toKeyString(null));
+	}
+
 	public static class SomePrimaryKey {
 
 		private String attr1;

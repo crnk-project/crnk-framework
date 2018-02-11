@@ -1,10 +1,13 @@
 package io.crnk.core.engine.internal.repository;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
@@ -51,6 +54,8 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	private ImplicitOwnerBasedRelationshipRepository taskProjectRepository;
 
+	private ResourceRegistry resourceRegistry;
+
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
@@ -60,7 +65,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		boot.boot();
 
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
+		resourceRegistry = boot.getResourceRegistry();
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
@@ -104,6 +109,53 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		}
 	}
 
+	@Test
+	public void hasProtectedDefaultConstructor() {
+		CoreClassTestUtils.assertProtectedConstructor(ImplicitOwnerBasedRelationshipRepository.class);
+	}
+
+	@Test
+	public void testSourceTargetResourceTypeConstructor() {
+		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
+		ResourceField otherField = entry.getResourceInformation().findFieldByUnderlyingName("testNested");
+		ResourceField relField = entry.getResourceInformation().findRelationshipFieldByName("testSerializeEager");
+
+		ImplicitOwnerBasedRelationshipRepository repo = new ImplicitOwnerBasedRelationshipRepository("relationIdTest",
+				"schedules");
+		repo.setResourceRegistry(resourceRegistry);
+
+		Assert.assertFalse(repo.getMatcher().matches(otherField));
+		Assert.assertTrue(repo.getMatcher().matches(relField));
+
+		relRepository.setRelation(resource, 3L, "testSerializeEager");
+		Assert.assertEquals(3L, resource.getTestSerializeEagerId().longValue());
+		Assert.assertNull(resource.getTestSerializeEager());
+
+		Assert.assertSame(schedule3,
+				relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
+	}
+
+	@Test
+	public void testSourceOnlyClassConstructor() {
+		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
+		ResourceField otherField = entry.getResourceInformation().findFieldByUnderlyingName("testNested");
+		ResourceField relField = entry.getResourceInformation().findRelationshipFieldByName("testSerializeEager");
+
+		ImplicitOwnerBasedRelationshipRepository repo = new ImplicitOwnerBasedRelationshipRepository(
+				RelationIdTestResource.class
+		);
+		repo.setResourceRegistry(resourceRegistry);
+
+		Assert.assertTrue(repo.getMatcher().matches(otherField));
+		Assert.assertTrue(repo.getMatcher().matches(relField));
+
+		relRepository.setRelation(resource, 3L, "testSerializeEager");
+		Assert.assertEquals(3L, resource.getTestSerializeEagerId().longValue());
+		Assert.assertNull(resource.getTestSerializeEager());
+
+		Assert.assertSame(schedule3,
+				relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
+	}
 
 	@Test
 	public void checkSetRelationId() {
@@ -123,6 +175,24 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		relRepository.setRelation(resource, null, "testSerializeEager");
 		Assert.assertNull(resource.getTestSerializeEagerId());
 		Assert.assertNull(resource.getTestSerializeEager());
+	}
+
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void checkSetRelationIdNotFound() {
+		relRepository.setRelation(resource, 123123L, "testSerializeEager");
+		Assert.assertEquals(123123L, resource.getTestSerializeEagerId().longValue());
+		Assert.assertNull(resource.getTestSerializeEager());
+		relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class));
+	}
+
+
+	@Test
+	public void checkSetRelationIdToNull() {
+		relRepository.setRelation(resource, null, "testSerializeEager");
+		Assert.assertEquals(null, resource.getTestSerializeEagerId());
+		Assert.assertNull(resource.getTestSerializeEager());
+		Assert.assertNull(relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
 	}
 
 	@Test
