@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.reflect.Type;
+import java.util.Objects;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -12,9 +15,6 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
-import java.util.Objects;
 
 public class ResourceFieldImpl implements ResourceField {
 
@@ -227,27 +227,39 @@ public class ResourceFieldImpl implements ResourceField {
 		this.parentResourceInformation = resourceInformation;
 	}
 
-	class ResourceIdentifierAccessorAdapter implements ResourceFieldAccessor {
+	static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
 
-		private final ResourceFieldAccessor idAccessor;
+		protected final ResourceFieldAccessor wrappedAccessor;
 
-		public ResourceIdentifierAccessorAdapter(ResourceFieldAccessor idAccessor) {
-			this.idAccessor = idAccessor;
+		public ResourceFieldAccessorWrapper(ResourceFieldAccessor wrappedAccessor) {
+			this.wrappedAccessor = wrappedAccessor;
 		}
 
 		@Override
 		public Object getValue(Object resource) {
-			return idAccessor.getValue(resource);
+			return wrappedAccessor.getValue(resource);
+		}
+
+		@Override
+		public void setValue(Object resource, Object fieldValue) {
+			wrappedAccessor.setValue(resource, fieldValue);
+		}
+	}
+
+	class ResourceIdentifierAccessorAdapter extends ResourceFieldAccessorWrapper {
+
+		public ResourceIdentifierAccessorAdapter(ResourceFieldAccessor idAccessor) {
+			super(idAccessor);
 		}
 
 		@Override
 		public void setValue(Object resource, Object fieldValue) {
 			if (fieldValue == null || fieldValue instanceof ResourceIdentifier) {
-				idAccessor.setValue(resource, fieldValue);
+				super.setValue(resource, fieldValue);
 			}
 			else {
 				// TODO try to get access to opposite ResourceInformation in the future, ok for basic use cases
-				idAccessor.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
+				super.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
 			}
 		}
 	}

@@ -1,5 +1,9 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -39,23 +43,13 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.Repository;
-import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.legacy.repository.RelationshipRepository;
-import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import net.jodah.typetools.TypeResolver;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -291,7 +285,7 @@ public class CrnkBoot {
 			module.addFilter(filter);
 		}
 		for (Object repository : getInstancesByType(Repository.class)) {
-			setupRepository(module, repository);
+			module.addRepository(repository);
 		}
 		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
 			JsonApiResourceRepository annotation =
@@ -320,33 +314,6 @@ public class CrnkBoot {
 		if (instance instanceof HttpRequestContextAware) {
 			HttpRequestContextAware aware = (HttpRequestContextAware) instance;
 			aware.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
-		}
-	}
-
-	private void setupRepository(SimpleModule module, Object repository) {
-		if (repository instanceof ResourceRepository) {
-			ResourceRepository resRepository = (ResourceRepository) repository;
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, resRepository.getClass());
-			Class resourceClass = typeArgs[0];
-			module.addRepository(resourceClass, resRepository);
-		}
-		else if (repository instanceof RelationshipRepository) {
-			RelationshipRepository relRepository = (RelationshipRepository) repository;
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, relRepository.getClass());
-			Class sourceResourceClass = typeArgs[0];
-			Class targetResourceClass = typeArgs[2];
-			module.addRepository(sourceResourceClass, targetResourceClass, relRepository);
-		}
-		else if (repository instanceof ResourceRepositoryV2) {
-			ResourceRepositoryV2<?, ?> resRepository = (ResourceRepositoryV2<?, ?>) repository;
-			module.addRepository(resRepository.getResourceClass(), resRepository);
-		}
-		else if (repository instanceof RelationshipRepositoryV2) {
-			RelationshipRepositoryV2<?, ?, ?, ?> relRepository = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
-			module.addRepository(relRepository.getSourceResourceClass(), relRepository.getTargetResourceClass(), relRepository);
-		}
-		else {
-			throw new IllegalStateException(repository.toString());
 		}
 	}
 

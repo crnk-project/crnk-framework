@@ -10,6 +10,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
@@ -24,9 +25,11 @@ public class QuerySpecAdapterTest {
 	public void test() {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
-		ResourceInformation resourceInformation = new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null);
+		ResourceInformation resourceInformation =
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null);
 		resourceRegistry.addEntry(
-				new RegistryEntry(resourceInformation, new ResourceRepositoryInformationImpl("tasks", resourceInformation, RepositoryMethodAccess.ALL), null, null));
+				new RegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
+						resourceInformation, RepositoryMethodAccess.ALL))));
 
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.includeField(Arrays.asList("test"));

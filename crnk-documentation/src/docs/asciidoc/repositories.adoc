@@ -136,6 +136,13 @@ defined implementing `RelationshipRepositoryV2`. `RelationshipRepositoryV2` impl
 necessary to work with a relationship. It provides methods for both single-valued and multi-valued
 relationships:
 
+
+* `getMatcher()`
+  Provides a  `RelationshipMatcher` instance that specifies which relationships it is able provide.
+  It can match against source and target types and fields in any combination. Note that this
+  is a default method that access the legacy `getSourceResourceClass` and `getTargetResourceClass`
+  by default. Implementation of those methods can be omitted if a matcher is available.
+
 * `setRelation(T source, D_ID targetId, String fieldName)`
   Sets a resource defined by targetId to a field fieldName in an instance source. If no value is to be set, null value is passed.
 
@@ -178,7 +185,7 @@ implementation then looks as simple as:
 ----
 	public class ProjectToTaskRepository extends RelationshipRepositoryBase<Project, Long, Task, Long> {
 
-		public ScheduleToTaskRepository() {
+		public ProjectToTaskRepository() {
 			super(Project.class, Task.class);
 		}
 	}
@@ -198,6 +205,52 @@ For this to work, relations must be set up bidirectionally with the `opposite` a
 	    ...
 	}
 ----
+
+## RelationshipMatcher
+
+The ProjectToTaskRepository repository from the previous section establishes a relationship between
+project and task. But by implementing `RelationshipRepositoryV2.getMatcher()`, one can gain much
+more flexibility about which kind of relationships a repository is possible to serve.
+Rules can look like:
+
+[source]
+.RelationshipMatcherTest
+----
+new RelationshipMatcher().rule().source("projects").add().matches(field)
+new RelationshipMatcher().rule().target(Task.class).add().matches(field)
+new RelationshipMatcher().rule().target(Tasks.class).add().matches(field)
+new RelationshipMatcher().rule().field("tasks").add().matches(field)
+new RelationshipMatcher().rule().oppositeField("project").add().matches(field)
+[source]
+----
+
+One can implement, for example, a history relationship repository that introduces a history relationship for every other resource.
+In this example, `RelationshipMatcher` would match against the history resource as target. Such an example is
+depicated in the next section.
+
+
+## ResourceFieldContributor
+
+The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
+touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
+want to add further fields like that mentioned history relationship from the previous section. It can be implemented
+by a repository or obtained from the regular service discovery mechanism.
+
+Any type of field can be added: meta, links, attribute and relationship fields. For relationship fields
+an application may make use of `RelationshipMatcher` to provide repository serving those fields.
+Notice the `accessor` property that is used to obtain the value of that field
+(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example[crnk-examples/spring-boot-example]:
+
+[source]
+.HistoryRelationshipRepository
+----
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
+----
+
+- `getRelationshipFields` introduces the field dynamically instead of statically.
+- `getMatcher` attaches the repository to the historized resources.
+- `findManyTarget` implements the lookup of history elements.
 
 
 ## BulkRelationshipRepositoryV2

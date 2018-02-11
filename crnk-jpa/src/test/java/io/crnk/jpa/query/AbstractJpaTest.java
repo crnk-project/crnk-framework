@@ -8,6 +8,7 @@ import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.*;
@@ -102,6 +103,7 @@ public abstract class AbstractJpaTest {
 		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
 		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.addModule(module);
+		moduleRegistry.setServiceDiscovery(new EmptyServiceDiscovery());
 		moduleRegistry.init(new ObjectMapper());
 
 		queryFactory = createQueryFactory(em);

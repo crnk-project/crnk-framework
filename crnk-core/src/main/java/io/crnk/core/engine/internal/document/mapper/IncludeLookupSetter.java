@@ -389,7 +389,7 @@ public class IncludeLookupSetter {
 
 		@SuppressWarnings("rawtypes")
 		RelationshipRepositoryAdapter relationshipRepository =
-				registyEntry.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+				registyEntry.getRelationshipRepository(relationshipField, parameterProvider);
 		if (relationshipRepository != null) {
 			Map<Object, JsonApiResponse> responseMap;
 			if (isMany) {

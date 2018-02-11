@@ -12,6 +12,8 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
@@ -36,57 +38,71 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	private HttpMethod method;
 
+	private ResourceInformation owningResourceInformation;
+
 	private RepositoryRequestSpecImpl(ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
 
 	}
 
-	public static RepositoryRequestSpec forDelete(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, Serializable id) {
+	public static RepositoryRequestSpec forDelete(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
+			QueryAdapter queryAdapter, Serializable id) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = Arrays.asList(id);
+		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = HttpMethod.DELETE;
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forSave(ModuleRegistry moduleRegistry, HttpMethod method, QueryAdapter queryAdapter,
+	public static RepositoryRequestSpec forSave(ModuleRegistry moduleRegistry, HttpMethod method,
+			ResourceInformation owningResourceInformation, QueryAdapter queryAdapter,
 			Object entity) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.entity = entity;
+		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = method;
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forFindIds(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, Iterable<?> ids) {
+	public static RepositoryRequestSpec forFindIds(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
+			QueryAdapter queryAdapter, Iterable<?> ids) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
+		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = HttpMethod.GET;
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forFindAll(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter) {
+	public static RepositoryRequestSpec forFindAll(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
+			QueryAdapter queryAdapter) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
+		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = HttpMethod.GET;
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forFindId(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, Serializable id) {
+	public static RepositoryRequestSpec forFindId(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
+			QueryAdapter queryAdapter, Serializable id) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = Collections.singleton(id);
+		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = HttpMethod.GET;
 		return spec;
 	}
 
-	public static RepositoryRequestSpec forFindTarget(ModuleRegistry moduleRegistry, QueryAdapter queryAdapter, List<?> ids,
+	public static RepositoryRequestSpec forFindTarget(ModuleRegistry moduleRegistry,
+			QueryAdapter queryAdapter, List<?> ids,
 			ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
 		spec.relationshipField = relationshipField;
+		spec.owningResourceInformation = relationshipField.getParentResourceInformation();
 		spec.method = HttpMethod.GET;
 		PreconditionUtil.assertNotNull("relationshipField is null", relationshipField);
 		return spec;
@@ -99,6 +115,7 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
 		spec.relationshipField = relationshipField;
+		spec.owningResourceInformation = relationshipField.getParentResourceInformation();
 		spec.method = method;
 		PreconditionUtil.assertNotNull("relationshipField is null", relationshipField);
 		return spec;
@@ -117,6 +134,28 @@ class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	@Override
 	public ResourceField getRelationshipField() {
 		return relationshipField;
+	}
+
+	@Override
+	public QuerySpec getResponseQuerySpec() {
+		ResourceInformation responseResourceInformation = getResponseResourceInformation();
+		return getQuerySpec(responseResourceInformation);
+	}
+
+	@Override
+	public ResourceInformation getResponseResourceInformation() {
+		if (relationshipField != null) {
+			String oppositeResourceType = relationshipField.getOppositeResourceType();
+			ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
+			RegistryEntry entry = resourceRegistry.getEntry(oppositeResourceType);
+			return entry.getResourceInformation();
+		}
+		return owningResourceInformation;
+	}
+
+	@Override
+	public ResourceInformation getOwningResourceInformation() {
+		return owningResourceInformation;
 	}
 
 	@Override

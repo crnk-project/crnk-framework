@@ -1,5 +1,7 @@
 package io.crnk.jpa.internal;
 
+import io.crnk.core.engine.information.resource.ResourceValidator;
+import io.crnk.core.engine.parser.StringMapper;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,7 +86,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 
@@ -100,8 +102,11 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				: null;
 
 		TypeParser typeParser = context.getTypeParser();
-		return new JpaResourceInformation(typeParser, meta, resourceClass, resourceType, superResourceType,
+		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceType, superResourceType,
 				instanceBuilder, fields);
+		info.setValidator(new JpaOptimisticLockingValidator(meta));
+		info.setIdStringMapper(new JpaIdMapper(meta));
+		return info;
 	}
 
 	@Override
@@ -132,19 +137,16 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		super.init(context);
 	}
 
-	class JpaResourceInformation extends ResourceInformation {
+	class JpaOptimisticLockingValidator implements ResourceValidator {
 
 		private MetaDataObject jpaMeta;
 
-		public JpaResourceInformation(TypeParser typeParser, MetaDataObject meta, Class<?> resourceClass,
-				String resourceType, String superResourceType, // NOSONAR
-				ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
-			super(typeParser, resourceClass, resourceType, superResourceType, instanceBuilder, fields);
-			this.jpaMeta = meta;
+		public JpaOptimisticLockingValidator(MetaDataObject jpaMeta) {
+			this.jpaMeta = jpaMeta;
 		}
 
 		@Override
-		public void verify(Object entity, Document requestDocument) {
+		public void validate(Object entity, Document requestDocument) {
 			// TODO consider implementing proper versioning/locking/timestamping mechanism
 			checkOptimisticLocking(entity, requestDocument.getSingleData().get());
 		}
@@ -164,21 +166,31 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				}
 			}
 		}
+	}
 
-		/**
-		 * Specialized ID handling to take care of embeddables and compound
-		 * primary keys.
-		 */
-		@Override
-		public Serializable parseIdString(String id) {
-			return fromKeyString(id);
+	/**
+	 * Specialized ID handling to take care of embeddables and compound
+	 * primary keys.
+	 */
+	class JpaIdMapper implements StringMapper {
+
+		private MetaDataObject jpaMeta;
+
+		public JpaIdMapper(MetaDataObject jpaMeta) {
+			this.jpaMeta = jpaMeta;
 		}
 
-		private Serializable fromKeyString(String id) {
 
+		@Override
+		public String toString(Object input) {
+			return jpaMeta.getPrimaryKey().toKeyString(input);
+		}
+
+		@Override
+		public Object parse(String input) {
 			MetaKey primaryKey = jpaMeta.getPrimaryKey();
 			MetaAttribute attr = primaryKey.getUniqueElement();
-			return (Serializable) fromKeyString(attr.getType(), id);
+			return (Serializable) fromKeyString(attr.getType(), input);
 		}
 
 		private Object fromKeyString(MetaType type, String idString) {
@@ -207,14 +219,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			}
 			return id;
 		}
-
-		/**
-		 * Specialized ID handling to take care of embeddables and compound
-		 * primary keys.
-		 */
-		@Override
-		public String toIdString(Object id) {
-			return jpaMeta.getPrimaryKey().toKeyString(id);
-		}
 	}
+
 }

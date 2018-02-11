@@ -21,7 +21,7 @@ public class User {
 
 	@JsonApiToMany(lazy = false)
 	@JsonApiIncludeByDefault
-	private List<Project> assignedTasks = Collections.emptyList();
+	private List<Task> assignedTasks = Collections.emptyList();
 
 	@JsonApiMetaInformation
 	private MetaInformation metaInformation;
@@ -69,11 +69,11 @@ public class User {
 		this.linksInformation = linksInformation;
 	}
 
-	public List<Project> getAssignedTasks() {
+	public List<Task> getAssignedTasks() {
 		return assignedTasks;
 	}
 
-	public void setAssignedTasks(List<Project> assignedTasks) {
+	public void setAssignedTasks(List<Task> assignedTasks) {
 		this.assignedTasks = assignedTasks;
 	}
 }

@@ -31,7 +31,7 @@ public class RelationshipRepositoryBehaviorTest {
 	@Test
 	public void checkRelationIdTriggersImplicitOwnerRepo() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepositoryForType("schedules", null)
+		Object relRepository = entry.getRelationshipRepository("testRelationId", null)
 				.getRelationshipRepository();
 		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
 	}
@@ -39,7 +39,7 @@ public class RelationshipRepositoryBehaviorTest {
 	@Test
 	public void checkNoLookupTriggersImplicitOwnerRepo() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepositoryForType("lazy_tasks", null)
+		Object relRepository = entry.getRelationshipRepository("testNoLookup", null)
 				.getRelationshipRepository();
 		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
 	}
@@ -47,14 +47,14 @@ public class RelationshipRepositoryBehaviorTest {
 	@Test(expected = RelationshipRepositoryNotFoundException.class)
 	public void checkAlwaysLookupTriggersNoImplicitRepo() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepositoryForType("projects-polymorphic", null);
+		Object relRepository = entry.getRelationshipRepository("testAlwaysLookup", null);
 		Assert.assertNull(relRepository);
 	}
 
 	@Test
 	public void checkImplicitOwnerRepo() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepositoryForType("projects", null)
+		Object relRepository = entry.getRelationshipRepository("testImplicityFromOwner", null)
 				.getRelationshipRepository();
 		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
 	}
@@ -62,7 +62,7 @@ public class RelationshipRepositoryBehaviorTest {
 	@Test
 	public void checkImplicitGetOppositeModifyOwner() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepositoryForType("tasks", null)
+		Object relRepository = entry.getRelationshipRepository("testImplicitGetOppositeModifyOwner", null)
 				.getRelationshipRepository();
 		Assert.assertEquals(RelationshipRepositoryBase.class, relRepository.getClass());
 	}

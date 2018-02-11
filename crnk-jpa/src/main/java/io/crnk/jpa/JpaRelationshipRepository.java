@@ -1,5 +1,7 @@
 package io.crnk.jpa;
 
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.repository.RelationshipMatcher;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,8 @@ import io.crnk.meta.model.MetaType;
 public class JpaRelationshipRepository<S, I extends Serializable, T, J extends Serializable> extends JpaRepositoryBase<T>
 		implements RelationshipRepositoryV2<S, I, T, J>, BulkRelationshipRepositoryV2<S, I, T, J> {
 
+	private final ResourceField resourceField;
+
 	private Class<S> sourceResourceClass;
 
 	private Class<?> sourceEntityClass;
@@ -46,18 +50,24 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	 * JPA relationship directly exposed as repository
 	 *
 	 * @param module that manages this repository
-	 * @param sourceResourceClass from this relation
-	 * @param targetResourceClass from this relation
+	 * @param resourceField from this relation
+	 * @param repositoryConfig from this relation
 	 */
-	public JpaRelationshipRepository(JpaModule module, Class<S> sourceResourceClass, JpaRepositoryConfig<T>
-			targetResourceClass) {
-		super(module, targetResourceClass);
-		this.sourceResourceClass = sourceResourceClass;
+	public JpaRelationshipRepository(JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T>
+			repositoryConfig) {
+		super(module, repositoryConfig);
+		this.sourceResourceClass = (Class<S>) resourceField.getParentResourceInformation().getResourceClass();
+		this.resourceField = resourceField;
 
 		JpaRepositoryConfig<S> sourceMapping = module.getRepositoryConfig(sourceResourceClass);
 		this.sourceEntityClass = sourceMapping.getEntityClass();
 		this.sourceMapper = sourceMapping.getMapper();
 		this.entityMeta = module.getJpaMetaProvider().getMeta(sourceEntityClass);
+	}
+
+	@Override
+	public RelationshipMatcher getMatcher() {
+		return new RelationshipMatcher().rule().field(resourceField).add();
 	}
 
 	@Override

@@ -210,7 +210,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 	@Override
 	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field) {
-		// nothing to verify during deserialization on client-side
+		// nothing to validate during deserialization on client-side
 		// there is only a need to check field access when receiving resources
 		// on the server-side client needs all the data he gets from the server
 		return true;

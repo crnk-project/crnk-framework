@@ -4,9 +4,8 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.test.mock.ClassTestUtils;
+import io.crnk.test.mock.TestModule;
 import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,9 +23,8 @@ public class HomeModuleTest {
 		this.module = Mockito.spy(HomeModule.create(HomeFormat.JSON_HOME));
 		boot = new CrnkBoot();
 		boot.addModule(module);
+		boot.addModule(new TestModule());
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery("io.crnk.test.mock", new SampleJsonServiceLocator
-				()));
 		boot.boot();
 	}
 

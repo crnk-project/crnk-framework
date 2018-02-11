@@ -1,9 +1,14 @@
 package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.repository.RelationshipMatcher;
 
 public interface RegistryEntryBuilder {
 
+	/**
+	 * Builds up the entry from the provided implementation
+	 */
+	void fromImplemenation(Object repository);
 
 	interface ResourceRepository {
 
@@ -23,7 +28,7 @@ public interface RegistryEntryBuilder {
 
 	InformationBuilder.Resource resource();
 
-	RelationshipRepository relationshipRepository(String targetResourceType);
+	RelationshipRepository relationshipRepositoryForField(String fieldName);
 
 	RegistryEntry build();
 

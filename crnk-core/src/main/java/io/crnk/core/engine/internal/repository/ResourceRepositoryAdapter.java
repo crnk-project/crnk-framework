@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.io.Serializable;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
@@ -14,8 +16,6 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.repository.ResourceRepository;
 
-import java.io.Serializable;
-
 /**
  * A repository adapter for resource repository
  */
@@ -25,13 +25,16 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 	private final Object resourceRepository;
 
 	private final boolean isAnnotated;
+
 	private boolean return404OnNull;
 
-	public ResourceRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry, Object resourceRepository) {
+	public ResourceRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry,
+			Object resourceRepository) {
 		super(resourceInformation, moduleRegistry);
 		this.resourceRepository = resourceRepository;
 		this.isAnnotated = resourceRepository instanceof AnnotatedResourceRepositoryAdapter;
-		return404OnNull = Boolean.parseBoolean(moduleRegistry.getPropertiesProvider().getProperty(CrnkProperties.RETURN_404_ON_NULL));
+		return404OnNull =
+				Boolean.parseBoolean(moduleRegistry.getPropertiesProvider().getProperty(CrnkProperties.RETURN_404_ON_NULL));
 	}
 
 	public JsonApiResponse findOne(I id, QueryAdapter queryAdapter) {
@@ -46,9 +49,12 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 				Object resource;
 				if (isAnnotated) {
 					resource = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findOne(id, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
-					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec(resourceInformation));
-				} else {
+				}
+				else if (resourceRepository instanceof ResourceRepositoryV2) {
+					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec
+							(resourceInformation));
+				}
+				else {
 					resource = ((ResourceRepository) resourceRepository).findOne(id, request.getQueryParams());
 				}
 				if (resource == null && return404OnNull) {
@@ -58,7 +64,8 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 			}
 
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindId(moduleRegistry, queryAdapter, id);
+		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindId(moduleRegistry, resourceInformation,
+				queryAdapter, id);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -73,17 +80,20 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 				Object resources;
 				if (isAnnotated) {
 					resources = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findAll(queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				}
+				else if (resourceRepository instanceof ResourceRepositoryV2) {
 					QuerySpec querySpec = request.getQuerySpec(resourceInformation);
 					resources = ((ResourceRepositoryV2) resourceRepository).findAll(querySpec);
-				} else {
+				}
+				else {
 					resources = ((ResourceRepository) resourceRepository).findAll(request.getQueryParams());
 				}
 				return getResponse(resourceRepository, resources, request);
 			}
 
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindAll(moduleRegistry, queryAdapter);
+		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindAll(moduleRegistry, resourceInformation,
+				queryAdapter);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -99,16 +109,20 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 				Object resources;
 				if (isAnnotated) {
 					resources = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findAll(ids, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
-					resources = ((ResourceRepositoryV2) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
-				} else {
+				}
+				else if (resourceRepository instanceof ResourceRepositoryV2) {
+					resources =
+							((ResourceRepositoryV2) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
+				}
+				else {
 					resources = ((ResourceRepository) resourceRepository).findAll(ids, request.getQueryParams());
 				}
 				return getResponse(resourceRepository, resources, request);
 			}
 
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindIds(moduleRegistry, queryAdapter, ids);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forFindIds(moduleRegistry, resourceInformation, queryAdapter, ids);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -132,20 +146,24 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 				Object resource;
 				if (isAnnotated) {
 					resource = ((AnnotatedResourceRepositoryAdapter) resourceRepository).save(entity);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				}
+				else if (resourceRepository instanceof ResourceRepositoryV2) {
 					if (method == HttpMethod.POST) {
 						resource = ((ResourceRepositoryV2) resourceRepository).create(entity);
-					} else {
+					}
+					else {
 						resource = ((ResourceRepositoryV2) resourceRepository).save(entity);
 					}
-				} else {
+				}
+				else {
 					resource = ((ResourceRepository) resourceRepository).save(entity);
 				}
 				return getResponse(resourceRepository, resource, request);
 			}
 
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forSave(moduleRegistry, method, queryAdapter, entity);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forSave(moduleRegistry, method, resourceInformation, queryAdapter, entity);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -160,25 +178,23 @@ public class ResourceRepositoryAdapter<T, I extends Serializable> extends Respon
 				Serializable id = request.getId();
 				if (isAnnotated) {
 					((AnnotatedResourceRepositoryAdapter) resourceRepository).delete(id, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				}
+				else if (resourceRepository instanceof ResourceRepositoryV2) {
 					((ResourceRepositoryV2) resourceRepository).delete(id);
-				} else {
+				}
+				else {
 					((ResourceRepository) resourceRepository).delete(id);
 				}
 				return new JsonApiResponse();
 			}
 		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forDelete(moduleRegistry, queryAdapter, id);
+		RepositoryRequestSpec requestSpec =
+				RepositoryRequestSpecImpl.forDelete(moduleRegistry, resourceInformation, queryAdapter, id);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
 	public Object getResourceRepository() {
 		return resourceRepository;
-	}
-
-	@Override
-	protected ResourceInformation getResourceInformation(Object repository) {
-		return resourceInformation;
 	}
 
 	public Class<?> getResourceClass() {

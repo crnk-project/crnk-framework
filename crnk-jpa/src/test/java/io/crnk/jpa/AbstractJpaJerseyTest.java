@@ -21,6 +21,7 @@ import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
+import io.crnk.test.mock.TestModule;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
@@ -116,7 +117,6 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 	private class TestApplication extends ResourceConfig {
 
 		public TestApplication() {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.test.mock");
 
 			Assert.assertNull(context);
 
@@ -130,10 +130,13 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			if (useQuerySpec) {
 				feature = new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
 						new SampleJsonServiceLocator());
-			} else {
+			}
+			else {
 				feature = new CrnkFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(), new SampleJsonServiceLocator
 						());
 			}
+
+			feature.addModule(new TestModule());
 
 			JpaModule module = JpaModule.newServerModule(em, transactionRunner);
 			module.setQueryFactory(QuerydslQueryFactory.newInstance());
