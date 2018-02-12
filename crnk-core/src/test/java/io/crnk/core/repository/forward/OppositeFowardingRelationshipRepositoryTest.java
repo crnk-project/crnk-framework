@@ -179,9 +179,6 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		project.setTasks(null);
 		projectRepository.save(project);
 
-		// manipulate
-		task.setId(null);
-
 		relRepository = new ForwardingRelationshipRepository(Task.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
@@ -193,6 +190,37 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		}
 		catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("field tasks is null for"));
+		}
+	}
+
+	@Test
+	public void checkFindTargetWithNullRelationshipValue() {
+		TaskRepository taskRepository = new TaskRepository();
+		Task task = new Task();
+		task.setId(13L);
+		task.setName("task");
+		taskRepository.save(task);
+
+		Task nullIdTask = new Task();
+
+		ProjectRepository projectRepository = new ProjectRepository();
+		Project project = new Project();
+		project.setId(42L);
+		project.setName("project");
+		project.setTasks(Arrays.asList(nullIdTask));
+		projectRepository.save(project);
+
+		relRepository = new ForwardingRelationshipRepository(Task.class, null,
+				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+		relRepository.setResourceRegistry(resourceRegistry);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		try {
+			relRepository.findOneTarget(13L, "project", querySpec);
+			Assert.fail();
+		}
+		catch (IllegalStateException e) {
+			Assert.assertTrue(e.getMessage().contains("id is null for"));
 		}
 	}
 
