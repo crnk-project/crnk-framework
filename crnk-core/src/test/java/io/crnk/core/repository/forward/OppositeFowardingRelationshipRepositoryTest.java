@@ -9,12 +9,10 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
-import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -31,10 +29,6 @@ public class OppositeFowardingRelationshipRepositoryTest {
 
 
 	private ForwardingRelationshipRepository relRepository;
-
-	private ScheduleRepositoryImpl scheduleRepository;
-
-	private Schedule schedule3;
 
 	private RelationIdTestRepository testRepository;
 
