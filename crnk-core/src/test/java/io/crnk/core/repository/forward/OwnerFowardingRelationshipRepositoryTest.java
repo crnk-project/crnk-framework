@@ -58,6 +58,8 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 	private ResourceRegistry resourceRegistry;
 
+	private ForwardingRelationshipRepository projectTaskRepository;
+
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
@@ -78,6 +80,11 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
 				ForwardingDirection.OWNER);
 		taskProjectRepository.setResourceRegistry(resourceRegistry);
+
+		projectTaskRepository = new ForwardingRelationshipRepository(Project.class, taskProjectMatcher, ForwardingDirection
+				.OWNER,
+				ForwardingDirection.OWNER);
+		projectTaskRepository.setResourceRegistry(resourceRegistry);
 
 		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
 		testRepository.setResourceRegistry(resourceRegistry);
@@ -211,6 +218,25 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		Assert.assertEquals(42L, target.getId().longValue());
 	}
 
+
+	@Test
+	public void checkAddRemoveRelations() {
+		projectTaskRepository.addRelations(project, Arrays.asList(13L, 14L), "tasks");
+		Assert.assertEquals(2, project.getTasks().size());
+		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
+
+		projectTaskRepository.addRelations(project, Arrays.asList(15L), "tasks");
+		Assert.assertEquals(3, project.getTasks().size());
+		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
+		Assert.assertEquals(15L, project.getTasks().get(2).getId().longValue());
+
+		projectTaskRepository.removeRelations(project, Arrays.asList(13L), "tasks");
+		Assert.assertEquals(2, project.getTasks().size());
+		Assert.assertEquals(14L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(15L, project.getTasks().get(1).getId().longValue());
+	}
 
 	@After
 	public void teardown() {

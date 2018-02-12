@@ -2,6 +2,7 @@ package io.crnk.core.repository.foward.strategy;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 
 		ResourceRepositoryAdapter<D, J> targetAdapter = targetEntry.getResourceRepository();
 		JsonApiResponse response = targetAdapter.findAll(context.createQueryAdapter(idQuerySpec));
-		List<D> results = (List<D>) response.getEntity();
+		Collection<D> results = (Collection<D>) response.getEntity();
 
 		MultivaluedMap<I, D> bulkResult = new MultivaluedMap<I, D>() {
 
