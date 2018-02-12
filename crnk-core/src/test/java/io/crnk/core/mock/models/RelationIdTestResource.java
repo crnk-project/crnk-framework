@@ -9,6 +9,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "relationIdTest")
@@ -64,7 +65,8 @@ public class RelationIdTestResource {
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private RelationIdTestResource testNested;
 
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "testNested")
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "testNested",
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
 	private RelationIdTestResource testNestedOpposite;
 
 	@JsonApiRelationId

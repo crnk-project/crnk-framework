@@ -53,8 +53,6 @@ public class GetOppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(RelationIdTestResource.class, relMatcher,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
 		relRepository.setResourceRegistry(resourceRegistry);
-
-
 	}
 
 	@Test
