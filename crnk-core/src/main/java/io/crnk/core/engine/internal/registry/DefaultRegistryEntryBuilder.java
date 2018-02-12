@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
@@ -12,27 +18,24 @@ import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceEntry;
-import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.repository.RelationshipRepositoryBase;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
+import io.crnk.core.repository.foward.ForwardingDirection;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
@@ -42,12 +45,6 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,8 +169,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 
 	private Map<ResourceField, ResponseRelationshipEntry> buildRelationships(ResourceInformation resourceInformation) {
-		for(String relationshipName : relationshipRepositoryMap.keySet()){
-			if(resourceInformation.findFieldByUnderlyingName(relationshipName) == null){
+		for (String relationshipName : relationshipRepositoryMap.keySet()) {
+			if (resourceInformation.findFieldByUnderlyingName(relationshipName) == null) {
 				throw new ResourceFieldNotFoundException("failed to find relationship field '" + relationshipName + "' to setup "
 						+ "registered relationship repository");
 			}
@@ -299,11 +296,17 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		if (behavior == RelationshipRepositoryBehavior.DEFAULT) {
 			if (relationshipField.hasIdField()
 					|| relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
-				behavior = RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER;
+				behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
 			}
 			else {
 				behavior = RelationshipRepositoryBehavior.CUSTOM;
 			}
+		}
+		if (behavior == RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER) {
+			behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
+		}
+		if (behavior == RelationshipRepositoryBehavior.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER) {
+			behavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER;
 		}
 
 		if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
@@ -319,14 +322,20 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			RelationshipRepositoryInformationImpl implicitRepoInformation =
 					new RelationshipRepositoryInformationImpl(matcher, access);
 
-			RelationshipRepositoryBase repository;
-			if (behavior == RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER) {
-				repository = new ImplicitOwnerBasedRelationshipRepository(sourceInformation.getResourceType());
+			ForwardingRelationshipRepository repository;
+			if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
+				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+						ForwardingDirection.OWNER, ForwardingDirection.OWNER);
+			}
+			else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
 			}
 			else {
 				PreconditionUtil.assertEquals("unknown behavior", RelationshipRepositoryBehavior
-						.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER, behavior);
-				repository = new RelationshipRepositoryBase(sourceInformation.getResourceType());
+						.FORWARD_OPPOSITE, behavior);
+				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+						ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 			}
 			repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
 			return setupRelationship(relationshipField, implicitRepoInformation, repository);

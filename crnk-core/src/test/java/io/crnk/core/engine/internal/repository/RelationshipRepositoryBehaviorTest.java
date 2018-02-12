@@ -8,8 +8,7 @@ import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.RelationshipBehaviorTestResource;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.repository.RelationshipRepositoryBase;
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +32,7 @@ public class RelationshipRepositoryBehaviorTest {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
 		Object relRepository = entry.getRelationshipRepository("testRelationId", null)
 				.getRelationshipRepository();
-		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
+		Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
 	}
 
 	@Test
@@ -41,7 +40,7 @@ public class RelationshipRepositoryBehaviorTest {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
 		Object relRepository = entry.getRelationshipRepository("testNoLookup", null)
 				.getRelationshipRepository();
-		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
+		Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
 	}
 
 	@Test(expected = RelationshipRepositoryNotFoundException.class)
@@ -56,7 +55,7 @@ public class RelationshipRepositoryBehaviorTest {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
 		Object relRepository = entry.getRelationshipRepository("testImplicityFromOwner", null)
 				.getRelationshipRepository();
-		Assert.assertEquals(ImplicitOwnerBasedRelationshipRepository.class, relRepository.getClass());
+		Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
 	}
 
 	@Test
@@ -64,6 +63,6 @@ public class RelationshipRepositoryBehaviorTest {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
 		Object relRepository = entry.getRelationshipRepository("testImplicitGetOppositeModifyOwner", null)
 				.getRelationshipRepository();
-		Assert.assertEquals(RelationshipRepositoryBase.class, relRepository.getClass());
+		Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
 	}
 }

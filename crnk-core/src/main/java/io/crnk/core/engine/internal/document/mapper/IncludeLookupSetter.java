@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -328,9 +329,12 @@ public class IncludeLookupSetter {
 			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider,
 			Map<ResourceIdentifier, Resource> resourceMap, Map<ResourceIdentifier, Object> entityMap) {
 
-		ResourceInformation oppositeResourceInformation =
-				resourceRegistry.getEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
-		RegistryEntry oppositeEntry = resourceRegistry.getEntry(oppositeResourceInformation.getResourceType());
+		String oppositeResourceType = relationshipField.getOppositeResourceType();
+		RegistryEntry oppositeEntry = resourceRegistry.getEntry(oppositeResourceType);
+		if (oppositeEntry == null) {
+			throw new RepositoryNotFoundException("no resource with type " + oppositeResourceType + " found");
+		}
+		ResourceInformation oppositeResourceInformation = oppositeEntry.getResourceInformation();
 		ResourceRepositoryAdapter oppositeResourceRepository = oppositeEntry.getResourceRepository(parameterProvider);
 		if (oppositeResourceRepository == null) {
 			throw new RepositoryNotFoundException(
@@ -431,7 +435,8 @@ public class IncludeLookupSetter {
 		Map<String, Relationship> relationships = sourceResource.getRelationships();
 		Relationship relationship = relationships.get(relationshipName);
 
-		RegistryEntry entry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
+		String oppositeType = relationshipField.getOppositeResourceType();
+		RegistryEntry entry = Objects.requireNonNull(resourceRegistry.getEntry(oppositeType));
 		ResourceInformation targetResourceInformation = entry.getResourceInformation();
 
 		if (targetEntityId instanceof Iterable) {
