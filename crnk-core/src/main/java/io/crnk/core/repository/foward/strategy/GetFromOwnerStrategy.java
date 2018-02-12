@@ -1,4 +1,4 @@
-package io.crnk.core.repository.implicit;
+package io.crnk.core.repository.foward.strategy;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -15,55 +15,24 @@ import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.RelationshipRepositoryBase;
-import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 
-/**
- * Implements RelationshipRepository for relationships making use of @JsonApiRelationId
- * by delegating to the underlying resource. Provides an implementation for
- * {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior#IMPLICIT_FROM_OWNER}.
- *
- * @deprecated use {@link ForwardingRelationshipRepository}
- */
-@Deprecated
-public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
-		extends RelationshipRepositoryBase<T, I, D, J> {
-
-	/**
-	 * default constructor for CDI an other DI libraries
-	 */
-	protected ImplicitOwnerBasedRelationshipRepository() {
-	}
-
-	public ImplicitOwnerBasedRelationshipRepository(Class sourceResourceClass, Class targetResourceClass) {
-		super(sourceResourceClass, targetResourceClass);
-	}
-
-	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType, String targetResourceType) {
-		super(sourceResourceType, targetResourceType);
-	}
-
-	public ImplicitOwnerBasedRelationshipRepository(Class sourceResourceClass) {
-		super(sourceResourceClass);
-	}
-
-	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType) {
-		super(sourceResourceType);
-	}
+public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serializable> extends ForwardingStrategyBase
+		implements ForwardingGetStrategy<T, I, D, J> {
 
 
 	@SuppressWarnings("unchecked")
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		RegistryEntry sourceEntry = getSourceEntry();
+		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
-
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
-		List sources = (List) sourceEntry.getResourceRepository().findAll(sourceIds, getSaveQueryAdapter(fieldName)).getEntity();
+		RegistryEntry targetEntry = context.getTargetEntry(field);
 
-		ResourceInformation targetInformation = getTargetInformation(field);
+		List sources = (List) sourceEntry.getResourceRepository().findAll(sourceIds,
+				context.createSaveQueryAdapter(fieldName)).getEntity();
+
+		ResourceInformation targetInformation = targetEntry.getResourceInformation();
 
 		List<D> targets;
 		if (field.hasIdField()) {
@@ -79,10 +48,10 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 			}
 
 			QuerySpec idQuerySpec = new QuerySpec(targetInformation);
-			ResourceRepositoryAdapter<D, J> targetAdapter = getTargetEntry(field).getResourceRepository();
-			JsonApiResponse response = targetAdapter.findAll(targetIds, new QuerySpecAdapter(idQuerySpec, resourceRegistry));
+			ResourceRepositoryAdapter<D, J> targetAdapter = targetEntry.getResourceRepository();
+			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(idQuerySpec));
 			targets = (List<D>) response.getEntity();
-			return toResult(fieldName, targetInformation, sources, targets);
+			return toResult(field, targetInformation, sources, targets);
 		}
 		else {
 			MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
@@ -109,13 +78,10 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 		}
 	}
 
-	private MultivaluedMap<I, D> toResult(String fieldName, ResourceInformation targetInformation,
+	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
 			List sources,
 			List<D> targets) {
 
-		RegistryEntry sourceEntry = getSourceEntry();
-		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
-		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
 
 			@Override
@@ -131,7 +97,7 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 		}
 
 		for (Object source : sources) {
-			Object sourceId = sourceInformation.getId(source);
+			Object sourceId = field.getParentResourceInformation().getId(source);
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
 				for (Object targetElementId : (Collection) targetId) {
@@ -155,9 +121,5 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 					field.getUnderlyingName() + ", sourceType=" + field.getParentResourceInformation().getResourceType());
 		}
 		bulkResult.add(sourceId, target);
-	}
-
-	private ResourceInformation getTargetInformation(ResourceField field) {
-		return resourceRegistry.getEntry(field.getOppositeResourceType()).getResourceInformation();
 	}
 }

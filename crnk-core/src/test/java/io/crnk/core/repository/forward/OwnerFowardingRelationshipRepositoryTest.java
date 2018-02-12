@@ -1,7 +1,9 @@
-package io.crnk.core.engine.internal.repository;
+package io.crnk.core.repository.forward;
+
+import java.util.Arrays;
+import java.util.List;
 
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -20,19 +22,19 @@ import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
+import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.repository.foward.ForwardingDirection;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImplicitOwnerBasedRelationshipRepositoryTest {
+public class OwnerFowardingRelationshipRepositoryTest {
 
 
-	private ImplicitOwnerBasedRelationshipRepository relRepository;
+	private ForwardingRelationshipRepository relRepository;
 
 	private ScheduleRepositoryImpl scheduleRepository;
 
@@ -52,7 +54,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	private Task task;
 
-	private ImplicitOwnerBasedRelationshipRepository taskProjectRepository;
+	private ForwardingRelationshipRepository taskProjectRepository;
 
 	private ResourceRegistry resourceRegistry;
 
@@ -69,10 +71,12 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
-				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepository("testSerializeEager", null)
+				(ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager", null)
 						.getRelationshipRepository();
 
-		taskProjectRepository = new ImplicitOwnerBasedRelationshipRepository(Task.class, Project.class);
+		RelationshipMatcher taskProjectMatcher = new RelationshipMatcher().rule().source(Task.class).target(Project.class).add();
+		taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
+				ForwardingDirection.OWNER);
 		taskProjectRepository.setResourceRegistry(resourceRegistry);
 
 		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
@@ -111,50 +115,7 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	@Test
 	public void hasProtectedDefaultConstructor() {
-		CoreClassTestUtils.assertProtectedConstructor(ImplicitOwnerBasedRelationshipRepository.class);
-	}
-
-	@Test
-	public void testSourceTargetResourceTypeConstructor() {
-		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
-		ResourceField otherField = entry.getResourceInformation().findFieldByUnderlyingName("testNested");
-		ResourceField relField = entry.getResourceInformation().findRelationshipFieldByName("testSerializeEager");
-
-		ImplicitOwnerBasedRelationshipRepository repo = new ImplicitOwnerBasedRelationshipRepository("relationIdTest",
-				"schedules");
-		repo.setResourceRegistry(resourceRegistry);
-
-		Assert.assertFalse(repo.getMatcher().matches(otherField));
-		Assert.assertTrue(repo.getMatcher().matches(relField));
-
-		relRepository.setRelation(resource, 3L, "testSerializeEager");
-		Assert.assertEquals(3L, resource.getTestSerializeEagerId().longValue());
-		Assert.assertNull(resource.getTestSerializeEager());
-
-		Assert.assertSame(schedule3,
-				relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
-	}
-
-	@Test
-	public void testSourceOnlyClassConstructor() {
-		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
-		ResourceField otherField = entry.getResourceInformation().findFieldByUnderlyingName("testNested");
-		ResourceField relField = entry.getResourceInformation().findRelationshipFieldByName("testSerializeEager");
-
-		ImplicitOwnerBasedRelationshipRepository repo = new ImplicitOwnerBasedRelationshipRepository(
-				RelationIdTestResource.class
-		);
-		repo.setResourceRegistry(resourceRegistry);
-
-		Assert.assertTrue(repo.getMatcher().matches(otherField));
-		Assert.assertTrue(repo.getMatcher().matches(relField));
-
-		relRepository.setRelation(resource, 3L, "testSerializeEager");
-		Assert.assertEquals(3L, resource.getTestSerializeEagerId().longValue());
-		Assert.assertNull(resource.getTestSerializeEager());
-
-		Assert.assertSame(schedule3,
-				relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
+		CoreClassTestUtils.assertProtectedConstructor(ForwardingRelationshipRepository.class);
 	}
 
 	@Test

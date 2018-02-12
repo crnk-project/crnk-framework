@@ -165,47 +165,6 @@ All of the methods in this interface have fieldName field as their last paramete
 are multiple relationships between two resources.
 
 
-
-## RelationshipRepositoryBase
-
-NOTE: Also have a look at <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>> before getting started to use
-this base class.
-
-In many cases, relationship operations can be mapped back to resource repository operations. Making the need
-for a custom relationship repository implementation redundant. `@JsonApiRelationId` fields is one example
-where Crnk will take care of this automatically. But there are many other scenarios where application apply
-similar techniques. A findManyTargets request might can be
-served by filtering the target repository. Or a relationship can be set by invoking the save operation
-on either the source or target resource repository (usually you want to save on the single-valued side).
-The ResourceRepositoryBase is a base class that takes care of exactly this. A repository
-implementation then looks as simple as:
-
-
-[source]
-----
-	public class ProjectToTaskRepository extends RelationshipRepositoryBase<Project, Long, Task, Long> {
-
-		public ProjectToTaskRepository() {
-			super(Project.class, Task.class);
-		}
-	}
-----
-
-For this to work, relations must be set up bidirectionally with the `opposite` attribute:
-
-[source]
-----
-	@JsonApiResource(type = "tasks")
-	public class Task {
-
-		@JsonApiToOne(opposite = "tasks")
-		@JsonApiIncludeByDefault
-		private Project project;
-
-	    ...
-	}
-----
-
 ## RelationshipMatcher
 
 The ProjectToTaskRepository repository from the previous section establishes a relationship between
@@ -251,6 +210,50 @@ include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/exa
 - `getRelationshipFields` introduces the field dynamically instead of statically.
 - `getMatcher` attaches the repository to the historized resources.
 - `findManyTarget` implements the lookup of history elements.
+
+
+## ForwardingRelationshipRepository
+
+NOTE: Also have a look at <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>> before getting started to use
+this base class.
+
+In many cases, relationship operations can be mapped back to resource repository operations. Making the need
+for a custom relationship repository implementation redundant. `@JsonApiRelationId` fields is one example
+where Crnk will take care of this automatically. But there are many other scenarios where application apply
+similar techniques. A findManyTargets request might can be
+served by filtering the target repository. Or a relationship can be set by invoking the save operation
+on either the source or target resource repository (usually you want to save on the single-valued side).
+The `ForwardingRelationshipRepository` is a base class that takes care of exactly such use cases.
+`ForwardingRelationshipRepository` knows to `ForwardingDirection`: `OWNER` and `OPPOSITE`. The former forwards requests
+to the resource repository of the owning side of a relationship, while the later forwards to the opposite side.
+`ForwardingDirection` and be set separately for `GET` and modification (`POST`, `PATCH`, `DELETE`) operations.
+
+An example to create such a repository looks like:
+
+[source]
+----
+RelationshipMatcher taskProjectMatcher = new RelationshipMatcher();
+taskProjectMatcher.rule().source(Task.class).target(Project.class).add();
+
+new ForwardingRelationshipRepository(
+  Task.class, taskProjectMatcher, ForwardingDirection.OWNER, ForwardingDirection.OWNER
+);
+----
+
+Note that to access the opposite side for `GET` operations, relations must be set up bidirectionally with the
+`opposite` attribute (to allow filtering in that direction):
+
+[source]
+----
+	@JsonApiResource(type = "tasks")
+	public class Task {
+
+		@JsonApiRelation(opposite = "tasks", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+		private Project project;
+
+	    ...
+	}
+----
 
 
 ## BulkRelationshipRepositoryV2
