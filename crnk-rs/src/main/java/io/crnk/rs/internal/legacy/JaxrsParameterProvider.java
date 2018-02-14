@@ -2,12 +2,12 @@ package io.crnk.rs.internal.legacy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.rs.internal.legacy.provider.Parameter;
 import io.crnk.rs.internal.legacy.provider.RequestContextParameterProvider;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.HeaderParam;

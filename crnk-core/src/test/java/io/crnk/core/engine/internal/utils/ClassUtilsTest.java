@@ -19,7 +19,7 @@ import org.junit.rules.ExpectedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class ClassUtilsTest {
 

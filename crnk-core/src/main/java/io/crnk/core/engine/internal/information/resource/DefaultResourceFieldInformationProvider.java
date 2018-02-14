@@ -22,7 +22,7 @@ import io.crnk.core.resource.annotations.SerializeType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 /**
  * Process the Crnk JSON API annotations.

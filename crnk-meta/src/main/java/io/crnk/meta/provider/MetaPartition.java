@@ -1,6 +1,6 @@
 package io.crnk.meta.provider;
 
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 
 import java.lang.reflect.Type;

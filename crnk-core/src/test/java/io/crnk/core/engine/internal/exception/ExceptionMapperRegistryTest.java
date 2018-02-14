@@ -13,7 +13,7 @@ import org.junit.Test;
 import java.nio.file.ClosedFileSystemException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import java.util.Set;
 
 public class ExceptionMapperRegistryTest {

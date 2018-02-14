@@ -5,7 +5,7 @@ import java.io.IOException;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;

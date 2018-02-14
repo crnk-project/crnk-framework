@@ -3,7 +3,7 @@ package io.crnk.meta.internal;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimitiveType;
 import io.crnk.meta.provider.MetaPartitionBase;

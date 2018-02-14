@@ -3,8 +3,8 @@ package io.crnk.core.engine.internal.exception;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.utils.Optional;
 
-import java.util.Optional;
 import java.util.Set;
 
 public class ExceptionMapperRegistry {

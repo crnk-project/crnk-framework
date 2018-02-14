@@ -15,7 +15,7 @@ import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 
 import net.jodah.typetools.TypeResolver;
 
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class DefaultRelationshipRepositoryInformationProvider implements RepositoryInformationProvider {
 

@@ -18,7 +18,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.resource.annotations.SerializeType;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class JpaResourceFieldInformationProvider extends ResourceFieldInformationProviderBase {
 

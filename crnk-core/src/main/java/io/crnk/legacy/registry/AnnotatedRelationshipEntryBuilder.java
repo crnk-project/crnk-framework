@@ -9,7 +9,7 @@ import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class AnnotatedRelationshipEntryBuilder implements ResponseRelationshipEntry {
 

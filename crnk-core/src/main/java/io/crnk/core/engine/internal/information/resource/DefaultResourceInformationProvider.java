@@ -11,6 +11,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -49,9 +50,11 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 
 		String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
 
-		ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class).ifPresent(propertyOrder -> {
-			Collections.sort(resourceFields, new FieldOrderedComparator(propertyOrder.value(), propertyOrder.alphabetic()));
-		});
+		Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
+		if (propertyOrder.isPresent()) {
+			JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
+			Collections.sort(resourceFields, new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
+		}
 
 		DefaultResourceInstanceBuilder<?> instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 

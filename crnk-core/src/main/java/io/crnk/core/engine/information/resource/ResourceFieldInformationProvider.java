@@ -5,7 +5,7 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 /**
  * Provides information necessary to properly serializer (or skip) resource attributes.

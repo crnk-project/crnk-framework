@@ -18,7 +18,7 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import java.util.HashMap;
 import java.util.Map;
 

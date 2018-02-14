@@ -106,16 +106,16 @@ public class ClassUtils {
 	 * @param <T> type of an annotation
 	 * @return an instance of an annotation
 	 */
-	public static <T extends Annotation> Optional<T> getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
+	public static <T extends Annotation> io.crnk.core.utils.Optional<T> getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
 		Class<?> currentClass = beanClass;
 		while (currentClass != null && currentClass != Object.class) {
 			if (currentClass.isAnnotationPresent(annotationClass)) {
-				return Optional.of(currentClass.getAnnotation(annotationClass));
+				return io.crnk.core.utils.Optional.of(currentClass.getAnnotation(annotationClass));
 			}
 			currentClass = currentClass.getSuperclass();
 		}
 
-		return Optional.empty();
+		return io.crnk.core.utils.Optional.empty();
 	}
 
 	/**

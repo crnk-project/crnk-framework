@@ -1,7 +1,7 @@
 package io.crnk.meta.provider;
 
 import io.crnk.core.module.Module;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 
 import java.util.concurrent.Callable;

@@ -20,7 +20,7 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 /**
  * A Jackson-backed implementation of the {@link ResourceFieldInformationProvider} interface.

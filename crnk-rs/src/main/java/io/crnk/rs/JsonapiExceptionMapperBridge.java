@@ -7,6 +7,7 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.utils.Optional;
 import io.crnk.rs.type.JsonApiMediaType;
 
 import org.slf4j.Logger;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class MethodCacheTest {
 

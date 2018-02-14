@@ -14,7 +14,7 @@ import javax.enterprise.util.TypeLiteral;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 /**
  * CDI-based discovery of services.

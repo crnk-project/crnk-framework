@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 import java.util.Set;
 
 /**

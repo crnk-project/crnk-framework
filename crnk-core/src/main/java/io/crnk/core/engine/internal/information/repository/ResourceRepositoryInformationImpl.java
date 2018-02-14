@@ -7,7 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class ResourceRepositoryInformationImpl implements ResourceRepositoryInformation {
 

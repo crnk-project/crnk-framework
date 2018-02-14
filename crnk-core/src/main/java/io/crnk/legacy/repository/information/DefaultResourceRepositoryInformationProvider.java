@@ -19,7 +19,7 @@ import net.jodah.typetools.TypeResolver;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import io.crnk.core.utils.Optional;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 
