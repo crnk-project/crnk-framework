@@ -4,10 +4,10 @@ import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.utils.Optional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ResourceRepositoryInformationImpl implements ResourceRepositoryInformation {
 

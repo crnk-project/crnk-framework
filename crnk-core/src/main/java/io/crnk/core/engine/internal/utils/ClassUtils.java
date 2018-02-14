@@ -1,7 +1,6 @@
 package io.crnk.core.engine.internal.utils;
 
 import io.crnk.core.exception.ResourceException;
-import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

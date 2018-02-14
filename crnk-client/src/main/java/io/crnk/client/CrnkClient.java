@@ -1,15 +1,8 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.client.action.ActionStubFactory;
 import io.crnk.client.action.ActionStubFactoryContext;
 import io.crnk.client.http.HttpAdapter;
@@ -65,11 +58,19 @@ import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.

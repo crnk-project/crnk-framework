@@ -5,12 +5,24 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.resource.annotations.*;
-import io.crnk.core.utils.Optional;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
 
 /**
  * Process the Crnk JSON API annotations.

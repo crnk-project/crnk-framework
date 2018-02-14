@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -29,12 +24,18 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.queryParams.QueryParams;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs

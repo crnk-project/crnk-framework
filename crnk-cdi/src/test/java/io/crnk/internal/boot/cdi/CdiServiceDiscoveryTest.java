@@ -10,7 +10,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.repository.Repository;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.internal.boot.cdi.model.CdiTestExceptionMapper;
 import io.crnk.internal.boot.cdi.model.ProjectRepository;
 import io.crnk.internal.boot.cdi.model.TaskRepository;

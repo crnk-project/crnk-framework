@@ -2,7 +2,8 @@ package io.crnk.core.engine.internal.information.repository;
 
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
-import io.crnk.core.utils.Optional;
+
+import java.util.Optional;
 
 public class RelationshipRepositoryInformationImpl implements
 		RelationshipRepositoryInformation {

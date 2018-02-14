@@ -1,6 +1,10 @@
 package io.crnk.legacy.repository.information;
 
-import io.crnk.core.engine.information.repository.*;
+import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
@@ -8,13 +12,14 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.UntypedResourceRepository;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import net.jodah.typetools.TypeResolver;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 

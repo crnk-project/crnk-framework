@@ -1,6 +1,6 @@
 package io.crnk.core.engine.information.repository;
 
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 
 /**
  * Holds information about the type of a relationship repository.

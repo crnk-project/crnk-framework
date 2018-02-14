@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.information.resource;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -10,7 +11,6 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -24,19 +24,15 @@ import java.util.List;
  */
 public class DefaultResourceInformationProvider extends ResourceInformationProviderBase {
 
-
-	public DefaultResourceInformationProvider(
-			PropertiesProvider propertiesProvider,
-			ResourceFieldInformationProvider... resourceFieldInformationProviders) {
+	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
+											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
 		this(propertiesProvider, Arrays.asList(resourceFieldInformationProviders));
 	}
 
-	public DefaultResourceInformationProvider(
-			PropertiesProvider propertiesProvider,
-			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
+	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
+											  List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		super(propertiesProvider, resourceFieldInformationProviders);
 	}
-
 
 	@Override
 	public boolean accept(Class<?> resourceClass) {
@@ -53,20 +49,17 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 
 		String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
 
-		Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
-		if (propertyOrder.isPresent()) {
-			JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
-			Collections.sort(resourceFields, new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
-		}
+		ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class).ifPresent(propertyOrder -> {
+			Collections.sort(resourceFields, new FieldOrderedComparator(propertyOrder.value(), propertyOrder.alphabetic()));
+		});
 
 		DefaultResourceInstanceBuilder<?> instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
 		Class<?> superclass = resourceClass.getSuperclass();
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
-		ResourceInformation information = new ResourceInformation(context.getTypeParser(), resourceClass, resourceType, superResourceType, instanceBuilder,
-
-				resourceFields);
+		ResourceInformation information = new ResourceInformation(context.getTypeParser(),
+				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields);
 		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}

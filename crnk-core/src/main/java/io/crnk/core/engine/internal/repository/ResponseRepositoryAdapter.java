@@ -10,9 +10,12 @@ import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
 import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.filter.RepositoryResultFilterChain;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
@@ -182,9 +185,25 @@ public abstract class ResponseRepositoryAdapter {
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
 			queryAdapter.getPagingSpec().buildPaging((PagedLinksInformation) linksInformation, resources,
-					queryAdapter, requestSpec, moduleRegistry.getResourceRegistry());
+					queryAdapter, pageSpec -> toUrl(pageSpec, requestSpec, moduleRegistry.getResourceRegistry()));
 		}
 		return linksInformation;
+	}
+
+	private String toUrl(QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec,
+						 ResourceRegistry resourceRegistry) {
+		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		Object relationshipSourceId = requestSpec.getId();
+		ResourceField relationshipField = requestSpec.getRelationshipField();
+
+		ResourceInformation rootInfo;
+		if (relationshipField == null) {
+			rootInfo = queryAdapter.getResourceInformation();
+		} else {
+			rootInfo = relationshipField.getParentResourceInformation();
+		}
+		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
+				relationshipField != null ? relationshipField.getJsonName() : null);
 	}
 
 	protected abstract ResourceInformation getResourceInformation(Object repository);

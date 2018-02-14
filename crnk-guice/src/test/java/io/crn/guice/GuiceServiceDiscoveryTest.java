@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.repository.Repository;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.guice.GuiceServiceDiscovery;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.test.mock.TestException;

@@ -7,7 +7,6 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -17,6 +16,7 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It

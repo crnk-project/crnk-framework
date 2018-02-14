@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

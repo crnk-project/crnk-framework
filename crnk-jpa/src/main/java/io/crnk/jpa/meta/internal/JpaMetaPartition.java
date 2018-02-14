@@ -1,6 +1,6 @@
 package io.crnk.jpa.meta.internal;
 
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.meta.internal.MetaIdProvider;
 import io.crnk.meta.internal.typed.TypedMetaPartitionBase;
 import io.crnk.meta.model.MetaElement;

@@ -3,9 +3,8 @@ package io.crnk.core.engine.internal.utils;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.crnk.core.utils.Optional;
 
 public class MethodCache {
 

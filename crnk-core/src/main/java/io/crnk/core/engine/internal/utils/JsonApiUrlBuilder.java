@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -13,10 +7,17 @@ import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecSerializer;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsSerializer;
+
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class JsonApiUrlBuilder {
 
@@ -28,7 +29,7 @@ public class JsonApiUrlBuilder {
 
 	public JsonApiUrlBuilder(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
-		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry);
+		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry, new OffsetLimitPagingSpecSerializer());
 	}
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {

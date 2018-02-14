@@ -1,5 +1,8 @@
 package io.crnk.core.engine.parser;
 
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.MethodCache;
+
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -11,11 +14,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
-
-import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.MethodCache;
-import io.crnk.core.utils.Optional;
 
 /**
  * Parses {@link String} into an instance of provided {@link Class}. It support

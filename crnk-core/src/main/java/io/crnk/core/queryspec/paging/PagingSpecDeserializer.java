@@ -1,21 +1,23 @@
 package io.crnk.core.queryspec.paging;
 
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import java.util.Set;
 
-public interface PagingSpecDeserializer {
+public interface PagingSpecDeserializer<T extends PagingSpec> {
 
 	/**
 	 * Initializes a {@link PagingSpec} instance
 	 *
 	 * @return Instance with default values
 	 */
-	PagingSpec init();
+	T init();
 
 	/**
-	 * Provides deserialization logics of a single iteration
+	 * Provides deserialization logic of a single iteration
 	 *
 	 * @param pagingSpec {@link PagingSpec} instance to fill out
-	 * @param parameter {@link io.crnk.core.queryspec.DefaultQuerySpecDeserializer.Parameter} object to deserialize
+	 * @param name Parameter's name
+	 * @param values Parameter's set of values
+	 * @throws {@link io.crnk.core.exception.ParametersDeserializationException} in case of deserialization error
 	 */
-	void deserialize(PagingSpec pagingSpec, DefaultQuerySpecDeserializer.Parameter parameter);
+	void deserialize(T pagingSpec, String name, Set<String> values);
 }

@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.TransportException;
@@ -18,12 +19,13 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.core.utils.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class ClientStubBase {
 

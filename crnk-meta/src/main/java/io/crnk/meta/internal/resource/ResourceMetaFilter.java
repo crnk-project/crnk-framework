@@ -12,7 +12,7 @@ import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;

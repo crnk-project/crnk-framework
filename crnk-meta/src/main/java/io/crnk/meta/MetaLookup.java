@@ -2,7 +2,7 @@ package io.crnk.meta;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.meta.internal.BaseMetaPartition;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.*;

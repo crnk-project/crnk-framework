@@ -1,7 +1,7 @@
 package io.crnk.meta.provider;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.utils.Optional;
+import java.util.Optional;
 import io.crnk.meta.model.*;
 
 import java.lang.reflect.ParameterizedType;

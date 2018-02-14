@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.filter;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.document.Document;
@@ -19,9 +26,12 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,10 +40,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
 
 public class FilterTest {
 
@@ -68,14 +74,14 @@ public class FilterTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		collectionGet = mock(CollectionGet.class);
 		controllerRegistry.addController(collectionGet);
-		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
+		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
+		querySpecDeserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
+		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		dispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 	}
 
 	@Test
 	public void test() throws Exception {
-
-
 		// WHEN
 		ArgumentCaptor<DocumentFilterContext> captor = ArgumentCaptor.forClass(DocumentFilterContext.class);
 		when(collectionGet.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();

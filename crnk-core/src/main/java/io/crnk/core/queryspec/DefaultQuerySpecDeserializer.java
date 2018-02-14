@@ -133,7 +133,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					deserializeFields(querySpec, parameter);
 					break;
 				case page:
-					pagingSpecDeserializer.deserialize(querySpec.getPagingSpec(), parameter);
+					pagingSpecDeserializer.deserialize(querySpec.getPagingSpec(), parameter.pageParameter, parameter.getValues());
 					break;
 				default:
 					deserializeUnknown(querySpec, parameter);

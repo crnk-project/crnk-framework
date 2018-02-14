@@ -1,16 +1,26 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
-import io.crnk.core.engine.information.repository.*;
+import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -21,8 +31,6 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
-import io.crnk.core.repository.RelationshipRepositoryBase;
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.Decorator;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -30,7 +38,13 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.RegistryEntryBuilder;
+import io.crnk.core.engine.registry.ResourceEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryAware;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
@@ -38,14 +52,15 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
+import io.crnk.core.repository.RelationshipRepositoryBase;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
@@ -56,7 +71,17 @@ import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -610,13 +635,13 @@ public class ModuleRegistry {
 		return modules;
 	}
 
-	public <T extends Module> io.crnk.core.utils.Optional<T> getModule(Class<T> clazz) {
+	public <T extends Module> Optional<T> getModule(Class<T> clazz) {
 		for (Module module : modules) {
 			if (clazz.isInstance(module)) {
-				return io.crnk.core.utils.Optional.of((T) module);
+				return Optional.ofNullable((T) module);
 			}
 		}
-		return io.crnk.core.utils.Optional.empty();
+		return Optional.empty();
 	}
 
 	public TypeParser getTypeParser() {

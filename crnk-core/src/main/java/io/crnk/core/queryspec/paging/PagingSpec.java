@@ -1,9 +1,9 @@
 package io.crnk.core.queryspec.paging;
 
-import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.links.PagedLinksInformation;
+
+import java.util.function.Function;
 
 public interface PagingSpec {
 
@@ -13,15 +13,14 @@ public interface PagingSpec {
 	 * @param linksInformation
 	 * @param resources
 	 * @param queryAdapter
-	 * @param requestSpec
-	 * @param resourceRegistry
+	 * @param urlFn
 	 */
 	void buildPaging(PagedLinksInformation linksInformation, Iterable<?> resources,
-					 QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec,
-					 ResourceRegistry resourceRegistry);
+					 QueryAdapter queryAdapter,
+					 Function<QueryAdapter, String> urlFn);
 
 	/**
-	 * Determines whether Crnk needs to provide paging links via {@link #buildPaging(PagedLinksInformation, Iterable, QueryAdapter, RepositoryRequestSpec, ResourceRegistry)}
+	 * Determines whether Crnk needs to provide paging links via {@link #buildPaging(PagedLinksInformation, Iterable, QueryAdapter, Function)}
 	 *
 	 * @return True in case of pagination is required otherwise False
 	 */
