@@ -9,13 +9,12 @@ import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.mapper.DefaultDateTimeMapper;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.Schedule;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -34,7 +33,7 @@ public class ApprovalManagerTest {
 
 	private RuntimeService runtimeService;
 
-	private ResourceRepositoryAdapter repositoryAdapter;
+	private ResourceRepositoryV2 repositoryFacade;
 
 	private RegistryEntry registryEntry;
 
@@ -44,7 +43,7 @@ public class ApprovalManagerTest {
 	public void setup() {
 		runtimeService = Mockito.mock(RuntimeService.class);
 		TaskService taskService = Mockito.mock(TaskService.class);
-		repositoryAdapter = Mockito.mock(ResourceRepositoryAdapter.class);
+		repositoryFacade = Mockito.mock(ResourceRepositoryV2.class);
 		ApprovalMapper approvalMapper = new ApprovalMapper();
 		ActivitiResourceMapper resourceMapper = new ActivitiResourceMapper(new TypeParser(), new DefaultDateTimeMapper());
 
@@ -52,7 +51,7 @@ public class ApprovalManagerTest {
 		registryEntry = Mockito.mock(RegistryEntry.class);
 		ResourceRegistry resourceRegistry = Mockito.mock(ResourceRegistry.class);
 		Mockito.when(registryEntry.getResourceInformation()).thenReturn(information);
-		Mockito.when(registryEntry.getResourceRepository()).thenReturn(repositoryAdapter);
+		Mockito.when(registryEntry.getResourceRepositoryFacade()).thenReturn(repositoryFacade);
 		Mockito.when(information.getResourceType()).thenReturn("schedule");
 		Mockito.when(information.getId(Mockito.any())).thenReturn(mockId);
 		Mockito.when(resourceRegistry.getEntry(Mockito.any(Class.class))).thenReturn(registryEntry);
@@ -64,9 +63,8 @@ public class ApprovalManagerTest {
 		originalResource = new Schedule();
 		originalResource.setId(mockId);
 		originalResource.setName("Jane");
-		JsonApiResponse response = new JsonApiResponse();
-		response.setEntity(originalResource);
-		Mockito.when(repositoryAdapter.findOne(Mockito.any(Long.class), Mockito.any(QueryAdapter.class))).thenReturn(response);
+		Mockito.when(repositoryFacade.findOne(Mockito.any(Long.class), Mockito.any(QuerySpec.class)))
+				.thenReturn(originalResource);
 
 		manager = new ApprovalManager();
 		manager.init(runtimeService, taskService, resourceMapper, approvalMapper, moduleRegistry);
@@ -106,7 +104,9 @@ public class ApprovalManagerTest {
 		manager.approved(execution);
 
 		ArgumentCaptor<Object> savedEntityCaptor = ArgumentCaptor.forClass(Object.class);
-		Mockito.verify(repositoryAdapter, Mockito.times(1)).update(savedEntityCaptor.capture(), Mockito.any(QueryAdapter.class));
+		Mockito.verify(repositoryFacade, Mockito.times(1)).save(savedEntityCaptor.capture());
+
+		System.out.println(savedEntityCaptor.getValue());
 
 		// check value updated on original resource
 		Schedule savedEntity = (Schedule) savedEntityCaptor.getValue();
