@@ -98,12 +98,10 @@ public class ApprovalIntTest extends JerseyTest {
 
 		ApproveForm form = task.getForm();
 		form.setApproved(true);
-		form = formRepo.save(form);
+		form = formRepo.create(form);
 		Assert.assertTrue(form.isApproved());
-		task = getUnique(taskRepo.findAll(taskQuery));
-		task.setCompleted(true);
-		task = taskRepo.save(task);
-		Assert.assertTrue(task.isCompleted());
+
+		Assert.assertEquals("POSTing form must close the task", 0, taskRepo.findAll(taskQuery).size());
 	}
 
 	private ApproveTask verifyApprovalStarted(Schedule schedule) {
