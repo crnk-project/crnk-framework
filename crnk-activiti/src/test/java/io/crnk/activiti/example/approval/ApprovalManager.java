@@ -7,14 +7,11 @@ import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.Schedule;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -126,21 +123,17 @@ public class ApprovalManager {
 	}
 
 	private void save(RegistryEntry entry, Object resource) {
-		ResourceInformation resourceInformation = entry.getResourceInformation();
-		ResourceRepositoryAdapter resourceRepository = entry.getResourceRepository();
-		QueryAdapter queryAdapter =
-				new QuerySpecAdapter(new QuerySpec(resourceInformation.getResourceType()), moduleRegistry.getResourceRegistry());
-		resourceRepository.update(resource, queryAdapter);
+		ResourceRepositoryV2 resourceRepository = entry.getResourceRepositoryFacade();
+		resourceRepository.save(resource);
 	}
 
 	private Object get(RegistryEntry entry, String idString) {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Object id = resourceInformation.parseIdString(idString);
-		ResourceRepositoryAdapter resourceRepository = entry.getResourceRepository();
-		QueryAdapter queryAdapter =
-				new QuerySpecAdapter(new QuerySpec(resourceInformation.getResourceType()), moduleRegistry.getResourceRegistry());
-		JsonApiResponse response = resourceRepository.findOne((Serializable) id, queryAdapter);
-		return response.getEntity();
+
+		ResourceRepositoryV2 resourceRepository = entry.getResourceRepositoryFacade();
+		QuerySpec querySpec = new QuerySpec(resourceInformation.getResourceType());
+		return resourceRepository.findOne((Serializable) id, querySpec);
 	}
 
 	public void denied(Execution execution) {
