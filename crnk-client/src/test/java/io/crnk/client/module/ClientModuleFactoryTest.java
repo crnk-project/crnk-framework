@@ -19,7 +19,7 @@ public class ClientModuleFactoryTest {
 		Assert.assertEquals(3, modules.size());
 		Assert.assertEquals(ClientModule.class, modules.get(0).getClass());
 		Assert.assertEquals(JacksonModule.class, modules.get(1).getClass());
-		Assert.assertEquals(TestModule.class, modules.get(2).getClass());
+		Assert.assertEquals(ClientTestModule.class, modules.get(2).getClass());
 	}
 
 	@Test
@@ -31,6 +31,6 @@ public class ClientModuleFactoryTest {
 		Assert.assertEquals(3, modules.size());
 		Assert.assertEquals(ClientModule.class, modules.get(0).getClass());
 		Assert.assertEquals(JacksonModule.class, modules.get(1).getClass());
-		Assert.assertEquals(TestModule.class, modules.get(2).getClass());
+		Assert.assertEquals(ClientTestModule.class, modules.get(2).getClass());
 	}
 }

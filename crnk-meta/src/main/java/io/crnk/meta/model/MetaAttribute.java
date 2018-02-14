@@ -172,13 +172,13 @@ public class MetaAttribute extends MetaElement {
 		this.version = version;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void addValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.add(value);
 	}
 
-	@SuppressWarnings({"rawtypes"})
+	@SuppressWarnings({ "rawtypes" })
 	public void removeValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.remove(value);

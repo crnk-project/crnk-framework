@@ -1,21 +1,6 @@
 package io.crnk.core.repository.implicit;
 
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.MultivaluedMap;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.RelationshipRepositoryBase;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.list.DefaultResourceList;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,11 +8,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.RelationshipRepositoryBase;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.DefaultResourceList;
+
 /**
  * Implements RelationshipRepository for relationships making use of @JsonApiRelationId
  * by delegating to the underlying resource. Provides an implementation for
  * {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior#IMPLICIT_FROM_OWNER}.
+ *
+ * @deprecated use {@link ForwardingRelationshipRepository}
  */
+@Deprecated
 public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
 		extends RelationshipRepositoryBase<T, I, D, J> {
 
@@ -44,6 +45,15 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType, String targetResourceType) {
 		super(sourceResourceType, targetResourceType);
 	}
+
+	public ImplicitOwnerBasedRelationshipRepository(Class sourceResourceClass) {
+		super(sourceResourceClass);
+	}
+
+	public ImplicitOwnerBasedRelationshipRepository(String sourceResourceType) {
+		super(sourceResourceType);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
@@ -128,8 +138,11 @@ public class ImplicitOwnerBasedRelationshipRepository<T, I extends Serializable,
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}
 			}
-			else {
+			else if (targetId != null) {
 				addResult(bulkResult, field, sourceId, targetId, targetMap);
+			}
+			else {
+				bulkResult.add(sourceId, null);
 			}
 		}
 		return bulkResult;

@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information;
 
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import java.lang.reflect.Type;
 
@@ -29,6 +30,8 @@ public interface InformationBuilder {
 
 	interface ResourceRepository {
 
+		void from(ResourceRepositoryInformation information);
+
 		void setResourceInformation(ResourceInformation resourceInformation);
 
 		void setAccess(RepositoryMethodAccess access);
@@ -38,6 +41,8 @@ public interface InformationBuilder {
 	}
 
 	interface Resource {
+
+		void from(ResourceInformation information);
 
 		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
 
@@ -54,6 +59,8 @@ public interface InformationBuilder {
 	interface Field {
 
 		ResourceField build();
+
+		void from(ResourceField field);
 
 		Field relationshipRepositoryBehavior(
 				RelationshipRepositoryBehavior relationshipRepositoryBehavior);
@@ -91,6 +98,8 @@ public interface InformationBuilder {
 	}
 
 	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
+
+	RelationshipRepository createRelationshipRepository(RelationshipMatcher matcher);
 
 	ResourceRepository createResourceRepository();
 

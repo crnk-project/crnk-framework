@@ -178,9 +178,8 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				}
 				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
-					Class<?> targetResourceClass = querySpecRepository.getTargetResourceClass();
 					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
 					resource = querySpecRepository
 							.findOneTarget(sourceId, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
 				}
@@ -214,9 +213,8 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 				}
 				else if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
-					Class<?> targetResourceClass = querySpecRepository.getTargetResourceClass();
 					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
 					resources = querySpecRepository.findManyTargets(sourceId, field.getUnderlyingName(),
 							request.getQuerySpec(targetResourceInformation));
 				}
@@ -245,9 +243,9 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 
 					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
-					Class<?> targetResourceClass = bulkRepository.getTargetResourceClass();
 					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+									.getResourceInformation();
 					QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
 					MultivaluedMap targetsMap = bulkRepository.findTargets(sourceIds, field.getUnderlyingName(), querySpec);
 					return toResponses(targetsMap, true, queryAdapter, field, HttpMethod.GET);
@@ -283,9 +281,9 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 
 					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
-					Class targetResourceClass = bulkRepository.getTargetResourceClass();
 					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().findEntry(targetResourceClass).getResourceInformation();
+							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+									.getResourceInformation();
 					MultivaluedMap<I, D> targetsMap = bulkRepository
 							.findTargets(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
 					return toResponses(targetsMap, false, queryAdapter, field, HttpMethod.GET);
@@ -328,11 +326,5 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 
 	public Object getRelationshipRepository() {
 		return relationshipRepository;
-	}
-
-	@Override
-	protected ResourceInformation getResourceInformation(Object repository) {
-		Class<?> clazz = ((RelationshipRepositoryV2<?, ?, ?, ?>) repository).getTargetResourceClass();
-		return this.moduleRegistry.getResourceRegistry().findEntry(clazz).getResourceInformation();
 	}
 }

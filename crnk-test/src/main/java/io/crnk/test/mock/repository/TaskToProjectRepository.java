@@ -19,6 +19,10 @@ public class TaskToProjectRepository implements RelationshipRepositoryV2<Task, L
 		THREAD_LOCAL_REPOSITORY.clear();
 	}
 
+	public TaskToProjectRepository(){
+
+	}
+
 	@Override
 	public void setRelation(Task source, Long targetId, String fieldName) {
 		removeRelations(fieldName);

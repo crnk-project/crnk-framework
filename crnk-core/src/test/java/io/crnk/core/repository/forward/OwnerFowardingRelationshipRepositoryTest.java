@@ -1,10 +1,15 @@
-package io.crnk.core.engine.internal.repository;
+package io.crnk.core.repository.forward;
+
+import java.util.Arrays;
+import java.util.List;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
@@ -17,19 +22,19 @@ import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
+import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.repository.foward.ForwardingDirection;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImplicitOwnerBasedRelationshipRepositoryTest {
+public class OwnerFowardingRelationshipRepositoryTest {
 
 
-	private ImplicitOwnerBasedRelationshipRepository relRepository;
+	private ForwardingRelationshipRepository relRepository;
 
 	private ScheduleRepositoryImpl scheduleRepository;
 
@@ -49,7 +54,11 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 
 	private Task task;
 
-	private ImplicitOwnerBasedRelationshipRepository taskProjectRepository;
+	private ForwardingRelationshipRepository taskProjectRepository;
+
+	private ResourceRegistry resourceRegistry;
+
+	private ForwardingRelationshipRepository projectTaskRepository;
 
 	@Before
 	public void setup() {
@@ -60,15 +69,22 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		boot.boot();
 
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
+		resourceRegistry = boot.getResourceRegistry();
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
-				(ImplicitOwnerBasedRelationshipRepository) entry.getRelationshipRepositoryForType("schedules", null)
+				(ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager", null)
 						.getRelationshipRepository();
 
-		taskProjectRepository = new ImplicitOwnerBasedRelationshipRepository(Task.class, Project.class);
+		RelationshipMatcher taskProjectMatcher = new RelationshipMatcher().rule().source(Task.class).target(Project.class).add();
+		taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
+				ForwardingDirection.OWNER);
 		taskProjectRepository.setResourceRegistry(resourceRegistry);
+
+		projectTaskRepository = new ForwardingRelationshipRepository(Project.class, taskProjectMatcher, ForwardingDirection
+				.OWNER,
+				ForwardingDirection.OWNER);
+		projectTaskRepository.setResourceRegistry(resourceRegistry);
 
 		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
 		testRepository.setResourceRegistry(resourceRegistry);
@@ -104,6 +120,10 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		}
 	}
 
+	@Test
+	public void hasProtectedDefaultConstructor() {
+		CoreClassTestUtils.assertProtectedConstructor(ForwardingRelationshipRepository.class);
+	}
 
 	@Test
 	public void checkSetRelationId() {
@@ -123,6 +143,24 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		relRepository.setRelation(resource, null, "testSerializeEager");
 		Assert.assertNull(resource.getTestSerializeEagerId());
 		Assert.assertNull(resource.getTestSerializeEager());
+	}
+
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void checkSetRelationIdNotFound() {
+		relRepository.setRelation(resource, 123123L, "testSerializeEager");
+		Assert.assertEquals(123123L, resource.getTestSerializeEagerId().longValue());
+		Assert.assertNull(resource.getTestSerializeEager());
+		relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class));
+	}
+
+
+	@Test
+	public void checkSetRelationIdToNull() {
+		relRepository.setRelation(resource, null, "testSerializeEager");
+		Assert.assertEquals(null, resource.getTestSerializeEagerId());
+		Assert.assertNull(resource.getTestSerializeEager());
+		Assert.assertNull(relRepository.findOneTarget(resource.getId(), "testSerializeEager", new QuerySpec(Schedule.class)));
 	}
 
 	@Test
@@ -180,6 +218,25 @@ public class ImplicitOwnerBasedRelationshipRepositoryTest {
 		Assert.assertEquals(42L, target.getId().longValue());
 	}
 
+
+	@Test
+	public void checkAddRemoveRelations() {
+		projectTaskRepository.addRelations(project, Arrays.asList(13L, 14L), "tasks");
+		Assert.assertEquals(2, project.getTasks().size());
+		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
+
+		projectTaskRepository.addRelations(project, Arrays.asList(15L), "tasks");
+		Assert.assertEquals(3, project.getTasks().size());
+		Assert.assertEquals(13L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(14L, project.getTasks().get(1).getId().longValue());
+		Assert.assertEquals(15L, project.getTasks().get(2).getId().longValue());
+
+		projectTaskRepository.removeRelations(project, Arrays.asList(13L), "tasks");
+		Assert.assertEquals(2, project.getTasks().size());
+		Assert.assertEquals(14L, project.getTasks().get(0).getId().longValue());
+		Assert.assertEquals(15L, project.getTasks().get(1).getId().longValue());
+	}
 
 	@After
 	public void teardown() {

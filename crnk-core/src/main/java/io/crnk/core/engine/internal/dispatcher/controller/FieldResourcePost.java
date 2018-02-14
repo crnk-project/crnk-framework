@@ -35,9 +35,10 @@ import java.util.List;
  */
 public class FieldResourcePost extends ResourceUpsert {
 
-	public FieldResourcePost(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser, @SuppressWarnings
-			("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper,
-							 List<ResourceModificationFilter> modificationFilters) {
+	public FieldResourcePost(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
+			@SuppressWarnings
+					("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper,
+			List<ResourceModificationFilter> modificationFilters) {
 		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
 	}
 
@@ -57,7 +58,7 @@ public class FieldResourcePost extends ResourceUpsert {
 
 	@Override
 	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
 
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
@@ -80,13 +81,14 @@ public class FieldResourcePost extends ResourceUpsert {
 		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
 		setAttributes(resourceBody, newResource, relationshipRegistryEntry.getResourceInformation());
 		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);
-		Document savedResourceResponse = documentMapper.toDocument(resourceRepository.create(newResource, queryAdapter), queryAdapter, parameterProvider);
+		Document savedResourceResponse =
+				documentMapper.toDocument(resourceRepository.create(newResource, queryAdapter), queryAdapter, parameterProvider);
 		setRelations(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
 
 		ResourceIdentifier resourceId1 = savedResourceResponse.getSingleData().get();
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = endpointRegistryEntry
-				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+				.getRelationshipRepository(relationshipField, parameterProvider);
 
 		@SuppressWarnings("unchecked")
 		JsonApiResponse parent = endpointRegistryEntry.getResourceRepository(parameterProvider)
@@ -94,7 +96,8 @@ public class FieldResourcePost extends ResourceUpsert {
 		if (Iterable.class.isAssignableFrom(baseRelationshipFieldClass)) {
 			List<ResourceIdentifier> resourceIdList = Collections.singletonList(resourceId1);
 			for (ResourceModificationFilter filter : modificationFilters) {
-				resourceIdList = filter.modifyManyRelationship(parent.getEntity(), relationshipField, ResourceRelationshipModificationType.ADD, resourceIdList);
+				resourceIdList = filter.modifyManyRelationship(parent.getEntity(), relationshipField,
+						ResourceRelationshipModificationType.ADD, resourceIdList);
 			}
 			List<Serializable> parsedIds = new ArrayList<>();
 			for (ResourceIdentifier resourceId : resourceIdList) {
@@ -103,7 +106,8 @@ public class FieldResourcePost extends ResourceUpsert {
 
 			//noinspection unchecked
 			relationshipRepositoryForClass.addRelations(parent.getEntity(), parsedIds, relationshipField, queryAdapter);
-		} else {
+		}
+		else {
 			//noinspection unchecked
 			for (ResourceModificationFilter filter : modificationFilters) {
 				resourceId1 = filter.modifyOneRelationship(parent.getEntity(), relationshipField, resourceId1);

@@ -1,6 +1,6 @@
 package io.crnk.core.resource.annotations;
 
-import io.crnk.core.repository.implicit.ImplicitOwnerBasedRelationshipRepository;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 
 /**
  * Provides multiple strategies how relationships are handled. In many cases it can developpers to skip the manual development
@@ -37,9 +37,9 @@ public enum RelationshipRepositoryBehavior {
 	 * requests will update the owning resource accordingly and invoke a save operation on the owning resource repository.
 	 * <p>
 	 * An implementation is provided by
-	 * {@link ImplicitOwnerBasedRelationshipRepository}.
+	 * {@link io.crnk.core.repository.foward.ForwardingRelationshipRepository}.
 	 */
-	IMPLICIT_FROM_OWNER,
+	FORWARD_OWNER,
 
 	/**
 	 * Works the same as {@link #IMPLICIT_FROM_OWNER} for PATCH, POST, DELETE methods. But will query the opposite resource
@@ -49,10 +49,27 @@ public enum RelationshipRepositoryBehavior {
 	 * Relational database are one typical example where the pattern fits nicely. In contract to {@IMPLICIT_FROM_OWNER}, only a
 	 * single resource repository is involved with a slightly more complex filter parameter, giving performance benefits.
 	 * <p>
-	 * An implementation is provided by {@link io.crnk.core.repository.RelationshipRepositoryBase}.
+	 * An implementation is provided by {@link ForwardingRelationshipRepository}.
 	 */
+	FORWARD_GET_OPPOSITE_SET_OWNER,
+
+	/**
+	 * Opposite to {@link #FORWARD_OWNER}.
+	 * <p>
+	 * An implementation is provided by {@link ForwardingRelationshipRepository}.
+	 */
+	FORWARD_OPPOSITE,
+
+	/**
+	 * @deprecated use FORWARD_TO_OWNER
+	 */
+	@Deprecated
+	IMPLICIT_FROM_OWNER,
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	IMPLICIT_GET_OPPOSITE_MODIFY_OWNER
 
-	// TODO implement in the future
-	// IMPLICIT_FROM_OPPOSITE
 }

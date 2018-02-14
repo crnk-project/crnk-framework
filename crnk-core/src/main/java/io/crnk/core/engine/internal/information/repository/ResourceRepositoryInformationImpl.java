@@ -11,35 +11,39 @@ import java.util.Optional;
 
 public class ResourceRepositoryInformationImpl implements ResourceRepositoryInformation {
 
-	private Optional<ResourceInformation> resourceInformation;
+	private ResourceInformation resourceInformation;
+
 	private String resourceType;
+
 	private String path;
+
 	private Map<String, RepositoryAction> actions;
 
 	private RepositoryMethodAccess access;
 
 	@Deprecated
-	public ResourceRepositoryInformationImpl(String path, ResourceInformation resourceInformation, RepositoryMethodAccess access) {
+	public ResourceRepositoryInformationImpl(String path, ResourceInformation resourceInformation,
+			RepositoryMethodAccess access) {
 		this(path, resourceInformation, new HashMap<String, RepositoryAction>(), access);
 	}
 
 	@Deprecated
 	public ResourceRepositoryInformationImpl(String path,
-											 ResourceInformation resourceInformation, Map<String, RepositoryAction> actions, RepositoryMethodAccess access) {
-		this(path, resourceInformation.getResourceType(), actions, access);
-		this.resourceInformation = Optional.of(resourceInformation);
-	}
-
-	public ResourceRepositoryInformationImpl(String path, String resourceType, Map<String, RepositoryAction> actions, RepositoryMethodAccess access) {
+			ResourceInformation resourceInformation, Map<String, RepositoryAction> actions, RepositoryMethodAccess access) {
+		this.resourceInformation = resourceInformation;
 		this.path = path;
 		this.actions = actions;
-		this.resourceInformation = Optional.empty();
 		this.resourceType = resourceType;
 		this.access = access;
 	}
 
 	@Override
 	public Optional<ResourceInformation> getResourceInformation() {
+		return Optional.of(getResource());
+	}
+
+	@Override
+	public ResourceInformation getResource() {
 		return resourceInformation;
 	}
 

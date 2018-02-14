@@ -1,11 +1,13 @@
 package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
+import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
@@ -17,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -24,33 +28,24 @@ import java.util.Optional;
  * information about the resource, - ResourceEntry instance, - List of all
  * repositories for relationships defined in resource class. - Parent
  * RegistryEntry if a resource inherits from another resource
- *
- * @param <T> resource type
  */
 public class RegistryEntry {
 
-	private final ResourceInformation resourceInformation;
-
 	private final ResourceEntry resourceEntry;
 
-	private final List<ResponseRelationshipEntry> relationshipEntries;
+	private final Map<ResourceField, ResponseRelationshipEntry> relationshipEntries;
 
 	private RegistryEntry parentRegistryEntry = null;
 
 	private ModuleRegistry moduleRegistry;
 
-	private ResourceRepositoryInformation repositoryInformation;
-
-	public RegistryEntry(ResourceRepositoryInformation repositoryInformation, @SuppressWarnings("SameParameterValue") ResourceEntry resourceEntry) {
-		this(repositoryInformation.getResourceInformation().get(), repositoryInformation, resourceEntry, new LinkedList<ResponseRelationshipEntry>());
+	public RegistryEntry(ResourceEntry resourceEntry) {
+		this(resourceEntry, new HashMap<>());
 	}
 
-	public RegistryEntry(ResourceInformation resourceInformation, ResourceRepositoryInformation repositoryInformation, ResourceEntry resourceEntry, List<ResponseRelationshipEntry> relationshipEntries) {
-		this.repositoryInformation = repositoryInformation;
-		this.resourceInformation = resourceInformation;
+	public RegistryEntry(ResourceEntry resourceEntry, Map<ResourceField, ResponseRelationshipEntry> relationshipEntries) {
 		this.resourceEntry = resourceEntry;
 		this.relationshipEntries = relationshipEntries;
-		PreconditionUtil.assertNotNull("no resourceInformation", resourceInformation);
 	}
 
 	public void initialize(ModuleRegistry moduleRegistry) {
@@ -63,7 +58,8 @@ public class RegistryEntry {
 		Object repoInstance = null;
 		if (resourceEntry instanceof DirectResponseResourceEntry) {
 			repoInstance = ((DirectResponseResourceEntry) resourceEntry).getResourceRepository();
-		} else if (resourceEntry instanceof AnnotatedResourceEntry) {
+		}
+		else if (resourceEntry instanceof AnnotatedResourceEntry) {
 			repoInstance = ((AnnotatedResourceEntry) resourceEntry).build(parameterProvider);
 		}
 
@@ -71,34 +67,33 @@ public class RegistryEntry {
 			((ResourceRegistryAware) repoInstance).setResourceRegistry(moduleRegistry.getResourceRegistry());
 		}
 
+		ResourceInformation resourceInformation = getResourceInformation();
 		return new ResourceRepositoryAdapter(resourceInformation, moduleRegistry, repoInstance);
 	}
 
-	public List<ResponseRelationshipEntry> getRelationshipEntries() {
-		return relationshipEntries;
-	}
-
-	public Optional<ResponseRelationshipEntry> getRelationshipEntry(String targetResourceType){
-		for (ResponseRelationshipEntry relationshipEntry : relationshipEntries) {
-			if (relationshipEntry.getTargetResourceType() == null || targetResourceType.equals(relationshipEntry.getTargetResourceType())) {
-				return Optional.of(relationshipEntry);
-			}
+	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName, RepositoryMethodParameterProvider
+			parameterProvider) {
+		ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
+		if (field == null) {
+			throw new ResourceFieldNotFoundException("field=" + fieldName);
 		}
-		return Optional.empty();
+		return getRelationshipRepository(field, parameterProvider);
 	}
 
 	@SuppressWarnings("unchecked")
-	public RelationshipRepositoryAdapter getRelationshipRepositoryForType(String targetResourceType, RepositoryMethodParameterProvider parameterProvider) {
-		Optional<ResponseRelationshipEntry> optRelationshipEntry = getRelationshipEntry(targetResourceType);
-		if (!optRelationshipEntry.isPresent()) {
-			throw new RelationshipRepositoryNotFoundException(resourceInformation.getResourceType(), targetResourceType);
+	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field, RepositoryMethodParameterProvider
+			parameterProvider) {
+		ResponseRelationshipEntry relationshipEntry = relationshipEntries.get(field);
+		if (relationshipEntry == null) {
+			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
+					field.getUnderlyingName());
 		}
-		ResponseRelationshipEntry relationshipEntry = optRelationshipEntry.get();
 
 		Object repoInstance;
 		if (relationshipEntry instanceof AnnotatedRelationshipEntryBuilder) {
 			repoInstance = ((AnnotatedRelationshipEntryBuilder) relationshipEntry).build(parameterProvider);
-		} else {
+		}
+		else {
 			repoInstance = ((DirectResponseRelationshipEntry) relationshipEntry).getRepositoryInstanceBuilder();
 		}
 
@@ -106,18 +101,19 @@ public class RegistryEntry {
 			((ResourceRegistryAware) repoInstance).setResourceRegistry(moduleRegistry.getResourceRegistry());
 		}
 
-		return new RelationshipRepositoryAdapter(resourceInformation, moduleRegistry, repoInstance);
+		return new RelationshipRepositoryAdapter(getResourceInformation(), moduleRegistry, repoInstance);
 	}
 
 	public ResourceInformation getResourceInformation() {
-		return resourceInformation;
+		return resourceEntry.getRepositoryInformation().getResourceInformation().get();
 	}
 
 	public ResourceRepositoryInformation getRepositoryInformation() {
-		return repositoryInformation;
+		return resourceEntry.getRepositoryInformation();
 	}
 
 	public RegistryEntry getParentRegistryEntry() {
+		ResourceInformation resourceInformation = getResourceInformation();
 		String superResourceType = resourceInformation.getSuperResourceType();
 		if (superResourceType != null) {
 			ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
@@ -152,26 +148,11 @@ public class RegistryEntry {
 		return false;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || !(o instanceof RegistryEntry)) {
-			return false;
-		}
-		RegistryEntry that = (RegistryEntry) o;
-		return Objects.equals(resourceInformation, that.resourceInformation) && // NOSONAR
-				Objects.equals(repositoryInformation, that.repositoryInformation) && Objects.equals(resourceEntry, that.resourceEntry) && Objects.equals(moduleRegistry, that.moduleRegistry)
-				&& Objects.equals(relationshipEntries, that.relationshipEntries) && Objects.equals(parentRegistryEntry, that.parentRegistryEntry);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(repositoryInformation, resourceInformation, resourceEntry, relationshipEntries, moduleRegistry, parentRegistryEntry);
-	}
-
 	public ResourceRepositoryAdapter getResourceRepository() {
 		return getResourceRepository(null);
+	}
+
+	public Map<ResourceField, ResponseRelationshipEntry> getRelationshipEntries() {
+		return relationshipEntries;
 	}
 }

@@ -1,5 +1,22 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -328,9 +345,12 @@ public class IncludeLookupSetter {
 			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider,
 			Map<ResourceIdentifier, Resource> resourceMap, Map<ResourceIdentifier, Object> entityMap) {
 
-		ResourceInformation oppositeResourceInformation =
-				resourceRegistry.getEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
-		RegistryEntry oppositeEntry = resourceRegistry.getEntry(oppositeResourceInformation.getResourceType());
+		String oppositeResourceType = relationshipField.getOppositeResourceType();
+		RegistryEntry oppositeEntry = resourceRegistry.getEntry(oppositeResourceType);
+		if (oppositeEntry == null) {
+			throw new RepositoryNotFoundException("no resource with type " + oppositeResourceType + " found");
+		}
+		ResourceInformation oppositeResourceInformation = oppositeEntry.getResourceInformation();
 		ResourceRepositoryAdapter oppositeResourceRepository = oppositeEntry.getResourceRepository(parameterProvider);
 		if (oppositeResourceRepository == null) {
 			throw new RepositoryNotFoundException(
@@ -389,7 +409,7 @@ public class IncludeLookupSetter {
 
 		@SuppressWarnings("rawtypes")
 		RelationshipRepositoryAdapter relationshipRepository =
-				registyEntry.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+				registyEntry.getRelationshipRepository(relationshipField, parameterProvider);
 		if (relationshipRepository != null) {
 			Map<Object, JsonApiResponse> responseMap;
 			if (isMany) {
@@ -431,7 +451,8 @@ public class IncludeLookupSetter {
 		Map<String, Relationship> relationships = sourceResource.getRelationships();
 		Relationship relationship = relationships.get(relationshipName);
 
-		RegistryEntry entry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
+		String oppositeType = relationshipField.getOppositeResourceType();
+		RegistryEntry entry = Objects.requireNonNull(resourceRegistry.getEntry(oppositeType));
 		ResourceInformation targetResourceInformation = entry.getResourceInformation();
 
 		if (targetEntityId instanceof Iterable) {

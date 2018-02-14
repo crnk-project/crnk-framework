@@ -15,7 +15,7 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 
 	private static final int TARGET_TYPE_GENERIC_PARAMETER_IDX = 2;
 
-	private RepositoryInstanceBuilder<RelationshipRepository> repositoryInstanceBuilder;
+	private RepositoryInstanceBuilder repositoryInstanceBuilder;
 
 	public DirectResponseRelationshipEntry(RepositoryInstanceBuilder repositoryInstanceBuilder) {
 		this.repositoryInstanceBuilder = repositoryInstanceBuilder;
@@ -41,8 +41,6 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 
 	@Override
 	public String toString() {
-		return "DirectResponseRelationshipEntry{" +
-				"repositoryInstanceBuilder=" + repositoryInstanceBuilder +
-				'}';
+		return repositoryInstanceBuilder.buildRepository().toString();
 	}
 }

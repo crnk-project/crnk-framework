@@ -1,5 +1,15 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -141,8 +151,9 @@ public class CrnkClient {
 				documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new PropertiesProvider() {
 					@Override
 					public String getProperty(String key) {
-						if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS))
+						if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
 							return "true";
+						}
 						return null;
 					}
 				});
@@ -283,10 +294,9 @@ public class CrnkClient {
 		ResourceRepositoryInformation repositoryInformation =
 				new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
 						resourceInformation, RepositoryMethodAccess.ALL);
-		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder);
-		List<ResponseRelationshipEntry> relationshipEntries = new ArrayList<>();
-		RegistryEntry registryEntry =
-				new RegistryEntry(resourceInformation, repositoryInformation, resourceEntry, relationshipEntries);
+		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
+		Map<ResourceField, ResponseRelationshipEntry> relationshipEntries = new HashMap<>();
+		RegistryEntry registryEntry = new RegistryEntry(resourceEntry, relationshipEntries);
 		registryEntry.initialize(moduleRegistry);
 		resourceRegistry.addEntry(resourceClass, registryEntry);
 
@@ -306,7 +316,7 @@ public class CrnkClient {
 		}
 	}
 
-	private void allocateRepositoryRelation(Class sourceClass, Class targetClass) {
+	private RelationshipRepositoryAdapter allocateRepositoryRelation(Class sourceClass, Class targetClass) {
 		// allocate relations as well
 		ClientResourceRegistry clientResourceRegistry = (ClientResourceRegistry) resourceRegistry;
 		if (!clientResourceRegistry.isInitialized(sourceClass)) {
@@ -318,11 +328,14 @@ public class CrnkClient {
 
 		RegistryEntry sourceEntry = resourceRegistry.getEntry(sourceClass);
 		final RegistryEntry targetEntry = resourceRegistry.getEntry(targetClass);
+		String targetResourceType = targetEntry.getResourceInformation().getResourceType();
 
-		final ResourceInformation targetResourceInformation = targetEntry.getResourceInformation();
-		Optional<ResponseRelationshipEntry> optRelationshipEntry =
-				sourceEntry.getRelationshipEntry(targetResourceInformation.getResourceType());
-		if (!optRelationshipEntry.isPresent()) {
+		Map relationshipEntries = sourceEntry.getRelationshipEntries();
+		DirectResponseRelationshipEntry relationshipEntry =
+				(DirectResponseRelationshipEntry) relationshipEntries.get(targetResourceType);
+
+		if (!relationshipEntries.containsKey(targetResourceType)) {
+
 			final RelationshipRepositoryStubImpl relationshipRepositoryStub =
 					new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(),
 							urlBuilder);
@@ -334,16 +347,19 @@ public class CrnkClient {
 							return relationshipRepositoryStub;
 						}
 					};
-			DirectResponseRelationshipEntry relationshipEntry =
+			relationshipEntry =
 					new DirectResponseRelationshipEntry(relationshipRepositoryInstanceBuilder) {
 
 						@Override
 						public String getTargetResourceType() {
-							return targetResourceInformation.getResourceType();
+							return targetEntry.getResourceInformation().getResourceType();
 						}
 					};
-			sourceEntry.getRelationshipEntries().add(relationshipEntry);
+			relationshipEntries.put(targetResourceType, relationshipEntry);
 		}
+		Object repoInstance = relationshipEntry.getRepositoryInstanceBuilder();
+
+		return new RelationshipRepositoryAdapter(sourceEntry.getResourceInformation(), moduleRegistry, repoInstance);
 	}
 
 	/**
@@ -449,11 +465,7 @@ public class CrnkClient {
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
 
-		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
-		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
-
-		RelationshipRepositoryAdapter repositoryAdapter =
-				sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
+		RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
 		return (RelationshipRepositoryStub<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
 	}
 
@@ -468,12 +480,7 @@ public class CrnkClient {
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
 
-		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceClass);
-		RegistryEntry targetEntry = resourceRegistry.findEntry(targetClass);
-		allocateRepositoryRelation(sourceClass, targetClass);
-
-		RelationshipRepositoryAdapter repositoryAdapter =
-				sourceEntry.getRelationshipRepositoryForType(targetEntry.getResourceInformation().getResourceType(), null);
+		RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
 		return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
 	}
 

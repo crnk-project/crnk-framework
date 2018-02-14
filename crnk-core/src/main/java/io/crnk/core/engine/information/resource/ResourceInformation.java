@@ -7,14 +7,24 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
+import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
+import io.crnk.core.exception.ResourceDuplicateIdException;
+import io.crnk.core.exception.ResourceException;
 import io.crnk.core.resource.annotations.JsonApiResource;
-
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Holds information about the type of the resource.
@@ -78,6 +88,21 @@ public class ResourceInformation {
 
 	private AnyResourceFieldAccessor anyFieldAccessor;
 
+	private ResourceValidator validator;
+
+	private StringMapper idStringMapper = new StringMapper() {
+		@Override
+		public String toString(Object input) {
+			return input.toString();
+		}
+
+		@Override
+		public Object parse(String input) {
+			Class idType = getIdField().getType();
+			return parser.parse(input, idType);
+		}
+	};
+
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
 			List<ResourceField> fields) {
 		this(parser, resourceClass, resourceType, superResourceType, null, fields);
@@ -99,6 +124,25 @@ public class ResourceInformation {
 		}
 
 		initAny();
+	}
+
+	@Deprecated
+	public void setValidator(ResourceValidator validator) {
+		this.validator = validator;
+	}
+
+	@Deprecated
+	public ResourceValidator getValidator() {
+		return validator;
+	}
+
+	@Deprecated
+	public void setIdStringMapper(StringMapper idStringMapper) {
+		this.idStringMapper = idStringMapper;
+	}
+
+	public StringMapper getIdStringMapper() {
+		return idStringMapper;
 	}
 
 	public AnyResourceFieldAccessor getAnyFieldAccessor() {
@@ -308,7 +352,7 @@ public class ResourceInformation {
 		if (id == null) {
 			return null;
 		}
-		return id.toString();
+		return idStringMapper.toString(id);
 	}
 
 	/**
@@ -347,8 +391,7 @@ public class ResourceInformation {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Serializable parseIdString(String id) {
-		Class idType = getIdField().getType();
-		return (Serializable) parser.parse(id, idType);
+		return (Serializable) idStringMapper.parse(id);
 	}
 
 	/**
@@ -364,6 +407,9 @@ public class ResourceInformation {
 
 	public void verify(Object resource, Document requestDocument) {
 		// nothing to do
+		if (validator != null) {
+			validator.validate(resource, requestDocument);
+		}
 	}
 
 	public List<ResourceField> getFields() {

@@ -3,9 +3,9 @@ package io.crnk.client.module;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.test.mock.TestExceptionMapper;
 
-public class TestModule extends SimpleModule {
+public class ClientTestModule extends SimpleModule {
 
-	public TestModule() {
+	public ClientTestModule() {
 		super("test");
 
 		addExceptionMapper(new TestExceptionMapper());

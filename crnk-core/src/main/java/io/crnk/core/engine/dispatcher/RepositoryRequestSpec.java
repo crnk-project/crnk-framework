@@ -26,7 +26,7 @@ public interface RepositoryRequestSpec {
 
 	/**
 	 * @param targetResourceClass to base the QuerySpec upon. Usually the requested resource,
-	 *                            but may also be the type of one of the relations.
+	 * but may also be the type of one of the relations.
 	 * @return issued query as QuerySpec
 	 */
 	QuerySpec getQuerySpec(ResourceInformation resourceInformation);
@@ -41,6 +41,22 @@ public interface RepositoryRequestSpec {
 	 * null.
 	 */
 	ResourceField getRelationshipField();
+
+	/**
+	 * @return QuerySpec applied to the return resources.
+	 */
+	QuerySpec getResponseQuerySpec();
+
+	/**
+	 * @return information about the returned resource
+	 */
+	ResourceInformation getResponseResourceInformation();
+
+	/**
+	 * @return information about the owning resource. In case of a relationship request, it will return the owner of the
+	 * relationship. In any other case it will match the result resource information.
+	 */
+	ResourceInformation getOwningResourceInformation();
 
 	/**
 	 * @return involved entity for push and patch operations or null otherwise.

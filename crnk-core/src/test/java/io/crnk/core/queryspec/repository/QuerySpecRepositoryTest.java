@@ -54,8 +54,8 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		scheduleAdapter = scheduleEntry.getResourceRepository(null);
 		projectAdapter = projectEntry.getResourceRepository(null);
 		taskAdapter = taskEntry.getResourceRepository(null);
-		projectRelAdapter = taskEntry.getRelationshipRepositoryForType("projects", null);
-		tasksRelAdapter = projectEntry.getRelationshipRepositoryForType("tasks", null);
+		projectRelAdapter = taskEntry.getRelationshipRepository("projects", null);
+		tasksRelAdapter = projectEntry.getRelationshipRepository("tasks", null);
 	}
 
 	@Test

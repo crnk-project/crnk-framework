@@ -49,11 +49,12 @@ public class FieldResourceGet extends ResourceIncludeField {
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
-				.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+				.getRelationshipRepository(relationshipField, parameterProvider);
 		JsonApiResponse entities;
 		if (Iterable.class.isAssignableFrom(baseRelationshipFieldClass)) {
 			entities = relationshipRepositoryForClass.findManyTargets(castedResourceId, relationshipField, queryAdapter);
-		} else {
+		}
+		else {
 			entities = relationshipRepositoryForClass.findOneTarget(castedResourceId, relationshipField, queryAdapter);
 		}
 		Document responseDocument = documentMapper.toDocument(entities, queryAdapter, parameterProvider);

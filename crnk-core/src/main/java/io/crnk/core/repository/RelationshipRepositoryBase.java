@@ -1,9 +1,16 @@
 package io.crnk.core.repository;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
@@ -15,18 +22,12 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Recommended base class to implement a relationship repository making use of
@@ -55,17 +56,20 @@ import java.util.Set;
  * @param <I> source identity type
  * @param <D> target resource type
  * @param <J> target identity type
+ * @deprecated use {@link ForwardingRelationshipRepository}
  */
+@Deprecated
 public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
 		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
 
-	protected ResourceRegistry resourceRegistry;
 
-	private Class<D> targetResourceClass;
+	protected ResourceRegistry resourceRegistry;
 
 	private Class<T> sourceResourceClass;
 
 	private String sourceResourceType;
+
+	private Class targetResourceClass;
 
 	private String targetResourceType;
 
@@ -77,13 +81,29 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	public RelationshipRepositoryBase(Class<T> sourceResourceClass, Class<D> targetResourceClass) {
-		this.sourceResourceClass = sourceResourceClass;
+		this(sourceResourceClass);
 		this.targetResourceClass = targetResourceClass;
 	}
 
 	public RelationshipRepositoryBase(String sourceResourceType, String targetResourceType) {
-		this.sourceResourceType = sourceResourceType;
+		this(sourceResourceType);
 		this.targetResourceType = targetResourceType;
+	}
+
+	public RelationshipRepositoryBase(Class<T> sourceResourceClass) {
+		this.sourceResourceClass = sourceResourceClass;
+	}
+
+	public RelationshipRepositoryBase(String sourceResourceType) {
+		this.sourceResourceType = sourceResourceType;
+	}
+
+	@Override
+	public RelationshipMatcher getMatcher() {
+		RelationshipMatcher matcher = new RelationshipMatcher();
+		matcher.rule().source(sourceResourceType).source(sourceResourceClass).target(targetResourceType)
+				.target(targetResourceClass).add();
+		return matcher;
 	}
 
 
@@ -345,10 +365,6 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 	@Override
 	public Class<D> getTargetResourceClass() {
-		if (targetResourceClass == null) {
-			RegistryEntry targetEntry = resourceRegistry.getEntry(targetResourceType);
-			return (Class) targetEntry.getResourceInformation().getResourceClass();
-		}
 		return targetResourceClass;
 	}
 

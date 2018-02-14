@@ -163,7 +163,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 
 		ResourceIdentifier projectResourceId = new ResourceIdentifier(projectId.toString(), "projects");
 		// TODO properly implement ResourceIdentifier vs Resource in relationship repositories
-		// Mockito.verify(modificationFilter, Mockito.times(1)).modifyOneRelationship(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq(projectResourceId));
+		// Mockito.validate(modificationFilter, Mockito.times(1)).modifyOneRelationship(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq(projectResourceId));
 	}
 
 	@Test

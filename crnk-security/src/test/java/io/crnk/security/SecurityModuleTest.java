@@ -9,6 +9,7 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
@@ -56,6 +57,7 @@ public class SecurityModuleTest {
 		Assert.assertSame(config, securityModule.getConfig());
 
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		moduleRegistry.setServiceDiscovery(new EmptyServiceDiscovery());
 		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(securityModule);
 		moduleRegistry.addModule(appModule);

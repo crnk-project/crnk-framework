@@ -26,6 +26,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
+import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,6 +67,7 @@ public class RepositoryFilterTest {
 	private ResourceInformation userInfo;
 
 	private ResourceInformation scheduleInfo;
+
 	private CrnkBoot boot;
 
 	@Before
@@ -95,8 +97,8 @@ public class RepositoryFilterTest {
 		scheduleInfo = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
 		RegistryEntry userEntry = resourceRegistry.getEntry(User.class);
 		resourceAdapter = userEntry.getResourceRepository(null);
-		projectRelationAdapter = userEntry.getRelationshipRepositoryForType("projects", null);
-		taskRelationAdapter = userEntry.getRelationshipRepositoryForType("tasks", null);
+		projectRelationAdapter = userEntry.getRelationshipRepository("assignedProjects", null);
+		taskRelationAdapter = userEntry.getRelationshipRepository("assignedTasks", null);
 		userInfo = userEntry.getResourceInformation();
 
 		UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
@@ -107,19 +109,23 @@ public class RepositoryFilterTest {
 		user2.setId(2L);
 		resourceRepository.save(user2);
 
-		UserToProjectRepository userProjectRepository = (UserToProjectRepository) ((AnnotatedRelationshipRepositoryAdapter<?, ?, ?, ?>) projectRelationAdapter.getRelationshipRepository()).getImplementationObject();
+		UserToProjectRepository userProjectRepository =
+				(UserToProjectRepository) ((AnnotatedRelationshipRepositoryAdapter<?, ?, ?, ?>) projectRelationAdapter
+						.getRelationshipRepository()).getImplementationObject();
 		userProjectRepository.setRelation(user1, 11L, "assignedProjects");
 
-		UserToTaskRepository userTaskRepository = (UserToTaskRepository) taskRelationAdapter.getRelationshipRepository();
+		UserToTaskRepository userTaskRepository = new UserToTaskRepository();
 		userTaskRepository.addRelations(user1, Arrays.asList(21L), "assignedTasks");
 		userTaskRepository.addRelations(user2, Arrays.asList(22L), "assignedTasks");
 
-		assignedTasksField = resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedTasks");
-		assignedProjectsField = resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedProjects");
+		assignedTasksField =
+				resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedTasks");
+		assignedProjectsField =
+				resourceRegistry.getEntry(User.class).getResourceInformation().findRelationshipFieldByName("assignedProjects");
 
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void findAllWithResourceListResult() throws Exception {
 
@@ -135,10 +141,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -152,7 +163,7 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, actualQuerySpec);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void findAllWithResourceList() throws Exception {
 		resourceAdapter.findAll(queryAdapter);
@@ -161,10 +172,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -177,7 +193,7 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void findOne() throws Exception {
 
@@ -187,10 +203,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -203,7 +224,7 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void findAllById() throws Exception {
 		resourceAdapter.findAll(Arrays.asList(2L), queryAdapter);
@@ -212,10 +233,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -229,7 +255,7 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void create() throws Exception {
 		User user = new User();
@@ -240,10 +266,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -257,7 +288,7 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void save() throws Exception {
 		User user = new User();
@@ -268,10 +299,15 @@ public class RepositoryFilterTest {
 		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources.capture(), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), linksResources
+						.capture(),
+				Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), metaResources.capture(),
+				Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, linksResources.getAllValues().size());
 		Assert.assertEquals(1, metaResources.getAllValues().size());
@@ -285,17 +321,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void delete() throws Exception {
 		resourceAdapter.delete(2L, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -307,17 +349,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findOneTarget() throws Exception {
 		projectRelationAdapter.findOneTarget(1L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -329,17 +377,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findManyTarget() throws Exception {
 		projectRelationAdapter.findManyTargets(1L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -352,17 +406,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void setRelation() throws Exception {
 		projectRelationAdapter.setRelation(user1, 13L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -376,17 +436,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void setRelations() throws Exception {
 		projectRelationAdapter.setRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -399,17 +465,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void addRelations() throws Exception {
 		projectRelationAdapter.addRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -421,17 +493,23 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void removeRelations() throws Exception {
 		projectRelationAdapter.removeRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(1)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context = contexts.getAllValues().iterator().next();
@@ -444,18 +522,25 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findBulkOneTargetsNoBulkImpl() throws Exception {
 		projectRelationAdapter.findBulkOneTargets(Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(2)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(2, contexts.getAllValues().size());
 		RepositoryFilterContext context1 = contexts.getAllValues().get(0);
@@ -471,18 +556,25 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec1.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findBulkManyTargetsNoBulkImpl() throws Exception {
 		projectRelationAdapter.findBulkManyTargets(Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(2)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(0)).filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(2, contexts.getAllValues().size());
 		RepositoryFilterContext context1 = contexts.getAllValues().get(0);
@@ -498,18 +590,25 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec1.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findBulkOneTargetsBulkImpl() throws Exception {
 		taskRelationAdapter.findBulkManyTargets(Arrays.asList(1L), assignedTasksField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(0)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context1 = contexts.getAllValues().get(0);
@@ -522,18 +621,26 @@ public class RepositoryFilterTest {
 		Assert.assertSame(querySpec, requestSpec1.getQuerySpec(userInfo));
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void findBulkManyTargetsBulkImpl() throws Exception {
-		taskRelationAdapter.findBulkManyTargets(Arrays.asList(1L, 2L), assignedTasksField, queryAdapter);
+		List<Long> ids = Arrays.asList(1L, 2L);
+		taskRelationAdapter.findBulkManyTargets(ids, assignedTasksField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
-		Mockito.verify(filter, Mockito.times(0)).filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(1)).filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryLinksFilterChain.class));
-		Mockito.verify(filter, Mockito.times(2)).filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class), Mockito.any(RepositoryMetaFilterChain.class));
+		Mockito.verify(filter, Mockito.times(0))
+				.filterRequest(contexts.capture(), Mockito.any(RepositoryRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(1))
+				.filterBulkRequest(contexts.capture(), Mockito.any(RepositoryBulkRequestFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryLinksFilterChain.class));
+		Mockito.verify(filter, Mockito.times(2))
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
 		RepositoryFilterContext context1 = contexts.getAllValues().get(0);

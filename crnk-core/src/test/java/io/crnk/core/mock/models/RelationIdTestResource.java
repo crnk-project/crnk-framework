@@ -1,14 +1,15 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.engine.document.ResourceIdentifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "relationIdTest")
@@ -63,6 +64,10 @@ public class RelationIdTestResource {
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private RelationIdTestResource testNested;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "testNested",
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
+	private RelationIdTestResource testNestedOpposite;
 
 	@JsonApiRelationId
 	private ResourceIdentifier testResourceIdRefId;
@@ -129,6 +134,14 @@ public class RelationIdTestResource {
 	public void setTestNested(RelationIdTestResource testNested) {
 		this.testNested = testNested;
 		this.testNestedId = testNested != null ? testNested.getId() : null;
+	}
+
+	public RelationIdTestResource getTestNestedOpposite() {
+		return testNestedOpposite;
+	}
+
+	public void setTestNestedOpposite(RelationIdTestResource testNestedOpposite) {
+		this.testNestedOpposite = testNestedOpposite;
 	}
 
 	public Long getTestLookupAlwaysId() {

@@ -7,7 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.client.module.TestModule;
+import io.crnk.client.module.ClientTestModule;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -49,7 +49,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 
 	protected void createClient() {
 		client = new CrnkClient(getBaseUri().toString());
-		client.addModule(new TestModule());
+		client.addModule(new ClientTestModule());
 		// tag::jerseyStubFactory[]
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		// end::jerseyStubFactory[]
@@ -125,9 +125,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 		}
 
 		public TestApplication(boolean querySpec, boolean jsonApiFilter, boolean serializeLinksAsObjects) {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "io.crnk.test.mock");
 			property(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS, Boolean.toString(serializeLinksAsObjects));
-
 			if (!querySpec) {
 				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
 						new SampleJsonServiceLocator());
@@ -137,7 +135,8 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 						new SampleJsonServiceLocator());
 			}
 
-			feature.addModule(new TestModule());
+			feature.addModule(new io.crnk.test.mock.TestModule());
+			feature.addModule(new ClientTestModule());
 
 			if (jsonApiFilter) {
 				register(new JsonApiResponseFilter(feature));

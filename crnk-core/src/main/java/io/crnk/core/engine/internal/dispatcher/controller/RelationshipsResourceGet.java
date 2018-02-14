@@ -44,8 +44,7 @@ public class RelationshipsResourceGet extends ResourceIncludeField {
 
 		boolean isCollection = Iterable.class.isAssignableFrom(relationshipField.getType());
 
-
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepositoryForType(relationshipField.getOppositeResourceType(), parameterProvider);
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
 		JsonApiResponse entities;
 		if (isCollection) {
 			entities = relationshipRepositoryForClass.findManyTargets(castedResourceId, relationshipField, queryAdapter);

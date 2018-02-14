@@ -48,15 +48,17 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	private PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Before
 	public void setup() {
 		super.setup();
 
 		// get repositories
 		ResourceRepositoryAdapter taskRepository = resourceRegistry.findEntry(Task.class).getResourceRepository(null);
-		RelationshipRepositoryAdapter relRepositoryTaskToProject = resourceRegistry.findEntry(Task.class).getRelationshipRepositoryForType("projects", null);
-		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.findEntry(Project.class).getRelationshipRepositoryForType("tasks", null);
+		RelationshipRepositoryAdapter relRepositoryTaskToProject =
+				resourceRegistry.findEntry(Task.class).getRelationshipRepository("projects", null);
+		RelationshipRepositoryAdapter relRepositoryProjectToTask =
+				resourceRegistry.findEntry(Project.class).getRelationshipRepository("tasks", null);
 		ResourceRepositoryAdapter projectRepository = resourceRegistry.findEntry(Project.class).getResourceRepository(null);
 		ResourceRepositoryAdapter hierarchicalTaskRepository =
 				resourceRegistry.findEntry(HierarchicalTask.class).getResourceRepository(null);
@@ -81,7 +83,8 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		taskRepository.create(task, taskQuery);
 		relRepositoryTaskToProject.setRelation(task, project.getId(), includedProjectField, projectQuey);
 		relRepositoryTaskToProject.setRelation(task, project.getId(), projectField, projectQuey);
-		relRepositoryTaskToProject.addRelations(task, Collections.singletonList(project.getId()), includedProjectsField, projectQuey);
+		relRepositoryTaskToProject
+				.addRelations(task, Collections.singletonList(project.getId()), includedProjectsField, projectQuey);
 
 		// setup deep nested relationship
 		Task includedTask = new Task();

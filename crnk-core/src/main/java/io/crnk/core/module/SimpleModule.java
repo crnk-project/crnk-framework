@@ -1,5 +1,14 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -14,8 +23,6 @@ import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-
-import java.util.*;
 
 /**
  * Vanilla {@link Module} implementation that allows registration of extensions.
@@ -258,12 +265,18 @@ public class SimpleModule implements Module {
 		repositories.add(repository);
 	}
 
+	/**
+	 * @deprecated use addRepository(repository)
+	 */
 	@Deprecated
 	public void addRepository(Class<?> resourceClass, Object repository) {
 		checkInitialized();
 		repositories.add(repository);
 	}
 
+	/**
+	 * @deprecated use addRepository(repository)
+	 */
 	@Deprecated
 	public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
 		checkInitialized();

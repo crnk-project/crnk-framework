@@ -1,12 +1,13 @@
 package io.crnk.core.repository.decorate;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-
-import java.io.Serializable;
 
 public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializable, D, J extends Serializable>
 		implements RelationshipRepositoryDecorator<T, I, D, J>, ResourceRegistryAware {
@@ -21,6 +22,11 @@ public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializa
 	@Override
 	public Class<D> getTargetResourceClass() {
 		return decoratedObject.getTargetResourceClass();
+	}
+
+	@Override
+	public RelationshipMatcher getMatcher() {
+		return decoratedObject.getMatcher();
 	}
 
 	@Override

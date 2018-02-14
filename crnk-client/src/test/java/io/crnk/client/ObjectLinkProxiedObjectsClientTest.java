@@ -3,7 +3,7 @@ package io.crnk.client;
 import java.util.concurrent.TimeUnit;
 
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.client.module.TestModule;
+import io.crnk.client.module.ClientTestModule;
 
 /**
  * Class creates a CrnkClient to serialize links as JSON objects.<br />
@@ -14,7 +14,7 @@ public class ObjectLinkProxiedObjectsClientTest extends AbstractProxiedObjectsCl
 	@Override
 	protected void createClient() {
 		client = new CrnkClient(getBaseUri().toString(), CrnkClient.ClientType.OBJECT_LINKS);
-		client.addModule(new TestModule());
+		client.addModule(new ClientTestModule());
 		// tag::jerseyStubFactory[]
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		// end::jerseyStubFactory[]
