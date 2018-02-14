@@ -7,7 +7,13 @@ import io.crnk.activiti.internal.repository.TaskRelationshipRepository;
 import io.crnk.activiti.internal.repository.TaskResourceRepository;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.FormResource;
+import io.crnk.activiti.resource.ProcessInstanceResource;
+import io.crnk.activiti.resource.TaskResource;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
@@ -20,6 +26,9 @@ public class ActivitiModule implements Module {
 	private ProcessEngine processEngine;
 
 	private ActivitiResourceMapper resourceMapper;
+
+	private ModuleContext moduleContext;
+
 
 	public static final ActivitiModule create(ProcessEngine processEngine, ActivitiModuleConfig config) {
 		return new ActivitiModule(processEngine, config);
@@ -36,6 +45,28 @@ public class ActivitiModule implements Module {
 		this.config = config;
 	}
 
+	public <T extends TaskResource> ResourceRepositoryV2<T, String> getTaskRepository(Class<T> resourceClass) {
+		return getRepository(resourceClass);
+	}
+
+	public <T extends FormResource> ResourceRepositoryV2<T, String> getFormRepository(Class<T> resourceClass) {
+		return getRepository(resourceClass);
+	}
+
+	public <T extends ProcessInstanceResource> ResourceRepositoryV2<T, String> getProcessInstanceRepository(
+			Class<T> resourceClass) {
+		return getRepository(resourceClass);
+	}
+
+	private <T> ResourceRepositoryV2<T, String> getRepository(Class<T> resourceClass) {
+		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+		RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
+		if (entry == null) {
+			throw new RepositoryNotFoundException(resourceClass.getName() + " not registered");
+		}
+		return entry.getResourceRepositoryFacade();
+	}
+
 
 	@Override
 	public String getModuleName() {
@@ -44,6 +75,7 @@ public class ActivitiModule implements Module {
 
 	@Override
 	public void setupModule(ModuleContext context) {
+		this.moduleContext = context;
 
 		TaskService taskService = processEngine.getTaskService();
 		RuntimeService runtimeService = processEngine.getRuntimeService();
@@ -69,7 +101,7 @@ public class ActivitiModule implements Module {
 
 			Class<? extends FormResource> formClass = taskConfig.getFormClass();
 			if (formClass != null) {
-				context.addRepository(new FormResourceRepository(formService, resourceMapper, formClass));
+				context.addRepository(new FormResourceRepository(formService, taskService, resourceMapper, formClass));
 				context.addRepository(new FormRelationshipRepository(taskConfig.getTaskClass(), formClass));
 			}
 		}
