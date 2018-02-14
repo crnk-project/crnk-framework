@@ -128,4 +128,21 @@ public class BeanAttributeInformation {
 			throw new IllegalStateException(e);
 		}
 	}
+
+	public void setValue(Object bean, Object value) {
+		try {
+			if (setter != null) {
+				setter.invoke(bean, value);
+			}
+			else {
+				field.set(bean, value);
+			}
+		}
+		catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		catch (InvocationTargetException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }
