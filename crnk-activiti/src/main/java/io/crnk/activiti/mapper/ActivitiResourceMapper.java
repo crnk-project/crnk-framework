@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import io.crnk.activiti.resource.ExecutionResource;
 import io.crnk.activiti.resource.FormResource;
@@ -201,7 +202,7 @@ public class ActivitiResourceMapper {
 
 	private boolean isPrimitive(Class clazz) {
 		return clazz == String.class || ClassUtils.isPrimitiveOrWrapper(clazz) || LocalDate.class.getPackage().equals(clazz
-				.getPackage()) || clazz.isEnum();
+				.getPackage()) || clazz.isEnum() || clazz == UUID.class;
 	}
 
 }
