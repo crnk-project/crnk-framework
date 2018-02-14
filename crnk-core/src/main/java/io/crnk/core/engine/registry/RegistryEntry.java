@@ -1,21 +1,39 @@
 package io.crnk.core.engine.registry;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.error.ErrorResponse;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
 import io.crnk.legacy.registry.AnnotatedResourceEntry;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -143,11 +161,112 @@ public class RegistryEntry {
 		return false;
 	}
 
+
+	/**
+	 * @return we may or may should not have a public facing ResourceRepositoryAdapter
+	 */
+	@Deprecated
 	public ResourceRepositoryAdapter getResourceRepository() {
 		return getResourceRepository(null);
 	}
 
+	/**
+	 * @return {@link ResourceRepositoryV2} facade to access the repository. Note that this is not the original
+	 * {@link ResourceRepositoryV2}
+	 * implementation backing the repository, but a facade that will also invoke all filters, decorators, etc. The actual
+	 * repository may or may not be implemented with {@link ResourceRepositoryV2}.
+	 * <p>
+	 * Note that currently there is not (yet) any inclusion mechanism supported. This is currently done on a
+	 * resource/document level only. But there might be some benefit to also be able to do it here on some occasions.
+	 */
+	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade() {
+		return (ResourceRepositoryV2<T, I>) new ResourceRepositoryFacade();
+	}
+
 	public Map<ResourceField, ResponseRelationshipEntry> getRelationshipEntries() {
 		return relationshipEntries;
+	}
+
+	class ResourceRepositoryFacade implements ResourceRepositoryV2<Object, Serializable> {
+
+		@Override
+		public Class getResourceClass() {
+			return getResourceInformation().getResourceClass();
+		}
+
+		@Override
+		public Object findOne(Serializable id, QuerySpec querySpec) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			return toResource(adapter.findOne(id, toAdapter(querySpec)));
+		}
+
+
+		@Override
+		public ResourceList findAll(QuerySpec querySpec) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			return (ResourceList) toResources(adapter.findAll(toAdapter(querySpec)));
+		}
+
+		@Override
+		public ResourceList findAll(Iterable ids, QuerySpec querySpec) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			return (ResourceList) toResources(adapter.findAll(ids, toAdapter(querySpec)));
+		}
+
+		@Override
+		public Object save(Object resource) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			return toResource(adapter.update(resource, createEmptyAdapter()));
+		}
+
+		@Override
+		public Object create(Object resource) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			return toResource(adapter.create(resource, createEmptyAdapter()));
+		}
+
+		@Override
+		public void delete(Serializable id) {
+			ResourceRepositoryAdapter adapter = getResourceRepository();
+			toResource(adapter.delete(id, createEmptyAdapter()));
+		}
+
+		private QueryAdapter createEmptyAdapter() {
+			return toAdapter(new QuerySpec(getResourceClass()));
+		}
+
+		private QueryAdapter toAdapter(QuerySpec querySpec) {
+			return new QuerySpecAdapter(querySpec, moduleRegistry.getResourceRegistry());
+		}
+	}
+
+
+	private ResourceList toResources(JsonApiResponse response) {
+		Collection elements = (Collection) toResource(response);
+
+		DefaultResourceList result = new DefaultResourceList();
+		result.addAll(elements);
+		result.setMeta(response.getMetaInformation());
+		result.setLinks(response.getLinksInformation());
+		return result;
+	}
+
+	private Object toResource(JsonApiResponse response) {
+		if (response.getErrors() != null && response.getErrors().iterator().hasNext()) {
+
+			List<ErrorData> errorList = new ArrayList<>();
+			response.getErrors().forEach(it -> errorList.add(it));
+			Optional<Integer> errorCode = errorList.stream().filter(it -> it.getStatus() != null)
+					.map(it -> Integer.parseInt(it.getStatus()))
+					.collect(Collectors.maxBy(Integer::compare));
+
+			ErrorResponse errorResponse = new ErrorResponse(errorList, errorCode.get());
+
+			ExceptionMapperRegistry exceptionMapperRegistry = moduleRegistry.getExceptionMapperRegistry();
+			ExceptionMapper<Throwable> exceptionMapper = exceptionMapperRegistry.findMapperFor(errorResponse).get();
+			return exceptionMapper.fromErrorResponse(errorResponse);
+		}
+		return response.getEntity();
+
 	}
 }
