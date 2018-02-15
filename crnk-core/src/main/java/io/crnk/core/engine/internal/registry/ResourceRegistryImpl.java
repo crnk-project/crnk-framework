@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
@@ -14,9 +17,6 @@ import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
-
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
@@ -105,7 +105,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		return String.format("%s/%s", url, resourceInformation.getResourceType());
+		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
 	}
 
 	@Override
@@ -129,8 +129,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(final Class<?> clazz, final String id) {
 		RegistryEntry registryEntry = findEntry(clazz);
-
-		return String.format("%s/%s", getResourceUrl(registryEntry.getResourceInformation()), id);
+		String typeUrl = getResourceUrl(registryEntry.getResourceInformation());
+		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
 	}
 
 	@Override

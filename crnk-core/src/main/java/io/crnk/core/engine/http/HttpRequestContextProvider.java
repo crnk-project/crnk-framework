@@ -11,7 +11,7 @@ public class HttpRequestContextProvider {
 		public String getUrl() {
 			HttpRequestContext request = threadLocal.get();
 			if (request == null) {
-				throw new IllegalStateException("HttpRequestContext not available, make sure to call onRequestStarted in advance");
+				return null;
 			}
 			return request.getBaseUrl();
 		}
