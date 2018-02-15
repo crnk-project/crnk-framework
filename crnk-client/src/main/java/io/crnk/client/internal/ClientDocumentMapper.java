@@ -12,12 +12,12 @@ import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.document.mapper.ResourceMapper;
+import io.crnk.core.engine.internal.document.mapper.ResourceMappingConfig;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -52,7 +52,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 			@Override
 			protected void setRelationship(Resource resource, ResourceField field, Object entity,
-					ResourceInformation resourceInformation, QueryAdapter queryAdapter) {
+					ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+					ResourceMappingConfig mappingConfig) {
 				// we also include relationship data if it is not null and not a
 				// unloaded proxy
 				boolean includeRelation = true;
