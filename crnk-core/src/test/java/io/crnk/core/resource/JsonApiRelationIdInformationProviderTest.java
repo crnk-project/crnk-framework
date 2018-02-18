@@ -15,6 +15,8 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -31,11 +33,14 @@ public class JsonApiRelationIdInformationProviderTest {
 
 	private final ResourceInformationProvider resourceInformationProvider =
 			new DefaultResourceInformationProvider(new NullPropertiesProvider(),
-					new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
+					new OffsetLimitPagingSpecSerializer(),
+					new OffsetLimitPagingSpecDeserializer(),
+					new DefaultResourceFieldInformationProvider(),
+					new JacksonResourceFieldInformationProvider());
 
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider,
-					new DefaultInformationBuilder(new TypeParser(), null, null), new TypeParser(), new ObjectMapper());
+					new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();

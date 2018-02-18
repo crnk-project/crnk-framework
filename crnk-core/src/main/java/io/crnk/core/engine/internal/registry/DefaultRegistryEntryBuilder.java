@@ -259,8 +259,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			List<ResourceField> contributedFields = contributor.getResourceFields(new ResourceFieldContributorContext() {
 				@Override
 				public InformationBuilder getInformationBuilder() {
-					return new DefaultInformationBuilder(moduleRegistry.getTypeParser(),
-							moduleRegistry.getPagingSpecSerializers(), moduleRegistry.getPagingSpecDeserializers());
+					return new DefaultInformationBuilder(moduleRegistry.getTypeParser());
 				}
 			});
 			List<ResourceField> fields = new ArrayList<>();

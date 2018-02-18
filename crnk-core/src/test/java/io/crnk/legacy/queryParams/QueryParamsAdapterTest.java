@@ -14,6 +14,8 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 
@@ -31,10 +33,12 @@ public class QueryParamsAdapterTest {
 
 		DefaultResourceInformationProvider builder = new DefaultResourceInformationProvider(
 			new NullPropertiesProvider(),
+				new OffsetLimitPagingSpecSerializer(),
+				new OffsetLimitPagingSpecDeserializer(),
 			new DefaultResourceFieldInformationProvider(),
 			new JacksonResourceFieldInformationProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder,
-				new DefaultInformationBuilder(moduleRegistry.getTypeParser(), null, null),  moduleRegistry.getTypeParser(), new ObjectMapper()));
+				new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
 
 		QueryParamsAdapter adapter = new QueryParamsAdapter(info, params, moduleRegistry);

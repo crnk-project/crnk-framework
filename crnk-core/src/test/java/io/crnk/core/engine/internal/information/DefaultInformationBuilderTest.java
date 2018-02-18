@@ -28,7 +28,7 @@ public class DefaultInformationBuilderTest {
 	@Before
 	public void setup() {
 		TypeParser parser = new TypeParser();
-		builder = new DefaultInformationBuilder(parser, null, null);
+		builder = new DefaultInformationBuilder(parser);
 	}
 
 	@Test

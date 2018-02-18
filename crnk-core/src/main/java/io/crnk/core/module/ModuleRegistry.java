@@ -39,8 +39,6 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
-import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
-import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -100,10 +98,6 @@ public class ModuleRegistry {
 
 	private ResourceFilterDirectory filterBehaviorProvider;
 
-	private Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
-
-	private Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
-
 	public ModuleRegistry() {
 		this(true);
 	}
@@ -113,7 +107,7 @@ public class ModuleRegistry {
 	}
 
 	public DefaultInformationBuilder getInformationBuilder() {
-		return new DefaultInformationBuilder(typeParser, pagingSpecSerializers, pagingSpecDeserializers);
+		return new DefaultInformationBuilder(typeParser);
 	}
 
 	public List<ResourceModificationFilter> getResourceModificationFilters() {
@@ -157,7 +151,7 @@ public class ModuleRegistry {
 	}
 
 	/**
-	 * Ensures the {@link ModuleRegistry#init(ObjectMapper, Map, Map)}
+	 * Ensures the {@link ModuleRegistry#init(ObjectMapper)}
 	 * has not yet been called.
 	 */
 
@@ -177,7 +171,7 @@ public class ModuleRegistry {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider =
 					new CombinedResourceInformationProvider(aggregatedModule.getResourceInformationProviders());
-			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser, pagingSpecSerializers, pagingSpecDeserializers);
+			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
 							objectMapper);
@@ -261,15 +255,11 @@ public class ModuleRegistry {
 	 *
 	 * @param objectMapper object mapper
 	 */
-	public void init(ObjectMapper objectMapper,
-					 Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers,
-					 Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers) {
+	public void init(ObjectMapper objectMapper) {
 		PreconditionUtil.assertEquals("already initialized", InitializedState.NOT_INITIALIZED, initializedState);
 		this.initializedState = InitializedState.INITIALIZING;
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModules(getJacksonModules());
-		this.pagingSpecSerializers = pagingSpecSerializers;
-		this.pagingSpecDeserializers = pagingSpecDeserializers;
 
 		initializeModules();
 
@@ -433,14 +423,6 @@ public class ModuleRegistry {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
-	}
-
-	public Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> getPagingSpecSerializers() {
-		return pagingSpecSerializers;
-	}
-
-	public Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> getPagingSpecDeserializers() {
-		return pagingSpecDeserializers;
 	}
 
 	/**

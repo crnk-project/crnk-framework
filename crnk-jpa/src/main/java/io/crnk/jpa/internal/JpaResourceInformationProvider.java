@@ -1,28 +1,20 @@
 package io.crnk.jpa.internal;
 
-import io.crnk.core.engine.information.resource.ResourceValidator;
-import io.crnk.core.engine.parser.StringMapper;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
-import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
+import io.crnk.core.engine.information.resource.ResourceValidator;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceInformationProviderBase;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
@@ -37,6 +29,15 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -103,7 +104,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 		TypeParser typeParser = context.getTypeParser();
 		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceType, superResourceType,
-				instanceBuilder, fields);
+				instanceBuilder, fields, null, null);
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
 		info.setIdStringMapper(new JpaIdMapper(meta));
 		return info;

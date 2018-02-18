@@ -9,6 +9,8 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -42,6 +44,7 @@ public abstract class AbstractQueryParamsTest {
 		ResourceInformationProvider resourceInformationProvider =
 				new DefaultResourceInformationProvider(
 					new NullPropertiesProvider(),
+						(PagingSpecSerializer) null, (PagingSpecDeserializer) null,
 					new DefaultResourceFieldInformationProvider(),
 					new JacksonResourceFieldInformationProvider());
 

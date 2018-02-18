@@ -25,11 +25,11 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
@@ -57,11 +57,14 @@ public class DefaultResourceInformationProviderTest {
 
 	private final ResourceInformationProvider resourceInformationProvider =
 			new DefaultResourceInformationProvider(new NullPropertiesProvider(),
-					new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
+					new OffsetLimitPagingSpecSerializer(),
+					new OffsetLimitPagingSpecDeserializer(),
+					new DefaultResourceFieldInformationProvider(),
+					new JacksonResourceFieldInformationProvider());
 
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider,
-					new DefaultInformationBuilder(new TypeParser(), null, null), new TypeParser(), new ObjectMapper());
+					new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -350,6 +353,8 @@ public class DefaultResourceInformationProviderTest {
 
 		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
 				propertiesProvider,
+				new OffsetLimitPagingSpecSerializer(),
+				new OffsetLimitPagingSpecDeserializer(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider.init(context);

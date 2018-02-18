@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.information.resource;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.collect.ImmutableList;
 
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
@@ -10,13 +11,18 @@ import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.PagingBehavior;
 import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
@@ -25,14 +31,41 @@ import java.util.List;
  */
 public class DefaultResourceInformationProvider extends ResourceInformationProviderBase {
 
+	private final Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
+
+	private final Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
+
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
+											  PagingSpecSerializer pagingSpecSerializer,
+											  PagingSpecDeserializer pagingSpecDeserializer,
 											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
-		this(propertiesProvider, Arrays.asList(resourceFieldInformationProviders));
+		this(propertiesProvider,
+				ImmutableList.of(pagingSpecSerializer),
+				ImmutableList.of(pagingSpecDeserializer),
+				Arrays.asList(resourceFieldInformationProviders));
 	}
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
+											  List<? extends PagingSpecSerializer> pagingSpecSerializers,
+											  List<? extends PagingSpecDeserializer> pagingSpecDeserializers,
+											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
+		this(propertiesProvider, pagingSpecSerializers, pagingSpecDeserializers, Arrays.asList(resourceFieldInformationProviders));
+	}
+
+	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
+											  List<? extends PagingSpecSerializer> pagingSpecSerializers,
+											  List<? extends PagingSpecDeserializer> pagingSpecDeserializers,
 											  List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		super(propertiesProvider, resourceFieldInformationProviders);
+
+		this.pagingSpecSerializers = new HashMap<>(pagingSpecSerializers.size());
+		for (int i = 0; i < pagingSpecSerializers.size(); i++) {
+			this.pagingSpecSerializers.put(pagingSpecSerializers.get(i).getClass(), pagingSpecSerializers.get(i));
+		}
+		this.pagingSpecDeserializers = new HashMap<>(pagingSpecDeserializers.size());
+		for (int i = 0; i < pagingSpecDeserializers.size(); i++) {
+			this.pagingSpecDeserializers.put(pagingSpecDeserializers.get(i).getClass(), pagingSpecDeserializers.get(i));
+		}
 	}
 
 	@Override
@@ -61,9 +94,11 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		Class<?> superclass = resourceClass.getSuperclass();
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
+		PagingBehavior pagingBehavior = ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().paging();
+
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),
 				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields,
-				null, null);
+				pagingSpecSerializers.get(pagingBehavior.serializer()), pagingSpecDeserializers.get(pagingBehavior.deserializer()));
 		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}

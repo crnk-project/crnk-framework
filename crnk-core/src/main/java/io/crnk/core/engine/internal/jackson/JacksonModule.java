@@ -9,6 +9,10 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.module.Module;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
+
+import java.util.List;
 
 public class JacksonModule implements Module {
 
@@ -18,13 +22,27 @@ public class JacksonModule implements Module {
 
 	private final boolean serializeLinksAsObjects;
 
+	private final List<? extends PagingSpecSerializer> pagingSpecSerializers;
+
+	private final List<? extends PagingSpecDeserializer> pagingSpecDeserializers;
+
+	@Deprecated
 	public JacksonModule(ObjectMapper objectMapper) {
-		this(objectMapper, false);
+		this(objectMapper, false, null, null);
 	}
 
+	@Deprecated
 	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects) {
+		this(objectMapper, serializeLinksAsObjects, null, null);
+	}
+
+	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects,
+						 List<? extends PagingSpecSerializer> pagingSpecSerializers,
+						 List<? extends PagingSpecDeserializer> pagingSpecDeserializers) {
 		this.objectMapper = objectMapper;
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
+		this.pagingSpecSerializers = pagingSpecSerializers;
+		this.pagingSpecDeserializers = pagingSpecDeserializers;
 	}
 
 	@Override
@@ -42,6 +60,8 @@ public class JacksonModule implements Module {
 		// TODO move somewhere else and make use of a SerializerExtension
 		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(
 			context.getPropertiesProvider(),
+			pagingSpecSerializers,
+			pagingSpecDeserializers,
 			defaultFieldProvider,
 			jacksonFieldProvider));
 	}

@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -19,6 +21,9 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
+import io.crnk.core.queryspec.repository.CustomOffsetLimitPagingDeserializer;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -48,6 +53,8 @@ public abstract class AbstractQuerySpecTest {
 	@Before
 	public void setup() {
 		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(),
+				ImmutableList.of(new OffsetLimitPagingSpecSerializer()),
+				ImmutableList.of(new OffsetLimitPagingSpecDeserializer(), new CustomOffsetLimitPagingDeserializer()),
 				new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
 
 			@Override
@@ -59,7 +66,7 @@ public abstract class AbstractQuerySpecTest {
 					String name = "computedAttribute";
 					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
-					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser(), null, null);
+					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
 
 					InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
 					fieldBuilder.type(Integer.class);

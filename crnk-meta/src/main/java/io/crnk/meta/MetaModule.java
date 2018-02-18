@@ -136,10 +136,11 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 	}
 
 	protected DefaultResourceInformationProvider registerInformationBuilder(PropertiesProvider propertiesProvider) {
-		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser(),
-				new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
+		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser());
 		DefaultResourceInformationProvider informationProvider = new DefaultResourceInformationProvider(
 				propertiesProvider,
+				new OffsetLimitPagingSpecSerializer(),
+				new OffsetLimitPagingSpecDeserializer(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,

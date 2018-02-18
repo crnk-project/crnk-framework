@@ -75,7 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import jersey.repackaged.com.google.common.collect.ImmutableList;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -141,7 +141,7 @@ public class CrnkClient {
 
 		switch (clientType) {
 			case OBJECT_LINKS:
-				moduleRegistry.addModule(new JacksonModule(objectMapper, true));
+				initJacksonModule(true);
 				documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new PropertiesProvider() {
 					@Override
 					public String getProperty(String key) {
@@ -153,11 +153,17 @@ public class CrnkClient {
 				});
 				break;
 			default:
-				moduleRegistry.addModule(new JacksonModule(objectMapper));
+				initJacksonModule(false);
 				documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
 		}
 
 		setProxyFactory(new BasicProxyFactory());
+	}
+
+	private void initJacksonModule(final boolean serializeLinksAsObjects) {
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects,
+				ImmutableList.of(new OffsetLimitPagingSpecSerializer()),
+				ImmutableList.of(new OffsetLimitPagingSpecDeserializer())));
 	}
 
 	/**
@@ -261,8 +267,7 @@ public class CrnkClient {
 	}
 
 	private void initModuleRegistry() {
-		moduleRegistry.init(objectMapper, ImmutableMap.of(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer()),
-				ImmutableMap.of(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer()));
+		moduleRegistry.init(objectMapper);
 	}
 
 	private void initExceptionMapperRegistry() {

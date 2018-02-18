@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.information;
 
-import com.google.common.collect.ImmutableMap;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -24,7 +22,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.PagingBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -37,10 +34,6 @@ import java.util.Map;
 public class DefaultInformationBuilder implements InformationBuilder {
 
 	private final TypeParser typeParser;
-
-	private final Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
-
-	private final Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
 
 	@Override
 	public Field createResourceField() {
@@ -154,10 +147,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 				field.from(fromField);
 				fields.add(field);
 			}
-
-			PagingBehavior pagingBehavior = ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().paging();
-			pagingSpecSerializer = pagingSpecSerializers.get(pagingBehavior.serializer());
-			pagingSpecDeserializer = pagingSpecDeserializers.get(pagingBehavior.deserializer());
+			pagingSpecSerializer = information.getPagingSpecSerializer();
+			pagingSpecDeserializer = information.getPagingSpecDeserializer();
 		}
 
 		@Override
@@ -399,19 +390,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	}
 
 
-	public DefaultInformationBuilder(TypeParser typeParser,
-									 Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers,
-									 Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers) {
+	public DefaultInformationBuilder(TypeParser typeParser) {
 		this.typeParser = typeParser;
-		this.pagingSpecSerializers = pagingSpecSerializers;
-		this.pagingSpecDeserializers = pagingSpecDeserializers;
-	}
-
-	public DefaultInformationBuilder(TypeParser typeParser,
-									 PagingSpecSerializer pagingSpecSerializer,
-									 PagingSpecDeserializer pagingSpecDeserializer) {
-		this.typeParser = typeParser;
-		this.pagingSpecSerializers = ImmutableMap.of(pagingSpecSerializer.getClass(), pagingSpecSerializer);
-		this.pagingSpecDeserializers = ImmutableMap.of(pagingSpecDeserializer.getClass(), pagingSpecDeserializer);
 	}
 }

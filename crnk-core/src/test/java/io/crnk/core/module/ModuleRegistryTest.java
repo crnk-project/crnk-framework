@@ -1,7 +1,7 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
@@ -94,11 +94,11 @@ public class ModuleRegistryTest {
 		testModule = new TestModule();
 		moduleRegistry.addModule(testModule);
 		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false,
+				ImmutableList.of(new OffsetLimitPagingSpecSerializer()),
+				ImmutableList.of(new OffsetLimitPagingSpecDeserializer())));
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
-		moduleRegistry.init(new ObjectMapper(),
-				ImmutableMap.of(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer()),
-				ImmutableMap.of(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer()));
+		moduleRegistry.init(new ObjectMapper());
 
 		Assert.assertEquals(resourceRegistry, moduleRegistry.getResourceRegistry());
 	}
@@ -119,7 +119,7 @@ public class ModuleRegistryTest {
 		module.addFilter(filter1);
 		module.addFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper(), null, null);
+		moduleRegistry.init(new ObjectMapper());
 
 		List<DocumentFilter> filters = moduleRegistry.getFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -144,7 +144,7 @@ public class ModuleRegistryTest {
 		module.addResourceModificationFilter(filter1);
 		module.addResourceModificationFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper(), null, null);
+		moduleRegistry.init(new ObjectMapper());
 
 		List<ResourceModificationFilter> filters = moduleRegistry.getResourceModificationFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -168,7 +168,7 @@ public class ModuleRegistryTest {
 		module.addRepositoryFilter(filter1);
 		module.addRepositoryFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper(), null, null);
+		moduleRegistry.init(new ObjectMapper());
 
 		List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -251,7 +251,7 @@ public class ModuleRegistryTest {
 
 			@Override
 			public InformationBuilder builder() {
-				return new DefaultInformationBuilder(getTypeParser(), null, null);
+				return new DefaultInformationBuilder(getTypeParser());
 			}
 		};
 	}
@@ -265,7 +265,7 @@ public class ModuleRegistryTest {
 	@Test(expected = IllegalStateException.class)
 	public void testDuplicateInitialization() {
 		ObjectMapper objectMapper = new ObjectMapper();
-		moduleRegistry.init(objectMapper, null, null);
+		moduleRegistry.init(objectMapper);
 	}
 
 	@Test

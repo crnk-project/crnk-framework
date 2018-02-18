@@ -53,7 +53,6 @@ import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -98,9 +97,9 @@ public class CrnkBoot {
 
 	private Boolean allowUnknownParameters;
 
-	private Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
+	private List<PagingSpecSerializer> pagingSpecSerializers;
 
-	private Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
+	private List<PagingSpecDeserializer> pagingSpecDeserializers;
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -194,7 +193,7 @@ public class CrnkBoot {
 		setupComponents();
 		ResourceRegistryPart rootPart = setupResourceRegistry();
 
-		moduleRegistry.init(objectMapper, pagingSpecSerializers, pagingSpecDeserializers);
+		moduleRegistry.init(objectMapper);
 
 		setupRepositories(rootPart);
 
@@ -338,7 +337,7 @@ public class CrnkBoot {
 
 		boolean serializeLinksAsObjects =
 				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, pagingSpecSerializers, pagingSpecDeserializers));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -516,13 +515,9 @@ public class CrnkBoot {
 		if (pagingSpecSerializers == null) {
 			setupServiceDiscovery();
 
-			pagingSpecSerializers = new HashMap<>();
-			pagingSpecSerializers.put(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer());
-
-			List<PagingSpecSerializer> serializers = serviceDiscovery.getInstancesByType(PagingSpecSerializer.class);
-			for (int i = 0; i < serializers.size(); i++) {
-				pagingSpecSerializers.put(serializers.get(i).getClass(), serializers.get(i));
-			}
+			pagingSpecSerializers = new ArrayList<>();
+			pagingSpecSerializers.add(new OffsetLimitPagingSpecSerializer());
+			pagingSpecSerializers.addAll(serviceDiscovery.getInstancesByType(PagingSpecSerializer.class));
 		}
 	}
 
@@ -530,13 +525,9 @@ public class CrnkBoot {
 		if (pagingSpecDeserializers == null) {
 			setupServiceDiscovery();
 
-			pagingSpecDeserializers = new HashMap<>();
-			pagingSpecDeserializers.put(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer());
-
-			List<PagingSpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(PagingSpecDeserializer.class);
-			for (int i = 0; i < deserializers.size(); i++) {
-				pagingSpecDeserializers.put(deserializers.get(i).getClass(), deserializers.get(i));
-			}
+			pagingSpecDeserializers = new ArrayList<>();
+			pagingSpecDeserializers.add(new OffsetLimitPagingSpecDeserializer());
+			pagingSpecDeserializers.addAll(serviceDiscovery.getInstancesByType(PagingSpecDeserializer.class));
 		}
 
 		for (int i = 0; i < pagingSpecDeserializers.size(); i++) {
