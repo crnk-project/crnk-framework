@@ -18,7 +18,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -47,7 +47,8 @@ public abstract class AbstractQuerySpecTest {
 
 	@Before
 	public void setup() {
-		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
+		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(),
+				new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
 
 			@Override
 			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
@@ -58,7 +59,7 @@ public abstract class AbstractQuerySpecTest {
 					String name = "computedAttribute";
 					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
 
-					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
+					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser(), null, null);
 
 					InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
 					fieldBuilder.type(Integer.class);

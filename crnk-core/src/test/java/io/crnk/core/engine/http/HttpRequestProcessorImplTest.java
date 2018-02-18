@@ -40,9 +40,7 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -166,9 +164,7 @@ public class HttpRequestProcessorImplTest {
 		when(controller.isAcceptable(any(JsonPath.class), eq("GET"))).thenCallRealMethod();
 
 		controllerRegistry.addController(controller);
-		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-		querySpecDeserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
-		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 		sut.process(requestContext);
 
@@ -186,9 +182,7 @@ public class HttpRequestProcessorImplTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		CollectionGet controller = mock(CollectionGet.class);
 		controllerRegistry.addController(controller);
-		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-		querySpecDeserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
-		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN
@@ -211,9 +205,7 @@ public class HttpRequestProcessorImplTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		RelationshipsResourceGet controller = mock(RelationshipsResourceGet.class);
 		controllerRegistry.addController(controller);
-		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-		querySpecDeserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
-		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		RequestDispatcher sut = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 
 		// WHEN

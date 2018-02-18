@@ -39,10 +39,13 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.repository.ResourceRepository;
@@ -55,7 +58,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import io.crnk.core.utils.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,12 @@ import java.util.stream.Collectors;
  * Container for setting up and holding {@link Module} instances;
  */
 public class ModuleRegistry {
+
+	enum InitializedState {
+		NOT_INITIALIZED,
+		INITIALIZING,
+		INITIALIZED
+	}
 
 	private TypeParser typeParser = new TypeParser();
 
@@ -78,24 +86,6 @@ public class ModuleRegistry {
 
 	private ResourceInformationProvider resourceInformationProvider;
 
-	public DefaultInformationBuilder getInformationBuilder() {
-		return new DefaultInformationBuilder(typeParser);
-	}
-
-	public List<ResourceModificationFilter> getResourceModificationFilters() {
-		return prioritze(aggregatedModule.getResourceModificationFilters());
-	}
-
-	public Collection<Object> getRepositories() {
-		return aggregatedModule.getRepositories();
-	}
-
-	enum InitializedState {
-		NOT_INITIALIZED,
-		INITIALIZING,
-		INITIALIZED
-	}
-
 	private ServiceDiscovery serviceDiscovery;
 
 	private boolean isServer = true;
@@ -110,12 +100,28 @@ public class ModuleRegistry {
 
 	private ResourceFilterDirectory filterBehaviorProvider;
 
+	private Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
+
+	private Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
+
 	public ModuleRegistry() {
 		this(true);
 	}
 
 	public ModuleRegistry(boolean isServer) {
 		this.isServer = isServer;
+	}
+
+	public DefaultInformationBuilder getInformationBuilder() {
+		return new DefaultInformationBuilder(typeParser, pagingSpecSerializers, pagingSpecDeserializers);
+	}
+
+	public List<ResourceModificationFilter> getResourceModificationFilters() {
+		return prioritze(aggregatedModule.getResourceModificationFilters());
+	}
+
+	public Collection<Object> getRepositories() {
+		return aggregatedModule.getRepositories();
 	}
 
 	/**
@@ -151,7 +157,7 @@ public class ModuleRegistry {
 	}
 
 	/**
-	 * Ensures the {@link ModuleRegistry#init(ObjectMapper)}
+	 * Ensures the {@link ModuleRegistry#init(ObjectMapper, Map, Map)}
 	 * has not yet been called.
 	 */
 
@@ -171,7 +177,7 @@ public class ModuleRegistry {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider =
 					new CombinedResourceInformationProvider(aggregatedModule.getResourceInformationProviders());
-			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
+			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser, pagingSpecSerializers, pagingSpecDeserializers);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
 							objectMapper);
@@ -255,11 +261,15 @@ public class ModuleRegistry {
 	 *
 	 * @param objectMapper object mapper
 	 */
-	public void init(ObjectMapper objectMapper) {
+	public void init(ObjectMapper objectMapper,
+					 Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers,
+					 Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers) {
 		PreconditionUtil.assertEquals("already initialized", InitializedState.NOT_INITIALIZED, initializedState);
 		this.initializedState = InitializedState.INITIALIZING;
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModules(getJacksonModules());
+		this.pagingSpecSerializers = pagingSpecSerializers;
+		this.pagingSpecDeserializers = pagingSpecDeserializers;
 
 		initializeModules();
 
@@ -340,7 +350,7 @@ public class ModuleRegistry {
 		for (Object repository : repositories) {
 			if (repository instanceof ResourceRepositoryV2 || repository instanceof ResourceRepository || repository.getClass()
 					.getAnnotation(JsonApiResourceRepository.class) != null) {
-				applyRepositoryRegistration(repository, repositories);
+				applyRepositoryRegistration(repository);
 			}
 		}
 	}
@@ -351,9 +361,9 @@ public class ModuleRegistry {
 				.collect(Collectors.toList());
 	}
 
-	private void applyRepositoryRegistration(Object repository, Collection<Object> repositories) {
+	private void applyRepositoryRegistration(Object repository) {
 		RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
-		entryBuilder.fromImplemenation(repository);
+		entryBuilder.fromImplementation(repository);
 		RegistryEntry entry = entryBuilder.build();
 		resourceRegistry.addEntry(entry);
 	}
@@ -423,6 +433,14 @@ public class ModuleRegistry {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+	}
+
+	public Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> getPagingSpecSerializers() {
+		return pagingSpecSerializers;
+	}
+
+	public Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> getPagingSpecDeserializers() {
+		return pagingSpecDeserializers;
 	}
 
 	/**

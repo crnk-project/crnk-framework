@@ -1,11 +1,7 @@
 package io.crnk.client;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.MultivaluedMap;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.client.module.ClientTestModule;
 import io.crnk.core.boot.CrnkProperties;
@@ -22,10 +18,17 @@ import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.test.mock.repository.TaskRepository;
 import io.crnk.test.mock.repository.TaskToProjectRepository;
+
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Assert;
 import org.junit.Before;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.MultivaluedMap;
 
 public abstract class AbstractClientTest extends JerseyTestBase {
 
@@ -34,7 +37,6 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 	protected TestApplication testApplication;
 
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
-
 
 	@Before
 	public void setup() {

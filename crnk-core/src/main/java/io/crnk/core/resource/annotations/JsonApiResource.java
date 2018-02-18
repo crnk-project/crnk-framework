@@ -1,6 +1,10 @@
 package io.crnk.core.resource.annotations;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Defines a resource. Each class annotated with {@link JsonApiResource} must have defined {@link JsonApiResource#type()}.
@@ -18,4 +22,10 @@ public @interface JsonApiResource {
 	 * @see <a href="http://jsonapi.org/format/#document-structure-resource-types">JSON API - Resource Types</a>
 	 */
 	String type();
+
+	/**
+	 * Defines paging behavior of the resource
+	 * @return {@link PagingBehavior} definition
+	 */
+	PagingBehavior paging() default @PagingBehavior;
 }

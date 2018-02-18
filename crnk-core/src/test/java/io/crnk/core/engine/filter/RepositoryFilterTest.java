@@ -23,7 +23,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import java.util.List;

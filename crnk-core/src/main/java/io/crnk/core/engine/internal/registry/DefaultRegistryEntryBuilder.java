@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
@@ -45,8 +39,15 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
@@ -115,7 +116,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	@Override
-	public void fromImplemenation(Object repository) {
+	public void fromImplementation(Object repository) {
 		RepositoryInformationProvider repositoryInformationBuilder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RepositoryInformationProviderContext builderContext = new DefaultRepositoryInformationProviderContext(moduleRegistry);
@@ -258,7 +259,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			List<ResourceField> contributedFields = contributor.getResourceFields(new ResourceFieldContributorContext() {
 				@Override
 				public InformationBuilder getInformationBuilder() {
-					return new DefaultInformationBuilder(moduleRegistry.getTypeParser());
+					return new DefaultInformationBuilder(moduleRegistry.getTypeParser(),
+							moduleRegistry.getPagingSpecSerializers(), moduleRegistry.getPagingSpecDeserializers());
 				}
 			});
 			List<ResourceField> fields = new ArrayList<>();
@@ -344,7 +346,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			return null;
 		}
 	}
-
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object decorateRepository(Object repository) {

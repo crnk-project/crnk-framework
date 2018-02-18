@@ -4,13 +4,18 @@ import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +28,7 @@ public class DefaultInformationBuilderTest {
 	@Before
 	public void setup() {
 		TypeParser parser = new TypeParser();
-		builder = new DefaultInformationBuilder(parser);
-
+		builder = new DefaultInformationBuilder(parser, null, null);
 	}
 
 	@Test

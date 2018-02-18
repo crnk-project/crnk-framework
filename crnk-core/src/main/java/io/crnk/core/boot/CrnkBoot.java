@@ -1,9 +1,5 @@
 package io.crnk.core.boot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -44,9 +40,10 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
-import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.Repository;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
@@ -55,9 +52,8 @@ import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
-import net.jodah.typetools.TypeResolver;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +97,10 @@ public class CrnkBoot {
 	private Boolean allowUnknownAttributes;
 
 	private Boolean allowUnknownParameters;
+
+	private Map<Class<? extends PagingSpecSerializer>, PagingSpecSerializer> pagingSpecSerializers;
+
+	private Map<Class<? extends PagingSpecDeserializer>, PagingSpecDeserializer> pagingSpecDeserializers;
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -172,6 +172,8 @@ public class CrnkBoot {
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		setupQuerySpecDeserializer();
+		setupPagingSpecSerializer();
+		setupPagingSpecDeserializer();
 		bootDiscovery();
 	}
 
@@ -192,7 +194,7 @@ public class CrnkBoot {
 		setupComponents();
 		ResourceRegistryPart rootPart = setupResourceRegistry();
 
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, pagingSpecSerializers, pagingSpecDeserializers);
 
 		setupRepositories(rootPart);
 
@@ -488,12 +490,6 @@ public class CrnkBoot {
 			}
 		}
 
-		if (querySpecDeserializer.getPagingSpecDeserializer() == null) {
-			List<PagingSpecDeserializer> list = serviceDiscovery.getInstancesByType(PagingSpecDeserializer.class);
-			querySpecDeserializer.setPagingSpecDeserializer(list.isEmpty()
-					? new OffsetLimitPagingSpecDeserializer() : list.get(0));
-		}
-
 		if (querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
 			if (allowUnknownAttributes == null) {
 				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
@@ -514,13 +510,44 @@ public class CrnkBoot {
 				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownParameters(allowUnknownParameters);
 			}
 		}
+	}
 
-		if (querySpecDeserializer.getPagingSpecDeserializer() instanceof OffsetLimitPagingSpecDeserializer) {
-			if (defaultPageLimit != null) {
-				((OffsetLimitPagingSpecDeserializer) this.querySpecDeserializer.getPagingSpecDeserializer()).setDefaultLimit(defaultPageLimit);
+	private void setupPagingSpecSerializer() {
+		if (pagingSpecSerializers == null) {
+			setupServiceDiscovery();
+
+			pagingSpecSerializers = new HashMap<>();
+			pagingSpecSerializers.put(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer());
+
+			List<PagingSpecSerializer> serializers = serviceDiscovery.getInstancesByType(PagingSpecSerializer.class);
+			for (int i = 0; i < serializers.size(); i++) {
+				pagingSpecSerializers.put(serializers.get(i).getClass(), serializers.get(i));
 			}
-			if (maxPageLimit != null) {
-				((OffsetLimitPagingSpecDeserializer) this.querySpecDeserializer.getPagingSpecDeserializer()).setMaxPageLimit(maxPageLimit);
+		}
+	}
+
+	private void setupPagingSpecDeserializer() {
+		if (pagingSpecDeserializers == null) {
+			setupServiceDiscovery();
+
+			pagingSpecDeserializers = new HashMap<>();
+			pagingSpecDeserializers.put(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer());
+
+			List<PagingSpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(PagingSpecDeserializer.class);
+			for (int i = 0; i < deserializers.size(); i++) {
+				pagingSpecDeserializers.put(deserializers.get(i).getClass(), deserializers.get(i));
+			}
+		}
+
+		for (int i = 0; i < pagingSpecDeserializers.size(); i++) {
+			PagingSpecDeserializer deserializer = pagingSpecDeserializers.get(i);
+			if (deserializer instanceof OffsetLimitPagingSpecDeserializer) {
+				if (defaultPageLimit != null) {
+					((OffsetLimitPagingSpecDeserializer) deserializer).setDefaultLimit(defaultPageLimit);
+				}
+				if (maxPageLimit != null) {
+					((OffsetLimitPagingSpecDeserializer) deserializer).setMaxPageLimit(maxPageLimit);
+				}
 			}
 		}
 	}

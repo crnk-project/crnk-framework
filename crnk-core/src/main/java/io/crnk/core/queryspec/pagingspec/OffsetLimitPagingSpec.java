@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec.paging;
+package io.crnk.core.queryspec.pagingspec;
 
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -7,8 +7,6 @@ import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
-
-import java.util.function.Function;
 
 public class OffsetLimitPagingSpec implements PagingSpec {
 
@@ -26,14 +24,14 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	@Override
 	public void buildPaging(final PagedLinksInformation linksInformation, final Iterable<?> resources,
 							final QueryAdapter queryAdapter,
-							final Function<QueryAdapter, String> urlFn) {
+							final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
 		Boolean isNextPageAvailable = isNextPageAvailable(resources);
 		if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(linksInformation)) {
 			// only enrich if not already set
 			boolean hasResults = resources.iterator().hasNext();
 			doEnrichPageLinksInformation(linksInformation, totalCount, isNextPageAvailable,
-					queryAdapter, hasResults, urlFn);
+					queryAdapter, hasResults, urlBuilder);
 		}
 	}
 
@@ -44,7 +42,8 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation linksInformation, Long total,
 											  Boolean isNextPageAvailable, QueryAdapter queryAdapter,
-											  boolean hasResults, Function<QueryAdapter, String> urlFn) {
+											  boolean hasResults,
+											  PagingSpecUrlBuilder urlBuilder) {
 		OffsetLimitPagingSpec offsetLimitPagingSpec = (OffsetLimitPagingSpec) queryAdapter.getPagingSpec();
 		long pageSize = offsetLimitPagingSpec.getLimit();
 		long offset = offsetLimitPagingSpec.getOffset();
@@ -60,22 +59,22 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 			Long totalPages = total != null ? (total + pageSize - 1) / pageSize : null;
 			QueryAdapter pageSpec = queryAdapter.duplicate();
 			pageSpec.setPagingSpec(new OffsetLimitPagingSpec(0L, pageSize));
-			linksInformation.setFirst(urlFn.apply(pageSpec));
+			linksInformation.setFirst(urlBuilder.build(pageSpec));
 
 			if (totalPages != null && totalPages > 0) {
 				pageSpec.setPagingSpec(new OffsetLimitPagingSpec((totalPages - 1) * pageSize, pageSize));
-				linksInformation.setLast(urlFn.apply(pageSpec));
+				linksInformation.setLast(urlBuilder.build(pageSpec));
 			}
 
 			if (currentPage > 0) {
 				pageSpec.setPagingSpec(new OffsetLimitPagingSpec((currentPage - 1) * pageSize, pageSize));
-				linksInformation.setPrev(urlFn.apply(pageSpec));
+				linksInformation.setPrev(urlBuilder.build(pageSpec));
 			}
 
 
 			if (isNextPageAvailable) {
 				pageSpec.setPagingSpec(new OffsetLimitPagingSpec((currentPage + 1) * pageSize, pageSize));
-				linksInformation.setNext(urlFn.apply(pageSpec));
+				linksInformation.setNext(urlBuilder.build(pageSpec));
 			}
 		}
 	}

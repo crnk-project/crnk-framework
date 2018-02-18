@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec.paging;
+package io.crnk.core.queryspec.pagingspec;
 
 import java.util.Arrays;
 import java.util.HashSet;

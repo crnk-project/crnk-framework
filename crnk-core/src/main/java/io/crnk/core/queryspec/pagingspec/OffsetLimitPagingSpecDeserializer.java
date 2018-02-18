@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec.paging;
+package io.crnk.core.queryspec.pagingspec;
 
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;

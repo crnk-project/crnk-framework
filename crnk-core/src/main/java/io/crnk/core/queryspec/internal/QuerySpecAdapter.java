@@ -8,7 +8,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.paging.PagingSpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.legacy.queryParams.DefaultQueryParamsConverter;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.include.Inclusion;

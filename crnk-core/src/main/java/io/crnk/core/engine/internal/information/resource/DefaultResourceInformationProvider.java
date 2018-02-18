@@ -62,7 +62,8 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),
-				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields);
+				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields,
+				null, null);
 		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}

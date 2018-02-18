@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
@@ -15,15 +10,13 @@ import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
 import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.filter.RepositoryResultFilterChain;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.pagingspec.PagingSpecUrlBuilder;
 import io.crnk.core.repository.LinksRepositoryV2;
 import io.crnk.core.repository.MetaRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -36,6 +29,11 @@ import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -191,27 +189,11 @@ public abstract class ResponseRepositoryAdapter {
 			linksInformation = new DefaultPagedLinksInformation();
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
+			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry.getResourceRegistry(), requestSpec);
 			queryAdapter.getPagingSpec().buildPaging((PagedLinksInformation) linksInformation, resources,
-					queryAdapter, pageSpec -> toUrl(pageSpec, requestSpec, moduleRegistry.getResourceRegistry()));
+					queryAdapter, urlBuilder);
 		}
 		return linksInformation;
-	}
-
-	private String toUrl(QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec,
-						 ResourceRegistry resourceRegistry) {
-		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
-		Object relationshipSourceId = requestSpec.getId();
-		ResourceField relationshipField = requestSpec.getRelationshipField();
-
-		ResourceInformation rootInfo;
-		if (relationshipField == null) {
-			rootInfo = queryAdapter.getResourceInformation();
-		}
-		else {
-			rootInfo = relationshipField.getParentResourceInformation();
-		}
-		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
-				relationshipField != null ? relationshipField.getJsonName() : null);
 	}
 
 	class RepositoryMetaFilterChainImpl implements RepositoryMetaFilterChain {

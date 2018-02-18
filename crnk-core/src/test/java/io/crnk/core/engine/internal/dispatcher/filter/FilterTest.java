@@ -26,9 +26,7 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
@@ -74,9 +72,7 @@ public class FilterTest {
 		ControllerRegistry controllerRegistry = new ControllerRegistry(null);
 		collectionGet = mock(CollectionGet.class);
 		controllerRegistry.addController(collectionGet);
-		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-		querySpecDeserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
-		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		QuerySpecAdapterBuilder queryAdapterBuilder = new QuerySpecAdapterBuilder(new DefaultQuerySpecDeserializer(), moduleRegistry);
 		dispatcher = new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, null, queryAdapterBuilder);
 	}
 

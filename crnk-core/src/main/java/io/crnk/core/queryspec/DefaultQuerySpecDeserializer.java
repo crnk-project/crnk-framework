@@ -9,7 +9,6 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ParametersDeserializationException;
-import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 
 import org.slf4j.Logger;
@@ -46,8 +45,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	private boolean allowUnknownParameters = false;
 
-	private PagingSpecDeserializer pagingSpecDeserializer;
-
 	public DefaultQuerySpecDeserializer() {
 		supportedOperators.add(FilterOperator.LIKE);
 		supportedOperators.add(FilterOperator.EQ);
@@ -79,6 +76,60 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.allowUnknownAttributes = allowUnknownAttributes;
 	}
 
+	@Deprecated
+	public long getDefaultOffset() {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return 0;
+	}
+
+	/**
+	 * Sets the default offset if no pagination is used.
+	 */
+	@Deprecated
+	public void setDefaultOffset(long defaultOffset) {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+	}
+
+	@Deprecated
+	public Long getDefaultLimit() {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return null;
+	}
+
+	/**
+	 * Sets the default limit if no pagination is used.
+	 */
+	@Deprecated
+	public void setDefaultLimit(Long defaultLimit) {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+	}
+
+	@Deprecated
+	public Long getMaxPageLimit() {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return null;
+	}
+
+	/**
+	 * Sets the maximum page limit.
+	 */
+	@Deprecated
+	public void setMaxPageLimit(Long maxPageLimit) {
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+	}
+
 	public FilterOperator getDefaultOperator() {
 		return defaultOperator;
 	}
@@ -108,7 +159,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
 		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation);
-		rootQuerySpec.setPagingSpec(pagingSpecDeserializer.init());
+		rootQuerySpec.setPagingSpec(resourceInformation.getPagingSpecDeserializer().init());
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
 		for (Parameter parameter : parameters) {
@@ -133,7 +184,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					deserializeFields(querySpec, parameter);
 					break;
 				case page:
-					pagingSpecDeserializer.deserialize(querySpec.getPagingSpec(), parameter.pageParameter, parameter.getValues());
+					resourceInformation.getPagingSpecDeserializer().deserialize(querySpec.getPagingSpec(), parameter.pageParameter, parameter.getValues());
 					break;
 				default:
 					deserializeUnknown(querySpec, parameter);
@@ -142,16 +193,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		}
 
 		return rootQuerySpec;
-	}
-
-	@Override
-	public void setPagingSpecDeserializer(final PagingSpecDeserializer pagingSpecDeserializer) {
-		this.pagingSpecDeserializer = pagingSpecDeserializer;
-	}
-
-	@Override
-	public PagingSpecDeserializer getPagingSpecDeserializer() {
-		return pagingSpecDeserializer;
 	}
 
 	private void deserializeIncludes(QuerySpec querySpec, Parameter parameter) {

@@ -2,7 +2,7 @@ package io.crnk.core.engine.query;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.paging.PagingSpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;

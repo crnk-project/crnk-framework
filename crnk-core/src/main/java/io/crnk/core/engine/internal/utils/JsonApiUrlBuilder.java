@@ -7,7 +7,6 @@ import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecSerializer;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
@@ -29,7 +28,7 @@ public class JsonApiUrlBuilder {
 
 	public JsonApiUrlBuilder(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
-		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry, new OffsetLimitPagingSpecSerializer());
+		this.querySpecSerializer = new DefaultQuerySpecSerializer(resourceRegistry);
 	}
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {

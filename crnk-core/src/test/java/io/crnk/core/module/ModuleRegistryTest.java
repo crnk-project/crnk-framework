@@ -1,6 +1,8 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -50,6 +52,8 @@ import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -60,14 +64,16 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -90,7 +96,9 @@ public class ModuleRegistryTest {
 		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
-		moduleRegistry.init(new ObjectMapper());
+		moduleRegistry.init(new ObjectMapper(),
+				ImmutableMap.of(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer()),
+				ImmutableMap.of(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer()));
 
 		Assert.assertEquals(resourceRegistry, moduleRegistry.getResourceRegistry());
 	}
@@ -111,7 +119,7 @@ public class ModuleRegistryTest {
 		module.addFilter(filter1);
 		module.addFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper());
+		moduleRegistry.init(new ObjectMapper(), null, null);
 
 		List<DocumentFilter> filters = moduleRegistry.getFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -136,7 +144,7 @@ public class ModuleRegistryTest {
 		module.addResourceModificationFilter(filter1);
 		module.addResourceModificationFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper());
+		moduleRegistry.init(new ObjectMapper(), null, null);
 
 		List<ResourceModificationFilter> filters = moduleRegistry.getResourceModificationFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -160,7 +168,7 @@ public class ModuleRegistryTest {
 		module.addRepositoryFilter(filter1);
 		module.addRepositoryFilter(filter2);
 		moduleRegistry.addModule(module);
-		moduleRegistry.init(new ObjectMapper());
+		moduleRegistry.init(new ObjectMapper(), null, null);
 
 		List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 		Assert.assertSame(filter2, filters.get(0));
@@ -243,7 +251,7 @@ public class ModuleRegistryTest {
 
 			@Override
 			public InformationBuilder builder() {
-				return new DefaultInformationBuilder(getTypeParser());
+				return new DefaultInformationBuilder(getTypeParser(), null, null);
 			}
 		};
 	}
@@ -257,7 +265,7 @@ public class ModuleRegistryTest {
 	@Test(expected = IllegalStateException.class)
 	public void testDuplicateInitialization() {
 		ObjectMapper objectMapper = new ObjectMapper();
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 	}
 
 	@Test

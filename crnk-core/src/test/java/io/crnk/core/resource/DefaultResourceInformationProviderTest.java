@@ -25,10 +25,11 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
+import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
@@ -55,12 +56,12 @@ public class DefaultResourceInformationProviderTest {
 	private static final String NAME_PROPERTY = "underlyingName";
 
 	private final ResourceInformationProvider resourceInformationProvider =
-			new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(),
-					new JacksonResourceFieldInformationProvider());
+			new DefaultResourceInformationProvider(new NullPropertiesProvider(),
+					new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider());
 
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider,
-					new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
+					new DefaultInformationBuilder(new TypeParser(), null, null), new TypeParser(), new ObjectMapper());
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();

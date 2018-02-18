@@ -2,7 +2,6 @@ package io.crnk.core.boot;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,8 +29,6 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
-import io.crnk.core.queryspec.paging.PagingSpecDeserializer;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
@@ -79,20 +76,6 @@ public class CrnkBootTest {
 				.thenReturn(Arrays.asList(instance));
 		boot.boot();
 		Assert.assertSame(instance, boot.getQuerySpecDeserializer());
-	}
-
-	@Test
-	public void testDiscoverPagingSpecDeserializer() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(serviceDiscovery);
-		boot.setQuerySpecDeserializer(new DefaultQuerySpecDeserializer());
-
-		PagingSpecDeserializer instance = new OffsetLimitPagingSpecDeserializer();
-		Mockito.when(serviceDiscovery.getInstancesByType(eq(PagingSpecDeserializer.class)))
-				.thenReturn(Arrays.asList(instance));
-		boot.boot();
-
-		Assert.assertSame(instance, boot.getQuerySpecDeserializer().getPagingSpecDeserializer());
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -165,8 +148,7 @@ public class CrnkBootTest {
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
 		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
 
-		QuerySpecDeserializer deserializer = mock(QuerySpecDeserializer.class);
-		when(deserializer.getPagingSpecDeserializer()).thenReturn(mock(PagingSpecDeserializer.class));
+		QuerySpecDeserializer deserializer = Mockito.mock(QuerySpecDeserializer.class);
 		boot.setQuerySpecDeserializer(deserializer);
 		Assert.assertSame(deserializer, boot.getQuerySpecDeserializer());
 		boot.boot();

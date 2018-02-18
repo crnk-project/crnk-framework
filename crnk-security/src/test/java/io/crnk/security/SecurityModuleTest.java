@@ -10,6 +10,8 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
@@ -20,6 +22,8 @@ import io.crnk.test.mock.models.UnknownResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 public class SecurityModuleTest {
 
@@ -63,7 +67,8 @@ public class SecurityModuleTest {
 		moduleRegistry.addModule(appModule);
 		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
 		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.init(new ObjectMapper());
+		moduleRegistry.init(new ObjectMapper(), ImmutableMap.of(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer()),
+				ImmutableMap.of(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer()));
 	}
 
 	@Test

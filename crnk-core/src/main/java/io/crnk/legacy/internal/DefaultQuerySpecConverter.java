@@ -7,7 +7,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.*;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.RestrictedPaginationKeys;
 import io.crnk.legacy.queryParams.RestrictedSortingValues;

@@ -1,22 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -34,7 +17,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
@@ -54,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class IncludeLookupSetter {

@@ -3,7 +3,7 @@ package io.crnk.core.queryspec;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;

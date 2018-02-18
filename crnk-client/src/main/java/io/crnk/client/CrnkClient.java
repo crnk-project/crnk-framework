@@ -55,6 +55,8 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -72,6 +74,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -128,7 +132,6 @@ public class CrnkClient {
 		moduleRegistry = new ModuleRegistry(false);
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.addModule(new ClientModule());
-
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
@@ -258,7 +261,8 @@ public class CrnkClient {
 	}
 
 	private void initModuleRegistry() {
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, ImmutableMap.of(OffsetLimitPagingSpecSerializer.class, new OffsetLimitPagingSpecSerializer()),
+				ImmutableMap.of(OffsetLimitPagingSpecDeserializer.class, new OffsetLimitPagingSpecDeserializer()));
 	}
 
 	private void initExceptionMapperRegistry() {
@@ -418,7 +422,8 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null);
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null,
+						new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		return new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder);
 	}
 
@@ -430,7 +435,8 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation sourceResourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null);
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
+						new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}
 

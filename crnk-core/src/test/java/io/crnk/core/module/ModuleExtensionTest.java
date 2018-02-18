@@ -1,16 +1,18 @@
 package io.crnk.core.module;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+
+import java.util.List;
 
 public class ModuleExtensionTest {
 
@@ -41,7 +43,7 @@ public class ModuleExtensionTest {
 	public void checkInorderInitializationWithInOrderRegistration() {
 		moduleRegistry.addModule(providerModule);
 		moduleRegistry.addModule(consumerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 		heckInorderInitialization();
 	}
 
@@ -49,21 +51,21 @@ public class ModuleExtensionTest {
 	public void checkInorderInitializationWithReverseRegistration() {
 		moduleRegistry.addModule(consumerModule);
 		moduleRegistry.addModule(providerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 		heckInorderInitialization();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void checkMissingMandatoryDependencyFailsInit() {
 		moduleRegistry.addModule(consumerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 	}
 
 	@Test
 	public void checkMissingOptionalDependencyIsIgnored() {
 		optional = true;
 		moduleRegistry.addModule(consumerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 
 		Mockito.verify(providerModule, Mockito.times(0)).init();
 		Mockito.verify(consumerModule, Mockito.times(1)).init();
@@ -73,7 +75,7 @@ public class ModuleExtensionTest {
 	public void checkProviderAbleToGetExtensions() {
 		moduleRegistry.addModule(consumerModule);
 		moduleRegistry.addModule(providerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 
 		InOrder inOrder = Mockito.inOrder(providerModule);
 		inOrder.verify(providerModule).setExtensions(Mockito.anyList());
@@ -92,7 +94,7 @@ public class ModuleExtensionTest {
 		simpleModule.addExtension(new TestModuleExtension());
 		moduleRegistry.addModule(simpleModule);
 		moduleRegistry.addModule(providerModule);
-		moduleRegistry.init(objectMapper);
+		moduleRegistry.init(objectMapper, null, null);
 
 		ArgumentCaptor<List> extensionsCaptor = ArgumentCaptor.forClass(List.class);
 		Mockito.verify(providerModule, Mockito.times(1)).setExtensions(extensionsCaptor.capture());

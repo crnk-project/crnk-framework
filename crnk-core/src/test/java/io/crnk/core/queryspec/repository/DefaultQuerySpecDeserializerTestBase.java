@@ -17,8 +17,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpec;
-import io.crnk.core.queryspec.paging.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 
 import org.junit.Assert;
@@ -42,6 +41,8 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 
 	protected ResourceInformation taskInformation;
 
+	private ResourceInformation taskWithPagingBehaviorInformation;
+
 	private QuerySpecDeserializerContext deserializerContext;
 
 	@Before
@@ -62,9 +63,9 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		};
 
 		deserializer = new DefaultQuerySpecDeserializer();
-		deserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
 		deserializer.init(deserializerContext);
-		taskInformation = resourceRegistry.getEntryForClass(Task.class).getResourceInformation();
+		taskInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
+		taskWithPagingBehaviorInformation = resourceRegistry.getEntry(TaskWithPagingBehavior.class).getResourceInformation();
 	}
 
 	@Test
@@ -72,10 +73,9 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertFalse(deserializer.getAllowUnknownAttributes());
 		deserializer.setAllowUnknownAttributes(true);
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
-		//todo undo / victor
-//		Assert.assertEquals(0, deserializer.getDefaultOffset());
-//		Assert.assertNull(deserializer.getDefaultLimit());
-//		Assert.assertNull(deserializer.getMaxPageLimit());
+		Assert.assertEquals(0, deserializer.getDefaultOffset());
+		Assert.assertNull(deserializer.getDefaultLimit());
+		Assert.assertNull(deserializer.getMaxPageLimit());
 		deserializer.getSupportedOperators().clear();
 		deserializer.setDefaultOperator(FilterOperator.LIKE);
 		deserializer.addSupportedOperator(FilterOperator.LIKE);
@@ -132,26 +132,43 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	@Test
 	public void defaultPaginationOnRoot() {
 		Map<String, Set<String>> params = new HashMap<>();
-		((OffsetLimitPagingSpecDeserializer) deserializer.getPagingSpecDeserializer()).setDefaultLimit(12L);
-		((OffsetLimitPagingSpecDeserializer) deserializer.getPagingSpecDeserializer()).setDefaultOffset(1L);
 		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
-		Assert.assertEquals(1L, actualSpec.getOffset());
-		Assert.assertEquals(12L, actualSpec.getLimit().longValue());
+		Assert.assertEquals(0L, actualSpec.getOffset());
+		Assert.assertNull(actualSpec.getLimit());
 	}
 
 	@Test
 	public void defaultPaginationOnRelation() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "sort[projects]", "name");
-		((OffsetLimitPagingSpecDeserializer) deserializer.getPagingSpecDeserializer()).setDefaultLimit(12L);
-		((OffsetLimitPagingSpecDeserializer) deserializer.getPagingSpecDeserializer()).setDefaultOffset(1L);
 		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
+		Assert.assertEquals(0L, actualSpec.getOffset());
+		Assert.assertNull(actualSpec.getLimit());
+		QuerySpec projectQuerySpec = actualSpec.getQuerySpec(Project.class);
+		Assert.assertNotNull(projectQuerySpec);
+		Assert.assertEquals(0L, projectQuerySpec.getOffset());
+		Assert.assertNull(projectQuerySpec.getLimit());
+	}
+
+	@Test
+	public void customPaginationOnRoot() {
+		Map<String, Set<String>> params = new HashMap<>();
+		QuerySpec actualSpec = deserializer.deserialize(taskWithPagingBehaviorInformation, params);
 		Assert.assertEquals(1L, actualSpec.getOffset());
-		Assert.assertEquals(12L, actualSpec.getLimit().longValue());
+		Assert.assertEquals(10L, actualSpec.getLimit().longValue());
+	}
+
+	@Test
+	public void customPaginationOnRelation() {
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "sort[projects]", "name");
+		QuerySpec actualSpec = deserializer.deserialize(taskWithPagingBehaviorInformation, params);
+		Assert.assertEquals(1L, actualSpec.getOffset());
+		Assert.assertEquals(10L, actualSpec.getLimit().longValue());
 		QuerySpec projectQuerySpec = actualSpec.getQuerySpec(Project.class);
 		Assert.assertNotNull(projectQuerySpec);
 		Assert.assertEquals(1L, projectQuerySpec.getOffset());
-		Assert.assertEquals(12L, projectQuerySpec.getLimit().longValue());
+		Assert.assertEquals(10L, projectQuerySpec.getLimit().longValue());
 	}
 
 	@Test
@@ -393,7 +410,6 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 			}
 		};
 		deserializer.init(deserializerContext);
-		deserializer.setPagingSpecDeserializer(new OffsetLimitPagingSpecDeserializer());
 		deserializer.deserialize(taskInformation, params);
 		Assert.assertTrue(deserialized[0]);
 	}
@@ -423,12 +439,11 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 	public void testPagingMaxLimitNotAllowed() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "page[offset]", "1");
-		add(params, "page[limit]", "5");
+		add(params, "page[limit]", "30");
 
-		((OffsetLimitPagingSpecDeserializer) deserializer.getPagingSpecDeserializer()).setMaxPageLimit(3L);
 		expectedException.expect(BadRequestException.class);
 
-		deserializer.deserialize(taskInformation, params);
+		deserializer.deserialize(taskWithPagingBehaviorInformation, params);
 	}
 
 	@Test
@@ -441,8 +456,6 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		add(params, "page[offset]", "1");
 		add(params, "page[limit]", "5");
 
-		//todo undo / victor
-//		deserializer.setMaxPageLimit(5L);
 		QuerySpec actualSpec = deserializer.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}

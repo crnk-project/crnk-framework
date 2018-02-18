@@ -4,20 +4,22 @@ import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.queryspec.paging.PagingSpecSerializer;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 
 	private ResourceRegistry resourceRegistry;
 
-	private PagingSpecSerializer pagingSpecSerializer;
-
-	public DefaultQuerySpecSerializer(ResourceRegistry resourceRegistry, PagingSpecSerializer pagingSpecSerializer) {
+	public DefaultQuerySpecSerializer(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
-		this.pagingSpecSerializer = pagingSpecSerializer;
 	}
 
 	private static void put(Map<String, Set<String>> map, String key, String value) {
@@ -43,16 +45,6 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		return map;
 	}
 
-	@Override
-	public void setPagingSpecSerializer(final PagingSpecSerializer serializer) {
-		this.pagingSpecSerializer = serializer;
-	}
-
-	@Override
-	public PagingSpecSerializer getPagingSpecSerializer() {
-		return this.pagingSpecSerializer;
-	}
-
 	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map) {
 		String resourceType = querySpec.getResourceType();
 		if (resourceType == null) {
@@ -67,7 +59,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		serializeSorting(querySpec, resourceType, map);
 		serializeIncludedFields(querySpec, resourceType, map);
 		serializeIncludedRelations(querySpec, resourceType, map);
-		pagingSpecSerializer.serialize(querySpec.getPagingSpec(), resourceType, map);
+		resourceRegistry.getBaseResourceInformation(resourceType).getPagingSpecSerializer().serialize(querySpec.getPagingSpec(), resourceType, map);
 
 		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
 			serialize(relatedSpec, map);

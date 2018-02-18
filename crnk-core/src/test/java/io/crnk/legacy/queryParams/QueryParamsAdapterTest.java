@@ -1,6 +1,7 @@
 package io.crnk.legacy.queryParams;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
@@ -15,6 +16,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +33,8 @@ public class QueryParamsAdapterTest {
 			new NullPropertiesProvider(),
 			new DefaultResourceFieldInformationProvider(),
 			new JacksonResourceFieldInformationProvider());
-		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
+		builder.init(new DefaultResourceInformationProviderContext(builder,
+				new DefaultInformationBuilder(moduleRegistry.getTypeParser(), null, null),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
 
 		QueryParamsAdapter adapter = new QueryParamsAdapter(info, params, moduleRegistry);

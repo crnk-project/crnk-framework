@@ -14,6 +14,8 @@ import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
 import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -90,6 +92,16 @@ public class ResourceInformation {
 
 	private ResourceValidator validator;
 
+	/**
+	 * {@link io.crnk.core.queryspec.pagingspec.PagingSpec} serializer
+	 */
+	private PagingSpecSerializer pagingSpecSerializer;
+
+	/**
+	 * {@link io.crnk.core.queryspec.pagingspec.PagingSpec} deserializer
+	 */
+	private PagingSpecDeserializer pagingSpecDeserializer;
+
 	private StringMapper idStringMapper = new StringMapper() {
 		@Override
 		public String toString(Object input) {
@@ -104,19 +116,21 @@ public class ResourceInformation {
 	};
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			List<ResourceField> fields) {
-		this(parser, resourceClass, resourceType, superResourceType, null, fields);
+			List<ResourceField> fields, PagingSpecSerializer pagingSpecSerializer, PagingSpecDeserializer pagingSpecDeserializer) {
+		this(parser, resourceClass, resourceType, superResourceType, null, fields, pagingSpecSerializer, pagingSpecDeserializer);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingSpecSerializer pagingSpecSerializer, PagingSpecDeserializer pagingSpecDeserializer) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
 		this.superResourceType = superResourceType;
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
+		this.pagingSpecSerializer = pagingSpecSerializer;
+		this.pagingSpecDeserializer = pagingSpecDeserializer;
 
 		initFields();
 		if (this.instanceBuilder == null) {
@@ -416,4 +430,11 @@ public class ResourceInformation {
 		return Collections.unmodifiableList(fields);
 	}
 
+	public PagingSpecSerializer getPagingSpecSerializer() {
+		return pagingSpecSerializer;
+	}
+
+	public PagingSpecDeserializer getPagingSpecDeserializer() {
+		return pagingSpecDeserializer;
+	}
 }

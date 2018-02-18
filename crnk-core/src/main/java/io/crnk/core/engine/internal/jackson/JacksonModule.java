@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.jackson;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
@@ -13,12 +14,12 @@ public class JacksonModule implements Module {
 
 	private static final String JSON_API_JACKSON_MODULE_NAME = "crnk";
 
-	final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
+
 	private final boolean serializeLinksAsObjects;
 
 	public JacksonModule(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-		this.serializeLinksAsObjects = false;
+		this(objectMapper, false);
 	}
 
 	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects) {
