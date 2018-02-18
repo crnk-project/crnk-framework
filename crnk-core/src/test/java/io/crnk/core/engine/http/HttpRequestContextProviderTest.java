@@ -15,12 +15,9 @@ public class HttpRequestContextProviderTest {
 		Mockito.when(context.getBaseUrl()).thenReturn("http://test");
 
 		Assert.assertNull(provider.getRequestContext());
-		try {
-			provider.getServiceUrlProvider().getUrl();
-			Assert.fail();
-		} catch (IllegalStateException e) {
-			// ok
-		}
+
+		// no request started yet, url not available
+		Assert.assertNull(provider.getServiceUrlProvider().getUrl());
 
 		provider.onRequestStarted(context);
 		Assert.assertSame(context, provider.getRequestContext());

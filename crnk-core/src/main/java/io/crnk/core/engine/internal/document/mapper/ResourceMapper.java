@@ -41,6 +41,11 @@ public class ResourceMapper {
 	}
 
 	public Resource toData(Object entity, QueryAdapter queryAdapter) {
+		ResourceMappingConfig mappingConfig = new ResourceMappingConfig();
+		return toData(entity, queryAdapter, mappingConfig);
+	}
+
+	public Resource toData(Object entity, QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		if (entity instanceof Resource) {
 			// Resource and ResourceId
 			return (Resource) entity;
@@ -55,11 +60,13 @@ public class ResourceMapper {
 			resource.setId(util.getIdString(entity, resourceInformation));
 			resource.setType(resourceInformation.getResourceType());
 			if (!client) {
-				util.setLinks(resource, getResourceLinks(entity, resourceInformation), queryAdapter);
+				if (mappingConfig.getSerializeLinks()) {
+					util.setLinks(resource, getResourceLinks(entity, resourceInformation), queryAdapter);
+				}
 				util.setMeta(resource, getResourceMeta(entity, resourceInformation));
 			}
 			setAttributes(resource, entity, resourceInformation, queryAdapter);
-			setRelationships(resource, entity, resourceInformation, queryAdapter);
+			setRelationships(resource, entity, resourceInformation, queryAdapter, mappingConfig);
 			return resource;
 		}
 	}
@@ -113,24 +120,25 @@ public class ResourceMapper {
 	}
 
 	protected void setRelationships(Resource resource, Object entity, ResourceInformation resourceInformation,
-			QueryAdapter queryAdapter) {
+			QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		List<ResourceField> fields = DocumentMapperUtil
 				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getRelationshipFields(), true);
 		for (ResourceField field : fields) {
 			if (!isIgnored(field)) {
-				setRelationship(resource, field, entity, resourceInformation, queryAdapter);
+				setRelationship(resource, field, entity, resourceInformation, queryAdapter, mappingConfig);
 			}
 		}
 	}
 
 	protected void setRelationship(Resource resource, ResourceField field, Object entity, ResourceInformation
 			resourceInformation,
-			QueryAdapter queryAdapter) {
+			QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		{ // NOSONAR signature is ok since protected
 			SerializerUtil serializerUtil = DocumentMapperUtil.getSerializerUtil();
 
 			Relationship relationship = new Relationship();
-			if (queryAdapter == null || !queryAdapter.getCompactMode()) {
+			boolean addLinks = mappingConfig.getSerializeLinks() && (queryAdapter == null || !queryAdapter.getCompactMode());
+			if (addLinks) {
 				ObjectNode relationshipLinks = objectMapper.createObjectNode();
 				String selfUrl = util.getRelationshipLink(resourceInformation, entity, field, false);
 				serializerUtil.serializeLink(objectMapper, relationshipLinks, SELF_FIELD_NAME, selfUrl);

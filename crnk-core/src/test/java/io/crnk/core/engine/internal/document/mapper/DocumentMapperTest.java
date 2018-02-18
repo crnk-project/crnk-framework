@@ -37,6 +37,24 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertThat(resource.getAttributes().get("writeOnlyValue"), CoreMatchers.nullValue());
 	}
 
+	@Test
+	public void testSerializeWithoutLinks() {
+		Task task = createTask(2, "sample task");
+
+		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+		mappingConfig.getResourceMapping().setSerializeLinks(false);
+		Document document = mapper.toDocument(toResponse(task), createAdapter(Task.class), mappingConfig);
+
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("2", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+		Assert.assertNull(resource.getLinks());
+
+		Relationship relationship = resource.getRelationships().get("project");
+		Assert.assertNull(relationship.getLinks());
+	}
+
+
 	public static class TaskLinks implements LinksInformation {
 
 		public String self = "something";

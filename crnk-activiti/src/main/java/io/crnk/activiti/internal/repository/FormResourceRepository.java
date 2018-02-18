@@ -11,21 +11,35 @@ import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.FormService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.form.TaskFormData;
 
 
-public class FormResourceRepository<F extends FormResource> extends ResourceRepositoryBase<F,
-		String> {
+/**
+ * Gives access to a form of a task. PATCH will updated the form. POST will update the form and close the task (i.e. assumes
+ * the work is done, not a perfect match to REST, but close enough).
+ */
+public class FormResourceRepository<F extends FormResource> extends ResourceRepositoryBase<F, String> {
 
 
 	private final FormService formService;
 
 	private final ActivitiResourceMapper resourceMapper;
 
-	public FormResourceRepository(FormService formatService, ActivitiResourceMapper resourceMapper, Class<F> formClass) {
+	private final TaskService taskService;
+
+	@Deprecated
+	public FormResourceRepository(FormService formService, ActivitiResourceMapper resourceMapper,
+			Class<F> formClass) {
+		this(formService, null, resourceMapper, formClass);
+	}
+
+	public FormResourceRepository(FormService formService, TaskService taskService, ActivitiResourceMapper resourceMapper,
+			Class<F> formClass) {
 		super(formClass);
-		this.formService = formatService;
+		this.formService = formService;
 		this.resourceMapper = resourceMapper;
+		this.taskService = taskService;
 	}
 
 	@Override
@@ -52,13 +66,16 @@ public class FormResourceRepository<F extends FormResource> extends ResourceRepo
 			properties.put(entry.getKey(), entry.getValue().toString());
 		}
 		formService.saveFormData(resource.getId(), properties);
+
 		return (S) findOne(resource.getId(), null);
 	}
 
 	@Override
 	public <S extends F> S create(S resource) {
-		// FIXME support form-based process creation
-		throw new UnsupportedOperationException();
+		String taskId = resource.getId();
+		S form = save(resource);
+		taskService.complete(taskId);
+		return form;
 	}
 
 	@Override

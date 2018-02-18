@@ -2,6 +2,9 @@ package io.crnk.core.resource.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -17,19 +20,13 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.Thing;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class RegistryEntryTest {
@@ -63,8 +60,7 @@ public class RegistryEntryTest {
 	private <T> ResourceRepositoryInformation newRepositoryInformation(Class<T> repositoryClass, String path) {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		TypeParser typeParser = moduleRegistry.getTypeParser();
-		return new ResourceRepositoryInformationImpl(path, new ResourceInformation(typeParser, Task.class, path, null, null,
-					new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer()),
+		return new ResourceRepositoryInformationImpl(path, new ResourceInformation(typeParser, Task.class, path, null, null),
 				RepositoryMethodAccess.ALL);
 	}
 
