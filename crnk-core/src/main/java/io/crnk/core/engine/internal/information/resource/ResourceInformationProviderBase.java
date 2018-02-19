@@ -1,17 +1,5 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
@@ -28,8 +16,20 @@ import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
@@ -130,8 +130,13 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);
 				if (idAttribute == null && multiValued && attributeDesc.getName().endsWith("s")) {
 					// also try to correlate by removing ending s
-					idFieldName = attributeDesc.getName().substring(0, attributeDesc.getName().length() - 1) + suffix;
-					idAttribute = beanDesc.getAttribute(idFieldName);
+					String idFieldNameTemp = attributeDesc.getName().substring(0, attributeDesc.getName().length() - 1) + suffix;
+					BeanAttributeInformation idAttributeTemp = beanDesc.getAttribute(idFieldNameTemp);
+					// make sure there are no custom get-named methods
+					if (idAttributeTemp != null && attributeDesc.getGetter() != null && idAttributeTemp.getGetter().getReturnType().equals(attributeDesc.getGetter().getReturnType())) {
+						idFieldName = idFieldNameTemp;
+						idAttribute = idAttributeTemp;
+					}
 				}
 				if (idAttribute != null) {
 					fieldBuilder.idName(idFieldName);
