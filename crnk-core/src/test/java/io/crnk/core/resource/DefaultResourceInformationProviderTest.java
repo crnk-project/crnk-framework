@@ -1,6 +1,7 @@
 package io.crnk.core.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,6 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
@@ -46,6 +46,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -392,6 +393,13 @@ public class DefaultResourceInformationProviderTest {
 				.contains(ResourceFieldType.RELATIONSHIP, ResourceFieldType.RELATIONSHIP);
 	}
 
+	@Test
+	public void shouldIgnoreCustomGetNamedMethods() {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationTypeCustomGetMethod.class);
+
+		assertNull(resourceInformation.getRelationshipFields().get(0).getIdType());
+	}
+
 	@JsonApiResource(type = "tasks")
 	@JsonPropertyOrder(alphabetic = true)
 	public static class JsonIgnoreTestResource {
@@ -661,6 +669,20 @@ public class DefaultResourceInformationProviderTest {
 
 		public String getField() {
 			return null;
+		}
+	}
+
+	@JsonApiResource(type = "jsonAPIRelationType")
+	private static class JsonApiRelationTypeCustomGetMethod {
+
+		@JsonApiRelation
+		public List<JsonApiRelationType> fields;
+
+		@JsonApiId
+		public Long id;
+
+		public Iterable<Long> getFieldIds() {
+			return new ArrayList<>();
 		}
 	}
 
