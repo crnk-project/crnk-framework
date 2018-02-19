@@ -58,7 +58,7 @@ public class JaxrsModuleTest {
 
 			@Override
 			public InformationBuilder builder() {
-				return new DefaultInformationBuilder(moduleRegistry.getTypeParser());
+				return new DefaultInformationBuilder(moduleRegistry.getTypeParser(), moduleRegistry.getServiceDiscovery());
 			}
 		};
 	}

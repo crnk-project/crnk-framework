@@ -1,6 +1,7 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -47,6 +48,7 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +64,12 @@ import java.util.stream.Collectors;
  */
 public class ModuleRegistry {
 
+	enum InitializedState {
+		NOT_INITIALIZED,
+		INITIALIZING,
+		INITIALIZED
+	}
+
 	private TypeParser typeParser = new TypeParser();
 
 	private ObjectMapper objectMapper;
@@ -75,24 +83,6 @@ public class ModuleRegistry {
 	private volatile InitializedState initializedState = InitializedState.NOT_INITIALIZED;
 
 	private ResourceInformationProvider resourceInformationProvider;
-
-	public DefaultInformationBuilder getInformationBuilder() {
-		return new DefaultInformationBuilder(typeParser);
-	}
-
-	public List<ResourceModificationFilter> getResourceModificationFilters() {
-		return prioritze(aggregatedModule.getResourceModificationFilters());
-	}
-
-	public Collection<Object> getRepositories() {
-		return aggregatedModule.getRepositories();
-	}
-
-	enum InitializedState {
-		NOT_INITIALIZED,
-		INITIALIZING,
-		INITIALIZED
-	}
 
 	private ServiceDiscovery serviceDiscovery;
 
@@ -114,6 +104,18 @@ public class ModuleRegistry {
 
 	public ModuleRegistry(boolean isServer) {
 		this.isServer = isServer;
+	}
+
+	public DefaultInformationBuilder getInformationBuilder() {
+		return new DefaultInformationBuilder(typeParser);
+	}
+
+	public List<ResourceModificationFilter> getResourceModificationFilters() {
+		return prioritze(aggregatedModule.getResourceModificationFilters());
+	}
+
+	public Collection<Object> getRepositories() {
+		return aggregatedModule.getRepositories();
 	}
 
 	/**
@@ -338,7 +340,7 @@ public class ModuleRegistry {
 		for (Object repository : repositories) {
 			if (repository instanceof ResourceRepositoryV2 || repository instanceof ResourceRepository || repository.getClass()
 					.getAnnotation(JsonApiResourceRepository.class) != null) {
-				applyRepositoryRegistration(repository, repositories);
+				applyRepositoryRegistration(repository);
 			}
 		}
 	}
@@ -349,9 +351,9 @@ public class ModuleRegistry {
 				.collect(Collectors.toList());
 	}
 
-	private void applyRepositoryRegistration(Object repository, Collection<Object> repositories) {
+	private void applyRepositoryRegistration(Object repository) {
 		RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
-		entryBuilder.fromImplemenation(repository);
+		entryBuilder.fromImplementation(repository);
 		RegistryEntry entry = entryBuilder.build();
 		resourceRegistry.addEntry(entry);
 	}
@@ -389,13 +391,13 @@ public class ModuleRegistry {
 		return modules;
 	}
 
-	public <T extends Module> io.crnk.core.utils.Optional<T> getModule(Class<T> clazz) {
+	public <T extends Module> Optional<T> getModule(Class<T> clazz) {
 		for (Module module : modules) {
 			if (clazz.isInstance(module)) {
-				return io.crnk.core.utils.Optional.of((T) module);
+				return Optional.ofNullable((T) module);
 			}
 		}
-		return io.crnk.core.utils.Optional.empty();
+		return Optional.empty();
 	}
 
 	public TypeParser getTypeParser() {

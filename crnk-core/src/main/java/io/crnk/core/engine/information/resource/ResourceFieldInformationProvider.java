@@ -4,6 +4,7 @@ import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
 import io.crnk.core.utils.Optional;
 
 /**

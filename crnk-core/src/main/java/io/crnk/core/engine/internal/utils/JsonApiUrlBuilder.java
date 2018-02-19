@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -17,6 +11,12 @@ import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsSerializer;
+
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class JsonApiUrlBuilder {
 

@@ -10,6 +10,8 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
@@ -26,7 +28,8 @@ public class QuerySpecAdapterTest {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null);
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null,
+						new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		resourceRegistry.addEntry(
 				new RegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
 						resourceInformation, RepositoryMethodAccess.ALL))));

@@ -29,6 +29,8 @@ import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
@@ -56,7 +58,10 @@ public class DefaultResourceInformationProviderTest {
 	private static final String NAME_PROPERTY = "underlyingName";
 
 	private final ResourceInformationProvider resourceInformationProvider =
-			new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(),
+			new DefaultResourceInformationProvider(new NullPropertiesProvider(),
+					new OffsetLimitPagingSpecSerializer(),
+					new OffsetLimitPagingSpecDeserializer(),
+					new DefaultResourceFieldInformationProvider(),
 					new JacksonResourceFieldInformationProvider());
 
 	private final ResourceInformationProviderContext context =
@@ -350,6 +355,8 @@ public class DefaultResourceInformationProviderTest {
 
 		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
 				propertiesProvider,
+				new OffsetLimitPagingSpecSerializer(),
+				new OffsetLimitPagingSpecDeserializer(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider.init(context);

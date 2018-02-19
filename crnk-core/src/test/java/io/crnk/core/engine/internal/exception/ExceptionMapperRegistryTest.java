@@ -1,19 +1,20 @@
 package io.crnk.core.engine.internal.exception;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.utils.Optional;
+
 import org.junit.Test;
 
 import java.nio.file.ClosedFileSystemException;
 import java.util.HashSet;
 import java.util.Iterator;
+import io.crnk.core.utils.Optional;
 import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExceptionMapperRegistryTest {
 

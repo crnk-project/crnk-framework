@@ -41,6 +41,11 @@ public class CrnkSpringBootProperties {
 	private Boolean allowUnknownAttributes;
 
 	/**
+	 * Allow unknown parameters in query parameters.
+	 */
+	private Boolean allowUnknownParameters;
+
+	/**
 	 * Enable 404 response if null.
 	 */
 	private Boolean return404OnNull;
@@ -103,6 +108,15 @@ public class CrnkSpringBootProperties {
 
 	public void setAllowUnknownAttributes(Boolean allowUnknownAttributes) {
 		this.allowUnknownAttributes = allowUnknownAttributes;
+	}
+
+	public Boolean getAllowUnknownParameters() {
+		return allowUnknownParameters;
+	}
+
+	public CrnkSpringBootProperties setAllowUnknownParameters(final Boolean allowUnknownParameters) {
+		this.allowUnknownParameters = allowUnknownParameters;
+		return this;
 	}
 
 	public Boolean getReturn404OnNull() {

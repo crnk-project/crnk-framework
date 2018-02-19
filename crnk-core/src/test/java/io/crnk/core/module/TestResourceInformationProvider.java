@@ -3,6 +3,8 @@ package io.crnk.core.module;
 import io.crnk.core.engine.information.resource.*;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +23,8 @@ public class TestResourceInformationProvider implements ResourceInformationProvi
 		ResourceField idField = new ResourceFieldImpl("testId", "id", ResourceFieldType.ID, Integer.class, null, null);
 		List<ResourceField> fields = Arrays.asList(idField);
 		TypeParser typeParser = context.getTypeParser();
-		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceClass.getSimpleName(), null, fields);
+		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceClass.getSimpleName(), null, fields,
+				new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		return info;
 	}
 

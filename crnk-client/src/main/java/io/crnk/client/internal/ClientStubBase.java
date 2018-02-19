@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.TransportException;

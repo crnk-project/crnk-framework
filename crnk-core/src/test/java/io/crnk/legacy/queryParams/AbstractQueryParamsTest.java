@@ -1,10 +1,5 @@
 package io.crnk.legacy.queryParams;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
@@ -14,10 +9,18 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
+
 import org.junit.Before;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractQueryParamsTest {
 
@@ -41,6 +44,7 @@ public abstract class AbstractQueryParamsTest {
 		ResourceInformationProvider resourceInformationProvider =
 				new DefaultResourceInformationProvider(
 					new NullPropertiesProvider(),
+						(PagingSpecSerializer) null, (PagingSpecDeserializer) null,
 					new DefaultResourceFieldInformationProvider(),
 					new JacksonResourceFieldInformationProvider());
 

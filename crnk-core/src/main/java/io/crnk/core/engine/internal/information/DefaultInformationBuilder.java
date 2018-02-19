@@ -5,13 +5,20 @@ import io.crnk.core.engine.information.repository.RelationshipRepositoryInformat
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
-import io.crnk.core.engine.information.resource.*;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.information.resource.ResourceValidator;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
@@ -124,6 +131,10 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceValidator validator;
 
+		private PagingSpecSerializer pagingSpecSerializer;
+
+		private PagingSpecDeserializer pagingSpecDeserializer;
+
 		@Override
 		public void from(ResourceInformation information) {
 			resourceClass = information.getResourceClass();
@@ -136,6 +147,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 				field.from(fromField);
 				fields.add(field);
 			}
+			pagingSpecSerializer = information.getPagingSpecSerializer();
+			pagingSpecDeserializer = information.getPagingSpecDeserializer();
 		}
 
 		@Override
@@ -165,6 +178,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
+		@Override
+		public Resource pagingBehavior(PagingSpecSerializer pagingSpecSerializer, PagingSpecDeserializer pagingSpecDeserializer) {
+			this.pagingSpecSerializer = pagingSpecSerializer;
+			this.pagingSpecDeserializer = pagingSpecDeserializer;
+
+			return this;
+		}
+
 		public ResourceInformation build() {
 
 			List<ResourceField> fieldImpls = new ArrayList<>();
@@ -173,7 +194,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			}
 
 			ResourceInformation information = new ResourceInformation(typeParser, resourceClass, resourceType, superResourceType,
-					fieldImpls);
+					fieldImpls, pagingSpecSerializer, pagingSpecDeserializer);
 			if (validator != null) {
 				information.setValidator(validator);
 			}

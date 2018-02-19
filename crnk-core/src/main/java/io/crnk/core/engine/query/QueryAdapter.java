@@ -2,6 +2,7 @@ package io.crnk.core.engine.query;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
@@ -16,20 +17,6 @@ public interface QueryAdapter {
 	ResourceInformation getResourceInformation();
 
 	/**
-	 * @return maximum number of resources to return or null for unbounded
-	 */
-	Long getLimit();
-
-	void setLimit(Long limit);
-
-	/**
-	 * @return maximum number of resources to skip in the response.
-	 */
-	long getOffset();
-
-	void setOffset(long offset);
-
-	/**
 	 * @return duplicate of this instance
 	 */
 	QueryAdapter duplicate();
@@ -39,6 +26,7 @@ public interface QueryAdapter {
 	 *
 	 * @return may return null if the implementation does not support QueryParams
 	 */
+	@Deprecated
 	QueryParams toQueryParams();
 
 	/**
@@ -50,4 +38,7 @@ public interface QueryAdapter {
 
 	boolean getCompactMode();
 
+	void setPagingSpec(PagingSpec pagingSpec);
+
+	PagingSpec getPagingSpec();
 }

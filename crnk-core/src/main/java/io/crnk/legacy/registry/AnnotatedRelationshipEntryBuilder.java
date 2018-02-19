@@ -4,11 +4,12 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
+
+import io.crnk.core.utils.Optional;
 
 public class AnnotatedRelationshipEntryBuilder implements ResponseRelationshipEntry {
 

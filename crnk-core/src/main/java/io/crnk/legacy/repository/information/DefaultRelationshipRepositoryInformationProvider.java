@@ -10,10 +10,12 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.UntypedRelationshipRepository;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
+
 import net.jodah.typetools.TypeResolver;
+
+import io.crnk.core.utils.Optional;
 
 public class DefaultRelationshipRepositoryInformationProvider implements RepositoryInformationProvider {
 

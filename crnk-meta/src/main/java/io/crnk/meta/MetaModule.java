@@ -18,6 +18,8 @@ import io.crnk.core.engine.registry.ResourceRegistryPartAdapter;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
 import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.module.discovery.ResourceLookup;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.utils.Supplier;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
@@ -137,6 +139,8 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser());
 		DefaultResourceInformationProvider informationProvider = new DefaultResourceInformationProvider(
 				propertiesProvider,
+				new OffsetLimitPagingSpecSerializer(),
+				new OffsetLimitPagingSpecDeserializer(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,

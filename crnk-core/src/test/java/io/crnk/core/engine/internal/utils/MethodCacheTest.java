@@ -1,12 +1,13 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.lang.reflect.Method;
-import java.util.Date;
-
-import io.crnk.core.utils.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.Method;
+import java.util.Date;
+import io.crnk.core.utils.Optional;
 
 public class MethodCacheTest {
 

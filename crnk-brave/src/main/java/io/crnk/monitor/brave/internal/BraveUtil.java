@@ -17,7 +17,6 @@ public class BraveUtil {
 	private BraveUtil() {
 	}
 
-
 	public static String getQuery(RepositoryRequestSpec request, ResourceRegistry resourceRegistry) {
 		QueryAdapter queryAdapter = request.getQueryAdapter();
 		StringBuilder builder = new StringBuilder();
@@ -67,6 +66,4 @@ public class BraveUtil {
 		}
 		return pathBuilder.toString();
 	}
-
-
 }

@@ -10,7 +10,6 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -21,9 +20,11 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.resource.annotations.JsonApiResource;
-
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,7 +69,8 @@ public class ResourceRegistryTest {
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null);
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null,
+						new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		return new RegistryEntry(new DirectResponseResourceEntry(null,
 				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
 	}
@@ -107,7 +109,8 @@ public class ResourceRegistryTest {
 				String.class, "projects");
 		ResourceInformation resourceInformation =
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null,
-						Arrays.asList(idField, valueField));
+						Arrays.asList(idField, valueField),
+						new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 		RegistryEntry registryEntry = new RegistryEntry(new DirectResponseResourceEntry(null, new
 				ResourceRepositoryInformationImpl
 				("tasks", resourceInformation, RepositoryMethodAccess.ALL)));

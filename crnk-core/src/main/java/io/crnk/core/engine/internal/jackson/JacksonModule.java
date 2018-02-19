@@ -3,27 +3,46 @@ package io.crnk.core.engine.internal.jackson;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.module.Module;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
+
+import java.util.List;
 
 public class JacksonModule implements Module {
 
 	private static final String JSON_API_JACKSON_MODULE_NAME = "crnk";
 
-	final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
+
 	private final boolean serializeLinksAsObjects;
 
+	private final List<? extends PagingSpecSerializer> pagingSpecSerializers;
+
+	private final List<? extends PagingSpecDeserializer> pagingSpecDeserializers;
+
+	@Deprecated
 	public JacksonModule(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-		this.serializeLinksAsObjects = false;
+		this(objectMapper, false, null, null);
 	}
 
+	@Deprecated
 	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects) {
+		this(objectMapper, serializeLinksAsObjects, null, null);
+	}
+
+	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects,
+						 List<? extends PagingSpecSerializer> pagingSpecSerializers,
+						 List<? extends PagingSpecDeserializer> pagingSpecDeserializers) {
 		this.objectMapper = objectMapper;
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
+		this.pagingSpecSerializers = pagingSpecSerializers;
+		this.pagingSpecDeserializers = pagingSpecDeserializers;
 	}
 
 	@Override
@@ -41,6 +60,8 @@ public class JacksonModule implements Module {
 		// TODO move somewhere else and make use of a SerializerExtension
 		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(
 			context.getPropertiesProvider(),
+			pagingSpecSerializers,
+			pagingSpecDeserializers,
 			defaultFieldProvider,
 			jacksonFieldProvider));
 	}

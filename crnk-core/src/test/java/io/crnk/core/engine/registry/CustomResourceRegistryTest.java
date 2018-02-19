@@ -7,9 +7,13 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.module.Module;
+import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
 import io.crnk.core.repository.response.JsonApiResponse;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,6 +25,7 @@ public class CustomResourceRegistryTest {
 	public void test() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.addModule(new CustomRegistryPartModule());
+		boot.setServiceDiscovery(new TestServiceDiscovery());
 		boot.boot();
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
@@ -56,6 +61,7 @@ public class CustomResourceRegistryTest {
 			resource.addField("value", ResourceFieldType.ATTRIBUTE, String.class);
 			resource.addField("parent", ResourceFieldType.RELATIONSHIP, Resource.class).oppositeResourceType("dynamic");
 			resource.addField("children", ResourceFieldType.RELATIONSHIP, List.class).oppositeResourceType("dynamic");
+			resource.pagingBehavior(new OffsetLimitPagingSpecSerializer(), new OffsetLimitPagingSpecDeserializer());
 
 			RegistryEntry resourceEntry = builder.build();
 			context.addRegistryPart("somePrefix", new CustomRegistryPart(resourceEntry));

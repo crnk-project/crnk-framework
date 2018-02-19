@@ -7,6 +7,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
+
 import net.jodah.typetools.TypeResolver;
 
 public class DirectResponseRelationshipEntry implements ResponseRelationshipEntry {

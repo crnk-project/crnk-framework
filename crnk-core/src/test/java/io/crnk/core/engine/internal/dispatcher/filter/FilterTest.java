@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.filter;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.document.Document;
@@ -22,6 +29,7 @@ import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,10 +38,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
 
 public class FilterTest {
 
@@ -74,8 +78,6 @@ public class FilterTest {
 
 	@Test
 	public void test() throws Exception {
-
-
 		// WHEN
 		ArgumentCaptor<DocumentFilterContext> captor = ArgumentCaptor.forClass(DocumentFilterContext.class);
 		when(collectionGet.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();

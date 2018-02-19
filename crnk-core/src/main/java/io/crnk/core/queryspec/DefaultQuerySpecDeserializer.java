@@ -1,13 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -16,11 +8,19 @@ import io.crnk.core.engine.parser.ParserException;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -29,19 +29,9 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultQuerySpecDeserializer.class);
 
-	private static final String OFFSET_PARAMETER = "offset";
-
-	private static final String LIMIT_PARAMETER = "limit";
-
 	private TypeParser typeParser;
 
 	private FilterOperator defaultOperator = FilterOperator.EQ;
-
-	private long defaultOffset = 0;
-
-	private Long defaultLimit = null;
-
-	private Long maxPageLimit = null;
 
 	private Set<FilterOperator> supportedOperators = new HashSet<>();
 
@@ -52,6 +42,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	private boolean enforceDotPathSeparator = false;
 
 	private boolean ignoreParseExceptions;
+
+	private boolean allowUnknownParameters = false;
 
 	public DefaultQuerySpecDeserializer() {
 		supportedOperators.add(FilterOperator.LIKE);
@@ -84,37 +76,58 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.allowUnknownAttributes = allowUnknownAttributes;
 	}
 
+	@Deprecated
 	public long getDefaultOffset() {
-		return defaultOffset;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return 0;
 	}
 
 	/**
 	 * Sets the default offset if no pagination is used.
 	 */
+	@Deprecated
 	public void setDefaultOffset(long defaultOffset) {
-		this.defaultOffset = defaultOffset;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
 	}
 
+	@Deprecated
 	public Long getDefaultLimit() {
-		return defaultLimit;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return null;
 	}
 
 	/**
 	 * Sets the default limit if no pagination is used.
 	 */
+	@Deprecated
 	public void setDefaultLimit(Long defaultLimit) {
-		this.defaultLimit = defaultLimit;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
 	}
 
+	@Deprecated
 	public Long getMaxPageLimit() {
-		return this.maxPageLimit;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
+		return null;
 	}
 
 	/**
 	 * Sets the maximum page limit.
 	 */
+	@Deprecated
 	public void setMaxPageLimit(Long maxPageLimit) {
-		this.maxPageLimit = maxPageLimit;
+		/**
+		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
+		 */
 	}
 
 	public FilterOperator getDefaultOperator() {
@@ -146,7 +159,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	@Override
 	public QuerySpec deserialize(ResourceInformation resourceInformation, Map<String, Set<String>> parameterMap) {
 		QuerySpec rootQuerySpec = createQuerySpec(resourceInformation);
-		setupDefaults(rootQuerySpec, true);
+		rootQuerySpec.setPagingSpec(resourceInformation.getPagingSpecDeserializer().init());
 
 		List<Parameter> parameters = parseParameters(parameterMap, resourceInformation);
 		for (Parameter parameter : parameters) {
@@ -155,7 +168,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				querySpec = rootQuerySpec.getQuerySpec(parameter.resourceInformation);
 				if (querySpec == null) {
 					querySpec = rootQuerySpec.getOrCreateQuerySpec(parameter.resourceInformation);
-					setupDefaults(querySpec, false);
 				}
 			}
 			switch (parameter.paramType) {
@@ -172,7 +184,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					deserializeFields(querySpec, parameter);
 					break;
 				case page:
-					deserializePage(querySpec, parameter);
+					resourceInformation.getPagingSpecDeserializer().deserialize(querySpec.getPagingSpec(), parameter.pageParameter, parameter.getValues());
 					break;
 				default:
 					deserializeUnknown(querySpec, parameter);
@@ -181,13 +193,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		}
 
 		return rootQuerySpec;
-	}
-
-	protected void setupDefaults(QuerySpec querySpec, boolean root) {
-		if (root) {
-			querySpec.setOffset(defaultOffset);
-			querySpec.setLimit(defaultLimit);
-		}
 	}
 
 	private void deserializeIncludes(QuerySpec querySpec, Parameter parameter) {
@@ -209,25 +214,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				List<String> attributePath = splitAttributePath(value, parameter);
 				querySpec.includeField(attributePath);
 			}
-		}
-	}
-
-	protected void deserializePage(QuerySpec querySpec, Parameter parameter) {
-		if (OFFSET_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
-			querySpec.setOffset(parameter.getLongValue());
-		}
-		else if (LIMIT_PARAMETER.equalsIgnoreCase(parameter.pageParameter)) {
-			Long limit = parameter.getLongValue();
-			if (getMaxPageLimit() != null && limit != null && limit > getMaxPageLimit()) {
-				String error =
-						String.format("%s legacy value %d is larger than the maximum allowed of " + "of %d", LIMIT_PARAMETER,
-								limit, getMaxPageLimit());
-				throw new BadRequestException(error);
-			}
-			querySpec.setLimit(limit);
-		}
-		else {
-			throw new ParametersDeserializationException(parameter.toString());
 		}
 	}
 
@@ -304,7 +290,9 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 	}
 
 	protected void deserializeUnknown(QuerySpec querySpec, Parameter parameter) {
-		throw new ParametersDeserializationException(parameter.paramType.toString());
+		if (!allowUnknownParameters) {
+			throw new ParametersDeserializationException(parameter.name);
+		}
 	}
 
 	private List<Parameter> parseParameters(Map<String, Set<String>> params, ResourceInformation rootResourceInformation) {
@@ -463,6 +451,14 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.ignoreParseExceptions = ignoreParseExceptions;
 	}
 
+	public boolean isAllowUnknownParameters() {
+		return allowUnknownParameters;
+	}
+
+	public void setAllowUnknownParameters(final boolean allowUnknownParameters) {
+		this.allowUnknownParameters = allowUnknownParameters;
+	}
+
 	public class Parameter {
 
 		private String pageParameter;
@@ -481,7 +477,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 		private Set<String> values;
 
-		private Long getLongValue() {
+		public Long getLongValue() {
 			if (values.size() != 1) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
@@ -496,6 +492,10 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		@Override
 		public String toString() {
 			return name + "=" + values;
+		}
+
+		public String getPageParameter() {
+			return pageParameter;
 		}
 
 		public String getName() {

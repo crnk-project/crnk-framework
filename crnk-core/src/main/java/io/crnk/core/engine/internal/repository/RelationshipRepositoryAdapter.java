@@ -1,12 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
@@ -22,6 +15,13 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import io.crnk.legacy.repository.RelationshipRepository;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * A repository adapter for relationship repository.
  */
@@ -34,7 +34,7 @@ public class RelationshipRepositoryAdapter<T, I extends Serializable, D, J exten
 	private final boolean isAnnotated;
 
 	public RelationshipRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry,
-			Object relationshipRepository) {
+										 Object relationshipRepository) {
 		super(resourceInformation, moduleRegistry);
 		this.relationshipRepository = relationshipRepository;
 		this.isAnnotated = relationshipRepository instanceof AnnotatedRelationshipRepositoryAdapter;

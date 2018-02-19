@@ -9,5 +9,4 @@ import java.util.Set;
 public interface QuerySpecSerializer {
 
 	Map<String, Set<String>> serialize(QuerySpec querySpec);
-
 }
