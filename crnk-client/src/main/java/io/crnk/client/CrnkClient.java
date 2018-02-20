@@ -68,13 +68,12 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
-
-import jersey.repackaged.com.google.common.collect.ImmutableList;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -161,7 +160,7 @@ public class CrnkClient {
 
 	private void initJacksonModule(final boolean serializeLinksAsObjects) {
 		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects,
-				ImmutableList.of(new OffsetLimitPagingBehavior())));
+				Collections.singletonList(new OffsetLimitPagingBehavior())));
 	}
 
 	/**
