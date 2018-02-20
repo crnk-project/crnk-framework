@@ -174,7 +174,7 @@ public abstract class ResponseRepositoryAdapter {
 			RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
-		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.getPagingSpec().isPagingRequired()) {
+		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.getPagingSpec().isRequired()) {
 			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
 					requestSpec);
 		}
@@ -190,7 +190,7 @@ public abstract class ResponseRepositoryAdapter {
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
 			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry.getResourceRegistry(), requestSpec);
-			queryAdapter.getPagingSpec().buildPaging((PagedLinksInformation) linksInformation, resources,
+			queryAdapter.getPagingSpec().build((PagedLinksInformation) linksInformation, resources,
 					queryAdapter, urlBuilder);
 		}
 		return linksInformation;

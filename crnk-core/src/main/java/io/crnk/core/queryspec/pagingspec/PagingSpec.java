@@ -13,14 +13,14 @@ public interface PagingSpec {
 	 * @param queryAdapter
 	 * @param urlBuilder
 	 */
-	void buildPaging(PagedLinksInformation linksInformation, Iterable<?> resources,
-					 QueryAdapter queryAdapter,
-					 PagingSpecUrlBuilder urlBuilder);
+	void build(PagedLinksInformation linksInformation, Iterable<?> resources,
+			   QueryAdapter queryAdapter,
+			   PagingSpecUrlBuilder urlBuilder);
 
 	/**
-	 * Determines whether Crnk needs to provide paging links via {@link #buildPaging(PagedLinksInformation, Iterable, QueryAdapter, PagingSpecUrlBuilder)}
+	 * Determines whether Crnk needs to provide paging links via {@link #build(PagedLinksInformation, Iterable, QueryAdapter, PagingSpecUrlBuilder)}
 	 *
 	 * @return True in case of pagination is required otherwise False
 	 */
-	boolean isPagingRequired();
+	boolean isRequired();
 }

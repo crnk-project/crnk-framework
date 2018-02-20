@@ -22,9 +22,9 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	}
 
 	@Override
-	public void buildPaging(final PagedLinksInformation linksInformation, final Iterable<?> resources,
-							final QueryAdapter queryAdapter,
-							final PagingSpecUrlBuilder urlBuilder) {
+	public void build(final PagedLinksInformation linksInformation, final Iterable<?> resources,
+					  final QueryAdapter queryAdapter,
+					  final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
 		Boolean isNextPageAvailable = isNextPageAvailable(resources);
 		if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(linksInformation)) {
@@ -36,7 +36,7 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	}
 
 	@Override
-	public boolean isPagingRequired() {
+	public boolean isRequired() {
 		return offset != 0 || limit != null;
 	}
 
