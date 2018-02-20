@@ -41,11 +41,11 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 	@Override
 	public Map<String, Set<String>> serialize(QuerySpec querySpec) {
 		Map<String, Set<String>> map = new HashMap<>();
-		serialize(querySpec, map);
+		serialize(querySpec, map, querySpec);
 		return map;
 	}
 
-	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map) {
+	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
 		String resourceType = querySpec.getResourceType();
 		if (resourceType == null) {
 			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
@@ -61,11 +61,11 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		serializeIncludedRelations(querySpec, resourceType, map);
 		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
 		if (entry != null && entry.getResourceInformation() != null) {
-			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(querySpec.getPagingSpec(), resourceType));
+			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(parentQuerySpec.getPagingSpec(), resourceType));
 		}
 
 		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
-			serialize(relatedSpec, map);
+			serialize(relatedSpec, map, querySpec);
 		}
 	}
 
