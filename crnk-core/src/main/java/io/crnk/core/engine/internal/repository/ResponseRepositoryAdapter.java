@@ -174,14 +174,14 @@ public abstract class ResponseRepositoryAdapter {
 			RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
-		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.getPagingSpec().isRequired()) {
-			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
+		if (queryAdapter instanceof QuerySpecAdapter && resources instanceof ResourceList && queryAdapter.getPagingSpec().isRequired()) {
+			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, (ResourceList<?>) resources, queryAdapter,
 					requestSpec);
 		}
 		return enrichedLinksInformation;
 	}
 
-	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
+	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, ResourceList<?> resources,
 			QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
 		if (linksInformation == null) {
 			// use default implementation if no link information

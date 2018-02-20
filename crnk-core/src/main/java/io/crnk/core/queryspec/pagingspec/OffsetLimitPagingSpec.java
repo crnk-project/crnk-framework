@@ -22,7 +22,8 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	}
 
 	@Override
-	public void build(final PagedLinksInformation linksInformation, final Iterable<?> resources,
+	public void build(final PagedLinksInformation linksInformation,
+					  final ResourceList<?> resources,
 					  final QueryAdapter queryAdapter,
 					  final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
@@ -79,25 +80,21 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 		}
 	}
 
-	private Long getTotalCount(Iterable<?> resources) {
-		if (resources instanceof ResourceList) {
-			ResourceList<?> list = (ResourceList<?>) resources;
-			PagedMetaInformation pagedMeta = list.getMeta(PagedMetaInformation.class);
-			if (pagedMeta != null) {
-				return pagedMeta.getTotalResourceCount();
-			}
+	private Long getTotalCount(ResourceList<?> resources) {
+		PagedMetaInformation pagedMeta = resources.getMeta(PagedMetaInformation.class);
+		if (pagedMeta != null) {
+			return pagedMeta.getTotalResourceCount();
 		}
+
 		return null;
 	}
 
-	private Boolean isNextPageAvailable(Iterable<?> resources) {
-		if (resources instanceof ResourceList) {
-			ResourceList<?> list = (ResourceList<?>) resources;
-			HasMoreResourcesMetaInformation pagedMeta = list.getMeta(HasMoreResourcesMetaInformation.class);
-			if (pagedMeta != null) {
-				return pagedMeta.getHasMoreResources();
-			}
+	private Boolean isNextPageAvailable(ResourceList<?> resources) {
+		HasMoreResourcesMetaInformation pagedMeta = resources.getMeta(HasMoreResourcesMetaInformation.class);
+		if (pagedMeta != null) {
+			return pagedMeta.getHasMoreResources();
 		}
+
 		return null;
 	}
 
