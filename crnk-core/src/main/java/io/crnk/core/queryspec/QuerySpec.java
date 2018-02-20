@@ -4,6 +4,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -174,6 +175,16 @@ public class QuerySpec {
 
 	public void setFilters(List<FilterSpec> filters) {
 		this.filters = filters;
+	}
+
+	public FilterSpec getFilter(final String name) {
+		for (FilterSpec filterSpec: filters) {
+			if (filterSpec.getAttributePath().contains(name)) {
+				return filterSpec;
+			}
+		}
+
+		throw new BadRequestException(String.format("Filter '%s' not found", name));
 	}
 
 	public List<SortSpec> getSort() {

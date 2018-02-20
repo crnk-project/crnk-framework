@@ -1,6 +1,7 @@
 package io.crnk.core.queryspec;
 
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
@@ -93,13 +94,15 @@ public class QuerySpecTest {
 
 	@Test
 	public void testBasic() {
+		FilterSpec filterSpec = new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test");
 		QuerySpec spec = new QuerySpec(Project.class);
-		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
+		spec.addFilter(filterSpec);
 		spec.addSort(new SortSpec(Arrays.asList("sortAttr"), Direction.ASC));
 		spec.includeField(Arrays.asList("includedField"));
 		spec.includeRelation(Arrays.asList("includedRelation"));
 
 		Assert.assertEquals(1, spec.getFilters().size());
+		Assert.assertEquals(filterSpec, spec.getFilter("filterAttr"));
 		Assert.assertEquals(1, spec.getSort().size());
 		Assert.assertEquals(1, spec.getIncludedFields().size());
 		Assert.assertEquals(1, spec.getIncludedRelations().size());
@@ -118,6 +121,13 @@ public class QuerySpecTest {
 		Assert.assertSame(relatedSpec, spec.getQuerySpec(Task.class));
 		Assert.assertEquals(1, spec.getRelatedSpecs().size());
 		spec.setRelatedSpecs(new HashMap<Class<?>, QuerySpec>());
+	}
+
+	@Test(expected = BadRequestException.class)
+	public void testFilterNotFound() {
+		QuerySpec spec = new QuerySpec(Project.class);
+		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
+		spec.getFilter("unknown");
 	}
 
 	@Test
