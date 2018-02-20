@@ -32,16 +32,6 @@ public class CrnkFeatureTest {
 		Assert.assertSame(serviceUrlProvider, feature.getBoot().getServiceUrlProvider());
 	}
 
-
-	@Test
-	public void setDefaultPageLimit() {
-		CrnkFeature feature = new CrnkFeature();
-		feature.setDefaultPageLimit(12L);
-
-		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) feature.getBoot().getQuerySpecDeserializer();
-		Assert.assertEquals(12L, deserializer.getDefaultLimit().longValue());
-	}
-
 	@Test
 	public void getQuerySpecDeserializer() {
 		CrnkFeature feature = new CrnkFeature();
