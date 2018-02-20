@@ -1,6 +1,8 @@
 package io.crnk.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -15,6 +17,10 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.rs.internal.JaxrsModule;
@@ -40,6 +46,8 @@ public class JaxrsModuleTest {
 		builder = new JaxrsModule.JaxrsResourceRepositoryInformationProvider();
 		final ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
 				moduleRegistry.getPropertiesProvider(),
+				ImmutableList.<PagingSpecSerializer>of(new OffsetLimitPagingSpecSerializer()),
+				ImmutableList.<PagingSpecDeserializer>of(new OffsetLimitPagingSpecDeserializer()),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider

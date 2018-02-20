@@ -31,6 +31,9 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
@@ -79,8 +82,7 @@ public class IncludeLookupSetter {
 		if (!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && queryAdapter != null) {
 			// offset/limit cannot properly work for nested inclusions if becomes cyclic
 			inclusionQueryAdapter = queryAdapter.duplicate();
-			inclusionQueryAdapter.setOffset(0);
-			inclusionQueryAdapter.setLimit(null);
+			inclusionQueryAdapter.setPagingSpec(new OffsetLimitPagingSpec());
 		}
 
 		List<Object> entityList = DocumentMapperUtil.toList(entity);

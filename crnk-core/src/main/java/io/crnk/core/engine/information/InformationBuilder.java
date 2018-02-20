@@ -1,10 +1,5 @@
 package io.crnk.core.engine.information;
 
-import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
-import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import java.lang.reflect.Type;
-
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -13,8 +8,13 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
@@ -51,6 +51,8 @@ public interface InformationBuilder {
 		Resource resourceType(String resourceType);
 
 		Resource superResourceType(String superResourceType);
+
+		Resource pagingBehavior(PagingBehavior pagingBehavior);
 
 		ResourceInformation build();
 

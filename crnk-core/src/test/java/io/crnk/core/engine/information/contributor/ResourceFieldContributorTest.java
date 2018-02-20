@@ -1,13 +1,7 @@
 package io.crnk.core.engine.information.contributor;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -32,15 +26,24 @@ import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.ProjectToTaskRepository;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.repository.TaskToProjectRelationshipRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ResourceFieldContributorTest {
 
@@ -60,6 +63,7 @@ public class ResourceFieldContributorTest {
 		testModule.addRepository(contributedRepository);
 
 		boot = new CrnkBoot();
+		boot.setServiceDiscovery(new TestServiceDiscovery());
 		boot.addModule(testModule);
 		boot.boot();
 	}

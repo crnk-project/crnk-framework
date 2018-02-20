@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -18,6 +20,9 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.repository.CustomOffsetLimitPagingBehavior;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -46,7 +51,9 @@ public abstract class AbstractQuerySpecTest {
 
 	@Before
 	public void setup() {
-		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(), new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
+		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(),
+				ImmutableList.of(new OffsetLimitPagingBehavior(), new CustomOffsetLimitPagingBehavior()),
+				new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
 
 			@Override
 			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
@@ -96,5 +103,16 @@ public abstract class AbstractQuerySpecTest {
 
 	public String getResourceSearchPackage() {
 		return getClass().getPackage().getName();
+	}
+
+	protected QuerySpec querySpec(Long offset, Long limit) {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
+
+		return querySpec;
+	}
+
+	protected QuerySpec querySpec() {
+		return querySpec(0L, null);
 	}
 }

@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
@@ -15,15 +10,13 @@ import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
 import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.filter.RepositoryResultFilterChain;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.pagingspec.PagingSpecUrlBuilder;
 import io.crnk.core.repository.LinksRepositoryV2;
 import io.crnk.core.repository.MetaRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -32,12 +25,15 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -178,7 +174,7 @@ public abstract class ResponseRepositoryAdapter {
 			RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
-		if (queryAdapter instanceof QuerySpecAdapter && (queryAdapter.getOffset() != 0 || queryAdapter.getLimit() != null)) {
+		if (queryAdapter instanceof QuerySpecAdapter && queryAdapter.getPagingSpec().isPagingRequired()) {
 			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, resources, queryAdapter,
 					requestSpec);
 		}
@@ -193,99 +189,11 @@ public abstract class ResponseRepositoryAdapter {
 			linksInformation = new DefaultPagedLinksInformation();
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
-			Long totalCount = getTotalCount(resources);
-			Boolean isNextPageAvailable = isNextPageAvailable(resources);
-			PagedLinksInformation pagedLinksInformation = (PagedLinksInformation) linksInformation;
-			if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(pagedLinksInformation)) {
-				// only enrich if not already set
-				boolean hasResults = resources.iterator().hasNext();
-				doEnrichPageLinksInformation(pagedLinksInformation, totalCount, isNextPageAvailable, queryAdapter, requestSpec,
-						hasResults);
-			}
+			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry.getResourceRegistry(), requestSpec);
+			queryAdapter.getPagingSpec().buildPaging((PagedLinksInformation) linksInformation, resources,
+					queryAdapter, urlBuilder);
 		}
 		return linksInformation;
-	}
-
-	private Long getTotalCount(Iterable<?> resources) {
-		if (resources instanceof ResourceList) {
-			ResourceList<?> list = (ResourceList<?>) resources;
-			PagedMetaInformation pagedMeta = list.getMeta(PagedMetaInformation.class);
-			if (pagedMeta != null) {
-				return pagedMeta.getTotalResourceCount();
-			}
-		}
-		return null;
-	}
-
-	private Boolean isNextPageAvailable(Iterable<?> resources) {
-		if (resources instanceof ResourceList) {
-			ResourceList<?> list = (ResourceList<?>) resources;
-			HasMoreResourcesMetaInformation pagedMeta = list.getMeta(HasMoreResourcesMetaInformation.class);
-			if (pagedMeta != null) {
-				return pagedMeta.getHasMoreResources();
-			}
-		}
-		return null;
-	}
-
-	private boolean hasPageLinks(PagedLinksInformation pagedLinksInformation) {
-		return pagedLinksInformation.getFirst() != null || pagedLinksInformation.getLast() != null
-				|| pagedLinksInformation.getPrev() != null || pagedLinksInformation.getNext() != null;
-	}
-
-	private void doEnrichPageLinksInformation(PagedLinksInformation pagedLinksInformation, Long total, Boolean
-			isNextPageAvailable, QueryAdapter queryAdapter,
-			RepositoryRequestSpec requestSpec, boolean hasResults) {
-		long pageSize = queryAdapter.getLimit().longValue();
-		long offset = queryAdapter.getOffset();
-		long currentPage = offset / pageSize;
-		if (currentPage * pageSize != offset) {
-			throw new BadRequestException("offset " + offset + " is not a multiple of limit " + pageSize);
-		}
-		if (total != null) {
-			isNextPageAvailable = offset + pageSize < total;
-		}
-
-		if (queryAdapter.getOffset() > 0 || hasResults) {
-			Long totalPages = total != null ? (total + pageSize - 1) / pageSize : null;
-			QueryAdapter pageSpec = queryAdapter.duplicate();
-			pageSpec.setLimit(pageSize);
-
-			pageSpec.setOffset(0);
-			pagedLinksInformation.setFirst(toUrl(pageSpec, requestSpec));
-
-			if (totalPages != null && totalPages > 0) {
-				pageSpec.setOffset((totalPages - 1) * pageSize);
-				pagedLinksInformation.setLast(toUrl(pageSpec, requestSpec));
-			}
-
-			if (currentPage > 0) {
-				pageSpec.setOffset((currentPage - 1) * pageSize);
-				pagedLinksInformation.setPrev(toUrl(pageSpec, requestSpec));
-			}
-
-
-			if (isNextPageAvailable) {
-				pageSpec.setOffset((currentPage + 1) * pageSize);
-				pagedLinksInformation.setNext(toUrl(pageSpec, requestSpec));
-			}
-		}
-	}
-
-	private String toUrl(QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
-		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(moduleRegistry.getResourceRegistry());
-		Object relationshipSourceId = requestSpec.getId();
-		ResourceField relationshipField = requestSpec.getRelationshipField();
-
-		ResourceInformation rootInfo;
-		if (relationshipField == null) {
-			rootInfo = queryAdapter.getResourceInformation();
-		}
-		else {
-			rootInfo = relationshipField.getParentResourceInformation();
-		}
-		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
-				relationshipField != null ? relationshipField.getJsonName() : null);
 	}
 
 	class RepositoryMetaFilterChainImpl implements RepositoryMetaFilterChain {

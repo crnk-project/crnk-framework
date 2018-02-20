@@ -1,10 +1,5 @@
 package io.crnk.core.queryspec.internal;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -13,12 +8,18 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.legacy.queryParams.DefaultQueryParamsConverter;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class QuerySpecAdapter implements QueryAdapter {
 
@@ -92,26 +93,6 @@ public class QuerySpecAdapter implements QueryAdapter {
 	}
 
 	@Override
-	public Long getLimit() {
-		return querySpec.getLimit();
-	}
-
-	@Override
-	public void setLimit(Long limit) {
-		querySpec.setLimit(limit);
-	}
-
-	@Override
-	public long getOffset() {
-		return querySpec.getOffset();
-	}
-
-	@Override
-	public void setOffset(long offset) {
-		querySpec.setOffset(offset);
-	}
-
-	@Override
 	public QueryAdapter duplicate() {
 		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
 		adapter.setCompactMode(compactMode);
@@ -132,6 +113,16 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public boolean getCompactMode() {
 		return compactMode;
+	}
+
+	@Override
+	public void setPagingSpec(final PagingSpec pagingSpec) {
+		querySpec.setPagingSpec(pagingSpec);
+	}
+
+	@Override
+	public PagingSpec getPagingSpec() {
+		return querySpec.getPagingSpec();
 	}
 
 	public void setCompactMode(boolean compactMode) {

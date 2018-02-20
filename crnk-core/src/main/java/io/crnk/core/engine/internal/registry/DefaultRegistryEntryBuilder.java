@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
@@ -45,8 +39,15 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
@@ -115,7 +116,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	@Override
-	public void fromImplemenation(Object repository) {
+	public void fromImplementation(Object repository) {
 		RepositoryInformationProvider repositoryInformationBuilder = moduleRegistry.getRepositoryInformationBuilder();
 
 		RepositoryInformationProviderContext builderContext = new DefaultRepositoryInformationProviderContext(moduleRegistry);
@@ -250,9 +251,11 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		// TODO make service discovery the primary target to resolve all objects => wrapped it with module
 		List<ResourceFieldContributor> contributors = new ArrayList<>();
 		contributors.addAll(moduleRegistry.getServiceDiscovery().getInstancesByType(ResourceFieldContributor.class));
-		moduleRegistry.getRepositories().stream()
-				.filter(it -> it instanceof ResourceFieldContributor && !contributors.contains(it))
-				.forEach(it -> contributors.add((ResourceFieldContributor) it));
+		for (Object repo: moduleRegistry.getRepositories()) {
+			if (repo instanceof ResourceFieldContributor && !contributors.contains(repo)) {
+				contributors.add((ResourceFieldContributor) repo);
+			}
+		}
 
 		for (ResourceFieldContributor contributor : contributors) {
 			List<ResourceField> contributedFields = contributor.getResourceFields(new ResourceFieldContributorContext() {
@@ -349,7 +352,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			return null;
 		}
 	}
-
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object decorateRepository(Object repository) {

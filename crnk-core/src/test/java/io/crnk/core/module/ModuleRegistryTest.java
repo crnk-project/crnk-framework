@@ -1,6 +1,8 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -50,6 +52,7 @@ import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -60,14 +63,16 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -88,7 +93,7 @@ public class ModuleRegistryTest {
 		testModule = new TestModule();
 		moduleRegistry.addModule(testModule);
 		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false, ImmutableList.of(new OffsetLimitPagingBehavior())));
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 		moduleRegistry.init(new ObjectMapper());
 

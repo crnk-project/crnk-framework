@@ -4,6 +4,8 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -17,10 +19,6 @@ public class QuerySpec {
 
 	private String resourceType;
 
-	private Long limit = null;
-
-	private long offset = 0;
-
 	private List<FilterSpec> filters = new ArrayList<>();
 
 	private List<SortSpec> sort = new ArrayList<>();
@@ -31,6 +29,8 @@ public class QuerySpec {
 
 	private Map<Object, QuerySpec> relatedSpecs = new HashMap<>();
 
+	private PagingSpec pagingSpec;
+
 	public QuerySpec(Class<?> resourceClass) {
 		this(resourceClass, null);
 	}
@@ -39,13 +39,13 @@ public class QuerySpec {
 		this(null, resourceType);
 	}
 
-
 	public QuerySpec(Class<?> resourceClass, String resourceType) {
 		verifyNotNull(resourceClass, resourceType);
 		if (resourceClass != Resource.class) {
 			this.resourceClass = resourceClass;
 		}
 		this.resourceType = resourceType;
+		this.pagingSpec = new OffsetLimitPagingSpec();
 	}
 
 	public QuerySpec(ResourceInformation resourceInformation) {
@@ -102,8 +102,7 @@ public class QuerySpec {
 		result = prime * result + ((filters == null) ? 0 : filters.hashCode());
 		result = prime * result + ((includedFields == null) ? 0 : includedFields.hashCode());
 		result = prime * result + ((includedRelations == null) ? 0 : includedRelations.hashCode());
-		result = prime * result + ((limit == null) ? 0 : limit.hashCode());
-		result = prime * result + Long.valueOf(offset).hashCode();
+		result = prime * result + ((pagingSpec == null) ? 0 : pagingSpec.hashCode());
 		result = prime * result + ((relatedSpecs == null) ? 0 : relatedSpecs.hashCode());
 		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
 		return result;
@@ -119,26 +118,54 @@ public class QuerySpec {
 		}
 		QuerySpec other = (QuerySpec) obj;
 		return CompareUtils.isEquals(filters, other.filters) // NOSONAR
-				&& CompareUtils.isEquals(includedFields, other.includedFields) && CompareUtils
-				.isEquals(includedRelations, other.includedRelations) && CompareUtils.isEquals(limit, other.limit)
-				&& CompareUtils.isEquals(offset, other.offset) && CompareUtils.isEquals(relatedSpecs, other.relatedSpecs)
+				&& CompareUtils.isEquals(includedFields, other.includedFields)
+				&& CompareUtils.isEquals(includedRelations, other.includedRelations)
+				&& CompareUtils.isEquals(pagingSpec, other.pagingSpec)
+				&& CompareUtils.isEquals(relatedSpecs, other.relatedSpecs)
 				&& CompareUtils.isEquals(sort, other.sort);
 	}
 
 	public Long getLimit() {
-		return limit;
+		if (pagingSpec instanceof OffsetLimitPagingSpec) {
+			return ((OffsetLimitPagingSpec) pagingSpec).getLimit();
+		}
+
+		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 	}
 
+	@Deprecated
 	public void setLimit(Long limit) {
-		this.limit = limit;
+		if (pagingSpec instanceof OffsetLimitPagingSpec) {
+			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
+		} else {
+			throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
+		}
 	}
 
 	public long getOffset() {
-		return offset;
+		if (pagingSpec instanceof OffsetLimitPagingSpec) {
+			return ((OffsetLimitPagingSpec) pagingSpec).getOffset();
+		}
+
+		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 	}
 
+	@Deprecated
 	public void setOffset(long offset) {
-		this.offset = offset;
+		if (pagingSpec instanceof OffsetLimitPagingSpec) {
+			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);
+		} else {
+			throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
+		}
+	}
+
+	public PagingSpec getPagingSpec() {
+		return pagingSpec;
+	}
+
+	public QuerySpec setPagingSpec(final PagingSpec pagingSpec) {
+		this.pagingSpec = pagingSpec;
+		return this;
 	}
 
 	public List<FilterSpec> getFilters() {
@@ -277,6 +304,7 @@ public class QuerySpec {
 				relatedSpecs.put(targetResourceType, querySpec);
 			}
 		}
+		querySpec.setPagingSpec(pagingSpec);
 		return querySpec;
 	}
 
@@ -298,8 +326,7 @@ public class QuerySpec {
 
 	public QuerySpec duplicate() {
 		QuerySpec copy = new QuerySpec(resourceClass);
-		copy.limit = limit;
-		copy.offset = offset;
+		copy.pagingSpec = pagingSpec;
 		copy.includedFields.addAll(includedFields);
 		copy.includedRelations.addAll(includedRelations);
 		copy.sort.addAll(sort);
@@ -319,8 +346,7 @@ public class QuerySpec {
 		return "QuerySpec{" +
 				(resourceClass != null ? "resourceClass=" + resourceClass.getName() : "") +
 				(resourceType != null ? "resourceType=" + resourceType : "") +
-				(limit != null ? ", limit=" + limit : "") +
-				(offset > 0 ? ", offset=" + offset : "") +
+				(pagingSpec != null ? ", paging=" + pagingSpec : "") +
 				(!filters.isEmpty() ? ", filters=" + filters : "") +
 				(!sort.isEmpty() ? ", sort=" + sort : "") +
 				(!includedFields.isEmpty() ? ", includedFields=" + includedFields : "") +
