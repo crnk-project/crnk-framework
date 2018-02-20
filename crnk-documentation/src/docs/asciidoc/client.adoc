@@ -7,23 +7,8 @@ anchor:client[]
 # Client
 
 There is a client implementation for Java and Android projects to allow
-communicating with JSON-API compliant servers. Three http client libraries are supported:
+communicating with JSON-API compliant servers.
 
-* `http://square.github.io/`
-  Library has been used to allow usage in both Android and server applications and services.
-
-* `Apache Http Client <https://hc.apache.org/httpcomponents-client-ga/index.html>`
-  Library widely used in the Java community.
-
-* `RestTemplate` from Spring that provides a Spring abstraction of other HTTP libraries.
-  Spring application benefit from using this over the underlying native implementation to share
-  the setup configuration setup. It is used by default if the presence of Spring is detected.
-  For some more setup information, have a look at the subsequent sections.
-
-Add one of those library to the classpath and Crnk will pick it up automatically.
-
-To start using the client just create an instance of `CrnkClient` and pass the service
-URL as parameter.
 
 ## Setup
 
@@ -34,12 +19,27 @@ The basic setup is as simple as:
   CrnkClient client = new CrnkClient("http://localhost:8080/api");
 ----
 
+Three underlying http client libraries are supported:
+
+* https://github.com/square/okhttp[OkHttp]
+ that is popular for Java and Android development. Implemented by
+ `io.crnk.client.http.okhttp.OkHttpAdapter`.
+
+* https://hc.apache.org/httpcomponents-client-ga/index.html[Apache Http Client]
+  implemented by `io.crnk.client.http.apache.HttpClientAdapter`.
+
+* `RestTemplate` from Spring provides a Spring abstraction of other HTTP libraries.
+  Spring application benefit from using this over the underlying native implementation to share
+  the setup configuration setup. It is used by default if the presence of Spring is detected.
+  Implemented by `io.crnk.spring.client.RestTemplateAdapter`.
+
+Add one of those library to the classpath and Crnk will pick it up automatically.
+A custom `HttpAdapter` can also set passed to `CrnkClient.setHttpAdapter(...)`.
 
 WARNING: For Spring a *reasonable HTTP client implementation must underlie `RestTemplate`*
 in order for `crnk-client` to work properly. For example, the default Java implementation does not
 support the `PATCH` method and as such no resources can be updated.
 To explicitly set HTTP implementation use:
-
 
 [source]
 ----
@@ -54,7 +54,6 @@ or
 ----
   client.setHttpAdapter(new RestTemplateAdapter(customRestTemplate));
 ----
-
 
 
 ## Usage
