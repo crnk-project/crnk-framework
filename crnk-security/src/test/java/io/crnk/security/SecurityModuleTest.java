@@ -12,8 +12,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
@@ -67,8 +66,7 @@ public class SecurityModuleTest {
 		moduleRegistry.addModule(securityModule);
 		moduleRegistry.addModule(appModule);
 		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false,
-				ImmutableList.of(new OffsetLimitPagingSpecSerializer()),
-				ImmutableList.of(new OffsetLimitPagingSpecDeserializer())));
+				ImmutableList.of(new OffsetLimitPagingBehavior())));
 		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.init(new ObjectMapper());
 	}

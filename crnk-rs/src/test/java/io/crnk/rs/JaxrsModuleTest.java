@@ -17,10 +17,8 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecDeserializer;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpecSerializer;
-import io.crnk.core.queryspec.pagingspec.PagingSpecDeserializer;
-import io.crnk.core.queryspec.pagingspec.PagingSpecSerializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.rs.internal.JaxrsModule;
@@ -46,8 +44,7 @@ public class JaxrsModuleTest {
 		builder = new JaxrsModule.JaxrsResourceRepositoryInformationProvider();
 		final ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
 				moduleRegistry.getPropertiesProvider(),
-				ImmutableList.<PagingSpecSerializer>of(new OffsetLimitPagingSpecSerializer()),
-				ImmutableList.<PagingSpecDeserializer>of(new OffsetLimitPagingSpecDeserializer()),
+				ImmutableList.<PagingBehavior>of(new OffsetLimitPagingBehavior()),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider
