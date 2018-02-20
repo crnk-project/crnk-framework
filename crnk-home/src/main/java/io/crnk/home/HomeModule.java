@@ -1,9 +1,7 @@
 package io.crnk.home;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sun.javafx.scene.shape.PathUtils;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
@@ -18,7 +16,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtensionAware;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
