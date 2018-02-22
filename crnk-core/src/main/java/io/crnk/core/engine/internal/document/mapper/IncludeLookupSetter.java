@@ -79,7 +79,9 @@ public class IncludeLookupSetter {
 		if (!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && queryAdapter != null) {
 			// offset/limit cannot properly work for nested inclusions if becomes cyclic
 			inclusionQueryAdapter = queryAdapter.duplicate();
-			inclusionQueryAdapter.setPagingSpec(inclusionQueryAdapter.getResourceInformation().getPagingBehavior().createEmptyPagingSpec());
+			if (queryAdapter.getResourceInformation().getPagingBehavior() != null) {
+				inclusionQueryAdapter.setPagingSpec(queryAdapter.getResourceInformation().getPagingBehavior().createEmptyPagingSpec());
+			}
 		}
 
 		List<Object> entityList = DocumentMapperUtil.toList(entity);
