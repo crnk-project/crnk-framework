@@ -60,7 +60,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		serializeIncludedFields(querySpec, resourceType, map);
 		serializeIncludedRelations(querySpec, resourceType, map);
 		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
-		if (entry != null && entry.getResourceInformation() != null) {
+		if (entry != null && entry.getResourceInformation() != null && entry.getResourceInformation().getPagingBehavior() != null) {
 			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(querySpec.getPagingSpec(), resourceType));
 		}
 
