@@ -36,7 +36,7 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 
 	@Override
 	public OffsetLimitPagingSpec deserialize(final Map<String, Set<String>> parameters) {
-		OffsetLimitPagingSpec result = new OffsetLimitPagingSpec(defaultOffset, defaultLimit);
+		OffsetLimitPagingSpec result = createEmptyPagingSpec();
 
 		for (Map.Entry<String, Set<String>> param : parameters.entrySet()) {
 			if (OFFSET_PARAMETER.equalsIgnoreCase(param.getKey())) {
@@ -55,6 +55,11 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 		}
 
 		return result;
+	}
+
+	@Override
+	public OffsetLimitPagingSpec createEmptyPagingSpec() {
+		return new OffsetLimitPagingSpec(defaultOffset, defaultLimit);
 	}
 
 	private Long getValue(final String name, final Set<String> values) {

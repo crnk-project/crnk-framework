@@ -63,12 +63,32 @@ public class QueryParamsAdapter implements QueryAdapter {
 	}
 
 	@Override
-	public PagingSpec getPagingSpec() {
+	public Long getLimit() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setLimit(Long limit) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public long getOffset() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setOffset(final long offset) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void setPagingSpec(final PagingSpec pagingSpec) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PagingSpec getPagingSpec() {
 		throw new UnsupportedOperationException();
 	}
 

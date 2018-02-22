@@ -134,7 +134,6 @@ public class QuerySpec {
 		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 	}
 
-	@Deprecated
 	public void setLimit(Long limit) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
@@ -151,7 +150,6 @@ public class QuerySpec {
 		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 	}
 
-	@Deprecated
 	public void setOffset(long offset) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);

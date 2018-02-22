@@ -27,4 +27,9 @@ public class CustomOffsetLimitPagingBehavior implements PagingBehavior<OffsetLim
 	public OffsetLimitPagingSpec deserialize(final Map<String, Set<String>> parameters) {
 		return delegate.deserialize(parameters);
 	}
+
+	@Override
+	public OffsetLimitPagingSpec createEmptyPagingSpec() {
+		return delegate.createEmptyPagingSpec();
+	}
 }

@@ -27,7 +27,7 @@ import org.junit.Test;
 public class OffsetLimitPagingSpecTest {
 
 	@Test
-	public void testIsRequired() {
+	public void testisPagingRequired() {
 		assertTrue(new OffsetLimitPagingSpec(1L, null).isRequired());
 		assertTrue(new OffsetLimitPagingSpec(0L, 30L).isRequired());
 	}

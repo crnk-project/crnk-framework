@@ -22,4 +22,10 @@ public interface PagingBehavior<T extends PagingSpec> {
 	 * @throws {@link io.crnk.core.exception.ParametersDeserializationException} in case of deserialization error
 	 */
 	T deserialize(Map<String, Set<String>> parameters);
+
+	/**
+	 * Creates a new instance of {@link PagingSpec}
+	 * @return New {@link PagingSpec} instance
+	 */
+	T createEmptyPagingSpec();
 }

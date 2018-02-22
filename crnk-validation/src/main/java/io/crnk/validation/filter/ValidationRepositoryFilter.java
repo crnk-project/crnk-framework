@@ -20,6 +20,7 @@ public class ValidationRepositoryFilter extends RepositoryFilterBase {
 		this.validator = validator;
 
 	}
+
 	@Override
 	public JsonApiResponse filterRequest(final RepositoryFilterContext context, final RepositoryRequestFilterChain chain) {
 		if (context.getRequest().getRelationshipField() == null) {
