@@ -513,14 +513,18 @@ public class CrnkBoot {
 			pagingBehaviors = new ArrayList<>();
 			pagingBehaviors.addAll(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 
-			for (PagingBehavior pagingBehavior: pagingBehaviors) {
-				if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
-					if (defaultPageLimit != null) {
-						((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
-					}
-					if (maxPageLimit != null) {
-						((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
-					}
+			if (pagingBehaviors.isEmpty()) {
+				pagingBehaviors.add(new OffsetLimitPagingBehavior());
+			}
+		}
+
+		for (PagingBehavior pagingBehavior: pagingBehaviors) {
+			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
+				if (defaultPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+				}
+				if (maxPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
 				}
 			}
 		}
