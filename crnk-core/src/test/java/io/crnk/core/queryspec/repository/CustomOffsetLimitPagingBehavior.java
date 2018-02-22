@@ -1,8 +1,12 @@
 package io.crnk.core.queryspec.repository;
 
+import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpecUrlBuilder;
+import io.crnk.core.resource.links.PagedLinksInformation;
+import io.crnk.core.resource.list.ResourceList;
 
 import java.util.Map;
 import java.util.Set;
@@ -31,5 +35,15 @@ public class CustomOffsetLimitPagingBehavior implements PagingBehavior<OffsetLim
 	@Override
 	public OffsetLimitPagingSpec createEmptyPagingSpec() {
 		return delegate.createEmptyPagingSpec();
+	}
+
+	@Override
+	public void build(final PagedLinksInformation linksInformation, final ResourceList<?> resources, final QueryAdapter queryAdapter, final PagingSpecUrlBuilder urlBuilder) {
+		delegate.build(linksInformation, resources, queryAdapter, urlBuilder);
+	}
+
+	@Override
+	public boolean isRequired(final OffsetLimitPagingSpec pagingSpec) {
+		return delegate.isRequired(pagingSpec);
 	}
 }
