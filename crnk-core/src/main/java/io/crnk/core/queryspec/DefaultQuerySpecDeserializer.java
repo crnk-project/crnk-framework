@@ -77,60 +77,6 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.allowUnknownAttributes = allowUnknownAttributes;
 	}
 
-	@Deprecated
-	public long getDefaultOffset() {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-		return 0;
-	}
-
-	/**
-	 * Sets the default offset if no pagination is used.
-	 */
-	@Deprecated
-	public void setDefaultOffset(long defaultOffset) {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-	}
-
-	@Deprecated
-	public Long getDefaultLimit() {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-		return null;
-	}
-
-	/**
-	 * Sets the default limit if no pagination is used.
-	 */
-	@Deprecated
-	public void setDefaultLimit(Long defaultLimit) {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-	}
-
-	@Deprecated
-	public Long getMaxPageLimit() {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-		return null;
-	}
-
-	/**
-	 * Sets the maximum page limit.
-	 */
-	@Deprecated
-	public void setMaxPageLimit(Long maxPageLimit) {
-		/**
-		 * Do nothing since all paging-related logic is configured as part of {@link io.crnk.core.resource.annotations.PagingBehavior}
-		 */
-	}
-
 	public FilterOperator getDefaultOperator() {
 		return defaultOperator;
 	}

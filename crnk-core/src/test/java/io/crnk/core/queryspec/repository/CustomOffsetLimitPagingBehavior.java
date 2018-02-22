@@ -38,6 +38,11 @@ public class CustomOffsetLimitPagingBehavior implements PagingBehavior<OffsetLim
 	}
 
 	@Override
+	public OffsetLimitPagingSpec createDefaultPagingSpec() {
+		return delegate.createDefaultPagingSpec();
+	}
+
+	@Override
 	public void build(final PagedLinksInformation linksInformation, final ResourceList<?> resources, final QueryAdapter queryAdapter, final PagingSpecUrlBuilder urlBuilder) {
 		delegate.build(linksInformation, resources, queryAdapter, urlBuilder);
 	}

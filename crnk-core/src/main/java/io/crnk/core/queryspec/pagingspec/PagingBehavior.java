@@ -28,10 +28,16 @@ public interface PagingBehavior<T extends PagingSpec> {
 	T deserialize(Map<String, Set<String>> parameters);
 
 	/**
-	 * Creates a new instance of {@link PagingSpec}
+	 * Creates an empty instance of {@link PagingSpec}
 	 * @return New {@link PagingSpec} instance
 	 */
 	T createEmptyPagingSpec();
+
+	/**
+	 * Creates an instance of {@link PagingSpec} with default values
+	 * @return New {@link PagingSpec} instance
+	 */
+	T createDefaultPagingSpec();
 
 	/**
 	 * Fills out the paging links

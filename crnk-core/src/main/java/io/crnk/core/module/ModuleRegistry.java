@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -344,14 +345,9 @@ public class ModuleRegistry {
 	}
 
 	private List<Object> filterDecorators(List<Object> repositories) {
-		List<Object> result = new ArrayList<>();
-		for (Object repo: repositories) {
-			if (!(repo instanceof ResourceRepositoryDecorator || repo instanceof RelationshipRepositoryDecorator)) {
-				result.add(repo);
-			}
-		}
-
-		return result;
+		return repositories.stream()
+				.filter(it -> !(it instanceof ResourceRepositoryDecorator || it instanceof RelationshipRepositoryDecorator))
+				.collect(Collectors.toList());
 	}
 
 	private void applyRepositoryRegistration(Object repository) {

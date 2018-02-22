@@ -73,9 +73,6 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		Assert.assertFalse(deserializer.getAllowUnknownAttributes());
 		deserializer.setAllowUnknownAttributes(true);
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
-		Assert.assertEquals(0, deserializer.getDefaultOffset());
-		Assert.assertNull(deserializer.getDefaultLimit());
-		Assert.assertNull(deserializer.getMaxPageLimit());
 		deserializer.getSupportedOperators().clear();
 		deserializer.setDefaultOperator(FilterOperator.LIKE);
 		deserializer.addSupportedOperator(FilterOperator.LIKE);
