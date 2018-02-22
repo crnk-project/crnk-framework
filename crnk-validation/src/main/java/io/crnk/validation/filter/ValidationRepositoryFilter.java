@@ -22,11 +22,13 @@ public class ValidationRepositoryFilter extends RepositoryFilterBase {
 	}
 	@Override
 	public JsonApiResponse filterRequest(final RepositoryFilterContext context, final RepositoryRequestFilterChain chain) {
-		if (context.getRequest().getMethod() == HttpMethod.POST ||
-				context.getRequest().getMethod() == HttpMethod.PATCH || context.getRequest().getMethod() == HttpMethod.PUT) {
-			Set<ConstraintViolation<Object>> violations = validator.validate(context.getRequest().getEntity());
-			if (!violations.isEmpty()) {
-				throw new ConstraintViolationException(violations);
+		if (context.getRequest().getRelationshipField() == null) {
+			if (context.getRequest().getMethod() == HttpMethod.POST ||
+					context.getRequest().getMethod() == HttpMethod.PATCH || context.getRequest().getMethod() == HttpMethod.PUT) {
+				Set<ConstraintViolation<Object>> violations = validator.validate(context.getRequest().getEntity());
+				if (!violations.isEmpty()) {
+					throw new ConstraintViolationException(violations);
+				}
 			}
 		}
 
