@@ -137,6 +137,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 					deserializeUnknown(querySpec, parameter);
 			}
 		}
+
+		if (resourceInformation.getPagingBehavior() == null && !pageParameters.isEmpty()) {
+			throw new IllegalStateException("Instance of PagingBehavior must be provided");
+		}
+
 		if (resourceInformation.getPagingBehavior() != null) {
 			rootQuerySpec.setPagingSpec(resourceInformation.getPagingBehavior().deserialize(pageParameters));
 		}
