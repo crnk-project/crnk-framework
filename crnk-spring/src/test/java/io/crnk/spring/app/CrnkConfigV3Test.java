@@ -48,8 +48,6 @@ public class CrnkConfigV3Test {
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
 		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
-		Assert.assertNull(deserializer.getDefaultLimit());
-		Assert.assertNull(deserializer.getMaxPageLimit());
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();

@@ -182,7 +182,16 @@ public class QuerySpec {
 			}
 		}
 
-		throw new BadRequestException(String.format("Filter '%s' not found", name));
+		return null;
+	}
+
+	public FilterSpec getFilterOrThrow(final String name) {
+		FilterSpec filter = getFilter(name);
+		if (filter == null) {
+			throw new BadRequestException(String.format("Filter '%s' not found", name));
+		}
+
+		return filter;
 	}
 
 	public List<SortSpec> getSort() {

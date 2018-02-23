@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import static org.junit.Assert.assertNull;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
@@ -52,7 +54,7 @@ public class QuerySpecTest {
 	@Test
 	public void testResourceClassIgnored() {
 		QuerySpec querySpec = new QuerySpec(Resource.class, "tasks");
-		Assert.assertNull(querySpec.getResourceClass());
+		assertNull(querySpec.getResourceClass());
 	}
 
 
@@ -124,10 +126,19 @@ public class QuerySpecTest {
 	}
 
 	@Test(expected = BadRequestException.class)
+	public void testFilterNotFoundOrThrow() {
+		QuerySpec spec = new QuerySpec(Project.class);
+		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
+		spec.getFilterOrThrow("unknown");
+	}
+
+	@Test
 	public void testFilterNotFound() {
 		QuerySpec spec = new QuerySpec(Project.class);
 		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
-		spec.getFilter("unknown");
+		FilterSpec filterSpec = spec.getFilter("unknown");
+
+		assertNull(filterSpec);
 	}
 
 	@Test
