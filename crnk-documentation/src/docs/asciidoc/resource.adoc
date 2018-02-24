@@ -23,6 +23,23 @@ The example below shows a sample class which contains a definition of a resource
   }
 ----
 
+where `type` parameter specifies the resource's name.
+
+anchor:jsonApiResourcePagingBehavior[]
+
+The optional `pagingBehavior` parameter allows to set a pagination behavior of the resource.
+In order to do it you have to specify a type which is actually an implementation of a `PagingBehavior` interface.
+
+[source]
+----
+  @JsonApiResource(type = "tasks", pagingBehavior = OffsetLimitPagingBehavior.class)
+  public class Task {
+    // fields, getters and setters
+  }
+----
+
+More detailed information about pagination behaviors could be found at <<pagination,Pagination>> section.
+
 
 ## JsonApiId
 
