@@ -3,16 +3,16 @@ package io.crnk.spring.boot;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-import javax.security.auth.message.config.AuthConfigFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.spring.app.BasicSpringBootApplication;
+
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +28,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+
+import javax.security.auth.message.config.AuthConfigFactory;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -75,6 +79,11 @@ public class BasicSpringBootTest {
 		Assert.assertSame(boot.getQuerySpecDeserializer(), deserializer);
 	}
 
+	@Test
+	public void testPagingBehaviorInjected() {
+		Assert.assertEquals(1, boot.getPagingBehaviors().size());
+		Assert.assertTrue(boot.getPagingBehaviors().get(0) instanceof OffsetLimitPagingBehavior);
+	}
 
 	@Test
 	public void testUiModuleRunning() {

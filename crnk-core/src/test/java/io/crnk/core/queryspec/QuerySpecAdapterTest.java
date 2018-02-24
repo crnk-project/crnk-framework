@@ -11,6 +11,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
@@ -47,5 +48,7 @@ public class QuerySpecAdapterTest {
 		IncludedRelationsParams includedRelationsParams = includedRelations.getParams().get("tasks");
 		Assert.assertEquals(1, includedRelationsParams.getParams().size());
 		Assert.assertEquals("relation", includedRelationsParams.getParams().iterator().next().getPath());
+
+		Assert.assertEquals(new OffsetLimitPagingSpec(), adapter.getPagingSpec());
 	}
 }

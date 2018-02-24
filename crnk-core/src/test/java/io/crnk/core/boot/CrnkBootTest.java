@@ -29,6 +29,7 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
@@ -90,7 +91,6 @@ public class CrnkBootTest {
 		CrnkBoot boot = new CrnkBoot();
 		boot.boot();
 	}
-
 
 	@Test
 	public void setServiceDiscovery() {
@@ -316,5 +316,8 @@ public class CrnkBootTest {
 		Assert.assertEquals(4, modules.size());
 		boot.setDefaultPageLimit(20L);
 		boot.setMaxPageLimit(100L);
+
+		Assert.assertEquals(1, boot.getPagingBehaviors().size());
+		Assert.assertTrue(boot.getPagingBehaviors().get(0) instanceof OffsetLimitPagingBehavior);
 	}
 }

@@ -548,4 +548,8 @@ public class CrnkBoot {
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		return pagingBehaviors;
+	}
 }
