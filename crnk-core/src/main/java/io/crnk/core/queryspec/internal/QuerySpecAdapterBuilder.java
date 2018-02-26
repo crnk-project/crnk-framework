@@ -1,8 +1,5 @@
 package io.crnk.core.queryspec.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -15,16 +12,19 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 
+import java.util.Map;
+import java.util.Set;
+
 public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
 
 	private final HttpRequestContextProvider requestContextProvider;
-
 
 	private QuerySpecDeserializer querySpecDeserializer;
 
 	private ResourceRegistry resourceRegistry;
 
-	public QuerySpecAdapterBuilder(QuerySpecDeserializer querySpecDeserializer, final ModuleRegistry moduleRegistry) {
+	public QuerySpecAdapterBuilder(final QuerySpecDeserializer querySpecDeserializer,
+								   final ModuleRegistry moduleRegistry) {
 		this.querySpecDeserializer = querySpecDeserializer;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.requestContextProvider = moduleRegistry.getHttpRequestContextProvider();

@@ -2,9 +2,9 @@ package io.crnk.core.engine.internal.document.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -20,6 +20,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -39,7 +40,7 @@ public abstract class AbstractDocumentMapperTest {
 		MockRepositoryUtil.clear();
 
 		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(String.format("%s,io.crnk.core.queryspec.pagingspec", MockConstants.TEST_MODELS_PACKAGE)));
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
 		boot.setPropertiesProvider(getPropertiesProvider());
 		boot.boot();

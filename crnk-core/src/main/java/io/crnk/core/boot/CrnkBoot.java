@@ -1,11 +1,8 @@
 package io.crnk.core.boot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -43,6 +40,8 @@ import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.Repository;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
@@ -50,6 +49,10 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -90,6 +93,9 @@ public class CrnkBoot {
 
 	private Boolean allowUnknownAttributes;
 
+	private Boolean allowUnknownParameters;
+
+	private List<PagingBehavior> pagingBehaviors;
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -161,6 +167,7 @@ public class CrnkBoot {
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		setupQuerySpecDeserializer();
+		setupPagingBehavior();
 		bootDiscovery();
 	}
 
@@ -325,7 +332,7 @@ public class CrnkBoot {
 
 		boolean serializeLinksAsObjects =
 				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, pagingBehaviors));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -444,6 +451,17 @@ public class CrnkBoot {
 		this.allowUnknownAttributes = true;
 	}
 
+	/**
+	 * Sets the allow unknown query parameters for API requests.
+	 * <p>
+	 */
+	public void setAllowUnknownParameters() {
+		PreconditionUtil.assertNull("Allow unknown parameters requires using the QuerySpecDeserializer, but " +
+				"it is null.", this.queryParamsBuilder);
+
+		this.allowUnknownParameters = true;
+	}
+
 	public ModuleRegistry getModuleRegistry() {
 		return moduleRegistry;
 	}
@@ -466,14 +484,7 @@ public class CrnkBoot {
 			}
 		}
 
-
 		if (querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
-			if (defaultPageLimit != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setDefaultLimit(defaultPageLimit);
-			}
-			if (maxPageLimit != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setMaxPageLimit(maxPageLimit);
-			}
 			if (allowUnknownAttributes == null) {
 				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
 				if (strAllow != null) {
@@ -481,8 +492,40 @@ public class CrnkBoot {
 				}
 			}
 			if (allowUnknownAttributes != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer)
-						.setAllowUnknownAttributes(allowUnknownAttributes);
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(allowUnknownAttributes);
+			}
+			if (allowUnknownParameters == null) {
+				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_PARAMETERS);
+				if (strAllow != null) {
+					allowUnknownParameters = Boolean.parseBoolean(strAllow);
+				}
+			}
+			if (allowUnknownParameters != null) {
+				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownParameters(allowUnknownParameters);
+			}
+		}
+	}
+
+	private void setupPagingBehavior() {
+		if (pagingBehaviors == null) {
+			setupServiceDiscovery();
+
+			pagingBehaviors = new ArrayList<>();
+			pagingBehaviors.addAll(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+
+			if (pagingBehaviors.isEmpty()) {
+				pagingBehaviors.add(new OffsetLimitPagingBehavior());
+			}
+		}
+
+		for (PagingBehavior pagingBehavior: pagingBehaviors) {
+			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
+				if (defaultPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+				}
+				if (maxPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
+				}
 			}
 		}
 	}
@@ -504,5 +547,9 @@ public class CrnkBoot {
 
 	public ServiceUrlProvider getServiceUrlProvider() {
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
+	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		return pagingBehaviors;
 	}
 }

@@ -5,6 +5,7 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
@@ -77,7 +78,17 @@ public class QueryParamsAdapter implements QueryAdapter {
 	}
 
 	@Override
-	public void setOffset(long offset) {
+	public void setOffset(final long offset) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setPagingSpec(final PagingSpec pagingSpec) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PagingSpec getPagingSpec() {
 		throw new UnsupportedOperationException();
 	}
 

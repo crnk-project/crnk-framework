@@ -1,6 +1,7 @@
 package io.crnk.meta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
@@ -18,11 +19,26 @@ import io.crnk.core.engine.registry.ResourceRegistryPartAdapter;
 import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
 import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.module.discovery.ResourceLookup;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.utils.Supplier;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.internal.MetaRelationshipRepositoryImpl;
 import io.crnk.meta.internal.MetaResourceRepositoryImpl;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaCollectionType;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaInterface;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaLiteral;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaProvider;
 
 import java.util.Collection;
@@ -137,6 +153,7 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
 		InformationBuilder informationBuilder = new DefaultInformationBuilder(context.getTypeParser());
 		DefaultResourceInformationProvider informationProvider = new DefaultResourceInformationProvider(
 				propertiesProvider,
+				new OffsetLimitPagingBehavior(),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		informationProvider.init(new DefaultResourceInformationProviderContext(informationProvider, informationBuilder,

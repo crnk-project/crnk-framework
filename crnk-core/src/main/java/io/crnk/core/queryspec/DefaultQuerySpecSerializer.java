@@ -6,7 +6,13 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 
@@ -35,11 +41,11 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 	@Override
 	public Map<String, Set<String>> serialize(QuerySpec querySpec) {
 		Map<String, Set<String>> map = new HashMap<>();
-		serialize(querySpec, map);
+		serialize(querySpec, map, querySpec);
 		return map;
 	}
 
-	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map) {
+	private void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
 		String resourceType = querySpec.getResourceType();
 		if (resourceType == null) {
 			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
@@ -53,10 +59,13 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		serializeSorting(querySpec, resourceType, map);
 		serializeIncludedFields(querySpec, resourceType, map);
 		serializeIncludedRelations(querySpec, resourceType, map);
-		serializePagination(querySpec, resourceType, map);
+		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
+		if (entry != null && entry.getResourceInformation() != null && entry.getResourceInformation().getPagingBehavior() != null) {
+			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(querySpec.getPagingSpec(), resourceType));
+		}
 
 		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
-			serialize(relatedSpec, map);
+			serialize(relatedSpec, map, querySpec);
 		}
 	}
 
@@ -129,14 +138,4 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 			put(map, key, builder.toString());
 		}
 	}
-
-	public void serializePagination(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) { // NOSONAR signature is ok
-		if (querySpec.getOffset() != 0) {
-			put(map, "page[offset]", Long.toString(querySpec.getOffset()));
-		}
-		if (querySpec.getLimit() != null) {
-			put(map, "page[limit]", Long.toString(querySpec.getLimit()));
-		}
-	}
-
 }

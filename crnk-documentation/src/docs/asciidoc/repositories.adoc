@@ -409,7 +409,11 @@ anchor:pagination[]
 
 ### Pagination
 
-Pagination for the repositories can be achieved by providing `page` parameter.
+Resources pagination strategies defined by <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
+By default, each resource has implicit pagination support defined by `OffsetLimitPagingBehavior`.
+It provides a simple strategy of a pair `offset/limit` parameters which can be used for filtering amount of results.
+
+Pagination executed automatically as soon as client provides a  `page` parameter.
 The format for pagination: `page[offset|limit] = "value", where value is an integer`
 
 Example:
@@ -436,6 +440,12 @@ The potential benefit of the second over the first approach is that it might be 
 determine whether more resources are available rather than counting all resources.
 This is typically achieved by querying `limit + 1` resources.
 
+#### Custom strategies
+
+Resources might have custom pagination strategies. In order to do so, you would have to perform the following actions:
+
+1. Provide an instance of a custom `PagingBehavior` implementation.
+2. Set it up via <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>> attribute.
 
 ### Sparse Fieldsets
 
@@ -474,6 +484,8 @@ The QuerySpec API looks like (further setters available as well):
 
 		public long getOffset() {...}
 
+		public PagingSpec getPagingSpec() {...}
+
 		public List<FilterSpec> getFilters() {...}
 
 		public List<SortSpec> getSort() {...}
@@ -498,6 +510,10 @@ included in the request, their QuerySpecs can be obtained by calling `QuerySpec.
 they get converted to the proper types by the `DefaultQuerySpecDeserializer`. The
 type is determined based on the type of the filtered attribute.
 
+`PagingSpec` holds a value of defined pagination strategy.
+By default, the values can be accessed via `getLimit/getOffset` methods.
+In case of custom strategies, `getPagingSpec` should be used.
+
 QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
 on any `java.util.Collection`. It is useful for testing and on smaller datasets to keep
 the implementation of a repository as simple as possible. It returns a ResourceList
@@ -511,15 +527,14 @@ Crnk make use of `DefaultQuerySpecDeserializer` to map URL parameters to a Query
 This instance is accessible from the various integrations, such as from the `CrnkFeature`. It
 provides a number of customization options:
 
-* `setDefaultLimit(Long)`
-	Sets the page limit if none is specified by the request.
-
-* `setMaxPageLimit(Long)`
-	Sets the maximum page limit allowed to be requested.
-
 * `setAllowUnknownAttributes(boolean)`
 	`DefaultQuerySpecDeserializer` validates all passed parameters against the domain model and fails
-	if one of the attributes is unknown. This flag allows to disable that check in case the should be necessary.
+	if one of the attributes is unknown. This flag allows to disable that check in case this should be necessary.
+
+* `setAllowUnknownParameters(boolean)`
+	`DefaultQuerySpecDeserializer` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
+	In case of any custom query parameter `ParametersDeserializationException` will be thrown.
+	This flag allows to disable that check and ignore any unknown ones.
 
 * `setIgnoreParseExceptions(boolean)`
 	`DefaultQuerySpecDeserializer` attempts to convert all filter parameters to their proper type based on the

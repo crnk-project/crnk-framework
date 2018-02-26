@@ -6,11 +6,12 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.Task;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 // tag::doc[]
 @Component
@@ -21,8 +22,6 @@ public class TaskRepositoryImpl extends ResourceRepositoryBase<Task, Long> imple
 
 	private static final AtomicLong ID_GENERATOR = new AtomicLong(4);
 
-
-	@Autowired
 	public TaskRepositoryImpl() {
 		super(Task.class);
 		Task task = new Task(1L, "Create tasks");

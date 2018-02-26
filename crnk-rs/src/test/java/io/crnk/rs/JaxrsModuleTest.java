@@ -1,6 +1,8 @@
 package io.crnk.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -15,6 +17,8 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.rs.internal.JaxrsModule;
@@ -40,6 +44,7 @@ public class JaxrsModuleTest {
 		builder = new JaxrsModule.JaxrsResourceRepositoryInformationProvider();
 		final ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(
 				moduleRegistry.getPropertiesProvider(),
+				ImmutableList.<PagingBehavior>of(new OffsetLimitPagingBehavior()),
 				new DefaultResourceFieldInformationProvider(),
 				new JacksonResourceFieldInformationProvider());
 		resourceInformationProvider

@@ -14,6 +14,7 @@ import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
 import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -90,6 +91,11 @@ public class ResourceInformation {
 
 	private ResourceValidator validator;
 
+	/**
+	 * {@link PagingBehavior} instance
+	 */
+	private PagingBehavior pagingBehavior;
+
 	private StringMapper idStringMapper = new StringMapper() {
 		@Override
 		public String toString(Object input) {
@@ -104,19 +110,20 @@ public class ResourceInformation {
 	};
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			List<ResourceField> fields) {
-		this(parser, resourceClass, resourceType, superResourceType, null, fields);
+			List<ResourceField> fields, PagingBehavior pagingBehavior) {
+		this(parser, resourceClass, resourceType, superResourceType, null, fields, pagingBehavior);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
 		this.superResourceType = superResourceType;
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
+		this.pagingBehavior = pagingBehavior;
 
 		initFields();
 		if (this.instanceBuilder == null) {
@@ -416,4 +423,7 @@ public class ResourceInformation {
 		return Collections.unmodifiableList(fields);
 	}
 
+	public PagingBehavior getPagingBehavior() {
+		return pagingBehavior;
+	}
 }

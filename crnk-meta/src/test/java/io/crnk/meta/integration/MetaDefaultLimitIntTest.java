@@ -1,9 +1,5 @@
 package io.crnk.meta.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -16,15 +12,18 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.rs.CrnkFeature;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 
-
 	private ResourceRepositoryV2<MetaResource, Serializable> repository;
-
 
 	@Before
 	public void setup() {
@@ -45,7 +44,6 @@ public class MetaDefaultLimitIntTest extends AbstractMetaJerseyTest {
 		ResourceList<MetaResource> list = repository.findAll(querySpec);
 		Assert.assertEquals(2, list.size());
 	}
-
 
 	@Test
 	public void limitShouldNotAffectRelationships() {

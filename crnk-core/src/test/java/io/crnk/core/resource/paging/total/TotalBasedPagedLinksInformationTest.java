@@ -6,9 +6,9 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
-import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.links.PagedLinksInformation;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 		adapter = registryEntry.getResourceRepository(null);
 
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+		QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec(), resourceRegistry);
 		for (long i = 0; i < 5; i++) {
 			Task task = new Task();
 			task.setId(i);
@@ -40,9 +40,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 	@Test
 	public void testPaging() throws InstantiationException, IllegalAccessException {
-		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
-		querySpec.setOffset(2L);
-		querySpec.setLimit(2L);
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(querySpec(2L, 2L), resourceRegistry);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
 		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=2", linksInformation.getFirst());
@@ -55,9 +53,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 	public void testPagingNoContents() throws InstantiationException, IllegalAccessException {
 		TotalResourceCountTestRepository.clear();
 
-		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
-		querySpec.setOffset(0L);
-		querySpec.setLimit(2L);
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(querySpec(0L, 2L), resourceRegistry);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
 		Assert.assertNull(linksInformation.getFirst());
@@ -68,9 +64,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 	@Test
 	public void testPagingFirst() throws InstantiationException, IllegalAccessException {
-		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
-		querySpec.setOffset(0L);
-		querySpec.setLimit(3L);
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(querySpec(0L, 3L), resourceRegistry);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
 		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=3", linksInformation.getFirst());
@@ -81,9 +75,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 	@Test
 	public void testPagingLast() throws InstantiationException, IllegalAccessException {
-		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
-		querySpec.setOffset(4L);
-		querySpec.setLimit(4L);
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(querySpec(4L, 4L), resourceRegistry);
 
 		PagedLinksInformation linksInformation = (PagedLinksInformation) adapter.findAll(querySpec).getLinksInformation();
 		Assert.assertEquals("http://127.0.0.1/tasks?page[limit]=4", linksInformation.getFirst());
@@ -94,9 +86,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 	@Test(expected = BadRequestException.class)
 	public void testInvalidPaging() throws InstantiationException, IllegalAccessException {
-		QuerySpecAdapter querySpec = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
-		querySpec.setOffset(1L);
-		querySpec.setLimit(3L);
+		QuerySpecAdapter querySpec = new QuerySpecAdapter(querySpec(1L, 3L), resourceRegistry);
 		adapter.findAll(querySpec).getLinksInformation();
 	}
 }
