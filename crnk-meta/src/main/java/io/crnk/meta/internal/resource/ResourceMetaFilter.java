@@ -1,5 +1,9 @@
 package io.crnk.meta.internal.resource;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Set;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -13,7 +17,13 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaCollectionType;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceBase;
@@ -21,13 +31,10 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaProviderContext;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Set;
-
 public class ResourceMetaFilter implements MetaFilter {
 
 	private final MetaProviderContext context;
+
 	private final ResourceMetaParitition partition;
 
 
@@ -43,7 +50,8 @@ public class ResourceMetaFilter implements MetaFilter {
 		if (element instanceof MetaResource) {
 			MetaResource metaResource = (MetaResource) element;
 			return adjustResourceForRequest(metaResource);
-		} else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
+		}
+		else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
 			// TODO also cover MetaResourceBase by expending InformationModel accordingly
 			MetaResourceField field = (MetaResourceField) element;
 			return adjustFieldForRequest(field);
@@ -60,9 +68,12 @@ public class ResourceMetaFilter implements MetaFilter {
 		ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getName());
 
 		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
-		boolean readable = metaResource.isReadable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
-		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.POST) == FilterBehavior.NONE;
-		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
+		boolean readable =
+				metaResource.isReadable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET) == FilterBehavior.NONE;
+		boolean insertable = metaResource.isInsertable()
+				&& filterBehaviorProvider.get(fieldInformation, HttpMethod.POST) == FilterBehavior.NONE;
+		boolean updatable = metaResource.isUpdatable()
+				&& filterBehaviorProvider.get(fieldInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
 
 		// hide element if no permission
 		if (!readable && !insertable && !updatable) {
@@ -84,10 +95,14 @@ public class ResourceMetaFilter implements MetaFilter {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 
 		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
-		boolean readable = metaResource.isReadable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.GET) == FilterBehavior.NONE;
-		boolean insertable = metaResource.isInsertable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.POST) == FilterBehavior.NONE;
-		boolean updatable = metaResource.isUpdatable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
-		boolean deletable = metaResource.isDeletable() && filterBehaviorProvider.get(resourceInformation, HttpMethod.DELETE) == FilterBehavior.NONE;
+		boolean readable = metaResource.isReadable()
+				&& filterBehaviorProvider.get(resourceInformation, HttpMethod.GET) == FilterBehavior.NONE;
+		boolean insertable = metaResource.isInsertable()
+				&& filterBehaviorProvider.get(resourceInformation, HttpMethod.POST) == FilterBehavior.NONE;
+		boolean updatable = metaResource.isUpdatable()
+				&& filterBehaviorProvider.get(resourceInformation, HttpMethod.PATCH) == FilterBehavior.NONE;
+		boolean deletable = metaResource.isDeletable()
+				&& filterBehaviorProvider.get(resourceInformation, HttpMethod.DELETE) == FilterBehavior.NONE;
 
 		// hide element if no permission
 		if (!readable && !insertable && !updatable && !deletable) {
@@ -95,7 +110,8 @@ public class ResourceMetaFilter implements MetaFilter {
 		}
 
 		// update element if necessary
-		if (metaResource.isReadable() != readable || metaResource.isUpdatable() != updatable || metaResource.isInsertable() != insertable || metaResource.isDeletable() != deletable) {
+		if (metaResource.isReadable() != readable || metaResource.isUpdatable() != updatable
+				|| metaResource.isInsertable() != insertable || metaResource.isDeletable() != deletable) {
 			MetaResource clone = (MetaResource) metaResource.duplicate();
 			clone.setReadable(readable);
 			clone.setInsertable(insertable);
@@ -159,7 +175,13 @@ public class ResourceMetaFilter implements MetaFilter {
 			if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 				String oppositeType = field.getOppositeResourceType();
 				String oppositeId = partition.getId(oppositeType);
-				MetaResource oppositeMeta = (MetaResource) context.getMetaElement(oppositeId).get();
+				Optional<MetaElement> optOppositeMeta = context.getMetaElement(oppositeId);
+				if (!optOppositeMeta.isPresent()) {
+					throw new IllegalStateException(
+							"opposite meta element '" + oppositeId + "' for element '" + element.getId() + "' not found");
+				}
+
+				MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
 
 				if (field.isCollection()) {
 					boolean isSet = Set.class.isAssignableFrom(field.getType());
@@ -168,7 +190,8 @@ public class ResourceMetaFilter implements MetaFilter {
 					MetaCollectionType metaCollection;
 					if (optMetaCollection.isPresent()) {
 						metaCollection = (MetaCollectionType) optMetaCollection.get();
-					} else {
+					}
+					else {
 						metaCollection = isSet ? new MetaSetType() : new MetaListType();
 						metaCollection.setId(oppositeMeta.getId() + suffix);
 						metaCollection.setName(oppositeMeta.getName() + suffix);
@@ -178,15 +201,18 @@ public class ResourceMetaFilter implements MetaFilter {
 					}
 					attr.setType(metaCollection);
 
-				} else {
+				}
+				else {
 					attr.setType(oppositeMeta);
 				}
-			} else {
+			}
+			else {
 				Type implementationType = field.getGenericType();
 				MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 				attr.setType(metaType.asType());
 			}
-		} else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
+		}
+		else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
 			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
