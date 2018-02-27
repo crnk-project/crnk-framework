@@ -42,21 +42,23 @@ public class CrnkFeature implements Feature {
 	private RequestContextParameterProviderRegistry parameterProviderRegistry;
 
 	@Context
-	private SecurityContext securityContext;
+	protected SecurityContext securityContext;
+
+	private boolean securityEnabled = true;
 
 	public CrnkFeature() {
 		// nothing to do
 	}
 
 	public CrnkFeature(ObjectMapper objectMapper, QueryParamsBuilder queryParamsBuilder,
-					   JsonServiceLocator jsonServiceLocator) {
+			JsonServiceLocator jsonServiceLocator) {
 		boot.setObjectMapper(objectMapper);
 		boot.setQueryParamsBuilds(queryParamsBuilder);
 		boot.setServiceLocator(jsonServiceLocator);
 	}
 
 	public CrnkFeature(ObjectMapper objectMapper, QuerySpecDeserializer querySpecDeserializer,
-					   JsonServiceLocator jsonServiceLocator) {
+			JsonServiceLocator jsonServiceLocator) {
 		boot.setObjectMapper(objectMapper);
 		boot.setQuerySpecDeserializer(querySpecDeserializer);
 		boot.setServiceLocator(jsonServiceLocator);
@@ -75,16 +77,10 @@ public class CrnkFeature implements Feature {
 
 	@Override
 	public boolean configure(final FeatureContext context) {
-		PropertiesProvider propertiesProvider = new PropertiesProvider() {
-
-			@Override
-			public String getProperty(String key) {
-				return (String) context.getConfiguration().getProperty(key);
-			}
-		};
-
-		boot.setPropertiesProvider(propertiesProvider);
-		boot.addModule(new JaxrsModule(securityContext));
+		boot.setPropertiesProvider(createPropertiesProvider(context));
+		if (securityEnabled) {
+			boot.addModule(new JaxrsModule(securityContext));
+		}
 		boot.boot();
 
 		parameterProviderRegistry = buildParameterProviderRegistry();
@@ -97,11 +93,19 @@ public class CrnkFeature implements Feature {
 		return true;
 	}
 
+	protected PropertiesProvider createPropertiesProvider(FeatureContext context) {
+		return key -> (String) context.getConfiguration().getProperty(key);
+	}
+
+	public void setSecurityEnabled(boolean securityEnabled) {
+		this.securityEnabled = securityEnabled;
+	}
+
 	/**
 	 * All repositories with JAX-RS action need to be registered with JAX-RS as singletons.
 	 *
 	 * @param context of jaxrs
-	 * @param boot    of crnk
+	 * @param boot of crnk
 	 */
 	private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();

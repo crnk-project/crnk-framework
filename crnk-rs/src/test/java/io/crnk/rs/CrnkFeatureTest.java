@@ -1,6 +1,12 @@
 package io.crnk.rs;
 
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.SecurityContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
@@ -36,5 +42,41 @@ public class CrnkFeatureTest {
 	public void getQuerySpecDeserializer() {
 		CrnkFeature feature = new CrnkFeature();
 		Assert.assertNotNull(feature.getQuerySpecDeserializer());
+	}
+
+	@Test
+	public void testSecurityDisabledDoesNotRegisterProvider() {
+		testSecurityRegistration(false);
+	}
+
+	@Test
+	public void testSecurityEnabledDoesRegisterProvider() {
+		testSecurityRegistration(true);
+	}
+
+	private void testSecurityRegistration(boolean enabled) {
+		CrnkFeature feature = new CrnkFeature();
+		feature.setSecurityEnabled(enabled);
+		feature.securityContext = Mockito.mock(SecurityContext.class);
+
+		FeatureContext context = Mockito.mock(FeatureContext.class);
+		Mockito.when(context.getConfiguration()).thenReturn(Mockito.mock(Configuration.class));
+
+		feature.configure(context);
+
+		CrnkBoot boot = feature.getBoot();
+		if (enabled) {
+			SecurityProvider securityProvider = boot.getModuleRegistry().getSecurityProvider();
+			Assert.assertNotNull(securityProvider);
+		}
+		else {
+			try {
+				Assert.assertNull(boot.getModuleRegistry().getSecurityProvider());
+				Assert.fail();
+			}
+			catch (IllegalStateException e) {
+				Assert.assertTrue(e.getMessage().contains("exactly one security provide must be installed"));
+			}
+		}
 	}
 }
