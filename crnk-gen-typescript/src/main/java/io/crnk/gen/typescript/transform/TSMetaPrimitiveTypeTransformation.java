@@ -1,12 +1,5 @@
 package io.crnk.gen.typescript.transform;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.crnk.gen.typescript.model.*;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimitiveType;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -14,6 +7,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.UUID;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.gen.typescript.model.TSAny;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
 
 public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 
@@ -51,6 +55,7 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		primitiveMapping.put(LocalDateTime.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(OffsetDateTime.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(OffsetDateTime.class, TSPrimitiveType.STRING);
+		primitiveMapping.put(UUID.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(Duration.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(byte[].class, TSPrimitiveType.STRING);
 	}
