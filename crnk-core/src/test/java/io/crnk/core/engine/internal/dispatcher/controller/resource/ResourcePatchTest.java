@@ -487,4 +487,38 @@ public class ResourcePatchTest extends BaseControllerTest {
 		assertThat(updatedTask.getAttributes().get("category")).isNull();
 	}
 
+
+	@Test
+	public void omittedFieldsShouldBeIgnored() throws Exception {
+		// GIVEN
+		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
+		Task task = new Task();
+		task.setName("Mary Joe");
+		JsonApiResponse jsonApiResponse = taskRepo.create(task, emptyTaskQuery);
+		task = (Task) (jsonApiResponse.getEntity());
+
+		// GIVEN
+		Document taskPatch = new Document();
+		Resource data = new Resource();
+		taskPatch.setData(Nullable.of((Object) data));
+		data.setType("tasks");
+		data.setAttribute("category", objectMapper.readTree("\"TestCategory\""));
+		JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
+		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper,
+				modificationFilters);
+
+		// WHEN
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
+
+		// THEN
+		Assert.assertNotNull(response);
+		assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
+		Resource updatedTask = response.getDocument().getSingleData().get();
+		assertThat(updatedTask.getAttributes().get("name").asText()).isEqualTo("Mary Joe");
+		assertThat(updatedTask.getAttributes().get("category").asText()).isEqualTo("TestCategory");
+		assertThat(updatedTask.getId()).isEqualTo(task.getId().toString());
+		Assert.assertEquals("Mary Joe", task.getName());
+		Assert.assertEquals("TestCategory", task.getCategory());
+	}
+
 }
