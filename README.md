@@ -21,7 +21,7 @@ information.
 
 ## Requirements
 
-Crnk requires Java 1.7 or later. 
+Crnk requires Java 1.8 or later and an SLF4J setup for logging. 
 
 ## Licensing
 
