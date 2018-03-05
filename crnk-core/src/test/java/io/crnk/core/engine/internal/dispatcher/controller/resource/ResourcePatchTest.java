@@ -498,11 +498,11 @@ public class ResourcePatchTest extends BaseControllerTest {
 		task = (Task) (jsonApiResponse.getEntity());
 
 		// GIVEN
-		Document taskPatch = new Document();
 		Resource data = new Resource();
-		taskPatch.setData(Nullable.of((Object) data));
 		data.setType("tasks");
 		data.setAttribute("category", objectMapper.readTree("\"TestCategory\""));
+		Document taskPatch = new Document();
+		taskPatch.setData(Nullable.of((Object) data));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
 		ResourcePatch sut = new ResourcePatch(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper,
 				modificationFilters);

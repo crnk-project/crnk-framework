@@ -45,6 +45,12 @@ public class ErrorDataTest {
 
 		ErrorData errorData = builder.build();
 		String json = mapper.writeValueAsString(errorData);
+
+		Assert.assertTrue(json.contains("\"parameter\":\"sourceParameter\""));
+		Assert.assertTrue(json.contains("\"pointer\":\"sourcePointer\""));
+		Assert.assertTrue(json.contains("\"meta\":{\"meta1\":\"value1\"}"));
+		Assert.assertTrue(json.contains("\"links\":{\"about\":\"about\"}"));
+
 		ErrorData copy = mapper.readerFor(ErrorData.class).readValue(json);
 
 		Assert.assertEquals(errorData, copy);
@@ -60,7 +66,10 @@ public class ErrorDataTest {
 		builder.setSourcePointer("sourcePointer");
 		builder.setSourceParameter("sourceParameter");
 		String actual = builder.build().toString();
-		Assert.assertEquals("ErrorData{id='null', aboutLink='null', status='status', code='code', title='title', detail='detail', sourcePointer='sourcePointer', sourceParameter='sourceParameter', meta=null}", actual);
+		Assert.assertEquals(
+				"ErrorData{id='null', aboutLink='null', status='status', code='code', title='title', detail='detail', "
+						+ "sourcePointer='sourcePointer', sourceParameter='sourceParameter', meta=null}",
+				actual);
 	}
 
 }
