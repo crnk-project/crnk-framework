@@ -327,7 +327,7 @@ anchor:brave_module[]
 
 ## Tracing with Zipkin/Brave
 
-A `BraveClientModule` and `BraveServletModule` provided by `io.crnk:crnk-brave4` provides
+A `BraveClientModule` and `BraveServletModule` provided by `io.crnk:crnk-monitor-brave4` provides
 integration into Zipkin/Brave to implement tracing for your repositories.  The module is applicable to
 both a Crnk client or server.
 
