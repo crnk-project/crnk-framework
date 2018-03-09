@@ -16,6 +16,8 @@ public interface QueryAdapter {
 
 	ResourceInformation getResourceInformation();
 
+	QueryContext getQueryContext();
+
 	/**
 	 * @return maximum number of resources to return or null for unbounded
 	 */
@@ -59,4 +61,10 @@ public interface QueryAdapter {
 	void setPagingSpec(PagingSpec pagingSpec);
 
 	PagingSpec getPagingSpec();
+
+	String getBaseUrl();
+
+	void setBaseUrl(String baseUrl);
+
+	boolean isEmpty();
 }

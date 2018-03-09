@@ -1,17 +1,19 @@
 package io.crnk.home;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.test.mock.TestModule;
-import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,8 +59,7 @@ public class HomeResourceFilteringTest {
 
 
 	private void checkResponse(boolean filtered) throws IOException {
-		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
+		ArgumentCaptor<HttpResponse> responseCaptor = ArgumentCaptor.forClass(HttpResponse.class);
 
 		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 
@@ -66,16 +67,15 @@ public class HomeResourceFilteringTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
-		Assert.assertEquals(200, (int) statusCaptor.getValue());
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(responseCaptor.capture());
+		HttpResponse response = responseCaptor.getValue();
+		Assert.assertEquals(200, response.getStatusCode());
 
-		String json = new String(responseCaptor.getValue());
-		JsonNode response = boot.getObjectMapper().reader().readTree(json);
-
-		JsonNode resourcesNode = response.get("links");
+		JsonNode json = boot.getObjectMapper().reader().readTree(new String(response.getBody()));
+		JsonNode resourcesNode = json.get("links");
 		JsonNode tasksNode = resourcesNode.get("tasks");
 		if (filtered) {
 			Assert.assertNull(tasksNode);

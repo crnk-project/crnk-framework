@@ -14,7 +14,7 @@ indent_size = 4
 continuation_indent_size = 8
 tab_width = 4
 trim_trailing_whitespace = true
-max_line_length = 130
+max_line_length = 180
 
 [*.{ts,js}]
 continuation_indent_size = 4

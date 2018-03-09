@@ -1,39 +1,32 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.dispatcher.Response;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.filter.ResourceModificationFilter;
-import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-public class ResourcePatch extends ResourceUpsert {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
+import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
+import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.result.Result;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-	public ResourcePatch(ResourceRegistry resourceRegistry, PropertiesProvider propertiesProvider, TypeParser typeParser,
-						 @SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, DocumentMapper documentMapper,
-						 List<ResourceModificationFilter> modificationFilters) {
-		super(resourceRegistry, propertiesProvider, typeParser, objectMapper, documentMapper, modificationFilters);
-	}
+public class ResourcePatch extends ResourceUpsert {
 
 	@Override
 	protected HttpMethod getHttpMethod() {
@@ -48,41 +41,86 @@ public class ResourcePatch extends ResourceUpsert {
 	}
 
 	@Override
-	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-						   RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
+										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
-		final Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
-		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
+		final Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
+		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(requestResource.getType());
+		logger.debug("using registry entry {}", registryEntry);
 
 		String idString = jsonPath.getIds().getIds().get(0);
 
-		ResourceInformation resourceInformation = bodyRegistryEntry.getResourceInformation();
+		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		Serializable resourceId = resourceInformation.parseIdString(idString);
 
-		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, bodyRegistryEntry);
+		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
+		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
-		JsonApiResponse resourceFindResponse = resourceRepository.findOne(resourceId, queryAdapter);
-		Object resource = resourceFindResponse.getEntity();
-		if (resource == null) {
-			throw new ResourceNotFoundException(jsonPath.toString());
+		return resourceRepository
+				.findOne(resourceId, queryAdapter)
+				.merge(existingResponse -> {
+					Object existingEntity = existingResponse.getEntity();
+					checkNotNull(existingEntity, jsonPath);
+					resourceInformation.verify(existingEntity, requestDocument);
+					return documentMapper.toDocument(existingResponse, queryAdapter, mappingConfig)
+							.map(it -> it.getSingleData().get())
+							.doWork(existing -> mergeNestedAttribute(existing, requestResource))
+							.map(it -> existingEntity);
+				})
+				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter,
+						parameterProvider))
+				.map(this::toResponse);
+	}
+
+	private Response toResponse(Document updatedDocument) {
+		return new Response(updatedDocument, 200);
+	}
+
+	private Result<Document> applyChanges(RegistryEntry registryEntry, Object existingResource, Resource requestResource,
+										  QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+
+		Set<String> loadedRelationshipNames;
+		Result<JsonApiResponse> updatedResource;
+		if (resourceInformation.getResourceClass() == Resource.class) {
+			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
+			updatedResource = resourceRepository.update(requestResource, queryAdapter);
+		} else {
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			setAttributes(requestResource, existingResource, resourceInformation, queryContext);
+			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
+
+			Result<List> relationsResult = setRelationsAsync(existingResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+			updatedResource = relationsResult.merge(it -> resourceRepository.update(existingResource, queryAdapter));
 		}
-		final Resource resourceFindData =
-				documentMapper.toDocument(resourceFindResponse, queryAdapter, parameterProvider).getSingleData().get();
 
-		resourceInformation.verify(resource, requestDocument);
+		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
+				.setParameterProvider(parameterProvider)
+				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
+		DocumentMapper documentMapper = context.getDocumentMapper();
 
+		return updatedResource
+				.doWork(it -> logger.debug("patched resource {}", it))
+				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
+	}
+
+	private void mergeNestedAttribute(Resource existingReseource, Resource requestResource) {
 		// extract current attributes from findOne without any manipulation by query params (such as sparse fieldsets)
 		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
-				String attributesFromFindOne = extractAttributesFromResourceAsJson(resourceFindData);
+				ObjectMapper objectMapper = context.getObjectMapper();
+
+				String attributesFromFindOne = extractAttributesFromResourceAsJson(existingReseource);
 				Map<String, Object> attributesToUpdate =
 						new HashMap<>(emptyIfNull(objectMapper.readValue(attributesFromFindOne, Map.class)));
 
 				// deserialize the request JSON's attributes object into a map
-				String attributesAsJson = objectMapper.writeValueAsString(resourceBody.getAttributes());
+				String attributesAsJson = objectMapper.writeValueAsString(requestResource.getAttributes());
 				Map<String, Object> attributesFromRequest = emptyIfNull(objectMapper.readValue(attributesAsJson, Map.class));
 
 				// remove attributes that were omitted in the request
@@ -102,26 +140,16 @@ public class ResourcePatch extends ResourceUpsert {
 					upsertedAttributes.put(entry.getKey(), value);
 				}
 
-				resourceBody.setAttributes(upsertedAttributes);
+				requestResource.setAttributes(upsertedAttributes);
 				return null;
 			}
 		}, "failed to merge patched attributes");
+	}
 
-		JsonApiResponse updatedResource;
-		Set<String> loadedRelationshipNames;
-		if (resourceInformation.getResourceClass() == Resource.class) {
-			loadedRelationshipNames = getLoadedRelationshipNames(resourceBody);
-			updatedResource = resourceRepository.update(resourceBody, queryAdapter);
-		} else {
-			setAttributes(resourceBody, resource, bodyRegistryEntry.getResourceInformation());
-			setRelations(resource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false);
-			loadedRelationshipNames = getLoadedRelationshipNames(resourceBody);
-			updatedResource = resourceRepository.update(resource, queryAdapter);
+	private void checkNotNull(Object resource, JsonPath jsonPath) {
+		if (resource == null) {
+			throw new ResourceNotFoundException(jsonPath.toString());
 		}
-		Document responseDocument =
-				documentMapper.toDocument(updatedResource, queryAdapter, parameterProvider, loadedRelationshipNames);
-
-		return new Response(responseDocument, 200);
 	}
 
 
@@ -134,6 +162,7 @@ public class ResourcePatch extends ResourceUpsert {
 		JsonApiResponse response = new JsonApiResponse();
 		response.setEntity(resource);
 		// deserialize using the objectMapper so it becomes json-api
+		ObjectMapper objectMapper = context.getObjectMapper();
 		String newRequestBody = objectMapper.writeValueAsString(resource);
 		JsonNode node = objectMapper.readTree(newRequestBody);
 		JsonNode attributes = node.findValue("attributes");

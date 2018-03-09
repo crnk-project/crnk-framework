@@ -24,7 +24,7 @@ import io.crnk.legacy.queryParams.QueryParams;
  * Add some point maybe a more prominent api is necessary for this. But i likely
  * should be keept separate from QuerySpec.
  */
-class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
+public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	private ResourceField relationshipField;
 

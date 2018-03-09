@@ -76,7 +76,7 @@ public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 
 		ResourceRepositoryStub<RelatedEntity, Long> relatedRepo = client.getQueryParamsRepository(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		for (long i = 0; i < 5; i++) {
 			RelatedEntity related1 = new RelatedEntity();

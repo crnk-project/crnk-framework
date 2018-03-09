@@ -3,7 +3,11 @@ package io.crnk.core.repository.foward;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
@@ -34,7 +38,7 @@ import io.crnk.core.resource.list.ResourceList;
  * This class provides the basis to implement {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior}.
  */
 public class ForwardingRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
-		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
+		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 
 	private RelationshipMatcher matcher;
@@ -49,6 +53,8 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 
 	private ForwardingStrategyContext context;
 
+	private HttpRequestContextProvider requestContextProvider;
+
 	/**
 	 * default constructor for CDI an other DI libraries
 	 */
@@ -56,14 +62,14 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingDirection getDirection,
-			ForwardingDirection setDirection) {
+											ForwardingDirection setDirection) {
 		this(sourceClass, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
 			getStrategy,
-			ForwardingSetStrategy<T, I, D, J> setStrategy) {
+											ForwardingSetStrategy<T, I, D, J> setStrategy) {
 		this.sourceClass = sourceClass;
 		this.matcher = matcher;
 		this.getStrategy = getStrategy;
@@ -71,7 +77,7 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingDirection getDirection,
-			ForwardingDirection setDirection) {
+											ForwardingDirection setDirection) {
 		this(sourceType, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
@@ -119,22 +125,26 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 
 	@Override
 	public void setRelation(T source, J targetId, String fieldName) {
-		setStrategy.setRelation(source, targetId, fieldName);
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		setStrategy.setRelation(source, targetId, fieldName, queryContext);
 	}
 
 	@Override
 	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
-		setStrategy.setRelations(source, targetIds, fieldName);
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		setStrategy.setRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
 	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
-		setStrategy.addRelations(source, targetIds, fieldName);
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		setStrategy.addRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
 	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
-		setStrategy.removeRelations(source, targetIds, fieldName);
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
@@ -158,7 +168,13 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 
 	@Override
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		return getStrategy.findTargets(sourceIds, fieldName, querySpec);
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+		return getStrategy.findTargets(sourceIds, fieldName, querySpec, queryContext);
 	}
 
+	@Override
+	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+		this.requestContextProvider = requestContextProvider;
+	}
 }

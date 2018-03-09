@@ -26,7 +26,7 @@ public interface RepositoryRequestSpec {
 
 	/**
 	 * @param targetResourceClass to base the QuerySpec upon. Usually the requested resource,
-	 * but may also be the type of one of the relations.
+	 *                            but may also be the type of one of the relations.
 	 * @return issued query as QuerySpec
 	 */
 	QuerySpec getQuerySpec(ResourceInformation resourceInformation);

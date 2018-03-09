@@ -1,5 +1,10 @@
 package io.crnk.jpa.mapping;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -11,7 +16,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
-import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.jpa.JpaRepositoryConfig;
 import io.crnk.jpa.JpaRepositoryFilterBase;
 import io.crnk.jpa.model.QTestEntity;
@@ -29,11 +33,6 @@ import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Example of how to do DTO mapping and computed attributes.
@@ -144,7 +143,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getQuerySpecRepository(TestDTO.class);
 		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedDTO.class);
 		RelationshipRepositoryV2<TestDTO, Serializable, RelatedDTO, Serializable> relRepo = client
-				.getQuerySpecRepository(TestDTO.class, RelatedDTO.class);
+				.getRepositoryForType(TestDTO.class, RelatedDTO.class);
 
 		TestDTO test = new TestDTO();
 		test.setId(2L);
@@ -180,7 +179,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getQuerySpecRepository(TestDTO.class);
 		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedDTO.class);
 		RelationshipRepositoryV2<TestDTO, Long, RelatedDTO, Long> relRepo = client
-				.getQuerySpecRepository(TestDTO.class, RelatedDTO.class);
+				.getRepositoryForType(TestDTO.class, RelatedDTO.class);
 
 		TestDTO test = new TestDTO();
 		test.setId(2L);

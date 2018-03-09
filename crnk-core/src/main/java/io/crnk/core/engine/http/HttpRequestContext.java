@@ -1,14 +1,23 @@
 package io.crnk.core.engine.http;
 
-import java.io.IOException;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.query.QueryContext;
 
 public interface HttpRequestContext extends HttpRequestContextBase {
 
 	boolean accepts(String contentType);
 
+	/**
+	 * @deprecated use {@link HttpResponse}
+	 */
+	@Deprecated
 	void setContentType(String contentType);
 
-	void setResponse(int statusCode, String text) throws IOException;
+	/**
+	 * @deprecated use {@link HttpResponse}
+	 */
+	@Deprecated
+	void setResponse(int statusCode, String text);
 
 	boolean acceptsAny();
 
@@ -18,4 +27,5 @@ public interface HttpRequestContext extends HttpRequestContextBase {
 
 	void setRequestAttribute(String name, Object value);
 
+	QueryContext getQueryContext();
 }

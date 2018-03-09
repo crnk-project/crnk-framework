@@ -1,12 +1,8 @@
 package io.crnk.core.repository.forward;
 
-import java.util.Arrays;
-import java.util.List;
-
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Task;
@@ -14,16 +10,17 @@ import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.TaskRepository;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class OppositeFowardingRelationshipRepositoryTest {
 
@@ -32,28 +29,30 @@ public class OppositeFowardingRelationshipRepositoryTest {
 
 	private RelationIdTestRepository testRepository;
 
-
 	private ResourceRegistry resourceRegistry;
+
+	private HttpRequestContextProvider requestContextProvider;
 
 	@Before
 	public void setup() {
 		MockRepositoryUtil.clear();
 
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
+		resourceRegistry = container.getResourceRegistry();
 
-		resourceRegistry = boot.getResourceRegistry();
 
-		testRepository = (RelationIdTestRepository) resourceRegistry.getEntry(RelationIdTestResource.class)
+		testRepository = (RelationIdTestRepository) container.getEntry(RelationIdTestResource.class)
 				.getResourceRepository().getResourceRepository();
+		requestContextProvider = container.getModuleRegistry().getHttpRequestContextProvider();
 
 		RelationshipMatcher relMatcher =
 				new RelationshipMatcher().rule().source(RelationIdTestResource.class).target(RelationIdTestResource.class).add();
 		relRepository = new ForwardingRelationshipRepository(RelationIdTestResource.class, relMatcher,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setResourceRegistry(container.getResourceRegistry());
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 	}
 
 	@Test
@@ -94,6 +93,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(Project.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		List<Task> tasks = relRepository.findManyTargets(42L, "tasks", querySpec);
@@ -120,6 +120,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(Task.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		Project foundProject = (Project) relRepository.findOneTarget(13L, "project", querySpec);
@@ -147,13 +148,13 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(Task.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null"));
 		}
 	}
@@ -176,13 +177,13 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(Task.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("field tasks is null for"));
 		}
 	}
@@ -207,13 +208,13 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		relRepository = new ForwardingRelationshipRepository(Task.class, null,
 				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null for"));
 		}
 	}

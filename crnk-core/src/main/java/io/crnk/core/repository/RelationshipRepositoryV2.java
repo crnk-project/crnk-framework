@@ -34,7 +34,7 @@ import io.crnk.core.resource.list.ResourceList;
  * @param <J> D class id type
  */
 public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extends Serializable>
-		extends Repository {
+		extends Repository, MatchedRelationshipRepository {
 
 	/**
 	 * @return the class that specifies the relation. Can be null if getMatcher() is implemented.
@@ -47,6 +47,7 @@ public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extend
 	Class<D> getTargetResourceClass();
 
 
+	@Override
 	default RelationshipMatcher getMatcher() {
 		if (this instanceof UntypedRelationshipRepository) {
 			UntypedRelationshipRepository untyped = (UntypedRelationshipRepository) this;

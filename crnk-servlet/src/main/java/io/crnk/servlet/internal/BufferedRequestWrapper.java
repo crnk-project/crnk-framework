@@ -3,6 +3,7 @@ package io.crnk.servlet.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Scanner;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -38,6 +39,21 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 		}
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bufferedRequest.getBytes());
 		return new ServletInputStream() {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+
+			@Override
+			public boolean isReady() {
+				return false;
+			}
+
+			@Override
+			public void setReadListener(ReadListener readListener) {
+
+			}
+
 			@Override
 			public int read() throws IOException {
 				return byteArrayInputStream.read();

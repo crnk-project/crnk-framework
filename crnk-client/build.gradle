@@ -4,12 +4,12 @@ dependencies {
 
 	compile project(':crnk-core')
 
-	compileOnly group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
-	compileOnly group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client', version: '2.25.1'
-	compileOnly group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.25.1'
-	compileOnly group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.25.1'
-	compileOnly group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
-	compileOnly group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: '2.9.0'
+	compileOnly 'org.apache.httpcomponents:httpclient:4.5.2'
+	compileOnly 'org.glassfish.jersey.ext:jersey-proxy-client'
+	compileOnly 'org.glassfish.jersey.core:jersey-client'
+	compileOnly 'org.glassfish.jersey.media:jersey-media-json-jackson'
+	compileOnly 'com.squareup.okhttp3:okhttp:3.4.1'
+	compileOnly 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 
 	testCompile project(':crnk-rs')
 	testCompile project(':crnk-test')

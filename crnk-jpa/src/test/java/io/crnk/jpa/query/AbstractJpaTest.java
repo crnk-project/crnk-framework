@@ -1,6 +1,7 @@
 package io.crnk.jpa.query;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
@@ -95,16 +96,14 @@ public abstract class AbstractJpaTest {
 
 	@Before
 	public void setup() {
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
-		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
+		CrnkBoot boot = new CrnkBoot();
+
+		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
 		module = JpaModule.newServerModule(emFactory, em, transactionRunner);
 		setupModule(module);
-		moduleRegistry.addModule(new JacksonModule(new ObjectMapper()));
-		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.addModule(module);
-		moduleRegistry.setServiceDiscovery(new EmptyServiceDiscovery());
-		moduleRegistry.init(new ObjectMapper());
+		boot.addModule(module);
+		boot.boot();
+		resourceRegistry = boot.getResourceRegistry();
 
 		queryFactory = createQueryFactory(em);
 		module.setQueryFactory(queryFactory);

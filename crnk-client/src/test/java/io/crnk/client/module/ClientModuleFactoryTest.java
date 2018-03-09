@@ -3,6 +3,7 @@ package io.crnk.client.module;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.module.Module;
+import io.crnk.test.mock.ClientTestModule;
 import org.junit.Assert;
 import org.junit.Test;
 

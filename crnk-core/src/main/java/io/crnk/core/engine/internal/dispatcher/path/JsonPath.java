@@ -98,4 +98,21 @@ public abstract class JsonPath {
 	public int hashCode() {
 		return Objects.hash(elementName, ids, parentResource);
 	}
+
+	@Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		if(parentResource != null){
+			builder.append(parentResource.toString());
+			builder.append("/");
+		}
+		if(elementName != null){
+			builder.append(elementName);
+			builder.append("/");
+		}
+		if(ids != null){
+			builder.append(ids);
+		}
+		return builder.toString();
+	}
 }

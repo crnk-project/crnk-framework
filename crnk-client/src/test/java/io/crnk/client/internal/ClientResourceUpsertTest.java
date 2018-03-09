@@ -1,5 +1,7 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
@@ -7,16 +9,13 @@ import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
-import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
 
 public class ClientResourceUpsertTest {
 
@@ -30,14 +29,10 @@ public class ClientResourceUpsertTest {
 		boot.addModule(new TestModule());
 		boot.boot();
 
-		PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 		ClientProxyFactory proxyFactory = Mockito.mock(ClientProxyFactory.class);
-
-		upsert = new ClientResourceUpsert(boot.getResourceRegistry(), propertiesProvider, boot.getModuleRegistry()
-				.getTypeParser(),
-				boot.getObjectMapper(),
-				boot.getDocumentMapper(),
-				proxyFactory);
+		ControllerContext controllerContext = new ControllerContext(boot.getModuleRegistry(), boot::getDocumentMapper);
+		upsert = new ClientResourceUpsert(proxyFactory);
+		upsert.init(controllerContext);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

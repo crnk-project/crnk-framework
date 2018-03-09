@@ -28,7 +28,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 		resourceProvider = new ResourceMetaProvider();
 
 		lookup = new MetaLookup();
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.addProvider(resourceProvider);
 		lookup.initialize();
 
@@ -38,6 +38,7 @@ public class MetaRelationshipRepositoryImplTest extends AbstractMetaTest {
 				return lookup;
 			}
 		}, MetaElement.class, MetaElement.class);
+		repo.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

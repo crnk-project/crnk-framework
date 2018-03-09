@@ -9,6 +9,7 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceInformat
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -39,7 +40,8 @@ public class QueryParamsAdapterTest {
 				new DefaultInformationBuilder(moduleRegistry.getTypeParser()),  moduleRegistry.getTypeParser(), new ObjectMapper()));
 		ResourceInformation info = builder.build(Task.class);
 
-		QueryParamsAdapter adapter = new QueryParamsAdapter(info, params, moduleRegistry);
+		QueryContext queryContext = new QueryContext();
+		QueryParamsAdapter adapter = new QueryParamsAdapter(info, params, moduleRegistry, queryContext);
 		Assert.assertEquals(Task.class, adapter.getResourceInformation().getResourceClass());
 		Assert.assertEquals(resourceRegistry, adapter.getResourceRegistry());
 	}

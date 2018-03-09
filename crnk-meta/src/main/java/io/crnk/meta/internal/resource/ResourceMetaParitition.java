@@ -1,5 +1,12 @@
 package io.crnk.meta.internal.resource;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -24,16 +31,12 @@ import io.crnk.meta.internal.typed.TypedMetaPartitionBase;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaType;
-import io.crnk.meta.model.resource.*;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
+import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaPartitionContext;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
@@ -63,7 +66,9 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		if (element instanceof MetaType) {
 			MetaType typeElement = element.asType();
 			if (!element.hasId()) {
-				element.setId(computeId(typeElement)); //idProvider.computeIdPrefixFromPackage(implClass, element) + element.getName());
+				element.setId(
+						computeId(typeElement)); //idProvider.computeIdPrefixFromPackage(implClass, element) + element.getName
+				// ());
 			}
 		}
 		return super.addElement(type, element);
@@ -83,7 +88,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				String id = getId(entry.getResourceInformation().getResourceType());
 				if (isMeta) {
 					return id + "$meta";
-				} else {
+				}
+				else {
 					return id + "$links";
 				}
 			}
@@ -98,14 +104,16 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				Class<?> resourceClass = resourceInformation.getResourceClass();
 				String resourcePackageName = resourceClass.getPackage().getName();
-				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null || closedPackageName.length() < resourcePackageName.length())) {
+				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null
+						|| closedPackageName.length() < resourcePackageName.length())) {
 					closedPackageName = resourcePackageName;
 					closedResourceType = resourceInformation.getResourceType();
 				}
 
 				Object resourceRepository = entry.getResourceRepository().getResourceRepository();
 				resourcePackageName = resourceRepository.getClass().getPackage().getName();
-				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null || closedPackageName.length() < resourcePackageName.length())) {
+				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null
+						|| closedPackageName.length() < resourcePackageName.length())) {
 					closedPackageName = resourcePackageName;
 					closedResourceType = resourceInformation.getResourceType();
 				}
@@ -132,7 +140,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 			MetaResource metaResource = discoverResource(resourceInformation);
 
 			ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
-			ResourceRepositoryAdapter<?, Serializable> resourceRepository = entry.getResourceRepository();
+			ResourceRepositoryAdapter resourceRepository = entry.getResourceRepository();
 			if (resourceRepository != null) {
 				MetaResourceRepository repository = discoverRepository(repositoryInformation, metaResource,
 						resourceRepository);
@@ -154,7 +162,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		MetaResource superMeta = null;
 		ResourceInformation superInformation = null;
 		if (superResourceType != null) {
-			superInformation = context.getModuleContext().getResourceRegistry().getEntry(superResourceType).getResourceInformation();
+			superInformation =
+					context.getModuleContext().getResourceRegistry().getEntry(superResourceType).getResourceInformation();
 			superMeta = discoverResource(superInformation);
 		}
 
@@ -176,7 +185,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntry(information.getResourceType());
 		if (entry != null) {
-			boolean readOnlyImpl = entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
+			boolean readOnlyImpl =
+					entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
 			resource.setUpdatable(resource.isUpdatable() && !readOnlyImpl);
 			resource.setInsertable(resource.isInsertable() && !readOnlyImpl);
 			resource.setDeletable(resource.isDeletable() && !readOnlyImpl);
@@ -208,7 +218,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		for (int i = 0; i < resourceType.length(); i++) {
 			if (i == 0 || resourceType.charAt(i - 1) == '/') {
 				name.append(Character.toUpperCase(resourceType.charAt(i)));
-			} else if (resourceType.charAt(i) != '/') {
+			}
+			else if (resourceType.charAt(i) != '/') {
 				name.append(resourceType.charAt(i));
 			}
 		}
@@ -216,7 +227,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	}
 
 	private MetaResourceRepository discoverRepository(ResourceRepositoryInformation repositoryInformation,
-													  MetaResource metaResource, ResourceRepositoryAdapter<?, Serializable> resourceRepository) {
+			MetaResource metaResource, ResourceRepositoryAdapter resourceRepository) {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);

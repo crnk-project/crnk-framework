@@ -3,17 +3,19 @@ package io.crnk.core.boot;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.Properties;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -36,15 +38,10 @@ import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 public class CrnkBootTest {
 
@@ -153,8 +150,7 @@ public class CrnkBootTest {
 		Assert.assertSame(deserializer, boot.getQuerySpecDeserializer());
 		boot.boot();
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
-		QueryAdapterBuilder queryAdapterBuilder = requestDispatcher.getQueryAdapterBuilder();
+		QueryAdapterBuilder queryAdapterBuilder = boot.getQueryAdapterBuilder();
 		Assert.assertTrue(queryAdapterBuilder instanceof QuerySpecAdapterBuilder);
 	}
 
@@ -168,8 +164,7 @@ public class CrnkBootTest {
 		boot.setQueryParamsBuilds(deserializer);
 		boot.boot();
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
-		QueryAdapterBuilder queryAdapterBuilder = requestDispatcher.getQueryAdapterBuilder();
+		QueryAdapterBuilder queryAdapterBuilder = boot.getQueryAdapterBuilder();
 		Assert.assertTrue(queryAdapterBuilder instanceof QueryParamsAdapterBuilder);
 	}
 
@@ -293,16 +288,17 @@ public class CrnkBootTest {
 		boot.addModule(new SimpleModule("test"));
 		boot.boot();
 
+		QueryContext queryContext = new QueryContext();
+		queryContext.setBaseUrl(boot.getServiceUrlProvider().getUrl());
+
 		RequestDispatcher requestDispatcher = boot.getRequestDispatcher();
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
-		Assert.assertNotEquals(0, taskEntry.getRelationshipEntries().size());
-		ResourceRepositoryAdapter<?, ?> repositoryAdapter = taskEntry.getResourceRepository(null);
+		ResourceRepositoryAdapter repositoryAdapter = taskEntry.getResourceRepository(null);
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
-		JsonApiResponse response = repositoryAdapter
-				.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(), new QueryParams(), boot.getModuleRegistry
-						()));
+		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(),
+				new QueryParams(), boot.getModuleRegistry(), queryContext)).get();
 		Assert.assertNotNull(response);
 
 		Assert.assertNotNull(requestDispatcher);
@@ -312,8 +308,6 @@ public class CrnkBootTest {
 		Assert.assertNotNull(boot.getModuleRegistry());
 		Assert.assertNotNull(boot.getExceptionMapperRegistry());
 
-		List<Module> modules = boot.getModuleRegistry().getModules();
-		Assert.assertEquals(4, modules.size());
 		boot.setDefaultPageLimit(20L);
 		boot.setMaxPageLimit(100L);
 

@@ -88,7 +88,7 @@ public class HttpRequestContextBaseAdapterTest {
 	@Test
 	public void getBaseUrl() throws IOException {
 		adapter.getBaseUrl();
-		Mockito.verify(base, Mockito.times(1)).getBaseUrl();
+		Mockito.verify(base, Mockito.times(2)).getBaseUrl();
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
@@ -59,7 +60,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 	@Override
 	public boolean accept(Class<?> resourceClass) {
 		JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
-		return annotation == null ? false : pagingBehaviors.values().stream().filter(pagingBehavior -> pagingBehavior.getClass().getName() == annotation.pagingBehavior().getName()).findFirst().isPresent();
+		return annotation != null;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -83,9 +84,15 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		Class<?> superclass = resourceClass.getSuperclass();
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
+		Class<? extends PagingBehavior> pagingBehaviorType = ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().pagingBehavior();
+		java.util.Optional<PagingBehavior> optPagingBehavior = pagingBehaviors.values().stream().filter(it -> pagingBehaviorType.isInstance(it)).findFirst();
+		if (!optPagingBehavior.isPresent()) {
+			throw new IllegalStateException("paging behavior not found: " + pagingBehaviorType);
+		}
+
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),
 				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields,
-				pagingBehaviors.get(ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().pagingBehavior()));
+				optPagingBehavior.get());
 		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
 		}

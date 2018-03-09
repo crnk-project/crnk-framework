@@ -12,6 +12,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -23,14 +24,14 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
+	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		RegistryEntry targetEntry = context.getTargetEntry(field);
 
 		List sources = (List) sourceEntry.getResourceRepository().findAll(sourceIds,
-				context.createSaveQueryAdapter(fieldName)).getEntity();
+				context.createSaveQueryAdapter(fieldName, queryContext)).get().getEntity();
 
 		ResourceInformation targetInformation = targetEntry.getResourceInformation();
 
@@ -41,19 +42,17 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 				Object targetId = field.getIdAccessor().getValue(source);
 				if (field.isCollection()) {
 					targetIds.addAll((Collection) targetId);
-				}
-				else {
+				} else {
 					targetIds.add(targetId);
 				}
 			}
 
 			QuerySpec idQuerySpec = new QuerySpec(targetInformation);
-			ResourceRepositoryAdapter<D, J> targetAdapter = targetEntry.getResourceRepository();
-			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(idQuerySpec));
+			ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
+			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(idQuerySpec, queryContext)).get();
 			targets = (List<D>) response.getEntity();
 			return toResult(field, targetInformation, sources, targets);
-		}
-		else {
+		} else {
 			MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
 
 				@Override
@@ -68,8 +67,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 				if (target != null) {
 					if (field.isCollection()) {
 						bulkResult.addAll(sourceId, (Collection) target);
-					}
-					else {
+					} else {
 						bulkResult.add(sourceId, target);
 					}
 				}
@@ -79,8 +77,8 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 	}
 
 	private MultivaluedMap<I, D> toResult(ResourceField field, ResourceInformation targetInformation,
-			List sources,
-			List<D> targets) {
+										  List sources,
+										  List<D> targets) {
 
 		MultivaluedMap bulkResult = new MultivaluedMap<I, D>() {
 
@@ -103,11 +101,9 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 				for (Object targetElementId : (Collection) targetId) {
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}
-			}
-			else if (targetId != null) {
+			} else if (targetId != null) {
 				addResult(bulkResult, field, sourceId, targetId, targetMap);
-			}
-			else {
+			} else {
 				bulkResult.add(sourceId, null);
 			}
 		}

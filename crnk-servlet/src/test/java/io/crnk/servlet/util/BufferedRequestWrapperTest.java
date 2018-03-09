@@ -1,18 +1,19 @@
 package io.crnk.servlet.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+
 import io.crnk.servlet.internal.BufferedRequestWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BufferedRequestWrapperTest {
@@ -25,6 +26,21 @@ public class BufferedRequestWrapperTest {
 		// GIVEN
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("hello".getBytes());
 		when(request.getInputStream()).thenReturn(new ServletInputStream() {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+
+			@Override
+			public boolean isReady() {
+				return false;
+			}
+
+			@Override
+			public void setReadListener(ReadListener readListener) {
+
+			}
+
 			@Override
 			public int read() throws IOException {
 				return byteArrayInputStream.read();

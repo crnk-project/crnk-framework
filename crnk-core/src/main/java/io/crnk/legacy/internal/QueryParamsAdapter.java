@@ -2,6 +2,7 @@ package io.crnk.legacy.internal;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
@@ -13,6 +14,8 @@ import io.crnk.legacy.queryParams.params.TypedParams;
 
 public class QueryParamsAdapter implements QueryAdapter {
 
+	private QueryContext queryContext;
+
 	private QueryParams queryParams;
 
 	private ResourceInformation resourceInformation;
@@ -22,7 +25,8 @@ public class QueryParamsAdapter implements QueryAdapter {
 	private ModuleRegistry moduleRegistry;
 
 	public QueryParamsAdapter(ResourceInformation resourceInformation, QueryParams queryParams, ModuleRegistry
-			moduleRegistry) {
+			moduleRegistry, QueryContext queryContext) {
+		this.queryContext = queryContext;
 		this.queryParams = queryParams;
 		this.resourceInformation = resourceInformation;
 		this.moduleRegistry = moduleRegistry;
@@ -53,6 +57,11 @@ public class QueryParamsAdapter implements QueryAdapter {
 			throw new IllegalStateException("resourceInformation not set");
 		}
 		return resourceInformation;
+	}
+
+	@Override
+	public QueryContext getQueryContext() {
+		return queryContext;
 	}
 
 	public ResourceRegistry getResourceRegistry() {
@@ -90,6 +99,21 @@ public class QueryParamsAdapter implements QueryAdapter {
 	@Override
 	public PagingSpec getPagingSpec() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getBaseUrl() {
+		return null;
+	}
+
+	@Override
+	public void setBaseUrl(String baseUrl) {
+
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
 	}
 
 	@Override

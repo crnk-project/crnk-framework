@@ -1,17 +1,13 @@
 package io.crnk.example.jersey;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.ws.rs.ApplicationPath;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.example.jersey.domain.repository.ProjectRepositoryImpl;
 import io.crnk.home.HomeModule;
 import io.crnk.rs.CrnkFeature;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
-
-import javax.inject.Singleton;
-import javax.ws.rs.ApplicationPath;
 
 @ApplicationPath("/")
 public class JerseyApplication extends ResourceConfig {
@@ -29,17 +25,5 @@ public class JerseyApplication extends ResourceConfig {
 
 		property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, APPLICATION_URL);
 		register(feature);
-		register(new AbstractBinder() {
-			@Override
-			public void configure() {
-				bindFactory(ObjectMapperFactory.class).to(ObjectMapper.class).in(Singleton.class);
-				bindService(ProjectRepositoryImpl.class);
-			}
-
-			private void bindService(Class<?> serviceType) {
-				bind(serviceType).to(serviceType).proxy(true).in(RequestScoped.class);
-			}
-		});
-
 	}
 }

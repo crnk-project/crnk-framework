@@ -3,7 +3,6 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -11,29 +10,21 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.RequestBodyException;
+import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.List;
 
 public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
-
-	protected final List<ResourceModificationFilter> modificationFilters;
-
-	RelationshipsResourceUpsert(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper, List<ResourceModificationFilter> modificationFilters) {
-		super(resourceRegistry, typeParser, documentMapper);
-		this.modificationFilters = modificationFilters;
-	}
 
 	/**
 	 * HTTP method name
@@ -46,29 +37,29 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	 * Processes To-Many field
 	 *
 	 * @param resource                       source resource
-	 * @param relationshipIdType             {@link Class} class of the relationship's id field
-	 * @param elementName                    field's name
+	 * @param targetResourceInformation      {@link ResourceInformation} of the relationship target.
+	 * @param resourceField                  field
 	 * @param dataBodies                     Data bodies with relationships
 	 * @param queryAdapter                   QueryAdapter
 	 * @param relationshipRepositoryForClass Relationship repository
 	 */
-	protected abstract void processToManyRelationship(Object resource, ResourceInformation targetResourceInformation,
-													  ResourceField resourceField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
-													  RelationshipRepositoryAdapter relationshipRepositoryForClass);
+	protected abstract Result processToManyRelationship(Result<Object> resource, ResourceInformation targetResourceInformation,
+														ResourceField resourceField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
+														RelationshipRepositoryAdapter relationshipRepositoryForClass);
 
 	/**
 	 * Processes To-One field
 	 *
 	 * @param resource                       source resource
-	 * @param relationshipIdType             {@link Class} class of the relationship's id field
-	 * @param elementName                    field's name
+	 * @param targetResourceInformation      {@link ResourceInformation} of the relationship target.
+	 * @param resourceField                  field
 	 * @param dataBody                       Data body with a relationship
 	 * @param queryAdapter                   QueryAdapter
 	 * @param relationshipRepositoryForClass Relationship repository
 	 */
-	protected abstract void processToOneRelationship(Object resource, ResourceInformation targetResourceInformation,
-													 ResourceField resourceField, ResourceIdentifier dataBody, QueryAdapter queryAdapter,
-													 RelationshipRepositoryAdapter relationshipRepositoryForClass);
+	protected abstract Result processToOneRelationship(Result<Object> resource, ResourceInformation targetResourceInformation,
+													   ResourceField resourceField, ResourceIdentifier dataBody, QueryAdapter queryAdapter,
+													   RelationshipRepositoryAdapter relationshipRepositoryForClass);
 
 	@Override
 	public final boolean isAcceptable(JsonPath jsonPath, String requestType) {
@@ -79,42 +70,40 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	}
 
 	@Override
-	public final Response handle(JsonPath jsonPath, QueryAdapter queryAdapter,
-								 RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public final Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
+											  RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
 		String resourceName = jsonPath.getResourceType();
-		PathIds resourceIds = jsonPath.getIds();
+		PathIds strResourceIds = jsonPath.getIds();
 		RegistryEntry registryEntry = getRegistryEntry(resourceName);
+		logger.debug("using registry entry {}", registryEntry);
 
 		assertRequestDocument(requestBody, HttpMethod.POST, resourceName);
 
-		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
+		Serializable resourceId = getResourceId(strResourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(jsonPath
 				.getElementName());
 		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
-		@SuppressWarnings("unchecked")
-		Object resource = resourceRepository.findOne(castedResourceId, queryAdapter).getEntity();
-
 		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
 
+		Result<Object> resource = resourceRepository.findOne(resourceId, queryAdapter).map(JsonApiResponse::getEntity);
 
-		@SuppressWarnings("unchecked")
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry
-				.getRelationshipRepository(relationshipField, parameterProvider);
+		Result result;
 		if (Iterable.class.isAssignableFrom(relationshipField.getType())) {
 			Iterable<ResourceIdentifier> dataBodies = (Iterable<ResourceIdentifier>) (requestBody.isMultiple() ? requestBody.getData().get() : Collections.singletonList(requestBody.getData().get()));
-			processToManyRelationship(resource, targetInformation, relationshipField, dataBodies, queryAdapter,
+			result = processToManyRelationship(resource, targetInformation, relationshipField, dataBodies, queryAdapter,
 					relationshipRepositoryForClass);
 		} else {
 			if (requestBody.isMultiple()) {
 				throw new RequestBodyException(HttpMethod.POST, resourceName, "Multiple data in body");
 			}
 			ResourceIdentifier dataBody = (ResourceIdentifier) requestBody.getData().get();
-			processToOneRelationship(resource, targetInformation, relationshipField, dataBody, queryAdapter,
+			result = processToOneRelationship(resource, targetInformation, relationshipField, dataBody, queryAdapter,
 					relationshipRepositoryForClass);
 		}
 
-		return new Response(new Document(), HttpStatus.NO_CONTENT_204);
+		return result.map(it -> new Response(new Document(), HttpStatus.NO_CONTENT_204));
 	}
 
 
@@ -124,6 +113,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 				.getResourceInformation()
 				.getIdField()
 				.getType();
+		TypeParser typeParser = context.getTypeParser();
 		return typeParser.parse(resourceId, idClass);
 	}
 }

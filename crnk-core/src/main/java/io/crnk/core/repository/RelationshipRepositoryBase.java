@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -15,6 +17,7 @@ import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
@@ -60,7 +63,7 @@ import io.crnk.core.resource.list.ResourceList;
  */
 @Deprecated
 public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
-		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
+		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 
 	protected ResourceRegistry resourceRegistry;
@@ -72,6 +75,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	private Class targetResourceClass;
 
 	private String targetResourceType;
+
+	private HttpRequestContextProvider requestContextProvider;
 
 
 	/**
@@ -128,13 +133,12 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	@Override
 	public void setRelation(T source, J targetId, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
-		ResourceRepositoryAdapter<T, I> sourceAdapter = sourceEntry.getResourceRepository();
+		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			field.getIdAccessor().setValue(source, targetId);
-		}
-		else {
+		} else {
 			RegistryEntry targetEntry = getTargetEntry(field);
 			D target = getTarget(targetEntry, targetId);
 			field.getAccessor().setValue(source, target);
@@ -145,13 +149,12 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	@Override
 	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
-		ResourceRepositoryAdapter<T, I> sourceAdapter = sourceEntry.getResourceRepository();
+		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			field.getIdAccessor().setValue(source, targetIds);
-		}
-		else {
+		} else {
 			RegistryEntry targetEntry = getTargetEntry(field);
 			Iterable<D> targets = getTargets(targetEntry, targetIds);
 			field.getAccessor().setValue(source, targets);
@@ -162,14 +165,13 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	@Override
 	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
-		ResourceRepositoryAdapter<T, I> sourceAdapter = sourceEntry.getResourceRepository();
+		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			Collection currentIds = (Collection) field.getIdAccessor().getValue(source);
 			currentIds.addAll((Collection) targetIds);
-		}
-		else {
+		} else {
 			RegistryEntry targetEntry = getTargetEntry(field);
 			Iterable<D> targets = getTargets(targetEntry, targetIds);
 			@SuppressWarnings("unchecked")
@@ -184,14 +186,13 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	@Override
 	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
-		ResourceRepositoryAdapter<T, I> sourceAdapter = sourceEntry.getResourceRepository();
+		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			Collection currentIds = (Collection) field.getIdAccessor().getValue(source);
 			currentIds.removeAll((Collection) targetIds);
-		}
-		else {
+		} else {
 			RegistryEntry targetEntry = getTargetEntry(field);
 			Iterable<D> targets = getTargets(targetEntry, targetIds);
 			@SuppressWarnings("unchecked")
@@ -207,14 +208,15 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	protected QueryAdapter getSaveQueryAdapter(String fieldName) {
 		QuerySpec querySpec = newSourceQuerySpec();
 		querySpec.includeRelation(Arrays.asList(fieldName));
-		return new QuerySpecAdapter(querySpec, resourceRegistry);
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 	}
 
 	private QuerySpec newSourceQuerySpec() {
 		return new QuerySpec(sourceResourceClass, sourceResourceType);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private Collection<D> getOrCreateCollection(Object source, String fieldName) {
 		Object property = PropertyUtils.getProperty(source, fieldName);
 		if (property == null) {
@@ -244,9 +246,10 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		if (targetId == null) {
 			return null;
 		}
-		ResourceRepositoryAdapter<D, J> targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
-		D target = (D) targetAdapter.findOne(targetId, queryAdapter).getEntity();
+		ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
+		D target = (D) targetAdapter.findOne(targetId, queryAdapter).get().getEntity();
 		if (target == null) {
 			throw new IllegalStateException(targetId + " not found");
 		}
@@ -255,9 +258,10 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 	@SuppressWarnings("unchecked")
 	protected Iterable<D> getTargets(RegistryEntry entry, Iterable<J> targetIds) {
-		ResourceRepositoryAdapter<D, J> targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
-		return (Iterable<D>) targetAdapter.findAll(targetIds, queryAdapter).getEntity();
+		ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
+		return (Iterable<D>) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -275,8 +279,9 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 						.EQ, sourceIds));
 		idQuerySpec.includeRelation(Arrays.asList(oppositeName));
 
-		ResourceRepositoryAdapter<D, J> targetAdapter = targetEntry.getResourceRepository();
-		JsonApiResponse response = targetAdapter.findAll(new QuerySpecAdapter(idQuerySpec, resourceRegistry));
+		ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
+		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		JsonApiResponse response = targetAdapter.findAll(new QuerySpecAdapter(idQuerySpec, resourceRegistry, queryContext)).get();
 		List<D> results = (List<D>) response.getEntity();
 
 		MultivaluedMap<I, D> bulkResult = new MultivaluedMap<I, D>() {
@@ -300,7 +305,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 	@SuppressWarnings("unchecked")
 	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, String oppositeName,
-			ResourceInformation sourceInformation) {
+							  ResourceInformation sourceInformation) {
 		Object property = PropertyUtils.getProperty(result, oppositeName);
 		if (property == null) {
 			throw new IllegalStateException("field " + oppositeName + " is null for " + result
@@ -318,8 +323,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 					bulkResult.add(sourceId, result);
 				}
 			}
-		}
-		else {
+		} else {
 			T source = (T) property;
 			I sourceId = (I) sourceInformation.getId(source);
 			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains
@@ -371,5 +375,10 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	@Override
 	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
+	}
+
+	@Override
+	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+		this.requestContextProvider = requestContextProvider;
 	}
 }

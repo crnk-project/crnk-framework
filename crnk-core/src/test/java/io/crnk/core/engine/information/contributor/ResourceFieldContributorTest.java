@@ -1,24 +1,20 @@
 package io.crnk.core.engine.information.contributor;
 
 import com.google.common.collect.Sets;
-
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
@@ -31,29 +27,22 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.repository.TaskToProjectRelationshipRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ResourceFieldContributorTest {
 
-	private CrnkBoot boot;
+	private CoreTestContainer container;
 
 	private ContributorRelationshipRepository contributedRepository;
 
 	@Before
 	public void setup() {
-		MockRepositoryUtil.clear();
 		contributedRepository = Mockito.spy(new ContributorRelationshipRepository());
 
 		SimpleModule testModule = new SimpleModule("test");
@@ -62,10 +51,10 @@ public class ResourceFieldContributorTest {
 		testModule.addRepository(new ProjectToTaskRepository());
 		testModule.addRepository(contributedRepository);
 
-		boot = new CrnkBoot();
-		boot.setServiceDiscovery(new TestServiceDiscovery());
-		boot.addModule(testModule);
-		boot.boot();
+		container = new CoreTestContainer();
+		container.getBoot().setServiceDiscovery(new TestServiceDiscovery());
+		container.addModule(testModule);
+		container.boot();
 	}
 
 	@After
@@ -75,8 +64,7 @@ public class ResourceFieldContributorTest {
 
 	@Test
 	public void checkFieldAddedToResourceInformation() {
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
+		RegistryEntry entry = container.getEntry(Task.class);
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		ResourceField contributedField = resourceInformation.findFieldByName("contributedProject");
 		Assert.assertNotNull(contributedField);
@@ -92,11 +80,7 @@ public class ResourceFieldContributorTest {
 		task.setName("someTask");
 		repo.save(task);
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
-
-		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
-		HttpRequestContext request = Mockito.mock(HttpRequestContext.class);
-		httpRequestContextProvider.onRequestStarted(request);
+		HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
 
 		Map<String, Set<String>> parameters = new HashMap<>();
 		parameters.put("include", Sets.newHashSet("contributedProject"));

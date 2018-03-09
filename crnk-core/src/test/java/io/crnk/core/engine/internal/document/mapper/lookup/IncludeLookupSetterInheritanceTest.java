@@ -38,17 +38,17 @@ public class IncludeLookupSetterInheritanceTest extends AbstractDocumentMapperTe
 		super.setup();
 
 		// get repositories
-		ResourceRepositoryAdapter taskRepository = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
+		ResourceRepositoryAdapter taskRepository = container.getEntry(Task.class).getResourceRepository(null);
 		RelationshipRepositoryAdapter relRepositoryTaskToProject =
-				resourceRegistry.getEntry(Task.class).getRelationshipRepository("projects", null);
-		ResourceRepositoryAdapter projectRepository = resourceRegistry.getEntry(Project.class).getResourceRepository(null);
+				container.getEntry(Task.class).getRelationshipRepository("projects", null);
+		ResourceRepositoryAdapter projectRepository = container.getEntry(Project.class).getResourceRepository(null);
 
 		// setup test data
-		ResourceInformation taskInfo = resourceRegistry.getEntry(Task.class).getResourceInformation();
+		ResourceInformation taskInfo = container.getEntry(Task.class).getResourceInformation();
 		ResourceField includedProjectsField = taskInfo.findRelationshipFieldByName("includedProjects");
 
-		QueryAdapter emptyProjectQuery = new QuerySpecAdapter(new QuerySpec(Project.class), resourceRegistry);
-		QueryAdapter emptyTaskQuery = new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry);
+		QueryAdapter emptyProjectQuery = container.toQueryAdapter(new QuerySpec(Project.class));
+		QueryAdapter emptyTaskQuery = container.toQueryAdapter(new QuerySpec(Task.class));
 
 		Project project1 = new Project();
 		project1.setId(3L);
@@ -74,7 +74,7 @@ public class IncludeLookupSetterInheritanceTest extends AbstractDocumentMapperTe
 		Task task = new Task();
 		task.setId(1L);
 
-		Document document = mapper.toDocument(toResponse(task), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(task), toAdapter(querySpec), mappingConfig).get();
 		Resource taskResource = document.getSingleData().get();
 
 		Relationship relationship = taskResource.getRelationships().get("includedProjects");

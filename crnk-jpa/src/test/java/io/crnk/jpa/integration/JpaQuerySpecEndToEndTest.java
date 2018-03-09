@@ -232,7 +232,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		testRepo.create(test);
 
 		RelationshipRepositoryV2<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		RelatedEntity related =
 				relRepo.findOneTarget(test.getId(), TestEntity.ATTR_oneRelatedValue, new QuerySpec(RelatedEntity.class));
@@ -244,7 +244,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		TestEntity test = addTestWithOneRelation();
 
 		RelationshipRepositoryV2<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		RelatedEntity related =
 				relRepo.findOneTarget(test.getId(), TestEntity.ATTR_oneRelatedValue, new QuerySpec(RelatedEntity.class));
@@ -286,7 +286,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 		// query relation
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		if (!onSave) {
 			relRepo.addRelations(test, Arrays.asList(1L, 2L), TestEntity.ATTR_manyRelatedValues);
@@ -297,7 +297,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 		// query relation in opposite direction
 		RelationshipRepositoryV2<RelatedEntity, Serializable, TestEntity, Serializable> backRelRepo = client
-				.getQuerySpecRepository(RelatedEntity.class, TestEntity.class);
+				.getRepositoryForType(RelatedEntity.class, TestEntity.class);
 
 		test = backRelRepo.findOneTarget(2L, RelatedEntity.ATTR_testEntity, new QuerySpec(TestEntity.class));
 		Assert.assertNotNull(test);
@@ -393,7 +393,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 		ResourceRepositoryStub<RelatedEntity, Long> relatedRepo = client.getQueryParamsRepository(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		for (long i = 0; i < 5; i++) {
 			RelatedEntity related1 = new RelatedEntity();
@@ -548,12 +548,12 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 	private TestEntity addTestWithManyRelations() {
 		ResourceRepositoryV2<OtherRelatedEntity, Long> otherRepo = client
-				.getQuerySpecRepository(OtherRelatedEntity.class);
+				.getRepositoryForType(OtherRelatedEntity.class);
 		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 		RelationshipRepositoryV2<RelatedEntity, Long, OtherRelatedEntity, Long> otherRelRepo = client
-				.getQuerySpecRepository(RelatedEntity.class, OtherRelatedEntity.class);
+				.getRepositoryForType(RelatedEntity.class, OtherRelatedEntity.class);
 
 		TestEntity test = new TestEntity();
 		test.setId(2L);

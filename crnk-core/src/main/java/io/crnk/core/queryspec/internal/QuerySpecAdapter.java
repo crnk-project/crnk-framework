@@ -3,6 +3,7 @@ package io.crnk.core.queryspec.internal;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.IncludeFieldSpec;
@@ -16,12 +17,11 @@ import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class QuerySpecAdapter implements QueryAdapter {
+
+	private final QueryContext queryContext;
 
 	private QuerySpec querySpec;
 
@@ -29,9 +29,10 @@ public class QuerySpecAdapter implements QueryAdapter {
 
 	private boolean compactMode;
 
-	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry) {
+	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry, QueryContext queryContext) {
 		this.querySpec = querySpec;
 		this.resourceRegistry = resourceRegistry;
+		this.queryContext = Objects.requireNonNull(queryContext);
 	}
 
 	public QuerySpec getQuerySpec() {
@@ -41,9 +42,11 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public TypedParams<IncludedRelationsParams> getIncludedRelations() {
 		Map<String, IncludedRelationsParams> params = new HashMap<>();
-		addRelations(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
-			addRelations(params, relatedSpec);
+		if (querySpec != null) {
+			addRelations(params, querySpec);
+			for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
+				addRelations(params, relatedSpec);
+			}
 		}
 		return new TypedParams<>(params);
 	}
@@ -70,9 +73,11 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public TypedParams<IncludedFieldsParams> getIncludedFields() {
 		Map<String, IncludedFieldsParams> params = new HashMap<>();
-		addFields(params, querySpec);
-		for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
-			addFields(params, relatedSpec);
+		if (querySpec != null) {
+			addFields(params, querySpec);
+			for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
+				addFields(params, relatedSpec);
+			}
 		}
 		return new TypedParams<>(params);
 	}
@@ -90,6 +95,11 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public ResourceInformation getResourceInformation() {
 		return resourceRegistry.getEntry(getResourceType(querySpec)).getResourceInformation();
+	}
+
+	@Override
+	public QueryContext getQueryContext() {
+		return queryContext;
 	}
 
 	@Override
@@ -114,7 +124,7 @@ public class QuerySpecAdapter implements QueryAdapter {
 
 	@Override
 	public QueryAdapter duplicate() {
-		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec.duplicate(), resourceRegistry);
+		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec != null ? querySpec.duplicate() : null, resourceRegistry, queryContext);
 		adapter.setCompactMode(compactMode);
 		return adapter;
 	}
@@ -145,7 +155,27 @@ public class QuerySpecAdapter implements QueryAdapter {
 		return querySpec.getPagingSpec();
 	}
 
+	@Override
+	public String getBaseUrl() {
+		return null;
+	}
+
+	@Override
+	public void setBaseUrl(String baseUrl) {
+
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return querySpec == null;
+	}
+
 	public void setCompactMode(boolean compactMode) {
 		this.compactMode = compactMode;
+	}
+
+	@Override
+	public String toString() {
+		return querySpec.toString();
 	}
 }

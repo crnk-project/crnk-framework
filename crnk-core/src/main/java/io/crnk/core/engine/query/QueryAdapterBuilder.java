@@ -10,6 +10,6 @@ import java.util.Set;
  */
 public interface QueryAdapterBuilder {
 
-	QueryAdapter build(ResourceInformation resourceInformation, Map<String, Set<String>> parameters);
+	QueryAdapter build(ResourceInformation resourceInformation,  Map<String, Set<String>> parameters, QueryContext queryContext);
 
 }

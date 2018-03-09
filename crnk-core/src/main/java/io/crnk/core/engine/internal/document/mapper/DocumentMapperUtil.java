@@ -13,12 +13,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.links.LinksInformation;
@@ -31,8 +33,12 @@ import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentMapperUtil {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMapper.class);
 
 	private ResourceRegistry resourceRegistry;
 
@@ -41,7 +47,7 @@ public class DocumentMapperUtil {
 	private static SerializerUtil serializerUtil;
 
 	public DocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-			PropertiesProvider propertiesProvider) {
+							  PropertiesProvider propertiesProvider) {
 		this.resourceRegistry = resourceRegistry;
 		this.objectMapper = objectMapper;
 
@@ -51,21 +57,20 @@ public class DocumentMapperUtil {
 	}
 
 	protected static List<ResourceField> getRequestedFields(ResourceInformation resourceInformation, QueryAdapter queryAdapter,
-			List<ResourceField> fields, boolean relation) {
+															List<ResourceField> fields, boolean relation) {
 		TypedParams<IncludedFieldsParams> includedFieldsSet = queryAdapter != null ? queryAdapter.getIncludedFields() : null;
 		IncludedFieldsParams includedFields =
 				includedFieldsSet != null ? includedFieldsSet.getParams().get(resourceInformation.getResourceType()) : null;
 
 		if (noResourceIncludedFieldsSpecified(includedFields)) {
 			return fields;
-		}
-		else {
+		} else {
 			return computeRequestedFields(includedFields, relation, queryAdapter, resourceInformation, fields);
 		}
 	}
 
 	private static List<ResourceField> computeRequestedFields(IncludedFieldsParams includedFields, boolean relation,
-			QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
+															  QueryAdapter queryAdapter, ResourceInformation resourceInformation, List<ResourceField> fields) {
 		Set<String> includedFieldNames = includedFields.getParams();
 
 		if (relation) {
@@ -95,26 +100,24 @@ public class DocumentMapperUtil {
 		return typeIncludedFields == null || typeIncludedFields.getParams().isEmpty();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> List<T> toList(Object entity) {
 		if (entity instanceof List) {
 			return (List) entity;
-		}
-		else if (entity instanceof Iterable) {
+		} else if (entity instanceof Iterable) {
 			ArrayList<T> result = new ArrayList<>();
 			for (Object element : (Iterable) entity) {
 				result.add((T) element);
 			}
 			return result;
-		}
-		else {
+		} else {
 			return Collections.singletonList((T) entity);
 		}
 	}
 
 	public String getRelationshipLink(ResourceInformation resourceInformation, Object entity, ResourceField field,
-			boolean related) {
-		String resourceUrl = resourceRegistry.getResourceUrl(resourceInformation);
+									  boolean related, QueryContext queryContext) {
+		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 		String resourceId = getIdString(entity, resourceInformation);
 		return resourceUrl + "/" + resourceId + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field
 				.getJsonName();
@@ -145,6 +148,7 @@ public class DocumentMapperUtil {
 
 	public void setLinks(LinksContainer container, LinksInformation linksInformation, QueryAdapter queryAdapter) {
 		if (linksInformation != null) {
+			LOGGER.debug("adding links information {}", linksInformation);
 			container.setLinks((ObjectNode) objectMapper.valueToTree(linksInformation));
 		}
 		if (queryAdapter != null && queryAdapter.getCompactMode()) {
@@ -161,6 +165,7 @@ public class DocumentMapperUtil {
 
 	public void setMeta(MetaContainer container, MetaInformation metaInformation) {
 		if (metaInformation != null) {
+			LOGGER.debug("adding meta information {}", metaInformation);
 			container.setMeta((ObjectNode) objectMapper.valueToTree(metaInformation));
 		}
 	}
@@ -173,8 +178,8 @@ public class DocumentMapperUtil {
 		return resourceRegistry.getEntry(resourceType).getResourceInformation();
 	}
 
-	public String getSelfUrl(ResourceInformation resourceInformation, Object entity) {
-		String resourceUrl = resourceRegistry.getResourceUrl(resourceInformation);
+	public String getSelfUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object entity) {
+		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 		return resourceUrl + "/" + getIdString(entity, resourceInformation);
 	}
 

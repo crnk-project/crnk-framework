@@ -34,8 +34,9 @@ public class ServletRequestContextTest {
 	@Test
 	public void testGetters() {
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
+		Assert.assertEquals(request, context.getServletRequest());
 		Assert.assertEquals(request, context.getRequest());
-		Assert.assertEquals(response, context.getResponse());
+		Assert.assertEquals(response, context.getServletResponse());
 		Assert.assertEquals(servletContext, context.getServletContext());
 	}
 

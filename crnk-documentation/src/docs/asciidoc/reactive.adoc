@@ -1,0 +1,76 @@
+
+anchor:reactive[]
+
+# Reactive Programming
+
+WARNING: Initial support is available, but still considered (very) experimental. The implementation is expected to mature over the coming weeks. Breaking changes
+  to the reactive API might be possible. The traditional API is left unchanged.
+
+The `ReactiveModule` of `crnk-reactive` bring support for reactive programming to Crnk.
+It allows to build more responsive, elastic, resilient, message-driven applications (see
+https://www.reactivemanifesto.org/). https://projectreactor.io/ was chosen as library.
+
+IMPORTANT: Traditional and reactive-style programming are considered being equally important and both have their respective advantages and disadvantages. The reactive API
+is by no means going to replace the traditional one!
+
+`crnk-reactive` brings along three new interfaces that act as reactive counter-parts of the traditional resource and relationship interfaces:
+
+- `ReactiveResourceRepository`
+- `ReactiveOneRelationshipRepository`
+- `ReactiveManyRelationshipRepository`
+
+The differences to the traditional ones are:
+
+- Single and multi-valued relationships are served by different interfaces (minor cleanup, usually one or the other is necessary).
+- `ResourceField` instead of a simple `String` give more detailed information about the accessed relationship.
+- Most importantly, `reactor.core.publisher.Mono` is used as return type to enable reactive programming.
+
+NOTE that:
+
+- A potential future V3 version of the traditional interfaces will align the first two differences.
+- `Mono` rather than `Flux` is used for list return types since meta and links information must be returned as well, not just a sequence of resources.
+  For large number of resources, the JSON API pagination mechanisms can be applied.
+- Internally the traditional and reactive repositories are served by the same Crnk engine and share virtually all of the code base.
+  The difference lies in the used `ResultFactory` implementation. `ImmediateResultFactory` is used by the traditional API. `MonoResultFactory` by
+  reactive setups.
+
+## Servlet Example
+
+The subsequent example shows as simple reactive resource repository holding its data in-memory:
+
+[source]
+.InMemoryReactiveResourceRepository.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/reactive/InMemoryReactiveResourceRepository.java[]
+----
+
+The following snipped shows how to setup the `ReactiveModule` together with `AsyncCrnkServlet` in Spring:
+
+[source]
+.ReactiveServletTestApplication.java
+----
+include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/resource/ReactiveServletTestApplication.java[tags=reactive]
+----
+
+Ready-to-use integrations into Spring, Vert.x and Ratpack are planned for the near future.
+
+## Interacting with traditional repositories
+
+Reactive and traditional repositories work well together side-by-side and can also be used in a mixed setting, for example when requesting the inclusion
+of related resources. Since the traditional repositories will block the caller, there are two mechanisms in place to remedy the issue:
+
+1. A repository can be annotated with `ImmediateRepository`. In this case the traditional repository is marked as being non-blocking and can be safely invoked.
+
+2. `ReactiveModule.setWorkerScheduler(...)` allows to set the scheduler to use to invoke traditional repositories. By default `Schedulers.elastic` is used where
+   worker threads are spanned as necessary.
+
+## Roadmap and Limitations
+
+- `DocumentFilter`, `RepositoryFilter` cannot be used in a reactive setup. Reactive counter-party will be available in the near future.
+- `HttpRequestContextProvider.getRequestContext` can only be used in a non-reactive setting or while the reactive request is being setup.
+  `HttpRequestContextProvider.getRequestContextResult` must be used instead that makes use of the subscriber context of Reactor.
+- `crnk-jpa` has not yet been ported yet. JDBC and JPA are blocking and require a transaction.
+- Spring, Vert.x and Ratpack integrations are target for the near future.
+- More testing will be necessary.
+
+Contributions in any area welcomed.

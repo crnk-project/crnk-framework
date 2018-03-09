@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Task;
@@ -181,12 +182,15 @@ public class OffsetLimitPagingBehaviorTest {
 
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
+		QueryContext queryContext = new QueryContext();
+		queryContext.setBaseUrl("http://some.org");
+
 		QuerySpec spec = new QuerySpec(Task.class);
-		QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(spec, resourceRegistry);
+		QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(spec, resourceRegistry, queryContext);
 		querySpecAdapter.setPagingSpec(pagingSpec);
 
 		PagingSpecUrlBuilder urlBuilder = mock(PagingSpecUrlBuilder.class);
-		when(urlBuilder.build(any(QuerySpecAdapter.class))).thenReturn("http://some.org");
+		when(urlBuilder.build(any(QuerySpecAdapter.class))).thenReturn(queryContext.getBaseUrl());
 
 		DefaultPagedMetaInformation pagedMetaInformation = new DefaultPagedMetaInformation();
 		pagedMetaInformation.setTotalResourceCount(30L);

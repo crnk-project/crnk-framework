@@ -23,7 +23,7 @@ public class MetaResourceRepositoryTest extends AbstractMetaTest {
 		ResourceMetaProvider provider = new ResourceMetaProvider();
 
 		lookup = new MetaLookup();
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.addProvider(provider);
 		lookup.initialize();
 
@@ -33,6 +33,7 @@ public class MetaResourceRepositoryTest extends AbstractMetaTest {
 				return lookup;
 			}
 		}, MetaElement.class);
+		repo.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 	}
 
 	@Test(expected = ResourceNotFoundException.class)

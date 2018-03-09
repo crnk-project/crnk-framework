@@ -3,7 +3,7 @@ package io.crnk.client;
 import java.util.concurrent.TimeUnit;
 
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.client.module.ClientTestModule;
+import io.crnk.test.mock.ClientTestModule;
 
 /**
  * Class creates a CrnkClient to serialize links as JSON objects.<br />

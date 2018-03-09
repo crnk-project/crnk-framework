@@ -1,15 +1,17 @@
 package io.crnk.home;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.TestModule;
-import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,9 +45,13 @@ public class JsonHomeFormatTest {
 		testHomeJsonReturned(false);
 	}
 
+	@Test
+	public void testWithAnyRequest() throws IOException {
+		testHomeJsonReturned(false);
+	}
+
 	private void testHomeJsonReturned(boolean anyRequest) throws IOException {
-		ArgumentCaptor<Integer> statusCaptor = ArgumentCaptor.forClass(Integer.class);
-		ArgumentCaptor<byte[]> responseCaptor = ArgumentCaptor.forClass(byte[].class);
+		ArgumentCaptor<HttpResponse> responseCaptor = ArgumentCaptor.forClass(HttpResponse.class);
 
 		HttpRequestContextBase requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 
@@ -54,18 +60,17 @@ public class JsonHomeFormatTest {
 		Mockito.when(requestContextBase.getRequestHeader("Accept"))
 				.thenReturn(anyRequest ? "*" : HomeModule.JSON_HOME_CONTENT_TYPE);
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(statusCaptor.capture(), responseCaptor.capture());
+		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(responseCaptor.capture());
 		String expectedContentType = anyRequest ? HomeModule.JSON_CONTENT_TYPE : HomeModule.JSON_HOME_CONTENT_TYPE;
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponseHeader("Content-Type", expectedContentType);
-		Assert.assertEquals(200, (int) statusCaptor.getValue());
+		HttpResponse response = responseCaptor.getValue();
+		Assert.assertEquals(expectedContentType, response.getContentType());
+		Assert.assertEquals(200, response.getStatusCode());
 
-		String json = new String(responseCaptor.getValue());
-		JsonNode response = boot.getObjectMapper().reader().readTree(json);
-
-		JsonNode resourcesNode = response.get("resources");
+		JsonNode json = boot.getObjectMapper().reader().readTree(new String(response.getBody()));
+		JsonNode resourcesNode = json.get("resources");
 		JsonNode usersNode = resourcesNode.get("tag:tasks");
 		Assert.assertEquals("tasks", usersNode.get("href").asText());
 	}

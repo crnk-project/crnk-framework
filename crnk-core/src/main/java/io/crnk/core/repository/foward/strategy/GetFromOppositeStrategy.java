@@ -13,6 +13,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -35,7 +36,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
+	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 
@@ -52,8 +53,8 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 						FilterOperator.EQ, sourceIds));
 		idQuerySpec.includeRelation(Arrays.asList(oppositeField.getUnderlyingName()));
 
-		ResourceRepositoryAdapter<D, J> targetAdapter = targetEntry.getResourceRepository();
-		JsonApiResponse response = targetAdapter.findAll(context.createQueryAdapter(idQuerySpec));
+		ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
+		JsonApiResponse response = targetAdapter.findAll(context.createQueryAdapter(idQuerySpec, queryContext)).get();
 		Collection<D> results = (Collection<D>) response.getEntity();
 
 		MultivaluedMap<I, D> bulkResult = new MultivaluedMap<I, D>() {
@@ -96,8 +97,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 					bulkResult.add(sourceId, result);
 				}
 			}
-		}
-		else {
+		} else {
 			T source = (T) property;
 			I sourceId = (I) sourceInformation.getId(source);
 			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains

@@ -1,19 +1,18 @@
 package io.crnk.core.mock.repository;
 
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.repository.annotations.*;
+import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-@JsonApiRelationshipRepository(source = User.class, target = Project.class)
-public class UserToProjectRepository {
+public class UserToProjectRepository implements RelationshipRepositoryV2<User, Long, Project, Long> {
 
 	private static final ConcurrentMap<Relation<User>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -21,7 +20,17 @@ public class UserToProjectRepository {
 		THREAD_LOCAL_REPOSITORY.clear();
 	}
 
-	@JsonApiSetRelation
+	@Override
+	public Class<User> getSourceResourceClass() {
+		return User.class;
+	}
+
+	@Override
+	public Class<Project> getTargetResourceClass() {
+		return Project.class;
+	}
+
+	@Override
 	public void setRelation(User source, Long targetId, String fieldName) {
 		removeRelations(fieldName);
 		if (targetId != null) {
@@ -29,7 +38,7 @@ public class UserToProjectRepository {
 		}
 	}
 
-	@JsonApiSetRelations
+	@Override
 	public void setRelations(User source, Iterable<Long> targetIds, String fieldName) {
 		removeRelations(fieldName);
 		if (targetIds != null) {
@@ -39,14 +48,14 @@ public class UserToProjectRepository {
 		}
 	}
 
-	@JsonApiAddRelations
+	@Override
 	public void addRelations(User source, Iterable<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			THREAD_LOCAL_REPOSITORY.put(new Relation<>(source, targetId, fieldName), 0);
 		}
 	}
 
-	@JsonApiRemoveRelations
+	@Override
 	public void removeRelations(User source, Iterable<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			Iterator<Relation<User>> iterator = THREAD_LOCAL_REPOSITORY.keySet().iterator();
@@ -69,7 +78,7 @@ public class UserToProjectRepository {
 		}
 	}
 
-	@JsonApiFindOneTarget
+	@Override
 	public Project findOneTarget(Long sourceId, String fieldName, QuerySpec querySpec) {
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
 			if (relation.getSource().getId().equals(sourceId) &&
@@ -82,9 +91,9 @@ public class UserToProjectRepository {
 		return null;
 	}
 
-	@JsonApiFindManyTargets
-	public Iterable<Project> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
-		List<Project> projects = new LinkedList<>();
+	@Override
+	public ResourceList<Project> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
+		ResourceList<Project> projects = new DefaultResourceList<>();
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
 			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Project project = new Project();

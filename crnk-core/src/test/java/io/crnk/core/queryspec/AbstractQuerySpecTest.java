@@ -1,21 +1,16 @@
 package io.crnk.core.queryspec;
 
-import com.google.common.collect.ImmutableList;
-
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
-import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
@@ -26,14 +21,9 @@ import io.crnk.core.queryspec.repository.CustomOffsetLimitPagingBehavior;
 import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
-
 import org.junit.Before;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractQuerySpecTest {
 
@@ -45,21 +35,20 @@ public abstract class AbstractQuerySpecTest {
 
 	protected ModuleRegistry moduleRegistry;
 
+	protected CoreTestContainer container;
+
 	protected static void addParams(Map<String, Set<String>> params, String key, String value) {
 		params.put(key, new HashSet<>(Arrays.asList(value)));
 	}
 
 	@Before
 	public void setup() {
-		ResourceInformationProvider resourceInformationProvider = new DefaultResourceInformationProvider(new NullPropertiesProvider(),
-				ImmutableList.of(new OffsetLimitPagingBehavior(), new CustomOffsetLimitPagingBehavior()),
-				new DefaultResourceFieldInformationProvider(), new JacksonResourceFieldInformationProvider()) {
-
+		container = new CoreTestContainer();
+		ResourceFieldContributor contributor = new ResourceFieldContributor() {
 			@Override
-			protected List<ResourceField> getResourceFields(Class<?> resourceClass) {
-				List<ResourceField> fields = super.getResourceFields(resourceClass);
-
-				if (resourceClass == Task.class) {
+			public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
+				List<ResourceField> fields = new ArrayList<>();
+				if (context.getResourceInformation().getResourceClass() == Task.class) {
 					// add additional field that is not defined on the class
 					String name = "computedAttribute";
 					ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
@@ -82,23 +71,23 @@ public abstract class AbstractQuerySpecTest {
 						}
 					});
 					fields.add(fieldBuilder.build());
+
 				}
 				return fields;
 			}
 		};
+		SimpleModule module = new SimpleModule("test");
+		module.addResourceFieldContributor(contributor);
+		module.addPagingBehavior(new OffsetLimitPagingBehavior());
+		module.addPagingBehavior(new CustomOffsetLimitPagingBehavior());
 
-		SimpleModule testModule = new SimpleModule("test");
-		testModule.addResourceInformationProvider(resourceInformationProvider);
+		container.setPackage(getResourceSearchPackage());
+		container.addModule(module);
+		container.boot();
 
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
-		boot.addModule(testModule);
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(getResourceSearchPackage()));
-		boot.boot();
-
-		moduleRegistry = boot.getModuleRegistry();
+		moduleRegistry = container.getModuleRegistry();
 		querySpecConverter = new DefaultQuerySpecConverter(moduleRegistry);
-		resourceRegistry = boot.getResourceRegistry();
+		resourceRegistry = container.getResourceRegistry();
 	}
 
 	public String getResourceSearchPackage() {
@@ -108,7 +97,6 @@ public abstract class AbstractQuerySpecTest {
 	protected QuerySpec querySpec(Long offset, Long limit) {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
-
 		return querySpec;
 	}
 

@@ -3,7 +3,7 @@ package io.crnk.client.http;
 import java.util.concurrent.TimeUnit;
 
 import io.crnk.client.CrnkClient;
-import io.crnk.client.QuerySpecClientTest;
+import io.crnk.client.suite.RepositoryAccessClientTest;
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.client.http.apache.HttpClientAdapterListener;
 import io.crnk.client.http.apache.HttpClientAdapterListenerBase;
@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-public class ApacheHttpClientTest extends QuerySpecClientTest {
+public class ApacheHttpClientTest extends RepositoryAccessClientTest {
 
 	private HttpClientAdapterListener listener;
 

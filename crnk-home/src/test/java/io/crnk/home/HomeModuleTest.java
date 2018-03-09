@@ -2,7 +2,7 @@ package io.crnk.home;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.test.mock.TestModule;
@@ -49,7 +49,7 @@ public class HomeModuleTest {
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
 		// execute
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
 	}
@@ -62,7 +62,7 @@ public class HomeModuleTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("application/doesNotExists");
 
-		HttpRequestProcessorImpl requestDispatcher = boot.getRequestDispatcher();
+		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
 		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
 	}

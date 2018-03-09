@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -9,6 +10,7 @@ import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.Assert;
@@ -31,14 +33,13 @@ public class PathBuilderTest {
 
 	@Before
 	public void prepare() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
 
-		pathBuilder = new PathBuilder(boot.getResourceRegistry());
+		pathBuilder = new PathBuilder(container.getResourceRegistry());
 
-		RegistryEntry entry = boot.getResourceRegistry().findEntry(Task.class);
+		RegistryEntry entry = container.getEntry(Task.class);
 		ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 		repositoryInformation.getActions().put("someRepositoryAction", Mockito.mock(RepositoryAction.class));
 		repositoryInformation.getActions().put("someResourceAction", Mockito.mock(RepositoryAction.class));

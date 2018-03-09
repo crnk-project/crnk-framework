@@ -6,6 +6,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -19,14 +20,16 @@ public class ServletModuleTest {
 
 	@Test
 	public void testName() {
-		HttpRequestContextProvider provider = new HttpRequestContextProvider();
+		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
 		ServletModule module = new ServletModule(provider);
 		Assert.assertEquals("servlet", module.getModuleName());
 	}
 
 	@Test
 	public void testSecurityProviderInstalled() {
-		HttpRequestContextProvider provider = new HttpRequestContextProvider();
+		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
+		HttpRequestContextProvider provider = new HttpRequestContextProvider(() -> resultFactory);
 		ServletModule module = new ServletModule(provider);
 
 		CrnkBoot boot = new CrnkBoot();

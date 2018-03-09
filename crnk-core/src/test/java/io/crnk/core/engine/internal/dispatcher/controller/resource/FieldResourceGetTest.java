@@ -1,5 +1,13 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -12,7 +20,6 @@ import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
@@ -21,20 +28,16 @@ import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 public class FieldResourceGetTest extends BaseControllerTest {
+
 	private static final String REQUEST_TYPE = "GET";
 
 	@Test
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
-		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -47,8 +50,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onRelationshipRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
-		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -61,8 +64,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -76,7 +79,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/project");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
@@ -90,7 +94,8 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		// WHEN
 		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
@@ -108,8 +113,10 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		ResourceRepositoryAdapter projectRepo = resourceRegistry.getEntry(Project.class).getResourceRepository(null);
 		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
 
-		RelationshipRepositoryAdapter relRepositoryUserToProject = resourceRegistry.getEntry(User.class).getRelationshipRepository("assignedProjects", null);
-		RelationshipRepositoryAdapter relRepositoryProjectToTask = resourceRegistry.getEntry(Project.class).getRelationshipRepository("tasks", null);
+		RelationshipRepositoryAdapter relRepositoryUserToProject =
+				resourceRegistry.getEntry(User.class).getRelationshipRepository("assignedProjects", null);
+		RelationshipRepositoryAdapter relRepositoryProjectToTask =
+				resourceRegistry.getEntry(Project.class).getRelationshipRepository("tasks", null);
 
 		ResourceInformation userInfo = resourceRegistry.getEntry(User.class).getResourceInformation();
 		ResourceInformation projectInfo = resourceRegistry.getEntry(Project.class).getResourceInformation();
@@ -126,15 +133,17 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		Task task = new Task();
 		task.setId(3L);
 		taskRepo.create(task, emptyTaskQuery);
-		relRepositoryUserToProject.setRelations(user, Collections.singletonList(project.getId()), assignedProjectsField, emptyProjectQuery);
+		relRepositoryUserToProject
+				.setRelations(user, Collections.singletonList(project.getId()), assignedProjectsField, emptyProjectQuery);
 		relRepositoryProjectToTask.setRelation(project, task.getId(), includedTaskField, emptyTaskQuery);
 
 		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
 		addParams(params, "include[projects]", "includedTask");
 		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
-		QueryAdapter queryAdapter = new QueryParamsAdapter(projectInfo, queryParams, moduleRegistry);
+		QueryAdapter queryAdapter = container.toQueryAdapter(Project.class, queryParams);
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet(resourceRegistry, typeParser, documentMapper);
+		FieldResourceGet sut = new FieldResourceGet();
+		sut.init(controllerContext);
 
 		Response response = sut.handle(jsonPath, queryAdapter, null, null);
 

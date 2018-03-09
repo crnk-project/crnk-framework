@@ -33,7 +33,7 @@ dependencies {
 	testCompile project(':crnk-test')
 	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
 	testCompile 'javax.el:javax.el-api:2.2.4'
-	testCompile 'org.glassfish.web:javax.el:2.2.4'
+	testCompile 'org.glassfish.web:javax.el:2.2.6'
 
 	testCompile 'org.springframework.boot:spring-boot-starter-data-jpa:1.5.8.RELEASE'
 	testCompile 'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'

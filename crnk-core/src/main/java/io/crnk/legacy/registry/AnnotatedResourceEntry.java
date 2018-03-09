@@ -6,6 +6,7 @@ import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
+@Deprecated
 public class AnnotatedResourceEntry implements ResourceEntry {
 
 	private final RepositoryInstanceBuilder repositoryInstanceBuilder;

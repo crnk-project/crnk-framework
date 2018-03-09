@@ -41,7 +41,7 @@ public abstract class AbstractIncludeBehaviorTest extends AbstractDocumentMapper
 
 		super.setup();
 
-		ResourceRepositoryAdapter hierarchicalTaskRepository = resourceRegistry.findEntry(HierarchicalTask.class).getResourceRepository(null);
+		ResourceRepositoryAdapter hierarchicalTaskRepository = container.getEntry(HierarchicalTask.class).getResourceRepository(null);
 
 		h = new HierarchicalTask();
 		h.setId(1L);
@@ -67,7 +67,7 @@ public abstract class AbstractIncludeBehaviorTest extends AbstractDocumentMapper
 		h1.setChildren(Arrays.asList(h11));
 		h11.setChildren(new ArrayList<HierarchicalTask>());
 
-		QueryAdapter emptyQueryAdapter = new QuerySpecAdapter(new QuerySpec(HierarchicalTask.class), resourceRegistry);
+		QueryAdapter emptyQueryAdapter = container.toQueryAdapter(new QuerySpec(HierarchicalTask.class));
 		hierarchicalTaskRepository.create(h, emptyQueryAdapter);
 		hierarchicalTaskRepository.create(h0, emptyQueryAdapter);
 		hierarchicalTaskRepository.create(h1, emptyQueryAdapter);

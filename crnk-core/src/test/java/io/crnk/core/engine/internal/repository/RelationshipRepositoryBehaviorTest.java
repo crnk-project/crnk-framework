@@ -1,15 +1,11 @@
 package io.crnk.core.engine.internal.repository;
 
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.RelationshipBehaviorTestResource;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +16,10 @@ public class RelationshipRepositoryBehaviorTest {
 
 	@Before
 	public void setup() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.boot();
-		resourceRegistry = boot.getResourceRegistry();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
+		resourceRegistry = container.getResourceRegistry();
 	}
 
 	@Test

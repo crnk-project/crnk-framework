@@ -1,13 +1,29 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
@@ -19,15 +35,15 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
+import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.RegistryEntryBuilder;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
@@ -35,23 +51,24 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-import io.crnk.legacy.repository.ResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Container for setting up and holding {@link Module} instances;
  */
 public class ModuleRegistry {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleRegistry.class);
+
+	private ResultFactory resultFactory = new ImmediateResultFactory();
+
 
 	enum InitializedState {
 		NOT_INITIALIZED,
@@ -81,7 +98,7 @@ public class ModuleRegistry {
 
 	private RequestDispatcher requestDispatcher;
 
-	private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider();
+	private HttpRequestContextProvider httpRequestContextProvider = new HttpRequestContextProvider(() -> getResultFactory());
 
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
@@ -103,8 +120,16 @@ public class ModuleRegistry {
 		return prioritze(aggregatedModule.getResourceModificationFilters());
 	}
 
+	public ResultFactory getResultFactory() {
+		return resultFactory;
+	}
+
 	public Collection<Object> getRepositories() {
 		return aggregatedModule.getRepositories();
+	}
+
+	public void setResultFactory(ResultFactory resultFactory) {
+		this.resultFactory = resultFactory;
 	}
 
 	/**
@@ -113,25 +138,32 @@ public class ModuleRegistry {
 	 * @param module module
 	 */
 	public void addModule(Module module) {
+		LOGGER.debug("adding module {}", module);
 		module.setupModule(new ModuleContextImpl(module));
 		modules.add(module);
 	}
+
 	/**
 	 * Add the given {@link PagingBehavior} to the module
+	 *
 	 * @param pagingBehavior the paging behavior
 	 */
-	public void addPagingBehavior(PagingBehavior pagingBehavior){
+	public void addPagingBehavior(PagingBehavior pagingBehavior) {
 		this.aggregatedModule.addPagingBehavior(pagingBehavior);
 	}
 
-	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors){
-		for (PagingBehavior pagingBehavior: pagingBehaviors){
+	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors) {
+		for (PagingBehavior pagingBehavior : pagingBehaviors) {
 			this.aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 	}
 
 	public List<PagingBehavior> getPagingBehaviors() {
 		return this.aggregatedModule.getPagingBehaviors();
+	}
+
+	public List<ResourceFieldContributor> getResourceFieldContributors() {
+		return aggregatedModule.getResourceFieldContributors();
 	}
 
 	public ResourceRegistry getResourceRegistry() {
@@ -298,8 +330,7 @@ public class ModuleRegistry {
 			Optional<? extends Module> optModule = getModule(extension.getTargetModule());
 			if (optModule.isPresent()) {
 				reverseExtensionMap.add(optModule.get(), extension);
-			}
-			else if (!extension.isOptional()) {
+			} else if (!extension.isOptional()) {
 				throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
 			}
 		}
@@ -340,14 +371,11 @@ public class ModuleRegistry {
 		return httpRequestContextProvider;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void applyRepositoryRegistrations() {
 		Collection<Object> repositories = filterDecorators(aggregatedModule.getRepositories());
 		for (Object repository : repositories) {
-			if (repository instanceof ResourceRepositoryV2 || repository instanceof ResourceRepository || repository.getClass()
-					.getAnnotation(JsonApiResourceRepository.class) != null) {
-				applyRepositoryRegistration(repository);
-			}
+			applyRepositoryRegistration(repository);
 		}
 	}
 
@@ -358,10 +386,16 @@ public class ModuleRegistry {
 	}
 
 	private void applyRepositoryRegistration(Object repository) {
+		if (repository instanceof HttpRequestContextAware) {
+			((HttpRequestContextAware) repository).setHttpRequestContextProvider(getHttpRequestContextProvider());
+		}
+
 		RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
 		entryBuilder.fromImplementation(repository);
 		RegistryEntry entry = entryBuilder.build();
-		resourceRegistry.addEntry(entry);
+		if (entry != null) {
+			resourceRegistry.addEntry(entry);
+		}
 	}
 
 	/**
@@ -429,6 +463,10 @@ public class ModuleRegistry {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+	}
+
+	public List<RepositoryAdapterFactory> getRepositoryAdapterFactories() {
+		return aggregatedModule.getRepositoryAdapterFactories();
 	}
 
 	/**
@@ -570,30 +608,35 @@ public class ModuleRegistry {
 
 		@Override
 		public void addPagingBehavior(PagingBehavior pagingBehavior) {
+			LOGGER.debug("adding paging behavior {}", pagingBehavior);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 
 		@Override
 		public void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider) {
+			LOGGER.debug("adding resource information provider {}", resourceInformationProvider);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addResourceInformationProvider(resourceInformationProvider);
 		}
 
 		@Override
 		public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
+			LOGGER.debug("adding repository information provider {}", repositoryInformationProvider);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addRepositoryInformationBuilder(repositoryInformationProvider);
 		}
 
 		@Override
 		public void addResourceLookup(ResourceLookup resourceLookup) {
+			LOGGER.debug("adding resource lookup {}", resourceLookup);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addResourceLookup(resourceLookup);
 		}
 
 		@Override
 		public void addJacksonModule(com.fasterxml.jackson.databind.Module module) {
+			LOGGER.debug("adding jackson module {}", module);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addJacksonModule(module);
 		}
@@ -609,6 +652,7 @@ public class ModuleRegistry {
 
 		@Override
 		public void addFilter(DocumentFilter filter) {
+			LOGGER.debug("adding document filter {}", filter);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addFilter(filter);
 		}
@@ -621,23 +665,27 @@ public class ModuleRegistry {
 
 		@Override
 		public void addExceptionMapper(ExceptionMapper<?> exceptionMapper) {
+			LOGGER.debug("adding exception mapper {}", exceptionMapper);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addExceptionMapper(exceptionMapper);
 		}
 
 		@Override
 		public void addRepository(Class<?> type, Object repository) {
+			LOGGER.debug("adding repository {}", repository);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
+			LOGGER.debug("adding repository {}", repository);
 			aggregatedModule.addRepository(repository);
 		}
 
 		@Override
 		public void addSecurityProvider(SecurityProvider securityProvider) {
+			LOGGER.debug("adding security provider {}", securityProvider);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addSecurityProvider(securityProvider);
 		}
@@ -650,6 +698,7 @@ public class ModuleRegistry {
 
 		@Override
 		public void addExtension(ModuleExtension extension) {
+			LOGGER.debug("adding extension {}", extension);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addExtension(extension);
 			extensionMap.add(module, extension);
@@ -657,6 +706,7 @@ public class ModuleRegistry {
 
 		@Override
 		public void addHttpRequestProcessor(HttpRequestProcessor processor) {
+			LOGGER.debug("adding http request processor {}", processor);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			ModuleRegistry.this.aggregatedModule.addHttpRequestProcessor(processor);
 		}
@@ -669,6 +719,7 @@ public class ModuleRegistry {
 
 		@Override
 		public void addRegistryPart(String prefix, ResourceRegistryPart part) {
+			LOGGER.debug("adding registry part {}", part);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addRegistryPart(prefix, part);
 		}
@@ -680,24 +731,35 @@ public class ModuleRegistry {
 
 		@Override
 		public void addRepositoryFilter(RepositoryFilter filter) {
+			LOGGER.debug("adding repository filter {}", filter);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addRepositoryFilter(filter);
 		}
 
 		@Override
 		public void addResourceFilter(ResourceFilter filter) {
+			LOGGER.debug("adding resource filter {}", filter);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addResourceFilter(filter);
 		}
 
 		@Override
+		public void addResourceFieldContributor(ResourceFieldContributor contributor) {
+			LOGGER.debug("adding resource field contributor {}", contributor);
+			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
+			aggregatedModule.addResourceFieldContributor(contributor);
+		}
+
+		@Override
 		public void addRepositoryDecoratorFactory(RepositoryDecoratorFactory decoratorFactory) {
+			LOGGER.debug("adding repository decorator factory {}", decoratorFactory);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
 			aggregatedModule.addRepositoryDecoratorFactory(decoratorFactory);
 		}
 
 		@Override
 		public void addRepository(Object repository) {
+			LOGGER.debug("adding repository {}", repository);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
 			aggregatedModule.addRepository(repository);
 		}
@@ -737,6 +799,7 @@ public class ModuleRegistry {
 
 		@Override
 		public void addRegistryEntry(RegistryEntry entry) {
+			LOGGER.debug("adding registry entry {}", entry);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
 			aggregatedModule.addRegistryEntry(entry);
 		}
@@ -749,7 +812,29 @@ public class ModuleRegistry {
 
 		@Override
 		public void addResourceModificationFilter(ResourceModificationFilter filter) {
+			LOGGER.debug("adding resource modification filter  {}", filter);
 			aggregatedModule.addResourceModificationFilter(filter);
+		}
+
+		@Override
+		public ResultFactory getResultFactory() {
+			return resultFactory;
+		}
+
+		@Override
+		public List<DocumentFilter> getDocumentFilters() {
+			return ModuleRegistry.this.getFilters();
+		}
+
+		@Override
+		public void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory) {
+			LOGGER.debug("adding repository adapter factory {}", repositoryAdapterFactory);
+			aggregatedModule.addRepositoryAdapterFactory(repositoryAdapterFactory);
+		}
+
+		@Override
+		public ModuleRegistry getModuleRegistry() {
+			return ModuleRegistry.this;
 		}
 
 		@Override

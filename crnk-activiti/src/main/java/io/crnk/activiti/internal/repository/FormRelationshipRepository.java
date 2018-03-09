@@ -1,6 +1,10 @@
 package io.crnk.activiti.internal.repository;
 
 
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 import io.crnk.activiti.resource.FormResource;
 import io.crnk.activiti.resource.TaskResource;
@@ -12,7 +16,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 
 
 public class FormRelationshipRepository<T extends TaskResource, F extends FormResource> extends ReadOnlyRelationshipRepositoryBase<T,
-		String, F, String> implements ResourceRegistryAware {
+		String, F, String> implements ResourceRegistryAware, HttpRequestContextAware {
 
 	private static final String RELATIONSHIP_NAME = "form";
 
@@ -21,6 +25,8 @@ public class FormRelationshipRepository<T extends TaskResource, F extends FormRe
 	private final Class<F> formClass;
 
 	private ResourceRegistry resourceRegistry;
+
+	private HttpRequestContextProvider requestContextProvider;
 
 	public FormRelationshipRepository(Class<T> taskClass, Class<F> formClass) {
 		this.taskClass = taskClass;
@@ -43,11 +49,12 @@ public class FormRelationshipRepository<T extends TaskResource, F extends FormRe
 
 			ResourceRepositoryAdapter resourceRepository = resourceRegistry.getEntry(formClass).getResourceRepository();
 
-			QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(querySpec, resourceRegistry);
+			HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+			QueryContext queryContext = requestContext.getQueryContext();
+			QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 
-			return (F) resourceRepository.findOne(taskId, querySpecAdapter).getEntity();
-		}
-		else {
+			return (F) resourceRepository.findOne(taskId, querySpecAdapter).get().getEntity();
+		} else {
 			throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
 		}
 	}
@@ -56,5 +63,10 @@ public class FormRelationshipRepository<T extends TaskResource, F extends FormRe
 	@Override
 	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
+	}
+
+	@Override
+	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+		this.requestContextProvider = requestContextProvider;
 	}
 }

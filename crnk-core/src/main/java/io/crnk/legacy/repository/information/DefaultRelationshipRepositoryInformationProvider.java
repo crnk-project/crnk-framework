@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.repository.MatchedRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.UntypedRelationshipRepository;
@@ -44,8 +45,8 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	private RepositoryInformation buildInformation(Object repository, Class<? extends Object> repositoryClass,
 			RepositoryInformationProviderContext context) {
 		RelationshipMatcher matcher;
-		if (repository instanceof RelationshipRepositoryV2) {
-			matcher = ((RelationshipRepositoryV2) repository).getMatcher();
+		if (repository instanceof MatchedRelationshipRepository) {
+			matcher = ((MatchedRelationshipRepository) repository).getMatcher();
 		}
 		else {
 			Class<?> sourceResourceClass = getSourceResourceClass(repository, repositoryClass);

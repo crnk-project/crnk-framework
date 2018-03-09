@@ -93,7 +93,6 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 				return applicationContext.getEnvironment().getProperty(key);
 			}
 		});
-		boot.setAllowUnknownAttributes();
 		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.boot();
 		return boot;

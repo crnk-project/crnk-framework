@@ -1,5 +1,14 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -16,13 +25,6 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class IncludeLookupUtil {
 
@@ -36,6 +38,14 @@ public class IncludeLookupUtil {
 		this.includeBehavior = includeBehavior;
 	}
 
+	public static List<Serializable> getIds(Collection<Resource> resources, ResourceInformation resourceInformation) {
+		List<Serializable> ids = new ArrayList<>();
+		for (Resource resource : resources) {
+			Serializable id = resourceInformation.parseIdString(resource.getId());
+			ids.add(id);
+		}
+		return ids;
+	}
 
 	public static LookupIncludeBehavior getGlolbalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
 		if (propertiesProvider == null) {
@@ -53,8 +63,7 @@ public class IncludeLookupUtil {
 
 			if (includeAutomaticallyOverwrite) {
 				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			}
-			else if (includeAutomatically) {
+			} else if (includeAutomatically) {
 				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 			}
 		}
@@ -141,15 +150,14 @@ public class IncludeLookupUtil {
 	}
 
 	public boolean isInclusionRequested(QueryAdapter queryAdapter, List<ResourceField> fieldPath) {
-		if (queryAdapter == null || queryAdapter.getIncludedRelations() == null
+		if (queryAdapter.isEmpty() || queryAdapter.getIncludedRelations() == null
 				|| queryAdapter.getIncludedRelations().getParams() == null) {
 			return false;
 		}
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		}
-		else {
+		} else {
 			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
 		}
 	}
@@ -158,8 +166,7 @@ public class IncludeLookupUtil {
 		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
 		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
 			return contains(querySpec, toPathList(fieldPath, 0));
-		}
-		else {
+		} else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
 				List<String> path = toPathList(fieldPath, i);
 
@@ -279,20 +286,20 @@ public class IncludeLookupUtil {
 	}
 
 	public List<Resource> findResourcesWithoutRelationshipToLoad(List<Resource> resources, ResourceField resourceField,
-			Map<ResourceIdentifier, Resource> resourceMap) {
+																 IncludeRequest includeRequest) {
 		List<Resource> results = new ArrayList<>();
 		for (Resource resource : resources) {
 			Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
-			if (!relationship.getData().isPresent() || !isLoaded(relationship, resourceMap)) {
+			if (!relationship.getData().isPresent() || !isLoaded(relationship, includeRequest)) {
 				results.add(resource);
 			}
 		}
 		return results;
 	}
 
-	private boolean isLoaded(Relationship relationship, Map<ResourceIdentifier, Resource> resourceMap) {
+	private boolean isLoaded(Relationship relationship, IncludeRequest includeRequest) {
 		for (ResourceIdentifier id : relationship.getCollectionData().get()) {
-			if (!resourceMap.containsKey(id)) {
+			if (!includeRequest.containsResource(id)) {
 				return false;
 			}
 		}
@@ -305,8 +312,7 @@ public class IncludeLookupUtil {
 		}
 		if (objectId instanceof ResourceIdentifier) {
 			return (ResourceIdentifier) objectId;
-		}
-		else {
+		} else {
 			String strId = resourceInformation.toIdString(objectId);
 			return new ResourceIdentifier(strId, resourceInformation.getResourceType());
 		}

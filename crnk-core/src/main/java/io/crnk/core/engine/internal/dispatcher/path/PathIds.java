@@ -44,4 +44,9 @@ public class PathIds {
 	public int hashCode() {
 		return ids.hashCode();
 	}
+
+	@Override
+	public String toString() {
+		return ids.toString();
+	}
 }

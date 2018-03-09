@@ -34,6 +34,7 @@ Crnk is small, modular and lightweight. It integrates well with many popular fra
 
 - CDI: resolve repositories and extensions with CDI.
 - Spring: run Crnk with Spring, including support for Spring Boot, ORM, Security and Sleuth.
+- Reactor: for support of reactive programming.
 - Servlet API: run Crnk as servlet.
 - JAXRS: run Crnk as feature.
 - JPA: expose entities as JSON API resources.
@@ -52,6 +53,7 @@ include::setup.adoc[]
 include::resource.adoc[]
 include::repositories.adoc[]
 include::client.adoc[]
+include::reactive.adoc[]
 include::modules.adoc[]
 include::module_development.adoc[]
 include::generation.adoc[]

@@ -1,5 +1,6 @@
 package io.crnk.meta.provider;
 
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.meta.model.MetaElement;
 
 public class MetaFilterBase implements MetaFilter {
@@ -16,7 +17,7 @@ public class MetaFilterBase implements MetaFilter {
 	}
 
 	@Override
-	public MetaElement adjustForRequest(MetaElement element) {
+	public MetaElement adjustForRequest(MetaElement element, QueryContext queryContext) {
 		return element;
 	}
 

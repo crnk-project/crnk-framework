@@ -2,6 +2,7 @@ package io.crnk.client.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import io.crnk.core.engine.internal.utils.CastableInformation;
 import io.crnk.core.resource.links.LinksInformation;
 
@@ -31,7 +32,8 @@ public class JsonLinksInformation implements LinksInformation, CastableInformati
 	@Override
 	public <L extends LinksInformation> L as(Class<L> linksClass) {
 		try {
-			return mapper.readerFor(linksClass).readValue(data);
+			ObjectReader reader = mapper.readerFor(linksClass);
+			return reader.readValue(data);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

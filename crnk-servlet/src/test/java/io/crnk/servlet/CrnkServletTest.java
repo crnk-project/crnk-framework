@@ -248,9 +248,6 @@ public class CrnkServletTest {
 		request.addHeader("Accept", "*/*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-
-		String responseContent = response.getContentAsString();
-		assertTrue("Response should not be returned for non matching document type", StringUtils.isBlank(responseContent));
 		assertEquals(404, response.getStatus());
 
 	}

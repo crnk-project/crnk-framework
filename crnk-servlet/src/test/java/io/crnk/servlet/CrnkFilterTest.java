@@ -112,7 +112,7 @@ public class CrnkFilterTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");
 		request.setContextPath("");
-		request.setServletPath(null);
+		request.setServletPath("/api");
 		request.setPathInfo(null);
 		request.setRequestURI("/api/somethingDifferent/");
 		request.addHeader("Accept", "*/*");
@@ -132,7 +132,7 @@ public class CrnkFilterTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");
 		request.setContextPath("");
-		request.setServletPath(null);
+		request.setServletPath("/api");
 		request.setPathInfo(null);
 		request.setRequestURI("/api/tasks/");
 		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
@@ -163,7 +163,7 @@ public class CrnkFilterTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");
 		request.setContextPath("");
-		request.setServletPath(null);
+		request.setServletPath("/api");
 		request.setPathInfo(null);
 		request.setRequestURI("/api/tasks/1");
 		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
@@ -192,7 +192,7 @@ public class CrnkFilterTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");
 		request.setContextPath("");
-		request.setServletPath(null);
+		request.setServletPath("/api");
 		request.setPathInfo(null);
 		request.setRequestURI("/api/tasks");
 		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
