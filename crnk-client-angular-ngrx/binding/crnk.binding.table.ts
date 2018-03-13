@@ -52,14 +52,14 @@ export class DataTableBinding {
 
 	private num = 0;
 
-	private ngrxJsonApiZone: NgrxJsonApiZoneService;
+	public readonly zone: NgrxJsonApiZoneService;
 
 	constructor(ngrxJsonApiService: NgrxJsonApiService, private config: DataTableBindingConfig,
 		private utils: CrnkBindingUtils, store: Store<any>
 	) {
 
 		const zoneId = config.zoneId || NGRX_JSON_API_DEFAULT_ZONE;
-		this.ngrxJsonApiZone = ngrxJsonApiService.getZone(zoneId);
+		this.zone = ngrxJsonApiService.getZone(zoneId);
 		this.result$ = this.resultSubject$.asObservable();
 
 		if (!this.config.queryId) {
@@ -83,7 +83,7 @@ export class DataTableBinding {
 			throw new Error('baseQuery not available');
 		}
 
-		this.result$ = this.ngrxJsonApiZone
+		this.result$ = this.zone
 			.selectManyResults(this.config.queryId, true)
 			.do(it => {
 				if (this.baseQuery === null) {
@@ -113,7 +113,7 @@ export class DataTableBinding {
 	}
 
 	public refresh() {
-		this.ngrxJsonApiZone.refreshQuery(this.config.queryId);
+		this.zone.refreshQuery(this.config.queryId);
 	}
 
 	public onLazyLoad(event: LazyLoadEvent) {
@@ -165,7 +165,7 @@ export class DataTableBinding {
 		this.num++;
 
 		if (!_.isEqual(query, this.latestQuery)) {
-			this.ngrxJsonApiZone.putQuery({
+			this.zone.putQuery({
 					query: query,
 					fromServer: this.config.fromServer
 				}
