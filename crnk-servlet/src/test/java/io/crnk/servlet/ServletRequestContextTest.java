@@ -64,4 +64,22 @@ public class ServletRequestContextTest {
 		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 		Assert.assertEquals("/tasks/", context.getPath());
 	}
+
+	@Test
+	public void testBaseUrlForInvalidServletPath() {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.setMethod("GET");
+		request.setContextPath("");
+		request.setServletPath("/api/tasks/"); // invalid => Spring Boot setup as it seems
+		request.setPathInfo(null);
+		request.setRequestURI("/api/tasks/");
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+		request.setServerName("test");
+		request.setServerPort(1234);
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
+
+		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
 }
