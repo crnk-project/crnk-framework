@@ -65,7 +65,7 @@ public class TaskRelationshipRepository<P extends ProcessInstanceResource, T ext
 			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(PROCESS_INSTANCE_ID_FIELD), FilterOperator.EQ, sourceId.toString()));
 			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(TASK_DEFINITION_KEY_FIELD), FilterOperator.EQ, taskDefinitionId));
 
-			ResourceList tasks = taskRepository.findAll(querySpec);
+			ResourceList tasks = taskRepository.findAll(processQuerySpec);
 			PreconditionUtil.assertTrue("unique result expected", tasks.size() <= 1);
 			return tasks.isEmpty() ? null : (T) tasks.get(0);
 		} else {

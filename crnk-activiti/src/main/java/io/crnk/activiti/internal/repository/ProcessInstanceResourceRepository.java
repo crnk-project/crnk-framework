@@ -102,7 +102,7 @@ public class ProcessInstanceResourceRepository<T extends ProcessInstanceResource
 	public void delete(String id) {
 		T resource = findOne(id, new QuerySpec(getResourceClass()));
 		checkFilter(resource, false);
-		
+
 		runtimeService.deleteProcessInstance(id, null);
 	}
 }

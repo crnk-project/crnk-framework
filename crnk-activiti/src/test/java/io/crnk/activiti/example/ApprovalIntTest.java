@@ -10,6 +10,8 @@ import io.crnk.activiti.example.model.ApproveTask;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -128,6 +130,14 @@ public class ApprovalIntTest extends JerseyTest {
 		Assert.assertEquals(1, tasks.size());
 		ApproveTask task = tasks.get(0);
 		checkApproveTaskCreated(schedule, task);
+
+		// check search for task by process
+		QuerySpec querySpec = new QuerySpec(ApproveTask.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("processInstance", "id"), FilterOperator.EQ, scheduleApproval.getId()));
+		ResourceList<ApproveTask> results = taskRepo.findAll(querySpec);
+		Assert.assertEquals(1, results.size());
+		Assert.assertEquals(scheduleApproval.getId(), results.get(0).getProcessInstanceId());
+
 		return task;
 	}
 

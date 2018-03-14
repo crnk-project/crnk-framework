@@ -20,8 +20,6 @@ public class TaskResource {
 
 	private String assignee;
 
-	private String processInstanceId;
-
 	private String executionId;
 
 	private String processDefinitionId;
@@ -58,14 +56,6 @@ public class TaskResource {
 
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
-	}
-
-	public String getProcessInstanceId() {
-		return processInstanceId;
-	}
-
-	public void setProcessInstanceId(String processInstanceId) {
-		this.processInstanceId = processInstanceId;
 	}
 
 	public String getName() {

@@ -96,7 +96,6 @@ public class ActivitiResourceMapper {
 
 	private void copyInternal(Object resource, String prefix, Map<String, Object> variables, boolean toResource,
 			Optional<Object> variableHolder) {
-		Package activitiPackage = ExecutionResource.class.getPackage();
 		BeanInformation beanInformation = BeanInformation.get(resource.getClass());
 		for (String attributeName : beanInformation.getAttributeNames()) {
 			BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
@@ -105,15 +104,25 @@ public class ActivitiResourceMapper {
 				continue;
 			}
 
-			Method getter = attribute.getGetter();
-			Class declaringClass = getter.getDeclaringClass();
-			if (declaringClass.getPackage().equals(activitiPackage)) {
+			if (isStaticField(attribute)) {
 				copyStaticField(resource, attributeName, variableHolder, toResource);
 			}
 			else {
 				copyDynamicField(resource, attribute, variableHolder, variables, prefix, toResource);
 			}
 		}
+	}
+
+	private boolean isStaticField(BeanAttributeInformation attribute) {
+		Package activitiPackage = ExecutionResource.class.getPackage();
+		Method getter = attribute.getGetter();
+		Class declaringClass = getter.getDeclaringClass();
+
+		if (declaringClass.getPackage().equals(activitiPackage)) {
+			return true;
+		}
+		// processInstanceId as exception since not on task, but defined as relationship on custom resource
+		return attribute.getName().equals("processInstanceId");
 	}
 
 	private void copyStaticField(Object resource, String attributeName, Optional<Object> activitiBean, boolean toResource) {

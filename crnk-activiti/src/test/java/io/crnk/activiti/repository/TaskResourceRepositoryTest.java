@@ -3,9 +3,12 @@ package io.crnk.activiti.repository;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
+import com.google.common.collect.Sets;
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.ActivitiModuleConfig;
 import io.crnk.activiti.example.model.ApproveTask;
+import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
+import io.crnk.activiti.internal.repository.ProcessInstanceResourceRepository;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ResourceNotFoundException;
@@ -16,6 +19,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.resource.list.ResourceList;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,6 +34,8 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
 
 	private Task isolatedTask;
 
+	protected ProcessInstanceResourceRepository<ScheduleApprovalProcessInstance> processInstanceRepository;
+
 	@Before
 	public void setup() {
 		super.setup();
@@ -39,11 +45,17 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
 		isolatedTask = addTask("isolatedTask", 12);
 		isolatedTask.setDescription("doesNotMatchRepositoryFilter");
 		processEngine.getTaskService().saveTask(isolatedTask);
+
+		processInstanceRepository = (ProcessInstanceResourceRepository<ScheduleApprovalProcessInstance>)
+				boot.getResourceRegistry().getEntry(ScheduleApprovalProcessInstance.class)
+						.getResourceRepository().getResourceRepository();
 	}
 
 	@Override
 	protected Module createActivitiModule() {
 		ActivitiModuleConfig config = new ActivitiModuleConfig();
+		config.addProcessInstance(ScheduleApprovalProcessInstance.class);
+
 		config.addTask(ApproveTask.class).filterBy("description", ENFORCED_DESCRIPTION);
 		return ActivitiModule.create(processEngine, config);
 	}
@@ -167,6 +179,17 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
 		querySpec = new QuerySpec(TaskResource.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "doesNotExists"));
 		Assert.assertEquals(0, taskRepository.findAll(querySpec).size());
+	}
+
+	@Test
+	public void checkFindAllByIds() {
+		ProcessInstance processInstance = processEngine.getRuntimeService().startProcessInstanceByKey("scheduleChange");
+		String id = processInstance.getId();
+
+		// note that this is not supported for Tasks, activiti lacks API to query multiple tasks
+		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		Assert.assertEquals(1, processInstanceRepository.findAll(Arrays.asList(id), querySpec).size());
+		Assert.assertEquals(1, processInstanceRepository.findAll(Sets.newHashSet(id), querySpec).size());
 	}
 
 	@Test(expected = BadRequestException.class)

@@ -4,8 +4,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
@@ -56,6 +60,9 @@ public class ActivitiQuerySpecMapper {
 
 		for (FilterSpec filterSpec : filters) {
 			List<String> attributePath = filterSpec.getAttributePath();
+			if (attributePath.size() == 2 && "id".equals(attributePath.get(1))) {
+				attributePath = Arrays.asList(attributePath.get(0) + "Id");
+			}
 			PreconditionUtil.assertTrue("nested attribute paths not supported", attributePath.size() == 1);
 			String attrName = attributePath.get(0);
 
@@ -70,12 +77,17 @@ public class ActivitiQuerySpecMapper {
 				method.invoke(activitiQuery);
 			}
 			else {
-				method.invoke(activitiQuery, unmapValue(value));
+				Class<?> expectedType = method.getParameterTypes()[0];
+				method.invoke(activitiQuery, unmapValue(value, expectedType));
 			}
 		}
 	}
 
-	private static Object unmapValue(Object value) {
+	private static Object unmapValue(Object value, Class expectedType) {
+		if (value instanceof List && Set.class.isAssignableFrom(expectedType)) {
+			return new HashSet<>((Collection) value);
+		}
+
 		if (value instanceof OffsetDateTime) {
 			return Date.from(((OffsetDateTime) value).toInstant());
 		}
@@ -95,11 +107,16 @@ public class ActivitiQuerySpecMapper {
 			Class valueClass) {
 		String name = attributeName;
 
-		boolean many = List.class.isAssignableFrom(valueClass);
+		boolean many = Collection.class.isAssignableFrom(valueClass);
 		boolean isDate = OffsetDateTime.class.isAssignableFrom(valueClass);
 
 		if (operator.equals(FilterOperator.EQ) && many) {
-			name = name + "Ids";
+			if (name.toLowerCase().endsWith("id")) {
+				name = name + "s";
+			}
+			else {
+				name = name + "Ids";
+			}
 		}
 		else if (operator.equals(FilterOperator.LIKE) && !many) {
 			name = name + "LikeIgnoreCase";
