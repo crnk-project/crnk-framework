@@ -265,7 +265,7 @@ and `QuerydslQueryFactory` provide a `registerComputedAttribute` method to
 register an expression factory to create such computed attributes. The registration requires
 the target entity and a name. To make the computed attribute available
 to consumers, the mapper class has access to it trough the provided
-tuple class. Have a look at https://github.com/crnk-project/crnk-framework/blob/develop/crnk-jpa/src/test/java/io/crnk/jpa/mapping/DtoMappingTest.java to see everything in use.
+tuple class. Have a look at https://github.com/crnk-project/crnk-framework/blob/master/crnk-jpa/src/test/java/io/crnk/jpa/mapping/DtoMappingTest.java to see everything in use.
 
 There is currently not yet any support for renaming of attribute. If attributes
 are renamed on DTOs, the incoming QuerySpec has to be modified accordingly to
