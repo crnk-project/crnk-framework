@@ -113,8 +113,12 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	public String getBaseUrl() {
 		String requestUrl = request.getRequestURL().toString();
 		String servletPath = request.getServletPath();
-
 		int sep = requestUrl.indexOf(servletPath);
+
+		if (pathPrefix != null && servletPath.startsWith(pathPrefix)) {
+			servletPath = pathPrefix;
+		}
+
 		String url = requestUrl.substring(0, sep + servletPath.length());
 		return UrlUtils.removeTrailingSlash(url);
 	}
