@@ -1,7 +1,6 @@
-<div *ngIf="result != null">
+<div *ngIf="result | async as result">
 	<p-dataTable [value]="result.data"
 			     selectionMode="single"
-				 [(selection)]="binding.selectedResource"
 				 [lazy]="true" [rows]="10" [paginator]="true"
 				 (onLazyLoad)="binding.onLazyLoad($event)"
 				 (onRowDblclick)="open($event.data)"

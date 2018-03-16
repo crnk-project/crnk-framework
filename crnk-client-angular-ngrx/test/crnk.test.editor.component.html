@@ -1,7 +1,11 @@
 <form #formRef="ngForm">
 	<div *ngIf="resource != null">
 
-		<input id="nameInput" required [crnkFormExpression]="resource.attributes.name"/>
+		<div>
+			{{binding.unmappedErrors | json}}
+		</div>
+
+		<input id="nameInput" required [crnkFormExpression]="resource.attributes.name" />
 
 		<div id="valid">{{binding.valid | async}}</div>
 		<div id="dirty">{{binding.dirty | async}}</div>

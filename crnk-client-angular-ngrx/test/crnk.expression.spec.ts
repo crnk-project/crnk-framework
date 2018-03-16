@@ -37,6 +37,7 @@ describe('Expression', () => {
 		expect(qbean.relationships.type.data.id.getValue()).toBe('testId');
 		expect(qbean.relationships.type.data.type.getValue()).toBe('testType');
 		expect(qbean.relationships.type.reference.attributes.name.getValue()).toBe('testName');
+		expect(qbean.relationships.type.reference.attributes.name.toQueryPath()).toBe('type.name');
 	});
 
 	it('should update bean', () => {
