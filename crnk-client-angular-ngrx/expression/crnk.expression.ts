@@ -8,6 +8,8 @@
  *     <li>{@link Path}: property member access</li>
  * </ul>
  */
+import { toQueryPath } from '../binding';
+
 export interface Expression<T> {
 
 	/**
@@ -69,6 +71,10 @@ export interface Path<T> extends Expression<T> {
 	 */
 	getSourcePointer(): String;
 
+	/**
+	 * @returns {string} path used for sorting and filtering (excludes any 'relationships' and 'attributes' in the path)
+	 */
+	toQueryPath(): string;
 }
 
 export const OPERATION_EQ = 'EQ';
@@ -225,9 +231,6 @@ export class BooleanConstant extends BooleanExpression implements Constant<boole
 }
 
 
-
-
-
 function toSourcePointerInternal(path: string, resource: any) {
 	if (resource !== null) {
 		return '/data/' + path.replace(new RegExp('\\.', 'g'), '/');
@@ -339,6 +342,10 @@ export class BeanPath<T> extends SimpleExpression<T> implements Path<T> {
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parentPath.getResource());
 	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
 }
 
 
@@ -382,6 +389,10 @@ export class StringPath extends StringExpression implements Path<string> {
 
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
 	}
 }
 
@@ -453,6 +464,10 @@ export class NumberPath extends NumberExpression implements Path<number> {
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
 	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
+	}
 }
 
 
@@ -496,6 +511,10 @@ export class BooleanPath extends BooleanExpression implements Path<boolean> {
 
 	getSourcePointer(): string {
 		return toSourcePointerInternal(this.toString(), this.parent.getResource());
+	}
+
+	toQueryPath(): string {
+		return toQueryPath(this.toString());
 	}
 }
 

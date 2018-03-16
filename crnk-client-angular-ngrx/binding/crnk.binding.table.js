@@ -43,12 +43,12 @@ var DataTableBinding = (function () {
 			for (var _i = 0, _a = event.multiSortMeta; _i < _a.length; _i++) {
 				var sortMeta = _a[_i];
 				var direction = sortMeta.order == -1 ? jsonapi_1.Direction.DESC : jsonapi_1.Direction.ASC;
-				sorting.push({direction: direction, api: this.utils.toSearchPath(sortMeta.field)});
+				sorting.push({direction: direction, api: this.utils.toQueryPath(sortMeta.field)});
 			}
 		}
 		else if (event.sortField) {
 			var direction = event.sortOrder == -1 ? jsonapi_1.Direction.DESC : jsonapi_1.Direction.ASC;
-			sorting.push({direction: direction, api: this.utils.toSearchPath(event.sortField)});
+			sorting.push({direction: direction, api: this.utils.toQueryPath(event.sortField)});
 		}
 		if (event.filters) {
 			for (var filterKey in event.filters) {
@@ -61,12 +61,12 @@ var DataTableBinding = (function () {
 				if (matchMode == 'like') {
 					value = '%' + value + '%';
 				}
-				var attributePath = this.utils.toSearchPath(filterKey);
+				var attributePath = this.utils.toQueryPath(filterKey);
 				filters.push({value: value, path: attributePath, operator: matchMode});
 			}
 		}
 		var query = _.cloneDeep(this.config.query);
-		this.utils.applyQueryParams(query, {
+		this.utils.updateQueryParams(query, {
 			limit: limit,
 			offset: offset,
 			include: includes,

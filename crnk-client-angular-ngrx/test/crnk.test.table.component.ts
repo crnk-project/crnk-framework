@@ -1,35 +1,32 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MetaAttributeListResult} from '../meta/meta.attribute';
-import {Subscription} from 'rxjs/Subscription';
-import {CrnkBindingService} from '../binding/crnk.binding.service';
-import {DataTableBinding} from '../binding/crnk.binding.table';
+import { Component, OnInit } from '@angular/core';
+import { MetaAttributeListResult } from '../meta/meta.attribute';
+import { CrnkBindingService } from '../binding/crnk.binding.service';
+import { DataTableBinding } from '../binding/crnk.binding.table';
+import { DataTableBindingConfig } from '../binding';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
 	selector: 'test-table',
 	templateUrl: 'crnk.test.table.component.html'
 })
-export class TestTableComponent implements OnInit, OnDestroy {
+export class TestTableComponent implements OnInit {
 
-	binding: DataTableBinding;
+	public binding: DataTableBinding;
 
-	private subscription: Subscription;
+	public result: Observable<MetaAttributeListResult>;
 
-	public result: MetaAttributeListResult;
+	public config: DataTableBindingConfig = {
+		queryId: 'tableQuery',
+		fromServer: false
+	}
 
 	constructor(private bindingService: CrnkBindingService) {
 	}
 
 	ngOnInit() {
-		this.binding = this.bindingService.bindDataTable({
-			queryId: 'tableQuery',
-			fromServer: false
-		});
-		this.subscription = this.binding.result$.subscribe(
-			it => this.result = it as MetaAttributeListResult
+		this.binding = this.bindingService.bindDataTable(this.config);
+		this.result = this.binding.result$.map(
+			it => it as MetaAttributeListResult
 		);
-	}
-
-	ngOnDestroy() {
-		this.subscription.unsubscribe();
 	}
 }

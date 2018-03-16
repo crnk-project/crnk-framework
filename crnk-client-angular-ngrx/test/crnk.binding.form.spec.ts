@@ -21,7 +21,6 @@ describe('FormBinding', () => {
 			imports: [TestingModule],
 			declarations: [TestEditorComponent]
 		}).compileComponents();
-
 	}));
 
 
