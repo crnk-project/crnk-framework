@@ -125,10 +125,8 @@ anchor:relationshipRepository[]
 
 ## RelationshipRepositoryV2
 
-
-with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation might not
-IMPORTANT: Before getting started with the development of relationship repositories, may sure you have familiarized yourself
-be necessary!
+IMPORTANT: Before getting started with the development of relationship repositories, familiarize yourself
+with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation is unnecessary!
 
 
 Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
@@ -165,12 +163,20 @@ All of the methods in this interface have fieldName field as their last paramete
 are multiple relationships between two resources.
 
 
-## RelationshipMatcher
+### Example
 
-The ProjectToTaskRepository repository from the previous section establishes a relationship between
-project and task. But by implementing `RelationshipRepositoryV2.getMatcher()`, one can gain much
-more flexibility about which kind of relationships a repository is possible to serve.
-Rules can look like:
+
+[source]
+.HistoryRelationshipRepository
+----
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
+----
+
+
+### RelationshipMatcher
+
+With `RelationshipRepositoryV2.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
+serving. Rules can look like:
 
 [source]
 .RelationshipMatcherTest
@@ -183,36 +189,11 @@ new RelationshipMatcher().rule().oppositeField("project").add().matches(field)
 [source]
 ----
 
-One can implement, for example, a history relationship repository that introduces a history relationship for every other resource.
-In this example, `RelationshipMatcher` would match against the history resource as target. Such an example is
-depicated in the next section.
+One can implement, for example, a history relationship repository that introduces a history relationship for every other resource
+as done in the example from the previous section.
 
 
-## ResourceFieldContributor
-
-The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
-touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
-want to add further fields like that mentioned history relationship from the previous section. It can be implemented
-by a repository or obtained from the regular service discovery mechanism.
-
-Any type of field can be added: meta, links, attribute and relationship fields. For relationship fields
-an application may make use of `RelationshipMatcher` to provide repository serving those fields.
-Notice the `accessor` property that is used to obtain the value of that field
-(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
-https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example[crnk-examples/spring-boot-example]:
-
-[source]
-.HistoryRelationshipRepository
-----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
-----
-
-- `getRelationshipFields` introduces the field dynamically instead of statically.
-- `getMatcher` attaches the repository to the historized resources.
-- `findManyTarget` implements the lookup of history elements.
-
-
-## ForwardingRelationshipRepository
+### ForwardingRelationshipRepository
 
 NOTE: Also have a look at <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>> before getting started to use
 this base class.
@@ -226,7 +207,7 @@ on either the source or target resource repository (usually you want to save on 
 The `ForwardingRelationshipRepository` is a base class that takes care of exactly such use cases.
 `ForwardingRelationshipRepository` knows to `ForwardingDirection`: `OWNER` and `OPPOSITE`. The former forwards requests
 to the resource repository of the owning side of a relationship, while the later forwards to the opposite side.
-`ForwardingDirection` and be set separately for `GET` and modification (`POST`, `PATCH`, `DELETE`) operations.
+`ForwardingDirection` is set separately for `GET` and modification operations (`POST`, `PATCH`, `DELETE`).
 
 An example to create such a repository looks like:
 
@@ -255,8 +236,7 @@ Note that to access the opposite side for `GET` operations, relations must be se
 	}
 ----
 
-
-## BulkRelationshipRepositoryV2
+### BulkRelationshipRepositoryV2
 
 BulkRelationshipRepositoryV2 extends RelationshipRepositoryV2 and provides an additional
 `findTargets` method. It allows to fetch a relation for multiple resources at once.
@@ -663,3 +643,27 @@ Crnk offers a `Crnk-Compact: true` header that can be sent along with the reques
 of those links is omitted. Further relationships without data are completely omitted.
 
 
+
+## ResourceFieldContributor
+
+The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
+touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
+want to add further fields like that mentioned history relationship from the earlier relationship example.
+`ResourceFieldContributor` can
+be implemented by a repository or obtained from the regular service discovery mechanism.
+
+Any type of field can be added: meta, links, attribute and relationship fields. For relationship fields
+an application may make use of `RelationshipMatcher` to provide repository serving those fields.
+Notice the `accessor` property that is used to obtain the value of that field
+(make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example[crnk-examples/spring-boot-example]:
+
+[source]
+.HistoryFieldContributor
+----
+include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryFieldContributor.java[tag=docs]
+----
+
+- `getRelationshipFields` introduces the field dynamically instead of statically.
+- `getMatcher` attaches the repository to the historized resources.
+- `findManyTarget` implements the lookup of history elements.
