@@ -146,12 +146,13 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 	private String buildPath(UriInfo uriInfo) {
 		String basePath = uriInfo.getPath();
 		String webPathPrefix = feature.getWebPathPrefix();
+		String path;
 		if (webPathPrefix != null && basePath.startsWith(webPathPrefix)) {
-			return basePath.substring(webPathPrefix.length());
+			path = basePath.substring(webPathPrefix.length());
+		} else {
+			path = basePath;
 		}
-		else {
-			return basePath;
-		}
+		return path == null || path.isEmpty() ? "/" : path;
 	}
 
 }

@@ -66,6 +66,25 @@ public class ServletRequestContextTest {
 	}
 
 	@Test
+	public void testRootPath() {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.setMethod("GET");
+		request.setContextPath("");
+		request.setServletPath("");
+		request.setPathInfo("");
+		request.setRequestURI("");
+		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+		request.addHeader("Accept", "*/*");
+		request.setServerName("test");
+		request.setServerPort(1234);
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
+
+		Assert.assertEquals("/", context.getPath());
+		Assert.assertEquals("http://test:1234", context.getBaseUrl());
+	}
+
+	@Test
 	public void testBaseUrlForInvalidServletPath() {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");

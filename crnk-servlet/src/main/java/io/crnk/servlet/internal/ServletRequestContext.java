@@ -55,7 +55,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	private String pathPrefix;
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-			final HttpServletResponse response, String pathPrefix) {
+								 final HttpServletResponse response, String pathPrefix) {
 		this.pathPrefix = pathPrefix;
 		this.servletContext = servletContext;
 		this.request = request;
@@ -106,6 +106,10 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			path = path.substring(pathPrefix.length());
 		}
 
+		if (path.isEmpty()) {
+			return "/";
+		}
+
 		return path;
 	}
 
@@ -117,6 +121,8 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 		if (pathPrefix != null && servletPath.startsWith(pathPrefix)) {
 			servletPath = pathPrefix;
+		} else if (servletPath.isEmpty()) {
+			return UrlUtils.removeTrailingSlash(requestUrl);
 		}
 
 		String url = requestUrl.substring(0, sep + servletPath.length());
@@ -130,8 +136,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			InputStream is = request.getInputStream();
 			if (is != null) {
 				requestBody = Nullable.of(io.crnk.core.engine.internal.utils.IOUtils.readFully(is));
-			}
-			else {
+			} else {
 				requestBody = Nullable.nullValue();
 			}
 		}

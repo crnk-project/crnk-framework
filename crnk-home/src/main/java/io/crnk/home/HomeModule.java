@@ -16,6 +16,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtensionAware;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -115,18 +116,15 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 						boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
 						if (acceptsHome) {
 							requestContext.setContentType(JSON_HOME_CONTENT_TYPE);
-						}
-						else {
+						} else {
 							requestContext.setContentType(JSON_CONTENT_TYPE);
 						}
 						writeJsonHome(requestContext, pathList);
-					}
-					else {
+					} else {
 						boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 						if (jsonapi) {
 							requestContext.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-						}
-						else {
+						} else {
 							requestContext.setContentType(JSON_CONTENT_TYPE);
 						}
 						writeJsonApi(requestContext, pathList);
