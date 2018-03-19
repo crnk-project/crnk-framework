@@ -1,5 +1,6 @@
 package io.crnk.example.jersey.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
@@ -9,7 +10,16 @@ public class Project {
 	@JsonApiId
 	private Long id;
 
+	@JsonProperty
 	private String name;
+
+	public Project() {
+	}
+
+	public Project(Long id, String name) {
+		this.id = id;
+		this.name = name;
+	}
 
 	public Long getId() {
 		return id;

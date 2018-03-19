@@ -23,11 +23,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.crnk.example.jersey.domain.model.Task;
+import io.crnk.example.jersey.domain.model.Project;
 import io.crnk.rs.type.JsonApiMediaType;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 
+/**
+ * NOTE that you may rather want to use crnk-client for testing! This showcases regular rest testing.
+ */
 public class JerseyApplicationTest extends JerseyTest {
 
 	private final ObjectMapper mapper = new ObjectMapper();
@@ -38,39 +41,34 @@ public class JerseyApplicationTest extends JerseyTest {
 	}
 
 	@Test
-	public void testGetTasks() throws Exception {
-		Response response = target("/tasks").request().get();
+	public void testGetProjects() throws Exception {
+		Response response = target("/projects").request().get();
 		assertResponseStatus(response, Response.Status.OK);
 		assertHeader(response.getHeaders(), HttpHeaders.CONTENT_TYPE, JsonApiMediaType.APPLICATION_JSON_API);
 
 		JsonNode data = mapper.readTree((InputStream) response.getEntity()).get("data");
 		assertThat(data.getNodeType(), is(JsonNodeType.ARRAY));
-		List<Task> tasks = new ArrayList<>();
+		List<Project> projects = new ArrayList<>();
 		for (JsonNode node : data) {
-			tasks.add(getTaskFromJson(node));
+			projects.add(getProjectFromJson(node));
 		}
-		assertThat(tasks, hasSize(1));
-		final Task task = tasks.get(0);
-		assertThat(task.getId(), is(1L));
-		assertThat(task.getName(), is("First task"));
-		assertThat(task.getProject(), is(nullValue()));
+		assertThat(projects, hasSize(4));
 	}
 
 	@Test
-	public void testGetTask() throws Exception {
-		final long taskId = 42;
-		Response response = target("/tasks/" + taskId).request().get();
+	public void testGetProject() throws Exception {
+		final long projectId = 121L;
+		Response response = target("/projects/" + projectId).request().get();
 		assertResponseStatus(response, Response.Status.OK);
 		assertHeader(response.getHeaders(), HttpHeaders.CONTENT_TYPE, JsonApiMediaType.APPLICATION_JSON_API);
 
 		JsonNode data = mapper.readTree((InputStream) response.getEntity()).get("data");
-		final Task task = getTaskFromJson(data);
-		assertThat(task.getId(), is(taskId));
-		assertThat(task.getName(), is("Some task"));
-		assertThat(task.getProject(), is(nullValue()));
+		final Project project = getProjectFromJson(data);
+		assertThat(project.getId(), is(projectId));
+		assertThat(project.getName(), is("Great Project"));
 	}
 
-	private Task getTaskFromJson(JsonNode node) throws JsonProcessingException {
+	private Project getProjectFromJson(JsonNode node) throws JsonProcessingException {
 		if (node.isObject()) {
 			ObjectNode onode = (ObjectNode) node;
 			final JsonNode type = onode.remove("type");
@@ -82,9 +80,8 @@ public class JerseyApplicationTest extends JerseyTest {
 				Map.Entry<String, JsonNode> f = fields.next();
 				onode.put(f.getKey(), f.getValue().textValue());
 			}
-			return mapper.treeToValue(onode, Task.class);
-		}
-		else {
+			return mapper.treeToValue(onode, Project.class);
+		} else {
 			throw new JsonMappingException("Not an object: " + node);
 		}
 	}

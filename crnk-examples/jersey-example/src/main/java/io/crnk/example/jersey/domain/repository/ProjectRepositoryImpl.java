@@ -1,9 +1,8 @@
-package io.crnk.example.springboot.domain.repository;
+package io.crnk.example.jersey.domain.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
-import io.crnk.example.springboot.domain.model.Project;
-import org.springframework.stereotype.Component;
+import io.crnk.example.jersey.domain.model.Project;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Component
 public class ProjectRepositoryImpl extends ResourceRepositoryBase<Project, Long> implements ProjectRepository {
 
 	private static final AtomicLong ID_GENERATOR = new AtomicLong(124);
