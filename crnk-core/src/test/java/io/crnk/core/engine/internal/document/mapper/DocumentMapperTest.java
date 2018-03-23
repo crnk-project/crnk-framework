@@ -325,6 +325,94 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
+	public void testMultipleInclusions() {
+		Task task1 = createTask(1, "other task");
+		Task task2 = createTask(2, "other task");
+		Task task3 = createTask(3, "sample task");
+
+		Project project = new Project();
+		project.setName("someProject");
+		project.setId(3L);
+		project.setTask(task1);
+		project.setTasks(Arrays.asList(task2, task3));
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		querySpec.includeRelation(Arrays.asList("tasks"));
+		querySpec.includeRelation(Arrays.asList("task"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(project), queryAdapter);
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("3", resource.getId());
+		Assert.assertEquals("projects", resource.getType());
+
+		Relationship taskRel = resource.getRelationships().get("task");
+		Assert.assertNotNull(taskRel.getLinks());
+		Assert.assertTrue(taskRel.getData().isPresent());
+		Assert.assertNotNull(taskRel.getData().get());
+
+		Relationship tasksRel = resource.getRelationships().get("tasks");
+		Assert.assertNotNull(tasksRel.getLinks());
+		Assert.assertTrue(tasksRel.getData().isPresent());
+		Assert.assertNotNull(tasksRel.getData().get());
+		Assert.assertEquals(2, tasksRel.getCollectionData().get().size());
+
+		Assert.assertEquals(3, document.getIncluded().size());
+	}
+
+	@Test
+	public void testConvergingInclusionPaths() {
+		Task task1 = createTask(1, "other task");
+		Task task2 = createTask(2, "other task");
+
+		Project project1 = new Project();
+		project1.setName("someProject");
+		project1.setId(3L);
+		project1.setTasks(Arrays.asList(task1, task2));
+
+		Project project2 = new Project();
+		project2.setName("someProject");
+		project2.setId(2L);
+
+		task1.setProject(project1);
+		task1.setProjectsInit(Arrays.asList(project2));
+
+		// come back/converge to same task
+		project1.setTask(task2);
+		project2.setTask(task2);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.includeRelation(Arrays.asList("project", "task"));
+		querySpec.includeRelation(Arrays.asList("projectsInit", "task"));
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		Document document = mapper.toDocument(toResponse(task1), queryAdapter);
+		Resource resource = document.getSingleData().get();
+		Assert.assertEquals("1", resource.getId());
+		Assert.assertEquals("tasks", resource.getType());
+
+		Relationship projectRel = resource.getRelationships().get("project");
+		Assert.assertNotNull(projectRel.getLinks());
+		Assert.assertTrue(projectRel.getData().isPresent());
+		Assert.assertNotNull(projectRel.getData().get());
+
+		Relationship projectsRel = resource.getRelationships().get("projectsInit");
+		Assert.assertNotNull(projectsRel.getLinks());
+		Assert.assertTrue(projectsRel.getData().isPresent());
+		Assert.assertNotNull(projectsRel.getData().get());
+		Assert.assertEquals(1, projectsRel.getCollectionData().get().size());
+
+		Assert.assertEquals(3, document.getIncluded().size());
+
+		List<Resource> included = document.getIncluded();
+		Resource projectResource2 = included.get(0);
+		Resource projectResource3 = included.get(1);
+
+		Assert.assertTrue(projectResource2.getRelationships().get("task").getData().isPresent());
+		Assert.assertTrue(projectResource3.getRelationships().get("task").getData().isPresent());
+	}
+
+	@Test
 	public void testRelationshipSingleValuedLazy() {
 		LazyTask task = createLazyTask(2);
 		Project project = createProject(3, "sample project");
