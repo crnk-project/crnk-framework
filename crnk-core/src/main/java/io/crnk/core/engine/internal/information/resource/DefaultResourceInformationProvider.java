@@ -58,7 +58,8 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 
 	@Override
 	public boolean accept(Class<?> resourceClass) {
-		return resourceClass.getAnnotation(JsonApiResource.class) != null;
+		JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
+		return annotation == null ? false : pagingBehaviors.values().stream().filter(pagingBehavior -> pagingBehavior.getClass().getName() == annotation.pagingBehavior().getName()).findFirst().isPresent();
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
