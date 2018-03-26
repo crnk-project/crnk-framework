@@ -1,19 +1,13 @@
 package io.crnk.spring.client;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import io.crnk.client.http.HttpAdapterRequest;
-import io.crnk.client.http.HttpAdapterResponse;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 
 public class RestTemplateRequest implements HttpAdapterRequest {
 
@@ -31,7 +25,7 @@ public class RestTemplateRequest implements HttpAdapterRequest {
 	private HttpHeaders headers;
 
 	public RestTemplateRequest(RestTemplate template, String url, io.crnk.core.engine.http.HttpMethod method,
-			String requestBody) {
+							   String requestBody) {
 		this.template = template;
 		this.requestBody = requestBody;
 		this.url = url;
@@ -50,13 +44,19 @@ public class RestTemplateRequest implements HttpAdapterRequest {
 	}
 
 	@Override
-	public RestTemplateResponse execute() throws IOException {
+	public RestTemplateResponse execute() {
 		HttpEntity<String> entityReq = new HttpEntity<>(requestBody, headers);
 		try {
-			ResponseEntity<String> response = template.exchange(url, HttpMethod.resolve(method.name()), entityReq, String.class);
-			return new RestTemplateResponse(response);
-		}
-		catch (HttpClientErrorException e) {
+			try {
+				java.net.URL url = new java.net.URL(this.url);
+				ResponseEntity<String> response = template.exchange(url.toURI(), HttpMethod.resolve(method.name()), entityReq, String.class);
+				return new RestTemplateResponse(response);
+			} catch (MalformedURLException e) {
+				throw new IllegalStateException(e);
+			} catch (URISyntaxException e) {
+				throw new IllegalStateException(e);
+			}
+		} catch (HttpClientErrorException e) {
 			return new RestTemplateResponse(e.getRawStatusCode(), e.getStatusCode().getReasonPhrase(), e.getResponseBodyAsString
 					(), e.getResponseHeaders());
 		}

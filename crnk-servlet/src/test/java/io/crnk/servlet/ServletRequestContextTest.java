@@ -69,9 +69,9 @@ public class ServletRequestContextTest {
 	}
 
 	@Test
-	public void testEncodedParameter() {
+	public void testParameter() {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.addParameter("include[test]", "a%2Cb%2Cc");
+		request.addParameter("include[test]", "a,b,c");
 
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
 		Map<String, Set<String>> parameters = context.getRequestParameters();

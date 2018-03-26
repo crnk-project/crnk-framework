@@ -16,24 +16,22 @@
  */
 package io.crnk.servlet.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.*;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.servlet.internal.legacy.ServletParametersProvider;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 public class ServletRequestContext implements HttpRequestContextBase {
 
@@ -85,19 +83,14 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				request.setCharacterEncoding(characterEncoding);
 			}
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			throw new IllegalStateException(e);
 		}
 
 		Map<String, Set<String>> queryParameters = new HashMap<>();
 		for (Map.Entry<String, String[]> queryEntry : request.getParameterMap().entrySet()) {
 			Set<String> paramValues = new LinkedHashSet();
 			for (String paramValue : queryEntry.getValue()) {
-				try {
-					String decodedParamValue = URLDecoder.decode(paramValue, characterEncoding);
-					paramValues.add(decodedParamValue);
-				} catch (UnsupportedEncodingException e) {
-					throw new BadRequestException(e.getMessage());
-				}
+				paramValues.add(paramValue);
 			}
 			queryParameters.put(queryEntry.getKey(), paramValues);
 		}
@@ -144,13 +137,15 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	public String getBaseUrl() {
 		String requestUrl = request.getRequestURL().toString();
 		String servletPath = request.getServletPath();
-		int sep = requestUrl.indexOf(servletPath);
 
 		if (pathPrefix != null && servletPath.startsWith(pathPrefix)) {
+			// harden again invalid servlet paths (e.g. in case of filters)
 			servletPath = pathPrefix;
 		} else if (servletPath.isEmpty()) {
 			return UrlUtils.removeTrailingSlash(requestUrl);
 		}
+
+		int sep = requestUrl.indexOf(servletPath);
 
 		String url = requestUrl.substring(0, sep + servletPath.length());
 		return UrlUtils.removeTrailingSlash(url);
