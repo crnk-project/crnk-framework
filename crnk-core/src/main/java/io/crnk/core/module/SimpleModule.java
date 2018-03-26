@@ -1,14 +1,6 @@
 package io.crnk.core.module;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableList;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -18,11 +10,18 @@ import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
+import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+
+import java.util.*;
 
 /**
  * Vanilla {@link Module} implementation that allows registration of extensions.
@@ -243,6 +242,20 @@ public class SimpleModule implements Module {
 	protected List<com.fasterxml.jackson.databind.Module> getJacksonModules() {
 		checkInitialized();
 		return Collections.unmodifiableList(jacksonModules);
+	}
+
+	/**
+	 * Add the given {@link PagingBehavior} to the module
+	 * @param pagingBehavior the paging behavior
+	 */
+	public void addPagingBehavior(PagingBehavior pagingBehavior){
+		checkInitialized();
+		addResourceInformationProvider(new DefaultResourceInformationProvider(
+				new NullPropertiesProvider()
+				, ImmutableList.of(pagingBehavior)
+				, new DefaultResourceFieldInformationProvider()
+				, new JacksonResourceFieldInformationProvider()
+		));
 	}
 
 	/**
