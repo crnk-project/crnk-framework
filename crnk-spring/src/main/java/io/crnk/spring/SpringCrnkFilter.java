@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.servlet.internal.ServletRequestContext;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
@@ -27,13 +28,15 @@ public class SpringCrnkFilter implements Filter {
 
 	private FilterConfig filterConfig;
 
+	private String defaultCharacterEncoding = HttpHeaders.DEFAULT_CHARSET;
+
 	public SpringCrnkFilter(CrnkBoot boot, CrnkSpringBootProperties properties) {
 		this.boot = boot;
 		this.properties = properties;
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
+	public void init(FilterConfig filterConfig) {
 		this.filterConfig = filterConfig;
 	}
 
@@ -43,15 +46,22 @@ public class SpringCrnkFilter implements Filter {
 			ServletContext servletContext = filterConfig.getServletContext();
 			RequestDispatcher requestDispatcher = boot.getRequestDispatcher();
 			ServletRequestContext context = new ServletRequestContext(servletContext, (HttpServletRequest) req,
-					(HttpServletResponse) res, boot.getWebPathPrefix());
+					(HttpServletResponse) res, boot.getWebPathPrefix(), defaultCharacterEncoding);
 			requestDispatcher.process(context);
 			if (!context.checkAbort()) {
 				chain.doFilter(req, res);
 			}
-		}
-		else {
+		} else {
 			chain.doFilter(req, res);
 		}
+	}
+
+	public String getDefaultCharacterEncoding() {
+		return defaultCharacterEncoding;
+	}
+
+	public void setDefaultCharacterEncoding(String defaultCharacterEncoding) {
+		this.defaultCharacterEncoding = defaultCharacterEncoding;
 	}
 
 	private boolean matchesPrefix(HttpServletRequest request) {

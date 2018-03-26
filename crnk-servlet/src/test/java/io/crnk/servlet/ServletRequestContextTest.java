@@ -13,6 +13,9 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.Map;
+import java.util.Set;
+
 public class ServletRequestContextTest {
 
 	private ServletContext servletContext;
@@ -63,6 +66,19 @@ public class ServletRequestContextTest {
 
 		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testEncodedParameter() {
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.addParameter("include[test]", "a%2Cb%2Cc");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
+		Map<String, Set<String>> parameters = context.getRequestParameters();
+		Assert.assertEquals(1, parameters.size());
+		Set<String> values = parameters.get("include[test]");
+		Assert.assertEquals(1, values.size());
+		Assert.assertEquals("a,b,c", values.iterator().next());
 	}
 
 	@Test

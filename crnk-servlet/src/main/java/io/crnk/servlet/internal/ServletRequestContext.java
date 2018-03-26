@@ -19,18 +19,18 @@ package io.crnk.servlet.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.servlet.internal.legacy.ServletParametersProvider;
@@ -46,6 +46,8 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	private final ServletContext servletContext;
 
+	private final String defaultCharacterEncoding;
+
 	private Map<String, Set<String>> parameters;
 
 	private Nullable<byte[]> requestBody = Nullable.empty();
@@ -56,11 +58,17 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
 								 final HttpServletResponse response, String pathPrefix) {
+		this(servletContext, request, response, pathPrefix, HttpHeaders.DEFAULT_CHARSET);
+	}
+
+	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
+								 final HttpServletResponse response, String pathPrefix, String defaultCharacterEncoding) {
 		this.pathPrefix = pathPrefix;
 		this.servletContext = servletContext;
 		this.request = request;
 		this.response = response;
 		this.parameterProvider = new ServletParametersProvider(servletContext, request, response);
+		this.defaultCharacterEncoding = Objects.requireNonNull(defaultCharacterEncoding);
 		this.parameters = getParameters(request);
 	}
 
@@ -70,9 +78,28 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	}
 
 	private Map<String, Set<String>> getParameters(HttpServletRequest request) {
+		String characterEncoding = request.getCharacterEncoding();
+		try {
+			if (characterEncoding == null) {
+				characterEncoding = defaultCharacterEncoding;
+				request.setCharacterEncoding(characterEncoding);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
 		Map<String, Set<String>> queryParameters = new HashMap<>();
 		for (Map.Entry<String, String[]> queryEntry : request.getParameterMap().entrySet()) {
-			queryParameters.put(queryEntry.getKey(), new LinkedHashSet<>(Arrays.asList(queryEntry.getValue())));
+			Set<String> paramValues = new LinkedHashSet();
+			for (String paramValue : queryEntry.getValue()) {
+				try {
+					String decodedParamValue = URLDecoder.decode(paramValue, characterEncoding);
+					paramValues.add(decodedParamValue);
+				} catch (UnsupportedEncodingException e) {
+					throw new BadRequestException(e.getMessage());
+				}
+			}
+			queryParameters.put(queryEntry.getKey(), paramValues);
 		}
 		return queryParameters;
 	}

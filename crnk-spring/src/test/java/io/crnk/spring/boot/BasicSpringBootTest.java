@@ -13,7 +13,14 @@ import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.spring.app.BasicSpringBootApplication;
 
+import io.crnk.test.mock.TestModule;
+import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.TaskRepository;
+import net.javacrumbs.jsonunit.fluent.JsonFluentAssert;
 import org.apache.catalina.authenticator.jaspic.AuthConfigFactoryImpl;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,10 +57,17 @@ public class BasicSpringBootTest {
 
 	@Before
 	public void setup() {
+		TestModule.clear();
+
 		// NPE fix
 		if (AuthConfigFactory.getFactory() == null) {
 			AuthConfigFactory.setFactory(new AuthConfigFactoryImpl());
 		}
+	}
+
+	@After
+	public void tearDown() {
+		TestModule.clear();
 	}
 
 	@Test
@@ -64,6 +78,27 @@ public class BasicSpringBootTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
 	}
+
+	@Test
+	public void testRelationshipInclusion() {
+		Project project = new Project();
+		ProjectRepository projectRepository = new ProjectRepository();
+		projectRepository.save(project);
+
+		Task task = new Task();
+		task.setProject(project);
+		TaskRepository taskRepository = new TaskRepository();
+		taskRepository.save(task);
+
+		RestTemplate testRestTemplate = new RestTemplate();
+		ResponseEntity<String> response = testRestTemplate
+				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule%2Cproject", String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		JsonFluentAssert included = assertThatJson(response.getBody()).node("included");
+		included.isArray().ofLength(1);
+	}
+
 
 	@Test
 	public void testJpa() {
@@ -100,8 +135,7 @@ public class BasicSpringBootTest {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/tasks", String.class);
 			Assert.fail();
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
 	}
@@ -122,8 +156,7 @@ public class BasicSpringBootTest {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/doesNotExist", String.class);
 			Assert.fail();
-		}
-		catch (HttpClientErrorException e) {
+		} catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 
 			String body = e.getResponseBodyAsString();

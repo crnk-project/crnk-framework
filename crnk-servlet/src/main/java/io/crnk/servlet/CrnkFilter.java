@@ -18,6 +18,7 @@ package io.crnk.servlet;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.servlet.internal.FilterPropertiesProvider;
 import io.crnk.servlet.internal.ServletModule;
@@ -41,6 +42,8 @@ public class CrnkFilter implements Filter {
 
 	private FilterConfig filterConfig;
 
+	private String defaultCharacterEncoding = HttpHeaders.DEFAULT_CHARSET;
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.filterConfig = filterConfig;
@@ -52,6 +55,14 @@ public class CrnkFilter implements Filter {
 		boot.addModule(new ServletModule(provider));
 		initCrnk(boot);
 		boot.boot();
+	}
+
+	public String getDefaultCharacterEncoding() {
+		return defaultCharacterEncoding;
+	}
+
+	public void setDefaultCharacterEncoding(String defaultCharacterEncoding) {
+		this.defaultCharacterEncoding = defaultCharacterEncoding;
 	}
 
 	protected void initCrnk(CrnkBoot boot) {
@@ -68,7 +79,7 @@ public class CrnkFilter implements Filter {
 		if (req instanceof HttpServletRequest && res instanceof HttpServletResponse) {
 			ServletContext servletContext = filterConfig.getServletContext();
 			ServletRequestContext context = new ServletRequestContext(servletContext, (HttpServletRequest) req,
-					(HttpServletResponse) res, boot.getWebPathPrefix());
+					(HttpServletResponse) res, boot.getWebPathPrefix(), defaultCharacterEncoding);
 			RequestDispatcher requestDispatcher = boot.getRequestDispatcher();
 			requestDispatcher.process(context);
 			if (!context.checkAbort()) {

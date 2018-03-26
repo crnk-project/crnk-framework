@@ -3,6 +3,7 @@ package io.crnk.servlet;
 import javax.servlet.ServletContext;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.security.SecurityProvider;
@@ -41,7 +42,7 @@ public class ServletModuleTest {
 		request.addUserRole("admin");
 
 		provider.onRequestStarted(new HttpRequestContextBaseAdapter(new ServletRequestContext(servletContext, request,
-				response, "api")));
+				response, "api", HttpHeaders.DEFAULT_CHARSET)));
 
 
 		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist"));

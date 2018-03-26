@@ -19,6 +19,7 @@ package io.crnk.servlet;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
@@ -46,6 +47,8 @@ public class CrnkServlet extends HttpServlet {
 
 	private boolean acceptPlainJson;
 
+	private String defaultCharacterEncoding = HttpHeaders.DEFAULT_CHARSET;
+
 	@Override
 	public void init() throws ServletException {
 		boot.setPropertiesProvider(new ServletPropertiesProvider(getServletConfig()));
@@ -57,6 +60,14 @@ public class CrnkServlet extends HttpServlet {
 		boot.boot();
 	}
 
+	public String getDefaultCharacterEncoding() {
+		return defaultCharacterEncoding;
+	}
+
+	public void setDefaultCharacterEncoding(String defaultCharacterEncoding) {
+		this.defaultCharacterEncoding = defaultCharacterEncoding;
+	}
+
 	protected void initCrnk(CrnkBoot boot) {
 		// nothing to do here
 	}
@@ -65,7 +76,7 @@ public class CrnkServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		ServletContext servletContext = getServletContext();
 
-		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, boot.getWebPathPrefix());
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, boot.getWebPathPrefix(), defaultCharacterEncoding);
 		RequestDispatcher requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(context);
 
