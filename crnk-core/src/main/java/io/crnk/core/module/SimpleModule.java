@@ -1,6 +1,5 @@
 package io.crnk.core.module;
 
-import com.google.common.collect.ImmutableList;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -10,10 +9,6 @@ import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
-import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
@@ -47,6 +42,8 @@ public class SimpleModule implements Module {
 	private List<SecurityProvider> securityProviders = new ArrayList<>();
 
 	private List<ResourceLookup> resourceLookups = new ArrayList<>();
+
+	private List<PagingBehavior> pagingBehaviors = new ArrayList<>();
 
 	private List<com.fasterxml.jackson.databind.Module> jacksonModules = new ArrayList<>();
 
@@ -114,6 +111,9 @@ public class SimpleModule implements Module {
 		}
 		for (ModuleExtension extension : extensions) {
 			context.addExtension(extension);
+		}
+		for (PagingBehavior pagingBehavior : pagingBehaviors) {
+			context.addPagingBehavior(pagingBehavior);
 		}
 	}
 
@@ -250,12 +250,7 @@ public class SimpleModule implements Module {
 	 */
 	public void addPagingBehavior(PagingBehavior pagingBehavior){
 		checkInitialized();
-		addResourceInformationProvider(new DefaultResourceInformationProvider(
-				new NullPropertiesProvider()
-				, ImmutableList.of(pagingBehavior)
-				, new DefaultResourceFieldInformationProvider()
-				, new JacksonResourceFieldInformationProvider()
-		));
+		pagingBehaviors.add(pagingBehavior);
 	}
 
 	/**
