@@ -1,15 +1,10 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.RepositoryFilter;
-import io.crnk.core.engine.filter.ResourceFilter;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
-import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.filter.*;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -49,14 +44,8 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -98,6 +87,8 @@ public class ModuleRegistry {
 
 	private ResourceFilterDirectory filterBehaviorProvider;
 
+	private List<PagingBehavior> pagingBehaviors = new ArrayList<>();
+
 	public ModuleRegistry() {
 		this(true);
 	}
@@ -126,6 +117,24 @@ public class ModuleRegistry {
 	public void addModule(Module module) {
 		module.setupModule(new ModuleContextImpl(module));
 		modules.add(module);
+	}
+	/**
+	 * Add the given {@link PagingBehavior} to the module
+	 * @param pagingBehavior the paging behavior
+	 */
+	public void addPagingBehavior(PagingBehavior pagingBehavior){
+		pagingBehaviors.add(pagingBehavior);
+	}
+
+	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors){
+		this.pagingBehaviors.addAll(pagingBehaviors);
+		for (PagingBehavior pagingBehavior: pagingBehaviors){
+			this.aggregatedModule.addPagingBehavior(pagingBehavior);
+		}
+	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		return pagingBehaviors;
 	}
 
 	public ResourceRegistry getResourceRegistry() {
@@ -565,6 +574,7 @@ public class ModuleRegistry {
 		@Override
 		public void addPagingBehavior(PagingBehavior pagingBehavior) {
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
+			pagingBehaviors.add(pagingBehavior);
 			aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 

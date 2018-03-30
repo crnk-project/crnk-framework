@@ -2,7 +2,6 @@ package io.crnk.core.boot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -23,11 +22,7 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -94,8 +89,6 @@ public class CrnkBoot {
 	private Boolean allowUnknownAttributes;
 
 	private Boolean allowUnknownParameters;
-
-	private List<PagingBehavior> pagingBehaviors;
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -305,6 +298,9 @@ public class CrnkBoot {
 					ClassUtils.getAnnotation(repository.getClass(), JsonApiRelationshipRepository.class).get();
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
+		for (PagingBehavior pagingBehavior: moduleRegistry.getPagingBehaviors()){
+			module.addPagingBehavior(pagingBehavior);
+		}
 		moduleRegistry.addModule(module);
 		moduleRegistry.addModule(new CoreModule());
 	}
@@ -332,7 +328,7 @@ public class CrnkBoot {
 
 		boolean serializeLinksAsObjects =
 				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, pagingBehaviors));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -507,18 +503,17 @@ public class CrnkBoot {
 	}
 
 	private void setupPagingBehavior() {
-		if (pagingBehaviors == null) {
+		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
 			setupServiceDiscovery();
 
-			pagingBehaviors = new ArrayList<>();
-			pagingBehaviors.addAll(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 
-			if (pagingBehaviors.isEmpty()) {
-				pagingBehaviors.add(new OffsetLimitPagingBehavior());
+			if (moduleRegistry.getPagingBehaviors().isEmpty()) {
+				moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
 			}
 		}
 
-		for (PagingBehavior pagingBehavior: pagingBehaviors) {
+		for (PagingBehavior pagingBehavior: moduleRegistry.getPagingBehaviors()) {
 			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
 				if (defaultPageLimit != null) {
 					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
@@ -550,6 +545,6 @@ public class CrnkBoot {
 	}
 
 	public List<PagingBehavior> getPagingBehaviors() {
-		return pagingBehaviors;
+		return moduleRegistry.getPagingBehaviors();
 	}
 }
