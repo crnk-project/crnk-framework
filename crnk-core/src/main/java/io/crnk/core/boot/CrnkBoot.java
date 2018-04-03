@@ -298,9 +298,6 @@ public class CrnkBoot {
 					ClassUtils.getAnnotation(repository.getClass(), JsonApiRelationshipRepository.class).get();
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
-		for (PagingBehavior pagingBehavior: moduleRegistry.getPagingBehaviors()){
-			module.addPagingBehavior(pagingBehavior);
-		}
 		moduleRegistry.addModule(module);
 		moduleRegistry.addModule(new CoreModule());
 	}
