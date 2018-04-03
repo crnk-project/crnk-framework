@@ -2,7 +2,6 @@ package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -29,26 +28,8 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.models.ComplexPojo;
-import io.crnk.core.mock.models.Document;
-import io.crnk.core.mock.models.FancyProject;
-import io.crnk.core.mock.models.Project;
-import io.crnk.core.mock.models.Schedule;
-import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.models.Thing;
-import io.crnk.core.mock.models.User;
-import io.crnk.core.mock.repository.DocumentRepository;
-import io.crnk.core.mock.repository.PojoRepository;
-import io.crnk.core.mock.repository.ProjectRepository;
-import io.crnk.core.mock.repository.RelationIdTestRepository;
-import io.crnk.core.mock.repository.ResourceWithoutRepositoryToProjectRepository;
-import io.crnk.core.mock.repository.ScheduleRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
-import io.crnk.core.mock.repository.TaskToProjectRepository;
-import io.crnk.core.mock.repository.TaskWithLookupRepository;
-import io.crnk.core.mock.repository.UserRepository;
-import io.crnk.core.mock.repository.UserToProjectRepository;
+import io.crnk.core.mock.models.*;
+import io.crnk.core.mock.repository.*;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -63,7 +44,6 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,6 +82,12 @@ public class ModuleRegistryTest {
 
 	interface PrioDocumentFilter extends DocumentFilter, Prioritizable {
 
+	}
+
+	@Test
+	public void checkAddingPagingBehavior(){
+		moduleRegistry.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+		Assert.assertEquals(1, moduleRegistry.getPagingBehaviors().size());
 	}
 
 	@Test
