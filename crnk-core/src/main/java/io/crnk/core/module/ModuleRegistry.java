@@ -87,8 +87,6 @@ public class ModuleRegistry {
 
 	private ResourceFilterDirectory filterBehaviorProvider;
 
-	private List<PagingBehavior> pagingBehaviors = new ArrayList<>();
-
 	public ModuleRegistry() {
 		this(true);
 	}
@@ -123,18 +121,17 @@ public class ModuleRegistry {
 	 * @param pagingBehavior the paging behavior
 	 */
 	public void addPagingBehavior(PagingBehavior pagingBehavior){
-		pagingBehaviors.add(pagingBehavior);
+		this.aggregatedModule.addPagingBehavior(pagingBehavior);
 	}
 
 	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors){
-		this.pagingBehaviors.addAll(pagingBehaviors);
 		for (PagingBehavior pagingBehavior: pagingBehaviors){
 			this.aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 	}
 
 	public List<PagingBehavior> getPagingBehaviors() {
-		return pagingBehaviors;
+		return this.aggregatedModule.getPagingBehaviors();
 	}
 
 	public ResourceRegistry getResourceRegistry() {
@@ -574,7 +571,6 @@ public class ModuleRegistry {
 		@Override
 		public void addPagingBehavior(PagingBehavior pagingBehavior) {
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
-			pagingBehaviors.add(pagingBehavior);
 			aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 

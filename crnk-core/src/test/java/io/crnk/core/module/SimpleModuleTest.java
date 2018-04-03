@@ -24,6 +24,7 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import org.junit.Assert;
 import org.junit.Before;
@@ -196,6 +197,8 @@ public class SimpleModuleTest {
 
 		private int numResourceInformationBuilds = 0;
 
+		private int numPagingBehaviors = 0;
+
 		private int numRepositoryInformationBuilds = 0;
 
 		private int numResourceLookups = 0;
@@ -305,6 +308,11 @@ public class SimpleModuleTest {
 		@Override
 		public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
 			numRepositoryInformationBuilds++;
+		}
+
+		@Override
+		public void addPagingBehavior(PagingBehavior pagingBehavior) {
+			numPagingBehaviors++;
 		}
 
 		@Override

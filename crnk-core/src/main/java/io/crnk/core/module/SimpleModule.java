@@ -253,6 +253,11 @@ public class SimpleModule implements Module {
 		pagingBehaviors.add(pagingBehavior);
 	}
 
+	public List<PagingBehavior> getPagingBehaviors() {
+		checkInitialized();
+		return Collections.unmodifiableList(pagingBehaviors);
+	}
+
 	/**
 	 * Registers a new {@link ResourceLookup} with this module.
 	 *
