@@ -7,25 +7,17 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
-import io.crnk.core.exception.ResourceDuplicateIdException;
-import io.crnk.core.exception.ResourceException;
+import io.crnk.core.exception.*;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Holds information about the type of the resource.
@@ -282,6 +274,18 @@ public class ResourceInformation {
 
 	public String getSuperResourceType() {
 		return superResourceType;
+	}
+
+	public String getResourcePath() {
+		JsonApiResource jsonApiResourceClass = getResourceClass().getAnnotation(JsonApiResource.class);
+		String resourcePath;
+		if (jsonApiResourceClass != null) {
+			resourcePath = StringUtils.isBlank(jsonApiResourceClass.resourcePath()) ? getResourceType() : jsonApiResourceClass.resourcePath();
+		}
+		else {
+			resourcePath = getResourceType();
+		}
+		return resourcePath;
 	}
 
 	public <T> ResourceInstanceBuilder<T> getInstanceBuilder() {
