@@ -1,7 +1,6 @@
 package io.crnk.jpa.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -31,14 +30,13 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
 
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -91,6 +89,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
+		String resourcePath = getResourcePath(resourceClass);
 
 
 		MetaDataObject meta = metaProvider.discoverMeta(resourceClass).asDataObject();
@@ -104,7 +103,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				: null;
 
 		TypeParser typeParser = context.getTypeParser();
-		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceType, superResourceType,
+		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
 				instanceBuilder, fields, new OffsetLimitPagingBehavior());
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
 		info.setIdStringMapper(new JpaIdMapper(meta));
@@ -126,6 +125,11 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			name = name.substring(0, name.length() - ENTITY_NAME_SUFFIX.length());
 		}
 		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	}
+
+	@Override
+	public String getResourcePath(Class<?> entityClass) {
+		return null;
 	}
 
 	@Override

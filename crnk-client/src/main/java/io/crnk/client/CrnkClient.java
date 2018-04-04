@@ -2,7 +2,6 @@ package io.crnk.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import io.crnk.client.action.ActionStubFactory;
 import io.crnk.client.action.ActionStubFactoryContext;
 import io.crnk.client.http.HttpAdapter;
@@ -43,6 +42,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.properties.SystemPropertiesProvider;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceEntry;
@@ -53,14 +53,21 @@ import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
+import io.crnk.core.module.discovery.FallbackServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ResourceLookup;
+import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
+import io.crnk.legacy.locator.JsonServiceLocator;
+import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
 
@@ -68,7 +75,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -102,6 +108,15 @@ public class CrnkClient {
 
 	private ClientDocumentMapper documentMapper;
 
+	private ServiceDiscovery serviceDiscovery;
+	private ServiceDiscoveryFactory serviceDiscoveryFactory = new DefaultServiceDiscoveryFactory();
+	private JsonServiceLocator serviceLocator = new SampleJsonServiceLocator();
+	private PropertiesProvider propertiesProvider = new SystemPropertiesProvider();
+	private Long defaultPageLimit = null;
+
+	private Long maxPageLimit = null;
+
+
 	private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
 	public enum ClientType {
@@ -131,6 +146,8 @@ public class CrnkClient {
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.addModule(new ClientModule());
 
+		setupPagingBehavior();
+
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
 
@@ -158,9 +175,47 @@ public class CrnkClient {
 		setProxyFactory(new BasicProxyFactory());
 	}
 
+	private void setupServiceDiscovery() {
+		if (serviceDiscovery == null) {
+			// revert to reflection-based approach if no ServiceDiscovery is
+			// found
+			FallbackServiceDiscoveryFactory fallback =
+					new FallbackServiceDiscoveryFactory(serviceDiscoveryFactory, serviceLocator, propertiesProvider);
+			setServiceDiscovery(fallback.getInstance());
+		}
+	}
+
+	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
+		PreconditionUtil.assertNull("already set", this.serviceDiscovery);
+		this.serviceDiscovery = serviceDiscovery;
+		moduleRegistry.setServiceDiscovery(serviceDiscovery);
+	}
+
+	private void setupPagingBehavior() {
+		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
+			if (this.serviceDiscovery == null) setupServiceDiscovery();
+
+ 			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+
+			if (moduleRegistry.getPagingBehaviors().isEmpty()) {
+				moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
+			}
+		}
+
+		for (PagingBehavior pagingBehavior: moduleRegistry.getPagingBehaviors()) {
+			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
+				if (defaultPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+				}
+				if (maxPageLimit != null) {
+					((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
+				}
+			}
+		}
+	}
+
 	private void initJacksonModule(final boolean serializeLinksAsObjects) {
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects,
-				Collections.singletonList(new OffsetLimitPagingBehavior())));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
 	}
 
 	/**
@@ -424,7 +479,7 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null, null,
 						new OffsetLimitPagingBehavior());
 		return new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder);
 	}
@@ -437,7 +492,7 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation sourceResourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null, null,
 						new OffsetLimitPagingBehavior());
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}

@@ -1,8 +1,5 @@
 package io.crnk.core.resource.registry;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -23,7 +20,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,6 +28,9 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 public class ResourceRegistryTest {
 
@@ -68,7 +67,7 @@ public class ResourceRegistryTest {
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null, null,
 						new OffsetLimitPagingBehavior());
 		return new RegistryEntry(new DirectResponseResourceEntry(null,
 				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
@@ -107,7 +106,7 @@ public class ResourceRegistryTest {
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null,
 						Arrays.asList(idField, valueField),
 						new OffsetLimitPagingBehavior());
 		RegistryEntry registryEntry = new RegistryEntry(new DirectResponseResourceEntry(null, new

@@ -1,7 +1,6 @@
 package io.crnk.core.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -39,6 +38,7 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -48,6 +48,7 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -125,6 +126,23 @@ public class ModuleRegistry {
 	public void addModule(Module module) {
 		module.setupModule(new ModuleContextImpl(module));
 		modules.add(module);
+	}
+	/**
+	 * Add the given {@link PagingBehavior} to the module
+	 * @param pagingBehavior the paging behavior
+	 */
+	public void addPagingBehavior(PagingBehavior pagingBehavior){
+		this.aggregatedModule.addPagingBehavior(pagingBehavior);
+	}
+
+	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors){
+		for (PagingBehavior pagingBehavior: pagingBehaviors){
+			this.aggregatedModule.addPagingBehavior(pagingBehavior);
+		}
+	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		return this.aggregatedModule.getPagingBehaviors();
 	}
 
 	public ResourceRegistry getResourceRegistry() {
@@ -468,6 +486,16 @@ public class ModuleRegistry {
 		}
 
 		@Override
+		public String getResourcePath(Class<?> resourceClass) {
+			for (ResourceInformationProvider builder : builders) {
+				if (builder.accept(resourceClass)) {
+					return builder.getResourcePath(resourceClass);
+				}
+			}
+			return null;
+		}
+
+		@Override
 		public void init(ResourceInformationProviderContext context) {
 			for (ResourceInformationProvider builder : builders) {
 				builder.init(context);
@@ -559,6 +587,12 @@ public class ModuleRegistry {
 
 		public ModuleContextImpl(Module module) {
 			this.module = module;
+		}
+
+		@Override
+		public void addPagingBehavior(PagingBehavior pagingBehavior) {
+			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
+			aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 
 		@Override

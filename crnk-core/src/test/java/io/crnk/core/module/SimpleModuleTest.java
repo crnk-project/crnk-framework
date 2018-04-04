@@ -24,6 +24,8 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import org.junit.Assert;
 import org.junit.Before;
@@ -86,6 +88,19 @@ public class SimpleModuleTest {
 
 		Assert.assertEquals(0, context.numResourceInformationBuilds);
 		Assert.assertEquals(1, context.numResourceLookups);
+		Assert.assertEquals(0, context.numFilters);
+		Assert.assertEquals(0, context.numJacksonModules);
+		Assert.assertEquals(0, context.numRepositories);
+	}
+
+	@Test
+	public void testPagingBehaviorsBuilder() {
+		module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+		Assert.assertEquals(1, module.getPagingBehaviors().size());
+		module.setupModule(context);
+		Assert.assertEquals(1, context.numPagingBehaviors);
+		Assert.assertEquals(0, context.numResourceInformationBuilds);
+		Assert.assertEquals(0, context.numResourceLookups);
 		Assert.assertEquals(0, context.numFilters);
 		Assert.assertEquals(0, context.numJacksonModules);
 		Assert.assertEquals(0, context.numRepositories);
@@ -196,6 +211,8 @@ public class SimpleModuleTest {
 
 		private int numResourceInformationBuilds = 0;
 
+		private int numPagingBehaviors = 0;
+
 		private int numRepositoryInformationBuilds = 0;
 
 		private int numResourceLookups = 0;
@@ -305,6 +322,11 @@ public class SimpleModuleTest {
 		@Override
 		public void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider) {
 			numRepositoryInformationBuilds++;
+		}
+
+		@Override
+		public void addPagingBehavior(PagingBehavior pagingBehavior) {
+			numPagingBehaviors++;
 		}
 
 		@Override

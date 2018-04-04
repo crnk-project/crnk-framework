@@ -21,4 +21,6 @@ public interface ResourceInformationProvider {
 
 	String getResourceType(Class<?> clazz);
 
+	String getResourcePath(Class<?> clazz);
+
 }

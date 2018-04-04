@@ -18,6 +18,7 @@ import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 
 /**
@@ -89,6 +90,12 @@ public interface Module {
 		 * @param RepositoryInformationBuilder resource information builder
 		 */
 		void addRepositoryInformationBuilder(RepositoryInformationProvider repositoryInformationProvider);
+
+		/**
+		 * Add the given {@link PagingBehavior} to the module
+		 * @param pagingBehavior the paging behavior
+		 */
+		void addPagingBehavior(PagingBehavior pagingBehavior);
 
 		/**
 		 * Register the given {@link ResourceLookup} in Crnk.

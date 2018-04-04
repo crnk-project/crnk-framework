@@ -60,10 +60,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	}
 
 	@Override
-	public Resource createResource(Class<?> resourceClass, String resourceType) {
+	public Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
 		DefaultResource resource = new DefaultResource();
 		resource.resourceClass(resourceClass);
 		resource.resourceType(resourceType);
+		resource.resourcePath(resourcePath);
 		return resource;
 	}
 
@@ -124,6 +125,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private String resourceType;
 
+		private String resourcePath;
+
 		private String superResourceType;
 
 		private StringMapper idStringMapper;
@@ -136,6 +139,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		public void from(ResourceInformation information) {
 			resourceClass = information.getResourceClass();
 			resourceType = information.getResourceType();
+			resourcePath = information.getResourcePath();
 			superResourceType = information.getSuperResourceType();
 			idStringMapper = information.getIdStringMapper();
 			validator = information.getValidator();
@@ -169,6 +173,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
+		public DefaultResource resourcePath(String resourcePath) {
+			this.resourcePath = resourcePath;
+			return this;
+		}
+
 		public DefaultResource superResourceType(String superResourceType) {
 			this.superResourceType = superResourceType;
 			return this;
@@ -188,7 +197,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 				fieldImpls.add(field.build());
 			}
 
-			ResourceInformation information = new ResourceInformation(typeParser, resourceClass, resourceType, superResourceType,
+			ResourceInformation information = new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
 					fieldImpls, pagingBehavior);
 			if (validator != null) {
 				information.setValidator(validator);

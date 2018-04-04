@@ -16,6 +16,7 @@ import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,6 +71,12 @@ public class ResourceInformation {
 	private final String resourceType;
 
 	/**
+	 * Type url path of the resource. Corresponds to {@link JsonApiResource.resourcePath}
+	 * for annotated resources.
+	 */
+	private final String resourcePath;
+
+	/**
 	 * Creates a new instance of the given resource.
 	 */
 	private ResourceInstanceBuilder<?> instanceBuilder;
@@ -109,17 +116,18 @@ public class ResourceInformation {
 		}
 	};
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath, String superResourceType,
 			List<ResourceField> fields, PagingBehavior pagingBehavior) {
-		this(parser, resourceClass, resourceType, superResourceType, null, fields, pagingBehavior);
+		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingBehavior);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath, String superResourceType,
 			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
+		this.resourcePath = resourcePath;
 		this.superResourceType = superResourceType;
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
@@ -280,6 +288,10 @@ public class ResourceInformation {
 		return resourceType;
 	}
 
+	public String getResourcePath() {
+		return resourcePath;
+	}
+
 	public String getSuperResourceType() {
 		return superResourceType;
 	}
@@ -341,12 +353,12 @@ public class ResourceInformation {
 			return false;
 		}
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType);
+		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects.equals(resourcePath, that.resourcePath);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(resourceClass, resourceType);
+		return Objects.hash(resourceClass, resourceType, resourcePath);
 	}
 
 	/**
