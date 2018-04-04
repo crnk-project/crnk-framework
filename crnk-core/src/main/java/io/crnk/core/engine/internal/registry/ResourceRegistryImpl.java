@@ -3,7 +3,12 @@ package io.crnk.core.engine.internal.registry;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.ResourceRegistryPartBase;
+import io.crnk.core.engine.registry.ResourceRegistryPartEvent;
+import io.crnk.core.engine.registry.ResourceRegistryPartListener;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
@@ -100,7 +105,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		return url != null ? String.format("%s/%s", url, resourceInformation.getResourcePath()) : null;
+		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
 	}
 
 	@Override
