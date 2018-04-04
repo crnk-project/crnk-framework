@@ -2,12 +2,12 @@ package io.crnk.core.engine.internal.information.resource;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.collect.ImmutableList;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
+import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
@@ -71,6 +71,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		List<ResourceField> resourceFields = getResourceFields(resourceClass);
 
 		String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
+		String resourcePath = getResourcePath(resourceClass, allowNonResourceBaseClass);
 
 		Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
 		if (propertyOrder.isPresent()) {
@@ -84,7 +85,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),
-				resourceClass, resourceType, superResourceType, instanceBuilder, resourceFields,
+				resourceClass, resourceType, resourcePath, superResourceType, instanceBuilder, resourceFields,
 				pagingBehaviors.get(ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().pagingBehavior()));
 		if (!allowNonResourceBaseClass && information.getIdField() == null) {
 			throw new ResourceIdNotFoundException(resourceClass.getCanonicalName());
@@ -95,6 +96,23 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 	@Override
 	public String getResourceType(Class<?> resourceClass) {
 		return getResourceType(resourceClass, false);
+	}
+
+	@Override
+	public String getResourcePath(Class<?> resourceClass) {
+		return getResourcePath(resourceClass, false);
+	}
+
+	private String getResourcePath(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
+		JsonApiResource jsonApiResourceClass = resourceClass.getAnnotation(JsonApiResource.class);
+		String resourcePath;
+		if (jsonApiResourceClass != null) {
+			resourcePath = StringUtils.isBlank(jsonApiResourceClass.resourcePath()) ? getResourceType(resourceClass, allowNonResourceBaseClass) : jsonApiResourceClass.resourcePath();
+		}
+		else {
+			resourcePath = getResourceType(resourceClass, allowNonResourceBaseClass);
+		}
+		return resourcePath;
 	}
 
 	private String getResourceType(Class<?> resourceClass, boolean allowNonResourceBaseClass) {

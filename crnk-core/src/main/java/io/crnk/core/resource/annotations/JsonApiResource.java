@@ -28,6 +28,15 @@ public @interface JsonApiResource {
 	String type();
 
 	/**
+	 * Defines path of the resource specified by <i>type</i>. According to JSON API, the <i>type</i> can be either singular or
+	 * plural.
+	 *
+	 * @return path of the <i>type</i> of the resource, default the type attribute value
+	 * @see <a href="http://jsonapi.org/format/#document-structure-resource-types">JSON API - Resource Types</a>
+	 */
+	String resourcePath() default "";
+
+	/**
 	 * Defines paging behavior of the resource
 	 * @return {@link PagingBehavior} definition
 	 */

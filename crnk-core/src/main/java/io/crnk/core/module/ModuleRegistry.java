@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -45,7 +49,14 @@ import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -469,6 +480,16 @@ public class ModuleRegistry {
 			for (ResourceInformationProvider builder : builders) {
 				if (builder.accept(resourceClass)) {
 					return builder.getResourceType(resourceClass);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public String getResourcePath(Class<?> resourceClass) {
+			for (ResourceInformationProvider builder : builders) {
+				if (builder.accept(resourceClass)) {
+					return builder.getResourcePath(resourceClass);
 				}
 			}
 			return null;

@@ -39,7 +39,6 @@ import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +140,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	@Override
 	public InformationBuilder.Resource resource() {
 		if (resource == null) {
-			resource = informationBuilder.createResource(null, null);
+			resource = informationBuilder.createResource(null, null, null);
 		}
 		return resource;
 	}
