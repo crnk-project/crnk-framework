@@ -105,7 +105,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		return url != null ? String.format("%s/%s", url, resourceInformation.getResourcePath()) : null;
+		String resourcePath = resourceInformation.getResourcePath() == null ? resourceInformation.getResourceType() : resourceInformation.getResourcePath();
+		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
 	@Override
