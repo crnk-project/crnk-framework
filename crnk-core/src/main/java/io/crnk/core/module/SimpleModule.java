@@ -1,14 +1,5 @@
 package io.crnk.core.module;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -22,7 +13,10 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+
+import java.util.*;
 
 /**
  * Vanilla {@link Module} implementation that allows registration of extensions.
@@ -48,6 +42,8 @@ public class SimpleModule implements Module {
 	private List<SecurityProvider> securityProviders = new ArrayList<>();
 
 	private List<ResourceLookup> resourceLookups = new ArrayList<>();
+
+	private List<PagingBehavior> pagingBehaviors = new ArrayList<>();
 
 	private List<com.fasterxml.jackson.databind.Module> jacksonModules = new ArrayList<>();
 
@@ -115,6 +111,9 @@ public class SimpleModule implements Module {
 		}
 		for (ModuleExtension extension : extensions) {
 			context.addExtension(extension);
+		}
+		for (PagingBehavior pagingBehavior : pagingBehaviors) {
+			context.addPagingBehavior(pagingBehavior);
 		}
 	}
 
@@ -243,6 +242,20 @@ public class SimpleModule implements Module {
 	protected List<com.fasterxml.jackson.databind.Module> getJacksonModules() {
 		checkInitialized();
 		return Collections.unmodifiableList(jacksonModules);
+	}
+
+	/**
+	 * Add the given {@link PagingBehavior} to the module
+	 * @param pagingBehavior the paging behavior
+	 */
+	public void addPagingBehavior(PagingBehavior pagingBehavior){
+		checkInitialized();
+		pagingBehaviors.add(pagingBehavior);
+	}
+
+	public List<PagingBehavior> getPagingBehaviors() {
+		checkInitialized();
+		return Collections.unmodifiableList(pagingBehaviors);
 	}
 
 	/**
