@@ -141,4 +141,12 @@ public class ClientStubBase {
 	public enum ResponseType {
 		NONE, RESOURCE, RESOURCES
 	}
+	
+	public JsonApiUrlBuilder getUrlBuilder() {
+		return this.urlBuilder;
+	}
+	
+	public void setUrlBuilder(JsonApiUrlBuilder urlBuilder) {
+		this.urlBuilder = urlBuilder;
+	}
 }
