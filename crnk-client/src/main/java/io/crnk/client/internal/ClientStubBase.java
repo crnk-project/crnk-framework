@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.TransportException;
@@ -141,4 +142,13 @@ public class ClientStubBase {
 	public enum ResponseType {
 		NONE, RESOURCE, RESOURCES
 	}
+	
+	public QuerySpecSerializer getQuerySpecSerializer() {
+		return this.urlBuilder.getQuerySpecSerializer();
+	}
+
+	public void setQuerySpecSerializer(QuerySpecSerializer querySpecSerializer) {
+		this.urlBuilder.setQuerySpecSerializer(querySpecSerializer);
+	}
+
 }
