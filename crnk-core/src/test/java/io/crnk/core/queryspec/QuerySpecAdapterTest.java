@@ -28,7 +28,7 @@ public class QuerySpecAdapterTest {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null, null, new OffsetLimitPagingBehavior());
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null, new OffsetLimitPagingBehavior());
 		resourceRegistry.addEntry(new RegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
 						resourceInformation, RepositoryMethodAccess.ALL))));
 

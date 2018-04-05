@@ -108,5 +108,6 @@ public interface InformationBuilder {
 	ResourceRepository createResourceRepository();
 
 	Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+	Resource createResource(Class<?> resourceClass, String resourceType);
 
 }

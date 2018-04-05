@@ -116,9 +116,19 @@ public class ResourceInformation {
 		}
 	};
 
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+							   List<ResourceField> fields, PagingBehavior pagingBehavior) {
+		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingBehavior);
+	}
+
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath, String superResourceType,
 			List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingBehavior);
+	}
+
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
+		this(parser,resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingBehavior);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

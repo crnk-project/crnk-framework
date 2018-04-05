@@ -60,6 +60,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	}
 
 	@Override
+	public Resource createResource(Class<?> resourceClass, String resourceType) {
+		return createResource(resourceClass, resourceType, null);
+	}
+
+	@Override
 	public Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
 		DefaultResource resource = new DefaultResource();
 		resource.resourceClass(resourceClass);

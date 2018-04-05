@@ -28,7 +28,7 @@ public class ResourceInformationTest {
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
 		TypeParser typeParser = new TypeParser();
-		sut = new ResourceInformation(typeParser, Task.class, "tasks",null,  null, Arrays.asList(idField, valueField),
+		sut = new ResourceInformation(typeParser, Task.class, "tasks",null, Arrays.asList(idField, valueField),
 				new OffsetLimitPagingBehavior());
 	}
 
