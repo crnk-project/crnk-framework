@@ -30,7 +30,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		return "[" + StringUtils.join(".", attributePath) + "]";
 	}
 
-	protected static String addResourceType(RestrictedQueryParamsMembers type, String key, String resourceType) {
+	protected String addResourceType(RestrictedQueryParamsMembers type, String key, String resourceType) {
 		return type.toString() + "[" + resourceType + "]" + (key != null ? key : "");
 	}
 
