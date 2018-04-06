@@ -109,7 +109,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	protected serializeIncludedFields(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedFields(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedFields().isEmpty()) {
 			String key = addResourceType(RestrictedQueryParamsMembers.fields, null, resourceType);
 
@@ -124,7 +124,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	protected serializeIncludedRelations(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedRelations(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedRelations().isEmpty()) {
 			String key = addResourceType(RestrictedQueryParamsMembers.include, null, resourceType);
 
