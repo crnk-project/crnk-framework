@@ -14,6 +14,7 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapperUtil;
 import io.crnk.core.engine.internal.document.mapper.ResourceMapper;
@@ -23,12 +24,15 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 
 public class ClientDocumentMapper extends DocumentMapper {
+
+	private final ModuleRegistry moduleRegistry;
 
 	private ClientProxyFactory proxyFactory;
 
@@ -40,7 +44,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
 			propertiesProvider) {
-		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, true);
+		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, new ImmediateResultFactory(), true);
+		this.moduleRegistry = moduleRegistry;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();
 		this.objectMapper = objectMapper;
@@ -116,8 +121,9 @@ public class ClientDocumentMapper extends DocumentMapper {
 	}
 
 	public Object fromDocument(Document document, boolean getList) {
-		ClientResourceUpsert upsert =
-				new ClientResourceUpsert(resourceRegistry, propertiesProvider, typeParser, objectMapper, null, proxyFactory);
+		ControllerContext controllerContext = new ControllerContext(moduleRegistry, () -> this);
+		ClientResourceUpsert upsert = new ClientResourceUpsert(proxyFactory);
+		upsert.init(controllerContext);
 
 		PreconditionUtil.assertFalse("document contains json api errors and cannot be processed",
 				document.getErrors() != null && !document.getErrors().isEmpty());

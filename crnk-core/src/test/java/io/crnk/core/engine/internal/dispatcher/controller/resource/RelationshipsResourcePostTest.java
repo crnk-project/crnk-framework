@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -14,28 +21,19 @@ import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ProjectPolymorphic;
-import io.crnk.core.mock.repository.ProjectPolymorphicRepository;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 public class RelationshipsResourcePostTest extends BaseControllerTest {
 
@@ -56,8 +54,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -70,8 +68,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		ResourceRegistry resourceRegistry = mock(ResourceRegistry.class);
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// WHEN
 		boolean result = sut.isAcceptable(jsonPath, REQUEST_TYPE);
@@ -83,7 +81,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	@Test(expected = RequestBodyNotFoundException.class)
 	public void onMissingBodyThrowException() throws Exception {
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// do not sent along a body
 		Document newTaskToProjectBody = null;
@@ -94,7 +93,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	@Test(expected = ResourceFieldNotFoundException.class)
 	public void onInvalidRelationshipThrowException() throws Exception {
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/doesNotExist");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// do not sent along a body
 		Document newTaskToProjectBody = null;
@@ -110,9 +110,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost
-				resourcePost = new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER,
-				documentMapper, modificationFilters);
+		ResourcePost resourcePost = new ResourcePost();
+		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -149,7 +148,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.of((Object) createProject(Long.toString(projectId))));
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
 		Response projectRelationshipResponse =
@@ -163,7 +163,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 
 		ResourceIdentifier projectResourceId = new ResourceIdentifier(projectId.toString(), "projects");
 		// TODO properly implement ResourceIdentifier vs Resource in relationship repositories
-		// Mockito.validate(modificationFilter, Mockito.times(1)).modifyOneRelationship(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq(projectResourceId));
+		// Mockito.validate(modificationFilter, Mockito.times(1)).modifyOneRelationship(Mockito.any(), Mockito.any(ResourceField
+		// .class), Mockito.eq(projectResourceId));
 	}
 
 	@Test
@@ -174,8 +175,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newUserBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/users");
-		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper, modificationFilters);
+		ResourcePost resourcePost = new ResourcePost();
+		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
 		Response taskResponse = resourcePost.handle(taskPath, emptyUserQuery, null, newUserBody);
@@ -217,7 +218,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
 		Response projectRelationshipResponse =
@@ -238,8 +240,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, OBJECT_MAPPER, documentMapper, modificationFilters);
+		ResourcePost resourcePost = new ResourcePost();
+		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
@@ -256,7 +258,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.nullValue());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost(resourceRegistry, typeParser, modificationFilters);
+		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
 		Response projectRelationshipResponse =
@@ -279,8 +282,8 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
-		ResourcePost resourcePost =
-				new ResourcePost(resourceRegistry, PROPERTIES_PROVIDER, typeParser, objectMapper, documentMapper, modificationFilters);
+		ResourcePost resourcePost = new ResourcePost();
+		resourcePost.init(controllerContext);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
 		Long taskIdOne = Long.parseLong(taskResponse.getDocument().getSingleData().get().getId());
@@ -316,10 +319,9 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		assertNotNull(projectPolymorphic.getRelationships().get("task").getSingleData().get());
 		assertNotNull(projectPolymorphic.getRelationships().get("tasks"));
 
-		ProjectPolymorphicRepository repository =
-				(ProjectPolymorphicRepository) resourceRegistry.getEntry(ProjectPolymorphic.class).getResourceRepository(null)
-						.getResourceRepository();
-		ProjectPolymorphic projectPolymorphicObj = repository.findOne(projectId, null);
+		ResourceRepositoryV2 repository = resourceRegistry.getEntry(ProjectPolymorphic.class).getResourceRepositoryFacade();
+		ProjectPolymorphic projectPolymorphicObj =
+				(ProjectPolymorphic) repository.findOne(projectId, new QuerySpec(ProjectPolymorphic.class));
 		assertNotNull(projectPolymorphicObj.getTasks());
 		assertEquals(2, projectPolymorphicObj.getTasks().size());
 	}

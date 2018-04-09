@@ -2,6 +2,7 @@ package io.crnk.core.resource.registry;
 
 import java.util.Arrays;
 
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -40,11 +41,9 @@ public class RegistryEntryFacadeTest {
 
 	@Before
 	public void setup() {
-		MockRepositoryUtil.clear();
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
 
 		user1 = new User();
 		user1.setName("test1");
@@ -56,7 +55,7 @@ public class RegistryEntryFacadeTest {
 		user2.setId(14L);
 		repository.save(user2);
 
-		entry = boot.getResourceRegistry().getEntry(User.class);
+		entry = container.getEntry(User.class);
 		facade = entry.getResourceRepositoryFacade();
 	}
 

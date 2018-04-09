@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -11,11 +18,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PerRootPathIncludeBehaviorTest extends AbstractIncludeBehaviorTest {
@@ -38,7 +40,7 @@ public class PerRootPathIncludeBehaviorTest extends AbstractIncludeBehaviorTest 
 		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
 		querySpec.includeRelation(Arrays.asList("parent"));
 
-		Document document = mapper.toDocument(toResponse(h11), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(h11), toAdapter(querySpec), mappingConfig).get();
 		Resource taskResource = document.getSingleData().get();
 
 		Relationship parentRelationship = taskResource.getRelationships().get("parent");
@@ -59,7 +61,7 @@ public class PerRootPathIncludeBehaviorTest extends AbstractIncludeBehaviorTest 
 		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
 		querySpec.includeRelation(Arrays.asList("parent", "parent"));
 
-		Document document = mapper.toDocument(toResponse(h11), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(h11), toAdapter(querySpec), mappingConfig).get();
 		Resource taskResource = document.getSingleData().get();
 
 		Relationship parentRelationship = taskResource.getRelationships().get("parent");

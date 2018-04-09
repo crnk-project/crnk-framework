@@ -3,6 +3,7 @@ package io.crnk.legacy.internal;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.queryParams.context.SimpleQueryParamsParserContext;
@@ -21,8 +22,8 @@ public class QueryParamsAdapterBuilder implements QueryAdapterBuilder {
 	}
 
 	@Override
-	public QueryAdapter build(ResourceInformation info, Map<String, Set<String>> parameters) {
+	public QueryAdapter build(ResourceInformation info, Map<String, Set<String>> parameters, QueryContext queryContext) {
 		SimpleQueryParamsParserContext context = new SimpleQueryParamsParserContext(parameters, info);
-		return new QueryParamsAdapter(info, queryParamsBuilder.buildQueryParams(context), moduleRegistry);
+		return new QueryParamsAdapter(info, queryParamsBuilder.buildQueryParams(context), moduleRegistry, queryContext);
 	}
 }

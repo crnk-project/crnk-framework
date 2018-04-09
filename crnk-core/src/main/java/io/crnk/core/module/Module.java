@@ -1,20 +1,29 @@
 package io.crnk.core.module;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.filter.*;
+import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.RepositoryFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
@@ -42,6 +51,7 @@ public interface Module {
 	 */
 	void setupModule(ModuleContext context);
 
+
 	/**
 	 * Interface Crnk exposes to modules for purpose of registering
 	 * extended functionality.
@@ -49,9 +59,14 @@ public interface Module {
 	interface ModuleContext {
 
 		/**
-		 * Adds the given extension
+		 * Sets the ResultFactory used. Can only be called once by all modules!
 		 *
-		 * @param extension
+		 * @param resultFactory
+		 */
+		void setResultFactory(ResultFactory resultFactory);
+
+		/**
+		 * Adds the given extension
 		 */
 		void addExtension(ModuleExtension extension);
 
@@ -93,6 +108,7 @@ public interface Module {
 
 		/**
 		 * Add the given {@link PagingBehavior} to the module
+		 *
 		 * @param pagingBehavior the paging behavior
 		 */
 		void addPagingBehavior(PagingBehavior pagingBehavior);
@@ -160,17 +176,16 @@ public interface Module {
 
 		/**
 		 * Adds a repository filter to intercept repository calls.
-		 *
-		 * @param filter
 		 */
 		void addRepositoryFilter(RepositoryFilter filter);
 
 		/**
 		 * Adds a resource filter to manage access to resources and fields.
-		 *
-		 * @param filter
 		 */
 		void addResourceFilter(ResourceFilter filter);
+
+
+		void addResourceFieldContributor(ResourceFieldContributor contributor);
 
 		/**
 		 * Adds a repository decorator to intercept repository calls.
@@ -227,5 +242,13 @@ public interface Module {
 		ResourceFilterDirectory getResourceFilterDirectory();
 
 		void addResourceModificationFilter(ResourceModificationFilter filter);
+
+		ResultFactory getResultFactory();
+
+		List<DocumentFilter> getDocumentFilters();
+
+		void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory);
+
+		ModuleRegistry getModuleRegistry();
 	}
 }

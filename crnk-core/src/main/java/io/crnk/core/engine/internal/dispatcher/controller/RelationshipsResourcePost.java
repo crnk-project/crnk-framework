@@ -7,9 +7,8 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,48 +17,53 @@ import java.util.List;
 
 public class RelationshipsResourcePost extends RelationshipsResourceUpsert {
 
-	public RelationshipsResourcePost(ResourceRegistry resourceRegistry, TypeParser typeParser, List<ResourceModificationFilter> modificationFilters) {
-		super(resourceRegistry, typeParser, null, modificationFilters);
-	}
-
 	@Override
 	public HttpMethod method() {
 		return HttpMethod.POST;
 	}
 
 	@Override
-	public void processToManyRelationship(Object resource, ResourceInformation targetResourceInformation, ResourceField relationshipField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
-										  RelationshipRepositoryAdapter relationshipRepositoryForClass) {
-		List<ResourceIdentifier> resourceIds = new ArrayList<>();
-		for (ResourceIdentifier dataBody : dataBodies) {
-			resourceIds.add(dataBody);
-		}
-		for (ResourceModificationFilter filter : modificationFilters) {
-			resourceIds = filter.modifyManyRelationship(resource, relationshipField, ResourceRelationshipModificationType.ADD, resourceIds);
-		}
+	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
+											RelationshipRepositoryAdapter relationshipRepositoryForClass) {
+		return resourceResult.merge(resource -> {
+			List<ResourceIdentifier> resourceIds = new ArrayList<>();
+			for (ResourceIdentifier dataBody : dataBodies) {
+				resourceIds.add(dataBody);
+			}
 
-		List<Serializable> parsedIds = new LinkedList<>();
-		for (ResourceIdentifier resourceId : resourceIds) {
-			Serializable parsedId = targetResourceInformation.parseIdString(resourceId.getId());
-			parsedIds.add(parsedId);
-		}
+			List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
+			for (ResourceModificationFilter filter : modificationFilters) {
+				resourceIds = filter.modifyManyRelationship(resource, relationshipField, ResourceRelationshipModificationType.ADD, resourceIds);
+			}
 
-		// noinspection unchecked
-		relationshipRepositoryForClass.addRelations(resource, parsedIds, relationshipField, queryAdapter);
+			List<Serializable> parsedIds = new LinkedList<>();
+			for (ResourceIdentifier resourceId : resourceIds) {
+				Serializable parsedId = targetResourceInformation.parseIdString(resourceId.getId());
+				parsedIds.add(parsedId);
+			}
+
+			// noinspection unchecked
+			return relationshipRepositoryForClass.addRelations(resource, parsedIds, relationshipField, queryAdapter);
+		});
 	}
 
 	@Override
-	protected void processToOneRelationship(Object resource, ResourceInformation targetResourceInformation, ResourceField relationshipField, ResourceIdentifier resourceId, QueryAdapter queryAdapter,
-											RelationshipRepositoryAdapter relationshipRepositoryForClass) {
-		for (ResourceModificationFilter filter : modificationFilters) {
-			resourceId = filter.modifyOneRelationship(resource, relationshipField, resourceId);
-		}
+	protected Result processToOneRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, ResourceIdentifier resourceId, QueryAdapter queryAdapter,
+											  RelationshipRepositoryAdapter relationshipRepositoryForClass) {
+		return resourceResult.merge(resource -> {
+			ResourceIdentifier filteredResourceId = resourceId;
 
-		Serializable parsedId = null;
-		if (resourceId != null) {
-			parsedId = targetResourceInformation.parseIdString(resourceId.getId());
-		}
-		// noinspection unchecked
-		relationshipRepositoryForClass.setRelation(resource, parsedId, relationshipField, queryAdapter);
+			List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
+			for (ResourceModificationFilter filter : modificationFilters) {
+				filteredResourceId = filter.modifyOneRelationship(resource, relationshipField, filteredResourceId);
+			}
+
+			Serializable parsedId = null;
+			if (filteredResourceId != null) {
+				parsedId = targetResourceInformation.parseIdString(filteredResourceId.getId());
+			}
+			// noinspection unchecked
+			return relationshipRepositoryForClass.setRelation(resource, parsedId, relationshipField, queryAdapter);
+		});
 	}
 }

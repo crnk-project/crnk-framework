@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.*;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
@@ -31,12 +32,11 @@ public class DocumentSerializerTest {
 
 	@Before
 	public void setup() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
 
-		objectMapper = boot.getObjectMapper();
+		objectMapper = container.getObjectMapper();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		reader = objectMapper.reader().forType(Document.class);

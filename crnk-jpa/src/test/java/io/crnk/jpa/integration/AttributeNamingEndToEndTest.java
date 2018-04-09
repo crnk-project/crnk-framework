@@ -13,7 +13,7 @@ import org.junit.Test;
 public class AttributeNamingEndToEndTest extends AbstractJpaJerseyTest {
 
 	@Test
-	public void testCanStoreBasicAttributeValues() throws InstantiationException, IllegalAccessException {
+	public void testCanStoreBasicAttributeValues() {
 		ResourceRepositoryV2<NamingTestEntity, Serializable> repo = client.getRepositoryForType(NamingTestEntity.class);
 
 		NamingTestEntity test = new NamingTestEntity();

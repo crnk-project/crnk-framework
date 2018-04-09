@@ -1,5 +1,9 @@
 package io.crnk.core.module;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -22,14 +26,33 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest.SomeIl
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.models.*;
-import io.crnk.core.mock.repository.*;
+import io.crnk.core.mock.models.ComplexPojo;
+import io.crnk.core.mock.models.Document;
+import io.crnk.core.mock.models.FancyProject;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.Thing;
+import io.crnk.core.mock.models.User;
+import io.crnk.core.mock.repository.DocumentRepository;
+import io.crnk.core.mock.repository.PojoRepository;
+import io.crnk.core.mock.repository.ProjectRepository;
+import io.crnk.core.mock.repository.RelationIdTestRepository;
+import io.crnk.core.mock.repository.ResourceWithoutRepositoryToProjectRepository;
+import io.crnk.core.mock.repository.ScheduleRepository;
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.mock.repository.TaskToProjectRepository;
+import io.crnk.core.mock.repository.TaskWithLookupRepository;
+import io.crnk.core.mock.repository.UserRepository;
+import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -43,16 +66,10 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
-import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -400,11 +417,8 @@ public class ModuleRegistryTest {
 		Assert.assertEquals(TestResource2.class, info.getResourceClass());
 
 		Assert.assertNotNull(entry.getResourceRepository(null));
-		Map relationshipEntries = entry.getRelationshipEntries();
-		Assert.assertEquals(1, relationshipEntries.size());
-		DirectResponseRelationshipEntry responseRelationshipEntry = (DirectResponseRelationshipEntry) relationshipEntries
-				.values().iterator().next();
-		Assert.assertNotNull(responseRelationshipEntry);
+		RelationshipRepositoryAdapter relationshipRepositoryAdapter = entry.getRelationshipRepository("parent", null);
+		Assert.assertNotNull(relationshipRepositoryAdapter);
 	}
 
 	@JsonApiResource(type = "test2")

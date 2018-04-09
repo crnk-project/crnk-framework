@@ -27,10 +27,10 @@ public class Project {
 	private Task task;
 
 	@JsonApiLinksInformation
-	private ProjectLinks links;
+	private ProjectLinks links = new ProjectLinks();
 
 	@JsonApiMetaInformation
-	private ProjectMeta meta;
+	private ProjectMeta meta = new ProjectMeta();
 
 	public Long getId() {
 		return id;

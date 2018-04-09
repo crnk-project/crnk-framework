@@ -30,7 +30,6 @@ public class JaxrsModule implements Module {
 
 	@Override
 	public void setupModule(ModuleContext context) {
-		context.addRepositoryInformationBuilder(new JaxrsResourceRepositoryInformationProvider());
 		context.addExceptionMapper(new WebApplicationExceptionMapper());
 
 		if (securityContext != null) {

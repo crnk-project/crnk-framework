@@ -60,7 +60,7 @@ public class SerializeOnlyIdRelationIdLookupTest extends AbstractDocumentMapperT
 
 		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
 
-		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec), mappingConfig).get();
 		Resource resource = document.getSingleData().get();
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("relationIdTest", resource.getType());

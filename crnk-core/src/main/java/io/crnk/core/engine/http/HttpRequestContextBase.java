@@ -18,13 +18,29 @@ public interface HttpRequestContextBase {
 
 	String getBaseUrl();
 
-	byte[] getRequestBody() throws IOException;
+	byte[] getRequestBody();
 
+	/**
+	 * @deprecated use {@link HttpResponse}
+	 */
+	@Deprecated
 	void setResponseHeader(String name, String value);
 
+	/**
+	 * @deprecated use {@link HttpResponse}
+	 */
+	@Deprecated
 	void setResponse(int code, byte[] body) throws IOException;
 
 	String getMethod();
 
+	/**
+	 * @deprecated use {@link HttpResponse}
+	 */
+	@Deprecated
 	String getResponseHeader(String name);
+
+	HttpResponse getResponse();
+
+	void setResponse(HttpResponse response);
 }

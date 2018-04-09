@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper.lookup.relationid;
 
+import java.util.Arrays;
+
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -9,7 +11,6 @@ import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.utils.Nullable;
-import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public class InconsistentRelationshipTest extends AbstractDocumentMapperTest {
 		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
 		querySpec.includeRelation(Arrays.asList("testResourceIdRef"));
 
-		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec), mappingConfig).get();
 		Resource resource = document.getSingleData().get();
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("relationIdTest", resource.getType());

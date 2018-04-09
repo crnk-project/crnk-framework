@@ -77,20 +77,16 @@ public class SecurityModule implements InitializingModule {
 	 * @param enabled to only perform security checks when true.
 	 */
 	public void setEnabled(final boolean enabled) {
-		setEnabled(new Supplier<Boolean>() {
-
-			@Override
-			public Boolean get() {
-				return enabled;
-			}
-		});
+		setEnabled(() -> enabled);
 	}
 
 	/**
 	 * @return true if enabled
 	 */
 	public boolean isEnabled() {
-		return enabled.get();
+		boolean en = enabled.get();
+		LOGGER.debug("enabled={}", en);
+		return en;
 	}
 
 	/**

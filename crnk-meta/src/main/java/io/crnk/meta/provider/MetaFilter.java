@@ -1,5 +1,6 @@
 package io.crnk.meta.provider;
 
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.meta.model.MetaElement;
 
 public interface MetaFilter {
@@ -14,5 +15,5 @@ public interface MetaFilter {
 	 * @param element
 	 * @return element, modified copy or null to exclude from request
 	 */
-	MetaElement adjustForRequest(MetaElement element);
+	MetaElement adjustForRequest(MetaElement element, QueryContext queryContext);
 }

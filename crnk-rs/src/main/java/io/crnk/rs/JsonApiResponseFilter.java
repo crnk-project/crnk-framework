@@ -1,25 +1,28 @@
 package io.crnk.rs;
 
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
-import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
-import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.list.ResourceListBase;
-import io.crnk.core.utils.Nullable;
-import io.crnk.rs.type.JsonApiMediaType;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
+
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
+import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
+import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.ResourceListBase;
+import io.crnk.core.utils.Nullable;
+import io.crnk.rs.type.JsonApiMediaType;
 
 /**
  * Uses the Crnk {@link DocumentMapper} to create a JSON API response for
@@ -67,13 +70,17 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				JsonApiResponse jsonApiResponse = new JsonApiResponse();
 				jsonApiResponse.setEntity(response);
 				// use the Crnk document mapper to create a JSON API response
-				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, null));
+				DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+				QueryAdapter queryAdapter = new QuerySpecAdapter(null, null, context.getQueryContext());
+				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, queryAdapter, mappingConfig).get());
 				responseContext.getHeaders().put("Content-Type",
 						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
-			} finally {
+			}
+			finally {
 				httpRequestContextProvider.onRequestFinished();
 			}
-		} else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
+		}
+		else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
 			Document document = new Document();
 			document.setData(Nullable.of(response));
 			responseContext.setEntity(document);

@@ -1,6 +1,6 @@
 package io.crnk.core.engine.registry;
 
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -9,10 +9,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,19 +20,18 @@ public class CustomResourceRegistryTest {
 
 	@Test
 	public void test() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.addModule(new CustomRegistryPartModule());
-		boot.setServiceDiscovery(new TestServiceDiscovery());
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.addModule(new CustomRegistryPartModule());
+		container.getBoot().setServiceDiscovery(new TestServiceDiscovery());
+		container.boot();
 
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		RegistryEntry entry = resourceRegistry.getEntry("somePrefix/custom");
+		RegistryEntry entry = container.getEntry("somePrefix/custom");
 		Assert.assertNotNull(entry);
 		ResourceRepositoryAdapter adapter = entry.getResourceRepository();
 
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec("somePrefix/custom"), resourceRegistry);
+		QueryAdapter queryAdapter = container.toQueryAdapter(new QuerySpec("somePrefix/custom"));
 
-		JsonApiResponse response = adapter.findAll(queryAdapter);
+		JsonApiResponse response = adapter.findAll(queryAdapter).get();
 		Assert.assertNotNull(response.getEntity());
 		List<Resource> resources = (List<Resource>) response.getEntity();
 		Assert.assertEquals(1, resources.size());

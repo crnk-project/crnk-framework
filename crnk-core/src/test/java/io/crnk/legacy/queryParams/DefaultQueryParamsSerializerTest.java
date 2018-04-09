@@ -1,26 +1,19 @@
 package io.crnk.legacy.queryParams;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class DefaultQueryParamsSerializerTest {
 
@@ -30,32 +23,33 @@ public class DefaultQueryParamsSerializerTest {
 
 	@Before
 	public void setup() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
-		boot.boot();
-		resourceRegistry = boot.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
+		container.boot();
+		resourceRegistry = container.getResourceRegistry();
+		urlBuilder = new JsonApiUrlBuilder(resourceRegistry, container.getQueryContext());
 	}
 
 	@Test
 	public void testHttpsSchema() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.boot();
-		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
+		container.boot();
+		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
 		check("https://127.0.0.1/tasks", null, new QueryParams());
 	}
 
 	@Test
 	public void testPort() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.boot();
-		resourceRegistry = boot.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
+		container.boot();
+
+		resourceRegistry = container.getResourceRegistry();
+		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
 		check("https://127.0.0.1:1234/tasks", null, new QueryParams());
 	}
 

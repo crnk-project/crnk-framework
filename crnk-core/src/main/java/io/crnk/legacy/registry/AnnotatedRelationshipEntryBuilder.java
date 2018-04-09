@@ -10,6 +10,7 @@ import io.crnk.legacy.internal.ParametersFactory;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 
+@Deprecated
 public class AnnotatedRelationshipEntryBuilder implements ResponseRelationshipEntry {
 
 	private RepositoryInstanceBuilder repositoryInstanceBuilder;

@@ -1,10 +1,8 @@
 package io.crnk.core.engine.internal.document.mapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Document;
@@ -16,11 +14,16 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentMapper {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentMapper.class);
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
@@ -32,17 +35,20 @@ public class DocumentMapper {
 
 	private IncludeLookupSetter includeLookupSetter;
 
+	private ResultFactory resultFactory;
+
 	private boolean client;
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-			ResourceFilterDirectory resourceFilterDirectory) {
-		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, false);
+						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory) {
+		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, false);
 	}
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-			ResourceFilterDirectory resourceFilterDirectory, boolean client) {
+						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, boolean client) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
+		this.resultFactory = resultFactory;
 		this.resourceFilterDirectory = resourceFilterDirectory;
 
 		PreconditionUtil.assertTrue("filterBehavior necessary on server-side", client || resourceFilterDirectory != null);
@@ -52,17 +58,13 @@ public class DocumentMapper {
 		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
 
-	public ResourceFilterDirectory getFilterBehaviorManager() {
-		return resourceFilterDirectory;
-	}
-
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-			PropertiesProvider propertiesProvider) {
-		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
+														 PropertiesProvider propertiesProvider) {
+		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-			PropertiesProvider propertiesProvider) {
+													   PropertiesProvider propertiesProvider) {
 		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 	}
 
@@ -70,26 +72,11 @@ public class DocumentMapper {
 		return new ResourceMapper(util, client, objectMapper, resourceFilterDirectory);
 	}
 
-	public Document toDocument(JsonApiResponse response, QueryAdapter queryAdapter) {
-		return toDocument(response, queryAdapter, (RepositoryMethodParameterProvider) null);
-	}
 
-	public Document toDocument(JsonApiResponse response, QueryAdapter queryAdapter,
-			RepositoryMethodParameterProvider parameterProvider) {
-		Set<String> mappingConfig = Collections.emptySet();
-		return toDocument(response, queryAdapter, parameterProvider, mappingConfig);
-	}
-
-	public Document toDocument(JsonApiResponse response, QueryAdapter queryAdapter,
-			RepositoryMethodParameterProvider parameterProvider, Set<String> fieldsWidthEnforcedIdSerialization) {
-		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
-		mappingConfig.setParameterProvider(parameterProvider);
-		mappingConfig.setFieldsWithEnforcedIdSerialization(fieldsWidthEnforcedIdSerialization);
-		return toDocument(response, queryAdapter, mappingConfig);
-	}
-
-	public Document toDocument(JsonApiResponse response, QueryAdapter queryAdapter, DocumentMappingConfig mappingConfig) {
+	public Result<Document> toDocument(JsonApiResponse response, QueryAdapter queryAdapter, DocumentMappingConfig
+			mappingConfig) {
 		if (response == null) {
+			LOGGER.debug("null response returned");
 			return null;
 		}
 
@@ -102,27 +89,27 @@ public class DocumentMapper {
 			util.setLinks(doc, response.getLinksInformation(), queryAdapter);
 		}
 		addData(doc, response.getEntity(), queryAdapter, resourceMapping);
-		addRelationDataAndInclusions(doc, response.getEntity(), queryAdapter, mappingConfig);
-		if (queryAdapter != null && queryAdapter.getCompactMode()) {
-			compact(doc);
-		}
-		return doc;
+
+		Result<Document> result = addRelationDataAndInclusions(doc, response.getEntity(), queryAdapter, mappingConfig);
+		result.doWork(it -> compact(doc, queryAdapter));
+		return result;
 	}
 
 	/**
 	 * removes unncessary json elements
 	 */
-	private void compact(Document doc) {
-		if (doc.getIncluded() != null) {
-			compact(doc.getIncluded());
-		}
-		if (doc.getData().isPresent()) {
-			if (doc.isMultiple()) {
-				compact(doc.getCollectionData().get());
+	private void compact(Document doc, QueryAdapter queryAdapter) {
+		if (queryAdapter != null && queryAdapter.getCompactMode()) {
+			if (doc.getIncluded() != null) {
+				compact(doc.getIncluded());
 			}
-		}
-		else {
-			compact(doc.getSingleData().get());
+			if (doc.getData().isPresent()) {
+				if (doc.isMultiple()) {
+					compact(doc.getCollectionData().get());
+				}
+			} else {
+				compact(doc.getSingleData().get());
+			}
 		}
 	}
 
@@ -145,26 +132,26 @@ public class DocumentMapper {
 
 	}
 
-	private void addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter, DocumentMappingConfig
-			mappingConfig) {
+	private Result<Document> addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter,
+														  DocumentMappingConfig mappingConfig) {
+
 		if (doc.getData().isPresent() && !client) {
-			RepositoryMethodParameterProvider parameterProvider = mappingConfig.getParameterProvider();
-			Set<String> fieldsWithEnforceIdSerialization = mappingConfig.getFieldsWithEnforcedIdSerialization();
-			includeLookupSetter.setIncludedElements(doc, entity, queryAdapter, parameterProvider,
-					fieldsWithEnforceIdSerialization);
+			return includeLookupSetter.processInclusions(doc, entity, queryAdapter, mappingConfig);
+		} else {
+			return resultFactory.just(doc);
 		}
 	}
 
 	private void addData(Document doc, Object entity, QueryAdapter queryAdapter, ResourceMappingConfig resourceMappingConfig) {
 		if (entity != null) {
+			LOGGER.debug("adding data {}", entity);
 			if (entity instanceof Iterable) {
 				ArrayList<Object> dataList = new ArrayList<>();
 				for (Object obj : (Iterable<?>) entity) {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
 				doc.setData(Nullable.of((Object) dataList));
-			}
-			else {
+			} else {
 				doc.setData(Nullable.of((Object) resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}
@@ -177,6 +164,7 @@ public class DocumentMapper {
 				errorList.add(error);
 			}
 			doc.setErrors(errorList);
+			LOGGER.debug("adding errors {}", errorList);
 		}
 	}
 

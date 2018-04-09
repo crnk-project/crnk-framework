@@ -11,6 +11,7 @@ There are three main, orthogonal aspects of Crnk that need configuration:
 3. The selection of third-party modules to reuse. For a list of modules provided by Crnk see the <modules> chapter.
 
 The subsequent sections explain various possibilities resp. how to implement a custom one.
+The <<reactive>> chapter further outlines how to setup Crnk in an asynchronous/reactive setting.
 
 
 ## Requirements

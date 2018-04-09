@@ -2,7 +2,6 @@ package io.crnk.spring.client;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -57,7 +56,7 @@ public class RestTemplateResponse implements HttpAdapterResponse {
 	@Override
 	public String getResponseHeader(String name) {
 		List<String> values = headers.get(name);
-		return StringUtils.join(",", values);
+		return values != null ? StringUtils.join(",", values) : null;
 	}
 
 }

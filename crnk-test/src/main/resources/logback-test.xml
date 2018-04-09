@@ -9,7 +9,9 @@
 		</encoder>
 	</appender>
 
-	<root level="ERROR">
+	<logger name="io.crnk" level="INFO"/>
+
+	<root level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </configuration>

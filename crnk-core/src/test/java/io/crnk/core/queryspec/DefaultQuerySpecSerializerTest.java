@@ -1,8 +1,6 @@
 package io.crnk.core.queryspec;
 
-import static org.junit.Assert.assertEquals;
-
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -11,13 +9,13 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class DefaultQuerySpecSerializerTest {
 
@@ -27,51 +25,50 @@ public class DefaultQuerySpecSerializerTest {
 
 	@Before
 	public void setup() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(String.format("%s,io.crnk.core.queryspec.pagingspec", MockConstants.TEST_MODELS_PACKAGE)));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setPackage(MockConstants.TEST_MODELS_PACKAGE + ",io.crnk.core.queryspec.pagingspec");
+		container.boot();
 
-		resourceRegistry = boot.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry);
+		resourceRegistry = container.getResourceRegistry();
+		urlBuilder = new JsonApiUrlBuilder(resourceRegistry, container.getQueryContext());
 	}
 
 	@Test
 	public void testHttpsSchema() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(String.format("%s,io.crnk.core.queryspec.pagingspec", MockConstants.TEST_MODELS_PACKAGE)));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
+		container.setPackage(MockConstants.TEST_MODELS_PACKAGE + ",io.crnk.core.queryspec.pagingspec");
+		container.boot();
 
-		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
+		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
 		check("https://127.0.0.1/tasks", null, new QuerySpec(Task.class));
 	}
 
 	@Test
 	public void testPort() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(String.format("%s,io.crnk.core.queryspec.pagingspec", MockConstants.TEST_MODELS_PACKAGE)));
-		boot.boot();
+		CoreTestContainer container = new CoreTestContainer();
+		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1:1234"));
+		container.setPackage(MockConstants.TEST_MODELS_PACKAGE + ",io.crnk.core.queryspec.pagingspec");
+		container.boot();
 
-		urlBuilder = new JsonApiUrlBuilder(boot.getResourceRegistry());
+		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
 		check("https://127.0.0.1:1234/tasks", null, new QuerySpec(Task.class));
 	}
 
 	@Test(expected = RepositoryNotFoundException.class)
-	public void unknownResourceShouldThrowException() throws InstantiationException, IllegalAccessException {
+	public void unknownResourceShouldThrowException() {
 		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
 		Class<?> notAResourceClass = String.class;
 		urlBuilder.buildUrl(entry.getResourceInformation(), null, new QuerySpec(notAResourceClass));
 	}
 
 	@Test
-	public void testFindAll() throws InstantiationException, IllegalAccessException {
+	public void testFindAll() {
 		check("http://127.0.0.1/tasks", null, new QuerySpec(Task.class));
 	}
 
 	@Test
-	public void testFilterNonRootType() throws InstantiationException, IllegalAccessException {
+	public void testFilterNonRootType() {
 		QuerySpec projectQuerySpec = new QuerySpec(Project.class);
 		projectQuerySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"));
 		QuerySpec querySpec = new QuerySpec(Task.class);
@@ -80,7 +77,7 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void testNestedFilterSpecNotYetSupported() throws InstantiationException, IllegalAccessException {
+	public void testNestedFilterSpecNotYetSupported() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(FilterSpec.or(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"),
 				new FilterSpec(Arrays.asList("name"), FilterOperator.GE, "test")));
@@ -90,24 +87,24 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testFindById() throws InstantiationException, IllegalAccessException {
+	public void testFindById() {
 		check("http://127.0.0.1/tasks/1", 1, new QuerySpec(Task.class));
 	}
 
 	@Test
-	public void testFindByIds() throws InstantiationException, IllegalAccessException {
+	public void testFindByIds() {
 		check("http://127.0.0.1/tasks/1,2,3", Arrays.asList(1, 2, 3), new QuerySpec(Task.class));
 	}
 
 	@Test
-	public void testFindAllOrderByAsc() throws InstantiationException, IllegalAccessException {
+	public void testFindAllOrderByAsc() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 		check("http://127.0.0.1/tasks?sort[tasks]=name", null, querySpec);
 	}
 
 	@Test
-	public void testFindAllOrderMultipleFields() throws InstantiationException, IllegalAccessException {
+	public void testFindAllOrderMultipleFields() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 		querySpec.addSort(new SortSpec(Arrays.asList("id"), Direction.DESC));
@@ -115,7 +112,7 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testFindAllIncludeMultipleFields() throws InstantiationException, IllegalAccessException {
+	public void testFindAllIncludeMultipleFields() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeField(Arrays.asList("name"));
 		querySpec.includeField(Arrays.asList("id"));
@@ -123,7 +120,7 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testFindAllIncludeMultipleRelations() throws InstantiationException, IllegalAccessException {
+	public void testFindAllIncludeMultipleRelations() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
 		querySpec.includeRelation(Arrays.asList("projects"));
@@ -131,28 +128,28 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testFindAllOrderByDesc() throws InstantiationException, IllegalAccessException {
+	public void testFindAllOrderByDesc() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.DESC));
 		check("http://127.0.0.1/tasks?sort[tasks]=-name", null, querySpec);
 	}
 
 	@Test
-	public void testFilterByOne() throws InstantiationException, IllegalAccessException {
+	public void testFilterByOne() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "value"));
 		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=value", null, querySpec);
 	}
 
 	@Test
-	public void testFilterByPath() throws InstantiationException, IllegalAccessException {
+	public void testFilterByPath() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("project", "name"), FilterOperator.EQ, "value"));
 		check("http://127.0.0.1/tasks?filter[tasks][project.name][EQ]=value", null, querySpec);
 	}
 
 	@Test
-	public void testFilterByMany() throws InstantiationException, IllegalAccessException {
+	public void testFilterByMany() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("value1", "value2")));
 
@@ -165,14 +162,14 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testFilterEquals() throws InstantiationException, IllegalAccessException {
+	public void testFilterEquals() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 1));
 		check("http://127.0.0.1/tasks?filter[tasks][id][EQ]=1", null, querySpec);
 	}
 
 	@Test
-	public void testFilterGreater() throws InstantiationException, IllegalAccessException {
+	public void testFilterGreater() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.LE, 1));
 		check("http://127.0.0.1/tasks?filter[tasks][id][LE]=1", null, querySpec);
@@ -180,7 +177,7 @@ public class DefaultQuerySpecSerializerTest {
 
 	//
 	@Test
-	public void testPaging() throws InstantiationException, IllegalAccessException {
+	public void testPaging() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setLimit(2L);
 		querySpec.setOffset(1L);
@@ -188,7 +185,7 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testPagingOnRelation() throws InstantiationException, IllegalAccessException {
+	public void testPagingOnRelation() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setLimit(2L);
 		querySpec.setOffset(1L);
@@ -199,14 +196,14 @@ public class DefaultQuerySpecSerializerTest {
 	}
 
 	@Test
-	public void testIncludeRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeRelations() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
 		check("http://127.0.0.1/tasks?include[tasks]=project", null, querySpec);
 	}
 
 	@Test
-	public void testIncludeAttributes() throws InstantiationException, IllegalAccessException {
+	public void testIncludeAttributes() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeField(Arrays.asList("name"));
 		check("http://127.0.0.1/tasks?fields[tasks]=name", null, querySpec);

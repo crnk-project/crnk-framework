@@ -1,4 +1,5 @@
 # crnk-examples
 
-Various example applications. In particular have a look at the spring-boot-example as it 
-is the most advanced one integrating various crnk modules.
+Various example applications showcasing the integration of crnk into various frameworks.
+Also have a look at https://github.com/crnk-project/crnk-example as our main example
+application.

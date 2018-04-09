@@ -2,6 +2,7 @@ package io.crnk.meta.internal.typed;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
@@ -52,7 +53,7 @@ public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<
 	}
 
 	@Override
-	public MetaElement adjustForRequest(MetaElement element) {
+	public MetaElement adjustForRequest(MetaElement element, QueryContext queryContext) {
 		return element;
 	}
 }

@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -9,20 +7,18 @@ import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-public class ResourceGet extends ResourceIncludeField {
+import java.io.Serializable;
 
-	public ResourceGet(ResourceRegistry resourceRegistry, TypeParser typeParser, DocumentMapper documentMapper) {
-		super(resourceRegistry, typeParser, documentMapper);
-	}
+public class ResourceGet extends ResourceIncludeField {
 
 	/**
 	 * {@inheritDoc}
@@ -41,26 +37,32 @@ public class ResourceGet extends ResourceIncludeField {
 	 * Passes the request to controller method.
 	 */
 	@Override
-	public Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
 		String resourceType = jsonPath.getElementName();
 		PathIds resourceIds = jsonPath.getIds();
 		RegistryEntry registryEntry = getRegistryEntry(resourceType);
+		logger.debug("using registry entry {}", registryEntry);
 
 		String id = resourceIds.getIds().get(0);
 
 		@SuppressWarnings("unchecked")
 		Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry.getResourceInformation().getIdField().getType();
-		Serializable castedId = typeParser.parse(id, idClass);
+		Serializable castedId = context.getTypeParser().parse(id, idClass);
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
-		JsonApiResponse entities = resourceRepository.findOne(castedId, queryAdapter);
 
-		Document responseDocument = documentMapper.toDocument(entities, queryAdapter);
+		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMapper documentMapper = context.getDocumentMapper();
 
+		return resourceRepository.findOne(castedId, queryAdapter)
+				.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig))
+				.map(this::toResponse);
+	}
+
+	public Response toResponse(Document document) {
 		// return explicit { data : null } if values found
-		if (!responseDocument.getData().isPresent()) {
-			responseDocument.setData(Nullable.nullValue());
+		if (!document.getData().isPresent()) {
+			document.setData(Nullable.nullValue());
 		}
-
-		return new Response(responseDocument, 200);
+		return new Response(document, 200);
 	}
 }

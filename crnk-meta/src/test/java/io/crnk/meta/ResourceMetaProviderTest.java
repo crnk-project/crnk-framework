@@ -1,19 +1,43 @@
 package io.crnk.meta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.meta.model.*;
-import io.crnk.meta.model.resource.*;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceAction;
 import io.crnk.meta.model.resource.MetaResourceAction.MetaRepositoryActionType;
+import io.crnk.meta.model.resource.MetaResourceField;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
-import io.crnk.test.mock.models.*;
+import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.Schedule;
+import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.models.TaskStatus;
+import io.crnk.test.mock.models.TaskSubType;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.*;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
@@ -28,7 +52,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		resourceProvider = new ResourceMetaProvider();
 
 		lookup = new MetaLookup();
-		lookup.setModuleContext(boot.getModuleRegistry().getContext());
+		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.addProvider(resourceProvider);
 		lookup.initialize();
 	}
@@ -121,8 +145,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 	@Test
 	public void testPreserveAttributeOrder() {
-		ResourceInformation resourceInformation =
-				boot.getResourceRegistry().getEntryForClass(Schedule.class).getResourceInformation();
+		ResourceInformation resourceInformation = container.getEntry(Schedule.class).getResourceInformation();
 		List<ResourceField> fields = resourceInformation.getFields();
 		Assert.assertEquals("id", fields.get(0).getUnderlyingName());
 		Assert.assertEquals("name", fields.get(1).getUnderlyingName());

@@ -200,7 +200,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 	@Test
 	public void testFindTargets() {
 		RelationshipRepositoryV2<Project, Serializable, Task, Serializable> relRepo = client
-				.getQuerySpecRepository(Project.class, Task.class);
+				.getRepositoryForType(Project.class, Task.class);
 		relRepo.findManyTargets(123L, "tasks", new QuerySpec(Task.class));
 
 		// check client call and link span

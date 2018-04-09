@@ -1,11 +1,14 @@
 package io.crnk.core.queryspec;
 
+import java.util.Arrays;
+
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
+import io.crnk.core.engine.internal.registry.LegacyRegistryEntry;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
@@ -16,11 +19,8 @@ import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
-
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class QuerySpecAdapterTest {
 
@@ -29,14 +29,18 @@ public class QuerySpecAdapterTest {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null, new OffsetLimitPagingBehavior());
-		resourceRegistry.addEntry(new RegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null, null,
+						new OffsetLimitPagingBehavior());
+		resourceRegistry.addEntry(
+				new LegacyRegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
 						resourceInformation, RepositoryMethodAccess.ALL))));
+
+		QueryContext queryContext = new QueryContext();
 
 		QuerySpec spec = new QuerySpec(Task.class);
 		spec.includeField(Arrays.asList("test"));
 		spec.includeRelation(Arrays.asList("relation"));
-		QuerySpecAdapter adapter = new QuerySpecAdapter(spec, resourceRegistry);
+		QuerySpecAdapter adapter = new QuerySpecAdapter(spec, resourceRegistry, queryContext);
 		Assert.assertEquals(Task.class, adapter.getResourceInformation().getResourceClass());
 		Assert.assertEquals(spec, adapter.getQuerySpec());
 

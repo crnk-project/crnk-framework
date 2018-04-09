@@ -3,13 +3,20 @@ package io.crnk.core.resource.registry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
+import io.crnk.core.engine.internal.registry.LegacyRegistryEntry;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -23,15 +30,12 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
 
 public class ResourceRegistryTest {
 
@@ -67,10 +71,12 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
+		List<ResourceField> fields = new ArrayList<>();
+		fields.add(new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null));
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, fields,
 						new OffsetLimitPagingBehavior());
-		return new RegistryEntry(new DirectResponseResourceEntry(null,
+		return new LegacyRegistryEntry(new DirectResponseResourceEntry(null,
 				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
 	}
 
@@ -99,6 +105,19 @@ public class ResourceRegistryTest {
 	}
 
 	@Test
+	public void onExistingTypeAndQueryContextShouldReturnUrl() {
+		Task task = new Task();
+		task.setId(12L);
+		QueryContext queryContext = new QueryContext();
+		queryContext.setBaseUrl("http://querycontext:1234");
+		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		assertThat(resourceRegistry.getResourceUrl(queryContext, entry.getResourceInformation())).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class)).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class, "12")).isEqualTo("http://querycontext:1234/tasks/12");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, task)).isEqualTo("http://querycontext:1234/tasks/12");
+	}
+
+	@Test
 	public void onExistingResourceShouldReturnUrl() {
 		Task task = new Task();
 		task.setId(1L);
@@ -110,7 +129,7 @@ public class ResourceRegistryTest {
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null,
 						Arrays.asList(idField, valueField),
 						new OffsetLimitPagingBehavior());
-		RegistryEntry registryEntry = new RegistryEntry(new DirectResponseResourceEntry(null, new
+		RegistryEntry registryEntry = new LegacyRegistryEntry(new DirectResponseResourceEntry(null, new
 				ResourceRepositoryInformationImpl
 				("tasks", resourceInformation, RepositoryMethodAccess.ALL)));
 		resourceRegistry.addEntry(Task.class, registryEntry);

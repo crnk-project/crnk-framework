@@ -8,6 +8,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
@@ -36,14 +37,14 @@ public class ForwardingStrategyContext {
 		return resourceRegistry.getEntry(field.getOppositeResourceType());
 	}
 
-	public QueryAdapter createQueryAdapter(QuerySpec querySpec) {
-		return new QuerySpecAdapter(querySpec, resourceRegistry);
+	public QueryAdapter createQueryAdapter(QuerySpec querySpec, QueryContext queryContext) {
+		return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 	}
 
-	protected QueryAdapter createSaveQueryAdapter(String fieldName) {
+	protected QueryAdapter createSaveQueryAdapter(String fieldName, QueryContext queryContext) {
 		QuerySpec querySpec = createSourceQuerySpec();
 		querySpec.includeRelation(Arrays.asList(fieldName));
-		return new QuerySpecAdapter(querySpec, resourceRegistry);
+		return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 	}
 
 	private QuerySpec createSourceQuerySpec() {
@@ -52,15 +53,15 @@ public class ForwardingStrategyContext {
 		return new QuerySpec(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
 	}
 
-	public <Q> Iterable<Q> findAll(RegistryEntry entry, Iterable<?> targetIds) {
+	public <Q> Iterable<Q> findAll(RegistryEntry entry, Iterable<?> targetIds, QueryContext queryContext) {
 		ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
-		return (Iterable) targetAdapter.findAll(targetIds, queryAdapter).getEntity();
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
+		return (Iterable) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
 	}
 
-	public <Q> Q findOne(RegistryEntry entry, Serializable id) {
+	public <Q> Q findOne(RegistryEntry entry, Serializable id, QueryContext queryContext) {
 		ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
-		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry);
-		return (Q) targetAdapter.findOne(id, queryAdapter).getEntity();
+		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
+		return (Q) targetAdapter.findOne(id, queryAdapter).get().getEntity();
 	}
 }

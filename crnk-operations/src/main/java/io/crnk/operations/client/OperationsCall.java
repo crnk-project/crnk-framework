@@ -16,7 +16,10 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
@@ -65,11 +68,15 @@ public class OperationsCall {
 		response.setEntity(object);
 
 		QuerySpec querySpec = new QuerySpec(object.getClass());
-		QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, client.getCrnk().getRegistry());
-
 		CrnkClient crnk = client.getCrnk();
+		QueryContext queryContext = crnk.getQueryContext();
+		ResourceRegistry registry = crnk.getRegistry();
+
+		QueryAdapter queryAdapter = new QuerySpecAdapter(querySpec, registry, queryContext);
+
 		DocumentMapper documentMapper = crnk.getDocumentMapper();
-		Document document = documentMapper.toDocument(response, queryAdapter);
+		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+		Document document = documentMapper.toDocument(response, queryAdapter, mappingConfig).get();
 		return document.getSingleData().get();
 	}
 
@@ -103,8 +110,7 @@ public class OperationsCall {
 			}
 			String json = response.body();
 			responses = Arrays.asList(mapper.readValue(json, OperationResponse[].class));
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

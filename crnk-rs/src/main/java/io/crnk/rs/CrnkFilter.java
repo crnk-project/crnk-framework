@@ -43,10 +43,12 @@ public class CrnkFilter implements ContainerRequestFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		try {
+			LOGGER.error("CrnkFilter entered");
 			JaxrsRequestContext context = new JaxrsRequestContext(requestContext, feature);
 			RequestDispatcher requestDispatcher = feature.getBoot().getRequestDispatcher();
 			requestDispatcher.process(context);
 			context.checkAbort();
+			LOGGER.error("CrnkFilter exited");
 		} catch (WebApplicationException e) {
 			LOGGER.error("failed to dispatch request", e);
 			throw e;

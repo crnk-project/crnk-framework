@@ -1,4 +1,5 @@
 include ':crnk-core'
+include ':crnk-reactive'
 include ':crnk-home'
 include ':crnk-test'
 include ':crnk-rs'
@@ -16,6 +17,7 @@ include ':crnk-brave'
 include ':crnk-monitor-brave4'
 include ':crnk-security'
 include ':crnk-activiti'
+
 
 include ':crnk-operations'
 include ':crnk-gen-typescript'

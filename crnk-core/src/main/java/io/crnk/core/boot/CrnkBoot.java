@@ -5,24 +5,23 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
-import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.ControllerRegistryBuilder;
+import io.crnk.core.engine.internal.dispatcher.controller.*;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
-import io.crnk.core.engine.internal.http.HttpRequestProcessorImpl;
+import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -44,10 +43,10 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -55,6 +54,8 @@ import java.util.Map;
  */
 @SuppressWarnings("deprecation")
 public class CrnkBoot {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkBoot.class);
 
 	private final ModuleRegistry moduleRegistry = new ModuleRegistry();
 
@@ -70,7 +71,7 @@ public class CrnkBoot {
 
 	private ResourceRegistry resourceRegistry;
 
-	private HttpRequestProcessorImpl requestDispatcher;
+	private HttpRequestDispatcherImpl requestDispatcher;
 
 	private PropertiesProvider propertiesProvider = new NullPropertiesProvider();
 
@@ -89,6 +90,12 @@ public class CrnkBoot {
 	private Boolean allowUnknownAttributes;
 
 	private Boolean allowUnknownParameters;
+
+	private List<PagingBehavior> pagingBehaviors;
+
+	private QueryAdapterBuilder queryAdapterBuilder;
+
+	private CoreModule coreModule = new CoreModule();
 
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
@@ -176,6 +183,9 @@ public class CrnkBoot {
 
 	private void bootDiscovery() {
 		setupObjectMapper();
+
+		resourceRegistry = new ResourceRegistryImpl(null, moduleRegistry);
+
 		addModules();
 
 		setupComponents();
@@ -200,8 +210,7 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		}
-		else {
+		} else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -211,8 +220,8 @@ public class CrnkBoot {
 			}
 			rootPart = hierarchialPart;
 		}
+		((ResourceRegistryImpl) resourceRegistry).setRootPart(rootPart);
 
-		resourceRegistry = new ResourceRegistryImpl(rootPart, moduleRegistry);
 		return rootPart;
 	}
 
@@ -231,49 +240,67 @@ public class CrnkBoot {
 		return moduleRegistry.getExceptionMapperRegistry();
 	}
 
-	private HttpRequestProcessorImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
-		ControllerRegistryBuilder controllerRegistryBuilder =
-				newControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-						propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(),
-						moduleRegistry.getResourceModificationFilters());
-		ControllerRegistry controllerRegistry = controllerRegistryBuilder.build();
-		this.documentMapper = controllerRegistryBuilder.getDocumentMapper();
-
-		QueryAdapterBuilder queryAdapterBuilder;
-		if (queryParamsBuilder != null) {
-			queryAdapterBuilder = new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		}
-		else {
-			queryAdapterBuilder = new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
-		}
-
-		return new HttpRequestProcessorImpl(moduleRegistry, controllerRegistry, exceptionMapperRegistry, queryAdapterBuilder);
+	private HttpRequestDispatcherImpl createRequestDispatcher(ExceptionMapperRegistry exceptionMapperRegistry) {
+		this.documentMapper = createDocumentMapper();
+		return new HttpRequestDispatcherImpl(moduleRegistry, exceptionMapperRegistry);
 	}
 
-	protected ControllerRegistryBuilder newControllerRegistryBuilder(
-			@SuppressWarnings("SameParameterValue") ResourceRegistry resourceRegistry,
-			@SuppressWarnings("SameParameterValue") TypeParser typeParser,
-			@SuppressWarnings("SameParameterValue") ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-			ResourceFilterDirectory resourceFilterDirectory, List<ResourceModificationFilter> modificationFilters) {
-		return new ControllerRegistryBuilder(resourceRegistry, moduleRegistry.getTypeParser(), objectMapper,
-				propertiesProvider, moduleRegistry.getContext().getResourceFilterDirectory(),
-				moduleRegistry.getResourceModificationFilters());
+	protected QueryAdapterBuilder createQueryAdapterBuilder() {
+		if (queryParamsBuilder != null) {
+			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
+		} else {
+			return new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		}
+	}
+
+	protected DocumentMapper createDocumentMapper() {
+		ResourceFilterDirectory filterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
+		ResultFactory resultFactory = moduleRegistry.getContext().getResultFactory();
+		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory);
+	}
+
+	protected ControllerRegistry createControllerRegistry() {
+		Set<Controller> controllers = new HashSet<>();
+		controllers.add(new RelationshipsResourceDelete());
+		controllers.add(new RelationshipsResourcePatch());
+		controllers.add(new RelationshipsResourcePost());
+		controllers.add(new ResourceDelete());
+		controllers.add(new CollectionGet());
+		controllers.add(new FieldResourceGet());
+		controllers.add(new RelationshipsResourceGet());
+		controllers.add(new ResourceGet());
+		controllers.add(new FieldResourcePost());
+		controllers.add(new ResourcePatch());
+		controllers.add(new ResourcePost());
+
+		ControllerContext context = new ControllerContext(moduleRegistry, this::getDocumentMapper);
+		for (Controller controller : controllers) {
+			controller.init(context);
+		}
+
+		return new ControllerRegistry(controllers);
 	}
 
 	public DocumentMapper getDocumentMapper() {
 		return documentMapper;
 	}
 
+	private ControllerRegistry controllerRegistry;
+
 	private void setupComponents() {
 		// not that the provided default implementation here are added last and
 		// as a consequence,
 		// can be overriden by other modules, like the
 		// JaxrsResourceRepositoryInformationBuilder.
+		LOGGER.debug("performing service discovery with {}", serviceDiscovery);
 		SimpleModule module = new SimpleModule("discovery") {
 
 			@Override
 			public void setupModule(ModuleContext context) {
-				this.addHttpRequestProcessor(new JsonApiRequestProcessor(context));
+				controllerRegistry = createControllerRegistry();
+				queryAdapterBuilder = createQueryAdapterBuilder();
+
+				this.addHttpRequestProcessor(new JsonApiRequestProcessor(context, controllerRegistry, queryAdapterBuilder));
 				super.setupModule(context);
 			}
 		};
@@ -284,7 +311,8 @@ public class CrnkBoot {
 		for (DocumentFilter filter : getInstancesByType(DocumentFilter.class)) {
 			module.addFilter(filter);
 		}
-		for (Object repository : getInstancesByType(Repository.class)) {
+		List<Repository> repositories = getInstancesByType(Repository.class);
+		for (Object repository : repositories) {
 			module.addRepository(repository);
 		}
 		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
@@ -299,7 +327,6 @@ public class CrnkBoot {
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
 		moduleRegistry.addModule(module);
-		moduleRegistry.addModule(new CoreModule());
 	}
 
 	private <T> List<T> getInstancesByType(Class<T> clazz) {
@@ -318,14 +345,16 @@ public class CrnkBoot {
 	}
 
 	private void addModules() {
+		boolean serializeLinksAsObjects =
+				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
+
+		// without priority setup or something, has to come last as some defaults are in there, needs to become more robust
+		moduleRegistry.addModule(coreModule);
 
 		for (Module module : registeredModules) {
 			moduleRegistry.addModule(module);
 		}
-
-		boolean serializeLinksAsObjects =
-				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
 
 		List<Module> discoveredModules = getInstancesByType(Module.class);
 		for (Module module : discoveredModules) {
@@ -342,7 +371,7 @@ public class CrnkBoot {
 		}
 	}
 
-	public HttpRequestProcessorImpl getRequestDispatcher() {
+	public HttpRequestDispatcherImpl getRequestDispatcher() {
 		PreconditionUtil.assertNotNull("expected requestDispatcher", requestDispatcher);
 		return requestDispatcher;
 	}
@@ -370,6 +399,7 @@ public class CrnkBoot {
 
 	public void setPropertiesProvider(PropertiesProvider propertiesProvider) {
 		checkNotConfiguredYet();
+		LOGGER.debug("set properties provider {}", propertiesProvider);
 		this.propertiesProvider = propertiesProvider;
 	}
 
@@ -398,6 +428,7 @@ public class CrnkBoot {
 	}
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
+		LOGGER.debug("set service discovery {}", serviceDiscovery);
 		PreconditionUtil.assertNull("already set", this.serviceDiscovery);
 		this.serviceDiscovery = serviceDiscovery;
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
@@ -471,8 +502,7 @@ public class CrnkBoot {
 			List<QuerySpecDeserializer> list = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 			if (list.isEmpty()) {
 				querySpecDeserializer = new DefaultQuerySpecDeserializer();
-			}
-			else {
+			} else {
 				querySpecDeserializer = list.get(0);
 			}
 		}
@@ -500,17 +530,15 @@ public class CrnkBoot {
 	}
 
 	private void setupPagingBehavior() {
-		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
-			setupServiceDiscovery();
+		setupServiceDiscovery();
 
-			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+		moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 
-			if (moduleRegistry.getPagingBehaviors().isEmpty()) {
-				moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
-			}
+		if (!moduleRegistry.getPagingBehaviors().stream().anyMatch(it -> it instanceof OffsetLimitPagingBehavior)) {
+			moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
 		}
 
-		for (PagingBehavior pagingBehavior: moduleRegistry.getPagingBehaviors()) {
+		for (PagingBehavior pagingBehavior : moduleRegistry.getPagingBehaviors()) {
 			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
 				if (defaultPageLimit != null) {
 					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
@@ -543,5 +571,17 @@ public class CrnkBoot {
 
 	public List<PagingBehavior> getPagingBehaviors() {
 		return moduleRegistry.getPagingBehaviors();
+	}
+
+	public ControllerRegistry getControllerRegistry() {
+		return controllerRegistry;
+	}
+
+	public QueryAdapterBuilder getQueryAdapterBuilder() {
+		return queryAdapterBuilder;
+	}
+
+	public CoreModule getCoreModule() {
+		return coreModule;
 	}
 }

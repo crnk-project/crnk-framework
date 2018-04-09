@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
@@ -13,27 +18,19 @@ import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.queryspec.pagingspec.PagingSpecUrlBuilder;
 import io.crnk.core.repository.LinksRepositoryV2;
 import io.crnk.core.repository.MetaRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -47,17 +44,15 @@ import java.util.Map;
  */
 public abstract class ResponseRepositoryAdapter {
 
-	protected ResourceInformation resourceInformation;
 
 	protected ModuleRegistry moduleRegistry;
 
-	public ResponseRepositoryAdapter(ResourceInformation resourceInformation, ModuleRegistry moduleRegistry) {
+	public ResponseRepositoryAdapter(ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
-		this.resourceInformation = resourceInformation;
 		PreconditionUtil.assertNotNull("moduleRegistry cannot be null", moduleRegistry);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected <T> Iterable<T> filterResult(Iterable<?> resources, RepositoryRequestSpec requestSpec) {
 		RepositoryResultFilterChainImpl<T> chain = new RepositoryResultFilterChainImpl<>((Iterable) resources);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
@@ -72,8 +67,7 @@ public abstract class ResponseRepositoryAdapter {
 		boolean isCollection = result instanceof Iterable;
 		if (isCollection) {
 			resources = (Iterable<?>) result;
-		}
-		else {
+		} else {
 			resources = Collections.singletonList(result);
 		}
 		Iterable<?> filteredResult = filterResult(resources, requestSpec);
@@ -83,14 +77,12 @@ public abstract class ResponseRepositoryAdapter {
 		Object resultEntity;
 		if (isCollection) {
 			resultEntity = filteredResult;
-		}
-		else {
+		} else {
 			Iterator<?> iterator = filteredResult.iterator();
 			if (iterator.hasNext()) {
 				resultEntity = iterator.next();
 				PreconditionUtil.assertFalse("expected unique result", iterator.hasNext());
-			}
-			else {
+			} else {
 				resultEntity = null;
 			}
 		}
@@ -104,7 +96,7 @@ public abstract class ResponseRepositoryAdapter {
 		return chain.doFilter(newRepositoryFilterContext(requestSpec), resources);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private MetaInformation doGetMetaInformation(Object repository, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
 		if (resources instanceof ResourceList) {
 			ResourceList<?> resourceList = (ResourceList<?>) resources;
@@ -115,11 +107,9 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).metaRepositoryAvailable()) {
 				return ((AnnotatedRepositoryAdapter) repository).getMetaInformation(resources, queryAdapter);
 			}
-		}
-		else if (repository instanceof MetaRepositoryV2) {
+		} else if (repository instanceof MetaRepositoryV2) {
 			return ((MetaRepositoryV2) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
-		}
-		else if (repository instanceof MetaRepository) {
+		} else if (repository instanceof MetaRepository) {
 			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
 		}
 		return null;
@@ -140,13 +130,13 @@ public abstract class ResponseRepositoryAdapter {
 		};
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private LinksInformation doGetLinksInformation(Object repository, Iterable<?>
 			resources, RepositoryRequestSpec requestSpec) {
 		if (resources instanceof ResourceList) {
 			ResourceList<?> resourceList = (ResourceList<?>) resources;
 			boolean createLinksInformation = resourceList instanceof DefaultResourceList;
-			LinksInformation newLinksInfo = enrichLinksInformation(resourceList.getLinks(), resources, requestSpec);
+			LinksInformation newLinksInfo = RepositoryAdapterUtils.enrichLinksInformation(moduleRegistry, resourceList.getLinks(), resources, requestSpec);
 			if (createLinksInformation) {
 				((DefaultResourceList) resources).setLinks(newLinksInfo);
 			}
@@ -158,44 +148,14 @@ public abstract class ResponseRepositoryAdapter {
 			if (((AnnotatedRepositoryAdapter) repository).linksRepositoryAvailable()) {
 				linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 			}
-		}
-		else if (repository instanceof LinksRepositoryV2) {
+		} else if (repository instanceof LinksRepositoryV2) {
 			linksInformation =
 					((LinksRepositoryV2) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
-		}
-		else if (repository instanceof LinksRepository) {
+		} else if (repository instanceof LinksRepository) {
 			linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}
 		// everything deprecated anyway
-		return enrichLinksInformation(linksInformation, resources, requestSpec);
-	}
-
-	private LinksInformation enrichLinksInformation(LinksInformation linksInformation, Iterable<?> resources,
-			RepositoryRequestSpec requestSpec) {
-		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
-		LinksInformation enrichedLinksInformation = linksInformation;
-		if (queryAdapter instanceof QuerySpecAdapter && resources instanceof ResourceList &&
-				requestSpec.getResponseResourceInformation().getPagingBehavior() != null &&
-				requestSpec.getResponseResourceInformation().getPagingBehavior().isRequired(queryAdapter.getPagingSpec())) {
-			enrichedLinksInformation = enrichPageLinksInformation(enrichedLinksInformation, (ResourceList<?>) resources, queryAdapter,
-					requestSpec);
-		}
-		return enrichedLinksInformation;
-	}
-
-	private LinksInformation enrichPageLinksInformation(LinksInformation linksInformation, ResourceList<?> resources,
-			QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
-		if (linksInformation == null) {
-			// use default implementation if no link information
-			// provided by resource
-			linksInformation = new DefaultPagedLinksInformation();
-		}
-		if (linksInformation instanceof PagedLinksInformation) {
-			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry.getResourceRegistry(), requestSpec);
-			requestSpec.getResponseResourceInformation().getPagingBehavior().build((PagedLinksInformation) linksInformation, resources,
-					queryAdapter, urlBuilder);
-		}
-		return linksInformation;
+		return RepositoryAdapterUtils.enrichLinksInformation(moduleRegistry, linksInformation, resources, requestSpec);
 	}
 
 	class RepositoryMetaFilterChainImpl implements RepositoryMetaFilterChain {
@@ -213,8 +173,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetMetaInformation(repository, resources, context.getRequest());
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterMeta(context, resources, this);
@@ -237,8 +196,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetLinksInformation(repository, resources, context.getRequest());
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterLinks(context, resources, this);
@@ -261,8 +219,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return result;
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterResult(context, this);
@@ -282,8 +239,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterRequest(context, this);
@@ -294,7 +250,9 @@ public abstract class ResponseRepositoryAdapter {
 			ResourceFilterDirectory resourceFilterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 			RepositoryRequestSpec request = context.getRequest();
 			ResourceInformation resourceInformation = request.getQueryAdapter().getResourceInformation();
-			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod());
+			QueryAdapter queryAdapter = context.getRequest().getQueryAdapter();
+			QueryContext queryContext = queryAdapter.getQueryContext();
+			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod(), queryContext);
 			if (filterBehavior != FilterBehavior.NONE) {
 				String msg = "not allowed to access " + resourceInformation.getResourceType();
 				throw new ForbiddenException(msg);
@@ -313,8 +271,7 @@ public abstract class ResponseRepositoryAdapter {
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return invoke(context);
-			}
-			else {
+			} else {
 				RepositoryFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filterBulkRequest(context, this);

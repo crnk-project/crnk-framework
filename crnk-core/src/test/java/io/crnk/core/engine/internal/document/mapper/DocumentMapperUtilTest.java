@@ -17,7 +17,7 @@ public class DocumentMapperUtilTest extends AbstractDocumentMapperTest {
 	@Before
 	public void setup() {
 		super.setup();
-		util = new DocumentMapperUtil(resourceRegistry, objectMapper, new NullPropertiesProvider());
+		util = new DocumentMapperUtil(container.getBoot().getResourceRegistry(), objectMapper, new NullPropertiesProvider());
 	}
 
 	@Test

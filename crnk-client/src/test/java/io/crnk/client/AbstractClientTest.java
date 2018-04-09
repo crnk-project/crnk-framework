@@ -7,7 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.client.module.ClientTestModule;
+import io.crnk.test.mock.ClientTestModule;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -29,12 +29,9 @@ import org.junit.Before;
 
 public abstract class AbstractClientTest extends JerseyTestBase {
 
-	protected CrnkClient client;
+	public CrnkClient client;
 
 	protected TestApplication testApplication;
-
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
-
 
 	@Before
 	public void setup() {

@@ -1,18 +1,9 @@
 package io.crnk.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-
-import io.crnk.core.engine.internal.CoreModule;
-import io.crnk.core.engine.internal.jackson.JacksonModule;
-import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.module.discovery.EmptyServiceDiscovery;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Project;
 import io.crnk.security.model.ProjectRepository;
@@ -20,7 +11,6 @@ import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.test.mock.models.UnknownResource;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,15 +50,10 @@ public class SecurityModuleTest {
 		securityModule = SecurityModule.newServerModule(config);
 		Assert.assertSame(config, securityModule.getConfig());
 
-		ModuleRegistry moduleRegistry = new ModuleRegistry();
-		moduleRegistry.setServiceDiscovery(new EmptyServiceDiscovery());
-		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
-		moduleRegistry.addModule(securityModule);
-		moduleRegistry.addModule(appModule);
-		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false,
-				ImmutableList.of(new OffsetLimitPagingBehavior())));
-		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.init(new ObjectMapper());
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(securityModule);
+		boot.addModule(appModule);
+		boot.boot();
 	}
 
 	@Test

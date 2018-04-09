@@ -1,22 +1,31 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
+import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-
-import java.util.*;
 
 /**
  * Vanilla {@link Module} implementation that allows registration of extensions.
@@ -37,6 +46,8 @@ public class SimpleModule implements Module {
 
 	private List<ResourceModificationFilter> resourceModificationFilters = new ArrayList<>();
 
+	private List<ResourceFieldContributor> resourceFieldContributors = new ArrayList<>();
+
 	private List<RepositoryDecoratorFactory> repositoryDecoratorFactories = new ArrayList<>();
 
 	private List<SecurityProvider> securityProviders = new ArrayList<>();
@@ -54,6 +65,8 @@ public class SimpleModule implements Module {
 	private List<RegistryEntry> registryEntries = new ArrayList<>();
 
 	private List<ModuleExtension> extensions = new ArrayList<>();
+
+	private List<RepositoryAdapterFactory> repositoryAdapterFactories = new ArrayList<>();
 
 	private String moduleName;
 
@@ -100,11 +113,17 @@ public class SimpleModule implements Module {
 		for (com.fasterxml.jackson.databind.Module jacksonModule : jacksonModules) {
 			context.addJacksonModule(jacksonModule);
 		}
+		for (RepositoryAdapterFactory factory : repositoryAdapterFactories) {
+			context.addRepositoryAdapterFactory(factory);
+		}
 		for (Object repository : repositories) {
 			context.addRepository(repository);
 		}
 		for (ExceptionMapperLookup exceptionMapperLookup : exceptionMapperLookups) {
 			context.addExceptionMapperLookup(exceptionMapperLookup);
+		}
+		for (ResourceFieldContributor resourceFieldContributor : resourceFieldContributors) {
+			context.addResourceFieldContributor(resourceFieldContributor);
 		}
 		for (HttpRequestProcessor httpRequestProcessor : httpRequestProcessors) {
 			context.addHttpRequestProcessor(httpRequestProcessor);
@@ -188,6 +207,15 @@ public class SimpleModule implements Module {
 		resourceFilters.add(filter);
 	}
 
+	public void addResourceFieldContributor(ResourceFieldContributor resourceFieldContributor) {
+		checkInitialized();
+		resourceFieldContributors.add(resourceFieldContributor);
+	}
+
+	protected List<ResourceFieldContributor> getResourceFieldContributors() {
+		checkInitialized();
+		return Collections.unmodifiableList(resourceFieldContributors);
+	}
 
 	public void addResourceModificationFilter(ResourceModificationFilter filter) {
 		checkInitialized();
@@ -246,9 +274,10 @@ public class SimpleModule implements Module {
 
 	/**
 	 * Add the given {@link PagingBehavior} to the module
+	 *
 	 * @param pagingBehavior the paging behavior
 	 */
-	public void addPagingBehavior(PagingBehavior pagingBehavior){
+	public void addPagingBehavior(PagingBehavior pagingBehavior) {
 		checkInitialized();
 		pagingBehaviors.add(pagingBehavior);
 	}
@@ -314,6 +343,14 @@ public class SimpleModule implements Module {
 
 	public List<HttpRequestProcessor> getHttpRequestProcessors() {
 		return Collections.unmodifiableList(httpRequestProcessors);
+	}
+
+	public void addRepositoryAdapterFactory(RepositoryAdapterFactory repositoryAdapterFactory) {
+		repositoryAdapterFactories.add(repositoryAdapterFactory);
+	}
+
+	public List<RepositoryAdapterFactory> getRepositoryAdapterFactories() {
+		return Collections.unmodifiableList(repositoryAdapterFactories);
 	}
 
 	public void addRegistryPart(String prefix, ResourceRegistryPart part) {

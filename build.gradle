@@ -75,6 +75,23 @@ gradle.beforeProject { Project project ->
 					exceptionFormat = 'full'
 				}
 			}
+
+			apply plugin: 'io.spring.dependency-management'
+			dependencyManagement {
+				imports {
+					mavenBom 'org.springframework.boot:spring-boot-dependencies:1.5.8.RELEASE'
+					mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
+					mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
+				}
+				dependencies {
+					dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
+					dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
+					dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4'
+					dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.4'
+					dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.4'
+					dependency 'com.fasterxml.jackson.core:jackson-core:2.9.4'
+				}
+			}
 		}
 
 		if (!docs && !examples && !testProject && !legacyBraveProject) {

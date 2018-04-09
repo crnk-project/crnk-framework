@@ -26,6 +26,7 @@ public final class ExceptionMapperRegistryBuilder {
 
 	private void addDefaultMappers() {
 		registerExceptionMapper(new CrnkExceptionMapper());
+		registerExceptionMapper(new TimeoutExceptionMapper());
 	}
 
 	private void registerExceptionMapper(JsonApiExceptionMapper<? extends Throwable> exceptionMapper) {
@@ -53,14 +54,13 @@ public final class ExceptionMapperRegistryBuilder {
 
 		for (Type type : types) {
 			Class<?> rawType = ClassUtils.getRawType(type);
-			if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType))
-			{
+			if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType)) {
 				//noinspection unchecked
 				return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
 			}
 		}
 
-		if(isProxy(mapper)){
+		if (isProxy(mapper)) {
 			return getGenericType((Class<? extends JsonApiExceptionMapper>) mapper.getSuperclass());
 		}
 

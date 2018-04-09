@@ -35,11 +35,11 @@ public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTes
 		client.setPushAlways(false);
 
 		scheduleRepo = client.getQuerySpecRepository(Schedule.class);
-		taskRepo = client.getQuerySpecRepository(Task.class);
-		projectRepo = client.getQuerySpecRepository(Project.class);
-		relRepo = client.getQuerySpecRepository(Task.class, Project.class);
+		taskRepo = client.getRepositoryForType(Task.class);
+		projectRepo = client.getRepositoryForType(Project.class);
+		relRepo = client.getRepositoryForType(Task.class, Project.class);
 		scheduleTaskRepo = client.getQuerySpecRepository(Schedule.class, Task.class);
-		taskScheduleRepo = client.getQuerySpecRepository(Task.class, Schedule.class);
+		taskScheduleRepo = client.getRepositoryForType(Task.class, Schedule.class);
 	}
 
 	@Override

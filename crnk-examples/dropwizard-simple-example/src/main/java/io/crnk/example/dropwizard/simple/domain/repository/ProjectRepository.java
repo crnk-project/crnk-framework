@@ -1,15 +1,13 @@
 package io.crnk.example.dropwizard.simple.domain.repository;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.dropwizard.simple.domain.model.Project;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ProjectRepository extends ResourceRepositoryBase<Project, Long> {
 
@@ -19,9 +17,6 @@ public class ProjectRepository extends ResourceRepositoryBase<Project, Long> {
 
 	public ProjectRepository() {
 		super(Project.class);
-		List<String> interests = new ArrayList<>();
-		interests.add("coding");
-		interests.add("art");
 		save(new Project(123L, "Great Project"));
 	}
 

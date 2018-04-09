@@ -6,6 +6,7 @@ import java.util.Arrays;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.monitor.brave.internal.BraveRepositoryFilter;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
@@ -70,7 +71,8 @@ public class BraveResponseFilterTest {
 		Mockito.when(moduleContext.getResourceRegistry()).thenReturn(boot.getResourceRegistry());
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
-		queryAdapter = new QuerySpecAdapter(querySpec, boot.getResourceRegistry());
+		QueryContext queryContext = new QueryContext();
+		queryAdapter = new QuerySpecAdapter(querySpec, boot.getResourceRegistry(), queryContext);
 
 		ResourceInformation taskResourceInformation = boot.getResourceRegistry().getEntry(Task.class).getResourceInformation();
 		requestSpec = Mockito.mock(RepositoryRequestSpec.class);
@@ -114,8 +116,7 @@ public class BraveResponseFilterTest {
 		try {
 			filter.filterRequest(filterContext, filterChain);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			// ok
 		}
 

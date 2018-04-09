@@ -1,8 +1,10 @@
 package io.crnk.core.engine.internal.registry;
 
+import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
@@ -38,13 +40,13 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		this.moduleRegistry = moduleRegistry;
 		this.moduleRegistry.setResourceRegistry(this);
 
-		rootPart.addListener(rootListener);
+		setRootPart(rootPart);
 	}
 
 	/**
 	 * Adds a new resource definition to a registry.
 	 *
-	 * @param resource class of a resource
+	 * @param resource      class of a resource
 	 * @param registryEntry resource information
 	 */
 	public RegistryEntry addEntry(Class<?> resource, RegistryEntry registryEntry) {
@@ -55,8 +57,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		Optional<Class<?>> resourceClazz = getResourceClass(clazz);
 		if (allowNull && !resourceClazz.isPresent()) {
 			return null;
-		}
-		else if (!resourceClazz.isPresent()) {
+		} else if (!resourceClazz.isPresent()) {
 			throw new RepositoryNotFoundException(clazz.getCanonicalName());
 		}
 		return rootPart.getEntry(resourceClazz.get());
@@ -102,13 +103,11 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return getResourceClass(resource.getClass());
 	}
 
-	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
 		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
 	}
 
-	@Override
 	public String getResourceUrl(final Object resource) {
 		Optional<Class<?>> type = getResourceClass(resource);
 		if (type.isPresent()) {
@@ -119,19 +118,49 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		throw new InvalidResourceException("Not registered resource found: " + resource);
 	}
 
-	@Override
 	public String getResourceUrl(final Class<?> clazz) {
 		RegistryEntry registryEntry = findEntry(clazz);
 
 		return getResourceUrl(registryEntry.getResourceInformation());
 	}
 
-	@Override
 	public String getResourceUrl(final Class<?> clazz, final String id) {
 		RegistryEntry registryEntry = findEntry(clazz);
 		String typeUrl = getResourceUrl(registryEntry.getResourceInformation());
 		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
 	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
+		String url = UrlUtils.removeTrailingSlash(queryContext.getBaseUrl());
+		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
+	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, final Object resource) {
+		Optional<Class<?>> type = getResourceClass(resource);
+		if (type.isPresent()) {
+			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
+			return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.getId(resource));
+		}
+
+		throw new InvalidResourceException("Not registered resource found: " + resource);
+	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, final Class<?> clazz) {
+		RegistryEntry registryEntry = findEntry(clazz);
+
+		return getResourceUrl(queryContext, registryEntry.getResourceInformation());
+	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, final Class<?> clazz, final String id) {
+		RegistryEntry registryEntry = findEntry(clazz);
+		String typeUrl = getResourceUrl(queryContext, registryEntry.getResourceInformation());
+		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
+	}
+
 
 	@Override
 	public ResourceInformation getBaseResourceInformation(String resourceType) {
@@ -181,5 +210,15 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public RegistryEntry getEntry(Class<?> clazz) {
 		return rootPart.getEntry(clazz);
+	}
+
+	public void setRootPart(ResourceRegistryPart rootPart) {
+		if (this.rootPart != null) {
+			this.rootPart.removeListener(rootListener);
+		}
+		if (rootPart != null) {
+			rootPart.addListener(rootListener);
+		}
+		this.rootPart = rootPart;
 	}
 }

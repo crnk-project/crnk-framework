@@ -1,7 +1,19 @@
 package io.crnk.client;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.Project;
@@ -9,8 +21,6 @@ import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.*;
 
 public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 
@@ -26,9 +36,9 @@ public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 	public void setup() {
 		super.setup();
 
-		taskRepo = client.getQuerySpecRepository(Task.class);
-		projectRepo = client.getQuerySpecRepository(Project.class);
-		relRepo = client.getQuerySpecRepository(Task.class, Project.class);
+		taskRepo = client.getRepositoryForType(Task.class);
+		projectRepo = client.getRepositoryForType(Project.class);
+		relRepo = client.getRepositoryForType(Task.class, Project.class);
 	}
 
 	@Override

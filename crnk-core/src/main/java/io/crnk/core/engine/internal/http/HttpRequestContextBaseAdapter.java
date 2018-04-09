@@ -3,14 +3,16 @@ package io.crnk.core.engine.internal.http;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
@@ -18,10 +20,14 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 
 	private boolean hasResponse;
 
-	private HashMap<String, Object> requestAttributes = new HashMap<>();
+	private Map<String, Object> requestAttributes = new ConcurrentHashMap<>();
+
+	private QueryContext queryContext = new QueryContext();
 
 	public HttpRequestContextBaseAdapter(HttpRequestContextBase base) {
 		this.base = base;
+		this.queryContext.setBaseUrl(base.getBaseUrl());
+		this.queryContext.setAttributes(requestAttributes);
 	}
 
 	public boolean hasResponse() {
@@ -49,7 +55,7 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	}
 
 	@Override
-	public void setResponse(final int statusCode, final String text) throws IOException {
+	public void setResponse(final int statusCode, final String text) {
 		hasResponse = true;
 
 		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
@@ -108,6 +114,11 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 		requestAttributes.put(name, value);
 	}
 
+	@Override
+	public QueryContext getQueryContext() {
+		return queryContext;
+	}
+
 	protected boolean isCompatible(String accept, String contentType) {
 		String acceptLower = accept.toLowerCase();
 		if (accept.equals(contentType)) {
@@ -146,7 +157,7 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	}
 
 	@Override
-	public byte[] getRequestBody() throws IOException {
+	public byte[] getRequestBody() {
 		return base.getRequestBody();
 	}
 
@@ -169,5 +180,15 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 	@Override
 	public String getResponseHeader(String name) {
 		return base.getResponseHeader(name);
+	}
+
+	@Override
+	public HttpResponse getResponse() {
+		return base.getResponse();
+	}
+
+	@Override
+	public void setResponse(HttpResponse response) {
+		base.setResponse(response);
 	}
 }

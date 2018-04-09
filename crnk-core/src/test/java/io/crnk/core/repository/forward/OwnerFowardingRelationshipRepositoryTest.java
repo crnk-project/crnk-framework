@@ -1,35 +1,27 @@
 package io.crnk.core.repository.forward;
 
-import java.util.Arrays;
-import java.util.List;
-
-import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
-import io.crnk.core.mock.repository.ProjectRepository;
-import io.crnk.core.mock.repository.RelationIdTestRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
+import io.crnk.core.mock.repository.*;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class OwnerFowardingRelationshipRepositoryTest {
 
@@ -62,14 +54,11 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 	@Before
 	public void setup() {
-		MockRepositoryUtil.clear();
+		CoreTestContainer container = new CoreTestContainer();
+		container.setDefaultPackage();
+		container.boot();
 
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
-		boot.setServiceUrlProvider(new ConstantServiceUrlProvider(ResourceRegistryTest.TEST_MODELS_URL));
-		boot.boot();
-
-		resourceRegistry = boot.getResourceRegistry();
+		resourceRegistry = container.getResourceRegistry();
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
@@ -80,11 +69,13 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
 				ForwardingDirection.OWNER);
 		taskProjectRepository.setResourceRegistry(resourceRegistry);
+		taskProjectRepository.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 
 		projectTaskRepository = new ForwardingRelationshipRepository(Project.class, taskProjectMatcher, ForwardingDirection
 				.OWNER,
 				ForwardingDirection.OWNER);
 		projectTaskRepository.setResourceRegistry(resourceRegistry);
+		projectTaskRepository.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 
 		testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
 		testRepository.setResourceRegistry(resourceRegistry);

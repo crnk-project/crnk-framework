@@ -74,7 +74,7 @@ public class MultiValuedRelationIdLookupTest extends AbstractDocumentMapperTest 
 		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
 		querySpec.includeRelation(Arrays.asList("testMultipleValues"));
 
-		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec));
+		Document document = mapper.toDocument(toResponse(entity), toAdapter(querySpec), mappingConfig).get();
 		Resource resource = document.getSingleData().get();
 		Assert.assertEquals("2", resource.getId());
 		Assert.assertEquals("relationIdTest", resource.getType());

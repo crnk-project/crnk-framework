@@ -4,6 +4,7 @@ dependencies {
 	compile project(':crnk-core')
 	compileOnly project(':crnk-client')
 	compileOnly project(':crnk-rs')
+	compileOnly 'javax.ws.rs:javax.ws.rs-api:2.1'
 
 	testCompile project(':crnk-client')
 	testCompile project(':crnk-rs')
@@ -12,7 +13,6 @@ dependencies {
 	testCompile project(':crnk-spring')
 	testCompile project(':crnk-validation')
 
-	compileOnly group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
 	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
 
 	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
