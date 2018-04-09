@@ -31,8 +31,6 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.Query;
-
 public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase implements HttpRequestProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonApiRequestProcessor.class);
@@ -41,18 +39,6 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 	public JsonApiRequestProcessor(Module.ModuleContext moduleContext, ControllerRegistry controllerRegistry,
 								   QueryAdapterBuilder queryAdapterBuilder) {
 		super(moduleContext, queryAdapterBuilder, controllerRegistry);
-	}
-
-	/**
-	 * Determines whether the supplied HTTP request is considered a JSON-API request. Accepts plain JSON requests by default.
-	 *
-	 * @param requestContext The HTTP request
-	 * @return <code>true</code> if it is a JSON-API request; <code>false</code> otherwise
-	 * @see #isJsonApiRequest(HttpRequestContext, boolean)
-	 */
-	@Deprecated
-	public static boolean isJsonApiRequest(HttpRequestContext requestContext) {
-		return isJsonApiRequest(requestContext, true);
 	}
 
 	/**

@@ -36,6 +36,10 @@ public class ReactiveModule implements Module {
 		workerScheduler = scheduler;
 	}
 
+	public Scheduler getWorkerScheduler() {
+		return workerScheduler;
+	}
+
 	class ReactiveResourceRepositoryInformationProvider extends DefaultResourceRepositoryInformationProvider {
 
 		@Override

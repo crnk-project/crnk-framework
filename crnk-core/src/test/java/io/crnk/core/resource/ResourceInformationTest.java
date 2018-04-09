@@ -1,34 +1,42 @@
 package io.crnk.core.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.information.resource.AnyResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
-
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceInformationTest {
 
 	private ResourceInformation sut;
 
+	private TypeParser typeParser = new TypeParser();
 
 	@Before
-	public void setup() throws NoSuchFieldException {
+	public void setup() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
-		TypeParser typeParser = new TypeParser();
 		sut = new ResourceInformation(typeParser, Task.class, "tasks", null, Arrays.asList(idField, valueField),
 				new OffsetLimitPagingBehavior());
 	}
@@ -76,4 +84,90 @@ public class ResourceInformationTest {
 		Assert.assertEquals(13L, task.getId().longValue());
 		Assert.assertEquals(13L, sut.getId(task));
 	}
+
+	@Test
+	public void checkAnyAccessor() {
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
+		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
+				new OffsetLimitPagingBehavior());
+
+		ResourceWithAny resource = new ResourceWithAny();
+
+		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
+		Assert.assertNull(accessor.getValue(resource, "test"));
+		accessor.setValue(resource, "test", "testValue");
+		Assert.assertEquals("testValue", accessor.getValue(resource, "test"));
+		Assert.assertEquals("testValue", resource.getProperty("test"));
+	}
+
+	@Test(expected = ResourceException.class)
+	public void checkGetAnyWithInvalidKey() {
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
+		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
+				new OffsetLimitPagingBehavior());
+
+		ResourceWithAny resource = new ResourceWithAny();
+
+		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
+		accessor.getValue(resource, "notAllowed");
+	}
+
+	@Test(expected = ResourceException.class)
+	public void checkSetAnyWithInvalidKey() {
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
+		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
+				new OffsetLimitPagingBehavior());
+
+		ResourceWithAny resource = new ResourceWithAny();
+
+		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
+		accessor.setValue(resource, "notAllowed", "testValue");
+	}
+
+	@Test(expected = InvalidResourceException.class)
+	public void checkAnyAccessorWithoutSetterThrowsException() {
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
+		new ResourceInformation(typeParser, ResourceWithAnyWithoutSetter.class, "tasks", null, Arrays.asList(idField),
+				new OffsetLimitPagingBehavior());
+	}
+
+	@JsonApiResource(type = "test")
+	public static class ResourceWithAny {
+
+		@JsonApiId
+		private String id;
+
+		private Map<String, String> properties = new HashMap<>();
+
+		@JsonAnyGetter
+		public String getProperty(String key) {
+			if ("notAllowed".equals(key)) {
+				throw new IllegalStateException();
+			}
+			return properties.get(key);
+		}
+
+		@JsonAnySetter
+		public void setProperty(String key, String value) {
+			if ("notAllowed".equals(key)) {
+				throw new IllegalStateException();
+			}
+			this.properties.put(key, value);
+		}
+	}
+
+
+	@JsonApiResource(type = "test")
+	class ResourceWithAnyWithoutSetter {
+
+		@JsonApiId
+		private String id;
+
+		@JsonAnyGetter
+		public Map<String, String> getProperties() {
+			return null;
+		}
+	}
+
+
 }

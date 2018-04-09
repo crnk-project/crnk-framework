@@ -58,10 +58,6 @@ public class DocumentMapper {
 		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 	}
 
-	public ResourceFilterDirectory getFilterBehaviorManager() {
-		return resourceFilterDirectory;
-	}
-
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
 														 PropertiesProvider propertiesProvider) {
 		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory);

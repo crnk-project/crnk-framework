@@ -40,11 +40,13 @@ public class ResourceFilterDirectoryImplTest {
 
 	private QueryContext queryContext;
 
+	private ImmediateResultFactory resultFactory;
+
 	@Before
 	public void setup() {
 		queryContext = new QueryContext();
 
-		ImmediateResultFactory resultFactory = new ImmediateResultFactory();
+		resultFactory = new ImmediateResultFactory();
 		requestContextProvider = new HttpRequestContextProvider(() -> resultFactory);
 
 		filter = Mockito.mock(ResourceFilter.class);
@@ -234,6 +236,31 @@ public class ResourceFilterDirectoryImplTest {
 		invalidateCache();
 		Assert.assertEquals(FilterBehavior.FORBIDDEN, directory.get(resourceField, HttpMethod.GET, queryContext));
 		Mockito.verify(filter, Mockito.times(2)).filterField(Mockito.eq(resourceField), Mockito.eq(HttpMethod.GET));
+	}
+
+	@Test
+	public void testDeprecatedFieldCheck() {
+		HttpRequestContext request = Mockito.mock(HttpRequestContext.class);
+		Mockito.when(request.getQueryContext()).thenReturn(queryContext);
+		resultFactory.setThreadContext(request);
+
+		setFieldBehavior(HttpMethod.GET, FilterBehavior.NONE);
+		Assert.assertEquals(FilterBehavior.NONE, directory.get(resourceField, HttpMethod.GET));
+		Mockito.verify(filter, Mockito.times(1)).filterField(Mockito.eq(resourceField), Mockito.eq(HttpMethod.GET));
+
+		Mockito.verify(request, Mockito.times(1)).getQueryContext();
+	}
+
+	@Test
+	public void testDeprecatedTypeCheck() {
+		HttpRequestContext request = Mockito.mock(HttpRequestContext.class);
+		Mockito.when(request.getQueryContext()).thenReturn(queryContext);
+		resultFactory.setThreadContext(request);
+
+		setResourceBehavior(HttpMethod.GET, FilterBehavior.NONE);
+		Assert.assertEquals(FilterBehavior.NONE, directory.get(resourceInformation, HttpMethod.GET));
+		Mockito.verify(filter, Mockito.times(1)).filterResource(Mockito.eq(resourceInformation), Mockito.eq(HttpMethod.GET));
+		Mockito.verify(request, Mockito.times(1)).getQueryContext();
 	}
 
 

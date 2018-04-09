@@ -64,7 +64,6 @@ public class NonReactiveButImmediateTest extends ReactiveTestBase {
 
 		// should incur delay for each call as it supposed to be immediate and no worker thread used
 		int cpuIgnoreMargin = 1000;
-		Assert.assertTrue("dt=" + dt, dt < n * SlowResourceRepository.DELAY + 2 * cpuIgnoreMargin);
 		Assert.assertTrue("dt=" + dt, dt > n * SlowResourceRepository.DELAY - cpuIgnoreMargin);
 
 		for (JsonApiResponse response : responses) {

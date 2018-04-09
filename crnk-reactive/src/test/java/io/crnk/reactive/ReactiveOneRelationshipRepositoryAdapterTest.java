@@ -70,4 +70,31 @@ public class ReactiveOneRelationshipRepositoryAdapterTest extends ReactiveTestBa
 		Assert.assertEquals(project, responses.get(1L).getEntity());
 	}
 
+	@Test(expected = UnsupportedOperationException.class)
+	public void setRelations() {
+		adapter.setRelations(null, null, null, null);
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void addRelations() {
+		adapter.addRelations(null, null, null, null);
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void removeRelations() {
+		adapter.removeRelations(null, null, null, null);
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void findManyTargets() {
+		adapter.findManyTargets(null, null, null);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void findBulkManyTargets() {
+		adapter.findBulkManyTargets(null, null, null);
+	}
 }

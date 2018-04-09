@@ -1,10 +1,9 @@
 package io.crnk.core.module.internal;
 
 import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -107,9 +106,6 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
 	private Map<Object, FilterBehavior> getCache(HttpMethod method, QueryContext queryContext) {
 		String key = ResourceFilterDirectoryImpl.class.getSimpleName() + method;
-		if (queryContext == null) {
-			return new HashMap<>(); // e.g. testing
-		}
 		Map<Object, FilterBehavior> cache = (Map<Object, FilterBehavior>) queryContext.getAttribute(key);
 		if (cache == null) {
 			cache = new ConcurrentHashMap<>();

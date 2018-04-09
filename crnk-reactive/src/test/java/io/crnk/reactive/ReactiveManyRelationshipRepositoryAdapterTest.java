@@ -1,10 +1,6 @@
 package io.crnk.reactive;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
-import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
@@ -16,6 +12,9 @@ import io.crnk.reactive.model.ReactiveTask;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class ReactiveManyRelationshipRepositoryAdapterTest extends ReactiveTestBase {
 
@@ -87,6 +86,23 @@ public class ReactiveManyRelationshipRepositoryAdapterTest extends ReactiveTestB
 		Map<Object, JsonApiResponse> responses = adapter.findBulkManyTargets(Arrays.asList(1L), adapter.getResourceField(), queryAdapter).get();
 		Assert.assertEquals(1, responses.keySet().size());
 		Assert.assertEquals(Arrays.asList(task2, task3), responses.get(1L).getEntity());
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void setRelation() {
+		adapter.setRelation(null, null, null, null);
+	}
+
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void findOneTarget() {
+		adapter.findOneTarget(null, null, null);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void findBulkOneTargets() {
+		adapter.findBulkOneTargets(null, null, null);
 	}
 
 }
