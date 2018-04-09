@@ -154,4 +154,12 @@ public class JsonApiUrlBuilder {
 			}
 		}
 	}
+	
+	public QuerySpecSerializer getQuerySpecSerializer() {
+		return this.querySpecSerializer;
+	}
+
+	public void setQuerySpecSerializer(QuerySpecSerializer querySpecSerializer) {
+		this.querySpecSerializer = querySpecSerializer;
+	}
 }

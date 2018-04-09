@@ -30,7 +30,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		return "[" + StringUtils.join(".", attributePath) + "]";
 	}
 
-	private static String addResourceType(RestrictedQueryParamsMembers type, String key, String resourceType) {
+	protected String addResourceType(RestrictedQueryParamsMembers type, String key, String resourceType) {
 		return type.toString() + "[" + resourceType + "]" + (key != null ? key : "");
 	}
 
@@ -69,7 +69,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	void serializeFilters(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeFilters(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
 		for (FilterSpec filterSpec : querySpec.getFilters()) {
 			if (filterSpec.hasExpressions()) {
 				throw new UnsupportedOperationException("filter expressions like and and or not yet supported");
@@ -109,7 +109,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	void serializeIncludedFields(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedFields(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedFields().isEmpty()) {
 			String key = addResourceType(RestrictedQueryParamsMembers.fields, null, resourceType);
 
@@ -124,7 +124,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		}
 	}
 
-	void serializeIncludedRelations(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedRelations(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedRelations().isEmpty()) {
 			String key = addResourceType(RestrictedQueryParamsMembers.include, null, resourceType);
 
