@@ -3,9 +3,11 @@ package io.crnk.servlet.resource;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.reactive.ReactiveModule;
 import io.crnk.reactive.internal.MonoResultFactory;
 import io.crnk.servlet.AsyncCrnkServlet;
+import io.crnk.servlet.reactive.model.SlowResourceRepository;
 import io.crnk.test.mock.ClientTestModule;
 import io.crnk.test.mock.reactive.ReactiveTestModule;
 import org.springframework.boot.SpringApplication;
@@ -26,7 +28,6 @@ public class ReactiveServletTestApplication implements ApplicationListener<Embed
 
 	private CrnkClient client;
 
-	private AsyncCrnkServlet servlet = new AsyncCrnkServlet();
 
 	private ReactiveTestModule testModule = new ReactiveTestModule();
 
@@ -41,6 +42,10 @@ public class ReactiveServletTestApplication implements ApplicationListener<Embed
 		SpringApplication.run(ReactiveServletTestApplication.class, args);
 	}
 
+	@Bean
+	public SlowResourceRepository slowRepository() {
+		return new SlowResourceRepository();
+	}
 
 	@Bean
 	public ReactiveServletTestContainer testContainer() {
@@ -49,21 +54,29 @@ public class ReactiveServletTestApplication implements ApplicationListener<Embed
 
 	// tag::reactive[]
 	@Bean
-	public ServletRegistrationBean reactiveServlet() {
-		ResultFactory resultFactory = new MonoResultFactory();
+	public AsyncCrnkServlet asyncCrnkServlet(SlowResourceRepository slowResourceRepository) {
+		SimpleModule slowModule = new SimpleModule("slow");
+		slowModule.addRepository(slowResourceRepository);
 
-		servlet.getBoot().getModuleRegistry().setResultFactory(resultFactory);
+		AsyncCrnkServlet servlet = new AsyncCrnkServlet();
 		servlet.getBoot().addModule(new ReactiveModule());
 		servlet.getBoot().addModule(testModule);
+		servlet.getBoot().addModule(slowModule);
 
+		return servlet;
+	}
+
+	@Bean
+	public ServletRegistrationBean crnkServletRegistration(AsyncCrnkServlet servlet) {
 		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, "/api/*");
 		bean.setLoadOnStartup(1);
 		return bean;
 	}
-	// end::reactive[]
 
 	@Bean
-	public CrnkBoot crnkBoot() {
+	public CrnkBoot crnkBoot(AsyncCrnkServlet servlet) {
 		return servlet.getBoot();
 	}
+	// end::reactive[]
+
 }

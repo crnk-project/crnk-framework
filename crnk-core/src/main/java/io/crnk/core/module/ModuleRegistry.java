@@ -67,8 +67,7 @@ public class ModuleRegistry {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleRegistry.class);
 
-	private ResultFactory resultFactory = new ImmediateResultFactory();
-
+	private ResultFactory resultFactory;
 
 	enum InitializedState {
 		NOT_INITIALIZED,
@@ -121,6 +120,9 @@ public class ModuleRegistry {
 	}
 
 	public ResultFactory getResultFactory() {
+		if (resultFactory == null) {
+			throw new IllegalStateException("resultFactory not yet available");
+		}
 		return resultFactory;
 	}
 
@@ -129,6 +131,9 @@ public class ModuleRegistry {
 	}
 
 	public void setResultFactory(ResultFactory resultFactory) {
+		if (this.resultFactory != null) {
+			throw new IllegalStateException("already set to " + this.resultFactory);
+		}
 		this.resultFactory = resultFactory;
 	}
 
@@ -294,6 +299,9 @@ public class ModuleRegistry {
 	 * @param objectMapper object mapper
 	 */
 	public void init(ObjectMapper objectMapper) {
+		if (resultFactory == null) {
+			resultFactory = new ImmediateResultFactory();
+		}
 		PreconditionUtil.assertEquals("already initialized", InitializedState.NOT_INITIALIZED, initializedState);
 		this.initializedState = InitializedState.INITIALIZING;
 		this.objectMapper = objectMapper;
@@ -694,6 +702,11 @@ public class ModuleRegistry {
 		public SecurityProvider getSecurityProvider() {
 			checkState(InitializedState.INITIALIZING, InitializedState.INITIALIZED);
 			return ModuleRegistry.this.getSecurityProvider();
+		}
+
+		@Override
+		public void setResultFactory(ResultFactory resultFactory) {
+			ModuleRegistry.this.setResultFactory(resultFactory);
 		}
 
 		@Override

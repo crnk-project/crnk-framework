@@ -1,7 +1,6 @@
 package io.crnk.core.engine.result;
 
-import io.crnk.core.engine.http.HttpRequestContext;
-
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,4 +24,5 @@ public interface Result<T> {
 
 	<R> Result<R> merge(Function<T, Result<R>> other);
 
+	Result<T> setTimeout(Duration timeout);
 }

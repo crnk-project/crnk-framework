@@ -59,6 +59,13 @@ public interface Module {
 	interface ModuleContext {
 
 		/**
+		 * Sets the ResultFactory used. Can only be called once by all modules!
+		 *
+		 * @param resultFactory
+		 */
+		void setResultFactory(ResultFactory resultFactory);
+
+		/**
 		 * Adds the given extension
 		 */
 		void addExtension(ModuleExtension extension);
@@ -129,7 +136,7 @@ public interface Module {
 		 * Adds the given repository for the given type.
 		 *
 		 * @param resourceClass resource class
-		 * @param repository resource
+		 * @param repository    resource
 		 * @deprecated use {@link #addRepository(Object)}
 		 */
 		@Deprecated
@@ -140,7 +147,7 @@ public interface Module {
 		 *
 		 * @param sourceResourceClass source resource class
 		 * @param targetResourceClass target resource class
-		 * @param repository resource
+		 * @param repository          resource
 		 * @deprecated use {@link #addRepository(Object)}
 		 */
 		@Deprecated

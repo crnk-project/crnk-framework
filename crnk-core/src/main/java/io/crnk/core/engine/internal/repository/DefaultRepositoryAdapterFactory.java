@@ -11,6 +11,8 @@ import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
+import java.util.Objects;
+
 public class DefaultRepositoryAdapterFactory implements RepositoryAdapterFactory {
 
 	private final ModuleRegistry moduleRegistry;
@@ -21,6 +23,7 @@ public class DefaultRepositoryAdapterFactory implements RepositoryAdapterFactory
 
 	@Override
 	public boolean accepts(Object repository) {
+		Objects.requireNonNull(repository);
 		return repository instanceof ResourceRepository || repository instanceof ResourceRepositoryV2
 				|| repository instanceof RelationshipRepository || repository instanceof RelationshipRepositoryV2
 				|| repository.getClass().getAnnotation(JsonApiResourceRepository.class) != null

@@ -48,7 +48,6 @@ public abstract class ReactiveTestBase {
 		testModule.addRepository(projectToTasks);
 
 		boot = new CrnkBoot();
-		boot.getModuleRegistry().setResultFactory(new MonoResultFactory());
 		boot.addModule(new ReactiveModule());
 		boot.addModule(testModule);
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:8080"));

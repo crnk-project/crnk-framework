@@ -1,15 +1,10 @@
 package io.crnk.core.engine.repository;
 
 import io.crnk.core.CoreTestContainer;
-import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.registry.CustomResourceRegistryTest;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.DefaultResourceList;

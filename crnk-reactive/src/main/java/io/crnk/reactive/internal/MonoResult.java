@@ -3,6 +3,7 @@ package io.crnk.reactive.internal;
 import io.crnk.core.engine.result.Result;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -58,6 +59,11 @@ public class MonoResult<T> implements Result<T> {
 			return result.mono;
 		});
 		return new MonoResult<>(flatMapped);
+	}
+
+	@Override
+	public Result<T> setTimeout(Duration timeout) {
+		return new MonoResult<>(mono.timeout(timeout));
 	}
 
 	public Mono<T> getMono() {

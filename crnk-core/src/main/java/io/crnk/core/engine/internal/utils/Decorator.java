@@ -7,5 +7,13 @@ package io.crnk.core.engine.internal.utils;
  */
 public interface Decorator<T> {
 
-	void setDecoratedObject(T object);
+	/**
+	 * Set upon construction.
+	 *
+	 * @param object
+	 */
+	@Deprecated
+	default void setDecoratedObject(T object) {
+
+	}
 }

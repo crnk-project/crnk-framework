@@ -1,5 +1,6 @@
 package io.crnk.core.engine.result;
 
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,6 +48,11 @@ public class ImmediateResult<T> implements Result<T> {
 	@Override
 	public <R> Result<R> merge(Function<T, Result<R>> other) {
 		return other.apply(object);
+	}
+
+	@Override
+	public Result<T> setTimeout(Duration timeout) {
+		throw new UnsupportedOperationException();
 	}
 
 }

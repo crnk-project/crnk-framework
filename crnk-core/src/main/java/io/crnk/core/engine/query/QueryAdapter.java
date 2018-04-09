@@ -62,9 +62,5 @@ public interface QueryAdapter {
 
 	PagingSpec getPagingSpec();
 
-	String getBaseUrl();
-
-	void setBaseUrl(String baseUrl);
-
 	boolean isEmpty();
 }

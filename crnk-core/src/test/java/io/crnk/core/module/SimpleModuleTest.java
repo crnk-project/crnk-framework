@@ -297,6 +297,10 @@ public class SimpleModuleTest {
 		}
 
 		@Override
+		public void setResultFactory(ResultFactory resultFactory) {
+		}
+
+		@Override
 		public void addExtension(ModuleExtension extension) {
 			throw new UnsupportedOperationException();
 		}

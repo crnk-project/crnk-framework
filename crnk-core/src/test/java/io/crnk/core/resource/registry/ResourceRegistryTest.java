@@ -3,7 +3,10 @@ package io.crnk.core.resource.registry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -13,6 +16,7 @@ import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInf
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.registry.LegacyRegistryEntry;
 import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -67,8 +71,10 @@ public class ResourceRegistryTest {
 	}
 
 	private <T> RegistryEntry newRegistryEntry(Class<T> repositoryClass, String path) {
+		List<ResourceField> fields = new ArrayList<>();
+		fields.add(new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null));
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, fields,
 						new OffsetLimitPagingBehavior());
 		return new LegacyRegistryEntry(new DirectResponseResourceEntry(null,
 				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
@@ -96,6 +102,19 @@ public class ResourceRegistryTest {
 		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
 		String resourceUrl = resourceRegistry.getResourceUrl(entry.getResourceInformation());
 		assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks");
+	}
+
+	@Test
+	public void onExistingTypeAndQueryContextShouldReturnUrl() {
+		Task task = new Task();
+		task.setId(12L);
+		QueryContext queryContext = new QueryContext();
+		queryContext.setBaseUrl("http://querycontext:1234");
+		RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+		assertThat(resourceRegistry.getResourceUrl(queryContext, entry.getResourceInformation())).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class)).isEqualTo("http://querycontext:1234/tasks");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class, "12")).isEqualTo("http://querycontext:1234/tasks/12");
+		assertThat(resourceRegistry.getResourceUrl(queryContext, task)).isEqualTo("http://querycontext:1234/tasks/12");
 	}
 
 	@Test

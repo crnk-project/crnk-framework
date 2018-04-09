@@ -64,8 +64,8 @@ public class CoreTestContainer {
 		queryContext = requestContext.getQueryContext();
 		queryContext.setBaseUrl(boot.getServiceUrlProvider().getUrl());
 
-		httpRequestContextProvider.onRequestStarted(requestContext);
 		boot.boot();
+		httpRequestContextProvider.onRequestStarted(requestContext);
 	}
 
 	public QueryContext getQueryContext() {

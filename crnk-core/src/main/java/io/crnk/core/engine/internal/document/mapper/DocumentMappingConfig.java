@@ -1,10 +1,9 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import io.crnk.core.engine.http.HttpRequestContext;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class DocumentMappingConfig {
 

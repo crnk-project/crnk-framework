@@ -102,16 +102,6 @@ public class QueryParamsAdapter implements QueryAdapter {
 	}
 
 	@Override
-	public String getBaseUrl() {
-		return null;
-	}
-
-	@Override
-	public void setBaseUrl(String baseUrl) {
-
-	}
-
-	@Override
 	public boolean isEmpty() {
 		return false;
 	}

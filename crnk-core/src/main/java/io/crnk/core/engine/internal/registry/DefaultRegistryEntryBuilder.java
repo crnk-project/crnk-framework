@@ -397,16 +397,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		Object decoratedRepository = repository;
 		List<RepositoryDecoratorFactory> repositoryDecorators = moduleRegistry.getRepositoryDecoratorFactories();
 		for (RepositoryDecoratorFactory repositoryDecorator : repositoryDecorators) {
-			Decorator decorator = null;
-			if (decoratedRepository instanceof RelationshipRepositoryV2) {
-				decorator = repositoryDecorator.decorateRepository((RelationshipRepositoryV2) decoratedRepository);
-			} else if (decoratedRepository instanceof ResourceRepositoryV2) {
-				decorator = repositoryDecorator.decorateRepository((ResourceRepositoryV2) decoratedRepository);
-			}
-			if (decorator != null) {
-				decorator.setDecoratedObject(decoratedRepository);
-				decoratedRepository = decorator;
-			}
+			decoratedRepository = repositoryDecorator.decorateRepository(decoratedRepository);
 		}
 
 		if (decoratedRepository instanceof ResourceRegistryAware) {

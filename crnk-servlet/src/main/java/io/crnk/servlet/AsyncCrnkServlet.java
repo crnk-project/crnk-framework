@@ -9,6 +9,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.result.ImmediateResultFactory;
+import io.crnk.servlet.internal.AsyncAdapter;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.servlet.internal.ServletPropertiesProvider;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -20,7 +21,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Async/reactive servlet filter class to integrate with Crnk.
@@ -35,37 +38,28 @@ public class AsyncCrnkServlet extends HttpServlet {
 
 	protected CrnkBoot boot = new CrnkBoot();
 
-	private int timeout = 30000;
+	private Duration timeout = Duration.ofMillis(30000);
 
 	public AsyncCrnkServlet() {
 	}
 
-	public void setResultFactory(ResultFactory resultFactory) {
-		boot.getModuleRegistry().setResultFactory(resultFactory);
-	}
-
 	@Override
 	public void init() {
-		if (boot.getModuleRegistry().getResultFactory() instanceof ImmediateResultFactory) {
-			throw new IllegalStateException("call setResultFactory with a async implementation");
-		}
 		HttpRequestContextProvider provider = boot.getModuleRegistry().getHttpRequestContextProvider();
 		boot.setPropertiesProvider(new ServletPropertiesProvider(getServletConfig()));
 		boot.addModule(new ServletModule(provider));
 		initCrnk(boot);
 		boot.boot();
+		if (!boot.getModuleRegistry().getResultFactory().isAsync()) {
+			throw new IllegalStateException("make use of an async ResultFactory, e.g. provided by ReactiveModule");
+		}
 	}
-
-	@Override
-	public void destroy() {
-	}
-
 
 	public CrnkBoot getBoot() {
 		return boot;
 	}
 
-	public void setTimeout(int timeout) {
+	public void setTimeout(Duration timeout) {
 		this.timeout = timeout;
 	}
 
@@ -92,9 +86,23 @@ public class AsyncCrnkServlet extends HttpServlet {
 		Optional<Result<HttpResponse>> optResponse = requestDispatcher.process(context);
 		if (optResponse.isPresent()) {
 			Result<HttpResponse> response = optResponse.get();
+			response = response.setTimeout(timeout);
+
 			AsyncContext asyncCtx = req.startAsync();
-			asyncCtx.addListener(new CrnkAsyncListener());
-			asyncCtx.setTimeout(timeout);
+
+			// timeout fallback on http layer
+			asyncCtx.setTimeout(timeout.toMillis() + 2000);
+
+			asyncCtx.addListener(new AsyncAdapter() {
+
+				@Override
+				public void onTimeout(AsyncEvent event) throws IOException {
+					LOGGER.error("timeout for request {}", event);
+					httpResponse.setStatus(HttpStatus.GATEWAY_TIMEOUT_504);
+
+				}
+
+			});
 			response.subscribe(it -> {
 						LOGGER.debug("writing response");
 						it.getHeaders().entrySet().forEach(entry -> httpResponse.setHeader(entry.getKey(), entry.getValue()));
@@ -105,13 +113,21 @@ public class AsyncCrnkServlet extends HttpServlet {
 								LOGGER.debug("response bodyLength={}", body.length);
 								outputStream.write(body);
 							}
-						} catch (IOException e) {
+						} catch (Exception e) {
 							LOGGER.error("failed to process request", e);
 						} finally {
 							asyncCtx.complete();
 							LOGGER.debug("response completed");
 						}
-					}, exception -> LOGGER.error("failed to process request", exception)
+					}, exception -> {
+						LOGGER.error("failed to process request", exception);
+						if (exception instanceof TimeoutException) {
+							httpResponse.setStatus(HttpStatus.GATEWAY_TIMEOUT_504);
+						} else {
+							httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+						}
+						asyncCtx.complete();
+					}
 			);
 		} else {
 			httpResponse.setStatus(HttpStatus.NOT_FOUND_404);
@@ -119,23 +135,5 @@ public class AsyncCrnkServlet extends HttpServlet {
 
 		long endTime = System.currentTimeMillis();
 		LOGGER.debug("prepared request in in {}ms", endTime - startTime);
-	}
-
-	public class CrnkAsyncListener implements AsyncListener {
-		public void onComplete(AsyncEvent event) throws IOException {
-			log("onComplete called");
-		}
-
-		public void onTimeout(AsyncEvent event) throws IOException {
-			log("onTimeout called");
-		}
-
-		public void onError(AsyncEvent event) throws IOException {
-			log("onError called");
-		}
-
-		public void onStartAsync(AsyncEvent event) throws IOException {
-			log("onStartAsync called");
-		}
 	}
 }

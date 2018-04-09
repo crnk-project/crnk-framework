@@ -38,6 +38,12 @@ public class NonReactiveButImmediateTest extends ReactiveTestBase {
 		ResourceRepositoryAdapter adapter = entry.getResourceRepository(null);
 
 		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(SlowTask.class), boot.getResourceRegistry(), queryContext);
+		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
+
+		// warm-up
+		httpRequestContextProvider.attach(adapter.findAll(queryAdapter)).get();
+		System.gc();
+		System.gc();
 
 		List<Result<JsonApiResponse>> results = new ArrayList<>();
 		int n = 40;
@@ -49,7 +55,7 @@ public class NonReactiveButImmediateTest extends ReactiveTestBase {
 		long s = System.currentTimeMillis();
 
 		Result<List<JsonApiResponse>> zipped = resultFactory.zip(results);
-		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();
+
 		zipped = httpRequestContextProvider.attach(zipped);
 
 		List<JsonApiResponse> responses = zipped.get();
@@ -58,7 +64,7 @@ public class NonReactiveButImmediateTest extends ReactiveTestBase {
 
 		// should incur delay for each call as it supposed to be immediate and no worker thread used
 		int cpuIgnoreMargin = 1000;
-		Assert.assertTrue("dt=" + dt, dt < n * SlowResourceRepository.DELAY + cpuIgnoreMargin);
+		Assert.assertTrue("dt=" + dt, dt < n * SlowResourceRepository.DELAY + 2 * cpuIgnoreMargin);
 		Assert.assertTrue("dt=" + dt, dt > n * SlowResourceRepository.DELAY - cpuIgnoreMargin);
 
 		for (JsonApiResponse response : responses) {

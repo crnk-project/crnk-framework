@@ -311,7 +311,8 @@ public class CrnkBoot {
 		for (DocumentFilter filter : getInstancesByType(DocumentFilter.class)) {
 			module.addFilter(filter);
 		}
-		for (Object repository : getInstancesByType(Repository.class)) {
+		List<Repository> repositories = getInstancesByType(Repository.class);
+		for (Object repository : repositories) {
 			module.addRepository(repository);
 		}
 		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
