@@ -21,4 +21,10 @@ public class RelationshipRepositoryBaseTest {
 		Assert.assertEquals(Task.class, base.getSourceResourceClass());
 		Assert.assertEquals(Project.class, base.getTargetResourceClass());
 	}
+
+	@Test
+	public void checkConstructors() {
+		new RelationshipRepositoryBase("a", "b");
+		new RelationshipRepositoryBase("a");
+	}
 }

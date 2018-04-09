@@ -250,9 +250,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
 		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
 		D target = (D) targetAdapter.findOne(targetId, queryAdapter).get().getEntity();
-		if (target == null) {
-			throw new IllegalStateException(targetId + " not found");
-		}
+		PreconditionUtil.assertNotNull("related resource not found", target);
 		return target;
 	}
 
@@ -311,12 +309,12 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 			throw new IllegalStateException("field " + oppositeName + " is null for " + result
 					+ ", make sure to properly implement relationship inclusions");
 		}
+
 		if (property instanceof Iterable) {
 			for (T potentialSource : (Iterable<T>) property) {
 				I sourceId = (I) sourceInformation.getId(potentialSource);
-				if (sourceId == null) {
-					throw new IllegalStateException("id is null for " + potentialSource);
-				}
+				PreconditionUtil.assertNotNull("id must not be null", sourceId);
+
 				// for to-many relations we have to assigned the found resource
 				// to all matching sources
 				if (sourceIdSet.contains(sourceId)) {
@@ -328,9 +326,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 			I sourceId = (I) sourceInformation.getId(source);
 			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains
 					(sourceId));
-			if (sourceId == null) {
-				throw new IllegalStateException("id is null for " + source);
-			}
+			PreconditionUtil.assertNotNull("id must not be null", sourceId);
 			bulkResult.add(sourceId, result);
 		}
 	}
@@ -339,14 +335,9 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		RegistryEntry entry = resourceRegistry.findEntry(sourceResourceClass);
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		ResourceField field = resourceInformation.findRelationshipFieldByName(fieldName);
-		if (field == null) {
-			throw new IllegalStateException("field " + sourceResourceClass.getSimpleName() + "." + fieldName + " not found");
-		}
+		PreconditionUtil.assertNotNull("field not found", field);
 		String oppositeName = field.getOppositeName();
-		if (oppositeName == null) {
-			throw new IllegalStateException(
-					"no opposite specified for field " + sourceResourceClass.getSimpleName() + "." + fieldName);
-		}
+		PreconditionUtil.assertNotNull("opposite not specified", oppositeName);
 		return oppositeName;
 	}
 

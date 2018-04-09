@@ -246,6 +246,26 @@ public class CrnkBootTest {
 	}
 
 	@Test
+	public void setAllowUnknownAttributes() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setAllowUnknownAttributes();
+		boot.boot();
+
+		DefaultQuerySpecDeserializer querySpecDeserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
+		Assert.assertTrue(querySpecDeserializer.getAllowUnknownAttributes());
+	}
+
+	@Test
+	public void setAllowUnknownParameters() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setAllowUnknownParameters();
+		boot.boot();
+
+		DefaultQuerySpecDeserializer querySpecDeserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
+		Assert.assertTrue(querySpecDeserializer.getAllowUknownParameters());
+	}
+
+	@Test
 	public void setConstantServiceUrlProvider() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);

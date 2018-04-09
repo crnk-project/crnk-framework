@@ -47,7 +47,7 @@ public class JsonHomeFormatTest {
 
 	@Test
 	public void testWithAnyRequest() throws IOException {
-		testHomeJsonReturned(false);
+		testHomeJsonReturned(true);
 	}
 
 	private void testHomeJsonReturned(boolean anyRequest) throws IOException {

@@ -101,36 +101,11 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 
 			@Override
 			public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
-				Set<String> pathSet = new HashSet<>();
-
 				LOGGER.debug("processing request");
 
 				QueryContext queryContext = requestContext.getQueryContext();
-
-				ResourceRegistry resourceRegistry = context.getResourceRegistry();
-				for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
-					RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-					if (repositoryInformation != null &&
-							context.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext)
-									== FilterBehavior.NONE) {
-						ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
-						String resourceType = resourceInformation.getResourceType();
-						pathSet.add("/" + resourceType);
-					}
-				}
-
-				if (extensions != null) {
-					for (HomeModuleExtension extension : extensions) {
-						pathSet.addAll(extension.getPaths());
-					}
-				}
-
 				String requestPath = requestContext.getPath();
-				pathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
-						.filter(it -> it != null).collect(Collectors.toSet());
-
-				List<String> pathList = new ArrayList<>(pathSet);
-				Collections.sort(pathList);
+				List<String> pathList = list(requestPath, queryContext);
 
 				HttpResponse response;
 				if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
@@ -157,15 +132,44 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				return resultFactory.just(response);
 			}
 
-			private String getChildName(String requestPath, String it) {
-				if (it.startsWith(requestPath)) {
-					String subPath = UrlUtils.removeTrailingSlash(it.substring(requestPath.length()));
-					int sep = subPath.indexOf('/');
-					return sep == -1 ? subPath : subPath.substring(0, sep) + "/";
-				}
-				return null;
-			}
 		});
+	}
+
+	public List<String> list(String requestPath, QueryContext queryContext) {
+		Set<String> pathSet = new HashSet<>();
+		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+		for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
+			RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
+			if (repositoryInformation != null &&
+					moduleContext.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext)
+							== FilterBehavior.NONE) {
+				ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
+				String resourceType = resourceInformation.getResourceType();
+				pathSet.add("/" + resourceType);
+			}
+		}
+
+		if (extensions != null) {
+			for (HomeModuleExtension extension : extensions) {
+				pathSet.addAll(extension.getPaths());
+			}
+		}
+
+		pathSet = pathSet.stream().map(it -> getChildName(requestPath, it))
+				.filter(it -> it != null).collect(Collectors.toSet());
+
+		List<String> pathList = new ArrayList<>(pathSet);
+		Collections.sort(pathList);
+		return pathList;
+	}
+
+	private String getChildName(String requestPath, String it) {
+		if (it.startsWith(requestPath)) {
+			String subPath = it.substring(requestPath.length());
+			int sep = subPath.indexOf('/');
+			return sep == -1 ? subPath : subPath.substring(0, sep + 1);
+		}
+		return null;
 	}
 
 	private HttpResponse getResponse(HttpRequestContext requestContext, List<String> pathList) {
