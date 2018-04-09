@@ -110,7 +110,7 @@ gradle.beforeProject { Project project ->
 			def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
 
 			def mainOutput = files(files(sourceSets.main.output).collect {
-				fileTree(dir: it, exclude: '**/legacy/**,**/RelationshipRepositoryBa**')
+				fileTree(dir: it, exclude: '**/legacy/**')
 			})
 
 			if (sourceDirs == null) {
