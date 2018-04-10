@@ -1,8 +1,13 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.common.collect.ImmutableList;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -11,17 +16,9 @@ import io.crnk.core.engine.internal.utils.FieldOrderedComparator;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
@@ -36,7 +33,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 											  PagingBehavior pagingBehavior,
 											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
 		this(propertiesProvider,
-				ImmutableList.of(pagingBehavior),
+				Collections.unmodifiableList(Arrays.asList(pagingBehavior)),
 				Arrays.asList(resourceFieldInformationProviders));
 	}
 
