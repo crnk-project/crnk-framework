@@ -1,11 +1,8 @@
 package io.crnk.example.springboot.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiRelationId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.*;
+
 import javax.validation.constraints.Size;
 
 // tag::doc1[]
@@ -24,7 +21,9 @@ public class Task {
 	@JsonApiRelationId
 	private Long projectId;
 
-	@JsonApiRelation(opposite = "tasks", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	@JsonApiRelation(opposite = "tasks", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER,
+			serialize = SerializeType.ONLY_ID)
 	private Project project;
 
 	// end::doc1[]

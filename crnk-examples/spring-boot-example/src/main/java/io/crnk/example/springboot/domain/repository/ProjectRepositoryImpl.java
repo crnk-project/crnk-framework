@@ -5,9 +5,7 @@ import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.example.springboot.domain.model.Project;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,13 +18,6 @@ public class ProjectRepositoryImpl extends ResourceRepositoryBase<Project, Long>
 
 	public ProjectRepositoryImpl() {
 		super(Project.class);
-		List<String> interests = new ArrayList<>();
-		interests.add("coding");
-		interests.add("art");
-		save(new Project(121L, "Great Project"));
-		save(new Project(122L, "Crnk Project"));
-		save(new Project(123L, "Some Project"));
-		save(new Project(124L, "JSON API Project"));
 	}
 
 	@Override
