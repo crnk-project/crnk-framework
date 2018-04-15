@@ -1,13 +1,6 @@
 package io.crnk.core.module;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -246,7 +239,7 @@ public class ModuleRegistry {
 
 	public List<HttpRequestProcessor> getHttpRequestProcessors() {
 		checkState(InitializedState.INITIALIZED, InitializedState.INITIALIZED);
-		return aggregatedModule.getHttpRequestProcessors();
+		return prioritze(aggregatedModule.getHttpRequestProcessors());
 	}
 
 	/**
@@ -857,12 +850,22 @@ public class ModuleRegistry {
 	}
 
 	private static <T> List<T> prioritze(List<T> list) {
+		Map<Object, Integer> indexMap = new HashMap<>();
+		int index = 0;
+		for (T item : list) {
+			indexMap.put(item, index--);
+		}
+
 		ArrayList<T> results = new ArrayList<>(list);
 		Collections.sort(results, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
 				int p1 = getPriority(o1);
 				int p2 = getPriority(o2);
+				if (p1 == p2) {
+					p1 = indexMap.get(o1);
+					p2 = indexMap.get(o2);
+				}
 				return p1 - p2;
 			}
 

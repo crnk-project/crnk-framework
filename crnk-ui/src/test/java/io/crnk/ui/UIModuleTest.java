@@ -1,9 +1,12 @@
 package io.crnk.ui;
 
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.Module;
+import io.crnk.home.HomeModule;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.ui.internal.UIHttpRequestProcessor;
 import org.junit.Assert;
@@ -11,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.util.List;
 
 public class UIModuleTest {
 
@@ -51,6 +55,26 @@ public class UIModuleTest {
 		Mockito.verify(context, Mockito.times(1)).setContentType(Mockito.eq("text/html"));
 	}
 
+	@Test
+	public void checkHomeModuleExtension() {
+		HomeModule homeModule = HomeModule.create();
+		UIModule uiModule = UIModule.create(new UIModuleConfig());
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(homeModule);
+		boot.addModule(uiModule);
+		boot.boot();
+
+		List<String> list = homeModule.list("/", new QueryContext());
+		Assert.assertTrue(list.contains("browse/"));
+	}
+
+	@Test
+	public void checkHomeModuleIsOptional() {
+		CrnkBoot boot = new CrnkBoot();
+		UIModule uiModule = UIModule.create(new UIModuleConfig());
+		boot.addModule(uiModule);
+		boot.boot();
+	}
 
 	@Test
 	public void processorReturnsIndexHtmlForRootPage() throws IOException {

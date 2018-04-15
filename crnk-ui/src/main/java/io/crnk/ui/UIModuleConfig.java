@@ -2,7 +2,7 @@ package io.crnk.ui;
 
 public class UIModuleConfig {
 
-	private String path = "browse";
+	private String path = "/browse/";
 
 	public String getPath() {
 		return path;

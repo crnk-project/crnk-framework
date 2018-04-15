@@ -28,6 +28,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtensionAware;
+import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,68 +72,74 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	@Override
 	public void setupModule(final ModuleContext context) {
 		this.moduleContext = context;
-		context.addHttpRequestProcessor(new HttpRequestProcessor() {
+		context.addHttpRequestProcessor(new HomeHttpRequestProcessor());
+	}
 
-			@Override
-			public boolean supportsAsync() {
-				return true;
+	class HomeHttpRequestProcessor implements HttpRequestProcessor, Prioritizable {
+
+		@Override
+		public boolean supportsAsync() {
+			return true;
+		}
+
+		@Override
+		public boolean accepts(HttpRequestContext requestContext) {
+			String path = requestContext.getPath();
+			if (!path.endsWith("/") || !requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())) {
+				return false;
 			}
 
-			@Override
-			public boolean accepts(HttpRequestContext requestContext) {
-				String path = requestContext.getPath();
-				if (!path.endsWith("/") || !requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())) {
-					return false;
-				}
+			boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
+			boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
+			boolean acceptsJson = requestContext.accepts(HttpHeaders.JSON_CONTENT_TYPE);
+			boolean acceptsAny = requestContext.acceptsAny();
+			if (!(acceptsHome || acceptsAny || acceptsJson || acceptsJsonApi)) {
+				return false;
+			}
 
+			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+			JsonPath jsonPath = new PathBuilder(resourceRegistry).build(path);
+			return jsonPath == null; // no repository with that path
+
+		}
+
+		@Override
+		public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
+			LOGGER.debug("processing request");
+
+			QueryContext queryContext = requestContext.getQueryContext();
+			String requestPath = requestContext.getPath();
+			List<String> pathList = list(requestPath, queryContext);
+
+			HttpResponse response;
+			if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
+				LOGGER.debug("using JSON home format");
 				boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-				boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				boolean acceptsJson = requestContext.accepts(HttpHeaders.JSON_CONTENT_TYPE);
-				boolean acceptsAny = requestContext.acceptsAny();
-				if (!(acceptsHome || acceptsAny || acceptsJson || acceptsJsonApi)) {
-					return false;
-				}
-
-				ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-				JsonPath jsonPath = new PathBuilder(resourceRegistry).build(path);
-				return jsonPath == null; // no repository with that path
-
-			}
-
-			@Override
-			public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
-				LOGGER.debug("processing request");
-
-				QueryContext queryContext = requestContext.getQueryContext();
-				String requestPath = requestContext.getPath();
-				List<String> pathList = list(requestPath, queryContext);
-
-				HttpResponse response;
-				if (defaultFormat == HomeFormat.JSON_HOME || requestContext.accepts(JSON_HOME_CONTENT_TYPE)) {
-					LOGGER.debug("using JSON home format");
-					boolean acceptsHome = requestContext.accepts(JSON_HOME_CONTENT_TYPE);
-					response = writeJsonHome(requestContext, pathList);
-					if (acceptsHome) {
-						response.setContentType(JSON_HOME_CONTENT_TYPE);
-					} else {
-						response.setContentType(JSON_CONTENT_TYPE);
-					}
+				response = writeJsonHome(requestContext, pathList);
+				if (acceptsHome) {
+					response.setContentType(JSON_HOME_CONTENT_TYPE);
 				} else {
-					boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
-					LOGGER.debug("using JSON API format");
-					response = getResponse(requestContext, pathList);
-					if (jsonapi) {
-						response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-					} else {
-						response.setContentType(JSON_CONTENT_TYPE);
-					}
+					response.setContentType(JSON_CONTENT_TYPE);
 				}
-
-				ResultFactory resultFactory = moduleContext.getResultFactory();
-				return resultFactory.just(response);
+			} else {
+				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
+				LOGGER.debug("using JSON API format");
+				response = getResponse(requestContext, pathList);
+				if (jsonapi) {
+					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
+				} else {
+					response.setContentType(JSON_CONTENT_TYPE);
+				}
 			}
 
-		});
+			ResultFactory resultFactory = moduleContext.getResultFactory();
+			return resultFactory.just(response);
+		}
+
+		@Override
+		public int getPriority() {
+			return 1000; // low prio to not override others like ui module
+		}
 	}
 
 	public List<String> list(String requestPath, QueryContext queryContext) {

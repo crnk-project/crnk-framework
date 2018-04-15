@@ -2,13 +2,16 @@ package io.crnk.example.springboot.simple;
 
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ValidatableResponse;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.Project;
 import io.crnk.example.springboot.domain.model.ScheduleDto;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
+import io.crnk.example.springboot.domain.model.Task;
 import io.crnk.example.springboot.domain.repository.ProjectRepository;
 import io.crnk.example.springboot.domain.repository.ProjectRepository.ProjectList;
 import io.crnk.example.springboot.domain.repository.ProjectRepository.ProjectListLinks;
@@ -42,7 +45,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
 	@Test
 	public void testClient() {
-		ProjectRepository projectRepo = client.getResourceRepository(ProjectRepository.class);
+		ProjectRepository projectRepo = client.getRepositoryForInterface(ProjectRepository.class);
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.setLimit(10L);
 		ProjectList list = projectRepo.findAll(querySpec);
@@ -58,8 +61,33 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 	}
 
 	@Test
+	public void testRelationship() {
+		RelationshipRepositoryV2<Project, Serializable, Task, Serializable> relRepo = client.getRepositoryForType(Project.class, Task.class);
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		ResourceList<Task> tasks = relRepo.findManyTargets(123L, "tasks", querySpec);
+		Assert.assertEquals(1, tasks.size());
+	}
+
+
+	@Test
+	public void testUi() {
+		Response response = RestAssured.given().when().get("/api/browse/");
+		response.then().assertThat().statusCode(200);
+		String body = response.getBody().print();
+		Assert.assertTrue(body.contains("<title>Crnk UI</title>"));
+	}
+
+	@Test
+	public void testUiRegistrationWithHome() {
+		Response response = RestAssured.given().when().get("/api/");
+		response.then().assertThat().statusCode(200);
+		String body = response.getBody().print();
+		Assert.assertTrue(body, body.contains("http://localhost:8080/api/browse/"));
+	}
+
+	@Test
 	public void testJpaEntityAccess() {
-		ResourceRepositoryV2<ScheduleEntity, Serializable> entityRepo = client.getQuerySpecRepository(ScheduleEntity.class);
+		ResourceRepositoryV2<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
 
 		QuerySpec querySpec = new QuerySpec(ScheduleEntity.class);
 		ResourceList<ScheduleEntity> list = entityRepo.findAll(querySpec);
