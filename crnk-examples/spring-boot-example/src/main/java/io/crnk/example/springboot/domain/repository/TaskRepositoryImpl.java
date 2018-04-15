@@ -24,15 +24,6 @@ public class TaskRepositoryImpl extends ResourceRepositoryBase<Task, Long> imple
 
 	public TaskRepositoryImpl() {
 		super(Task.class);
-		Task task = new Task(1L, "Create tasks");
-		task.setProjectId(123L);
-		save(task);
-		task = new Task(2L, "Make coffee");
-		task.setProjectId(123L);
-		save(task);
-		task = new Task(3L, "Do things");
-		task.setProjectId(123L);
-		save(task);
 	}
 
 	@Override

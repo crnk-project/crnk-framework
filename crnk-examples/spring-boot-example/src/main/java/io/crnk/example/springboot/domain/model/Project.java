@@ -1,12 +1,8 @@
 package io.crnk.example.springboot.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import java.util.ArrayList;
+import io.crnk.core.resource.annotations.*;
+
 import java.util.List;
 
 // tag::doc[]
@@ -20,8 +16,8 @@ public class Project {
 	private String name;
 
 	@JsonApiRelation(opposite = "project", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
-			repositoryBehavior = RelationshipRepositoryBehavior.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER)
-	private List<Task> tasks = new ArrayList<>();
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
+	private List<Task> tasks;
 
 	// end::doc[]
 
