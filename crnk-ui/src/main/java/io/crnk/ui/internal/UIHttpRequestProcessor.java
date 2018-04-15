@@ -30,7 +30,7 @@ public class UIHttpRequestProcessor implements HttpRequestProcessor {
 
 	@Override
 	public void process(HttpRequestContext context) throws IOException {
-		String pathPrefix = UrlUtils.removeTrailingSlash(config.getPath()) + "/";
+		String pathPrefix = UrlUtils.removeLeadingSlash(UrlUtils.removeTrailingSlash(config.getPath())) + "/";
 		String path = UrlUtils.removeLeadingSlash(context.getPath());
 
 		if (context.getMethod().equals(HttpMethod.GET.toString()) && path.startsWith(pathPrefix)) {
