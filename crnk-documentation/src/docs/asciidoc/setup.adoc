@@ -20,7 +20,41 @@ Crnk library requires minimum Java 8 (as of Crnk 2.4) to build and run. In the f
 for both the current major Java releases (9, 10, 11, etc.) and the current long-term support version that gets
 released every three years.
 
+## BOM
 
+With `io.crnk:crnk-bom` a Maven BOM is provided that manages the dependencies of all crnk artifacts.
+In Gradle the setup then looks as follows:
+
+[source]
+----
+buildscript {
+	dependencies {
+		classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+	}
+}
+
+gradle.beforeProject { Project project ->
+	project.with {
+		apply plugin: 'io.spring.dependency-management'
+		dependencyManagement {
+			imports {
+				mavenBom "io.crnk:crnk-bom:$CRNK_VERSION"
+			}
+		}
+	}
+}
+----
+
+The crnk modules can then simply be used without having to specify a version:
+
+[source]
+----
+dependencies {
+	compile 'io.crnk:crnk-rs'
+	compile 'io.crnk:crnk-spring'
+	...
+}
+----
 
 ## Integration with JAX-RS
 

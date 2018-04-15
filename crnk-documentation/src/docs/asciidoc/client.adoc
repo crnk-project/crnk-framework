@@ -131,7 +131,7 @@ And then it can be used like:
 [source]
 .QuerySpecClientTest.java
 ----
-include::../../../../crnk-client/src/test/java/io/crnk/client/QuerySpecClientTest.java[tags=interfaceAccess]
+include::../../../../crnk-client/src/test/java/io/crnk/client/suite/RepositoryAccessClientTest.java[tags=interfaceAccess]
 ----
 
 

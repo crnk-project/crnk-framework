@@ -30,6 +30,7 @@ include ':crnk-examples:spring-boot-example'
 
 include ':crnk-ui'
 include ':crnk-documentation'
+include ':crnk-bom'
 
 gradle.beforeProject { Project project ->
 	project.with {
@@ -60,3 +61,4 @@ gradle.beforeProject { Project project ->
 		group = rootProject.group
 	}
 }
+
