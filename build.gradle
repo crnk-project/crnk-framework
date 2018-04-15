@@ -56,6 +56,7 @@ gradle.beforeProject { Project project ->
 		def ui = project.name == 'crnk-ui'
 		def testProject = project.name == 'crnk-test'
 		def legacyBraveProject = project.name == 'crnk-brave'
+		def bom = project.name == 'crnk-bom'
 		def examples = project.name.contains('example')
 
 		if (!docs) {
@@ -64,32 +65,34 @@ gradle.beforeProject { Project project ->
 			sourceCompatibility = 1.8
 			targetCompatibility = 1.8
 
-			dependencies {
-				testCompile group: 'junit', name: 'junit', version: '4.12'
-				testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-				testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
-			}
-
-			test {
-				testLogging {
-					exceptionFormat = 'full'
-				}
-			}
-
-			apply plugin: 'io.spring.dependency-management'
-			dependencyManagement {
-				imports {
-					mavenBom 'org.springframework.boot:spring-boot-dependencies:1.5.8.RELEASE'
-					mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
-					mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
-				}
+			if(!bom) {
 				dependencies {
-					dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
-					dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
-					dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4'
-					dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.4'
-					dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.4'
-					dependency 'com.fasterxml.jackson.core:jackson-core:2.9.4'
+					testCompile group: 'junit', name: 'junit', version: '4.12'
+					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
+					testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+				}
+
+				test {
+					testLogging {
+						exceptionFormat = 'full'
+					}
+				}
+
+				apply plugin: 'io.spring.dependency-management'
+				dependencyManagement {
+					imports {
+						mavenBom 'org.springframework.boot:spring-boot-dependencies:1.5.8.RELEASE'
+						mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
+						mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
+					}
+					dependencies {
+						dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
+						dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.4'
+						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4'
+						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.4'
+						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.4'
+						dependency 'com.fasterxml.jackson.core:jackson-core:2.9.4'
+					}
 				}
 			}
 		}
@@ -229,8 +232,6 @@ gradle.beforeProject { Project project ->
 				tasks.publish.dependsOn(tasks.uploadArchives)
 			}
 			else {
-				apply plugin: 'maven-publish'
-
 				task sourcesJar(type: Jar) {
 					from sourceSets.main.allSource
 					classifier = 'sources'

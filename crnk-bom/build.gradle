@@ -1,0 +1,38 @@
+description = "Crnk extensions BOM"
+
+def bomGenerator = {
+	def node = asNode()
+	def dependencyMgmtNode = node.appendNode('dependencyManagement')
+	def dependenciesNode = dependencyMgmtNode.appendNode('dependencies')
+
+	// add subprojects to the bom
+	project.rootProject.subprojects.each {
+		System.out.println(it.name)
+		if (it.name != 'crnk-bom') {
+			Node dep = dependenciesNode.appendNode('dependency')
+			dep.appendNode('groupId').value = it.group
+			dep.appendNode('artifactId').value = it.name
+			dep.appendNode('version').value = project.version
+		}
+	}
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			pom.withXml bomGenerator
+		}
+	}
+}
+
+if (!rootProject.timestampedVersion) {
+	// dev build
+
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				pom.withXml bomGenerator
+			}
+		}
+	}
+}
