@@ -142,7 +142,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	@Override
 	public InformationBuilder.Resource resource() {
 		if (resource == null) {
-			resource = informationBuilder.createResource(null, null);
+			resource = informationBuilder.createResource(null, null, null);
 		}
 		return resource;
 	}

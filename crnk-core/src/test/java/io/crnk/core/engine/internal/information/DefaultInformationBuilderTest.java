@@ -15,7 +15,6 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void resource() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
 		resource.resourceClass(Project.class);
@@ -84,7 +83,7 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void checkRelationIdFieldCreation() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
 		resource.resourceClass(Project.class);
@@ -130,7 +129,7 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void checkResourceRepository() {
-		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks").build();
+		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks", null).build();
 
 		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository();
 		repositoryBuilder.setResourceInformation(resourceInformation);

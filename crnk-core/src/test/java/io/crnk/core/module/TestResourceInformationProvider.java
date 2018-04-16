@@ -37,6 +37,11 @@ public class TestResourceInformationProvider implements ResourceInformationProvi
 	}
 
 	@Override
+	public String getResourcePath(Class<?> clazz) {
+		return getResourceType(clazz);
+	}
+
+	@Override
 	public void init(ResourceInformationProviderContext context) {
 		this.context = context;
 	}
