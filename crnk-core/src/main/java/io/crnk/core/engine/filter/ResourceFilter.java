@@ -9,7 +9,9 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
  * <p>
  * Note that invocations to this methods are cached on a per-request basis.
  */
+// tag::docs[]
 public interface ResourceFilter {
+	// end::docs[]
 
 	/**
 	 * Allows to filter the given type.
@@ -17,7 +19,9 @@ public interface ResourceFilter {
 	 * @param resourceInformation to filter
 	 * @param method              to which to apply this filter to
 	 */
+	// tag::docs[]
 	FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method);
+	// end::docs[]
 
 	/**
 	 * Allows to filter the given field.
@@ -25,6 +29,8 @@ public interface ResourceFilter {
 	 * @param field  to filter
 	 * @param method to which to apply this filter to
 	 */
-	FilterBehavior filterField(ResourceField field, HttpMethod method);
 
+	// tag::docs[]
+	FilterBehavior filterField(ResourceField field, HttpMethod method);
 }
+// end::docs[]

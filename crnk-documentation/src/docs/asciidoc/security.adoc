@@ -1,0 +1,206 @@
+:basedir: ../../../..
+
+anchor:security_module[]
+
+# Security
+
+The resource-oriented nature of Crnk makes a number of quite powerful security schemes possible
+to authorize access to resources. The semantics of JSON API with resources, relationships, fields
+and parameters provide much more information about an application compared to, for example, a
+more classical JAX-RS oder Spring MVC application. This in turn allows to automate and simplify
+many security-related topics, which in turn allows for a more robust authorization.
+
+Authorization can happen on three levels:
+
+- Resource-based authorization: only a subset of all resource types are accessible to the user.
+- Field-based authorization: only a subset of the fields (attributes and relationships) of a resource are accessible to the user.
+- Data-based authorization: only a subset of all resources of a given type are accessible to the user
+      based on the contents of the resources. Typically denominated Dataroom access control (DAC).
+
+Crnk comes with support for all three. The subsequent sections outline a number of different strategies how to apply them.
+
+## Authentication
+
+Authorization requires to first know the calling user through authentication. Crnk is agnostic to
+the used authorization scheme and is usually provided by the underlying integration, for example,
+the `Principal` of JEE or the `SecurityContext` of Spring Security. They in turn are populated
+from a scheme like OAuth, JWT or SAML.
+
+Crnk makes use of `SecurityProvider` to integrate with such systems and check access to roles
+for the current user:
+
+[source]
+.SecurityProvider.java
+----
+include::../../../../crnk-core/src/main/java/io/crnk/core/engine/security/SecurityProvider.java[]
+----
+
+The JAX-RS and servlet integration of Crnk come both with a `SecurityProvider` implementation. Which in
+turn also provides an implementation for all integrations derived from them, such as Spring.
+
+The `SecurityProvider` is accessible from the module API and can be used to perform both DAC and RBAC
+or any other kind of check.
+
+
+
+## Resource-based Access Control with the SecurityModule
+
+There is a `SecurityModule` provided by `crnk-security` that intercepts all repository requests and
+perform access control. Currently it supports resource-based access control.
+A setup can looks as follows:
+
+[source]
+.SecurityModuleIntTest.java
+----
+include::../../../../crnk-security/src/test/java/io/crnk/security/SecurityModuleIntTest.java[tags=setup]
+----
+
+A builder is used to construct rules. Each rule grants access to either a given or all resources.
+Thereby `ResourcePermission` specifies the set of authorized methods: `GET`, `POST`, `PATCH`, `DELETE`.
+
+Once the rules are defined, the runtime checks go well beyond more traditional approaches like
+JEE `@RolesAllowed` annotation. The rules are enforced in various contexts:
+
+- Access to resource repositories are checked.
+- Access to relationship repositories are checked based on the target (return) type.
+- Relationship fields targeting resources the user is not authorized to see are omitted from results and cannot
+  be modified.
+- A request may span multiple repository accesses in case of inclusions with the `include` parameter. In this
+  case every access is checked individually.
+- `HomeModule` and `MetaModule` show only resources the user is authorized to see. In case of the `MetaModule`
+  the `MetaAttribute` and `MetaResource` provide further information about what can be read, inserted, updated and
+  deleted.
+- (soon) Query parameters for sorting and filtering are checked against unauthorized access to
+  related resources.
+
+Internally the security module makes use of `ResourceFilter` to perform this task. More information about that is
+available in a subsequent section.
+
+Is is up to the application how and when to configure the `SecurityModule`. The set of rules can be static
+or created dynamically. `SecurityModule.reconfigure(...)` allows to replace the security
+rules at runtime.
+
+
+anchor:resourcefilter[]
+
+## Role-based Access Control with ResourceFilter
+
+The `SecurityModule` is only one example how to implement security. Underlying it is the `ResourceFilter` interface
+provided by the Crnk engine:
+
+[source]
+.ResourceFilter.java
+----
+include::../../../../crnk-core/src/main/java/io/crnk/core/engine/filter/ResourceFilter.java[tags=docs]
+----
+
+`ResourceFilter` allows to restrict access to resources and fields. To methods `filterResource` and
+`filterField` can be implemented for this purpose. Both return a `FilterBehavior` which allows to
+distinguish between `NONE`, `IGNORE` and `FORBIDDEN`. For example, a field like a
+lock count can make use of `IGNORE` in order to be ignored for POST and PATCH requests (the current value
+on the server is left untouched). While access to an unauthorized resource or
+field results in a forbidden error with `FORBIDDEN`. An example is given by the
+`SecurityResourceFilter` of `SecurityModule` in 'crnk-security`. Since `ResourceFilter` methods are
+invoked often, it is important for them to return quickly.
+
+There is a `ResourceFilterDirectory` that complements `ResourceFilter`. It allows to query the authorization status
+of a particular resource or field in context of the current request. The `ResourceFilterDirectory` makes
+use of per-request caching as the information may be accessed repeatedly for a request.
+It can be obtained with `ModuleContext.getResourceFilterDirectory(...)` from the module API. For example, the `MetaModule` and
+`HomeModule` make use of `ResourceFilterDirectory` to only list authorized elements.
+
+
+## Dataroom Access Control
+
+Filtering of resources is one of the main building blocks of JSON API. As such it is typically
+not too hard to implement DAC. The roles of a user can be checked and if necessary
+for filters specific to that user can be added. There are two possibilities
+to add such filters:
+
+- by updating the repository filters.
+- by implementing a repository decorator that intercepts the request before reaching the repository.
+  For more information see <<repository_decoration,Repository Decoration>>.
+
+In the future the `SecurityModule` may be enhanced to also support DAC.
+
+
+## Adapt User Interfaces based on Authorizations
+
+In many cases it is desired to adjust UIs based on the authorizations of a user to guide the
+user early what he is authorized to do. There are two mechanisms that are outlined
+in the next sections.
+
+### ResourcePermissionInformation
+
+The `ResourcePermissionInformation` interface specializes `MetaInformation` to
+give access to the `ResourcePermission` of that particular element, either a list
+or a single resource. If either of the two carries a `MetaInformation` implementing `ResourcePermissionInformation`, then the `SecurityModule`
+will fill-in the `ResourcePermission` for the current request.
+
+
+### Home and Meta Module
+
+- `HomeModule` and `MetaModule` hide resources the user is not authorized to see.
+  Any UI can query their respective URLs to gain information about what the user is authorized to see.
+- The `MetaAttribute`  and `MetaResource` resources from the `MetaModule`  further show
+  information about which resources and fields can be inserted, updated and deleted.
+  The resources are available from `/meta/attributes` and `/meta/resource` respectively.
+
+
+## Provide Authentication Information to the User
+
+A frequent use case is to display user/login related information for a user. However, Crnk does not
+do authentication on its own and the set of provided information is typically application-specific.
+As such there is no direct support from Crnk, but a custom repository can look like:
+
+
+[source]
+.LoginRepository.java
+----
+ public class LoginRepository extends ResourceRepositoryBase<Login, String> {
+
+
+ 	public LoginRepository() {
+ 		super(Login.class);
+ 	}
+
+ 	@Override
+ 	public ResourceList<Login> findAll(QuerySpec querySpec) {
+ 		List<Login> logins = new ArrayList<>();
+ 		SecurityContext context = SecurityContextHolder.getContext();
+ 		if (context != null) {
+ 			Authentication authentication = context.getAuthentication();
+ 			Login me = new Login();
+ 			me.setId("me");
+ 			me.setUserName(authentication.getName());
+ 			logins.add(me);
+ 		}
+ 		return querySpec.apply(logins);
+ 	}
+}
+----
+
+This particular example has been taken from
+https://github.com/crnk-project/crnk-example/blob/master/crnk-example-service/src/main/java/io/crnk/example/service/security/LoginRepository.java[crnk-example].
+
+
+
+## Exception Mapping
+
+Crnk comes with four exceptions that are relevant in a security context:
+
+- `io.crnk.core.exception.ForbiddenException` results in a HTTP `403` status code and forbids access to the requested element.
+- `io.crnk.core.exception.UnauthorizedException` results in a HTTP `401` status code to trigger authentication.
+- `io.crnk.core.exception.RepositoryNotFoundException` and `io.crnk.core.exception.ResourceNotFoundException` may be
+  used in favor of `io.crnk.core.exception.ForbiddenException` to completely hide unauthorized resources with a status `404`
+  indistinguishable from non-existing ones.
+
+
+## (Potential) Future Work
+
+- Authorize access to fields with `SecurityModule`.
+- Authorize sort and filter parameters.
+- Resource annotations to configure `SecurityModule`.
+- Deny rules for `SecurityModule`.
+- Potentially give security-related information through `OPTIONS` requests.
+- DAC support for `SecurityModule`.
