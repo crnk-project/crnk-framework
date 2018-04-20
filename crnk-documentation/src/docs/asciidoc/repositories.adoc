@@ -636,11 +636,43 @@ If you want to add meta information along with the responses, all repositories (
 When using annotated versions of repositories, a method that returns a `LinksInformation` object should be annotated with `JsonApiLinks` and the first parameter of the method has to be a list of resources.
 
 
-### Payload Size Optimizations
+
+## Payload Size Optimizations
 
 Self and related links can make up to 60% of the response payload size and not always are those links of use.
 Crnk offers a `Crnk-Compact: true` header that can be sent along with the request. In this case the computation
 of those links is omitted. Further relationships without data are completely omitted.
+
+
+
+anchor:repository_decoration[]
+
+## Repository Decoration
+
+Sometimes it is useful to augment a repository with further features. There are  different situations where that can makes sense:
+
+- the main repository implementation comes from a third-party library and can/should not directly be modified.
+- the feature is unrelated to the main repository feature set, for example, cross-cutting concerns like security, caching, tracing and metrics.
+
+`RepositoryDecoratorFactory` allows to do exactly that. It puts a **decorating** resource or relationship repository inbetween
+the Crnk engine and the main repository. It implements the same interface contract as the main repository,
+intercept all requests and can do arbitrary modifications. The modifications may or may not include calling the main repository.
+
+An example can look like:
+
+[source]
+.ApprovalRepositoryDecorator.java
+----
+include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
+----
+
+The particular example, for example, intercepts the `save` operation and may trigger an approval workflow:
+
+[source]
+.ApprovalRepositoryDecorator.java
+----
+include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
+----
 
 
 

@@ -17,6 +17,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 
 	private final ApprovalManager approvalManager;
 
+	// tag::docs_decorator[]
 	public static final RepositoryDecoratorFactory createFactory(ApprovalManager approvalManager) {
 		return new RepositoryDecoratorFactoryBase() {
 
@@ -30,11 +31,13 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 			}
 		};
 	}
+	// end::docs_decorator[]
 
 	public ApprovalRepositoryDecorator(ApprovalManager approvalManager) {
 		this.approvalManager = approvalManager;
 	}
 
+	// tag::docs_save[]
 	@Override
 	public <S extends T> S save(S entity) {
 		if (approvalManager.needsApproval(entity, HttpMethod.PATCH)) {
@@ -44,6 +47,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 			return super.save(entity);
 		}
 	}
+	// end::docs_save[]
 
 	@Override
 	public <S extends T> S create(S entity) {
