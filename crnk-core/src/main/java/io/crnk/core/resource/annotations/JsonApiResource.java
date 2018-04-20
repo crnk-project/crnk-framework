@@ -2,6 +2,7 @@ package io.crnk.core.resource.annotations;
 
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -40,5 +41,5 @@ public @interface JsonApiResource {
 	 * Defines paging behavior of the resource
 	 * @return {@link PagingBehavior} definition
 	 */
-	Class<? extends PagingBehavior> pagingBehavior() default OffsetLimitPagingBehavior.class;
+	Class<? extends PagingBehavior> pagingBehavior() default VoidPagingBehavior.class;
 }

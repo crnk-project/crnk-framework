@@ -14,6 +14,7 @@ import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
@@ -42,8 +43,9 @@ public abstract class AbstractDocumentMapperTest {
 
 
 		container = new CoreTestContainer();
-		container.setPackage(MockConstants.TEST_MODELS_PACKAGE + ",io.crnk.core.queryspec.pagingspec");
+		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
 		container.getBoot().setPropertiesProvider(getPropertiesProvider());
+		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
 		container.boot();
 
 		objectMapper = container.getBoot().getObjectMapper();
