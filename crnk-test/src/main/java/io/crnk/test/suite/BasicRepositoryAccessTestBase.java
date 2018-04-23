@@ -1,5 +1,6 @@
 package io.crnk.test.suite;
 
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.QuerySpec;
@@ -10,11 +11,15 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,6 +73,19 @@ public abstract class BasicRepositoryAccessTestBase {
 		Assert.assertEquals(1, list.size());
 		schedule = list.get(0);
 		Assert.assertNotNull(schedule.getId());
+	}
+
+	@Test
+	public void testJsonApiResponseContentTypeReceived() throws IOException {
+		String url = testContainer.getBaseUrl() + "/schedules";
+		OkHttpClient client = new OkHttpClient();
+		Request request = new Request.Builder().url(url).build();
+		Response response = client.newCall(request).execute();
+		Assert.assertEquals(removeWhiteSpace(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET), removeWhiteSpace(response.header(HttpHeaders.HTTP_CONTENT_TYPE)));
+	}
+
+	private String removeWhiteSpace(String value) {
+		return value.replace(" ", "");
 	}
 
 	@Test
