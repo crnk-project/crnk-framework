@@ -29,6 +29,7 @@ import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
+import io.crnk.core.module.TestResourceInformationProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -62,6 +63,8 @@ public class DefaultResourceInformationProviderTest {
 					new DefaultResourceFieldInformationProvider(),
 					new JacksonResourceFieldInformationProvider());
 
+	private final ResourceInformationProvider testResourceInformationProvider = new TestResourceInformationProvider();
+
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider,
 					new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper());
@@ -72,6 +75,7 @@ public class DefaultResourceInformationProviderTest {
 	@Before
 	public void setup() {
 		resourceInformationProvider.init(context);
+		testResourceInformationProvider.init(context);
 	}
 
 	@Test
@@ -402,6 +406,11 @@ public class DefaultResourceInformationProviderTest {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationTypeCustomGetMethod.class);
 
 		assertNull(resourceInformation.getRelationshipFields().get(0).getIdType());
+	}
+
+	@Test
+	public void buildResourceInformationWithoutResourcePath(){
+		ResourceInformation resourceInformation = testResourceInformationProvider.build(FieldWithAccessorGetterResource.class);
 	}
 
 	@JsonApiResource(type = "tasks")
