@@ -10,8 +10,7 @@ The `ReactiveModule` of `crnk-reactive` bring support for reactive programming t
 It allows to build more responsive, elastic, resilient, message-driven applications (see
 https://www.reactivemanifesto.org/). https://projectreactor.io/ was chosen as library.
 
-IMPORTANT: Traditional and reactive-style programming are considered being equally important and both have their respective advantages and disadvantages. The reactive API
-is by no means going to replace the traditional one!
+IMPORTANT: Traditional and reactive-style programming APIs are considered being equally important and will both be supported the coming years.
 
 `crnk-reactive` brings along three new interfaces that act as reactive counter-parts of the traditional resource and relationship interfaces:
 

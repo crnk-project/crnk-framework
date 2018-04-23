@@ -3,6 +3,8 @@ anchor:setup[]
 
 # Setup
 
+Crnk integrates well with many popular framework. The example applications outline various different possible
+setups. But application are also free to customize their setup to their liking.
 There are three main, orthogonal aspects of Crnk that need configuration:
 
 1. The integration into a web framework like JAXRS or the Servlet API to be able to process requests.
@@ -12,6 +14,7 @@ There are three main, orthogonal aspects of Crnk that need configuration:
 
 The subsequent sections explain various possibilities resp. how to implement a custom one.
 The <<reactive>> chapter further outlines how to setup Crnk in an asynchronous/reactive setting.
+
 
 
 ## Requirements
@@ -56,11 +59,19 @@ dependencies {
 }
 ----
 
+## Logging
+
+Crnk makes use of SLF4J to do logging. Make sure to have the API properly setup. For example by making use of Logback or one of the many bridges to
+other Logging frameworks.
+
+TIP: Set `io.crnk` to `DEBUG` if you encounter any issues during setup or later at runtime.
+
+
 ## Integration with JAX-RS
 
 Crnk allows integration with JAX-RS environments through the usage of JAX-RS specification. JAX-RS 2.0 is
 required for this integration. Under the hood there is a @PreMatching filter which checks each request for
-JSON API processing. The Setup can look as simple as:
+JSON API processing. The setup can look as simple as:
 
 ### CrnkFeature
 
@@ -279,6 +290,36 @@ crnk.return404-on-null=true
 
 See https://github.com/crnk-project/crnk-framework/blob/master/crnk-setup/crnk-setup-spring-boot2/src/main/java/io/crnk/setup/spring/boot/core/CrnkCoreProperties.java[CrnkCoreProperties] for more information.
 The <<spring_modules,Spring modules>> and their auto configurations make further configuration properties available.
+
+
+
+
+## Integration with Vert.x
+
+CAUTION: Reactive programming support has been introduced in Crnk 2.6 and is still considered experimental
+  with some limitations. Please also provide feedback about this Vert.x integration.
+
+Crnk integrates with Vert.x RxJava 2 using `crnk-reactive` and `crnk-setup-vertx`. More information about
+reactive programming is available <<reactive,here>>. To make use of Crnk with Vert.x, make sure you have
+the following dependencies specified:
+
+[source]
+----
+	compile 'io.crnk:crnk-setup-vertx'
+	compile 'io.vertx:vertx-rx-java2'
+----
+
+An example Vert.x vehicle may then look like:
+
+[source]
+.CrnkVerticle.java
+----
+include::../../../../crnk-setup/crnk-setup-vertx/src/test/java/io/crnk/setup/vertx/CrnkVerticle.java[tags=docs]
+----
+
+`CrnkVertxHandler` holds the Crnk setup. Its constructor takes a `Consumer<CrnkBoot>` that allows the customization
+of Crnk. The example makes use of it to register two modules. `CrnkVertxHandler.process` is the main method
+that allows to process `HttpServerRequest` objects of Vert.x.
 
 
 ## Discovery with CDI

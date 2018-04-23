@@ -21,7 +21,7 @@ include ':crnk-legacy:crnk-spring'
 include ':crnk-setup:crnk-setup-spring'
 include ':crnk-setup:crnk-setup-spring-boot1'
 include ':crnk-setup:crnk-setup-spring-boot2'
-
+include ':crnk-setup:crnk-setup-vertx'
 
 include ':crnk-operations'
 include ':crnk-gen-typescript'
