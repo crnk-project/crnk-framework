@@ -85,4 +85,9 @@ public class ClientTestContainer implements TestContainer {
 	public CrnkClient getClient() {
 		return test.client;
 	}
+
+	@Override
+	public String getBaseUrl() {
+		return test.client.getServiceUrlProvider().getUrl();
+	}
 }

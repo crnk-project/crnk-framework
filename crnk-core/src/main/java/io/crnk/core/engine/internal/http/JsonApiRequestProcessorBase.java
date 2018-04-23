@@ -78,17 +78,21 @@ public class JsonApiRequestProcessorBase {
 
 	protected HttpResponse toHttpResponse(Response response) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
-		String responseBody;
-		try {
-			responseBody = objectMapper.writeValueAsString(response.getDocument());
-		} catch (JsonProcessingException e) {
-			throw new IllegalStateException(e);
-		}
 
 		HttpResponse httpResponse = new HttpResponse();
-		httpResponse.setBody(responseBody);
-		httpResponse.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
 		httpResponse.setStatusCode(response.getHttpStatus());
+
+		if (response.getHttpStatus() != HttpStatus.NO_CONTENT_204) {
+			String responseBody;
+			try {
+				responseBody = objectMapper.writeValueAsString(response.getDocument());
+			} catch (JsonProcessingException e) {
+				throw new IllegalStateException(e);
+			}
+			httpResponse.setBody(responseBody);
+			httpResponse.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
+		}
+		logger.debug("setup http resposne {}", httpResponse);
 		return httpResponse;
 	}
 

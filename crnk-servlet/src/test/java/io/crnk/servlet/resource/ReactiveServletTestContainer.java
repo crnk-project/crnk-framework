@@ -52,7 +52,8 @@ public class ReactiveServletTestContainer implements TestContainer {
 		throw new UnsupportedOperationException();
 	}
 
-	public String getUrl() {
+	@Override
+	public String getBaseUrl() {
 		return client.get().getServiceUrlProvider().getUrl();
 	}
 }

@@ -17,4 +17,6 @@ public interface TestContainer {
 			Class<T> sourceClass, Class<D> targetClass);
 
 	<T> T getTestData(Class<T> clazz, Object id);
+
+	String getBaseUrl();
 }

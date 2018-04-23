@@ -63,7 +63,7 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 
 	@Override
 	public String toString() {
-		return "ResourceIdentifier{" +
+		return getClass().getSimpleName() + "{" +
 				"id='" + id + '\'' +
 				", type='" + type + '\'' +
 				'}';
