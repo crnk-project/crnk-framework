@@ -110,12 +110,9 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 
 	private String getResourcePath(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
 		JsonApiResource jsonApiResourceClass = resourceClass.getAnnotation(JsonApiResource.class);
-		String resourcePath;
+		String resourcePath = null;
 		if (jsonApiResourceClass != null) {
 			resourcePath = StringUtils.isBlank(jsonApiResourceClass.resourcePath()) ? getResourceType(resourceClass, allowNonResourceBaseClass) : jsonApiResourceClass.resourcePath();
-		}
-		else {
-			resourcePath = getResourceType(resourceClass, allowNonResourceBaseClass);
 		}
 		return resourcePath;
 	}

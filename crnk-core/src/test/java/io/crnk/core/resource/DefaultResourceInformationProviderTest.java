@@ -410,7 +410,22 @@ public class DefaultResourceInformationProviderTest {
 
 	@Test
 	public void buildResourceInformationWithoutResourcePath(){
-		ResourceInformation resourceInformation = testResourceInformationProvider.buildWithoutResourcePath(FieldWithAccessorGetterResource.class);
+		ResourceInformation resourceInformation = testResourceInformationProvider.buildWithoutResourcePath(ResourcePathResource.class);
+	}
+
+	@Test
+	public void checkGetSetResourcePathFromInformationProvider(){
+		assertThat(resourceInformationProvider.getResourcePath(ResourcePathResource.class)).isEqualTo("/resourcePathGetterResources");
+	}
+
+	@Test
+	public void checkGetNotSetResourcePathFromInformationProvider(){
+		assertThat(resourceInformationProvider.getResourcePath(IdFieldWithAccessorGetterResource.class)).isEqualTo("idFieldWithAccessorGetterResource");
+	}
+
+	@Test
+	public void checkGetNotSetResourcePathFromNonResourceFromInformationProvider(){
+		assertThat(resourceInformationProvider.getResourcePath(String.class)).isNull();
 	}
 
 	@JsonApiResource(type = "tasks")
@@ -508,6 +523,15 @@ public class DefaultResourceInformationProviderTest {
 
 		public String getAccessorField() {
 			return accessorField;
+		}
+	}
+
+	@JsonApiResource(type="resourcePathGetterResource", resourcePath = "/resourcePathGetterResources")
+	private static class ResourcePathResource {
+
+		@JsonApiId
+		public Long getId() {
+			return null;
 		}
 	}
 

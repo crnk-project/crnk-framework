@@ -31,6 +31,17 @@ public class DefaultInformationBuilderTest {
 	}
 
 	@Test
+	public void resourceWithNoResourcePath() {
+		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		ResourceInformation info = resource.build();
+		resource.superResourceType("superTask");
+		resource.resourceClass(Project.class);
+		Assert.assertEquals("tasks", info.getResourceType());
+		Assert.assertNull(info.getResourcePath());
+
+	}
+
+	@Test
 	public void resource() {
 		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
