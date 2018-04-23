@@ -497,8 +497,14 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation resourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, resourceType, null, null,
-						new OffsetLimitPagingBehavior());
+				new ResourceInformation(
+						moduleRegistry.getTypeParser()
+						, Resource.class
+						, resourceType
+						,null
+						, null
+						, new OffsetLimitPagingBehavior()
+				);
 		return new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder);
 	}
 
@@ -510,7 +516,7 @@ public class CrnkClient {
 		init();
 
 		ResourceInformation sourceResourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType,null, null,
 						new OffsetLimitPagingBehavior());
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}

@@ -105,7 +105,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
+		String resourcePath = resourceInformation.getResourcePath() == null ? resourceInformation.getResourceType() : resourceInformation.getResourcePath();
+		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
 	public String getResourceUrl(final Object resource) {
@@ -133,7 +134,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(queryContext.getBaseUrl());
-		return url != null ? String.format("%s/%s", url, resourceInformation.getResourceType()) : null;
+		String resourcePath = resourceInformation.getResourcePath() == null ? resourceInformation.getResourceType() : resourceInformation.getResourcePath();
+		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
 	@Override

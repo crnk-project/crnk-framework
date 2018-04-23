@@ -1,6 +1,14 @@
 package io.crnk.core.module;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -508,6 +516,16 @@ public class ModuleRegistry {
 			for (ResourceInformationProvider builder : builders) {
 				if (builder.accept(resourceClass)) {
 					return builder.getResourceType(resourceClass);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public String getResourcePath(Class<?> resourceClass) {
+			for (ResourceInformationProvider builder : builders) {
+				if (builder.accept(resourceClass)) {
+					return builder.getResourcePath(resourceClass);
 				}
 			}
 			return null;

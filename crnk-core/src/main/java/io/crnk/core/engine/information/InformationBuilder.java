@@ -50,6 +50,8 @@ public interface InformationBuilder {
 
 		Resource resourceType(String resourceType);
 
+		Resource resourcePath(String resourcePath);
+
 		Resource superResourceType(String superResourceType);
 
 		Resource pagingBehavior(PagingBehavior pagingBehavior);
@@ -105,6 +107,7 @@ public interface InformationBuilder {
 
 	ResourceRepository createResourceRepository();
 
+	Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath);
 	Resource createResource(Class<?> resourceClass, String resourceType);
 
 }

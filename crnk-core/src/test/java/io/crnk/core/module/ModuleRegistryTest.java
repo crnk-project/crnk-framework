@@ -151,6 +151,15 @@ public class ModuleRegistryTest {
 		Assert.assertSame(filter1, filters.get(1));
 	}
 
+	@Test
+	public void checkNullResourcePath(){
+		ModuleRegistry moduleRegistry = new ModuleRegistry();
+		SimpleModule module = new SimpleModule("test");
+		moduleRegistry.addModule(module);
+		moduleRegistry.init(new ObjectMapper());
+		Assert.assertEquals(moduleRegistry.getResourceInformationBuilder().getResourcePath(TestResource2.class), null);
+	}
+
 	interface PrioRepositoryFilter extends RepositoryFilter, Prioritizable {
 
 	}
@@ -445,6 +454,13 @@ public class ModuleRegistryTest {
 		public void setParent(TestResource2 parent) {
 			this.parent = parent;
 		}
+	}
+
+	@JsonApiResource(type = "test3", resourcePath = "/testResource3s")
+	static class TestResource3 {
+
+		@JsonApiId
+		private int id;
 	}
 
 	class TestModule implements InitializingModule {

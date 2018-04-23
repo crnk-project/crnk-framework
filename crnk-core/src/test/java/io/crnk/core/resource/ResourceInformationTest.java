@@ -26,6 +26,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ResourceInformationTest {
 
 	private ResourceInformation sut;
@@ -37,7 +43,7 @@ public class ResourceInformationTest {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
-		sut = new ResourceInformation(typeParser, Task.class, "tasks", null, Arrays.asList(idField, valueField),
+		sut = new ResourceInformation(typeParser, Task.class, "tasks",null, Arrays.asList(idField, valueField),
 				new OffsetLimitPagingBehavior());
 	}
 
