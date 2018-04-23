@@ -63,7 +63,7 @@ public class DefaultResourceInformationProviderTest {
 					new DefaultResourceFieldInformationProvider(),
 					new JacksonResourceFieldInformationProvider());
 
-	private final ResourceInformationProvider testResourceInformationProvider = new TestResourceInformationProvider();
+	private final TestResourceInformationProvider testResourceInformationProvider = new TestResourceInformationProvider();
 
 	private final ResourceInformationProviderContext context =
 			new DefaultResourceInformationProviderContext(resourceInformationProvider,
@@ -410,7 +410,7 @@ public class DefaultResourceInformationProviderTest {
 
 	@Test
 	public void buildResourceInformationWithoutResourcePath(){
-		ResourceInformation resourceInformation = testResourceInformationProvider.build(FieldWithAccessorGetterResource.class);
+		ResourceInformation resourceInformation = testResourceInformationProvider.buildWithoutResourcePath(FieldWithAccessorGetterResource.class);
 	}
 
 	@JsonApiResource(type = "tasks")
