@@ -42,12 +42,10 @@ public abstract class RelationIdAccessTestBase {
 		relRepo = testContainer.getRepositoryForType(Schedule.class, Project.class);
 	}
 
-
 	@After
 	public void tearDown() {
 		testContainer.stop();
 	}
-
 
 	@Test
 	public void checkCrud() {

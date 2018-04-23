@@ -56,4 +56,9 @@ public class HttpResponse {
 	public String getContentType() {
 		return getHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[status=" + statusCode + ",bodyLength=" + (body != null ? body.length : 0) + ",headers=" + headers + "]";
+	}
 }

@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.ResponseBodyException;
 import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
@@ -77,14 +78,19 @@ public class ClientStubBase {
 			LOGGER.debug("response body: {}", body);
 			ObjectMapper objectMapper = client.getObjectMapper();
 
-			if (responseType != ResponseType.NONE && Resource.class.equals(resourceClass)) {
-				Document document = objectMapper.readValue(body, Document.class);
-				return toResourceResponse(document, objectMapper);
-			} else if (responseType != ResponseType.NONE) {
-				Document document = objectMapper.readValue(body, Document.class);
+			if (responseType != ResponseType.NONE) {
+				if (body.length() == 0) {
+					throw new ResponseBodyException("no body received");
+				}
+				if (Resource.class.equals(resourceClass)) {
+					Document document = objectMapper.readValue(body, Document.class);
+					return toResourceResponse(document, objectMapper);
+				} else {
+					Document document = objectMapper.readValue(body, Document.class);
 
-				ClientDocumentMapper documentMapper = client.getDocumentMapper();
-				return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
+					ClientDocumentMapper documentMapper = client.getDocumentMapper();
+					return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
+				}
 			}
 			return null;
 		} catch (IOException e) {
@@ -142,7 +148,7 @@ public class ClientStubBase {
 	public enum ResponseType {
 		NONE, RESOURCE, RESOURCES
 	}
-	
+
 	public QuerySpecSerializer getQuerySpecSerializer() {
 		return this.urlBuilder.getQuerySpecSerializer();
 	}
