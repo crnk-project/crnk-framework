@@ -81,7 +81,11 @@ public abstract class BasicRepositoryAccessTestBase {
 		OkHttpClient client = new OkHttpClient();
 		Request request = new Request.Builder().url(url).build();
 		Response response = client.newCall(request).execute();
-		Assert.assertEquals(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET, response.header(HttpHeaders.HTTP_CONTENT_TYPE));
+		Assert.assertEquals(removeWhiteSpace(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET), removeWhiteSpace(response.header(HttpHeaders.HTTP_CONTENT_TYPE)));
+	}
+
+	private String removeWhiteSpace(String value) {
+		return value.replace(" ", "");
 	}
 
 	@Test
