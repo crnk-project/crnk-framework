@@ -1,14 +1,37 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.controller.*;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
+import io.crnk.core.engine.internal.dispatcher.controller.Controller;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDelete;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatch;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceDelete;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatch;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
@@ -20,7 +43,11 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.*;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
+import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
@@ -43,10 +70,6 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -326,7 +349,9 @@ public class CrnkBoot {
 					ClassUtils.getAnnotation(repository.getClass(), JsonApiRelationshipRepository.class).get();
 			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
+
 		moduleRegistry.addModule(module);
+		moduleRegistry.addModule(new ResourceInformationProviderModule());
 	}
 
 	private <T> List<T> getInstancesByType(Class<T> clazz) {
@@ -347,7 +372,7 @@ public class CrnkBoot {
 	private void addModules() {
 		boolean serializeLinksAsObjects =
 				Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS));
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
 
 		// without priority setup or something, has to come last as some defaults are in there, needs to become more robust
 		moduleRegistry.addModule(coreModule);

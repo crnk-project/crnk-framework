@@ -4,8 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -16,6 +21,7 @@ import io.crnk.core.engine.information.repository.RepositoryInformationProviderC
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.filter.TestFilter;
 import io.crnk.core.engine.internal.dispatcher.filter.TestRepositoryDecorator;
@@ -66,10 +72,6 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class ModuleRegistryTest {
 
@@ -87,11 +89,15 @@ public class ModuleRegistryTest {
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost"));
 		resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);
 
+		moduleRegistry.setServiceDiscovery(serviceDiscovery);
+
 		testModule = new TestModule();
 		moduleRegistry.addModule(testModule);
 		moduleRegistry.addModule(new CoreModule());
-		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false, ImmutableList.of(new OffsetLimitPagingBehavior())));
-		moduleRegistry.setServiceDiscovery(serviceDiscovery);
+		moduleRegistry.addModule(new JacksonModule(new ObjectMapper(), false));
+
+		moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
+		moduleRegistry.addModule(new ResourceInformationProviderModule());
 		moduleRegistry.init(new ObjectMapper());
 
 		Assert.assertEquals(resourceRegistry, moduleRegistry.getResourceRegistry());
@@ -103,7 +109,6 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void checkAddingPagingBehavior(){
-		moduleRegistry.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
 		Assert.assertEquals(1, moduleRegistry.getPagingBehaviors().size());
 	}
 
@@ -187,7 +192,7 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void getModules() {
-		Assert.assertEquals(3, moduleRegistry.getModules().size());
+		Assert.assertEquals(4, moduleRegistry.getModules().size());
 	}
 
 	@Test

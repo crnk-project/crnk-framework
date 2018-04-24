@@ -38,6 +38,7 @@ import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
@@ -157,6 +158,7 @@ public class CrnkClient {
 		moduleRegistry.addModule(new ClientModule());
 
 		setupPagingBehavior();
+		moduleRegistry.addModule(new ResourceInformationProviderModule());
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		queryContext.setBaseUrl(serviceUrlProvider.getUrl());
@@ -233,7 +235,7 @@ public class CrnkClient {
 	}
 
 	private void initJacksonModule(final boolean serializeLinksAsObjects) {
-		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects, moduleRegistry.getPagingBehaviors()));
+		moduleRegistry.addModule(new JacksonModule(objectMapper, serializeLinksAsObjects));
 	}
 
 	/**
