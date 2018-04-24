@@ -5,14 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.module.Module;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-
-import java.util.Collections;
-import java.util.List;
 
 public class JacksonModule implements Module {
 
@@ -22,23 +15,9 @@ public class JacksonModule implements Module {
 
 	private final boolean serializeLinksAsObjects;
 
-	private final List<? extends PagingBehavior> pagingBehaviors;
-
-	@Deprecated
-	public JacksonModule(ObjectMapper objectMapper) {
-		this(objectMapper, false, Collections.<PagingBehavior>emptyList());
-	}
-
-	@Deprecated
 	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects) {
-		this(objectMapper, serializeLinksAsObjects, Collections.<PagingBehavior>emptyList());
-	}
-
-	public JacksonModule(ObjectMapper objectMapper, boolean serializeLinksAsObjects,
-						 List<? extends PagingBehavior> pagingBehaviors) {
 		this.objectMapper = objectMapper;
 		this.serializeLinksAsObjects = serializeLinksAsObjects;
-		this.pagingBehaviors = pagingBehaviors;
 	}
 
 	@Override
@@ -49,16 +28,6 @@ public class JacksonModule implements Module {
 	@Override
 	public void setupModule(ModuleContext context) {
 		objectMapper.registerModule(createJacksonModule(serializeLinksAsObjects));
-
-		DefaultResourceFieldInformationProvider defaultFieldProvider = new DefaultResourceFieldInformationProvider();
-		ResourceFieldInformationProvider jacksonFieldProvider = new JacksonResourceFieldInformationProvider();
-
-		// TODO move somewhere else and make use of a SerializerExtension
-		context.addResourceInformationBuilder(new DefaultResourceInformationProvider(
-			context.getPropertiesProvider(),
-			pagingBehaviors,
-			defaultFieldProvider,
-			jacksonFieldProvider));
 	}
 
 
