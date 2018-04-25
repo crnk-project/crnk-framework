@@ -1,25 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.crnk.servlet;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.servlet.internal.FilterPropertiesProvider;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -44,17 +29,27 @@ public class CrnkFilter implements Filter {
 
 	private String defaultCharacterEncoding = HttpHeaders.DEFAULT_CHARSET;
 
+	public CrnkFilter() {
+
+	}
+
+	public CrnkFilter(CrnkBoot boot) {
+		this.boot = boot;
+	}
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.filterConfig = filterConfig;
 
-		boot = new CrnkBoot();
-		boot.setPropertiesProvider(new FilterPropertiesProvider(filterConfig));
+		if (boot == null) {
+			boot = new CrnkBoot();
+			boot.setPropertiesProvider(new FilterPropertiesProvider(filterConfig));
 
-		HttpRequestContextProvider provider = boot.getModuleRegistry().getHttpRequestContextProvider();
-		boot.addModule(new ServletModule(provider));
-		initCrnk(boot);
-		boot.boot();
+			HttpRequestContextProvider provider = boot.getModuleRegistry().getHttpRequestContextProvider();
+			boot.addModule(new ServletModule(provider));
+			initCrnk(boot);
+			boot.boot();
+		}
 	}
 
 	public String getDefaultCharacterEncoding() {
@@ -76,7 +71,7 @@ public class CrnkFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-		if (req instanceof HttpServletRequest && res instanceof HttpServletResponse) {
+		if (req instanceof HttpServletRequest && res instanceof HttpServletResponse && matchesPrefix((HttpServletRequest) req)) {
 			ServletContext servletContext = filterConfig.getServletContext();
 			ServletRequestContext context = new ServletRequestContext(servletContext, (HttpServletRequest) req,
 					(HttpServletResponse) res, boot.getWebPathPrefix(), defaultCharacterEncoding);
@@ -88,6 +83,12 @@ public class CrnkFilter implements Filter {
 		} else {
 			chain.doFilter(req, res);
 		}
+	}
+
+	private boolean matchesPrefix(HttpServletRequest request) {
+		String pathPrefix = UrlUtils.removeLeadingSlash(boot.getWebPathPrefix());
+		String path = UrlUtils.removeLeadingSlash(request.getRequestURI().substring(request.getContextPath().length()));
+		return pathPrefix == null || path.startsWith(pathPrefix);
 	}
 
 }

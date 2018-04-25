@@ -18,6 +18,11 @@ include ':crnk-monitor-brave4'
 include ':crnk-security'
 include ':crnk-activiti'
 
+include ':crnk-legacy:crnk-spring'
+include ':crnk-setup:crnk-setup-spring'
+include ':crnk-setup:crnk-setup-spring-boot1'
+include ':crnk-setup:crnk-setup-spring-boot2'
+
 
 include ':crnk-operations'
 include ':crnk-gen-typescript'

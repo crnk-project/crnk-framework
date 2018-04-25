@@ -133,13 +133,14 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	@Override
 	public String getBaseUrl() {
-		String requestUrl = servletRequest.getRequestURL().toString();
-		String servletPath = servletRequest.getServletPath();
+		String requestUrl = UrlUtils.removeTrailingSlash(servletRequest.getRequestURL().toString());
+		String servletPath = UrlUtils.removeTrailingSlash(servletRequest.getServletPath());
 
 		if (pathPrefix != null && servletPath.startsWith(pathPrefix)) {
 			// harden again invalid servlet paths (e.g. in case of filters)
 			servletPath = pathPrefix;
-		} else if (servletPath.isEmpty()) {
+		}
+		if (servletPath.isEmpty()) {
 			return UrlUtils.removeTrailingSlash(requestUrl);
 		}
 
