@@ -10,7 +10,7 @@ dependencies {
 	testCompile project(':crnk-rs')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-jpa')
-	testCompile project(':crnk-spring')
+	testCompile project(':crnk-setup:crnk-setup-spring')
 	testCompile project(':crnk-validation')
 
 	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'

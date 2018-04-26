@@ -95,7 +95,7 @@ is registered as `JpaRelationshipRepository`.
   environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and adding a
   `@Transactional` annotation. The JPA module makes sure that every call to a repository happens within such a transaction
   boundary. Crnk comes with two default implementations: `SpringTransactionRunner` and
-  `CdiTransactionRunner` that come are included in `crnk-spring` and `crnk-cdi`.
+  `CdiTransactionRunner` that come are included in `crnk-setup-spring` and `crnk-cdi`.
 
 For crnk-client it might be worthwhile to have an interface definition of the otherwise fully generic
 JSON API entity repositories. The interface has the benefit of providing proper typing of meta information,

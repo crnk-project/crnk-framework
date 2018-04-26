@@ -12,7 +12,7 @@ dependencies {
 	testCompile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 	testCompile 'javax.servlet:javax.servlet-api:3.1.0'
 
-	testCompile 'org.springframework.boot:spring-boot-starter-web'
-	testCompile 'org.springframework.boot:spring-boot-starter-test'
+	testCompile 'org.springframework.boot:spring-boot-starter-web:1.5.8.RELEASE'
+	testCompile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
 	testCompile 'net.javacrumbs.json-unit:json-unit:1.5.5'
 }

@@ -29,7 +29,7 @@ public class ValidationRepositoryFilter extends RepositoryFilterBase {
 	public JsonApiResponse filterRequest(final RepositoryFilterContext context, final RepositoryRequestFilterChain chain) {
 		if (context.getRequest().getRelationshipField() == null) {
 			if (context.getRequest().getMethod() == HttpMethod.POST ||
-					context.getRequest().getMethod() == HttpMethod.PATCH || context.getRequest().getMethod() == HttpMethod.PUT) {
+					context.getRequest().getMethod() == HttpMethod.PATCH) {
 				Object entity = context.getRequest().getEntity();
 				Set<ConstraintViolation<Object>> violations = validator.validate(entity);
 				LOGGER.debug("performing validation check, {} violations for entity {}", violations.size(), entity);

@@ -1,0 +1,58 @@
+apply plugin: 'java'
+
+apply plugin: 'io.spring.dependency-management'
+dependencyManagement {
+	imports {
+		mavenBom 'org.springframework.boot:spring-boot-dependencies:2.0.1.RELEASE'
+	}
+}
+
+dependencies {
+
+	compile project(':crnk-servlet')
+	compile project(':crnk-setup:crnk-setup-spring')
+	compileOnly project(':crnk-jpa')
+	compileOnly project(':crnk-validation')
+	compileOnly project(':crnk-home')
+	compileOnly project(':crnk-meta')
+	compileOnly project(':crnk-operations')
+	compileOnly project(':crnk-security')
+	compileOnly project(':crnk-ui')
+	compileOnly project(':crnk-client')
+
+	compileOnly 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+	compileOnly 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+	compileOnly 'org.springframework.boot:spring-boot-starter-actuator'
+	compileOnly 'org.springframework.security:spring-security-core'
+
+	compileOnly 'org.springframework:spring-orm'
+
+	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-validation')
+	testCompile project(':crnk-home')
+	testCompile project(':crnk-meta')
+	testCompile project(':crnk-operations')
+	testCompile project(':crnk-security')
+	testCompile project(':crnk-ui')
+	testCompile project(':crnk-client')
+	testCompile project(':crnk-test')
+
+	testCompile 'org.springframework.boot:spring-boot-starter-data-jpa'
+	testCompile 'org.springframework.boot:spring-boot-starter-web'
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+	testCompile 'org.springframework.boot:spring-boot-starter-actuator'
+
+	testCompile 'org.hibernate:hibernate-core'
+	testCompile 'org.hibernate:hibernate-entitymanager'
+	testCompile 'com.h2database:h2'
+
+	testCompile 'org.springframework.boot:spring-boot-configuration-processor'
+	testCompile 'org.springframework:spring-orm'
+	testCompile 'org.springframework.security:spring-security-core'
+	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
+	testCompile 'org.mockito:mockito-core:2.18.3'
+}
+
+

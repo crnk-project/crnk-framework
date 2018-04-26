@@ -1,0 +1,12 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  io.crnk.spring.setup.boot.home.CrnkHomeAutoConfiguration,\
+  io.crnk.spring.setup.boot.core.CrnkCoreAutoConfiguration,\
+  io.crnk.spring.setup.boot.jpa.CrnkJpaAutoConfiguration,\
+  io.crnk.spring.setup.boot.meta.CrnkMetaAutoConfiguration,\
+  io.crnk.spring.setup.boot.operations.CrnkOperationsAutoConfiguration,\
+  io.crnk.spring.setup.boot.ui.CrnkUIAutoConfiguration,\
+  io.crnk.spring.setup.boot.security.CrnkSecurityAutoConfiguration,\
+  io.crnk.spring.setup.boot.mvc.CrnkSpringMvcAutoConfiguration,\
+  io.crnk.spring.setup.boot.mvc.CrnkErrorControllerAutoConfiguration,\
+  io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration

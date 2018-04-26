@@ -51,7 +51,7 @@ The crnk modules can then simply be used without having to specify a version:
 ----
 dependencies {
 	compile 'io.crnk:crnk-rs'
-	compile 'io.crnk:crnk-spring'
+	compile 'io.crnk:crnk-setup-spring-boot2'
 	...
 }
 ----
@@ -246,30 +246,38 @@ A code below shows a sample ``web.xml`` file with properly defined and configure
 
 ## Integration with Spring and String Boot
 
-Crnk provides with `crnk-spring` a number of utilities to seamlessly integrate with Spring and Spring Boot.
-First and foremost, there is a ``CrnkConfigV3`` configuration class to hook Crnk into Spring Web to serve requests.
+Crnk provides with:
 
-Spring integration uses crnk-servlet ``CrnkFilter`` to fetch the requests. Similar to CDI, repositories
-and modules are picked up from the Spring ApplicationContext with  ``SpringServiceDiscovery``.
+- `io-crnk:crnk-setup-spring` support for plain Spring 4 and 5.
+- `io-crnk:crnk-setup-spring-boot1` support for Spring Boot 1.x. This module is considered being deprecated and will be removed in the future.
+- `io-crnk:crnk-setup-spring-boot2` support for Spring Boot 2.x.
 
-Next to the Spring Web integration, `crnk-spring` provides a number modules to hook into other Spring components.
-For a detailed overview see <<spring_modules,Spring modules>>.
 
-The web integration can be customized with the subsequent properties:
+
+There is a `CrnkCoreAutoConfiguration` in  `crnk-setup-spring-boot2` that outlines
+the basic setup that can easily be applied to a Spring-only setup without Spring Boot using `crnk-setup-spring`:
+
+- It uses the `CrnkFilter` servlet filter to fetch the requests.
+- Service discovery is performed with `SpringServiceDiscovery` using the Spring `ApplicationContext`.
+
+There are further auto configurations that automatically setup various Crnk modules. And there are also further integrations into Spring (like for `RestTemplate`
+and Spring Security). More information is available in <<spring_modules,Spring modules>>.
+
+The web integration can be customized for Spring Boot setups with the subsequent properties:
 
 [source]
 .application.properties
 ----
 crnk.enabled=true
-crnk.domainName=http://localhost:8080
-crnk.pathPrefix=/api
-crnk.defaultPageLimit=20
-crnk.maxPageLimit=1000
-crnk.allowUnknownAttributes=false
-crnk.return404OnNull=true
+crnk.domain-name=http://localhost:8080
+crnk.path-prefix=/api
+crnk.default-page-limit=20
+crnk.max-page-limit=1000
+crnk.allow-unknown-attributes=false
+crnk.return404-on-null=true
 ----
 
-See https://github.com/crnk-project/crnk-framework/blob/master/crnk-spring/src/main/java/io/crnk/spring/boot/CrnkSpringBootProperties.java[CrnkBootProperties] for more information.
+See https://github.com/crnk-project/crnk-framework/blob/master/crnk-setup/crnk-setup-spring-boot2/src/main/java/io/crnk/setup/spring/boot/core/CrnkCoreProperties.java[CrnkCoreProperties] for more information.
 The <<spring_modules,Spring modules>> and their auto configurations make further configuration properties available.
 
 
