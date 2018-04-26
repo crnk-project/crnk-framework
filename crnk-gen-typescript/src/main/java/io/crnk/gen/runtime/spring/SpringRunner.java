@@ -1,8 +1,11 @@
 package io.crnk.gen.runtime.spring;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
@@ -30,7 +33,13 @@ public class SpringRunner {
 				initializerMethod.invoke(configurationClass);
 			}
 
-			SpringApplication application = new SpringApplication(configurationClass);
+			// Spring Boot 2 broke contract with 1 (Class[] instead of Object[])
+			Stream<Constructor<?>> constructors = Arrays.asList(SpringApplication.class.getConstructors()).stream();
+			Constructor<?> constructor = constructors.filter(it -> it.getParameterCount() == 1).findFirst().get();
+			Object constructorParam = constructor.getParameterTypes()[0] == Object.class ?
+					new Object[] { configurationClass } : new Class[] { configurationClass };
+
+			SpringApplication application = (SpringApplication) constructor.newInstance(constructorParam);
 			application.setWebEnvironment(false);
 			application.setAdditionalProfiles(springConfig.getProfile());
 			application.setDefaultProperties(springConfig.getDefaultProperties());
@@ -41,19 +50,8 @@ public class SpringRunner {
 			MetaLookup lookup = metaModule.getLookup();
 			context.generate(lookup);
 		}
-		catch (ClassNotFoundException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (NoSuchMethodException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (InvocationTargetException e) {
+		catch (IOException | IllegalAccessException | InvocationTargetException | NoSuchMethodException |
+				InstantiationException | ClassNotFoundException e) {
 			throw new IllegalStateException(e);
 		}
 		finally {
