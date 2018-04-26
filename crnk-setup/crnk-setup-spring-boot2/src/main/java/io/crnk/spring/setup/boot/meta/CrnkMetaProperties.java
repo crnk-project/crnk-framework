@@ -12,7 +12,7 @@ public class CrnkMetaProperties {
 
 	private boolean listResources = true;
 
-	public boolean getEnabled() {
+	public boolean isEnabled() {
 		return enabled;
 	}
 

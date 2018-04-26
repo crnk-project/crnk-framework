@@ -11,8 +11,20 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBoot2Application;
 
+import io.crnk.spring.setup.boot.core.CrnkCoreProperties;
+import io.crnk.spring.setup.boot.home.CrnkHomeProperties;
+import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
+import io.crnk.spring.setup.boot.meta.CrnkMetaProperties;
+import io.crnk.spring.setup.boot.meta.MetaModuleConfigurer;
+import io.crnk.spring.setup.boot.mvc.SpringMvcModule;
+import io.crnk.spring.setup.boot.operations.CrnkOperationsProperties;
+import io.crnk.spring.setup.boot.security.CrnkSecurityProperties;
+import io.crnk.spring.setup.boot.ui.CrnkUiProperties;
+import io.crnk.spring.setup.boot.validation.CrnkValidationProperties;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
@@ -25,6 +37,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +68,35 @@ public class BasicSpringBoot2Test {
 	@Autowired
 	private CrnkBoot boot;
 
+	@Autowired
+	private CrnkUiProperties uiProperties;
+
+	@Autowired
+	private CrnkHomeProperties homeProperties;
+
+	@Autowired
+	private ObjectProvider<CrnkSecurityProperties> securityProperties;
+
+	@Autowired
+	private CrnkCoreProperties coreProperties;
+
+	@Autowired
+	private CrnkOperationsProperties operationsProperties;
+
+	@Autowired
+	private CrnkValidationProperties validationProperties;
+
+	@Autowired
+	private CrnkMetaProperties metaProperties;
+
+	@Autowired
+	private MetaModuleConfigurer metaConfigurer;
+
+	@Autowired
+	private JpaModuleConfigurer jpaConfigurer;
+
+	@Autowired
+	private SpringMvcModule mvcModule;
 
 	@Before
 	public void setup() {
@@ -69,6 +112,29 @@ public class BasicSpringBoot2Test {
 	public void tearDown() {
 		TestModule.clear();
 	}
+
+	@Test
+	public void testProperties() {
+		Assert.assertTrue(uiProperties.isEnabled());
+		Assert.assertTrue(homeProperties.isEnabled());
+		Assert.assertTrue(securityProperties.getIfAvailable() == null);
+		Assert.assertTrue(coreProperties.isEnabled());
+		Assert.assertTrue(operationsProperties.isEnabled());
+		Assert.assertTrue(validationProperties.isEnabled());
+		Assert.assertTrue(uiProperties.isEnabled());
+		Assert.assertTrue(metaProperties.isEnabled());
+
+		Mockito.verify(metaConfigurer, Mockito.times(1)).configure(Mockito.any(MetaModuleConfig.class));
+		Mockito.verify(jpaConfigurer, Mockito.times(1)).configure(Mockito.any(JpaModuleConfig.class));
+
+		Assert.assertEquals("spring.mvc", mvcModule.getModuleName());
+
+		CrnkSecurityProperties unmanagedSecurityProperties = new CrnkSecurityProperties();
+		Assert.assertTrue(unmanagedSecurityProperties.isEnabled());
+		unmanagedSecurityProperties.setEnabled(false);
+		Assert.assertFalse(unmanagedSecurityProperties.isEnabled());
+	}
+
 
 	@Test
 	public void testTestEndpointWithQueryParams() {

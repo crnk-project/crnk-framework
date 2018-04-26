@@ -111,8 +111,6 @@ gradle.beforeProject { Project project ->
 
 			def mainOutput = files(files(sourceSets.main.output).collect {
 				fileTree(dir: it, exclude: '**/legacy/**')
-				fileTree(dir: it, exclude: '**/crnk-setup-spring-boot1/**')
-				fileTree(dir: it, exclude: '**/crnk-brave/**')
 			})
 
 			if (sourceDirs == null) {

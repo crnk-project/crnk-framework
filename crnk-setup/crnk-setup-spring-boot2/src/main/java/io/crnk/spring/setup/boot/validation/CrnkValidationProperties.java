@@ -12,7 +12,7 @@ public class CrnkValidationProperties {
 
 	private boolean validateResources = true;
 
-	public boolean getEnabled() {
+	public boolean isEnabled() {
 		return enabled;
 	}
 

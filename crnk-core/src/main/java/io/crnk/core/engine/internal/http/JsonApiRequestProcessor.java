@@ -24,6 +24,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.exception.MethodNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
@@ -51,8 +52,10 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 	 */
 	@SuppressWarnings("UnnecessaryLocalVariable")
 	public static boolean isJsonApiRequest(HttpRequestContext requestContext, boolean acceptPlainJson) {
-		if (requestContext.getMethod().equalsIgnoreCase(HttpMethod.PATCH.toString()) || requestContext.getMethod()
-				.equalsIgnoreCase(HttpMethod.POST.toString())) {
+		String method = requestContext.getMethod().toUpperCase();
+		boolean isPatch = method.equals(HttpMethod.PATCH.toString());
+		boolean isPost = method.equals(HttpMethod.POST.toString());
+		if (isPatch || isPost) {
 			String contentType = requestContext.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 			if (contentType == null || !contentType.startsWith(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
 				LOGGER.debug("not a JSON-API request due to content type {}", contentType);
@@ -64,6 +67,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		// found a match. Intentionally kept as separate statements (instead of a big, chained ||) to ease debugging/maintenance.
 		boolean acceptsJsonApi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 		boolean acceptsAny = acceptsJsonApi || requestContext.acceptsAny();
+
 		boolean acceptsPlainJson = acceptsAny || (acceptPlainJson && requestContext.accepts("application/json"));
 		LOGGER.debug("accepting request as JSON-API: {}", acceptPlainJson);
 		return acceptsPlainJson;

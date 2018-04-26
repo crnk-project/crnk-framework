@@ -11,8 +11,11 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBootApplication;
 
+import io.crnk.spring.mvc.SpringMvcModule;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
@@ -25,6 +28,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +60,36 @@ public class BasicSpringBoot1Test {
 	private CrnkBoot boot;
 
 
+	@Autowired
+	private CrnkUiProperties uiProperties;
+
+	@Autowired
+	private CrnkHomeProperties homeProperties;
+
+	@Autowired
+	private ObjectProvider<CrnkSecurityProperties> securityProperties;
+
+	@Autowired
+	private CrnkSpringBootProperties coreProperties;
+
+	@Autowired
+	private CrnkOperationsProperties operationsProperties;
+
+	@Autowired
+	private CrnkValidationProperties validationProperties;
+
+	@Autowired
+	private CrnkMetaProperties metaProperties;
+
+	@Autowired
+	private MetaModuleConfigurer metaConfigurer;
+
+	@Autowired
+	private JpaModuleConfigurer jpaConfigurer;
+
+	@Autowired
+	private SpringMvcModule mvcModule;
+
 	@Before
 	public void setup() {
 		TestModule.clear();
@@ -77,6 +112,28 @@ public class BasicSpringBoot1Test {
 				.getForEntity("http://localhost:" + this.port + "/api/tasks?filter[tasks][name]=John", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
+	}
+
+	@Test
+	public void testProperties() {
+		Assert.assertTrue(uiProperties.getEnabled());
+		Assert.assertTrue(homeProperties.getEnabled());
+		Assert.assertTrue(securityProperties.getIfAvailable() == null);
+		Assert.assertTrue(coreProperties.isEnabled());
+		Assert.assertTrue(operationsProperties.getEnabled());
+		Assert.assertTrue(validationProperties.getEnabled());
+		Assert.assertTrue(uiProperties.getEnabled());
+		Assert.assertTrue(metaProperties.getEnabled());
+
+		Mockito.verify(metaConfigurer, Mockito.times(1)).configure(Mockito.any(MetaModuleConfig.class));
+		Mockito.verify(jpaConfigurer, Mockito.times(1)).configure(Mockito.any(JpaModuleConfig.class));
+
+		Assert.assertEquals("spring.mvc", mvcModule.getModuleName());
+
+		CrnkSecurityProperties unmanagedSecurityProperties = new CrnkSecurityProperties();
+		Assert.assertTrue(unmanagedSecurityProperties.getEnabled());
+		unmanagedSecurityProperties.setEnabled(false);
+		Assert.assertFalse(unmanagedSecurityProperties.getEnabled());
 	}
 
 	@Test

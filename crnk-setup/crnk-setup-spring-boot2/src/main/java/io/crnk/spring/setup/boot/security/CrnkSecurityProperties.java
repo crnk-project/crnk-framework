@@ -10,7 +10,7 @@ public class CrnkSecurityProperties {
 
 	private boolean enabled = true;
 
-	public boolean getEnabled() {
+	public boolean isEnabled() {
 		return enabled;
 	}
 
