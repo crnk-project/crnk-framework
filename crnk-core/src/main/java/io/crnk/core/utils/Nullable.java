@@ -1,12 +1,14 @@
 package io.crnk.core.utils;
 
-import com.google.common.base.Objects;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
+
 
 public class Nullable<T> {
 
 	private static final Nullable<?> EMPTY = new Nullable<>();
+
 	private static final Nullable<?> NULL = new Nullable<>(null);
 
 	private final T value;
@@ -66,6 +68,6 @@ public class Nullable<T> {
 			return false;
 		}
 		Nullable<?> other = (Nullable<?>) obj;
-		return Objects.equal(present, other.present) && Objects.equal(value, other.value);
+		return Objects.equals(present, other.present) && Objects.equals(value, other.value);
 	}
 }
