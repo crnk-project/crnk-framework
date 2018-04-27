@@ -253,7 +253,7 @@ See http://jsonapi.org/format/#document-links for more information about linking
 		@JsonApiLinksInformation
 		private ProjectLinks links;
 
-		public static class ProjectLinks implements MetaInformation {
+		public static class ProjectLinks implements LinksInformation {
 
 			private String value;
 
