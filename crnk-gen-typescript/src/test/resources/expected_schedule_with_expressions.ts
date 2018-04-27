@@ -35,6 +35,7 @@ export module Schedules {
 	}
 	export interface Attributes {
 		name?: string;
+		description?: string;
 		delayed?: boolean;
 	}
 }
@@ -116,6 +117,7 @@ export module QSchedules {
 	}
 	export class QAttributes extends BeanPath<Schedules.Attributes> {
 		name: StringPath = this.createString('name');
+		description: StringPath = this.createString('description');
 		delayed: BooleanPath = this.createBoolean('delayed');
 	}
 }

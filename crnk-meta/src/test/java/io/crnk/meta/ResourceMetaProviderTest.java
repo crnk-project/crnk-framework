@@ -89,6 +89,15 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertNull(meta.getVersionAttribute());
 	}
 
+
+	@Test
+	public void checkUseOfJsonNaming() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		// this is the json name, not java (desc)!
+		MetaAttribute attr = meta.getAttribute("description");
+		Assert.assertNotNull(attr);
+	}
+
 	@Test
 	public void resolvePath() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
@@ -149,25 +158,27 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		List<ResourceField> fields = resourceInformation.getFields();
 		Assert.assertEquals("id", fields.get(0).getUnderlyingName());
 		Assert.assertEquals("name", fields.get(1).getUnderlyingName());
-		Assert.assertEquals("task", fields.get(2).getUnderlyingName());
-		Assert.assertEquals("lazyTask", fields.get(3).getUnderlyingName());
-		Assert.assertEquals("tasks", fields.get(4).getUnderlyingName());
-		Assert.assertEquals("tasksList", fields.get(5).getUnderlyingName());
-		Assert.assertEquals("project", fields.get(6).getUnderlyingName());
-		Assert.assertEquals("projects", fields.get(7).getUnderlyingName());
-		Assert.assertEquals("delayed", fields.get(8).getUnderlyingName());
+		Assert.assertEquals("desc", fields.get(2).getUnderlyingName());
+		Assert.assertEquals("task", fields.get(3).getUnderlyingName());
+		Assert.assertEquals("lazyTask", fields.get(4).getUnderlyingName());
+		Assert.assertEquals("tasks", fields.get(5).getUnderlyingName());
+		Assert.assertEquals("tasksList", fields.get(6).getUnderlyingName());
+		Assert.assertEquals("project", fields.get(7).getUnderlyingName());
+		Assert.assertEquals("projects", fields.get(8).getUnderlyingName());
+		Assert.assertEquals("delayed", fields.get(9).getUnderlyingName());
 
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		List<? extends MetaAttribute> attributes = meta.getAttributes();
 		Assert.assertEquals("id", attributes.get(0).getName());
 		Assert.assertEquals("name", attributes.get(1).getName());
-		Assert.assertEquals("task", attributes.get(2).getName());
-		Assert.assertEquals("lazyTask", attributes.get(3).getName());
-		Assert.assertEquals("tasks", attributes.get(4).getName());
-		Assert.assertEquals("tasksList", attributes.get(5).getName());
-		Assert.assertEquals("project", attributes.get(6).getName());
-		Assert.assertEquals("projects", attributes.get(7).getName());
-		Assert.assertEquals("delayed", attributes.get(8).getName());
+		Assert.assertEquals("description", attributes.get(2).getName());
+		Assert.assertEquals("task", attributes.get(3).getName());
+		Assert.assertEquals("lazyTask", attributes.get(4).getName());
+		Assert.assertEquals("tasks", attributes.get(5).getName());
+		Assert.assertEquals("tasksList", attributes.get(6).getName());
+		Assert.assertEquals("project", attributes.get(7).getName());
+		Assert.assertEquals("projects", attributes.get(8).getName());
+		Assert.assertEquals("delayed", attributes.get(9).getName());
 	}
 
 	@Test

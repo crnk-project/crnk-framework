@@ -282,7 +282,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		MetaResourceField attr = new MetaResourceField();
 
 		attr.setParent(resource, true);
-		attr.setName(field.getUnderlyingName());
+		attr.setName(field.getJsonName());
 		attr.setAssociation(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP);
 		attr.setMeta(field.getResourceFieldType() == ResourceFieldType.META_INFORMATION);
 		attr.setLinks(field.getResourceFieldType() == ResourceFieldType.LINKS_INFORMATION);
