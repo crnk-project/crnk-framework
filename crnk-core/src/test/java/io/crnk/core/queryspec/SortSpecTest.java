@@ -66,4 +66,13 @@ public class SortSpecTest {
 		Assert.assertNotEquals(spec1, null);
 		Assert.assertNotEquals(spec1, "test");
 	}
+
+	@Test
+	public void testClone() {
+		SortSpec sortSpec = new SortSpec(Arrays.asList("sortAttr"), Direction.ASC);
+		SortSpec duplicate = sortSpec.clone();
+		Assert.assertNotSame(sortSpec, duplicate);
+		Assert.assertSame(sortSpec.getAttributePath(), duplicate.getAttributePath());
+		Assert.assertSame(sortSpec.getDirection(), duplicate.getDirection());
+	}
 }

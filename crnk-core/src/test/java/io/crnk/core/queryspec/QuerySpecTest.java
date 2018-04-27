@@ -2,21 +2,19 @@ package io.crnk.core.queryspec;
 
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class QuerySpecTest {
 
@@ -64,32 +62,39 @@ public class QuerySpecTest {
 		Assert.assertEquals("QuerySpec{resourceType=projects, paging=OffsetLimitPagingSpec{offset=0}}", spec.toString());
 
 		spec = new QuerySpec(Project.class);
-		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}}", spec.toString());
+		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}}",
+				spec.toString());
 
 		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
-		Assert.assertEquals("QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, filters=[filterAttr EQ test]}",
+		Assert.assertEquals(
+				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, "
+						+ "filters=[filterAttr EQ test]}",
 				spec.toString());
 
 		spec.addSort(new SortSpec(Arrays.asList("sortAttr"), Direction.ASC));
 		Assert.assertEquals(
-				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, filters=[filterAttr EQ test], sort=[sortAttr ASC]}",
+				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, "
+						+ "filters=[filterAttr EQ test], sort=[sortAttr ASC]}",
 				spec.toString());
 
 		spec.includeField(Arrays.asList("includedField"));
 		Assert.assertEquals(
-				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, filters=[filterAttr EQ test], sort=[sortAttr ASC], "
+				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, "
+						+ "filters=[filterAttr EQ test], sort=[sortAttr ASC], "
 						+ "includedFields=[includedField]}",
 				spec.toString());
 
 		spec.includeRelation(Arrays.asList("includedRelation"));
 		Assert.assertEquals(
-				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, filters=[filterAttr EQ test], sort=[sortAttr ASC], "
+				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=0}, "
+						+ "filters=[filterAttr EQ test], sort=[sortAttr ASC], "
 						+ "includedFields=[includedField], includedRelations=[includedRelation]}",
 				spec.toString());
 
 		spec.setPagingSpec(new OffsetLimitPagingSpec(12L, 13L));
 		Assert.assertEquals(
-				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=12, limit=13}, filters=[filterAttr EQ test], "
+				"QuerySpec{resourceClass=io.crnk.core.mock.models.Project, paging=OffsetLimitPagingSpec{offset=12, limit=13}, "
+						+ "filters=[filterAttr EQ test], "
 						+ "sort=[sortAttr ASC], includedFields=[includedField], includedRelations=[includedRelation]}",
 				spec.toString());
 	}
@@ -137,15 +142,17 @@ public class QuerySpecTest {
 		QuerySpec spec = new QuerySpec(Project.class);
 		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
 		FilterSpec filterSpec = spec.getFilter("unknown");
-
 		assertNull(filterSpec);
 	}
 
+
 	@Test
-	public void testDuplicate() {
+	public void testClone() {
+		FilterSpec filterSpec = new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test");
+		SortSpec sortSpec = new SortSpec(Arrays.asList("sortAttr"), Direction.ASC);
 		QuerySpec spec = new QuerySpec(Project.class);
-		spec.addFilter(new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test"));
-		spec.addSort(new SortSpec(Arrays.asList("sortAttr"), Direction.ASC));
+		spec.addFilter(filterSpec);
+		spec.addSort(sortSpec);
 		spec.includeField(Arrays.asList("includedField"));
 		spec.includeRelation(Arrays.asList("includedRelation"));
 		spec.setLimit(2L);
@@ -153,6 +160,12 @@ public class QuerySpecTest {
 
 		QuerySpec duplicate = spec.duplicate();
 		Assert.assertNotSame(spec, duplicate);
+		Assert.assertNotSame(spec.getFilters().get(0), duplicate.getFilters().get(0));
+		Assert.assertNotSame(spec.getSort(), duplicate.getSort());
+		Assert.assertNotSame(spec.getSort().get(0), duplicate.getSort().get(0));
+		Assert.assertNotSame(spec.getIncludedFields(), duplicate.getIncludedFields());
+		Assert.assertNotSame(spec.getIncludedRelations(), duplicate.getIncludedRelations());
+		Assert.assertNotSame(spec.getPagingSpec(), duplicate.getPagingSpec());
 		Assert.assertEquals(spec, duplicate);
 	}
 

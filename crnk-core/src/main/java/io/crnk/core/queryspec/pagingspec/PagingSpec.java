@@ -5,4 +5,9 @@ package io.crnk.core.queryspec.pagingspec;
  */
 public interface PagingSpec {
 
+
+	default PagingSpec clone() {
+		return this; // TODO remove this default with crnk 3.0 to maintain backwardcompatibility in 2.x
+	}
+
 }

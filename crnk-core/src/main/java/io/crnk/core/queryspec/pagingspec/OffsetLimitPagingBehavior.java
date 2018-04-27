@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.pagingspec;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
@@ -7,12 +13,6 @@ import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagingSpec> {
 

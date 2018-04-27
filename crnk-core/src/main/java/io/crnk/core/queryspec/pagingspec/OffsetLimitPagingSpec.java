@@ -8,7 +8,8 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 
 	private Long offset = 0L;
 
-	public OffsetLimitPagingSpec() {}
+	public OffsetLimitPagingSpec() {
+	}
 
 	public OffsetLimitPagingSpec(final Long offset, final Long limit) {
 		this.offset = offset;
@@ -31,6 +32,11 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	public OffsetLimitPagingSpec setOffset(final long offset) {
 		this.offset = offset;
 		return this;
+	}
+
+	@Override
+	public OffsetLimitPagingSpec clone() {
+		return new OffsetLimitPagingSpec(offset, limit);
 	}
 
 	@Override

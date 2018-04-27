@@ -1,5 +1,14 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.CompareUtils;
@@ -10,9 +19,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 public class QuerySpec {
 
@@ -137,7 +143,8 @@ public class QuerySpec {
 	public void setLimit(Long limit) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
 		}
 	}
@@ -153,7 +160,8 @@ public class QuerySpec {
 	public void setOffset(long offset) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 		}
 	}
@@ -176,7 +184,7 @@ public class QuerySpec {
 	}
 
 	public FilterSpec getFilter(final String name) {
-		for (FilterSpec filterSpec: filters) {
+		for (FilterSpec filterSpec : filters) {
 			if (filterSpec.getAttributePath().contains(name)) {
 				return filterSpec;
 			}
@@ -342,14 +350,27 @@ public class QuerySpec {
 		relatedSpecs.put(relatedResourceClass, relatedSpec);
 	}
 
+	/**
+	 * @return use clone() instead
+	 */
+	@Deprecated
 	public QuerySpec duplicate() {
+		return clone();
+	}
+
+	public QuerySpec clone() {
 		QuerySpec copy = new QuerySpec(resourceClass);
-		copy.pagingSpec = pagingSpec;
+		if (pagingSpec != null) {
+			copy.pagingSpec = pagingSpec.clone();
+		}
 		copy.includedFields.addAll(includedFields);
 		copy.includedRelations.addAll(includedRelations);
-		copy.sort.addAll(sort);
-		copy.filters.addAll(filters);
-
+		for (SortSpec sortSpec : sort) {
+			copy.sort.add(sortSpec.clone());
+		}
+		for (FilterSpec filterSpec : filters) {
+			copy.filters.add(filterSpec.clone());
+		}
 		Iterator<Entry<Object, QuerySpec>> iterator = relatedSpecs.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<Object, QuerySpec> entry = iterator.next();
