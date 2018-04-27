@@ -11,7 +11,7 @@ dependencies {
 	compileOnly 'com.squareup.okhttp3:okhttp:3.4.1'
 	compileOnly 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
 
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 
 }

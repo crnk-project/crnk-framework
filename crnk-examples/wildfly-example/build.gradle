@@ -6,8 +6,8 @@ war {
 
 dependencies {
 
-	compile project(':crnk-rs')
-	compile project(':crnk-cdi')
+	compile project(':crnk-setup:crnk-setup-rs')
+	compile project(':crnk-setup:crnk-setup-cdi')
 	compile project(':crnk-home')
 	compile project(':crnk-jpa')
 

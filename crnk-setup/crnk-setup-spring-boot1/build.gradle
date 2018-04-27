@@ -9,7 +9,7 @@ dependencyManagement {
 
 dependencies {
 
-	compile project(':crnk-servlet')
+	compile project(':crnk-setup:crnk-setup-servlet')
 	compile project(':crnk-setup:crnk-setup-spring')
 	compileOnly project(':crnk-jpa')
 	compileOnly project(':crnk-validation')

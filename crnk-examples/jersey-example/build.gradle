@@ -5,7 +5,7 @@ apply plugin: 'application'
 mainClassName = "io.crnk.example.jersey.App"
 
 dependencies {
-	compile project(':crnk-rs')
+	compile project(':crnk-setup:crnk-setup-rs')
 	compile project(':crnk-home')
 
 	compile 'ch.qos.logback:logback-classic:1.2.3'
