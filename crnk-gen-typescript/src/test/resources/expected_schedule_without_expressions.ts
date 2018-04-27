@@ -22,6 +22,7 @@ export module Schedules {
 	}
 	export interface Attributes {
 		name?: string;
+		description?: string;
 		delayed?: boolean;
 	}
 }

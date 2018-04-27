@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -21,6 +22,9 @@ public class Schedule {
 	private Long id;
 
 	private String name;
+
+	@JsonProperty("description")
+	private String desc;
 
 	@JsonApiToOne(lazy = false)
 	private Task task;
@@ -147,6 +151,13 @@ public class Schedule {
 		else {
 			projectIds = null;
 		}
+	}
 
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 }

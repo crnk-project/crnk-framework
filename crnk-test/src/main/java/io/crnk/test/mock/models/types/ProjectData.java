@@ -1,6 +1,9 @@
 package io.crnk.test.mock.models.types;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProjectData {
 
@@ -9,6 +12,9 @@ public class ProjectData {
 	private String[] keywords;
 
 	private Map<String, String> customData;
+
+	@JsonProperty("due")
+	private OffsetDateTime dueDate;
 
 	public String getData() {
 		return data;
@@ -33,5 +39,13 @@ public class ProjectData {
 
 	public void setCustomData(Map<String, String> customData) {
 		this.customData = customData;
+	}
+
+	public OffsetDateTime getDueDate() {
+		return dueDate;
+	}
+
+	public void setDueDate(OffsetDateTime dueDate) {
+		this.dueDate = dueDate;
 	}
 }

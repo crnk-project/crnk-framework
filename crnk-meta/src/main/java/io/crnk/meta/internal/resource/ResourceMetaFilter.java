@@ -32,8 +32,6 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaProviderContext;
 
-import javax.management.Query;
-
 public class ResourceMetaFilter implements MetaFilter {
 
 	private final MetaProviderContext context;
@@ -67,7 +65,7 @@ public class ResourceMetaFilter implements MetaFilter {
 		Module.ModuleContext moduleContext = context.getModuleContext();
 		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(metaResource.getResourceType());
 		ResourceInformation resourceInformation = entry.getResourceInformation();
-		ResourceField fieldInformation = resourceInformation.findFieldByUnderlyingName(field.getName());
+		ResourceField fieldInformation = resourceInformation.findFieldByName(field.getName());
 
 		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
 		boolean readable =
@@ -171,7 +169,7 @@ public class ResourceMetaFilter implements MetaFilter {
 			MetaResourceBase parent = (MetaResourceBase) attr.getParent();
 
 			ResourceInformation information = getResourceInformation(parent, true);
-			ResourceField field = information.findFieldByUnderlyingName(attr.getName());
+			ResourceField field = information.findFieldByName(attr.getName());
 			PreconditionUtil.assertNotNull(attr.getName(), field);
 
 			if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
