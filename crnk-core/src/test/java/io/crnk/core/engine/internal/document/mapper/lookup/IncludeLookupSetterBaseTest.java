@@ -27,7 +27,6 @@ import io.crnk.core.mock.models.HierarchicalTask;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -273,7 +272,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 			}
 		};
 		mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, propertiesProvider, resourceFilterDirectory,
-				new ImmediateResultFactory());
+				new ImmediateResultFactory(), null);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -301,7 +300,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 			}
 		};
 		mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, propertiesProvider, resourceFilterDirectory,
-				new ImmediateResultFactory());
+				new ImmediateResultFactory(), null);
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -333,7 +332,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 		task.setProject(projectDefault);
 
 		mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, new EmptyPropertiesProvider(), resourceFilterDirectory,
-				new ImmediateResultFactory());
+				new ImmediateResultFactory(), null);
 
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.includeRelation(Collections.singletonList("task"));

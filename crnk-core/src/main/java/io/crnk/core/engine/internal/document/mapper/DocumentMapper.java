@@ -3,8 +3,10 @@ package io.crnk.core.engine.internal.document.mapper;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
@@ -27,6 +29,8 @@ public class DocumentMapper {
 
 	private final ResourceFilterDirectory resourceFilterDirectory;
 
+	private ObjectNode jsonapi;
+
 	protected PropertiesProvider propertiesProvider;
 
 	private DocumentMapperUtil util;
@@ -40,12 +44,13 @@ public class DocumentMapper {
 	private boolean client;
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory) {
-		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, false);
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo) {
+		this(resourceRegistry, objectMapper, propertiesProvider, resourceFilterDirectory, resultFactory, serverInfo, false);
 	}
 
 	public DocumentMapper(ResourceRegistry resourceRegistry, ObjectMapper objectMapper, PropertiesProvider propertiesProvider,
-						  ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, boolean client) {
+			ResourceFilterDirectory resourceFilterDirectory, ResultFactory resultFactory, Map<String, String> serverInfo,
+			boolean client) {
 		this.propertiesProvider = propertiesProvider;
 		this.client = client;
 		this.resultFactory = resultFactory;
@@ -56,15 +61,19 @@ public class DocumentMapper {
 		this.util = newDocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 		this.resourceMapper = newResourceMapper(util, client, objectMapper);
 		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
+
+		if (serverInfo != null && !serverInfo.isEmpty()) {
+			jsonapi = (ObjectNode) objectMapper.valueToTree(serverInfo);
+		}
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-														 PropertiesProvider propertiesProvider) {
+			PropertiesProvider propertiesProvider) {
 		return new IncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider, resultFactory);
 	}
 
 	protected DocumentMapperUtil newDocumentMapperUtil(ResourceRegistry resourceRegistry, ObjectMapper objectMapper,
-													   PropertiesProvider propertiesProvider) {
+			PropertiesProvider propertiesProvider) {
 		return new DocumentMapperUtil(resourceRegistry, objectMapper, propertiesProvider);
 	}
 
@@ -83,6 +92,7 @@ public class DocumentMapper {
 		ResourceMappingConfig resourceMapping = mappingConfig.getResourceMapping();
 
 		Document doc = new Document();
+		doc.setJsonapi(jsonapi);
 		addErrors(doc, response.getErrors());
 		util.setMeta(doc, response.getMetaInformation());
 		if (mappingConfig.getResourceMapping().getSerializeLinks()) {
@@ -107,7 +117,8 @@ public class DocumentMapper {
 				if (doc.isMultiple()) {
 					compact(doc.getCollectionData().get());
 				}
-			} else {
+			}
+			else {
 				compact(doc.getSingleData().get());
 			}
 		}
@@ -133,11 +144,12 @@ public class DocumentMapper {
 	}
 
 	private Result<Document> addRelationDataAndInclusions(Document doc, Object entity, QueryAdapter queryAdapter,
-														  DocumentMappingConfig mappingConfig) {
+			DocumentMappingConfig mappingConfig) {
 
 		if (doc.getData().isPresent() && !client) {
 			return includeLookupSetter.processInclusions(doc, entity, queryAdapter, mappingConfig);
-		} else {
+		}
+		else {
 			return resultFactory.just(doc);
 		}
 	}
@@ -151,7 +163,8 @@ public class DocumentMapper {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
 				doc.setData(Nullable.of((Object) dataList));
-			} else {
+			}
+			else {
 				doc.setData(Nullable.of((Object) resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}

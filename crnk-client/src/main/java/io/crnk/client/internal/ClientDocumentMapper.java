@@ -44,7 +44,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 	public ClientDocumentMapper(ModuleRegistry moduleRegistry, ObjectMapper objectMapper, PropertiesProvider
 			propertiesProvider) {
-		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, new ImmediateResultFactory(), true);
+		super(moduleRegistry.getResourceRegistry(), objectMapper, propertiesProvider, null, new ImmediateResultFactory(), null, true);
 		this.moduleRegistry = moduleRegistry;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
 		this.typeParser = moduleRegistry.getTypeParser();

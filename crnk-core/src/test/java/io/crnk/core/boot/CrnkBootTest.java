@@ -7,17 +7,22 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
@@ -29,7 +34,9 @@ import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -333,5 +340,42 @@ public class CrnkBootTest {
 
 		Assert.assertEquals(1, boot.getPagingBehaviors().size());
 		Assert.assertTrue(boot.getPagingBehaviors().get(0) instanceof OffsetLimitPagingBehavior);
+	}
+
+	@Test
+	public void testSetServerInfo() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
+		boot.putServerInfo("a", "b");
+		boot.boot();
+
+		DocumentMapper documentMapper = boot.getDocumentMapper();
+		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+		QuerySpecAdapter querySpecAdapter =
+				new QuerySpecAdapter(new QuerySpec(Task.class), boot.getResourceRegistry(), new QueryContext());
+
+		JsonApiResponse response = new JsonApiResponse();
+		Result<Document> document = documentMapper.toDocument(response, querySpecAdapter, mappingConfig);
+		ObjectNode jsonapi = document.get().getJsonapi();
+		Assert.assertNotNull(jsonapi);
+		Assert.assertNotNull(jsonapi.get("a"));
+		Assert.assertEquals("b", jsonapi.get("a").asText());
+	}
+
+	@Test
+	public void testEmptyServerInfo() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setServiceDiscovery(new ReflectionsServiceDiscovery(MockConstants.TEST_MODELS_PACKAGE));
+		boot.boot();
+
+		DocumentMapper documentMapper = boot.getDocumentMapper();
+		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+		QuerySpecAdapter querySpecAdapter =
+				new QuerySpecAdapter(new QuerySpec(Task.class), boot.getResourceRegistry(), new QueryContext());
+
+		JsonApiResponse response = new JsonApiResponse();
+		Result<Document> document = documentMapper.toDocument(response, querySpecAdapter, mappingConfig);
+		ObjectNode jsonapi = document.get().getJsonapi();
+		Assert.assertNull(jsonapi);
 	}
 }

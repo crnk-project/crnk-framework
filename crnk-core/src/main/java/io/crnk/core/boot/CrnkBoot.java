@@ -1,6 +1,7 @@
 package io.crnk.core.boot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -120,8 +121,17 @@ public class CrnkBoot {
 
 	private CoreModule coreModule = new CoreModule();
 
+	private Map<String, String> serverInfo = new HashMap<>();
+
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
+	}
+
+	/**
+	 * Returned in the jsonapi field with every response. See http://jsonapi.org/format/#document-top-level.
+	 */
+	public void putServerInfo(String key, String value) {
+		serverInfo.put(key, value);
 	}
 
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {
@@ -233,7 +243,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -271,7 +282,8 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			return new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
 		}
 	}
@@ -279,7 +291,7 @@ public class CrnkBoot {
 	protected DocumentMapper createDocumentMapper() {
 		ResourceFilterDirectory filterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 		ResultFactory resultFactory = moduleRegistry.getContext().getResultFactory();
-		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory);
+		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory, serverInfo);
 	}
 
 	protected ControllerRegistry createControllerRegistry() {
@@ -527,7 +539,8 @@ public class CrnkBoot {
 			List<QuerySpecDeserializer> list = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 			if (list.isEmpty()) {
 				querySpecDeserializer = new DefaultQuerySpecDeserializer();
-			} else {
+			}
+			else {
 				querySpecDeserializer = list.get(0);
 			}
 		}
