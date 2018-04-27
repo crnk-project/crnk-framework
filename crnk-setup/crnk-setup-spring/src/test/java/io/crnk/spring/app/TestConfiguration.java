@@ -4,8 +4,8 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
@@ -43,9 +43,9 @@ public class TestConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(QuerySpecDeserializer.class)
-	public QuerySpecDeserializer querySpecDeserializer() {
-		return new DefaultQuerySpecDeserializer();
+	@ConditionalOnMissingBean(QuerySpecUrlMapper.class)
+	public QuerySpecUrlMapper querySpecUrlMapper() {
+		return new DefaultQuerySpecUrlMapper();
 	}
 
 	@Bean
@@ -78,27 +78,4 @@ public class TestConfiguration implements ApplicationContextAware {
 	public TestModule testModule() {
 		return new TestModule();
 	}
-
-/*
-
-	@Bean
-	@ConditionalOnMissingBean
-	public SpringTransactionRunner transactionRunner() {
-		return new SpringTransactionRunner();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public JpaModuleConfig jpaModuleConfig() {
-		return new JpaModuleConfig();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public JpaModule jpaModule(JpaModuleConfig config) {
-		config.exposeAllEntities(emf);
-		JpaModule module = JpaModule.createServerModule(config, em, transactionRunner());
-		return module;
-	}
-	*/
 }

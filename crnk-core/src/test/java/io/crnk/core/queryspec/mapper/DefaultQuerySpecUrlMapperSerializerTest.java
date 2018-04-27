@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec;
+package io.crnk.core.queryspec.mapper;
 
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
@@ -9,6 +9,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.*;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,8 +19,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
-@Deprecated
-public class DefaultQuerySpecSerializerTest {
+public class DefaultQuerySpecUrlMapperSerializerTest {
 
 	private JsonApiUrlBuilder urlBuilder;
 
@@ -34,7 +34,6 @@ public class DefaultQuerySpecSerializerTest {
 
 		resourceRegistry = container.getResourceRegistry();
 		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
-		urlBuilder.setQuerySpecSerializer(new DefaultQuerySpecSerializer(resourceRegistry));
 	}
 
 	@Test

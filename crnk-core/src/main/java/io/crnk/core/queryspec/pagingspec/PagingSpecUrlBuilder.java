@@ -6,29 +6,31 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.module.ModuleRegistry;
 
 public class PagingSpecUrlBuilder {
 
-	private final ResourceRegistry resourceRegistry;
+	private final ModuleRegistry moduleRegistry;
 
 	private final RepositoryRequestSpec requestSpec;
 
-	public PagingSpecUrlBuilder(final ResourceRegistry resourceRegistry, final RepositoryRequestSpec requestSpec) {
-		this.resourceRegistry = resourceRegistry;
+
+	public PagingSpecUrlBuilder(final ModuleRegistry moduleRegistry, final RepositoryRequestSpec requestSpec) {
+		this.moduleRegistry = moduleRegistry;
 		this.requestSpec = requestSpec;
 	}
 
 	public String build(QueryAdapter queryAdapter) {
 		QueryContext queryContext = queryAdapter.getQueryContext();
-		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(resourceRegistry, queryContext);
+		JsonApiUrlBuilder urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
 		Object relationshipSourceId = requestSpec.getId();
 		ResourceField relationshipField = requestSpec.getRelationshipField();
 
 		ResourceInformation rootInfo;
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();
-		} else {
+		}
+		else {
 			rootInfo = relationshipField.getParentResourceInformation();
 		}
 		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,

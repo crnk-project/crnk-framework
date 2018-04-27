@@ -1,7 +1,6 @@
 package io.crnk.spring.setup.boot.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -9,15 +8,14 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.servlet.CrnkFilter;
 import io.crnk.servlet.internal.ServletModule;
 import io.crnk.spring.internal.SpringServiceDiscovery;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -98,9 +96,9 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(QuerySpecDeserializer.class)
-	public QuerySpecDeserializer querySpecDeserializer() {
-		return new DefaultQuerySpecDeserializer();
+	@ConditionalOnMissingBean(QuerySpecUrlMapper.class)
+	public QuerySpecUrlMapper querySpecUrlMapper() {
+		return new DefaultQuerySpecUrlMapper();
 	}
 
 	@Bean

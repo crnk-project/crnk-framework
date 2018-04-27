@@ -1,48 +1,34 @@
 package io.crnk.core.queryspec.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializerContext;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+
+import java.util.Map;
+import java.util.Set;
 
 public class QuerySpecAdapterBuilder implements QueryAdapterBuilder {
 
 
-	private QuerySpecDeserializer querySpecDeserializer;
+	private QuerySpecUrlMapper querySpecUrlMapper;
 
 	private ModuleRegistry moduleRegistry;
 
-	public QuerySpecAdapterBuilder(final QuerySpecDeserializer querySpecDeserializer,
+	public QuerySpecAdapterBuilder(final QuerySpecUrlMapper querySpecUrlMapper,
 								   final ModuleRegistry moduleRegistry) {
-		this.querySpecDeserializer = querySpecDeserializer;
 		this.moduleRegistry = moduleRegistry;
-		this.querySpecDeserializer.init(new QuerySpecDeserializerContext() {
-
-			@Override
-			public ResourceRegistry getResourceRegistry() {
-				return moduleRegistry.getResourceRegistry();
-			}
-
-			@Override
-			public TypeParser getTypeParser() {
-				return moduleRegistry.getTypeParser();
-			}
-		});
+		this.querySpecUrlMapper = querySpecUrlMapper;
 	}
 
 	@Override
-	public QueryAdapter build(ResourceInformation resourceInformation, Map<String, Set<String>> parameters, QueryContext queryContext) {
-		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpecDeserializer.deserialize(resourceInformation, parameters),
+	public QueryAdapter build(ResourceInformation resourceInformation, Map<String, Set<String>> parameters,
+							  QueryContext queryContext) {
+		QuerySpecAdapter adapter = new QuerySpecAdapter(querySpecUrlMapper.deserialize(resourceInformation, parameters),
 				moduleRegistry.getResourceRegistry(), queryContext);
 		HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
 		if (requestContext != null) {

@@ -95,6 +95,7 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 
 	@Before
 	public void setup() {
+		clear();
 		client = new CrnkClient(getBaseUri().toString());
 		client.setActionStubFactory(JerseyActionStubFactory.newInstance());
 		client.getHttpAdapter().setReceiveTimeout(10000000, TimeUnit.MILLISECONDS);
@@ -133,20 +134,20 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 	public void tearDown() throws Exception {
 		super.tearDown();
 
-		SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
-		transactionRunner.doInTransaction(new Callable<Object>() {
-
-			@Override
-			public Object call() throws Exception {
-				EntityManager em = context.getBean(io.crnk.operations.EntityManagerProducer.class).getEntityManager();
-				clear(em);
-				return null;
-			}
-		});
+		clear();
 
 		if (context != null) {
 			context.destroy();
 		}
+	}
+
+	protected void clear() {
+		SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
+		transactionRunner.doInTransaction(() -> {
+			EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
+			clear(em);
+			return null;
+		});
 	}
 
 	@Override

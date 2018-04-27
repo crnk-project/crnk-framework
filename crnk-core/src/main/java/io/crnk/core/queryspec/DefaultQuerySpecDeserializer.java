@@ -18,14 +18,19 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ParametersDeserializationException;
+import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Maps url parameters to QuerySpec.
+ *
+ * @deprecated use {@link DefaultQuerySpecUrlMapper}
  */
-public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
+@Deprecated
+public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, UnkonwnMappingAware {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultQuerySpecDeserializer.class);
 
@@ -175,11 +180,13 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				TypeParser typeParser = context.getTypeParser();
 				Object value = typeParser.parse(stringValue, (Class) attributeType);
 				typedValues.add(value);
-			} catch (ParserException e) {
+			}
+			catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				} else {
+				}
+				else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -200,10 +207,12 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 				current = getAttributeType(current, propertyName);
 			}
 			return current;
-		} catch (PropertyException e) {
+		}
+		catch (PropertyException e) {
 			if (allowUnknownAttributes) {
 				return String.class;
-			} else {
+			}
+			else {
 				throw e;
 			}
 		}
@@ -258,7 +267,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		RestrictedQueryParamsMembers paramType;
 		try {
 			paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			paramType = RestrictedQueryParamsMembers.unknown;
 		}
 
@@ -272,17 +282,22 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 
 		if (paramType == RestrictedQueryParamsMembers.filter && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.pageParameter = elements.get(0);
-		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 			param.pageParameter = elements.get(1);
-		} else if (paramType == RestrictedQueryParamsMembers.unknown) {
+		}
+		else if (paramType == RestrictedQueryParamsMembers.unknown) {
 			param.resourceInformation = null;
-		} else if (elements.size() == 1) {
+		}
+		else if (elements.size() == 1) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		if (param.operator == null) {
@@ -319,23 +334,26 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			param.attributePath = Arrays.asList(elements.get(1).split("\\."));
-		} else if (enforceDotPathSeparator && elements.size() == 1) {
+		}
+		else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.attributePath = Arrays.asList(elements.get(0).split("\\."));
-		} else {
+		}
+		else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
 	private void legacyParseFilterParameterName(Parameter param, List<String> elements,
-												ResourceInformation rootResourceInformation) {
+			ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			elements.remove(0);
-		} else {
+		}
+		else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		param.attributePath = new ArrayList<>();
@@ -349,7 +367,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		param.operator = findOperator(lastElement);
 		if (param.operator != null) {
 			elements.remove(elements.size() - 1);
-		} else {
+		}
+		else {
 			param.operator = defaultOperator;
 		}
 	}
@@ -390,10 +409,12 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 		this.ignoreParseExceptions = ignoreParseExceptions;
 	}
 
+	@Override
 	public boolean isAllowUnknownParameters() {
 		return allowUnknownParameters;
 	}
 
+	@Override
 	public void setAllowUnknownParameters(final boolean allowUnknownParameters) {
 		this.allowUnknownParameters = allowUnknownParameters;
 	}
@@ -426,7 +447,8 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer {
 			}
 			try {
 				return Long.parseLong(values.iterator().next());
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
 		}

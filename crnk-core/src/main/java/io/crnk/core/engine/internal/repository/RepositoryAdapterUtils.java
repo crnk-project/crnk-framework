@@ -15,8 +15,8 @@ import io.crnk.core.resource.list.ResourceList;
 public class RepositoryAdapterUtils {
 
 	public static LinksInformation enrichLinksInformation(ModuleRegistry moduleRegistry, LinksInformation linksInformation,
-														  Object resources,
-														  RepositoryRequestSpec requestSpec) {
+			Object resources,
+			RepositoryRequestSpec requestSpec) {
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
 		LinksInformation enrichedLinksInformation = linksInformation;
 		if (queryAdapter instanceof QuerySpecAdapter && resources instanceof ResourceList) {
@@ -32,15 +32,15 @@ public class RepositoryAdapterUtils {
 	}
 
 	private static LinksInformation enrichPageLinksInformation(ModuleRegistry moduleRegistry, LinksInformation linksInformation,
-															   ResourceList<?> resources,
-															   QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
+			ResourceList<?> resources,
+			QueryAdapter queryAdapter, RepositoryRequestSpec requestSpec) {
 		if (linksInformation == null) {
 			// use default implementation if no link information
 			// provided by resource
 			linksInformation = new DefaultPagedLinksInformation();
 		}
 		if (linksInformation instanceof PagedLinksInformation) {
-			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry.getResourceRegistry(), requestSpec);
+			PagingSpecUrlBuilder urlBuilder = new PagingSpecUrlBuilder(moduleRegistry, requestSpec);
 			requestSpec.getResponseResourceInformation().getPagingBehavior()
 					.build((PagedLinksInformation) linksInformation, resources, queryAdapter, urlBuilder);
 		}

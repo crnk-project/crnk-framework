@@ -9,6 +9,7 @@ import org.junit.Before;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 
+@Deprecated
 public class LegacyQuerySpecDeserializerTest extends DefaultQuerySpecDeserializerTestBase {
 
 	@Override

@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.Project;
@@ -30,7 +30,7 @@ public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 
 	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
 
-	private DefaultQuerySpecDeserializer deserializer;
+	private DefaultQuerySpecUrlMapper urlMapper;
 
 	@Before
 	public void setup() {
@@ -44,8 +44,8 @@ public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 	@Override
 	protected TestApplication configure() {
 		TestApplication app = new TestApplication(true);
-		deserializer = (DefaultQuerySpecDeserializer) app.getFeature().getQuerySpecDeserializer();
-		deserializer.setAllowUnknownAttributes(true);
+		urlMapper = (DefaultQuerySpecUrlMapper) app.getFeature().getUrlMapper();
+		urlMapper.setAllowUnknownAttributes(true);
 		return app;
 	}
 
@@ -64,7 +64,7 @@ public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 		parameterMap.put("filter[unknownAttr]", Collections.singleton("test"));
 		parameterMap.put("sort", Collections.singleton("-unknownAttr"));
 		ResourceInformation taskInformation = client.getRegistry().getEntryForClass(Task.class).getResourceInformation();
-		QuerySpec querySpec = deserializer.deserialize(taskInformation, parameterMap);
+		QuerySpec querySpec = urlMapper.deserialize(taskInformation, parameterMap);
 		Assert.assertEquals(1, querySpec.getFilters().size());
 		FilterSpec filterSpec = querySpec.getFilters().get(0);
 		Assert.assertEquals("unknownAttr", filterSpec.getAttributePath().get(0));

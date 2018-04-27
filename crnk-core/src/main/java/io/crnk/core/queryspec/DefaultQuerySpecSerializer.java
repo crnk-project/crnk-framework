@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.resource.RestrictedQueryParamsMembers;
+
+/**
+ * @deprecated use {@link io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper}
+ */
+@Deprecated
 public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 
 	private ResourceRegistry resourceRegistry;
@@ -60,7 +64,8 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 		serializeIncludedFields(querySpec, resourceType, map);
 		serializeIncludedRelations(querySpec, resourceType, map);
 		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
-		if (entry != null && entry.getResourceInformation() != null && entry.getResourceInformation().getPagingBehavior() != null) {
+		if (entry != null && entry.getResourceInformation() != null
+				&& entry.getResourceInformation().getPagingBehavior() != null) {
 			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(querySpec.getPagingSpec(), resourceType));
 		}
 
@@ -84,7 +89,8 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 					values.add(serializeValue(elem));
 				}
 				map.put(key, values);
-			} else {
+			}
+			else {
 				String value = serializeValue(filterSpec.getValue());
 				put(map, key, value);
 			}
