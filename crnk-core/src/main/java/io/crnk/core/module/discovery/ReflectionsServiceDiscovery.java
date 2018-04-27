@@ -1,19 +1,5 @@
 package io.crnk.core.module.discovery;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.repository.Repository;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.repository.ResourceRepository;
-
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -21,6 +7,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.repository.Repository;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.legacy.locator.JsonServiceLocator;
+import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.legacy.repository.ResourceRepository;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
+
+/**
+ * Choose a proper DI implementation if desired (Guava, Spring, CDI, etc.)
+ */
+@Deprecated
 public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 
 	private Reflections reflections;
