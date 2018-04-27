@@ -1,13 +1,13 @@
 package io.crnk.core.engine.internal.information.resource;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -18,6 +18,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 
@@ -28,7 +29,7 @@ import io.crnk.core.utils.Optional;
  */
 public class DefaultResourceInformationProvider extends ResourceInformationProviderBase {
 
-	private final Map<Class<? extends PagingBehavior>, PagingBehavior> pagingBehaviors;
+	private final ArrayList<? extends PagingBehavior> pagingBehaviors;
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
 											  PagingBehavior pagingBehavior,
@@ -49,10 +50,8 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 											  List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		super(propertiesProvider, resourceFieldInformationProviders);
 
-		this.pagingBehaviors = new HashMap<>(pagingBehaviors.size());
-		for (int i = 0; i < pagingBehaviors.size(); i++) {
-			this.pagingBehaviors.put(pagingBehaviors.get(i).getClass(), pagingBehaviors.get(i));
-		}
+		// order of behaviors must stay the same
+		this.pagingBehaviors = new ArrayList<>(pagingBehaviors);
 	}
 
 	@Override
@@ -84,9 +83,21 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
 
 		Class<? extends PagingBehavior> pagingBehaviorType = ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get().pagingBehavior();
-		java.util.Optional<PagingBehavior> optPagingBehavior = pagingBehaviors.values().stream().filter(it -> pagingBehaviorType.isInstance(it)).findFirst();
-		if (!optPagingBehavior.isPresent()) {
-			throw new IllegalStateException("paging behavior not found: " + pagingBehaviorType);
+
+		// cross check if desired resource paging behavior is a registered behavior, error out if not.
+		// if no behavior is set for the resource, we pick the first from registered behaviors.
+		java.util.Optional<? extends PagingBehavior> optPagingBehavior;
+		if (!pagingBehaviorType.equals(VoidPagingBehavior.class)) {
+			optPagingBehavior = pagingBehaviors.stream()
+							.filter(it -> pagingBehaviorType.isInstance(it))
+							.findFirst();
+
+			if (!optPagingBehavior.isPresent()) {
+				throw new IllegalStateException("paging behavior not found: " + pagingBehaviorType);
+			}
+
+		} else {
+			optPagingBehavior = pagingBehaviors.stream().findFirst();
 		}
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),

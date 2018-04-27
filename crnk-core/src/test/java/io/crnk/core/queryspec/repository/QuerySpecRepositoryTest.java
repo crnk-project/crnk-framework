@@ -12,6 +12,8 @@ import io.crnk.core.mock.repository.ScheduleRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
@@ -34,6 +36,11 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 	private RelationshipRepositoryAdapter tasksRelAdapter;
 
 	private ResourceRepositoryAdapter scheduleAdapter;
+
+	@Override
+	protected List<PagingBehavior> additionalPagingBehaviors() {
+		return new ArrayList<>(Arrays.asList(new CustomOffsetLimitPagingBehavior()));
+	}
 
 	@Before
 	public void setup() {

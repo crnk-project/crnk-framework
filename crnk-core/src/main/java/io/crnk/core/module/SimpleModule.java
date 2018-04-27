@@ -279,7 +279,19 @@ public class SimpleModule implements Module {
 	 */
 	public void addPagingBehavior(PagingBehavior pagingBehavior) {
 		checkInitialized();
-		pagingBehaviors.add(pagingBehavior);
+
+		// avoid adding the same type(!) of behavior twice, error out if that's the case
+		boolean behaviorTypeAdded = pagingBehaviors
+				.stream()
+				.anyMatch(pbh -> pbh.getClass().equals(pagingBehavior.getClass()));
+
+		if (!behaviorTypeAdded) {
+			pagingBehaviors.add(pagingBehavior);
+		} else {
+			throw new IllegalArgumentException(
+					"PagingBehavior of same type already added. Type:"
+					+ pagingBehavior.getClass().getSimpleName());
+		}
 	}
 
 	public List<PagingBehavior> getPagingBehaviors() {

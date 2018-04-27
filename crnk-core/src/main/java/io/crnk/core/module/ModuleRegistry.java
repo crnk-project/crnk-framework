@@ -11,7 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -42,9 +46,12 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.registry.*;
-import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.RegistryEntryBuilder;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.result.ImmediateResultFactory;
+import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
@@ -58,8 +65,6 @@ import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -155,7 +160,7 @@ public class ModuleRegistry {
 	 * @param pagingBehavior the paging behavior
 	 */
 	public void addPagingBehavior(PagingBehavior pagingBehavior) {
-		this.aggregatedModule.addPagingBehavior(pagingBehavior);
+		aggregatedModule.addPagingBehavior(pagingBehavior);
 	}
 
 	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors) {
