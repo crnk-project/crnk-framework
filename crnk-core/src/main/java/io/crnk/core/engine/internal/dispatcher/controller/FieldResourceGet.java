@@ -24,10 +24,10 @@ import java.io.Serializable;
 public class FieldResourceGet extends ResourceIncludeField {
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		return !jsonPath.isCollection()
 				&& FieldPath.class.equals(jsonPath.getClass())
-				&& HttpMethod.GET.name().equals(requestType);
+				&& HttpMethod.GET.name().equals(method);
 	}
 
 	@Override

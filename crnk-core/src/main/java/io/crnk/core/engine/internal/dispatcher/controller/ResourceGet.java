@@ -27,8 +27,8 @@ public class ResourceGet extends ResourceIncludeField {
 	 * a resource.
 	 */
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		return !jsonPath.isCollection() && jsonPath instanceof ResourcePath && HttpMethod.GET.name().equals(requestType);
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
+		return !jsonPath.isCollection() && jsonPath instanceof ResourcePath && HttpMethod.GET.name().equals(method);
 	}
 
 	/**

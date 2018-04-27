@@ -5,7 +5,7 @@ import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.MethodNotFoundException;
+import io.crnk.core.exception.BadRequestException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class ControllerRegistryTest {
 		ControllerRegistry sut = new ControllerRegistry(null);
 
 		// THEN
-		expectedException.expect(MethodNotFoundException.class);
+		expectedException.expect(BadRequestException.class);
 
 		// WHEN
 		sut.getController(jsonPath, requestType);

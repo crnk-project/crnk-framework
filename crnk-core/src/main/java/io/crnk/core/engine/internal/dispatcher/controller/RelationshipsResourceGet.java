@@ -23,8 +23,8 @@ import java.io.Serializable;
 public class RelationshipsResourceGet extends ResourceIncludeField {
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		return !jsonPath.isCollection() && jsonPath instanceof RelationshipsPath && HttpMethod.GET.name().equals(requestType);
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
+		return !jsonPath.isCollection() && jsonPath instanceof RelationshipsPath && HttpMethod.GET.name().equals(method);
 	}
 
 	@Override

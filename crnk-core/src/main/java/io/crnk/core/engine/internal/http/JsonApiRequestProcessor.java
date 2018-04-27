@@ -9,7 +9,11 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilterChain;
-import io.crnk.core.engine.http.*;
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
@@ -20,12 +24,10 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-import io.crnk.core.engine.result.ImmediateResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
-import io.crnk.core.exception.MethodNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -38,14 +40,14 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
 
 	public JsonApiRequestProcessor(Module.ModuleContext moduleContext, ControllerRegistry controllerRegistry,
-								   QueryAdapterBuilder queryAdapterBuilder) {
+			QueryAdapterBuilder queryAdapterBuilder) {
 		super(moduleContext, queryAdapterBuilder, controllerRegistry);
 	}
 
 	/**
 	 * Determines whether the supplied HTTP request is considered a JSON-API request.
 	 *
-	 * @param requestContext  The HTTP request
+	 * @param requestContext The HTTP request
 	 * @param acceptPlainJson Whether a plain JSON request should also be considered a JSON-API request
 	 * @return <code>true</code> if it is a JSON-API request; <code>false</code> otherwise
 	 * @since 2.4
@@ -91,10 +93,15 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
 	@Override
 	public Result<HttpResponse> processAsync(HttpRequestContext requestContext) {
+		Result<HttpResponse> response = checkMethod(requestContext);
+		if (response != null) {
+			return response;
+		}
+
+		String method = requestContext.getMethod();
 		ResultFactory resultFactory = moduleContext.getResultFactory();
 		String path = requestContext.getPath();
 		JsonPath jsonPath = getJsonPath(requestContext);
-		String method = requestContext.getMethod();
 		LOGGER.debug("processing JSON API request path={}, method={}", jsonPath, method);
 		Map<String, Set<String>> parameters = requestContext.getRequestParameters();
 		RepositoryMethodParameterProvider parameterProvider = requestContext.getRequestParameterProvider();
@@ -104,23 +111,40 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 			RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
 			requestDispatcher.dispatchAction(path, method, parameters);
 			return null;
-		} else if (jsonPath != null) {
+		}
+		else if (jsonPath != null) {
 			Document requestDocument;
 			try {
 				requestDocument = getRequestDocument(requestContext);
-			} catch (JsonProcessingException e) {
+			}
+			catch (JsonProcessingException e) {
 				return resultFactory.just(getErrorResponse(e));
 			}
 			QueryContext queryContext = requestContext.getQueryContext();
 			return processAsync(jsonPath, method, parameters, parameterProvider, requestDocument, queryContext)
 					.map(this::toHttpResponse);
 		}
-		return resultFactory.just(getErrorResponse(new ResourceNotFoundException(path)));
+		return resultFactory.just(buildMethodNotAllowedResponse(method));
+	}
+
+	private Result<HttpResponse> checkMethod(HttpRequestContext requestContext) {
+		String method = requestContext.getMethod();
+		boolean isPatch = method.equals(HttpMethod.PATCH.toString());
+		boolean isPost = method.equals(HttpMethod.POST.toString());
+		boolean isGet = method.equals(HttpMethod.GET.toString());
+		boolean isDelete = method.equals(HttpMethod.DELETE.toString());
+		boolean acceptsMethod = isGet || isDelete || isPatch || isPost;
+		if (!acceptsMethod) {
+			ResultFactory resultFactory = moduleContext.getResultFactory();
+			return resultFactory.just(buildMethodNotAllowedResponse(method));
+		}
+		return null;
 	}
 
 
-	public Result<Response> processAsync(JsonPath jsonPath, String method, Map<String, Set<String>> parameters, RepositoryMethodParameterProvider parameterProvider,
-										 Document requestDocument, QueryContext queryContext) {
+	public Result<Response> processAsync(JsonPath jsonPath, String method, Map<String, Set<String>> parameters,
+			RepositoryMethodParameterProvider parameterProvider,
+			Document requestDocument, QueryContext queryContext) {
 		ResultFactory resultFactory = moduleContext.getResultFactory();
 		ResourceInformation resourceInformation = getRequestedResource(jsonPath);
 		QueryAdapter queryAdapter = queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
@@ -128,16 +152,19 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		if (resultFactory instanceof ImmediateResultFactory) {
 			LOGGER.debug("processing synchronously");
 			// not that document filters are not compatible with async programming
-			DocumentFilterContextImpl filterContext = new DocumentFilterContextImpl(jsonPath, queryAdapter, parameterProvider, requestDocument, method);
+			DocumentFilterContextImpl filterContext =
+					new DocumentFilterContextImpl(jsonPath, queryAdapter, parameterProvider, requestDocument, method);
 			try {
 				DocumentFilterChain filterChain = getFilterChain(jsonPath, method);
 				Response response = filterChain.doFilter(filterContext);
 				return resultFactory.just(response);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				Response response = toErrorResponse(e);
 				return resultFactory.just(response);
 			}
-		} else {
+		}
+		else {
 			LOGGER.debug("processing asynchronously");
 			Controller controller = controllerRegistry.getController(jsonPath, method);
 			Result<Response> responseResult = controller.handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
@@ -152,8 +179,10 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 			LOGGER.error("failed to process request", e);
 			e = new InternalServerErrorException(e.getMessage());
 			exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
-			PreconditionUtil.assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
-		} else {
+			PreconditionUtil
+					.assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
+		}
+		else {
 			LOGGER.debug("dispatching exception to mapper", e);
 		}
 		return exceptionMapper.get().toErrorResponse(e).toResponse();

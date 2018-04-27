@@ -2,8 +2,6 @@ package io.crnk.core.engine.internal.http;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +9,6 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpResponse;
@@ -22,14 +19,12 @@ import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.Module;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +40,8 @@ public class JsonApiRequestProcessorBase {
 
 	protected ControllerRegistry controllerRegistry;
 
-	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext, QueryAdapterBuilder queryAdapterBuilder, ControllerRegistry controllerRegistry) {
+	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext, QueryAdapterBuilder queryAdapterBuilder,
+			ControllerRegistry controllerRegistry) {
 		this.moduleContext = moduleContext;
 		this.queryAdapterBuilder = queryAdapterBuilder;
 		this.controllerRegistry = controllerRegistry;
@@ -53,7 +49,8 @@ public class JsonApiRequestProcessorBase {
 
 	protected boolean isAcceptingPlainJson() {
 		if (acceptingPlainJson == null) {
-			acceptingPlainJson = !Boolean.parseBoolean(moduleContext.getPropertiesProvider().getProperty(CrnkProperties.REJECT_PLAIN_JSON));
+			acceptingPlainJson =
+					!Boolean.parseBoolean(moduleContext.getPropertiesProvider().getProperty(CrnkProperties.REJECT_PLAIN_JSON));
 		}
 		return acceptingPlainJson;
 	}
@@ -65,15 +62,12 @@ public class JsonApiRequestProcessorBase {
 		return toHttpResponse(response);
 	}
 
-	protected HttpResponse getErrorResponse(ResourceNotFoundException e) {
-		final String message = "Not found";
+	protected HttpResponse buildMethodNotAllowedResponse(final String method) {
 		Document responseDocument = new Document();
-		responseDocument.setErrors(Arrays.asList(ErrorData.builder()
-				.setStatus(String.valueOf(HttpStatus.NOT_FOUND_404))
-				.setTitle(message)
-				.build()));
-		logger.warn(message, e);
-		return toHttpResponse(new Response(responseDocument, HttpStatus.NOT_FOUND_404));
+		responseDocument.setErrors(Arrays.asList(MethodNotAllowedException.createErrorData(method)));
+		Response response = new Response(responseDocument, HttpStatus.METHOD_NOT_ALLOWED_405);
+		logger.warn("method not allowed: {}", method);
+		return toHttpResponse(response);
 	}
 
 	protected HttpResponse toHttpResponse(Response response) {
@@ -86,7 +80,8 @@ public class JsonApiRequestProcessorBase {
 			String responseBody;
 			try {
 				responseBody = objectMapper.writeValueAsString(response.getDocument());
-			} catch (JsonProcessingException e) {
+			}
+			catch (JsonProcessingException e) {
 				throw new IllegalStateException(e);
 			}
 			httpResponse.setBody(responseBody);
@@ -103,9 +98,11 @@ public class JsonApiRequestProcessorBase {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			try {
 				return objectMapper.readerFor(Document.class).readValue(requestBody);
-			} catch (JsonProcessingException e) {
+			}
+			catch (JsonProcessingException e) {
 				throw e;
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
@@ -142,7 +139,8 @@ public class JsonApiRequestProcessorBase {
 			}
 			String oppositeResourceType = relationshipField.getOppositeResourceType();
 			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
-		} else {
+		}
+		else {
 			return registryEntry.getResourceInformation();
 		}
 	}

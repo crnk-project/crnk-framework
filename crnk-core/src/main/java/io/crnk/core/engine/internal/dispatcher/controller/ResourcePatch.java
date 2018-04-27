@@ -34,10 +34,10 @@ public class ResourcePatch extends ResourceUpsert {
 	}
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		return !jsonPath.isCollection() &&
 				jsonPath instanceof ResourcePath &&
-				HttpMethod.PATCH.name().equals(requestType);
+				HttpMethod.PATCH.name().equals(method);
 	}
 
 	@Override

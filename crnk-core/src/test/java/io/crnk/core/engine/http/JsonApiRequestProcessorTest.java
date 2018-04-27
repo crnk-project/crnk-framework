@@ -1,5 +1,8 @@
 package io.crnk.core.engine.http;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.document.Document;
@@ -8,6 +11,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.internal.http.JsonApiRequestProcessor;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskLinks;
 import io.crnk.core.mock.repository.TaskRepository;
@@ -20,9 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.List;
 
 public class JsonApiRequestProcessorTest {
 
@@ -64,7 +65,8 @@ public class JsonApiRequestProcessorTest {
 		TaskRepository tasks = new TaskRepository();
 		tasks.save(task);
 
-		processor = new JsonApiRequestProcessor(moduleContext, container.getBoot().getControllerRegistry(), container.getBoot().getQueryAdapterBuilder());
+		processor = new JsonApiRequestProcessor(moduleContext, container.getBoot().getControllerRegistry(),
+				container.getBoot().getQueryAdapterBuilder());
 
 		requestContextBase = container.getRequestContextBase();
 		requestContext = container.getRequestContext();
@@ -117,6 +119,16 @@ public class JsonApiRequestProcessorTest {
 
 		processor.process(requestContext);
 		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
+	}
+
+	@Test
+	public void return405ForInvalidMethod() {
+		Mockito.when(requestContextBase.getMethod()).thenReturn("PUT");
+		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/12");
+		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+
+		Result<HttpResponse> result = processor.processAsync(requestContext);
+		Assert.assertEquals(HttpStatus.METHOD_NOT_ALLOWED_405, result.get().getStatusCode());
 	}
 
 	@Test
@@ -188,7 +200,8 @@ public class JsonApiRequestProcessorTest {
 		JsonApiResponse request = new JsonApiResponse();
 		request.setEntity(task);
 		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
-		Document requestDocument = container.getDocumentMapper().toDocument(request, container.toQueryAdapter(new QuerySpec(Task.class)), mappingConfig).get();
+		Document requestDocument = container.getDocumentMapper()
+				.toDocument(request, container.toQueryAdapter(new QuerySpec(Task.class)), mappingConfig).get();
 		return container.getObjectMapper().writeValueAsString(requestDocument);
 	}
 

@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -16,18 +18,16 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.io.Serializable;
-
 public class CollectionGet extends ResourceIncludeField {
 
 	/**
 	 * Check if it is a GET request for a collection of resources.
 	 */
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		return jsonPath.isCollection()
 				&& jsonPath instanceof ResourcePath
-				&& HttpMethod.GET.name().equals(requestType);
+				&& HttpMethod.GET.name().equals(method);
 	}
 
 	@Override

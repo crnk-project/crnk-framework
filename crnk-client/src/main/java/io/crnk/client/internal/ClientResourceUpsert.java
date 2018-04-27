@@ -150,7 +150,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 	}
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		// no in use on client side, consider refactoring ResourceUpsert to
 		// separate from controllers
 		throw new UnsupportedOperationException();

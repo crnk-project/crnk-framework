@@ -22,10 +22,10 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 public class ResourceDelete extends BaseController {
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		return !jsonPath.isCollection()
 				&& jsonPath instanceof ResourcePath
-				&& HttpMethod.DELETE.name().equals(requestType);
+				&& HttpMethod.DELETE.name().equals(method);
 	}
 
 	@Override

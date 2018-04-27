@@ -15,10 +15,10 @@ public interface Controller {
 	 * Checks if requested repository method is acceptable.
 	 *
 	 * @param jsonPath    Requested resource path
-	 * @param requestType HTTP request type
+	 * @param method HTTP request type
 	 * @return Acceptance result in boolean
 	 */
-	boolean isAcceptable(JsonPath jsonPath, String requestType);
+	boolean isAcceptable(JsonPath jsonPath, String method);
 
 	@Deprecated
 	Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider

@@ -1,13 +1,13 @@
 package io.crnk.core.exception;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.exception.CrnkExceptionMapper;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class CrnkExceptionMapperTest {
 
@@ -34,6 +34,17 @@ public class CrnkExceptionMapperTest {
 		CrnkMappableException exception = mapper.fromErrorResponse(response);
 		assertThat(exception).isInstanceOf(InternalServerErrorException.class);
 		assertThat(exception.getMessage()).isEqualTo("testMessage");
+	}
+
+	@Test
+	public void methodNotAllowed() {
+		CrnkExceptionMapper mapper = new CrnkExceptionMapper();
+		ErrorResponse response = mapper.toErrorResponse(new MethodNotAllowedException("GET"));
+		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED_405);
+		assertThat(mapper.accepts(response)).isTrue();
+		CrnkMappableException exception = mapper.fromErrorResponse(response);
+		assertThat(exception).isInstanceOf(MethodNotAllowedException.class);
+		assertThat(exception.getMessage()).isEqualTo("method not allowed: GET");
 	}
 
 

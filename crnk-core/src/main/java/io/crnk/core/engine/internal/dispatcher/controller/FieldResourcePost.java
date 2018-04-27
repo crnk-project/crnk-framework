@@ -42,12 +42,12 @@ public class FieldResourcePost extends ResourceUpsert {
 	}
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
 		PreconditionUtil.assertNotNull("path cannot be null", jsonPath);
 		return !jsonPath.isCollection()
 				&& FieldPath.class.equals(jsonPath.getClass())
 				&& HttpMethod.POST.name()
-				.equals(requestType);
+				.equals(method);
 	}
 
 	@Override

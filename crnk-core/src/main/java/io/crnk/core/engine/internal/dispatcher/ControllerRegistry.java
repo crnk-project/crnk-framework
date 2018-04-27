@@ -1,16 +1,16 @@
 package io.crnk.core.engine.internal.dispatcher;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
-import io.crnk.core.exception.MethodNotFoundException;
+import io.crnk.core.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Stores a list of controllers which are used to process the incoming requests.
@@ -42,17 +42,17 @@ public class ControllerRegistry {
 	 * Iterate over all registered controllers to get the first suitable one.
 	 *
 	 * @param jsonPath    built JsonPath object mad from request path
-	 * @param requestType type of a HTTP request
+	 * @param method type of a HTTP request
 	 * @return suitable controller
 	 */
-	public Controller getController(JsonPath jsonPath, String requestType) {
+	public Controller getController(JsonPath jsonPath, String method) {
 		for (Controller controller : controllers) {
-			if (controller.isAcceptable(jsonPath, requestType)) {
+			if (controller.isAcceptable(jsonPath, method)) {
 				LOGGER.debug("using controller {}", controller);
 				return controller;
 			}
 		}
-		throw new MethodNotFoundException(PathBuilder.build(jsonPath), requestType);
+		throw new BadRequestException(PathBuilder.build(jsonPath) + " with method " + method);
 	}
 
 	public List<Controller> getControllers() {

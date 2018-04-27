@@ -1,10 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -19,8 +20,6 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import java.util.Set;
-
 public class ResourcePost extends ResourceUpsert {
 
 	@Override
@@ -29,8 +28,8 @@ public class ResourcePost extends ResourceUpsert {
 	}
 
 	@Override
-	public boolean isAcceptable(JsonPath jsonPath, String requestType) {
-		return jsonPath.isCollection() && jsonPath instanceof ResourcePath && HttpMethod.POST.name().equals(requestType);
+	public boolean isAcceptable(JsonPath jsonPath, String method) {
+		return jsonPath.isCollection() && jsonPath instanceof ResourcePath && HttpMethod.POST.name().equals(method);
 	}
 
 	@Override

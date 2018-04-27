@@ -20,6 +20,8 @@ public class HttpStatus {
 
 	public static final int FORBIDDEN_403 = 403;
 
+	public static final int METHOD_NOT_ALLOWED_405 = 405;
+
 	public static final int CONFLICT_409 = 409;
 
 	public static final int PRECONDITION_FAILED_412 = 412;

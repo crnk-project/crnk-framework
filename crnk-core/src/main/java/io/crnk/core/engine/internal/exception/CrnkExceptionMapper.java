@@ -1,14 +1,20 @@
 package io.crnk.core.engine.internal.exception;
 
+import java.util.Iterator;
+
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.exception.*;
+import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.exception.CrnkMappableException;
+import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.exception.MethodNotAllowedException;
+import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Iterator;
 
 /**
  * Exception mapper for a generic exception which can be thrown in request processing.
@@ -22,7 +28,8 @@ public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableEx
 		// log 5xx status as error and anything else as warn
 		if (exception.getHttpStatus() >= 500 && exception.getHttpStatus() < 600) {
 			LOGGER.error("failed to process request", exception);
-		} else {
+		}
+		else {
 			LOGGER.warn("failed to process request", exception);
 		}
 
@@ -36,6 +43,9 @@ public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableEx
 		int httpStatus = errorResponse.getHttpStatus();
 		if (httpStatus == HttpStatus.FORBIDDEN_403) {
 			return new ForbiddenException(message);
+		}
+		if (httpStatus == HttpStatus.METHOD_NOT_ALLOWED_405) {
+			return new MethodNotAllowedException(message);
 		}
 		if (httpStatus == HttpStatus.UNAUTHORIZED_401) {
 			return new UnauthorizedException(message);
@@ -65,7 +75,7 @@ public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableEx
 	@Override
 	public boolean accepts(ErrorResponse errorResponse) {
 		int httpStatus = errorResponse.getHttpStatus();
-		return httpStatus == HttpStatus.NOT_FOUND_404 ||
+		return httpStatus == HttpStatus.NOT_FOUND_404 || httpStatus == HttpStatus.METHOD_NOT_ALLOWED_405 ||
 				httpStatus == HttpStatus.BAD_REQUEST_400 || httpStatus == HttpStatus.FORBIDDEN_403
 				|| httpStatus == HttpStatus.UNAUTHORIZED_401 || httpStatus == HttpStatus.INTERNAL_SERVER_ERROR_500;
 	}

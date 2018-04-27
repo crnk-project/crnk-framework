@@ -2,7 +2,10 @@ package io.crnk.core.exception;
 
 /**
  * Indicates that no corresponding controller for a request had not been found.
+ *
+ * @Deprecated use MethodNotAllowedException
  */
+@Deprecated
 public class MethodNotFoundException extends InternalServerErrorException {// NOSONAR ignore deep class hierarchy
 
 	public MethodNotFoundException(String uri, String method) {
