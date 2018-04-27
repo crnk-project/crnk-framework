@@ -160,14 +160,7 @@ public class ModuleRegistry {
 	 * @param pagingBehavior the paging behavior
 	 */
 	public void addPagingBehavior(PagingBehavior pagingBehavior) {
-		// avoid adding the same type(!) of behavior twice
-		boolean behaviorTypeAdded = aggregatedModule.getPagingBehaviors()
-				.stream()
-				.anyMatch(pbh -> pbh.getClass().equals(pagingBehavior.getClass()));
-
-		if (!behaviorTypeAdded) {
-			aggregatedModule.addPagingBehavior(pagingBehavior);
-		}
+		aggregatedModule.addPagingBehavior(pagingBehavior);
 	}
 
 	public void addAllPagingBehaviors(List<PagingBehavior> pagingBehaviors) {
@@ -641,15 +634,7 @@ public class ModuleRegistry {
 		public void addPagingBehavior(PagingBehavior pagingBehavior) {
 			LOGGER.debug("adding paging behavior {}", pagingBehavior);
 			checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
-
-			// avoid adding the same type(!) of behavior twice
-			boolean behaviorTypeAdded = aggregatedModule.getPagingBehaviors()
-					.stream()
-					.anyMatch(pbh -> pbh.getClass().equals(pagingBehavior.getClass()));
-
-			if (!behaviorTypeAdded) {
-				aggregatedModule.addPagingBehavior(pagingBehavior);
-			}
+			aggregatedModule.addPagingBehavior(pagingBehavior);
 		}
 
 		@Override

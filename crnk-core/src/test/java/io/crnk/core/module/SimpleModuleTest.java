@@ -119,6 +119,17 @@ public class SimpleModuleTest {
 	}
 
 	@Test
+	public void testDuplicatePagingBehaviorRegistration() {
+		module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+
+		// adding the same paging behavior a second time should cause an exception
+		try {
+			module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
+			Assert.fail("IllegalArgumentException expected, paging was added already");
+		} catch (IllegalArgumentException e) {}
+	}
+
+	@Test
 	public void testFilter() {
 		module.addFilter(new TestFilter());
 		Assert.assertEquals(1, module.getFilters().size());
