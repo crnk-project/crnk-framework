@@ -107,13 +107,17 @@ public abstract class AbstractQuerySpecTest {
 
 		additionalPagingBehaviors().forEach(module::addPagingBehavior);
 
-		container.setPackage(getResourceSearchPackage());
+		setup(container);
 		container.addModule(module);
 		container.boot();
 
 		moduleRegistry = container.getModuleRegistry();
 		querySpecConverter = new DefaultQuerySpecConverter(moduleRegistry);
 		resourceRegistry = container.getResourceRegistry();
+	}
+
+	protected void setup(CoreTestContainer container) {
+		container.setPackage(getResourceSearchPackage());
 	}
 
 	public String getResourceSearchPackage() {

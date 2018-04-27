@@ -73,6 +73,8 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
 import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.RelationshipRepositoryV2;
@@ -154,6 +156,7 @@ public class CrnkClient {
 		this.registerHttpAdapterProvider(new HttpClientAdapterProvider());
 
 		moduleRegistry = new ModuleRegistry(false);
+		moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.addModule(new ClientModule());
 
@@ -162,7 +165,7 @@ public class CrnkClient {
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
 		queryContext.setBaseUrl(serviceUrlProvider.getUrl());
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry, queryContext);
+		urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
 
 
 		objectMapper = new ObjectMapper();
@@ -347,7 +350,7 @@ public class CrnkClient {
 		exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass) {
 		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
@@ -377,7 +380,7 @@ public class CrnkClient {
 		return registryEntry;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void allocateRepositoryRelations(RegistryEntry registryEntry) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
@@ -457,7 +460,7 @@ public class CrnkClient {
 		ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
 		InvocationHandler invocationHandler =
 				new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-		return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepositoryV2.class},
+		return (R) Proxy.newProxyInstance(classLoader, new Class[] { repositoryInterfaceClass, ResourceRepositoryV2.class },
 				invocationHandler);
 	}
 
@@ -466,7 +469,7 @@ public class CrnkClient {
 	 * @return stub for the given resourceClass
 	 * @deprecated make use of QuerySpec
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Deprecated
 	public <T, I extends Serializable> ResourceRepositoryStub<T, I> getQueryParamsRepository(Class<T> resourceClass) {
 		init();
@@ -482,7 +485,7 @@ public class CrnkClient {
 	 * @param resourceClass repository class
 	 * @return stub for the given resourceClass
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
 		init();
 
@@ -503,7 +506,7 @@ public class CrnkClient {
 						moduleRegistry.getTypeParser()
 						, Resource.class
 						, resourceType
-						,null
+						, null
 						, null
 						, new OffsetLimitPagingBehavior()
 				);
@@ -514,11 +517,11 @@ public class CrnkClient {
 	 * Generic access using {@link Resource} class without type mapping.
 	 */
 	public RelationshipRepositoryV2<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType,
-																							 String targetResourceType) {
+			String targetResourceType) {
 		init();
 
 		ResourceInformation sourceResourceInformation =
-				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType,null, null,
+				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
 						new OffsetLimitPagingBehavior());
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}
@@ -539,7 +542,7 @@ public class CrnkClient {
 	 * class
 	 * @deprecated make use of QuerySpec
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryStub<T, I, D, J>
 	getQueryParamsRepository(
 			Class<T> sourceClass, Class<D> targetClass) {
@@ -555,7 +558,7 @@ public class CrnkClient {
 	 * @return stub for the relationship between the given source and target
 	 * class
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
@@ -646,6 +649,14 @@ public class CrnkClient {
 				}
 			});
 		}
+	}
+
+	public QuerySpecUrlMapper getUrlMapper() {
+		return moduleRegistry.getUrlMapper();
+	}
+
+	public void setUrlMapper(QuerySpecUrlMapper urlMapper) {
+		moduleRegistry.setUrlMapper(urlMapper);
 	}
 
 	public ModuleRegistry getModuleRegistry() {

@@ -7,12 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -59,9 +55,12 @@ import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.FallbackServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.discovery.ServiceDiscoveryFactory;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.internal.UrlMapperAdapter;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.Repository;
@@ -71,6 +70,8 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -86,8 +87,6 @@ public class CrnkBoot {
 	private ObjectMapper objectMapper;
 
 	private QueryParamsBuilder queryParamsBuilder;
-
-	private QuerySpecDeserializer querySpecDeserializer;
 
 	private boolean configured;
 
@@ -114,8 +113,6 @@ public class CrnkBoot {
 	private Boolean allowUnknownAttributes;
 
 	private Boolean allowUnknownParameters;
-
-	private List<PagingBehavior> pagingBehaviors;
 
 	private QueryAdapterBuilder queryAdapterBuilder;
 
@@ -148,7 +145,7 @@ public class CrnkBoot {
 		checkNotConfiguredYet();
 		PreconditionUtil.assertNotNull("A query params builder must be provided, but is null", queryParamsBuilder);
 		this.queryParamsBuilder = queryParamsBuilder;
-		this.querySpecDeserializer = null;
+		moduleRegistry.setUrlMapper(null);
 	}
 
 	/**
@@ -182,7 +179,7 @@ public class CrnkBoot {
 
 	private void checkNotConfiguredYet() {
 		if (configured) {
-			throw new IllegalStateException("cannot further modify CrnkFeature once configured/initialized by JAX-RS");
+			throw new IllegalStateException("cannot further modify CrnkBoot once configured/initialized");
 		}
 	}
 
@@ -199,7 +196,7 @@ public class CrnkBoot {
 
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
-		setupQuerySpecDeserializer();
+		setupQuerySpecUrlMapper();
 		setupPagingBehavior();
 		bootDiscovery();
 	}
@@ -243,8 +240,7 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		}
-		else {
+		} else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -282,16 +278,16 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		}
-		else {
-			return new QuerySpecAdapterBuilder(querySpecDeserializer, moduleRegistry);
+		} else {
+			return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
 		}
 	}
 
 	protected DocumentMapper createDocumentMapper() {
 		ResourceFilterDirectory filterDirectory = moduleRegistry.getContext().getResourceFilterDirectory();
 		ResultFactory resultFactory = moduleRegistry.getContext().getResultFactory();
-		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory, serverInfo);
+		return new DocumentMapper(resourceRegistry, objectMapper, propertiesProvider, filterDirectory, resultFactory,
+				serverInfo);
 	}
 
 	protected ControllerRegistry createControllerRegistry() {
@@ -477,7 +473,7 @@ public class CrnkBoot {
 	 * <p>
 	 * This is important to prevent denial of service attacks on the server.
 	 * <p>
-	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
+	 * NOTE: This using this feature requires a {@link DefaultQuerySpecUrlMapper} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
@@ -491,7 +487,7 @@ public class CrnkBoot {
 	 * <p>
 	 * This is important to prevent denial of service attacks on the server.
 	 * <p>
-	 * NOTE: This using this feature requires a {@link QuerySpecDeserializer} and it does not work with the
+	 * NOTE: This using this feature requires a {@link DefaultQuerySpecUrlMapper} and it does not work with the
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
@@ -527,25 +523,38 @@ public class CrnkBoot {
 		return moduleRegistry;
 	}
 
+	/**
+	 * @deprecated use {@link #getUrlMapper()}
+	 */
+	@Deprecated
 	public QuerySpecDeserializer getQuerySpecDeserializer() {
-		setupQuerySpecDeserializer();
-		return querySpecDeserializer;
+		QuerySpecUrlMapper urlMapper = getUrlMapper();
+		if (urlMapper instanceof UrlMapperAdapter) {
+			return ((UrlMapperAdapter) urlMapper).getDeserializer();
+		}
+		return (QuerySpecDeserializer) urlMapper;
 	}
 
-	private void setupQuerySpecDeserializer() {
-		if (querySpecDeserializer == null) {
+
+	private void setupQuerySpecUrlMapper() {
+		if (moduleRegistry.getUrlMapper() == null) {
 			setupServiceDiscovery();
 
-			List<QuerySpecDeserializer> list = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
+			List<QuerySpecUrlMapper> list = serviceDiscovery.getInstancesByType(QuerySpecUrlMapper.class);
 			if (list.isEmpty()) {
-				querySpecDeserializer = new DefaultQuerySpecDeserializer();
-			}
-			else {
-				querySpecDeserializer = list.get(0);
+				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
+				if (deserializers.isEmpty()) {
+					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
+				} else {
+					setQuerySpecDeserializerUnchecked(deserializers.get(0));
+				}
+			} else {
+				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
 
-		if (querySpecDeserializer instanceof DefaultQuerySpecDeserializer) {
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		if (urlMapper instanceof UnkonwnMappingAware) {
 			if (allowUnknownAttributes == null) {
 				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES);
 				if (strAllow != null) {
@@ -553,8 +562,9 @@ public class CrnkBoot {
 				}
 			}
 			if (allowUnknownAttributes != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownAttributes(allowUnknownAttributes);
+				((UnkonwnMappingAware) urlMapper).setAllowUnknownAttributes(allowUnknownAttributes);
 			}
+
 			if (allowUnknownParameters == null) {
 				String strAllow = propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_PARAMETERS);
 				if (strAllow != null) {
@@ -562,7 +572,7 @@ public class CrnkBoot {
 				}
 			}
 			if (allowUnknownParameters != null) {
-				((DefaultQuerySpecDeserializer) this.querySpecDeserializer).setAllowUnknownParameters(allowUnknownParameters);
+				((UnkonwnMappingAware) urlMapper).setAllowUnknownParameters(allowUnknownParameters);
 			}
 		}
 	}
@@ -591,11 +601,29 @@ public class CrnkBoot {
 	/**
 	 * Set the {@link QuerySpecDeserializer} to use to parse and handle query parameters.
 	 * When invoked, overwrites previous {@link QueryParamsBuilder}s and QuerySpecDeserializers.
+	 * <p>
+	 * use {@link #setUrlMapper(QuerySpecUrlMapper)}}
 	 */
+	@Deprecated
 	public void setQuerySpecDeserializer(QuerySpecDeserializer querySpecDeserializer) {
 		checkNotConfiguredYet();
+		setQuerySpecDeserializerUnchecked(querySpecDeserializer);
+	}
+
+	private void setQuerySpecDeserializerUnchecked(QuerySpecDeserializer querySpecDeserializer) {
 		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", querySpecDeserializer);
-		this.querySpecDeserializer = querySpecDeserializer;
+		moduleRegistry.setUrlMapper(new UrlMapperAdapter(querySpecDeserializer));
+		this.queryParamsBuilder = null;
+	}
+
+	/**
+	 * Set the {@link QuerySpecUrlMapper} to use to parse and handle query parameters.
+	 * When invoked, overwrites previous {@link QueryParamsBuilder}s and QuerySpecDeserializers.
+	 */
+	public void setUrlMapper(QuerySpecUrlMapper urlMapper) {
+		checkNotConfiguredYet();
+		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", urlMapper);
+		moduleRegistry.setUrlMapper(urlMapper);
 		this.queryParamsBuilder = null;
 	}
 
@@ -621,5 +649,10 @@ public class CrnkBoot {
 
 	public CoreModule getCoreModule() {
 		return coreModule;
+	}
+
+	public QuerySpecUrlMapper getUrlMapper() {
+		setupQuerySpecUrlMapper();
+		return moduleRegistry.getUrlMapper();
 	}
 }

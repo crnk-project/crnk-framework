@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +88,8 @@ public class ModuleRegistry {
 	private ObjectMapper objectMapper;
 
 	private ResourceRegistry resourceRegistry;
+
+	private QuerySpecUrlMapper urlMapper;
 
 	private List<Module> modules = new ArrayList<>();
 
@@ -900,5 +904,28 @@ public class ModuleRegistry {
 			}
 		});
 		return results;
+	}
+
+	public QuerySpecUrlMapper getUrlMapper() {
+		return urlMapper;
+	}
+
+	public void setUrlMapper(QuerySpecUrlMapper urlMapper) {
+		this.urlMapper = urlMapper;
+
+		if (urlMapper != null) {
+			this.urlMapper.init(new QuerySpecUrlContext() {
+
+				@Override
+				public ResourceRegistry getResourceRegistry() {
+					return ModuleRegistry.this.getResourceRegistry();
+				}
+
+				@Override
+				public TypeParser getTypeParser() {
+					return ModuleRegistry.this.getTypeParser();
+				}
+			});
+		}
 	}
 }

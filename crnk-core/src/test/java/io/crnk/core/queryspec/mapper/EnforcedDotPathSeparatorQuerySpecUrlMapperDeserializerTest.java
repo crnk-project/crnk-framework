@@ -1,11 +1,4 @@
-package io.crnk.core.queryspec.repository;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package io.crnk.core.queryspec.mapper;
 
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
@@ -13,13 +6,13 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@Deprecated
-public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQuerySpecDeserializerTestBase {
+import java.util.*;
+
+public class EnforcedDotPathSeparatorQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecUrlMapperDeserializerTestBase {
 
 	@Override
 	protected List<PagingBehavior> additionalPagingBehaviors() {
@@ -29,15 +22,15 @@ public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQu
 	@Before
 	public void setup() {
 		super.setup();
-		deserializer.setEnforceDotPathSeparator(true);
-		Assert.assertTrue(deserializer.getEnforceDotPathSeparator());
+		urlMapper.setEnforceDotPathSeparator(true);
+		Assert.assertTrue(urlMapper.getEnforceDotPathSeparator());
 	}
 
 	@Test(expected = ParametersDeserializationException.class)
 	public void testDotNotationDisallowsBrackets() throws InstantiationException, IllegalAccessException {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[projects][tasks][name]", "test");
-		deserializer.deserialize(taskInformation, params);
+		urlMapper.deserialize(taskInformation, params);
 	}
 
 	@Test
@@ -46,7 +39,7 @@ public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQu
 		// note that there is both a type and an attribute on tasks called
 		// projects
 		add(params, "filter[projects][name]", "test");
-		QuerySpec querySpec = deserializer.deserialize(taskInformation, params);
+		QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(Task.class, querySpec.getResourceClass());
 		Assert.assertEquals(0, querySpec.getFilters().size());
 		QuerySpec projectQuerySpec = querySpec.getRelatedSpecs().get(Project.class);
@@ -60,8 +53,8 @@ public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQu
 		// projects, here the attribute should match
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[projects]", "someValue");
-		deserializer.setIgnoreParseExceptions(true);
-		QuerySpec querySpec = deserializer.deserialize(taskInformation, params);
+		urlMapper.setIgnoreParseExceptions(true);
+		QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(Task.class, querySpec.getResourceClass());
 		Assert.assertEquals(Arrays.asList("projects"), querySpec.getFilters().get(0).getAttributePath());
 		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));

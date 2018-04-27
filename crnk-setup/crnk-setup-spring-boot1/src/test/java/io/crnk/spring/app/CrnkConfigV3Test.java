@@ -6,6 +6,7 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
 import io.crnk.spring.internal.SpringServiceDiscovery;
@@ -47,7 +48,7 @@ public class CrnkConfigV3Test {
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
-		DefaultQuerySpecDeserializer deserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
+		DefaultQuerySpecUrlMapper deserializer = (DefaultQuerySpecUrlMapper) boot.getQuerySpecDeserializer();
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();

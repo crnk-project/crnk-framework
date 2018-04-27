@@ -1,10 +1,10 @@
-package io.crnk.core.queryspec;
+package io.crnk.core.queryspec.mapper;
 
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 
-@Deprecated
-public interface QuerySpecDeserializerContext {
+public interface QuerySpecUrlContext extends QuerySpecDeserializerContext {
 
 	ResourceRegistry getResourceRegistry();
 

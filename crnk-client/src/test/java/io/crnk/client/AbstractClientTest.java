@@ -7,9 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
-import io.crnk.test.mock.ClientTestModule;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -17,6 +15,7 @@ import io.crnk.rs.CrnkFeature;
 import io.crnk.rs.JsonApiResponseFilter;
 import io.crnk.rs.JsonapiExceptionMapperBridge;
 import io.crnk.test.JerseyTestBase;
+import io.crnk.test.mock.ClientTestModule;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
@@ -128,8 +127,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 						new SampleJsonServiceLocator());
 			}
 			else {
-				feature = new CrnkTestFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(),
-						new SampleJsonServiceLocator());
+				feature = new CrnkTestFeature();
 			}
 
 			feature.addModule(new io.crnk.test.mock.TestModule());

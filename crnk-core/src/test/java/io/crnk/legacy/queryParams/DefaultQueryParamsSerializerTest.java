@@ -28,7 +28,7 @@ public class DefaultQueryParamsSerializerTest {
 		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("http://127.0.0.1"));
 		container.boot();
 		resourceRegistry = container.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(resourceRegistry, container.getQueryContext());
+		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class DefaultQueryParamsSerializerTest {
 		container.setDefaultPackage();
 		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
 		container.boot();
-		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
+		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
 		check("https://127.0.0.1/tasks", null, new QueryParams());
 	}
 
@@ -49,7 +49,7 @@ public class DefaultQueryParamsSerializerTest {
 		container.boot();
 
 		resourceRegistry = container.getResourceRegistry();
-		urlBuilder = new JsonApiUrlBuilder(container.getResourceRegistry(), container.getQueryContext());
+		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
 		check("https://127.0.0.1:1234/tasks", null, new QueryParams());
 	}
 

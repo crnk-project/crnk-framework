@@ -1,11 +1,5 @@
 package io.crnk.core.boot;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-
-import java.util.Arrays;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -38,6 +32,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
+import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
@@ -49,6 +44,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Properties;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 
@@ -258,6 +259,17 @@ public class CrnkBootTest {
 		boot.setAllowUnknownAttributes();
 		boot.boot();
 
+		DefaultQuerySpecUrlMapper urlMapper = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
+		Assert.assertTrue(urlMapper.getAllowUnknownAttributes());
+	}
+
+	@Test
+	public void setAllowUnknownAttributesDefaultQuerySpecDeserializer() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setAllowUnknownAttributes();
+		boot.setQuerySpecDeserializer(new DefaultQuerySpecDeserializer());
+		boot.boot();
+
 		DefaultQuerySpecDeserializer querySpecDeserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
 		Assert.assertTrue(querySpecDeserializer.getAllowUnknownAttributes());
 	}
@@ -266,6 +278,18 @@ public class CrnkBootTest {
 	public void setAllowUnknownParameters() {
 		CrnkBoot boot = new CrnkBoot();
 		boot.setAllowUnknownParameters();
+		boot.boot();
+
+		DefaultQuerySpecUrlMapper urlMapper = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
+		Assert.assertTrue(urlMapper.getAllowUknownParameters());
+	}
+
+
+	@Test
+	public void setAllowUnknownParametersDefaultQuerySpecDeserializer() {
+		CrnkBoot boot = new CrnkBoot();
+		boot.setAllowUnknownParameters();
+		boot.setQuerySpecDeserializer(new DefaultQuerySpecDeserializer());
 		boot.boot();
 
 		DefaultQuerySpecDeserializer querySpecDeserializer = (DefaultQuerySpecDeserializer) boot.getQuerySpecDeserializer();
