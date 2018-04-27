@@ -6,7 +6,7 @@ mainClassName = "io.crnk.example.springboot.SpringBootExampleApplication"
 
 dependencies {
 
-	compile project(':crnk-rs')
+	compile project(':crnk-setup:crnk-setup-rs')
 	compile project(':crnk-legacy:crnk-spring')
 	compile project(':crnk-jpa')
 	compile project(':crnk-validation')

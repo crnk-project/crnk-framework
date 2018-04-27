@@ -15,7 +15,7 @@ dependencies {
 	compileOnly group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
 
 	testCompile project(':crnk-client')
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
 	testCompile group: 'com.querydsl', name: 'querydsl-core', version: '4.1.3'

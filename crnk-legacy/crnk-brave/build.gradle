@@ -14,7 +14,7 @@ dependencies {
 	// TODO make testCompile, but BraveModule needs dependency cleanup for server-side
 	compile project(':crnk-client')
 
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
 	testCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'

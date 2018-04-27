@@ -5,6 +5,6 @@ dependencies {
 	compileOnly project(':crnk-client')
 
 	testCompile project(':crnk-client')
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 }
