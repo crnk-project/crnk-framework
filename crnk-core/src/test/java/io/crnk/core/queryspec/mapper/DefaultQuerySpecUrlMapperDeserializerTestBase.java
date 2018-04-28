@@ -3,19 +3,22 @@ package io.crnk.core.queryspec.mapper;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.PropertyException;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.repository.TaskWithPagingBehavior;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import io.crnk.core.queryspec.repository.TaskWithPagingBehaviorQuerySpecRepository;
+import io.crnk.core.queryspec.repository.TaskWithPagingBehaviorToProjectRelationshipRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,6 +69,12 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	@Override
 	protected void setup(CoreTestContainer container) {
 		container.addModule(new CoreTestModule());
+
+		SimpleModule customPagingModule = new SimpleModule("customPaging");
+		customPagingModule.addRepository(new TaskWithPagingBehaviorQuerySpecRepository());
+		customPagingModule.addRepository(new TaskWithPagingBehaviorToProjectRelationshipRepository());
+		customPagingModule.addPagingBehavior(new CustomOffsetLimitPagingBehavior());
+		container.addModule(customPagingModule);
 	}
 
 	@Test
@@ -148,6 +157,32 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	}
 
 	@Test
+	public void mapJsonToJavaNames() {
+		ResourceInformation scheduleInformation = resourceRegistry.getEntry(Schedule.class).getResourceInformation();
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "sort", "description");
+		add(params, "filter[description]", "test");
+		add(params, "fields", "description");
+		add(params, "include", "followup");
+		QuerySpec actualSpec = urlMapper.deserialize(scheduleInformation, params);
+
+		Assert.assertEquals(1, actualSpec.getSort().size());
+		Assert.assertEquals(1, actualSpec.getFilters().size());
+		Assert.assertEquals(1, actualSpec.getIncludedFields().size());
+		Assert.assertEquals(1, actualSpec.getIncludedRelations().size());
+
+		SortSpec sortSpec = actualSpec.getSort().get(0);
+		FilterSpec filterSpec = actualSpec.getFilters().get(0);
+		IncludeRelationSpec includeRelationSpec = actualSpec.getIncludedRelations().get(0);
+		IncludeFieldSpec includeFieldSpec = actualSpec.getIncludedFields().get(0);
+
+		Assert.assertEquals(Arrays.asList("desc"), sortSpec.getAttributePath());
+		Assert.assertEquals(Arrays.asList("desc"), filterSpec.getAttributePath());
+		Assert.assertEquals(Arrays.asList("followupProject"), includeRelationSpec.getAttributePath());
+		Assert.assertEquals(Arrays.asList("desc"), includeFieldSpec.getAttributePath());
+	}
+
+	@Test
 	public void customPaginationOnRoot() {
 		Map<String, Set<String>> params = new HashMap<>();
 		QuerySpec actualSpec = urlMapper.deserialize(taskWithPagingBehaviorInformation, params);
@@ -182,12 +217,14 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	@Test
 	public void testFollowNestedObjectWithinResource() {
 		// follow ProjectData.data
-		QuerySpec expectedSpec = new QuerySpec(Project.class);
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addSort(new SortSpec(Arrays.asList("data", "data"), Direction.ASC));
+
+		ResourceInformation projectInformation = resourceRegistry.getEntry(Project.class).getResourceInformation();
 
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "sort", "data.data");
-		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+		QuerySpec actualSpec = urlMapper.deserialize(projectInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}
 
@@ -279,7 +316,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}
 
-	@Test(expected = PropertyException.class)
+	@Test(expected = BadRequestException.class)
 	public void testUnknownPropertyNotAllowed() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
 		expectedSpec.addFilter(new FilterSpec(Arrays.asList("doesNotExists"), FilterOperator.EQ, "value"));

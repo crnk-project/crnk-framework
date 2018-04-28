@@ -18,6 +18,8 @@ public class BeanInformation {
 
 	private Map<String, BeanAttributeInformation> attributeMap = new HashMap<>();
 
+	private Map<String, BeanAttributeInformation> jsonAttributeMap = new HashMap<>();
+
 	private List<String> attributeNames = new ArrayList<>();
 
 	private BeanInformation superType;
@@ -76,6 +78,7 @@ public class BeanInformation {
 			String name = attrDesc.getName();
 			Class<?> attrType = attrDesc.getImplementationClass();
 			attrDesc.setSetter(ClassUtils.findSetter(implementationClass, name, attrType));
+			jsonAttributeMap.put(attrDesc.getJsonName(), attrDesc);
 		}
 
 		if (implementationClass.getSuperclass() != null && implementationClass.getSuperclass() != Object.class) {
@@ -98,6 +101,11 @@ public class BeanInformation {
 	public BeanAttributeInformation getAttribute(String name) {
 		return attributeMap.get(name);
 	}
+
+	public BeanAttributeInformation getAttributeByJsonName(String jsonName) {
+		return jsonAttributeMap.get(jsonName);
+	}
+
 
 	public List<String> getAttributeNames() {
 		return attributeNames;

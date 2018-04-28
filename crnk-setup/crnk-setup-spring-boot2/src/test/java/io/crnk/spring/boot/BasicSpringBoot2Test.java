@@ -155,7 +155,7 @@ public class BasicSpringBoot2Test {
 
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
-				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule%2Cproject", String.class);
+				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule,project", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 
 		JsonFluentAssert included = assertThatJson(response.getBody()).node("included");

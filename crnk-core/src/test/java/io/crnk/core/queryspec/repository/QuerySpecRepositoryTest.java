@@ -1,5 +1,6 @@
 package io.crnk.core.queryspec.repository;
 
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -37,16 +38,10 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 
 	private ResourceRepositoryAdapter scheduleAdapter;
 
-	@Override
-	protected List<PagingBehavior> additionalPagingBehaviors() {
-		return new ArrayList<>(Arrays.asList(new CustomOffsetLimitPagingBehavior()));
-	}
 
 	@Before
 	public void setup() {
-		TaskQuerySpecRepository.clear();
-		ProjectQuerySpecRepository.clear();
-		ScheduleRepositoryImpl.clear();
+		CoreTestModule.clear();
 
 		super.setup();
 		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);

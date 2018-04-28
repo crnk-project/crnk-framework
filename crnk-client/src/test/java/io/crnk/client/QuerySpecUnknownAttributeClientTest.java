@@ -14,6 +14,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.Project;
@@ -35,6 +36,9 @@ public class QuerySpecUnknownAttributeClientTest extends AbstractClientTest {
 	@Before
 	public void setup() {
 		super.setup();
+
+		DefaultQuerySpecUrlMapper urlMapper = (DefaultQuerySpecUrlMapper) client.getUrlMapper();
+		urlMapper.setAllowUnknownAttributes(true);
 
 		taskRepo = client.getRepositoryForType(Task.class);
 		projectRepo = client.getRepositoryForType(Project.class);

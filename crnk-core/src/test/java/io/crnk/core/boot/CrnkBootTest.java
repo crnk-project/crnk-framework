@@ -281,7 +281,7 @@ public class CrnkBootTest {
 		boot.boot();
 
 		DefaultQuerySpecUrlMapper urlMapper = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
-		Assert.assertTrue(urlMapper.getAllowUknownParameters());
+		Assert.assertTrue(urlMapper.getAllowUnknownParameters());
 	}
 
 

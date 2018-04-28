@@ -1,5 +1,6 @@
 package io.crnk.core.mock.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -20,6 +21,13 @@ public class Schedule {
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
 	private Project project;
+
+	@JsonProperty("description")
+	private String desc;
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
+	@JsonProperty("followup")
+	private Project followupProject;
 
 	public Long getId() {
 		return id;
@@ -54,5 +62,21 @@ public class Schedule {
 	public void setProject(Project project) {
 		this.projectId = project != null ? project.getId() : null;
 		this.project = project;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public Project getFollowupProject() {
+		return followupProject;
+	}
+
+	public void setFollowupProject(Project followupProject) {
+		this.followupProject = followupProject;
 	}
 }
