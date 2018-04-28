@@ -8,6 +8,7 @@ import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.*;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
@@ -214,8 +215,18 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		check("http://127.0.0.1/tasks?fields[tasks]=name", null, querySpec);
 	}
 
+	@Test
+	public void mapJsonToJavaNames() {
+		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		querySpec.includeField(Arrays.asList("desc"));
+		querySpec.includeRelation(Arrays.asList("followupProject"));
+		querySpec.addSort(new SortSpec(Arrays.asList("desc"), Direction.ASC));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("desc"), FilterOperator.EQ, "test"));
+		check("http://127.0.0.1/schedules?include[schedules]=followup&filter[schedules][description][EQ]=test&sort[schedules]=description&fields[schedules]=description", null, querySpec);
+	}
+
 	private void check(String expectedUrl, Object id, QuerySpec querySpec) {
-		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
+		RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
 		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), id, querySpec);
 		assertEquals(expectedUrl, actualUrl);
 	}

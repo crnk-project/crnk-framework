@@ -1,9 +1,18 @@
 package io.crnk.core;
 
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.repository.*;
 
 public class CoreTestModule implements Module {
+
+	public static void clear() {
+		TaskQuerySpecRepository.clear();
+		TaskSubtypeRepository.clear();
+		ProjectQuerySpecRepository.clear();
+		ScheduleRepositoryImpl.clear();
+	}
+
 	@Override
 	public String getModuleName() {
 		return "test";
@@ -17,7 +26,6 @@ public class CoreTestModule implements Module {
 		context.addRepository(new TaskQuerySpecRepository());
 		context.addRepository(new TaskToProjectRelationshipRepository());
 		context.addRepository(new TaskWithLookupQuerySpecRepository());
-		context.addRepository(new TaskWithPagingBehaviorQuerySpecRepository());
-		context.addRepository(new TaskWithPagingBehaviorToProjectRelationshipRepository());
+		context.addRepository(new TaskSubtypeRepository());
 	}
 }

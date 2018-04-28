@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec.repository;
 
+import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
 import io.crnk.core.engine.parser.TypeParser;
@@ -9,6 +11,7 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.Direction;
@@ -17,6 +20,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
+import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 
@@ -67,6 +71,17 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		deserializer.init(deserializerContext);
 		taskInformation = resourceRegistry.getEntry(Task.class).getResourceInformation();
 		taskWithPagingBehaviorInformation = resourceRegistry.getEntry(TaskWithPagingBehavior.class).getResourceInformation();
+	}
+
+	@Override
+	protected void setup(CoreTestContainer container) {
+		container.addModule(new CoreTestModule());
+
+		SimpleModule customPagingModule = new SimpleModule("customPaging");
+		customPagingModule.addRepository(new TaskWithPagingBehaviorQuerySpecRepository());
+		customPagingModule.addRepository(new TaskWithPagingBehaviorToProjectRelationshipRepository());
+		customPagingModule.addPagingBehavior(new CustomOffsetLimitPagingBehavior());
+		container.addModule(customPagingModule);
 	}
 
 	@Test

@@ -1,6 +1,5 @@
 package io.crnk.core.engine.registry;
 
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.url.ServiceUrlProvider;

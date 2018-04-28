@@ -1,18 +1,7 @@
 package io.crnk.core.queryspec.mapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.PropertyException;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.parser.ParserException;
 import io.crnk.core.engine.parser.TypeParser;
@@ -20,19 +9,12 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.queryspec.Direction;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.IncludeFieldSpec;
-import io.crnk.core.queryspec.IncludeRelationSpec;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializerContext;
-import io.crnk.core.queryspec.QuerySpecSerializer;
-import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class DefaultQuerySpecUrlMapper
 		implements QuerySpecUrlMapper, QuerySpecDeserializer, QuerySpecSerializer, UnkonwnMappingAware {
@@ -43,15 +25,15 @@ public class DefaultQuerySpecUrlMapper
 
 	private Set<FilterOperator> supportedOperators = new HashSet<>();
 
-	private boolean allowUnknownAttributes = false;
-
 	private boolean enforceDotPathSeparator = false;
 
 	private boolean ignoreParseExceptions;
 
 	private boolean allowUnknownParameters = false;
 
-	private QuerySpecUrlContext context;
+	protected QuerySpecUrlContext context;
+
+	protected QueryPathResolver pathResolver = new DefaultQueryPathResolver();
 
 	public DefaultQuerySpecUrlMapper() {
 		supportedOperators.add(FilterOperator.LIKE);
@@ -66,6 +48,7 @@ public class DefaultQuerySpecUrlMapper
 	@Override
 	public void init(QuerySpecUrlContext ctx) {
 		this.context = ctx;
+		pathResolver.init(context);
 	}
 
 	/**
@@ -81,12 +64,26 @@ public class DefaultQuerySpecUrlMapper
 		this.enforceDotPathSeparator = enforceDotPathSeparator;
 	}
 
+	/**
+	 * @return whether to allow to pass unknown paths in sort, filter, include and field parameters. Disabled by default.
+	 */
 	public boolean getAllowUnknownAttributes() {
-		return allowUnknownAttributes;
+		return pathResolver.getAllowUnknownAttributes();
 	}
 
 	public void setAllowUnknownAttributes(boolean allowUnknownAttributes) {
-		this.allowUnknownAttributes = allowUnknownAttributes;
+		pathResolver.setAllowUnknownAttributes(allowUnknownAttributes);
+	}
+
+	/**
+	 * @return whether to map json to java names in {@link QuerySpec} for sort, filter, include and field parameters. True by default.
+	 */
+	public boolean getMapJsonNames() {
+		return pathResolver.getMapJsonNames();
+	}
+
+	public void setMapJsonNames(boolean mapJsonNames) {
+		pathResolver.setMapJsonNames(mapJsonNames);
 	}
 
 	public FilterOperator getDefaultOperator() {
@@ -112,7 +109,7 @@ public class DefaultQuerySpecUrlMapper
 
 	@Override
 	public void init(QuerySpecDeserializerContext ctx) {
-		this.context = new QuerySpecUrlContext() {
+		init(new QuerySpecUrlContext() {
 			@Override
 			public ResourceRegistry getResourceRegistry() {
 				return ctx.getResourceRegistry();
@@ -122,7 +119,7 @@ public class DefaultQuerySpecUrlMapper
 			public TypeParser getTypeParser() {
 				return ctx.getTypeParser();
 			}
-		};
+		});
 	}
 
 	@Override
@@ -175,12 +172,14 @@ public class DefaultQuerySpecUrlMapper
 		map.put(key, new HashSet<>(Arrays.asList(value)));
 	}
 
-	private static String toKey(List<String> attributePath) {
-		return "[" + StringUtils.join(".", attributePath) + "]";
+	private String toJsonPath(ResourceInformation resourceInformation, List<String> attributePath) {
+		QueryPathSpec pathSpec = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JAVA, null);
+		return StringUtils.join(".", pathSpec.getAttributePath());
 	}
 
-	protected String addResourceType(RestrictedQueryParamsMembers type, String key, String resourceType) {
-		return type.toString() + "[" + resourceType + "]" + (key != null ? key : "");
+	protected String addResourceType(QueryParameterType type, String key, ResourceInformation resourceInformation) {
+		String resourceType = resourceInformation.getResourceType();
+		return type.toString().toLowerCase() + "[" + resourceType + "]" + (key != null ? key : "");
 	}
 
 	private static String serializeValue(Object value) {
@@ -197,18 +196,27 @@ public class DefaultQuerySpecUrlMapper
 	protected void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
 		String resourceType = querySpec.getResourceType();
+		ResourceInformation resourceInformation;
 		if (resourceType == null) {
 			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
 			if (entry == null) {
 				throw new RepositoryNotFoundException(querySpec.getResourceClass());
 			}
-			resourceType = entry.getResourceInformation().getResourceType();
+			resourceInformation = entry.getResourceInformation();
+		} else {
+			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
+			if (entry == null) {
+				// model may not be available on client side in case of dynamic client with Resource.class
+				resourceInformation = null;
+			} else {
+				resourceInformation = entry.getResourceInformation();
+			}
 		}
 
-		serializeFilters(querySpec, resourceType, map);
-		serializeSorting(querySpec, resourceType, map);
-		serializeIncludedFields(querySpec, resourceType, map);
-		serializeIncludedRelations(querySpec, resourceType, map);
+		serializeFilters(querySpec, resourceInformation, map);
+		serializeSorting(querySpec, resourceInformation, map);
+		serializeIncludedFields(querySpec, resourceInformation, map);
+		serializeIncludedRelations(querySpec, resourceInformation, map);
 		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
 		if (entry != null && entry.getResourceInformation() != null
 				&& entry.getResourceInformation().getPagingBehavior() != null) {
@@ -220,13 +228,13 @@ public class DefaultQuerySpecUrlMapper
 		}
 	}
 
-	protected void serializeFilters(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeFilters(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
 		for (FilterSpec filterSpec : querySpec.getFilters()) {
 			if (filterSpec.hasExpressions()) {
 				throw new UnsupportedOperationException("filter expressions like and and or not yet supported");
 			}
-			String attrKey = toKey(filterSpec.getAttributePath()) + "[" + filterSpec.getOperator().getName() + "]";
-			String key = addResourceType(RestrictedQueryParamsMembers.filter, attrKey, resourceType);
+			String attrKey = "[" + toJsonPath(resourceInformation, filterSpec.getAttributePath()) + "][" + filterSpec.getOperator().getName() + "]";
+			String key = addResourceType(QueryParameterType.FILTER, attrKey, resourceInformation);
 
 			if (filterSpec.getValue() instanceof Collection) {
 				Collection<?> col = filterSpec.getValue();
@@ -242,9 +250,9 @@ public class DefaultQuerySpecUrlMapper
 		}
 	}
 
-	public void serializeSorting(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	public void serializeSorting(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
 		if (!querySpec.getSort().isEmpty()) {
-			String key = addResourceType(RestrictedQueryParamsMembers.sort, null, resourceType);
+			String key = addResourceType(QueryParameterType.SORT, null, resourceInformation);
 
 			StringBuilder builder = new StringBuilder();
 			for (SortSpec filterSpec : querySpec.getSort()) {
@@ -254,37 +262,37 @@ public class DefaultQuerySpecUrlMapper
 				if (filterSpec.getDirection() == Direction.DESC) {
 					builder.append("-");
 				}
-				builder.append(StringUtils.join(".", filterSpec.getAttributePath()));
+				builder.append(toJsonPath(resourceInformation, filterSpec.getAttributePath()));
 			}
 			put(map, key, builder.toString());
 		}
 	}
 
-	protected void serializeIncludedFields(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedFields(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedFields().isEmpty()) {
-			String key = addResourceType(RestrictedQueryParamsMembers.fields, null, resourceType);
+			String key = addResourceType(QueryParameterType.FIELDS, null, resourceInformation);
 
 			StringBuilder builder = new StringBuilder();
 			for (IncludeFieldSpec includedField : querySpec.getIncludedFields()) {
 				if (builder.length() > 0) {
 					builder.append(",");
 				}
-				builder.append(StringUtils.join(".", includedField.getAttributePath()));
+				builder.append(toJsonPath(resourceInformation, includedField.getAttributePath()));
 			}
 			put(map, key, builder.toString());
 		}
 	}
 
-	protected void serializeIncludedRelations(QuerySpec querySpec, String resourceType, Map<String, Set<String>> map) {
+	protected void serializeIncludedRelations(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedRelations().isEmpty()) {
-			String key = addResourceType(RestrictedQueryParamsMembers.include, null, resourceType);
+			String key = addResourceType(QueryParameterType.INCLUDE, null, resourceInformation);
 
 			StringBuilder builder = new StringBuilder();
 			for (IncludeRelationSpec includedField : querySpec.getIncludedRelations()) {
 				if (builder.length() > 0) {
 					builder.append(",");
 				}
-				builder.append(StringUtils.join(".", includedField.getAttributePath()));
+				builder.append(toJsonPath(resourceInformation, includedField.getAttributePath()));
 			}
 			put(map, key, builder.toString());
 		}
@@ -295,7 +303,10 @@ public class DefaultQuerySpecUrlMapper
 		for (String values : parameter.getValues()) {
 			for (String value : splitValues(values)) {
 				List<String> attributePath = splitAttributePath(value, parameter);
-				querySpec.includeRelation(attributePath);
+
+				ResourceInformation resourceInformation = parameter.getResourceInformation();
+				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				querySpec.includeRelation(resolvedPath.getAttributePath());
 			}
 		}
 	}
@@ -305,22 +316,31 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected void deserializeFields(QuerySpec querySpec, QueryParameter parameter) {
+		ResourceInformation resourceInformation = parameter.getResourceInformation();
 		for (String values : parameter.getValues()) {
 			for (String value : splitValues(values)) {
 				List<String> attributePath = splitAttributePath(value, parameter);
-				querySpec.includeField(attributePath);
+				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				querySpec.includeField(resolvedPath.getAttributePath());
 			}
 		}
 	}
 
 	protected void deserializeFilter(QuerySpec querySpec, QueryParameter parameter) {
-		Class<?> attributeType = getAttributeType(querySpec, parameter.getAttributePath());
+		ResourceInformation resourceInformation = parameter.getResourceInformation();
+		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, parameter.getAttributePath(), QueryPathResolver.NamingType.JSON, parameter.getName());
+		Class attributeType = ClassUtils.getRawType(resolvedPath.getValueType());
+
 		Set<Object> typedValues = new HashSet<>();
 		for (String stringValue : parameter.getValues()) {
 			try {
-				TypeParser typeParser = context.getTypeParser();
-				Object value = typeParser.parse(stringValue, (Class) attributeType);
-				typedValues.add(value);
+				if (attributeType != Object.class) {
+					TypeParser typeParser = context.getTypeParser();
+					Object value = typeParser.parse(stringValue, (Class) attributeType);
+					typedValues.add(value);
+				} else {
+					typedValues.add(stringValue);
+				}
 			} catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
@@ -332,43 +352,12 @@ public class DefaultQuerySpecUrlMapper
 		}
 		Object value = typedValues.size() == 1 ? typedValues.iterator().next() : typedValues;
 
-		querySpec.addFilter(new FilterSpec(parameter.getAttributePath(), parameter.getOperator(), value));
+		querySpec.addFilter(new FilterSpec(resolvedPath.getAttributePath(), parameter.getOperator(), value));
 	}
 
-	protected Class<?> getAttributeType(QuerySpec querySpec, List<String> attributePath) {
-		try {
-			if (attributePath == null) {
-				// no attribute specified, query string expected, use String
-				return String.class;
-			}
-			Class<?> current = querySpec.getResourceClass();
-			for (String propertyName : attributePath) {
-				current = getAttributeType(current, propertyName);
-			}
-			return current;
-		} catch (PropertyException e) {
-			if (allowUnknownAttributes) {
-				return String.class;
-			} else {
-				throw e;
-			}
-		}
-	}
-
-	protected Class<?> getAttributeType(Class<?> clazz, String propertyName) {
-		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		if (resourceRegistry.hasEntry(clazz)) {
-			RegistryEntry entry = resourceRegistry.getEntryForClass(clazz);
-			ResourceInformation resourceInformation = entry.getResourceInformation();
-			ResourceField field = resourceInformation.findFieldByName(propertyName);
-			if (field != null) {
-				return field.getType();
-			}
-		}
-		return PropertyUtils.getPropertyClass(clazz, propertyName);
-	}
 
 	private void deserializeSort(QuerySpec querySpec, QueryParameter parameter) {
+		ResourceInformation resourceInformation = parameter.getResourceInformation();
 		for (String values : parameter.getValues()) {
 			for (String value : splitValues(values)) {
 				boolean desc = value.startsWith("-");
@@ -376,8 +365,11 @@ public class DefaultQuerySpecUrlMapper
 					value = value.substring(1);
 				}
 				List<String> attributePath = splitAttributePath(value, parameter);
+
+				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+
 				Direction dir = desc ? Direction.DESC : Direction.ASC;
-				querySpec.addSort(new SortSpec(attributePath, dir));
+				querySpec.addSort(new SortSpec(resolvedPath.getAttributePath(), dir));
 			}
 		}
 	}
@@ -548,8 +540,11 @@ public class DefaultQuerySpecUrlMapper
 		this.allowUnknownParameters = allowUnknownParameters;
 	}
 
-	public boolean getAllowUknownParameters() {
+	public boolean getAllowUnknownParameters() {
 		return allowUnknownParameters;
 	}
 
+	public QueryPathResolver getPathResolver() {
+		return pathResolver;
+	}
 }

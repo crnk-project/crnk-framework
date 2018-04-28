@@ -1,6 +1,5 @@
 package io.crnk.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.InternalServerErrorException;
