@@ -109,15 +109,14 @@ A more advanced setup may look like:
 			JpaModule jpaModule = new JpaModule(emFactory, em, transactionRunner);
 			jpaModule.setRepositoryFactory(new ValidatedJpaRepositoryFactory());
 
-			// JSON API compliant URL handling with QuerySpec
-			DefaultQuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-
 			// limit all incoming requests to 20 resources if not specified otherwise
-			querySpecDeserializer.setDefaultLimit(20L);
+			DefaultQuerySpecUrlMapper urlMapper = new DefaultQuerySpecUrlMapper();
+			urlMapper.setDefaultLimit(20L);
 
 			ServiceLocator serviceLocator = ...
-			CrnkFeature feature = new CrnkFeature(new ObjectMapper(), querySpecDeserializer, serviceLocator);
+			CrnkFeature feature = new CrnkFeature();
 			feature.addModule(jpaModule);
+			feature.getBoot().setUrlMapper(urlMapper);
 
 			featureContext.register(feature);
 			return true;
@@ -164,7 +163,7 @@ And the JAX-RS application setup looks like:
 [source]
 .JsonApiResponseFilterTestBase.java
 ----
-include::../../../../crnk-rs/src/test/java/io/crnk/rs/JsonApiResponseFilterTestBase.java[tags=docs]
+include::../../../../crnk-setup/crnk-setup-rs/src/test/java/io/crnk/rs/JsonApiResponseFilterTestBase.java[tags=docs]
 ----
 
 Note that:
@@ -197,7 +196,7 @@ extends `CrnkServlet` and get access to `CrnkBoot`. The code below shows a sampl
 [source]
 .SampleCrnkServlet.java
 ----
-include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/SampleCrnkServlet.java[tags=docs]
+include::../../../../crnk-setup/crnk-setup-servlet/src/test/java/io/crnk/servlet/SampleCrnkServlet.java[tags=docs]
 ----
 
 The newly created servlet must be added to the ``web.xml`` file or to another deployment descriptor.
@@ -232,7 +231,7 @@ Integrating Crnk as a Servlet filter works in a very similar fashion as for serv
 [source]
 .SampleCrnkFilter.java
 ----
-include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/SampleCrnkFilter.java[tags=docs]
+include::../../../../crnk-setup/crnk-setup-servlet/src/test/java/io/crnk/servlet/SampleCrnkFilter.java[tags=docs]
 ----
 
 The newly created filter must be added to ``web.xml`` file or other deployment descriptor.
@@ -403,13 +402,14 @@ Have a look at the various <<modules>> chapters for more information.
 Application can bring along there own implementation of `ServiceDiscovery`. For more information
 see <<customdiscovery,here>>.
 
+anchor:CrnkBoot[]
 
 ## CrnkBoot
 
 `CrnkBoot` is a class shared among all the different integrations that takes care of setting up and starting
 Crnk. Every integration will provide access to it, which in turn allows for virtually any kind of customization.
 
-Some possiblities:
+Some possibilities:
 
 - `getObjectMapper` allows access to the used Jackson instance.
 - `addModule` allows to add a module.
@@ -425,6 +425,9 @@ Some possiblities:
    fail to provide pagination. As a result, your entire database may get downloaded and may bring down
    your servers depending on the datasize.
 
+IMPORTANT: Appropriate page limits are vital to protect against denial-of-service attacks when working
+with large data sets! Such attacks may not be of malicious nature, but normal users using a browser
+and just omitting to specify pagination parameters.
 
 anchor:properties[]
 

@@ -136,7 +136,7 @@ through the Java service mechanism. For example, `crnk-cdi` makes use of:
 [source]
 .META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery
 ----
-include::../../../../crnk-cdi/src/main/resources/META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery[]
+include::../../../../crnk-setup/crnk-setup-cdi/src/main/resources/META-INF/services/io.crnk.core.module.discovery.ServiceDiscovery[]
 ----
 
 
