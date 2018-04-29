@@ -1,6 +1,6 @@
 apply plugin: 'org.asciidoctor.convert'
 
-apply plugin: 'org.ajoberstar.git-publish'
+
 
 asciidoctor {
 	backends = ['html5', 'pdf']
@@ -12,10 +12,10 @@ asciidoctor {
 
 tasks.assemble.dependsOn 'asciidoctor'
 
-
+apply plugin: 'org.ajoberstar.git-publish'
 // see https://github.com/ajoberstar/gradle-git-publish
 gitPublish {
-	repoUri = 'git@github.com:crnk-project/crnk-web.git'
+	repoUri = 'https://github.com/crnk-project/crnk-web.git'
 	branch = 'master'
 	repoDir = file("$buildDir/asciidoc/")
 
@@ -34,5 +34,4 @@ gitPublish {
 	commitMessage = 'Publishing a new documentation'
 }
 
-// TODO plugin broken
-// tasks.publish.dependsOn 'gitPublishPush'
+tasks.publish.dependsOn 'gitPublishPush'
