@@ -48,7 +48,7 @@ The following snipped shows how to setup the `ReactiveModule` together with `Asy
 [source]
 .ReactiveServletTestApplication.java
 ----
-include::../../../../crnk-servlet/src/test/java/io/crnk/servlet/resource/ReactiveServletTestApplication.java[tags=reactive]
+include::../../../../crnk-setup/crnk-setup-servlet/src/test/java/io/crnk/servlet/resource/ReactiveServletTestApplication.java[tags=reactive]
 ----
 
 Ready-to-use integrations into Spring, Vert.x and Ratpack are planned for the near future.

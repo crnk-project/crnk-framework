@@ -308,6 +308,9 @@ Crnk comes with (partial) support for Jackson annotations. Currently supported a
 | `@JsonProperty.access`
 | Specifies whether an object can be read and/or written.
 
+| `@JsonAnyGetter` and `@JsonAnySetter`
+| To map dynamic data structures to JSON.
+
 |===
 
 Support for more annotations will be added in the future. PRs welcomed.

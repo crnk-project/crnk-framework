@@ -77,6 +77,10 @@ An example of the usage:
 
 Have a look at, for example, the QuerySpecClientTest to see more examples of how it is used.
 
+## URL handling
+
+Crnk clienet and server share the URL handling. `QuerySpecUrlMapper` performs the mapping of HTTP request parameters to QuerySpec.
+For more information see <<urlmapper,url mapping>>.
 
 ## Modules
 
