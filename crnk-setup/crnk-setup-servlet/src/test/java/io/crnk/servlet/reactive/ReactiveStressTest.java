@@ -10,6 +10,7 @@ import io.crnk.servlet.resource.ReactiveServletTestContainer;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.concurrent.Future;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ReactiveServletTestApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Ignore
 public class ReactiveStressTest {
 
 
