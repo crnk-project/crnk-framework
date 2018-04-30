@@ -16,7 +16,7 @@ This includes features such as  sorting, filtering, pagination, requesting compl
 field sets, attaching links to data or atomically execute multiple operations. Further integration 
 with frameworks and libraries such as Spring, CDI, JPA, Bean Validation, Dropwizard, Servlet API, Zipkin and
 and more ensure that JSON API plays well together with the Java ecosystem. Have a look at 
-[www.crnk.io](http://www.crnk.io) and the [documentation](http://www.crnk.io/documentation/) for more detailed 
+[www.crnk.io](http://www.crnk.io) and the [documentation](http://www.crnk.io/releases/stable/documentation/) for more detailed 
 information.
 
 ## Requirements
@@ -41,7 +41,7 @@ Note as part of the build a local Node installation is downloaded to build the f
 ## Links
 
 * [Homepage](http://www.crnk.io)
-* [Documentation](http://www.crnk.io/documentation)
+* [Documentation](http://www.crnk.io/releases/stable/documentation/)
 * [Source code](https://github.com/crnk-project/crnk-framework/)
 * [Issue tracker](https://github.com/crnk-project/crnk-framework/issues)
 * [Forum](https://gitter.im/crnk-io/Lobby)
