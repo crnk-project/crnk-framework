@@ -17,22 +17,10 @@ def bomGenerator = {
 	}
 }
 
-uploadArchives {
-	repositories {
-		mavenDeployer {
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
 			pom.withXml bomGenerator
-		}
-	}
-}
-
-if (!rootProject.timestampedVersion) {
-	// dev build
-
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				pom.withXml bomGenerator
-			}
 		}
 	}
 }

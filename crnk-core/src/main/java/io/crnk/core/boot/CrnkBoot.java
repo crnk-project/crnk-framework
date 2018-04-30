@@ -129,6 +129,8 @@ public class CrnkBoot {
 	 */
 	public void putServerInfo(String key, String value) {
 		serverInfo.put(key, value);
+
+		moduleRegistry.setServerInfo(serverInfo);
 	}
 
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {

@@ -1,5 +1,7 @@
 package io.crnk.spring.app;
 
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.spring.setup.boot.core.CrnkBootConfigurer;
 import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import io.crnk.spring.setup.boot.meta.MetaModuleConfigurer;
 import io.crnk.test.mock.TestModule;
@@ -23,5 +25,10 @@ public class ModuleConfig {
 	@Bean
 	public JpaModuleConfigurer jpaModujleConfigurer() {
 		return Mockito.mock(JpaModuleConfigurer.class);
+	}
+
+	@Bean
+	public CrnkBootConfigurer bootConfigurer() {
+		return boot -> boot.putServerInfo("vendor", "crnk");
 	}
 }
