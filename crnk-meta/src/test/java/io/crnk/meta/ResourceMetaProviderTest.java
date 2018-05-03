@@ -275,11 +275,24 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	}
 
 	@Test
-	public void testRelatedData() {
+	public void testNestedObject() {
 		MetaResource meta = resourceProvider.getMeta(Project.class);
 		MetaAttribute data = meta.getAttribute("data");
 		MetaType type = data.getType();
 		Assert.assertEquals("resources.types.projectdata", type.getId());
+	}
+
+
+	@Test
+	public void testNestedAttributeRenaming() {
+		MetaResource meta = resourceProvider.getMeta(Project.class);
+		MetaAttribute data = meta.getAttribute("data");
+		MetaJsonObject type = (MetaJsonObject) data.getType();
+		Assert.assertEquals("resources.types.projectdata", type.getId());
+
+		Assert.assertFalse(type.hasAttribute("dueDate"));
+		Assert.assertNotNull(type.getAttribute("due"));
+
 	}
 
 

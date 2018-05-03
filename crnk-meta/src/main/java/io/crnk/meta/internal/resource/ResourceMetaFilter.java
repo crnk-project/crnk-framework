@@ -7,12 +7,13 @@ import java.util.Set;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -211,7 +212,11 @@ public class ResourceMetaFilter implements MetaFilter {
 		} else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
-			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
+
+			BeanInformation parentBeanInfo = BeanInformation.get(parent.getImplementationClass());
+			BeanAttributeInformation attrInformation = parentBeanInfo.getAttributeByJsonName(attr.getName());
+
+			Type implementationType = attrInformation.getImplementationType();
 			MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 			attr.setType(metaType.asType());
 		}
