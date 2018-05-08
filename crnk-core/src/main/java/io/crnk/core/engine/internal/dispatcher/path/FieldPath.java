@@ -18,7 +18,7 @@ public class FieldPath extends JsonPath {
 	}
 
 	@Override
-	public String getResourceType() {
+	public String getResourcePath() {
 		return parentResource.elementName;
 	}
 

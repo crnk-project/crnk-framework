@@ -125,10 +125,10 @@ public class JsonApiRequestProcessorBase {
 
 	protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		RegistryEntry registryEntry = resourceRegistry.getEntry(jsonPath.getResourceType());
+		RegistryEntry registryEntry = resourceRegistry.getEntryByPath(jsonPath.getResourcePath());
 		PreconditionUtil.assertNotNull("repository not found, that should have been catched earlier", registryEntry);
 		String elementName = jsonPath.getElementName();
-		if (elementName != null && !elementName.equals(jsonPath.getResourceType())) {
+		if (elementName != null && !elementName.equals(jsonPath.getResourcePath())) {
 			ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
 			if (relationshipField == null) {
 				throw new ResourceFieldNotFoundException(elementName);

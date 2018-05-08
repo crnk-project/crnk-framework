@@ -169,7 +169,7 @@ public class ApprovalIntTest extends JerseyTest {
 
 	private void checkOpenApproval(Schedule schedule, ScheduleApprovalProcessInstance scheduleApproval) {
 		Assert.assertEquals("scheduleChange", scheduleApproval.getProcessDefinitionKey());
-		Assert.assertEquals("schedules", scheduleApproval.getResourceType());
+		Assert.assertEquals("schedule", scheduleApproval.getResourceType());
 		Assert.assertEquals(schedule.getId().toString(), scheduleApproval.getResourceId());
 		Assert.assertEquals("updatedName", scheduleApproval.getNewValues().getName());
 	}

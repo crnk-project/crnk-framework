@@ -158,7 +158,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		querySpec.includeRelation(Arrays.asList("declaredAttributes"));
 		querySpec.includeRelation(Arrays.asList("primaryKey", "elements"));
 		querySpec.includeRelation(Arrays.asList("superType"));
-		String id = "resources.schedules";
+		String id = "resources.schedule";
 		MetaResource resource = (MetaResource) client.getQuerySpecRepository(elementClass).findOne(id, querySpec);
 		Assert.assertNotNull(resource);
 		Assert.assertNotNull(resource.getAttributes());

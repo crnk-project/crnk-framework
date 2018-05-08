@@ -236,9 +236,9 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	public void testResourceProperties() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
-		Assert.assertEquals("schedules", meta.getResourceType());
-		Assert.assertEquals("Schedules", meta.getName());
-		Assert.assertEquals("resources.schedules", meta.getId());
+		Assert.assertEquals("schedule", meta.getResourceType());
+		Assert.assertEquals("Schedule", meta.getName());
+		Assert.assertEquals("resources.schedule", meta.getId());
 
 		Assert.assertEquals(Schedule.class, meta.getImplementationClass());
 		Assert.assertEquals(Schedule.class, meta.getImplementationType());
@@ -394,7 +394,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
 		MetaResourceField attr = (MetaResourceField) meta.getAttribute("tasks");
 		Assert.assertEquals("tasks", attr.getName());
-		Assert.assertEquals("resources.schedules.tasks", attr.getId());
+		Assert.assertEquals("resources.schedule.tasks", attr.getId());
 		Assert.assertTrue(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());

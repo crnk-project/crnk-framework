@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class ScheduleEntity {
+public class BuildingEntity {
 
 	@Id
 	private Long id;

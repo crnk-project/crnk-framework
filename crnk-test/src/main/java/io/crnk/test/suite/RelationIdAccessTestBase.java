@@ -66,7 +66,7 @@ public abstract class RelationIdAccessTestBase {
 		RelationIdTestResource resource = new RelationIdTestResource();
 		resource.setId(14L);
 		resource.setName("test");
-		resource.setTestResourceIdRefId(new ResourceIdentifier("13", "schedules"));
+		resource.setTestResourceIdRefId(new ResourceIdentifier("13", "schedule"));
 
 		ResourceRepositoryV2<RelationIdTestResource, Serializable> repository =
 				testContainer.getRepositoryForType(RelationIdTestResource.class);

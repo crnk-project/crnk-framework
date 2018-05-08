@@ -72,12 +72,12 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	@Override
 	public final Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
 											  RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getResourceType();
+		String resourcePath = jsonPath.getResourcePath();
 		PathIds strResourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntry(resourceName);
+		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
 		logger.debug("using registry entry {}", registryEntry);
 
-		assertRequestDocument(requestBody, HttpMethod.POST, resourceName);
+		assertRequestDocument(requestBody, HttpMethod.POST, resourcePath);
 
 		Serializable resourceId = getResourceId(strResourceIds, registryEntry);
 		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(jsonPath
@@ -96,7 +96,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 					relationshipRepositoryForClass);
 		} else {
 			if (requestBody.isMultiple()) {
-				throw new RequestBodyException(HttpMethod.POST, resourceName, "Multiple data in body");
+				throw new RequestBodyException(HttpMethod.POST, resourcePath, "Multiple data in body");
 			}
 			ResourceIdentifier dataBody = (ResourceIdentifier) requestBody.getData().get();
 			result = processToOneRelationship(resource, targetInformation, relationshipField, dataBody, queryAdapter,

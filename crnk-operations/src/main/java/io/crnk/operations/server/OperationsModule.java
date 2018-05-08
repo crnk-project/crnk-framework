@@ -93,7 +93,7 @@ public class OperationsModule implements Module {
 				JsonPath jsonPath = (new PathBuilder(resourceRegistry)).build(path);
 
 				Resource resource = new Resource();
-				resource.setType(jsonPath.getResourceType());
+				resource.setType(jsonPath.getResourcePath());
 				resource.setId(jsonPath.getIds().getIds().get(0));
 				operation.setValue(resource);
 			}

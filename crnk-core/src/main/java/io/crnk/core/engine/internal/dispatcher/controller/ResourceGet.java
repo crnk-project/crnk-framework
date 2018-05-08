@@ -38,9 +38,9 @@ public class ResourceGet extends ResourceIncludeField {
 	 */
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceType = jsonPath.getElementName();
+		String resourcePath = jsonPath.getResourcePath();
 		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntry(resourceType);
+		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
 		logger.debug("using registry entry {}", registryEntry);
 
 		String id = resourceIds.getIds().get(0);

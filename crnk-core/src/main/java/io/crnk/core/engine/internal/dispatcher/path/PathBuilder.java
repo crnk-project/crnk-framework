@@ -118,7 +118,7 @@ public class PathBuilder {
 						potentialResourceType.append("/");
 					}
 					potentialResourceType.append(strings[currentElementIdx + i]);
-					entry = resourceRegistry.getEntry(potentialResourceType.toString());
+					entry = resourceRegistry.getEntryByPath(potentialResourceType.toString());
 					if (entry != null) {
 						currentElementIdx += i;
 						elementName = potentialResourceType.toString();
@@ -175,7 +175,7 @@ public class PathBuilder {
 
 	private JsonPath getNonResourcePath(JsonPath previousJsonPath, String elementName, boolean relationshipMark) {
 		String previousElementName = previousJsonPath.getElementName();
-		RegistryEntry previousEntry = resourceRegistry.getEntry(previousElementName);
+		RegistryEntry previousEntry = resourceRegistry.getEntryByPath(previousElementName);
 
 		ResourceInformation resourceInformation = previousEntry.getResourceInformation();
 

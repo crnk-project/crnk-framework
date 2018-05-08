@@ -36,9 +36,10 @@ public class ResourcePost extends ResourceUpsert {
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
 										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		String resourcePath = jsonPath.getResourcePath();
+		RegistryEntry endpointRegistryEntry = getRegistryEntryByPath(resourcePath);
 		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
-		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(requestResource.getType());
+		RegistryEntry registryEntry = getRegistryEntry(requestResource.getType());
 		logger.debug("using registry entry {}", registryEntry);
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.POST, endpointRegistryEntry, registryEntry);

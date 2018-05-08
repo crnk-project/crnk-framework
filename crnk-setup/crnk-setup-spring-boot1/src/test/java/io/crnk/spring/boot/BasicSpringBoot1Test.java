@@ -161,7 +161,7 @@ public class BasicSpringBoot1Test {
 	public void testJpa() {
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
-				.getForEntity("http://localhost:" + this.port + "/api/schedule", String.class);
+				.getForEntity("http://localhost:" + this.port + "/api/building", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
 	}
