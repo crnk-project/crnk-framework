@@ -195,7 +195,9 @@ QueryDSL sits on top of JPQL and has to advantage of being easier to use.
 
 ### Customizing the JPA repository
 
-The setup page outlined the `JpaRepositoryFactory` that can be used to hook a custom JPA repository
+In general JPA repositories support the same set of <<repository_decoration,decoration>> and <<requestfilter,filtering>> mechanisms as any other repository.
+They allow to intercept and customize request before or after hitting the JPA repositories. Next to that, there are further
+mechanisms to customize the JPA repositories themselves. The setup page outlined the `JpaRepositoryFactory` that can be used to hook a custom JPA repository
 implementations into the JPA module. The JPA module further provides a more
 lightweight filter API to perform various changes to JPA repository requests:
 
