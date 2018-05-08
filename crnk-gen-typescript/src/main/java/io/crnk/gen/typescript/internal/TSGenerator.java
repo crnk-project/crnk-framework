@@ -47,7 +47,7 @@ public class TSGenerator {
 
 	private Map<MetaElement, TSElement> elementSourceMap = new HashMap<>();
 
-	private Set<TSSource> sources = new HashSet<>();
+	private List<TSSource> sources = new ArrayList<>();
 
 	private ArrayList<TSMetaTransformation> transformations;
 

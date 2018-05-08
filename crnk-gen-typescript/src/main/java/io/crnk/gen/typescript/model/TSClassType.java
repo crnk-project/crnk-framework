@@ -1,5 +1,7 @@
 package io.crnk.gen.typescript.model;
 
+import java.util.ArrayList;
+
 public class TSClassType extends TSObjectType {
 
 	private TSType superType;
@@ -21,5 +23,4 @@ public class TSClassType extends TSObjectType {
 		return super.implementsInterface(interfaceType) || superType instanceof TSObjectType &&
 				((TSObjectType) superType).implementsInterface(interfaceType);
 	}
-
 }

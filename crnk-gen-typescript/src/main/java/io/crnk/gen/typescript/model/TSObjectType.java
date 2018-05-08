@@ -6,7 +6,7 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 
 	private List<TSMember> declaredMembers = new ArrayList<>();
 
-	private Set<TSInterfaceType> implementedInterfaces = new HashSet<>();
+	private List<TSInterfaceType> implementedInterfaces = new ArrayList<>();
 
 	private boolean exported;
 
@@ -54,8 +54,18 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 		return members;
 	}
 
-	public Set<TSInterfaceType> getImplementedInterfaces() {
-		return implementedInterfaces;
+	public void addImplementedInterface(TSInterfaceType type) {
+		if (!implementedInterfaces.contains(type)) {
+			implementedInterfaces.add(type);
+		}
+	}
+
+	public List<TSInterfaceType> getImplementedInterfaces() {
+		return Collections.unmodifiableList(implementedInterfaces);
+	}
+
+	public void setImplementedInterfaces(List<TSInterfaceType> implementedInterfaces) {
+		this.implementedInterfaces = implementedInterfaces;
 	}
 
 	@Override
