@@ -6,6 +6,8 @@ public class TSCodeStyle {
 
 	private String lineSeparator = "\n";
 
+	private boolean stringEnums = true;
+
 	public String getIndentation() {
 		return indentation;
 	}
@@ -20,5 +22,13 @@ public class TSCodeStyle {
 
 	public void setLineSeparator(String lineSeparator) {
 		this.lineSeparator = lineSeparator;
+	}
+
+	public boolean isStringEnums() {
+		return stringEnums;
+	}
+
+	public void setStringEnums(boolean stringEnums) {
+		this.stringEnums = stringEnums;
 	}
 }

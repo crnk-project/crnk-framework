@@ -1,2 +1,5 @@
 
-export type MetaRepositoryActionType = 'REPOSITORY' | 'RESOURCE';
+export enum MetaRepositoryActionType {
+	REPOSITORY = 'REPOSITORY',
+	RESOURCE = 'RESOURCE',
+}
