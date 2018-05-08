@@ -37,11 +37,9 @@ The feature set includes:
 Have a look at the Spring Boot example application which makes use of the JPA module, DTO mapping
 and computed attributes.
 
-Not yet supported are:
+Not yet supported are sparse field sets queried by tuple queries.
 
-- sparse field sets.
-
-### JPA Setup
+### JPA Module Setup
 
 To use the module, add a dependency to `io.crnk:crnk-jpa` and register the `JpaModule`
 to Crnk. For example in the case of JAX-RS:
@@ -97,6 +95,7 @@ is registered as `JpaRelationshipRepository`.
   boundary. Crnk comes with two default implementations: `SpringTransactionRunner` and
   `CdiTransactionRunner` that come are included in `crnk-setup-spring` and `crnk-cdi`.
 
+
 For crnk-client it might be worthwhile to have an interface definition of the otherwise fully generic
 JSON API entity repositories. The interface has the benefit of providing proper typing of meta information,
 link information and list return type. An example can look like:
@@ -146,6 +145,28 @@ Have a look at https://github.com/crnk-project/crnk-framework/blob/develop/crnk-
 test cases to see how everything is used together with `crnk-client`.
 The JPA modules further has a number of more advanced customization options that
 are discussed in the subsequent sections.
+
+
+### JPA Entity Setup
+
+Most features of JPA are supported and get mapped to JSON API:
+
+- Entities are mapped to resources.
+- Embeddables are mapped to nested json structures.
+- Embeddables used as primary keys are mapped to/from a simple string to remain addressable as resource id. The order of attributes thereby determines the position
+  of the values in the string.
+- Not yet supported are relationships within embeddables.
+
+It is possible to add additional JSON API related fields to entities by making use of the `@Transient` annotation of `javax.persistence` (or the other way around by marking
+it with `@JsonIgnore`):
+
+[source]
+.JpaTransientTestEntity.java
+----
+include::../../../../crnk-jpa/src/test/java/io/crnk/jpa/model/JpaTransientTestEntity.java[tags=docs]
+----
+
+However, for more complex scenarios application may rather make use of <<dto_mapping,DTO mapping>>.
 
 
 ### JPA Setup with Spring
@@ -199,6 +220,7 @@ A filter looks like:
 
 The various filter methods allow a wide variety of customizations or also to replace the passed object in question.
 
+anchor:dto_mapping[]
 
 ### DTO Mapping
 

@@ -101,6 +101,19 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
+	public void testJpaTransient() {
+		// available on resource-layer
+		ResourceInformation information = builder.build(JpaTransientTestEntity.class);
+		Assert.assertNotNull(information.findFieldByName("id"));
+		Assert.assertNotNull(information.findFieldByName("task"));
+
+		// not available on jpa-layer
+		MetaDataObject entityMeta = jpaMetaProvider.discoverMeta(JpaTransientTestEntity.class);
+		Assert.assertTrue(entityMeta.hasAttribute("id"));
+		Assert.assertFalse(entityMeta.hasAttribute("task"));
+	}
+
+	@Test
 	public void testStringAttributeAccess() {
 		ResourceInformation info = builder.build(TestEntity.class);
 		ResourceField field = info.findAttributeFieldByName("stringValue");

@@ -84,6 +84,7 @@ public abstract class AbstractJpaTest {
 		clear(em, factory.query(BasicAttributesTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(RenamedTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(UuidTestEntity.class).buildExecutor().getResultList());
+		clear(em, factory.query(JpaTransientTestEntity.class).buildExecutor().getResultList());
 		em.flush();
 		em.clear();
 	}
