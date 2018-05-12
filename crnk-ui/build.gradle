@@ -41,16 +41,6 @@ task npmRunBuild(type: NpmTask) {
 
 tasks.processResources.dependsOn 'npmRunBuild'
 
-task war(type: War) {
-	group = 'Build'
-	description = 'Generates a war archive.'
-	dependsOn 'npmRunBuild'
-
-	from { 'build/npm/io/crnk/ui' }
-	webInf { from 'src/WEB-INF' }
-}
-tasks.assemble.dependsOn 'war'
-
 clean {
 	delete 'build/npm'
 }

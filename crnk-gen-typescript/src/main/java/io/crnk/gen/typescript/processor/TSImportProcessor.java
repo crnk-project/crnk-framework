@@ -21,7 +21,7 @@ import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
 public class TSImportProcessor implements TSSourceProcessor {
 
 	@Override
-	public Set<TSSource> process(Set<TSSource> sources) {
+	public List<TSSource> process(List<TSSource> sources) {
 		for (TSSource source : sources) {
 			transform(source);
 			sortImports(source);

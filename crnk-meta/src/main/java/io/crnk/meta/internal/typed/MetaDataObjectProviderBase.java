@@ -1,5 +1,7 @@
 package io.crnk.meta.internal.typed;
 
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.meta.internal.MetaUtils;
 import io.crnk.meta.model.MetaAttribute;
@@ -24,35 +26,33 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 	protected void createAttributes(T meta) {
 		Class<?> implClass = meta.getImplementationClass();
 
-		List<Field> fields = ClassUtils.getClassFields(implClass);
-		List<Method> getters = ClassUtils.getClassGetters(implClass);
+		BeanInformation beanInformation = BeanInformation.get(implClass);
 
-		Map<String, Field> fieldMap = toFieldMap(fields);
-		Map<String, Method> getterMap = toGetterMethodMap(getters);
+		for (String name : beanInformation.getAttributeNames()) {
+			BeanAttributeInformation attrInformation = beanInformation.getAttribute(name);
+			if (attrInformation.getGetter() != null && !isIgnored(attrInformation)) {
+				if (attrInformation.getGetter().getDeclaringClass() != implClass) {
+					continue; // contained in super type
+				}
 
-		List<String> propertyNames = getOrderedPropertyNames(fields, getters, fieldMap);
-		for (String name : propertyNames) {
-			Method getterMethod = getterMap.get(name);
-			if (getterMethod == null) {
-				continue;
+				MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(name));
+				attribute.setReadMethod(attrInformation.getGetter());
+				attribute.setWriteMethod(attrInformation.getSetter());
+
+				attribute.setSortable(true);
+				attribute.setFilterable(true);
+				if (attrInformation.getSetter() != null) {
+					attribute.setInsertable(true);
+					attribute.setUpdatable(true);
+				}
+
+				initAttribute(attribute);
 			}
-			Method setterMethod = ClassUtils.findSetter(implClass, name, getterMethod.getReturnType());
-			if (getterMethod.getDeclaringClass() != implClass) {
-				continue; // contained in super type
-			}
-			MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(name));
-			attribute.setReadMethod(getterMethod);
-			attribute.setWriteMethod(setterMethod);
-
-			attribute.setSortable(true);
-			attribute.setFilterable(true);
-			if (setterMethod != null) {
-				attribute.setInsertable(true);
-				attribute.setUpdatable(true);
-			}
-
-			initAttribute(attribute);
 		}
+	}
+
+	protected boolean isIgnored(BeanAttributeInformation information) {
+		return false;
 	}
 
 	protected void initAttribute(MetaAttribute attribute) {

@@ -1,11 +1,6 @@
 package io.crnk.gen.typescript.writer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import io.crnk.gen.typescript.model.TSAny;
 import io.crnk.gen.typescript.model.TSArrayType;
@@ -67,16 +62,10 @@ public class TSWriter implements TSVisitor {
 		endScope();
 	}
 
-	private void sortAndAppendTypes(Set<TSInterfaceType> types) {
+	private void sortAndAppendTypes(Collection<TSInterfaceType> types) {
 		List<TSInterfaceType> sorted = new ArrayList<>(types);
-		Collections.sort(sorted, new Comparator<TSInterfaceType>() {
-
-			@Override
-			public int compare(TSInterfaceType type0, TSInterfaceType type1) {
-				return type0.getName().compareTo
-						(type1.getName());
-			}
-		});
+		Collections.sort(sorted, (type0, type1) -> type0.getName().compareTo
+				(type1.getName()));
 
 
 		Iterator<TSInterfaceType> iterator = sorted.iterator();
@@ -145,8 +134,7 @@ public class TSWriter implements TSVisitor {
 				visitReference(parameters.get(i));
 			}
 			builder.append(">");
-		}
-		else {
+		} else {
 			if (type.getParent() instanceof TSModule) {
 				visitReference((TSModule) type.getParent());
 				builder.append(".");
@@ -200,21 +188,41 @@ public class TSWriter implements TSVisitor {
 		// we make use of string literal types since enums are number-based in Typescript
 		appendLine();
 		appendExported(element);
-		builder.append("type ");
-		builder.append(element.getName());
-		builder.append(" = ");
 
-		List<TSEnumLiteral> literals = element.getLiterals();
-		for (int i = 0; i < literals.size(); i++) {
-			if (i > 0) {
-				builder.append(" | ");
+		if (codeStyle.isStringEnums()) {
+			builder.append("enum ");
+			builder.append(element.getName());
+			startScope();
+
+			List<TSEnumLiteral> literals = element.getLiterals();
+			for (int i = 0; i < literals.size(); i++) {
+				appendLine();
+				TSEnumLiteral literal = literals.get(i);
+				builder.append(literal.getValue());
+				builder.append(" = \'");
+				builder.append(literal.getValue());
+				builder.append('\'');
+				builder.append(",");
 			}
-			TSEnumLiteral literal = literals.get(i);
-			builder.append('\'');
-			builder.append(literal.getValue());
-			builder.append('\'');
+
+			endScope();
+		} else {
+			builder.append("type ");
+			builder.append(element.getName());
+			builder.append(" = ");
+
+			List<TSEnumLiteral> literals = element.getLiterals();
+			for (int i = 0; i < literals.size(); i++) {
+				if (i > 0) {
+					builder.append(" | ");
+				}
+				TSEnumLiteral literal = literals.get(i);
+				builder.append('\'');
+				builder.append(literal.getValue());
+				builder.append('\'');
+			}
+			builder.append(";");
 		}
-		builder.append(";");
 	}
 
 	@Override
@@ -298,8 +306,7 @@ public class TSWriter implements TSVisitor {
 		Iterator<String> iterator = importElement.getTypeNames().iterator();
 		if (importElement.getTypeNames().size() == 1) {
 			builder.append(iterator.next());
-		}
-		else {
+		} else {
 			builder.append("\n");
 			while (iterator.hasNext()) {
 				builder.append("\t");
@@ -322,8 +329,7 @@ public class TSWriter implements TSVisitor {
 		builder.append("export ");
 		if (exportElement.getAny()) {
 			builder.append("*");
-		}
-		else {
+		} else {
 			builder.append("{");
 			Iterator<String> iterator = exportElement.getTypeNames().iterator();
 			while (iterator.hasNext()) {
@@ -356,8 +362,7 @@ public class TSWriter implements TSVisitor {
 			builder.append("get ");
 			builder.append(function.getName());
 			builder.append("()");
-		}
-		else {
+		} else {
 			appendExported(function);
 			builder.append("let ");
 			builder.append(function.getName());

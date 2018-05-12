@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+dependencies {
+
+	compile project(':crnk-core')
+
+	compileOnly project(':crnk-client')
+	compileOnly group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
+	compileOnly group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+
+	compile group: 'io.zipkin.brave', name: 'brave-okhttp', version: '3.14.1'
+	compile group: 'io.zipkin.brave', name: 'brave-apache-http-interceptors', version: '3.14.1'
+
+	// TODO make testCompile, but BraveModule needs dependency cleanup for server-side
+	compile project(':crnk-client')
+
+	testCompile project(':crnk-setup:crnk-setup-rs')
+	testCompile project(':crnk-test')
+	testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.4.1'
+	testCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+}

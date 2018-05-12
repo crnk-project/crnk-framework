@@ -41,7 +41,7 @@ public class JsonApiRequestProcessorBase {
 	protected ControllerRegistry controllerRegistry;
 
 	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext, QueryAdapterBuilder queryAdapterBuilder,
-			ControllerRegistry controllerRegistry) {
+									   ControllerRegistry controllerRegistry) {
 		this.moduleContext = moduleContext;
 		this.queryAdapterBuilder = queryAdapterBuilder;
 		this.controllerRegistry = controllerRegistry;
@@ -80,8 +80,7 @@ public class JsonApiRequestProcessorBase {
 			String responseBody;
 			try {
 				responseBody = objectMapper.writeValueAsString(response.getDocument());
-			}
-			catch (JsonProcessingException e) {
+			} catch (JsonProcessingException e) {
 				throw new IllegalStateException(e);
 			}
 			httpResponse.setBody(responseBody);
@@ -91,18 +90,15 @@ public class JsonApiRequestProcessorBase {
 		return httpResponse;
 	}
 
-
 	protected Document getRequestDocument(HttpRequestContext requestContext) throws JsonProcessingException {
 		byte[] requestBody = requestContext.getRequestBody();
 		if (requestBody != null && requestBody.length > 0) {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			try {
 				return objectMapper.readerFor(Document.class).readValue(requestBody);
-			}
-			catch (JsonProcessingException e) {
+			} catch (JsonProcessingException e) {
 				throw e;
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
@@ -139,8 +135,7 @@ public class JsonApiRequestProcessorBase {
 			}
 			String oppositeResourceType = relationshipField.getOppositeResourceType();
 			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
-		}
-		else {
+		} else {
 			return registryEntry.getResourceInformation();
 		}
 	}

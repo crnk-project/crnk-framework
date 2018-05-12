@@ -1,15 +1,15 @@
 package io.crnk.core.resource.paging.total;
 
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.links.PagedLinksInformation;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +37,13 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 			adapter.create(task, queryAdapter);
 		}
 
+	}
+
+	@Override
+	protected void setup(CoreTestContainer container) {
+		SimpleModule module = new SimpleModule("total");
+		module.addRepository(new TotalResourceCountTestRepository());
+		container.addModule(module);
 	}
 
 	@Test

@@ -6,4 +6,4 @@ Angular helper library for ngrx-json-api and crnk:
 - bulk update support with JSON Patch
 - Typescript interfaces for crnk meta model
 
-For more information see http://www.crnk.io/documentation/#_angular_development_with_ngrx.
+For more information see http://www.crnk.io/releases/stable/documentation/#_angular_development_with_ngrx.

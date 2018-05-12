@@ -11,10 +11,12 @@ buildscript {
 		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
 		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
-		classpath 'org.ajoberstar:gradle-git-publish:0.2.1'
+		classpath 'org.ajoberstar:gradle-git-publish:0.4.1'
 		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 		classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
+
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
 	}
 }
 
@@ -29,11 +31,12 @@ ext {
 	timestampedVersion = isProductionBuild
 }
 
-SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss")
+apply plugin: 'org.ajoberstar.grgit'
+
 if (ext.timestampedVersion) {
-	version = BUILD_VERSION_PREFIX + "." + format.format(new Date())
-}
-else {
+	def gitCommitTimestamp = grgit.head().date.format("yyyyMMddHHmmss", TimeZone.getTimeZone('GMT'))
+	version =  BUILD_VERSION_PREFIX + "." + gitCommitTimestamp
+} else {
 	version = '0.0.0-SNAPSHOT'
 }
 group = GROUP_ID
@@ -65,7 +68,9 @@ gradle.beforeProject { Project project ->
 			sourceCompatibility = 1.8
 			targetCompatibility = 1.8
 
-			if(!bom) {
+			if (!bom) {
+
+
 				dependencies {
 					testCompile group: 'junit', name: 'junit', version: '4.12'
 					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
@@ -98,7 +103,6 @@ gradle.beforeProject { Project project ->
 
 		if (!docs && !examples && !testProject && !legacyBraveProject) {
 			apply plugin: "jacoco"
-
 			jacoco {
 				toolVersion = "0.7.6.201602180812"
 			}
@@ -117,12 +121,13 @@ gradle.beforeProject { Project project ->
 				rootProject.tasks.jacocoRootReport.sourceDirectories = files(sourceSets.main.allSource.srcDirs)
 				rootProject.tasks.jacocoRootReport.classDirectories = mainOutput
 
-			}
-			else {
+			} else {
 				rootProject.tasks.jacocoRootReport.sourceDirectories = sourceDirs.plus(files(sourceSets.main.allSource.srcDirs))
 				rootProject.tasks.jacocoRootReport.classDirectories = classDirs.plus(mainOutput)
 			}
 			rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
+
+
 
 			jacocoTestReport {
 				reports {
@@ -134,101 +139,43 @@ gradle.beforeProject { Project project ->
 
 		apply plugin: 'maven-publish'
 
-
 		if (!docs && !examples) {
 
-			if (isProductionBuild) {
-				apply plugin: 'signing'
-
-
-				task sourcesJar(type: Jar) {
-					from sourceSets.main.allSource
-					classifier = 'sources'
-				}
-
-				task javadocJar(type: Jar, dependsOn: 'javadoc') {
-					from javadoc.destinationDir
-					classifier = 'javadoc'
-				}
-
-				artifacts {
-					archives jar
-					archives javadocJar
-					archives sourcesJar
-				}
-
-				ext.'signing.secretKeyRingFile' = "${rootProject.projectDir}/secring.gpg"
-
-				signing {
-					required {
-						gradle.taskGraph.hasTask("uploadArchives")
-					}
-					sign configurations.archives
-				}
-
-				uploadArchives {
-					repositories {
-						mavenDeployer {
-							beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-							// if(!System.env.NEXUS_DEPLOY_PASS){
-							//	throw new IllegalStateException("NEXUS_DEPLOY_PASS not specified in environment")
-							// }
-
-							repository(url: NEXUS_DEPLOY_URL) {
-								authentication(
-										userName: System.env.NEXUS_DEPLOY_USER,
-										password: System.env.NEXUS_DEPLOY_PASS
-								)
-
-								// that plugin does not make use of global proxy settings :-(
-								def proxyHost = System.getProperty("https.proxyHost")
-								def proxyPort = System.getProperty("https.proxyPort")
-								if (proxyHost && proxyPort) {
-									proxy(host: proxyHost, port: Integer.parseInt(proxyPort), type: 'http')
-								}
-							}
-
-							pom.project {
-								name project.name
-								description 'JSON API framework for Java'
-								url 'http://www.crnk.io'
-								scm {
-									url 'https://github.com/crnk-project/crnk-framework'
-									connection 'scm:git:git://github.com/crnk-project/crnk-framework.git'
-									developerConnection 'scm:git:git@github.com:crnk-project/crnk-framework.git'
-								}
-								licenses {
-									license {
-										name 'The Apache Software License, Version 2.0'
-										url 'http://www.apache.org/licenses/LICENSE-2.0.html'
-										distribution 'repo'
-									}
-								}
-								issueManagement {
-									system 'GitHub'
-									url 'https://github.com/crnk-project/crml-framework/issues'
-								}
-								developers {
-									developer {
-										id 'crnk.io'
-										name 'crnk.io'
-										email 'info@crnk.io'
-									}
-								}
-							}
-						}
-					}
-				}
-
-				tasks.publish.dependsOn(tasks.uploadArchives)
+			task sourcesJar(type: Jar) {
+				from sourceSets.main.allSource
+				classifier = 'sources'
 			}
-			else {
-				task sourcesJar(type: Jar) {
-					from sourceSets.main.allSource
-					classifier = 'sources'
+
+			task javadocJar(type: Jar, dependsOn: 'javadoc') {
+				from javadoc.destinationDir
+				classifier = 'javadoc'
+			}
+
+			apply plugin: 'com.jfrog.bintray'
+
+			// Create the pom configuration:
+			def pomConfig = {
+				licenses {
+					license {
+						name "The Apache Software License, Version 2.0"
+						url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+						distribution "repo"
+					}
+				}
+				developers {
+					developer {
+						id 'crnk.io'
+						name 'crnk.io'
+						email 'info@crnk.io'
+					}
 				}
 
+				scm {
+					url "https://github.com/crnk-project/crnk-framework"
+				}
+			}
+
+			if (!bom) {
 				publishing {
 					publications {
 						mavenJava(MavenPublication) {
@@ -237,10 +184,72 @@ gradle.beforeProject { Project project ->
 							artifact sourcesJar {
 								classifier "sources"
 							}
+
+							artifact javadocJar {
+								classifier "javadoc"
+							}
+
+							groupId GROUP_ID
+							artifactId project.name
+							version project.version
+
+							pom.withXml {
+								def root = asNode()
+								root.appendNode('description', 'JSON API with Crnk')
+								root.appendNode('name', 'Crnk')
+								root.appendNode('url', 'http://wwww.crnk.io')
+								root.children().last() + pomConfig
+							}
 						}
 					}
 				}
 			}
+
+
+			bintray {
+				user = System.env.BINTRAY_USER
+				key = System.env.BINTRAY_TOKEN
+
+				publications = ['mavenJava']
+
+				pkg {
+					repo = 'maven'
+					name = project.name
+					userOrg = 'crnk-project'
+					licenses = ['Apache-2.0']
+					vcsUrl = 'https://github.com/crnk-project/crnk-framework.git'
+					websiteUrl = 'http://www.crnk.io'
+					desc = 'JSON API with Crnk'
+					labels = ['JSONAPI', 'rest']
+
+					githubRepo = 'crnk-project/crnk-framework'
+					githubReleaseNotesFile = 'README.md'
+
+					publish = true
+
+					version {
+						name = project.version
+						desc = 'JSON API with Crnk'
+						released = new Date()
+						vcsTag = "v$project.version"
+
+
+						mavenCentralSync {
+							sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+							user = System.env.NEXUS_DEPLOY_USER
+							password = System.env.NEXUS_DEPLOY_PASS
+							close = '1'
+						}
+					}
+
+
+				}
+			}
+
+			tasks.bintrayUpload.dependsOn assemble, sourcesJar, javadocJar, publishToMavenLocal
+
+			publish.dependsOn tasks.bintrayUpload
+
 
 		}
 

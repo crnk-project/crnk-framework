@@ -5,12 +5,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TSImportProcessorTest {
 
-	private HashSet<TSSource> sources;
+	private List<TSSource> sources;
 
 	private TSSource interfaceSource;
 
@@ -36,21 +38,21 @@ public class TSImportProcessorTest {
 
 		classType = new TSClassType();
 		classType.setName("SomeClass");
-		classType.getImplementedInterfaces().add(interfaceType);
+		classType.addImplementedInterface(interfaceType);
 		classSource = new TSSource();
 		classSource.setNpmPackage("@crnk/test");
 		classSource.setDirectory("someDir");
 		classSource.setName("some-class");
 		classSource.addElement(classType);
 
-		sources = new HashSet<>();
+		sources = new ArrayList<>();
 		sources.add(classSource);
 		sources.add(interfaceSource);
 	}
 
 	@Test
 	public void sameDirectoryImport() {
-		Set<TSSource> updatedSources = processor.process(sources);
+		List<TSSource> updatedSources = processor.process(sources);
 		Assert.assertEquals(sources.size(), updatedSources.size());
 
 		Assert.assertEquals(1, classSource.getImports().size());
@@ -91,7 +93,6 @@ public class TSImportProcessorTest {
 		TSField field = new TSField();
 		field.setName("someField");
 		field.setType(new TSArrayType(interfaceType));
-		classType.getImplementedInterfaces().clear();
 		classType.addDeclaredMember(field);
 
 		processor.process(sources);
@@ -113,7 +114,6 @@ public class TSImportProcessorTest {
 		TSField field = new TSField();
 		field.setName("someField");
 		field.setType(new TSParameterizedType(interfaceType, parameterType));
-		classType.getImplementedInterfaces().clear();
 		classType.addDeclaredMember(field);
 
 		processor.process(sources);
@@ -141,7 +141,7 @@ public class TSImportProcessorTest {
 		TSField field = new TSField();
 		field.setName("someField");
 		field.setType(moduleInterface);
-		classType.getImplementedInterfaces().clear();
+		classType.setImplementedInterfaces(new ArrayList<>());
 		classType.addDeclaredMember(field);
 
 		processor.process(sources);

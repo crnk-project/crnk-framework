@@ -13,7 +13,7 @@ dependencies {
 	compileOnly 'io.zipkin.brave:brave-instrumentation-okhttp3:4.9.1'
 	compileOnly 'io.zipkin.brave:brave-instrumentation-httpclient:4.9.1'
 
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-client')
 	testCompile 'com.squareup.okhttp3:okhttp:3.9.0'

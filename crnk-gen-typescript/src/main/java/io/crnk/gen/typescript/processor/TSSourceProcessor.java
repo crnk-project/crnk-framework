@@ -1,11 +1,11 @@
 package io.crnk.gen.typescript.processor;
 
-import java.util.Set;
-
 import io.crnk.gen.typescript.model.TSSource;
+
+import java.util.List;
 
 @FunctionalInterface
 public interface TSSourceProcessor {
 
-	Set<TSSource> process(Set<TSSource> sources);
+	List<TSSource> process(List<TSSource> sources);
 }

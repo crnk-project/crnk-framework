@@ -17,6 +17,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.LoggerFactory;
 
 public class GenerateTypescriptTaskTest {
 
@@ -117,6 +118,8 @@ public class GenerateTypescriptTaskTest {
 				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedules.ts")), utf8);
 
 		expectedSource = expectedSource.replace("\r\n", "\n");
+
+		LoggerFactory.getLogger(getClass()).info(actualSource);
 
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');

@@ -1,10 +1,6 @@
 package io.crnk.home;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -191,6 +187,11 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 			String href = baseUrl + path;
 			String id = UrlUtils.removeTrailingSlash(path);
 			links.put(id, href);
+		}
+
+		Map<String, String> serverInfo = moduleContext.getModuleRegistry().getServerInfo();
+		if (serverInfo != null && !serverInfo.isEmpty()) {
+			node.set("jsonapi", objectMapper.valueToTree(serverInfo));
 		}
 
 		String json;

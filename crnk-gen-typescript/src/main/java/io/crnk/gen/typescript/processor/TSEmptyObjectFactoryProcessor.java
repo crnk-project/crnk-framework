@@ -33,7 +33,7 @@ public class TSEmptyObjectFactoryProcessor implements TSSourceProcessor {
 	private static final String RELATIONSHIPS_ATTRIBUTE = "relationships";
 
 	@Override
-	public Set<TSSource> process(Set<TSSource> sources) {
+	public List<TSSource> process(List<TSSource> sources) {
 		EmptyObjectVisitor visitor = new EmptyObjectVisitor();
 		for (TSSource source : sources) {
 			source.accept(visitor);

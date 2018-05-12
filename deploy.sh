@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  ./gradlew publish --max-workers=1 --no-parallel
+if [ "$TRAVIS_BRANCH" == "stable" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then
+  ./gradlew publish promote
 else
   echo "Skip deploying";
 fi

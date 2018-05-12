@@ -32,7 +32,7 @@ dependencies {
 	testCompile project(':crnk-core')
 	testCompile project(':crnk-meta')
 	testCompile project(':crnk-test')
-	testCompile project(':crnk-cdi')
+	testCompile project(':crnk-setup:crnk-setup-cdi')
 	testCompile 'junit:junit:4.12'
 	testCompile 'commons-io:commons-io:2.5'
 	testCompile 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'

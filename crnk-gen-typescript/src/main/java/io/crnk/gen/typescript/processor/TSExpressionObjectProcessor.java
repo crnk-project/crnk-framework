@@ -35,7 +35,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TSExpressionObjectProcessor.class);
 
 	@Override
-	public Set<TSSource> process(Set<TSSource> sources) {
+	public List<TSSource> process(List<TSSource> sources) {
 		QueryObjectVisitor visitor = new QueryObjectVisitor();
 		for (TSSource source : sources) {
 			source.accept(visitor);
@@ -88,8 +88,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				List<TSElement> elements = parent.getElements();
 				int insertIndex = module != null ? elements.indexOf(module) : elements.size();
 				parent.addElement(insertIndex, queryType);
-			}
-			else {
+			} else {
 				TSModule module = (TSModule) parent;
 				TSContainerElement grandParent = (TSContainerElement) module.getParent();
 
@@ -123,7 +122,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 		}
 
 		private void setupField(TSInterfaceType interfaceType, TSClassType queryType, TSField qField,
-				TSField field) {
+								TSField field) {
 			TSType fieldType = field.getType();
 			if (fieldType instanceof TSPrimitiveType) {
 				TSPrimitiveType primitiveFieldType = (TSPrimitiveType) fieldType;
@@ -131,20 +130,16 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 				qField.setType(CrnkLibrary.getPrimitiveExpression(primitiveName));
 				qField.setInitializer(setupPrimitiveField(primitiveName, field));
 				queryType.addDeclaredMember(qField);
-			}
-			else if (fieldType instanceof TSEnumType) {
+			} else if (fieldType instanceof TSEnumType) {
 				qField.setType(CrnkLibrary.STRING_PATH);
 				qField.setInitializer(setupPrimitiveField("String", qField));
 				queryType.addDeclaredMember(qField);
-			}
-			else if (fieldType instanceof TSInterfaceType) {
+			} else if (fieldType instanceof TSInterfaceType) {
 				setupInterfaceField(qField, field);
 				queryType.addDeclaredMember(qField);
-			}
-			else if (isRelationship(fieldType)) {
+			} else if (isRelationship(fieldType)) {
 				setupRelationshipField(interfaceType, queryType, qField, field);
-			}
-			else {
+			} else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}
@@ -203,8 +198,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 
 				queryType.addDeclaredMember(qField);
 				queryType.addDeclaredMember(getterFunction);
-			}
-			else {
+			} else {
 				LOGGER.warn("query object generation for {}.{} not yet supported", interfaceType.getName(), field.getName());
 			}
 		}

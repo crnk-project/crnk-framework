@@ -1,16 +1,9 @@
 package io.crnk.gen.typescript.processor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.gen.typescript.model.TSExport;
 import io.crnk.gen.typescript.model.TSSource;
+
+import java.util.*;
 
 /**
  * Computes Index files for the given source files.
@@ -18,8 +11,8 @@ import io.crnk.gen.typescript.model.TSSource;
 public class TSIndexFileProcessor implements TSSourceProcessor {
 
 	@Override
-	public Set<TSSource> process(Set<TSSource> sources) {
-		Set<TSSource> newSources = new HashSet<>(sources);
+	public List<TSSource> process(List<TSSource> sources) {
+		List<TSSource> newSources = new ArrayList<>(sources);
 
 		Map<String, List<TSSource>> directoryIndex = new HashMap<>();
 		for (TSSource fileSource : sources) {

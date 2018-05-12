@@ -9,12 +9,13 @@ import org.mockito.Mockito;
 
 public class TSWriterTest {
 
-
 	private TSWriter writer;
+
+	private TSCodeStyle codeStyle;
 
 	@Before
 	public void setup() {
-		TSCodeStyle codeStyle = new TSCodeStyle();
+		codeStyle = new TSCodeStyle();
 		writer = new TSWriter(codeStyle);
 	}
 
@@ -39,6 +40,32 @@ public class TSWriterTest {
 	}
 
 	@Test
+	public void writeEnum() {
+		TSEnumType enumType = new TSEnumType();
+		enumType.setName("TestEnum");
+		enumType.getLiterals().add(new TSEnumLiteral("TEST_LITERAL_1"));
+		enumType.getLiterals().add(new TSEnumLiteral("TEST_LITERAL_2"));
+
+		enumType.accept(writer);
+		Assert.assertEquals("\nenum TestEnum {\n" +
+				"\tTEST_LITERAL_1 = 'TEST_LITERAL_1',\n" +
+				"\tTEST_LITERAL_2 = 'TEST_LITERAL_2',\n" +
+				"}", writer.toString());
+	}
+
+	@Test
+	public void writeEnumLegacy() {
+		codeStyle.setStringEnums(false);
+		TSEnumType enumType = new TSEnumType();
+		enumType.setName("TestEnum");
+		enumType.getLiterals().add(new TSEnumLiteral("TEST_LITERAL_1"));
+		enumType.getLiterals().add(new TSEnumLiteral("TEST_LITERAL_2"));
+
+		enumType.accept(writer);
+		Assert.assertEquals("\ntype TestEnum = 'TEST_LITERAL_1' | 'TEST_LITERAL_2';", writer.toString());
+	}
+
+	@Test
 	public void writePrimitiveType() {
 		TSPrimitiveType.STRING.accept(writer);
 		Assert.assertEquals("string", writer.toString());
@@ -57,7 +84,7 @@ public class TSWriterTest {
 
 		TSClassType classType = new TSClassType();
 		classType.setName("SomeClass");
-		classType.getImplementedInterfaces().add(interfaceType);
+		classType.addImplementedInterface(interfaceType);
 
 		classType.accept(writer);
 		Assert.assertEquals("\nclass SomeClass implements SomeInterface {\n}", writer.toString());

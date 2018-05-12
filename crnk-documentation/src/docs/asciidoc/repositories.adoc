@@ -315,10 +315,12 @@ sections will provide a number of example.
 NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
 are provided as different applications are likely to be in need of different semantics and
 implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
-QuerySpec (like the legacy `QueryParams`).
+QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
+is implemented by <<urlmapper,`QuerySpecUrlMapper`>>.
 
 For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
 
+anchor:filtering[]
 
 ### Filtering
 
@@ -373,9 +375,11 @@ a `matches` method can be implemented to support in-memory filtering
 with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
 to handle the various filter operators; usually by translating them
 to datastore-native query expressions. Custom operators can be registered
-with `DefaultQuerySpecDeserializer.addSupportedOperator(..)`. The default operator can be
-overridden by setting `DefaultQuerySpecDeserializer.setDefaultOperator(...)`.
+with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
+overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
+For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
 
+anchor:sorting[]
 
 ### Sorting
 
@@ -487,7 +491,7 @@ is invoked with the QuerySpec for the requested root type. If related resources 
 included in the request, their QuerySpecs can be obtained by calling `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
 
 `FilterSpec` holds a value of type object. Since URL parameters are passed as String,
-they get converted to the proper types by the `DefaultQuerySpecDeserializer`. The
+they get converted to the proper types by a <<urlmapper,`QuerySpecUrlMapper`>> implementation. The
 type is determined based on the type of the filtered attribute.
 
 `PagingSpec` holds a value of defined pagination strategy.
@@ -500,51 +504,55 @@ the implementation of a repository as simple as possible. It returns a ResourceL
 that carries a PagedMetaInformation that lets Crnk automatically compute pagination links.
 
 
+anchor:urlmapper[]
 
-### DefaultQuerySpecDeserializer
+### URL Mapping
 
-Crnk make use of `DefaultQuerySpecDeserializer` to map URL parameters to a QuerySpec instance.
-This instance is accessible from the various integrations, such as from the `CrnkFeature`. It
-provides a number of customization options:
+The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
+With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON API
+specification and recommendations and introduces some further defaults as documented
+in the previous sections (like the filter operators) where the recommendations
+do not go far enough. The used `QuerySpecUrlMapper` can be obtained
+from `CrnkBoot.getUrlMapper()` and `CrnkClient.getUrlMapper()`. Matching setter allow to
+setup a custom implementation.
+
+`DefaultQuerySpecUrlMapper` comes with a number of customization options:
 
 * `setAllowUnknownAttributes(boolean)`
-	`DefaultQuerySpecDeserializer` validates all passed parameters against the domain model and fails
+	`DefaultQuerySpecUrlMapper` validates all passed parameters against the domain model and fails
 	if one of the attributes is unknown. This flag allows to disable that check in case this should be necessary.
 
 * `setAllowUnknownParameters(boolean)`
-	`DefaultQuerySpecDeserializer` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
+	`DefaultQuerySpecUrlMapper` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
 	In case of any custom query parameter `ParametersDeserializationException` will be thrown.
 	This flag allows to disable that check and ignore any unknown ones.
 
 * `setIgnoreParseExceptions(boolean)`
-	`DefaultQuerySpecDeserializer` attempts to convert all filter parameters to their proper type based on the
+	`DefaultQuerySpecUrlMapper` attempts to convert all filter parameters to their proper type based on the
 	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
 	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
 	such values and provide them as `String` within `FilterSpec`.
 
 * `setEnforceDotPathSeparator(boolean)`
-	DefaultQuerySpecDeserializer by default supports by default two URL conventions:
+	DefaultQuerySpecUrlMapper by default supports by default two URL conventions:
 	 `http://.../resource?filter[task][project][name]=myProject` and
 	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
 	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
-	 to be packagingEnabled and will become the default at some point in the future. Note that without the enforcement,
+	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
 	 there is danger of introducing ambiguity with resources and attributes are named equally.
 
+* `setMapJsonNames`
+    Whether to map JSON to Java names for `QuerySpec`. Enabled by default. Typically JSON and Java names are equal, but, for example,
+    fields can be renamed with the `@JsonProperty` annotation.
 
-Note that appropriate page limits are vital to protect against denial-of-service attacks when working
-with large data sets! Such attacks may not be of malicious nature, but normals users using a browser
-and omitting to specify pagination parameters.
 
-`DefaultQuerySpecDeserializer` implements `QuerySpecDeserializer` and you may also provide your own
-implementation to further customize its behavior. The various integrations like `CrnkFeature` will
-allow to replace the implementation.
+* `addSupportedOperator`
+    Adds a new `FilterOperator`. See <<filtering>> for more information.
 
-One can get access to `DefaultQuerySpecDeserializer` trough the various integrations, e.g.
-`CrnkFeature.getQuerySpecDeserializer()`. For more information have a look at the
-<<setup,setup chapter>>. Next to the setters in the various integrations, it is also possible
-to provide a custom  `QuerySpecDeserializer` trough the
-service discovery mechanism (like specifying a Spring or CDI bean).
+* `setDefaultOperator`
+    Sets the default `FilterOperator`. See <<filtering>> for more information.
 
+Some of those methods are also available from some of the integrations like `CrnkFeature` for convenience.
 
 
 ## Error Handling

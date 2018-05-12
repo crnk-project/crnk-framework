@@ -9,7 +9,7 @@ dependencies {
 
 	testCompile 'com.h2database:h2:1.4.195'
 
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-client')
 	testCompile 'com.squareup.okhttp3:okhttp:3.4.1'

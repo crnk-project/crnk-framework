@@ -40,14 +40,14 @@ public class TSMetaResourceRepositoryTransformation implements TSMetaTransformat
 		TSInterfaceType oneResultType = new TSInterfaceType();
 		oneResultType.setName(metaResource.getName() + "Result");
 		oneResultType.setExported(true);
-		oneResultType.getImplementedInterfaces().add(NgrxJsonApiLibrary.ONE_QUERY_RESULT);
+		oneResultType.addImplementedInterface(NgrxJsonApiLibrary.ONE_QUERY_RESULT);
 		oneResultType.addDeclaredMember(newDataField(context, resourceType, false));
 		parent.addElement(oneResultType);
 
 		TSInterfaceType manyResultType = new TSInterfaceType();
 		manyResultType.setName(metaResource.getName() + "ListResult");
 		manyResultType.setExported(true);
-		manyResultType.getImplementedInterfaces().add(NgrxJsonApiLibrary.MANY_QUERY_RESULT);
+		manyResultType.addImplementedInterface(NgrxJsonApiLibrary.MANY_QUERY_RESULT);
 		manyResultType.addDeclaredMember(newDataField(context, resourceType, true));
 		parent.addElement(manyResultType);
 

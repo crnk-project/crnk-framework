@@ -1,10 +1,12 @@
 package io.crnk.core.resource.paging.next;
 
+import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
@@ -39,7 +41,13 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
 			task.setName("myTask");
 			adapter.create(task, queryAdapter);
 		}
+	}
 
+	@Override
+	protected void setup(CoreTestContainer container) {
+		SimpleModule module = new SimpleModule("next");
+		module.addRepository(new HasNextPageTestRepository());
+		container.addModule(module);
 	}
 
 	@Test

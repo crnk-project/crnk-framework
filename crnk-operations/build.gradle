@@ -3,11 +3,11 @@ apply plugin: 'java'
 dependencies {
 	compile project(':crnk-core')
 	compileOnly project(':crnk-client')
-	compileOnly project(':crnk-rs')
+	compileOnly project(':crnk-setup:crnk-setup-rs')
 	compileOnly 'javax.ws.rs:javax.ws.rs-api:2.1'
 
 	testCompile project(':crnk-client')
-	testCompile project(':crnk-rs')
+	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-jpa')
 	testCompile project(':crnk-setup:crnk-setup-spring')

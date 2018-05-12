@@ -9,7 +9,7 @@ dependencyManagement {
 
 dependencies {
 
-	compile project(':crnk-servlet')
+	compile project(':crnk-setup:crnk-setup-servlet')
 	compileOnly project(':crnk-client')
 
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'

@@ -77,6 +77,9 @@ public class ModuleRegistry {
 
 	private ResultFactory resultFactory;
 
+	private Map<String, String> serverInfo;
+
+
 	enum InitializedState {
 		NOT_INITIALIZED,
 		INITIALIZING,
@@ -127,6 +130,14 @@ public class ModuleRegistry {
 
 	public List<ResourceModificationFilter> getResourceModificationFilters() {
 		return prioritze(aggregatedModule.getResourceModificationFilters());
+	}
+
+	public void setServerInfo(Map<String, String> serverInfo) {
+		this.serverInfo = serverInfo;
+	}
+
+	public Map<String, String> getServerInfo() {
+		return serverInfo;
 	}
 
 	public ResultFactory getResultFactory() {

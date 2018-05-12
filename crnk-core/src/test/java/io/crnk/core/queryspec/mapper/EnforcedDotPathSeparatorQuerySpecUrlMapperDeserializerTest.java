@@ -4,20 +4,17 @@ import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class EnforcedDotPathSeparatorQuerySpecUrlMapperDeserializerTest extends DefaultQuerySpecUrlMapperDeserializerTestBase {
 
-	@Override
-	protected List<PagingBehavior> additionalPagingBehaviors() {
-		return new ArrayList<>(Arrays.asList(new CustomOffsetLimitPagingBehavior()));
-	}
 
 	@Before
 	public void setup() {
