@@ -1,0 +1,67 @@
+import proguard.gradle.ProGuardTask
+
+apply plugin: 'java'
+
+apply plugin: 'application'
+
+buildscript {
+	dependencies {
+		classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+
+		classpath 'net.sf.proguard:proguard-gradle:6.0.3'
+	}
+
+
+}
+
+apply plugin: 'net.ltgt.apt'
+
+sourceSets {
+	main {
+		java {
+			srcDir 'build/generated/source/apt/main'
+		}
+	}
+}
+
+mainClassName = "io.crnk.example.vertx.VertxApplication"
+
+dependencies {
+	compile project(':crnk-setup:crnk-setup-vertx')
+	compile project(':crnk-home')
+	compile project(':crnk-security')
+	// compile project(':crnk-meta')
+	// compile project(':crnk-operations')
+	// compile project(':crnk-ui')
+	// compile project(':crnk-validation')
+
+	compile 'ch.qos.logback:logback-classic:1.2.3'
+	compile 'javax.inject:javax.inject:1'
+	compile 'com.google.dagger:dagger:2.16'
+
+	annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+}
+
+
+task proguard(type: ProGuardTask) {
+	dependsOn assemble
+	configuration 'proguard.txt'
+
+	injars "$buildDir/libs/dagger-vertx-example-${version}.jar"
+	injars configurations.compile.files
+	outjars "$buildDir/libs/dagger-vertx-example-min-${version}.jar"
+
+	//	libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+	//	libraryjars configurations.compile.files
+}
+
+// https://github.com/immutables/immutables/issues/134
+// issues with incremental compilation
+compileJava {
+	options.incremental = false
+}
+def generatedSrcRoot = file("${buildDir}/generated/source/apt/main")
+task deleteGeneratedSources(type: Delete) {
+	delete generatedSrcRoot
+}
+tasks.withType(JavaCompile) { it.dependsOn('deleteGeneratedSources') }

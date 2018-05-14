@@ -6,6 +6,5 @@ dependencies {
 	compile 'io.projectreactor:reactor-core'
 	testCompile 'io.projectreactor:reactor-test'
 	testCompile 'ch.qos.logback:logback-classic:1.2.3'
-
-	compile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
+	testCompile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
 }

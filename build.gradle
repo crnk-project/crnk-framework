@@ -8,20 +8,24 @@ buildscript {
 		def depMgmtVersion = versions['dependency.management.plugin.version']
 
 		classpath "io.spring.gradle:dependency-management-plugin:${depMgmtVersion}"
-		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.11'
+		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.7'
+		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
 		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 		classpath 'org.ajoberstar:gradle-git-publish:0.4.1'
 		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
 		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 		classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
 
+		// asciidoc java 9 issues: https://github.com/asciidoctor/asciidoctorj/issues/515
+		classpath 'org.jruby:jruby-complete:9.1.17.0'
+
+
 		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
 	}
 }
 
 wrapper {
-	gradleVersion = '4.3'
+	gradleVersion = '4.7'
 }
 
 // note that a production build creates javadoc, sources jars and signatures undesired during development

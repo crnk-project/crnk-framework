@@ -4,6 +4,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -47,25 +48,29 @@ public final class ExceptionMapperRegistryBuilder {
 	}
 
 	private Class<? extends Throwable> getGenericType(Class<? extends JsonApiExceptionMapper> mapper) {
-		Type[] types = mapper.getGenericInterfaces();
-		if (null == types || 0 == types.length) {
-			types = new Type[]{mapper.getGenericSuperclass()};
-		}
-
-		for (Type type : types) {
-			Class<?> rawType = ClassUtils.getRawType(type);
-			if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType)) {
-				//noinspection unchecked
-				return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
+		try {
+			Type[] types = mapper.getGenericInterfaces();
+			if (null == types || 0 == types.length) {
+				types = new Type[]{mapper.getGenericSuperclass()};
 			}
-		}
 
-		if (isProxy(mapper)) {
-			return getGenericType((Class<? extends JsonApiExceptionMapper>) mapper.getSuperclass());
-		}
+			for (Type type : types) {
+				Class<?> rawType = ClassUtils.getRawType(type);
+				if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType)) {
+					//noinspection unchecked
+					return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
+				}
+			}
 
-		//Won't get in here
-		throw new IllegalStateException("unable to discover exception class for " + mapper.getName());
+			if (isProxy(mapper)) {
+				return getGenericType((Class<? extends JsonApiExceptionMapper>) mapper.getSuperclass());
+			}
+
+			//Won't get in here
+			throw new IllegalStateException("unable to discover exception class for " + mapper.getName());
+		}catch(MalformedParameterizedTypeException e){
+			throw new IllegalStateException(mapper.getName(), e);
+		}
 	}
 
 }
