@@ -98,6 +98,11 @@ public class QuerySpecAdapter implements QueryAdapter {
 	}
 
 	@Override
+	public ResourceRegistry getResourceRegistry() {
+		return resourceRegistry;
+	}
+
+	@Override
 	public QueryContext getQueryContext() {
 		return queryContext;
 	}
