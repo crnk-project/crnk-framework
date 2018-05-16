@@ -147,7 +147,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 					moduleContext.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext)
 							== FilterBehavior.NONE) {
 				ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
-				String resourceType = resourceInformation.getResourceType();
+				String resourceType = resourceInformation.getResourcePath();
 				pathSet.add("/" + resourceType);
 			}
 		}

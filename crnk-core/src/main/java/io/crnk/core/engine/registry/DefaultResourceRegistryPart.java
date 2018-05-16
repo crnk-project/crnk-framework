@@ -22,11 +22,13 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 
 	private final Map<String, RegistryEntry> resourcesByType;
 
-	private final Map<Class, RegistryEntry> resourcesByClass;
+	private final Map<String, RegistryEntry> resourcesByPath;
 
+	private final Map<Class, RegistryEntry> resourcesByClass;
 
 	public DefaultResourceRegistryPart() {
 		this.resourcesByType = new HashMap<>();
+		this.resourcesByPath = new HashMap<>();
 		this.resourcesByClass = new HashMap<>();
 	}
 
@@ -35,9 +37,13 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Class<?> resourceClass = resourceInformation.getResourceClass();
 		String resourceType = resourceInformation.getResourceType();
-		PreconditionUtil.assertNotNull("no resourceType set", resourceType);
+		String resourcePath = resourceInformation.getResourcePath();
+		PreconditionUtil.assertNotNull("No resourceType set", resourceType);
+		PreconditionUtil.assertFalse("Resource already exists", resourcesByType.containsKey(resourceType));
+		PreconditionUtil.assertFalse("Resource already exists", resourcesByPath.containsKey(resourcePath));
 		resourcesByClass.put(resourceClass, entry);
 		resourcesByType.put(resourceType, entry);
+		resourcesByPath.put(resourcePath != null ? resourcePath : resourceType, entry);
 		logger.debug("Added resource {} to ResourceRegistry", entry.getResourceInformation().getResourceType());
 		notifyChange();
 		return entry;
@@ -76,4 +82,14 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 	public RegistryEntry getEntry(String resourceType) {
 		return resourcesByType.get(resourceType);
 	}
+
+	/**
+	 * Searches the registry for a resource identified by a JSON API resource
+	 * path. If a resource cannot be found, <i>null</i> is returned.
+	 *
+	 * @param resourcePath resource path
+	 * @return registry entry or <i>null</i>
+	 */
+	public RegistryEntry getEntryByPath(String resourcePath) { return resourcesByPath.get(resourcePath); }
+
 }

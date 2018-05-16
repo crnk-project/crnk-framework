@@ -24,6 +24,7 @@ public class HierarchicalResourceRegistryPartTest {
 		Assert.assertFalse(part.hasEntry("doesNotExists"));
 		Assert.assertFalse(part.hasEntry(String.class));
 		Assert.assertNull(part.getEntry("doesNotExists")); // TODO consider exception
+		Assert.assertNull(part.getEntryByPath("doesNotExists")); // TODO consider exception
 		Assert.assertNull(part.getEntry(String.class)); // TODO consider exception
 	}
 
@@ -36,6 +37,7 @@ public class HierarchicalResourceRegistryPartTest {
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("test");
 		Mockito.when(information.getResourceClass()).thenReturn((Class) TestResource.class);
+		Mockito.when(information.getResourcePath()).thenReturn("path");
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
 		RegistryEntry savedEntry = part.addEntry(entry);
@@ -45,6 +47,7 @@ public class HierarchicalResourceRegistryPartTest {
 		Assert.assertEquals(1, resources.size());
 		Assert.assertSame(entry, part.getEntry("test"));
 		Assert.assertSame(entry, part.getEntry(TestResource.class));
+		Assert.assertSame(entry, part.getEntryByPath("path"));
 		Assert.assertTrue(part.hasEntry("test"));
 		Assert.assertTrue(part.hasEntry(TestResource.class));
 	}

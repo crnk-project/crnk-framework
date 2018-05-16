@@ -31,12 +31,12 @@ public class ResourceDelete extends BaseController {
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
 										RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getElementName();
+		String resourcePath = jsonPath.getElementName();
 		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(resourceName);
+		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
 		if (registryEntry == null) {
 			//TODO: Add JsonPath toString and provide to exception?
-			throw new ResourceNotFoundException(resourceName);
+			throw new ResourceNotFoundException(resourcePath);
 		}
 		logger.debug("using registry entry {}", registryEntry);
 		logger.debug("deleting ids={}", resourceIds);

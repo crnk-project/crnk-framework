@@ -205,6 +205,11 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
+	public RegistryEntry getEntryByPath(String resourcePath) {
+		return rootPart.getEntryByPath(resourcePath);
+	}
+
+	@Override
 	public Collection<RegistryEntry> getResources() {
 		return rootPart.getResources();
 	}

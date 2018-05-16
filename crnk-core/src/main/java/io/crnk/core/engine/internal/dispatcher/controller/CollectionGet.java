@@ -33,11 +33,11 @@ public class CollectionGet extends ResourceIncludeField {
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
 			parameterProvider, Document requestBody) {
-		String resourceName = jsonPath.getElementName();
-		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(resourceName);
+		String resourcePath = jsonPath.getElementName();
+		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
 		logger.debug("using registry entry {}", registryEntry);
 		if (registryEntry == null) {
-			throw new ResourceNotFoundException(resourceName);
+			throw new ResourceNotFoundException(resourcePath);
 		}
 
 		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);

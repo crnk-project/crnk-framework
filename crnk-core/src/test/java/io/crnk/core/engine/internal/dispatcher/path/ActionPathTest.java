@@ -27,6 +27,6 @@ public class ActionPathTest {
 	@Test(expected = UnsupportedOperationException.class)
 	public void checkGetResourceTypeNotSupported() {
 		ActionPath path = new ActionPath("test");
-		path.getResourceType();
+		path.getResourcePath();
 	}
 }

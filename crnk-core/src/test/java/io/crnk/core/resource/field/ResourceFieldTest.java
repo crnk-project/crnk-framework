@@ -110,7 +110,7 @@ public class ResourceFieldTest {
 						annotations, new ResourceFieldAccess(true, true, true, true));
 
 		ResourceInformation parent = Mockito.mock(ResourceInformation.class);
-		Mockito.when(parent.getResourceType()).thenReturn("type");
+		Mockito.when(parent.getResourcePath()).thenReturn("type");
 		Mockito.when(parent.toString()).thenReturn("parent");
 		Mockito.when(parent.getResourceClass()).thenReturn((Class) Task.class);
 		sut.setResourceInformation(parent);

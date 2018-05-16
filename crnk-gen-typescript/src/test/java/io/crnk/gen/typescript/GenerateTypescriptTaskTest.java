@@ -83,7 +83,7 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/generated/source/typescript/src/index.ts");
 		assertExists("build/generated/source/typescript/src/projects.ts");
 		assertExists("build/generated/source/typescript/src/types/project.data.ts");
-		assertExists("build/generated/source/typescript/src/schedules.ts");
+		assertExists("build/generated/source/typescript/src/schedule.ts");
 		assertExists("build/generated/source/typescript/src/tasks.ts");
 		assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
 		assertNotExists("build/generated/source/typescript/src/tasks.meta.ts");
@@ -115,7 +115,7 @@ public class GenerateTypescriptTaskTest {
 				"expected_schedule_without_expressions.ts";
 		String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
 		String actualSource = IOUtils
-				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedules.ts")), utf8);
+				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedule.ts")), utf8);
 
 		expectedSource = expectedSource.replace("\r\n", "\n");
 

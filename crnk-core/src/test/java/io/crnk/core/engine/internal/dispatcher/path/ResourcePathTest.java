@@ -17,7 +17,7 @@ public class ResourcePathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testResourceName = sut.getResourceType();
+		String testResourceName = sut.getResourcePath();
 
 		// THEN
 		assertThat(isCollection).isTrue();
@@ -32,7 +32,7 @@ public class ResourcePathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testResourceName = sut.getResourceType();
+		String testResourceName = sut.getResourcePath();
 
 		// THEN
 		assertThat(isCollection).isFalse();
@@ -47,7 +47,7 @@ public class ResourcePathTest {
 
 		// WHEN
 		boolean isCollection = sut.isCollection();
-		String testResourceName = sut.getResourceType();
+		String testResourceName = sut.getResourcePath();
 
 		// THEN
 		assertThat(isCollection).isTrue();

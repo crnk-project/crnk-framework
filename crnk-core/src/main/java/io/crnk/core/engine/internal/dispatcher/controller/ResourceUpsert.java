@@ -51,12 +51,10 @@ import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import javax.management.Query;
-
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourceType = path.getResourceType();
+		String resourceType = path.getResourcePath();
 
 		assertRequestDocument(requestDocument, method, resourceType);
 
@@ -76,8 +74,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected RegistryEntry getRegistryEntry(JsonPath jsonPath) {
-		String resourceType = jsonPath.getResourceType();
-		return getRegistryEntry(resourceType);
+		String resourcePath = jsonPath.getResourcePath();
+		return getRegistryEntryByPath(resourcePath);
 	}
 
 	protected Object newResource(ResourceInformation resourceInformation, Resource dataBody) {
