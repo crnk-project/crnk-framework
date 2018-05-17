@@ -6,7 +6,7 @@
 
 	<persistence-unit name="TEST_SPRING" transaction-type="RESOURCE_LOCAL">
 
-		<class>io.crnk.spring.app.model.ScheduleEntity</class>
+		<class>io.crnk.spring.app.model.PersonEntity</class>
 
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<properties>

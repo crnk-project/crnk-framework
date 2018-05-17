@@ -73,6 +73,15 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 		return part.getEntry(resourceType);
 	}
 
+	@Override
+	public RegistryEntry getEntryByPath(String resourcePath) {
+		ResourceRegistryPart part = getPart(resourcePath);
+		if (part == null) {
+			return null;
+		}
+		return part.getEntryByPath(resourcePath);
+	}
+
 	private ResourceRegistryPart getPart(String resourceType) {
 		int sep = resourceType.indexOf(PATH_SEPARATOR);
 		String prefix;

@@ -24,11 +24,4 @@ public abstract class ResourceIncludeField extends BaseController {
 			throw new RequestBodyNotFoundException(method, resourceType);
 		}
 	}
-
-	protected Optional<RegistryEntry> getRegistryEntry(String resourceType) {
-		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		RegistryEntry registryEntry = resourceRegistry.getEntry(resourceType);
-		return Optional.ofNullable(registryEntry);
-	}
-
 }

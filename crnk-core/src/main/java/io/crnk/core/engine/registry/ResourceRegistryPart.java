@@ -17,6 +17,8 @@ public interface ResourceRegistryPart {
 
 	RegistryEntry getEntry(Class<?> clazz);
 
+	RegistryEntry getEntryByPath(String resourcePath);
+
 	void addListener(ResourceRegistryPartListener listener);
 
 	void removeListener(ResourceRegistryPartListener listener);

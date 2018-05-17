@@ -52,12 +52,10 @@ import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-import javax.management.Query;
-
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourceType = path.getResourceType();
+		String resourceType = path.getResourcePath();
 
 		assertRequestDocument(requestDocument, method, resourceType);
 
@@ -77,11 +75,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected RegistryEntry getRegistryEntry(JsonPath jsonPath) {
-		io.crnk.core.utils.Optional<RegistryEntry> optionalRegistryEntry = getRegistryEntry(jsonPath.getResourceType());
-		if (!optionalRegistryEntry.isPresent()) {
-			throw new RepositoryNotFoundException(jsonPath.getResourceType());
-		}
-		return optionalRegistryEntry.get();
+		String resourcePath = jsonPath.getResourcePath();
+		return getRegistryEntryByPath(resourcePath);
 	}
 
 	protected Object newResource(ResourceInformation resourceInformation, Resource dataBody) {
@@ -279,13 +274,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			ResourceRegistry resourceRegistry = context.getResourceRegistry();
 			List relationshipTypedIds = new LinkedList<>();
 			for (ResourceIdentifier resourceId : relationshipIds) {
-				io.crnk.core.utils.Optional<RegistryEntry> optionalEntry = getRegistryEntry(resourceId.getType());
-				if (!optionalEntry.isPresent()) {
-					throw new BadRequestException(
-							String.format("Invalid resource type: %s for relationship: %s", resourceId.getType(), relationshipName)
-					);
-				}
-				RegistryEntry entry = optionalEntry.get();
+				RegistryEntry entry = getRegistryEntry(resourceId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
@@ -349,13 +338,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			if (relationshipId == null) {
 				field.getAccessor().setValue(newResource, null);
 			} else {
-				io.crnk.core.utils.Optional<RegistryEntry> optionalEntry = getRegistryEntry(relationshipId.getType());
-				if (!optionalEntry.isPresent()) {
-					throw new BadRequestException(
-							String.format("Invalid resource type: %s for relationship: %s", relationshipId.getType(), relationshipName)
-					);
-				}
-				RegistryEntry entry = optionalEntry.get();
+				RegistryEntry entry = getRegistryEntry(relationshipId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();

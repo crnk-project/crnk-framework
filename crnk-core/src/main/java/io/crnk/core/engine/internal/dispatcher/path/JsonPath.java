@@ -52,7 +52,7 @@ public abstract class JsonPath {
 	 *
 	 * @return nam of the lase resource
 	 */
-	public abstract String getResourceType();
+	public abstract String getResourcePath();
 
 	/**
 	 * Returns name of the current element. It can be either resource type or resource's field.

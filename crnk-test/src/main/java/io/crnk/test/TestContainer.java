@@ -113,4 +113,8 @@ public class TestContainer {
 	public RegistryEntry getEntry(String resourceType) {
 		return getResourceRegistry().getEntry(resourceType);
 	}
+
+	public RegistryEntry getEntryByPath(String resourcePath) {
+		return getResourceRegistry().getEntryByPath(resourcePath);
+	}
 }

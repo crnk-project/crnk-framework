@@ -369,7 +369,7 @@ public class ResourcePostTest extends BaseControllerTest {
 			sut.handle(taskPath, emptyUserQuery, null, newUserBody);
 			Assert.fail("should not be allowed to create a relationship with an invalid resource");
 		} catch (BadRequestException e) {
-			Assert.assertEquals("Invalid resource type: notAResource for relationship: assignedProjects", e.getMessage());
+			Assert.assertEquals("Invalid resource type: notAResource", e.getMessage());
 		}
 	}
 

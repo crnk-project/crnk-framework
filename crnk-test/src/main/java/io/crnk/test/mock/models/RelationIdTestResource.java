@@ -237,6 +237,6 @@ public class RelationIdTestResource {
 	public void setTestResourceIdRef(Schedule testResourceIdRef) {
 		this.testResourceIdRef = testResourceIdRef;
 		this.testResourceIdRefId = testResourceIdRef != null ?
-				new ResourceIdentifier(testResourceIdRef.getId().toString(), "schedules") : null;
+				new ResourceIdentifier(testResourceIdRef.getId().toString(), "schedule") : null;
 	}
 }

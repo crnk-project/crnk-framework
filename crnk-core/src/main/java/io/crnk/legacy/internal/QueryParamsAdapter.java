@@ -64,6 +64,7 @@ public class QueryParamsAdapter implements QueryAdapter {
 		return queryContext;
 	}
 
+	@Override
 	public ResourceRegistry getResourceRegistry() {
 		if (resourceRegistry == null) {
 			throw new IllegalStateException("resourceRegistry not set");
