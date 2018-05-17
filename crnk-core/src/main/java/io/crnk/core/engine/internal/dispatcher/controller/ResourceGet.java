@@ -12,7 +12,6 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
-import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 

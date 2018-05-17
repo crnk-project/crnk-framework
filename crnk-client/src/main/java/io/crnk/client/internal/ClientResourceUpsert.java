@@ -29,6 +29,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 class ClientResourceUpsert extends ResourceUpsert {

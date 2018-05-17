@@ -44,6 +44,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
@@ -272,7 +273,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			ResourceRegistry resourceRegistry = context.getResourceRegistry();
 			List relationshipTypedIds = new LinkedList<>();
 			for (ResourceIdentifier resourceId : relationshipIds) {
-				RegistryEntry entry = resourceRegistry.getEntry(resourceId.getType());
+				RegistryEntry entry = getRegistryEntry(resourceId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();
@@ -336,8 +337,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			if (relationshipId == null) {
 				field.getAccessor().setValue(newResource, null);
 			} else {
-				ResourceRegistry resourceRegistry = context.getResourceRegistry();
-				RegistryEntry entry = resourceRegistry.getEntry(relationshipId.getType());
+				RegistryEntry entry = getRegistryEntry(relationshipId.getType());
 				Class idFieldType = entry.getResourceInformation()
 						.getIdField()
 						.getType();

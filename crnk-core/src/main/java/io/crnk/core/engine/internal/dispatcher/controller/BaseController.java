@@ -9,6 +9,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -69,7 +70,9 @@ public abstract class BaseController implements Controller {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
 		RegistryEntry registryEntry = resourceRegistry.getEntry(resource);
 		if (registryEntry == null) {
-			throw new RepositoryNotFoundException(resource);
+			throw new BadRequestException(
+					String.format("Invalid resource type: %s", resource)
+			);
 		}
 		return registryEntry;
 	}
