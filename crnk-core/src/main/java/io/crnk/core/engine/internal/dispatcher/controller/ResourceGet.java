@@ -12,10 +12,7 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;

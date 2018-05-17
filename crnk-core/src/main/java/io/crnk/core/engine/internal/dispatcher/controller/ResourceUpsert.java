@@ -233,7 +233,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						//noinspection unchecked
 						result = setRelationsFieldAsync(newResource,
 								registryEntry,
-								relationshipName,
 								entry,
 								queryAdapter,
 								parameterProvider);
@@ -253,7 +252,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		return resultFactory.zip((List) results);
 	}
 
-	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry, String relationshipName,
+	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
 													  Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
 													  RepositoryMethodParameterProvider parameterProvider) {
 		Relationship relationship = property.getValue();
