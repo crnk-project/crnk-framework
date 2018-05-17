@@ -29,6 +29,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 class ClientResourceUpsert extends ResourceUpsert {
@@ -99,8 +100,11 @@ class ClientResourceUpsert extends ResourceUpsert {
 		List<Object> objects = new ArrayList<>();
 		for (Resource resource : resources) {
 
-			RegistryEntry registryEntry = getRegistryEntry(resource.getType());
-			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+			io.crnk.core.utils.Optional<RegistryEntry> registryEntry = getRegistryEntry(resource.getType());
+			if (!registryEntry.isPresent()) {
+				throw new RepositoryNotFoundException(resource.getType());
+			}
+			ResourceInformation resourceInformation = registryEntry.get().getResourceInformation();
 
 			Object object = newResource(resourceInformation, resource);
 			setId(resource, object, resourceInformation);

@@ -27,6 +27,7 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
@@ -320,6 +321,56 @@ public class ResourcePostTest extends BaseControllerTest {
 		Mockito.verify(modificationFilter, Mockito.times(1))
 				.modifyManyRelationship(Mockito.any(), Mockito.any(ResourceField.class),
 						Mockito.eq(ResourceRelationshipModificationType.SET), Mockito.eq(projectIds));
+	}
+
+	@Test
+	public void onNewResourcesAndRelationshipsWithInvalidNameShouldReturnBadRequest() throws Exception {
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject();
+		newProjectBody.setData(Nullable.of((Object) data));
+		data.setType("projects");
+
+		JsonPath projectPath = pathBuilder.build("/projects");
+		ResourcePost sut = new ResourcePost();
+		sut.init(controllerContext);
+
+		// WHEN
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+
+		// THEN
+		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
+		assertThat(projectResponse.getDocument().getSingleData().get().getId()).isNotNull();
+		assertThat(projectResponse.getDocument().getSingleData().get().getAttributes().get("name").asText())
+				.isEqualTo("sample project");
+		Long projectId = Long.parseLong(projectResponse.getDocument().getSingleData().get().getId());
+		Mockito.verify(modificationFilter, Mockito.times(1))
+				.modifyAttribute(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq("name"),
+						Mockito.eq("sample project"));
+
+		/* ------- */
+
+		// GIVEN
+		Document newUserBody = new Document();
+		data = new Resource();
+		newUserBody.setData(Nullable.of((Object) data));
+		data.setType("users");
+		data.setAttribute("name", objectMapper.readTree("\"some user\""));
+		// give a bad resource name inside the relationship
+		List<ResourceIdentifier> projectIds = Collections.singletonList(new ResourceIdentifier(projectId.toString(),
+				"notAResource"));
+
+		data.getRelationships().put("assignedProjects", new Relationship(projectIds));
+
+		JsonPath taskPath = pathBuilder.build("/users");
+
+		// WHEN
+		try{
+			sut.handle(taskPath, emptyUserQuery, null, newUserBody);
+			Assert.fail("should not be allowed to create a relationship with an invalid resource");
+		} catch (BadRequestException e) {
+			Assert.assertEquals("Invalid resource type: notAResource for relationship: assignedProjects", e.getMessage());
+		}
 	}
 
 	@Test

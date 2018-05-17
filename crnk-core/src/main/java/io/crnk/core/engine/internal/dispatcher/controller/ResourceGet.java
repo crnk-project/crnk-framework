@@ -12,8 +12,10 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
+import io.crnk.core.utils.Optional;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
@@ -40,7 +42,11 @@ public class ResourceGet extends ResourceIncludeField {
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
 		String resourceType = jsonPath.getElementName();
 		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntry(resourceType);
+		Optional<RegistryEntry> optionalRegistryEntry = getRegistryEntry(resourceType);
+		if (!optionalRegistryEntry.isPresent()) {
+			throw new RepositoryNotFoundException(resourceType);
+		}
+		RegistryEntry registryEntry = optionalRegistryEntry.get();
 		logger.debug("using registry entry {}", registryEntry);
 
 		String id = resourceIds.getIds().get(0);

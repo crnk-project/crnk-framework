@@ -17,6 +17,7 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
@@ -74,7 +75,12 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 											  RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
 		String resourceName = jsonPath.getResourceType();
 		PathIds strResourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntry(resourceName);
+		io.crnk.core.utils.Optional<RegistryEntry> optionalRegistryEntry = getRegistryEntry(resourceName);
+		if (!optionalRegistryEntry.isPresent()) {
+			throw new RepositoryNotFoundException(resourceName);
+		}
+
+		RegistryEntry registryEntry = optionalRegistryEntry.get();
 		logger.debug("using registry entry {}", registryEntry);
 
 		assertRequestDocument(requestBody, HttpMethod.POST, resourceName);
@@ -84,7 +90,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 				.getElementName());
 		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
-		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
+		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).get().getResourceInformation();
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
 
 		Result<Object> resource = resourceRepository.findOne(resourceId, queryAdapter).map(JsonApiResponse::getEntity);
