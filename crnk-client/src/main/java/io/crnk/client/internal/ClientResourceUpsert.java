@@ -100,11 +100,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 		List<Object> objects = new ArrayList<>();
 		for (Resource resource : resources) {
 
-			io.crnk.core.utils.Optional<RegistryEntry> registryEntry = getRegistryEntry(resource.getType());
-			if (!registryEntry.isPresent()) {
-				throw new RepositoryNotFoundException(resource.getType());
-			}
-			ResourceInformation resourceInformation = registryEntry.get().getResourceInformation();
+			RegistryEntry registryEntry = getRegistryEntry(resource.getType());
+			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 
 			Object object = newResource(resourceInformation, resource);
 			setId(resource, object, resourceInformation);
