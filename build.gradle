@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 // tag::versions[]
 buildscript {
 	dependencies {
@@ -21,6 +19,8 @@ buildscript {
 
 
 		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+
+		classpath 'com.bmuschko:gradle-docker-plugin:3.2.8'
 	}
 }
 

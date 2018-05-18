@@ -45,6 +45,11 @@ include ':crnk-bom'
 gradle.beforeProject { Project project ->
 	project.with {
 
+		ext {
+			dockerHubUser = System.getenv('DOCKER_HUB_USER')
+			dockerHubPass = System.getenv('DOCKER_HUB_PASS')
+		}
+
 		// get password from environment if available
 		String sonarLogin = System.env['SONAR_LOGIN']
 		if (sonarLogin) {
