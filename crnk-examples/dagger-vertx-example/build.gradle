@@ -1,6 +1,7 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 import proguard.gradle.ProGuardTask
 
 apply plugin: 'java'
@@ -49,18 +50,7 @@ dependencies {
 	annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
 }
 
-
-task proguard(type: ProGuardTask) {
-	dependsOn jar
-	configuration 'proguard.txt'
-
-	injars "$buildDir/libs/dagger-vertx-example-${version}.jar"
-	injars configurations.compile.files
-	outjars "$buildDir/libs/dagger-vertx-example-min-${version}.jar"
-}
-
-// https://github.com/immutables/immutables/issues/134
-// issues with incremental compilation
+// https://github.com/immutables/immutables/issues/134 issues with incremental compilation
 compileJava {
 	options.incremental = false
 }
@@ -70,74 +60,87 @@ task deleteGeneratedSources(type: Delete) {
 }
 tasks.withType(JavaCompile) { it.dependsOn('deleteGeneratedSources') }
 
-// startup
+// shrinking requires Java 10
+if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
 
-apply plugin: 'application'
-distributions {
-	main {
+	task proguard(type: ProGuardTask) {
+		dependsOn jar
+		configuration 'proguard.txt'
+
+		injars "$buildDir/libs/dagger-vertx-example-${version}.jar"
+		injars configurations.compile.files
+		outjars "$buildDir/libs/dagger-vertx-example-min-${version}.jar"
+	}
+
+	apply plugin: 'application'
+	distributions {
 		main {
-			contents {
-				from { proguard.outputs.files } {
-					into 'lib'
+			main {
+				contents {
+					from { proguard.outputs.files } {
+						into 'lib'
+					}
+					include "**/dagger-vertx-example"
+					include "**/dagger-vertx-example.bat"
+					include "**/*-min-*.jar"
 				}
-				include "**/dagger-vertx-example"
-				include "**/dagger-vertx-example.bat"
-				include "**/*-min-*.jar"
 			}
 		}
 	}
-}
 
 
-apply plugin: 'com.bmuschko.docker-java-application'
+	apply plugin: 'com.bmuschko.docker-java-application'
 
-
-startScripts {
-	dependsOn proguard
-}
-
-
-mainClassName = 'io.crnk.example.vertx.VertxApplication'
-
-
-dockerDistTar {
-	environmentVariable('JAVA_HOME', '/opt/java/openjdk/jdk-10.0.1+10')
-}
-
-
-docker {
-	javaApplication {
-		baseImage = 'adoptopenjdk/openjdk10-openj9:nightly'
-		maintainer = '"remo@adnovum.ch"'
-		ports = [8080]
-		tag = "crnk/example-dagger-vertx:$project.version"
+	startScripts {
+		dependsOn proguard
+		classpath = files(proguard.outputs.files.singleFile)
 	}
 
-	registryCredentials {
-		email = 'remo@adnovum.ch'
-		username = dockerHubUser
-		password = dockerHubPass
+
+	mainClassName = 'io.crnk.example.vertx.VertxApplication'
+
+	dockerDistTar {
+		environmentVariable('JAVA_HOME', '/opt/java/openjdk/jdk-10.0.1+10')
 	}
-}
 
-task dockerCreateContainer(type: DockerCreateContainer) {
-	dependsOn dockerBuildImage
-	targetImageId { dockerBuildImage.getImageId() }
-	portBindings = ['8080:8080']
-}
+	docker {
+		javaApplication {
+			baseImage = 'adoptopenjdk/openjdk10-openj9:nightly'
+			maintainer = '"remo@adnovum.ch"'
+			ports = [8080]
+			tag = "crnk/example-dagger-vertx:$project.version"
+		}
 
-task dockerStartContainer(type: DockerStartContainer) {
-	dependsOn dockerCreateContainer
-	targetContainerId { dockerCreateContainer.getContainerId() }
-}
+		registryCredentials {
+			email = 'remo@adnovum.ch'
+			username = dockerHubUser
+			password = dockerHubPass
+		}
+	}
 
-task dockerStopContainer(type: DockerStopContainer) {
-	targetContainerId { dockerCreateContainer.getContainerId() }
-}
+	task dockerCreateContainer(type: DockerCreateContainer) {
+		dependsOn dockerBuildImage
+		targetImageId { dockerBuildImage.getImageId() }
+		portBindings = ['8080:8080']
+	}
 
-apply plugin: 'java'
+	task dockerStartContainer(type: DockerStartContainer) {
+		dependsOn dockerCreateContainer
+		targetContainerId { dockerCreateContainer.getContainerId() }
+	}
 
-task runMin(type: JavaExec) {
-	classpath = files(proguard.outputs.files.singleFile)
-	main = 'io.crnk.example.vertx.VertxApplication'
+	task dockerStopContainer(type: DockerStopContainer) {
+		targetContainerId { dockerCreateContainer.getContainerId() }
+	}
+
+	task dockerRemoveContainer(type: DockerRemoveContainer) {
+		dependsOn dockerStopContainer
+		targetContainerId { dockerCreateContainer.getContainerId() }
+	}
+
+	task runMin(type: JavaExec) {
+		dependsOn proguard
+		classpath = files(proguard.outputs.files.singleFile)
+		main = 'io.crnk.example.vertx.VertxApplication'
+	}
 }

@@ -1,5 +1,6 @@
 package io.crnk.example.vertx;
 
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.home.HomeModule;
 import io.crnk.setup.vertx.CrnkVertxHandler;
@@ -15,13 +16,13 @@ public class CrnkVerticle extends AbstractVerticle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkVerticle.class);
 
-	private int port;
+	private final Set<ResourceRepositoryV2> repositories;
+
+	private int port = 8080;
 
 	@Inject
-	protected Set<ResourceRepositoryV2> repositories;
-
-	public CrnkVerticle(int port) {
-		this.port = port;
+	public CrnkVerticle(Set<ResourceRepositoryV2> repositories) {
+		this.repositories = repositories;
 	}
 
 	@Override
@@ -30,7 +31,9 @@ public class CrnkVerticle extends AbstractVerticle {
 		HttpServer server = vertx.createHttpServer();
 
 		CrnkVertxHandler handler = new CrnkVertxHandler((boot) -> {
-
+			SimpleModule daggerModule = new SimpleModule("dagger");
+			repositories.forEach(it -> daggerModule.addRepository(it));
+			boot.addModule(daggerModule);
 
 			boot.addModule(HomeModule.create());
 		});
@@ -41,5 +44,9 @@ public class CrnkVerticle extends AbstractVerticle {
 		LOGGER.debug("listen on port={}", port);
 		server.listen(port);
 		LOGGER.debug("started");
+	}
+
+	public int getPort() {
+		return port;
 	}
 }

@@ -13,7 +13,7 @@
 -printmapping proguard.map
 
 # Keep filenames and line numbers
--keepattributes Signature, SourceFile, LineNumberTable
+-keepattributes Signature, SourceFile, LineNumberTable, *Annotation*
 
 
 -dontskipnonpubliclibraryclasses
@@ -44,11 +44,10 @@
    *;
 }
 
-# TODO netty freezes without this
+# netty freezes without this
 -keepclasseswithmembers class io.netty.channel.nio.* {
    *;
 }
-
 
 -keep public class io.crnk.core.engine.internal.exception.CrnkExceptionMapper {
   	*;
@@ -58,6 +57,11 @@
 -keepnames class io.vertx.core.spi.BufferFactory
 -keepnames class io.vertx.core.spi.FutureFactory
 -keepnames class org.slf4j.impl.StaticMDCBinder
+
+# keep all naming for now for simplicity... still some issues left
+-keepnames class * {
+  *;
+}
 
 -keepclasseswithmembers public class io.crnk.example.vertx.VertxApplication {
     public static void main(java.lang.String[]);

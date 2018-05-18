@@ -9,7 +9,8 @@ import javax.inject.Singleton;
 @Component(modules = {AppModule.class})
 public interface AppComponent {
 
-	void inject(CrnkVerticle vehicle);
+
+	AppServer server();
 
 	// void inject(MyFragment fragment);
 	// void inject(MyService service);
