@@ -15,6 +15,7 @@ And there are various simpler example applications that show the integration of 
 - `dropwizard-mongo-example`
 - `dropwizard-simple-example`
 - `jersey-example`
+- `dagger-vertx-example` showcasing a very lightweight setup with Dagger, Vert.x, Proguard, OpenJ9 VM having a small size, startup time and memory footprint.
 
 available from https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/[crnk-examples].
 

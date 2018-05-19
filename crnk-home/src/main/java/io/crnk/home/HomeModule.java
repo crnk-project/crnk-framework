@@ -45,6 +45,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 
 	private ModuleContext moduleContext;
 
+	private HttpRequestProcessor requestProcessor;
+
 	// protected for CDI
 	protected HomeModule() {
 	}
@@ -59,6 +61,9 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		return module;
 	}
 
+	protected HttpRequestProcessor getRequestProcessor() {
+		return requestProcessor;
+	}
 
 	@Override
 	public String getModuleName() {
@@ -68,7 +73,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	@Override
 	public void setupModule(final ModuleContext context) {
 		this.moduleContext = context;
-		context.addHttpRequestProcessor(new HomeHttpRequestProcessor());
+		requestProcessor = new HomeHttpRequestProcessor();
+		context.addHttpRequestProcessor(requestProcessor);
 	}
 
 	class HomeHttpRequestProcessor implements HttpRequestProcessor, Prioritizable {
@@ -95,7 +101,16 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 			JsonPath jsonPath = new PathBuilder(resourceRegistry).build(path);
-			return jsonPath == null; // no repository with that path
+
+			// check no repository with that path
+			if (jsonPath == null) {
+				// check there are children to display
+				QueryContext queryContext = requestContext.getQueryContext();
+				String requestPath = requestContext.getPath();
+				List<String> pathList = list(requestPath, queryContext);
+				return path.equals("/") || !pathList.isEmpty();
+			}
+			return false;
 
 		}
 

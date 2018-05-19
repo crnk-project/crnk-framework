@@ -189,6 +189,7 @@ public class CrnkBoot {
 	 * Performs the setup.
 	 */
 	public void boot() {
+		LOGGER.debug("performing setup");
 		checkNotConfiguredYet();
 		configured = true;
 
@@ -201,6 +202,8 @@ public class CrnkBoot {
 		setupQuerySpecUrlMapper();
 		setupPagingBehavior();
 		bootDiscovery();
+
+		LOGGER.debug("completed setup");
 	}
 
 	private void setupServiceDiscovery() {
