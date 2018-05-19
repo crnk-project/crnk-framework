@@ -45,8 +45,13 @@ To launch with docker:
  	
 ## Future Work
 
+Note that jigsaw support by Gradle and others is currently rather limited. As such jaotc and jlink
+have not yet been used by this example. Upcoming work once better support is available to
+further optimize the application: 
+
 - Setup jlink to reduce the size of the distribution.
 - alpine as base image.
 - Package into a docker image.
 - Improve tree-shaking with proguard. 
 - Setup jaotc for ahead-of-time compilation.
+ 
