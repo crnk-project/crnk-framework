@@ -25,7 +25,7 @@ public class TSVisitorBase implements TSVisitor {
 	}
 
 	@Override
-	public void visit(TSIndexSignature element) {
+	public void visit(TSIndexSignatureType element) {
 		// nothing to do
 	}
 

@@ -14,7 +14,7 @@ public class TSVisiterBaseTest {
 		base.visit((TSEnumType) null);
 		base.visit((TSPrimitiveType) null);
 		base.visit((TSMember) null);
-		base.visit((TSIndexSignature) null);
+		base.visit((TSIndexSignatureType) null);
 		base.visit((TSField) null);
 		base.visit((TSAny) null);
 		base.visit((TSImport) null);

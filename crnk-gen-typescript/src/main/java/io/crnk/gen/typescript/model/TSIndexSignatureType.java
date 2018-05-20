@@ -1,6 +1,6 @@
 package io.crnk.gen.typescript.model;
 
-public class TSIndexSignature extends TSElementBase {
+public class TSIndexSignatureType extends TSTypeBase {
 
 	private TSType keyType;
 

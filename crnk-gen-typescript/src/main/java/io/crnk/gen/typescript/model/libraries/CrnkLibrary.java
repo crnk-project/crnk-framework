@@ -23,6 +23,10 @@ public class CrnkLibrary {
 
 	public static final TSClassType QTYPED_MANY_RESOURCE_RELATIONSHIP;
 
+	public static final TSClassType ARRAY_PATH;
+
+	public static final TSClassType MAP_PATH;
+
 	static {
 		EXPRESSION_SOURCE.setNpmPackage("@crnk/angular-ngrx");
 		EXPRESSION_SOURCE.setDirectory("expression");
@@ -44,6 +48,14 @@ public class CrnkLibrary {
 		BOOLEAN_PATH = new TSClassType();
 		BOOLEAN_PATH.setName("BooleanPath");
 		BOOLEAN_PATH.setParent(EXPRESSION_SOURCE);
+
+		ARRAY_PATH = new TSClassType();
+		ARRAY_PATH.setName("ArrayPath");
+		ARRAY_PATH.setParent(EXPRESSION_SOURCE);
+
+		MAP_PATH = new TSClassType();
+		MAP_PATH.setName("MapPath");
+		MAP_PATH.setParent(EXPRESSION_SOURCE);
 
 		QTYPED_ONE_RESOURCE_RELATIONSHIP = new TSClassType();
 		QTYPED_ONE_RESOURCE_RELATIONSHIP.setName("QTypedOneResourceRelationship");

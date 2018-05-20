@@ -3,10 +3,11 @@ package io.crnk.gen.typescript.transform;
 import java.util.List;
 
 import io.crnk.gen.typescript.internal.TypescriptUtils;
+import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSContainerElement;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSField;
-import io.crnk.gen.typescript.model.TSIndexSignature;
+import io.crnk.gen.typescript.model.TSIndexSignatureType;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSModule;
 import io.crnk.gen.typescript.model.TSParameterizedType;
@@ -14,15 +15,22 @@ import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
+import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaCollectionType;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TSMetaDataObjectTransformation implements TSMetaTransformation {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TSMetaDataObjectTransformation.class);
 
 	private static final String ATTRIBUTES_CLASS_NAME = "Attributes";
 
@@ -193,7 +201,7 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		TSInterfaceType relationshipsType = new TSInterfaceType();
 		relationshipsType.setName(RELATIONSHIPS_CLASS_NAME);
 		relationshipsType.setExported(true);
-		TSIndexSignature relationshipsIndexSignature = new TSIndexSignature();
+		TSIndexSignatureType relationshipsIndexSignature = new TSIndexSignatureType();
 		relationshipsIndexSignature.setKeyType(TSPrimitiveType.STRING);
 		relationshipsIndexSignature.setValueType(NgrxJsonApiLibrary.RESOURCE_RELATIONSHIP);
 		relationshipsIndexSignature.setParent(relationshipsType);
@@ -236,8 +244,10 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 
 	private static void generateResourceField(MetaAttribute attr, TSMetaTransformationContext context,
 											  TSInterfaceType interfaceType, TSInterfaceType attributesType, TSInterfaceType relationshipsType) {
-		MetaType metaElementType = attr.getType().getElementType();
-		TSType elementType = (TSType) context.transform(metaElementType, TSMetaTransformationOptions.EMPTY);
+
+		LOGGER.debug("transforming field {}", attr.getName());
+
+		TSType elementType = transformType(context, attr);
 
 		TSField field = new TSField();
 		field.setName(attr.getName());
@@ -245,8 +255,12 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		field.setNullable(true);
 
 		if (attr.isAssociation()) {
-			TSType relationshipType = attr.getType().isCollection() ? NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP
+			boolean isMany = attr.getType().isCollection();
+			TSType relationshipType = isMany ? NgrxJsonApiLibrary.TYPED_MANY_RESOURCE_RELATIONSHIP
 					: NgrxJsonApiLibrary.TYPED_ONE_RESOURCE_RELATIONSHIP;
+			if (isMany) {
+				elementType = ((TSArrayType) elementType).getElementType();
+			}
 			field.setType(new TSParameterizedType(relationshipType, elementType));
 			relationshipsType.getDeclaredMembers().add(field);
 			field.setParent(relationshipsType);
@@ -272,14 +286,32 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 	private static void generateAttributes(TSMetaTransformationContext context, TSInterfaceType interfaceType,
 										   MetaDataObject element) {
 		for (MetaAttribute attr : element.getDeclaredAttributes()) {
-			MetaType elementType = attr.getType().getElementType();
+
+			LOGGER.debug("transforming attribute {}", attr.getName());
 
 			TSField field = new TSField();
 			field.setName(attr.getName());
-			field.setType((TSType) context.transform(elementType, TSMetaTransformationOptions.EMPTY));
+			field.setType(transformType(context, attr));
+			LOGGER.debug("  tsType=" + field.getType());
 			field.setNullable(true);
 			interfaceType.getDeclaredMembers().add(field);
 		}
+	}
+
+	private static TSType transformType(TSMetaTransformationContext context, MetaAttribute attr) {
+		MetaType type = attr.getType();
+		TSType tsElementType = (TSType) context.transform(type.getElementType(), TSMetaTransformationOptions.EMPTY);
+		if (type instanceof MetaMapType) {
+			MetaMapType mapType = (MetaMapType) type;
+			TSType tsKeyType = (TSType) context.transform(mapType.getKeyType(), TSMetaTransformationOptions.EMPTY);
+			TSIndexSignatureType tsMapType = new TSIndexSignatureType();
+			tsMapType.setKeyType(tsKeyType);
+			tsMapType.setValueType(tsElementType);
+			return tsMapType;
+		} else if (type instanceof MetaCollectionType || type instanceof MetaArrayType) {
+			return new TSArrayType(tsElementType);
+		}
+		return tsElementType;
 	}
 
 	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType,

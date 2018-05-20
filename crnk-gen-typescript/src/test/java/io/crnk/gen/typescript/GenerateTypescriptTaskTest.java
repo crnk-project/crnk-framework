@@ -17,9 +17,12 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GenerateTypescriptTaskTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
 
 	@Rule
 	public TemporaryFolder testProjectDir = new TemporaryFolder();
@@ -100,6 +103,15 @@ public class GenerateTypescriptTaskTest {
 
 		checkSchedule(expressions);
 		checkProject();
+		if (expressions) {
+			checkProjectData();
+		}
+	}
+
+	private void checkProjectData() throws IOException {
+		String expectedSourceFileName = "expected_project_data.ts";
+		String actualSourcePath = "build/generated/source/typescript/src/types/project.data.ts";
+		compare(expectedSourceFileName, actualSourcePath);
 	}
 
 	private void checkProject() throws IOException {
@@ -110,21 +122,31 @@ public class GenerateTypescriptTaskTest {
 	}
 
 	private void checkSchedule(boolean expressions) throws IOException {
-		Charset utf8 = Charset.forName("UTF8");
 		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
 				"expected_schedule_without_expressions.ts";
+		String actualSourcePath = "build/generated/source/typescript/src/schedule.ts";
+		compare(expectedSourceFileName, actualSourcePath);
+	}
+
+	private void compare(String expectedSourceFileName, String actualSourcePath) throws IOException {
+		Charset utf8 = Charset.forName("UTF8");
+
 		String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
 		String actualSource = IOUtils
-				.toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/schedule.ts")), utf8);
+				.toString(new FileInputStream(new File(outputDir, actualSourcePath)), utf8);
 
 		expectedSource = expectedSource.replace("\r\n", "\n");
 
 		LoggerFactory.getLogger(getClass()).info(actualSource);
 
+		LOGGER.info(actualSource);
+
+		System.out.println(actualSource);
+
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
 		for (int i = 0; i < expectedLines.length; i++) {
-			Assert.assertEquals(expectedLines[i], actualLines[i]);
+			Assert.assertEquals("line: " + Integer.toString(i) + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
 		}
 		Assert.assertEquals(expectedLines.length, actualLines.length);
 	}

@@ -99,7 +99,7 @@ public class TSWriterTest {
 
 	@Test
 	public void writeClassWithIndex() {
-		TSIndexSignature indexSignature = new TSIndexSignature();
+		TSIndexSignatureType indexSignature = new TSIndexSignatureType();
 		indexSignature.setKeyType(TSPrimitiveType.STRING);
 		indexSignature.setValueType(TSPrimitiveType.NUMBER);
 

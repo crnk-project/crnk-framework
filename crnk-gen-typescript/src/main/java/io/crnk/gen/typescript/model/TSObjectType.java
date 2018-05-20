@@ -10,7 +10,7 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 
 	private boolean exported;
 
-	private TSIndexSignature indexSignature;
+	private TSIndexSignatureType indexSignature;
 
 	public List<TSMember> getDeclaredMembers() {
 		return declaredMembers;
@@ -77,11 +77,11 @@ public abstract class TSObjectType extends TSTypeBase implements TSExportedEleme
 		this.exported = exported;
 	}
 
-	public TSIndexSignature getIndexSignature() {
+	public TSIndexSignatureType getIndexSignature() {
 		return indexSignature;
 	}
 
-	public void setIndexSignature(TSIndexSignature indexSignature) {
+	public void setIndexSignature(TSIndexSignatureType indexSignature) {
 		this.indexSignature = indexSignature;
 	}
 
