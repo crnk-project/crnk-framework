@@ -4,7 +4,8 @@ This example showcases a very light-weight flavor of setting up crnk with:
 
 - 4.5 MB in size (excluding JRE docker base image)
 - 35 MB memory usage
-- fast startup time
+- super fast startup time: below 1000ms for the application and 
+  another 500 to 1000ms for the VM. Subject for improvement (see future work).
 
 The examples makes use of:
 
