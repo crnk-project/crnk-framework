@@ -14,7 +14,7 @@ import io.crnk.gen.typescript.model.TSField;
 import io.crnk.gen.typescript.model.TSFunction;
 import io.crnk.gen.typescript.model.TSFunctionType;
 import io.crnk.gen.typescript.model.TSImport;
-import io.crnk.gen.typescript.model.TSIndexSignature;
+import io.crnk.gen.typescript.model.TSIndexSignatureType;
 import io.crnk.gen.typescript.model.TSInterfaceType;
 import io.crnk.gen.typescript.model.TSMember;
 import io.crnk.gen.typescript.model.TSModule;
@@ -53,7 +53,9 @@ public class TSWriter implements TSVisitor {
 		startScope();
 
 		if (element.getIndexSignature() != null) {
+			appendLine();
 			element.getIndexSignature().accept(this);
+			builder.append(";");
 		}
 
 		for (TSMember member : element.getDeclaredMembers()) {
@@ -98,7 +100,9 @@ public class TSWriter implements TSVisitor {
 		startScope();
 
 		if (element.getIndexSignature() != null) {
+			appendLine();
 			element.getIndexSignature().accept(this);
+			builder.append(";");
 		}
 
 		for (TSMember member : element.getDeclaredMembers()) {
@@ -134,6 +138,10 @@ public class TSWriter implements TSVisitor {
 				visitReference(parameters.get(i));
 			}
 			builder.append(">");
+		} else if (type instanceof TSIndexSignatureType) {
+			builder.append("{ ");
+			visit((TSIndexSignatureType) type);
+			builder.append(" }");
 		} else {
 			if (type.getParent() instanceof TSModule) {
 				visitReference((TSModule) type.getParent());
@@ -167,13 +175,11 @@ public class TSWriter implements TSVisitor {
 	}
 
 	@Override
-	public void visit(TSIndexSignature element) {
-		appendLine();
+	public void visit(TSIndexSignatureType element) {
 		builder.append("[key: ");
 		visitReference(element.getKeyType());
 		builder.append("]: ");
 		visitReference(element.getValueType());
-		builder.append(";");
 	}
 
 	@Override

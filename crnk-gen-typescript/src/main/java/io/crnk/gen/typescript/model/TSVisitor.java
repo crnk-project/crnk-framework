@@ -14,7 +14,7 @@ public interface TSVisitor {
 
 	void visit(TSParameter parameter);
 
-	void visit(TSIndexSignature element);
+	void visit(TSIndexSignatureType element);
 
 	void visit(TSField element);
 

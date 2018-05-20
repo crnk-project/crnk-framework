@@ -86,7 +86,7 @@ public class TSTypeReferenceResolver extends TSVisitorBase {
 	}
 
 	@Override
-	public void visit(TSIndexSignature element) {
+	public void visit(TSIndexSignatureType element) {
 		addReference(element.getKeyType());
 		addReference(element.getValueType());
 	}

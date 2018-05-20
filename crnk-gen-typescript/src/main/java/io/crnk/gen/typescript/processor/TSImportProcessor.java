@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import io.crnk.gen.typescript.model.TSAny;
+import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSImport;
+import io.crnk.gen.typescript.model.TSIndexSignatureType;
 import io.crnk.gen.typescript.model.TSModule;
 import io.crnk.gen.typescript.model.TSNamedElement;
 import io.crnk.gen.typescript.model.TSPrimitiveType;
@@ -67,7 +69,15 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static void addImport(TSSource refSource, TSSource source, TSNamedElement type) {
-		if (type instanceof TSAny) {
+		if (type instanceof TSArrayType) {
+			type = ((TSArrayType) type).getElementType();
+		}
+		if (type instanceof TSIndexSignatureType) {
+			addImport(refSource, source, ((TSIndexSignatureType) type).getKeyType());
+			addImport(refSource, source, ((TSIndexSignatureType) type).getValueType());
+			return;
+		}
+		if (type instanceof TSAny || type instanceof TSPrimitiveType) {
 			return;
 		}
 		String path = computeImportPath(refSource, source);
@@ -81,6 +91,9 @@ public class TSImportProcessor implements TSSourceProcessor {
 	}
 
 	private static String computeImportPath(TSSource refSource, TSSource source) {
+		if (refSource == null) {
+			throw new NullPointerException();
+		}
 		StringBuilder pathBuilder = new StringBuilder();
 		if (refSource.getNpmPackage() == null) {
 			throw new IllegalStateException(refSource.getName());
@@ -90,8 +103,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 		}
 		if (!source.getNpmPackage().equals(refSource.getNpmPackage())) {
 			appendThirdPartyImport(pathBuilder, refSource);
-		}
-		else {
+		} else {
 			appendRelativeImport(pathBuilder, refSource, source);
 		}
 		return pathBuilder.toString();
@@ -123,8 +135,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 	private static void appendParentPath(StringBuilder pathBuilder, String[] srcDirs, int shared) {
 		if (shared == srcDirs.length) {
 			pathBuilder.append("./");
-		}
-		else {
+		} else {
 			for (int i = shared; i < srcDirs.length; i++) {
 				pathBuilder.append("../");
 			}
@@ -144,8 +155,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 		for (int i = 0; i < Math.min(srcDirs.length, refDirs.length); i++) {
 			if (srcDirs[i].equals(refDirs[i])) {
 				n++;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
