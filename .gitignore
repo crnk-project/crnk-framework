@@ -3,7 +3,7 @@
 *.class
 replay_pid*
 hs_err_pid*
-temp*
+
 coverage**
 
 # Mobile Tools for Java (J2ME)
@@ -57,7 +57,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-### Eclipse template
 
 .metadata
 bin/
@@ -109,7 +108,7 @@ local.properties
 
 # Code Recommenders
 .recommenders/
-### Maven template
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup
