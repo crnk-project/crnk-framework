@@ -112,12 +112,13 @@ gitPublishCommit.doFirst {
 
 task promote(type: Copy) {
 	from("${project.buildDir}/website/releases/latest"){
-		into("${project.buildDir}/website/releases/v$BUILD_VERSION_PREFIX")
+		into("v$BUILD_VERSION_PREFIX")
 	}
 
 	from("${project.buildDir}/website/releases/latest"){
-		into("${project.buildDir}/website/releases/stable")
+		into("stable")
 	}
+	into("${project.buildDir}/website/releases")
 
 	doLast {
 		def latestSrc = file("${project.projectDir}/src/docs/releases/latest/info.html")
