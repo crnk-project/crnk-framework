@@ -1,18 +1,28 @@
 package io.crnk.meta;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.utils.Optional;
 import io.crnk.meta.internal.BaseMetaPartition;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.provider.*;
+import io.crnk.meta.provider.MetaFilter;
+import io.crnk.meta.provider.MetaPartition;
+import io.crnk.meta.provider.MetaPartitionContext;
+import io.crnk.meta.provider.MetaProvider;
+import io.crnk.meta.provider.MetaProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaLookup {
 
@@ -184,11 +194,14 @@ public class MetaLookup {
 					initialize(element);
 				}
 			}
-			return result;
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		} finally {
 			LOGGER.debug("discovery completed");
+			return result;
+		}
+		catch (Exception e) {
+			LOGGER.debug("discovery failed", e);
+			throw new IllegalStateException(e);
+		}
+		finally {
 			discovering = false;
 		}
 	}

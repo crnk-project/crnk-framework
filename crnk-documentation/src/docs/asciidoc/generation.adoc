@@ -27,6 +27,9 @@ include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_wi
 
 For an example have a look at the Crnk example application, see https://github.com/crnk-project/crnk-example[crnk-project/crnk-example].
 
+
+### Setup
+
 Internally the generator has to make use of the running application to gather the necessary information for generation. This
 approach not only supports the typical, manual implement resources and repositories manually, but also
 the ones obtained through third-party modules such the JPA entities exposed by the JPA module. There are different
@@ -35,6 +38,7 @@ possibilities to do that. https://github.com/crnk-project/crnk-framework/blob/ma
 does such a setup manually in Gradle. Alternatively, there is a Gradle plugin taking care of the generator setup. It makes use
 of the JUnit to get
 the application to a running state at built-time. Currently supported are CDI and Spring-based applications.
+
 Such a setup may look like:
 
 [source]
@@ -148,6 +152,13 @@ The plugin allows various further customization options:
   have more stable builds.
 
 
+### Error Handling
 
+Since the Typescript generator internally launches the application to extract information about its resources, the
+generator is in need of a consistent application/Crnk setup. For example, every resource must have a match
+repository serving it. Otherwise
+inconsistencies can arise that will break the generation. This means if the generation fails, it is usually
+best to verify the the application itself is working properly.
 
-
+To track errors further down, a log file is written to `build/tmp/crnk.gen.typescript.log`. It runs with
+`io.crnk` on level `DEBUG` to output a large number of information.
