@@ -7,10 +7,9 @@ def bomGenerator = {
 
 	// add subprojects to the bom
 	project.rootProject.subprojects.each {
-		System.out.println(it.name)
 		if (it.name != 'crnk-bom') {
 			Node dep = dependenciesNode.appendNode('dependency')
-			dep.appendNode('groupId').value = it.group
+			dep.appendNode('groupId').value = GROUP_ID
 			dep.appendNode('artifactId').value = it.name
 			dep.appendNode('version').value = project.version
 		}

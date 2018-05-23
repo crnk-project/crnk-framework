@@ -18,7 +18,7 @@ buildscript {
 		classpath 'org.jruby:jruby-complete:9.1.17.0'
 
 
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
 
 		classpath 'com.bmuschko:gradle-docker-plugin:3.2.8'
 	}
@@ -229,7 +229,7 @@ gradle.beforeProject { Project project ->
 					githubRepo = 'crnk-project/crnk-framework'
 					githubReleaseNotesFile = 'README.md'
 
-					publish = true
+					publish = false
 
 					version {
 						name = project.version
@@ -239,7 +239,7 @@ gradle.beforeProject { Project project ->
 
 
 						mavenCentralSync {
-							sync = true //[Default: true] Determines whether to sync the version to Maven Central.
+							sync = false //[Default: true] Determines whether to sync the version to Maven Central.
 							user = System.env.NEXUS_DEPLOY_USER
 							password = System.env.NEXUS_DEPLOY_PASS
 							close = '1'

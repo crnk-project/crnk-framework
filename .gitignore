@@ -127,3 +127,5 @@ buildNumber.properties
 build
 
 node_modules
+
+temp
