@@ -14,7 +14,7 @@ export interface ProjectData {
 export class QProjectData extends BeanPath<ProjectData> {
 	metaId = 'resources.types.projectdata';
 	data: StringPath = this.createString('data');
-	keywords: ArrayPath<StringPath> = new ArrayType(this, 'keywords', StringPath);
-	customData: MapPath<StringPath> = new MapType(this, 'customData', StringPath);
+	keywords: ArrayPath<StringPath, string> = new ArrayPath(this, 'keywords', StringPath);
+	customData: MapPath<StringPath, string> = new MapPath(this, 'customData', StringPath);
 	dueDate: StringPath = this.createString('dueDate');
 }

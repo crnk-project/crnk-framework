@@ -130,26 +130,33 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 		private List<TSMember> setupField(TSClassType queryType, String fieldName, TSType fieldType) {
 			if (fieldType instanceof TSArrayType) {
 				TSArrayType arrayType = (TSArrayType) fieldType;
+				TSType valueType = arrayType.getElementType();
+				if(valueType instanceof TSPrimitiveType) {
+					TSField elementField = getField(setupField(queryType, fieldName, arrayType.getElementType()));
+					TSType elementType = elementField.getType();
+					TSPrimitiveType primitiveValueType = (TSPrimitiveType) valueType;
 
-				TSField elementField = getField(setupField(queryType, fieldName, arrayType.getElementType()));
-				TSType elementType = elementField.getType();
-
-				TSField qField = new TSField();
-				qField.setName(fieldName);
-				qField.setType(new TSParameterizedType(CrnkLibrary.ARRAY_PATH, elementType));
-				qField.setInitializer("new ArrayType(this, '" + fieldName + "', " + elementType.getName() + ")");
-				return Arrays.asList(qField);
+					TSField qField = new TSField();
+					qField.setName(fieldName);
+					qField.setType(new TSParameterizedType(CrnkLibrary.ARRAY_PATH, elementType, primitiveValueType));
+					qField.setInitializer("new ArrayPath(this, '" + fieldName + "', " + elementType.getName() + ")");
+					return Arrays.asList(qField);
+				}return null;
 			} else if (fieldType instanceof TSIndexSignatureType) {
 				TSIndexSignatureType mapType = (TSIndexSignatureType) fieldType;
+				TSType valueType = mapType.getValueType();
+				if(valueType instanceof TSPrimitiveType) {
+					TSField elementField = getField(setupField(queryType, fieldName, mapType.getValueType()));
+					TSType elementType = elementField.getType();
+					TSPrimitiveType primitiveValueType = (TSPrimitiveType) valueType;
 
-				TSField elementField = getField(setupField(queryType, fieldName, mapType.getValueType()));
-				TSType elementType = elementField.getType();
-
-				TSField qField = new TSField();
-				qField.setName(fieldName);
-				qField.setType(new TSParameterizedType(CrnkLibrary.MAP_PATH, elementType));
-				qField.setInitializer("new MapType(this, '" + fieldName + "', " + elementType.getName() + ")");
-				return Arrays.asList(qField);
+					TSField qField = new TSField();
+					qField.setName(fieldName);
+					qField.setType(new TSParameterizedType(CrnkLibrary.MAP_PATH, elementType, primitiveValueType));
+					qField.setInitializer("new MapPath(this, '" + fieldName + "', " + elementType.getName() + ")");
+					return Arrays.asList(qField);
+				}
+				return null;
 			} else if (fieldType instanceof TSPrimitiveType) {
 				TSPrimitiveType primitiveFieldType = (TSPrimitiveType) fieldType;
 				String primitiveName = TypescriptUtils.firstToUpper(primitiveFieldType.getName());
