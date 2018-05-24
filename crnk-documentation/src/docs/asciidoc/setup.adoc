@@ -23,6 +23,23 @@ Crnk library requires minimum Java 8 (as of Crnk 2.4) to build and run. In the f
 for both the current major Java releases (9, 10, 11, etc.) and the current long-term support version that gets
 released every three years.
 
+## Repository
+
+Crnk Maven artifacts are available from Bintray/JCenter.
+
+https://bintray.com/crnk-project
+
+In Gradle it looks like:
+
+```
+repositories {
+   jcenter()
+}
+```
+
+Note that due to performance/reliability issues, releases are only intermittently pushed to Maven Central.
+It is highly recommended for project to go with JCenter as well.
+
 ## BOM
 
 With `io.crnk:crnk-bom` a Maven BOM is provided that manages the dependencies of all crnk artifacts.
