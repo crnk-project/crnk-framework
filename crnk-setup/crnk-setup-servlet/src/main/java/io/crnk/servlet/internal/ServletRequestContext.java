@@ -105,13 +105,16 @@ public class ServletRequestContext implements HttpRequestContextBase {
 		LOGGER.debug("use basePath={} for contextPath={}, pathPrefix={}, servletPath={}, requestUrl=requestUrl", basePath,
 				contextPath, pathPrefix, servletPath, requestUrl);
 
+		String serverName = servletRequest.getServerName();
+		int serverNameEndIndex = requestUrl.indexOf(serverName) + serverName.length();
+
 		String url;
 		if (basePath.isEmpty()) {
 			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI().toString());
 			if(requestUri.isEmpty()){
 				url = requestUrl;
 			}else {
-				int sep = requestUrl.indexOf(requestUri);
+				int sep = requestUrl.indexOf(requestUri, serverNameEndIndex);
 				if (sep == -1) {
 					throw new IllegalStateException(
 							"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
@@ -122,7 +125,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			}
 		}
 		else {
-			int sep = requestUrl.indexOf(basePath);
+			int sep = requestUrl.indexOf(basePath, serverNameEndIndex);
 			if (sep == -1) {
 				throw new IllegalStateException(
 						"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
