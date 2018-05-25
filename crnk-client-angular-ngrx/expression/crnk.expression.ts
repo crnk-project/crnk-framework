@@ -9,8 +9,6 @@
  * </ul>
  */
 import {toQueryPath} from '../binding';
-import {QResourceIdentifier, TypedOneResourceRelationship} from "../stub/crnk.stub.base";
-import {StoreResource} from "ngrx-json-api";
 
 export interface Expression<T> {
 

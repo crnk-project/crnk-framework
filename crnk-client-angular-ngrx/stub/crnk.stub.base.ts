@@ -1,5 +1,5 @@
 import {OperationType, Resource, ResourceError, ResourceState, ManyResourceRelationship, OneResourceRelationship, ResourceIdentifier, StoreResource} from 'ngrx-json-api';
-import { BeanPath, StringExpression, StringPath } from '../expression';
+import { BeanPath, StringPath } from '../expression';
 
 /**
  * For some reason the compiler does not get in applicaiton projects it if we make use of StoreResource directly.
