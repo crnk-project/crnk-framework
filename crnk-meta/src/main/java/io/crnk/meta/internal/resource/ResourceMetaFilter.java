@@ -52,7 +52,8 @@ public class ResourceMetaFilter implements MetaFilter {
 		if (element instanceof MetaResource) {
 			MetaResource metaResource = (MetaResource) element;
 			return adjustResourceForRequest(metaResource, queryContext);
-		} else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
+		}
+		else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
 			// TODO also cover MetaResourceBase by expending InformationModel accordingly
 			MetaResourceField field = (MetaResourceField) element;
 			return adjustFieldForRequest(field, queryContext);
@@ -70,7 +71,8 @@ public class ResourceMetaFilter implements MetaFilter {
 
 		ResourceFilterDirectory filterBehaviorProvider = moduleContext.getResourceFilterDirectory();
 		boolean readable =
-				metaResource.isReadable() && filterBehaviorProvider.get(fieldInformation, HttpMethod.GET, queryContext) == FilterBehavior.NONE;
+				metaResource.isReadable()
+						&& filterBehaviorProvider.get(fieldInformation, HttpMethod.GET, queryContext) == FilterBehavior.NONE;
 		boolean insertable = metaResource.isInsertable()
 				&& filterBehaviorProvider.get(fieldInformation, HttpMethod.POST, queryContext) == FilterBehavior.NONE;
 		boolean updatable = metaResource.isUpdatable()
@@ -191,7 +193,8 @@ public class ResourceMetaFilter implements MetaFilter {
 					MetaCollectionType metaCollection;
 					if (optMetaCollection.isPresent()) {
 						metaCollection = (MetaCollectionType) optMetaCollection.get();
-					} else {
+					}
+					else {
 						metaCollection = isSet ? new MetaSetType() : new MetaListType();
 						metaCollection.setId(oppositeMeta.getId() + suffix);
 						metaCollection.setName(oppositeMeta.getName() + suffix);
@@ -201,20 +204,27 @@ public class ResourceMetaFilter implements MetaFilter {
 					}
 					attr.setType(metaCollection);
 
-				} else {
+				}
+				else {
 					attr.setType(oppositeMeta);
 				}
-			} else {
+			}
+			else {
 				Type implementationType = field.getGenericType();
 				MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 				attr.setType(metaType.asType());
 			}
-		} else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
+		}
+		else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
 
 			BeanInformation parentBeanInfo = BeanInformation.get(parent.getImplementationClass());
 			BeanAttributeInformation attrInformation = parentBeanInfo.getAttributeByJsonName(attr.getName());
+			if (attrInformation == null) {
+				throw new IllegalStateException(
+						"attribute not found " + parent.getImplementationClass().getName() + "." + attr.getName());
+			}
 
 			Type implementationType = attrInformation.getImplementationType();
 			MetaElement metaType = partition.allocateMetaElement(implementationType).get();

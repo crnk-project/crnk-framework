@@ -9,12 +9,12 @@ export interface ProjectData {
 	data?: string;
 	keywords?: Array<string>;
 	customData?: { [key: string]: string };
-	dueDate?: string;
+	due?: string;
 }
 export class QProjectData extends BeanPath<ProjectData> {
 	metaId = 'resources.types.projectdata';
 	data: StringPath = this.createString('data');
 	keywords: ArrayPath<StringPath, string> = new ArrayPath(this, 'keywords', StringPath);
 	customData: MapPath<StringPath, string> = new MapPath(this, 'customData', StringPath);
-	dueDate: StringPath = this.createString('dueDate');
+	due: StringPath = this.createString('due');
 }
