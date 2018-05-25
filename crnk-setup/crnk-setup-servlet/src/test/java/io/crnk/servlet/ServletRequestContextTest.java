@@ -1,8 +1,8 @@
 package io.crnk.servlet;
 
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -13,22 +13,26 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.util.Map;
-import java.util.Set;
-
 public class ServletRequestContextTest {
 
 	private ServletContext servletContext;
 
-	private HttpServletRequest request;
+	private MockHttpServletRequest request;
 
-	private HttpServletResponse response;
+	private MockHttpServletResponse response;
 
 	@Before
 	public void setup() {
 		servletContext = Mockito.mock(ServletContext.class);
-		request = Mockito.mock(HttpServletRequest.class);
-		response = Mockito.mock(HttpServletResponse.class);
+
+		request = new MockHttpServletRequest(servletContext);
+		request.setMethod("GET");
+		request.setContextPath("");
+		request.setServerPort(1234);
+		request.setRequestURI("/api/tasks/");
+		request.setServerName("test");
+
+		response = new MockHttpServletResponse();
 	}
 
 	@Test
@@ -42,7 +46,6 @@ public class ServletRequestContextTest {
 
 	@Test
 	public void testResponseHeaders() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
 
 		context.setResponseHeader("test", "13");
@@ -50,23 +53,68 @@ public class ServletRequestContextTest {
 	}
 
 	@Test
-	public void testGetUrl() {
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
-		request.setMethod("GET");
-		request.setContextPath("");
+	public void testGetUrlWithServletPath() {
 		request.setServletPath("/api");
-		request.setPathInfo("/tasks/");
-		request.setRequestURI("/api/tasks/");
-		request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		request.addHeader("Accept", "*/*");
-		request.setServerName("test");
-		request.setServerPort(1234);
 
-
-		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
-
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
 		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testGetUrlWithPathPrefixOverridingServletPath() {
+		request.setServletPath("");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
+		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testGetUrlWithServletAndContextPath() {
+		request.setContextPath("context");
+		request.setServletPath("/context/servlet");
+		request.setRequestURI("/context/servlet/tasks/");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
+		Assert.assertEquals("http://test:1234/context/servlet", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testGetUrlWithPathPrefixAndContextPath() {
+		request.setContextPath("context");
+		request.setServletPath("/context/servlet");
+		request.setRequestURI("/context/api/tasks/");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api/");
+		Assert.assertEquals("http://test:1234/context/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+
+	@Test
+	public void testGetUrlWithEmptyServletPath() {
+		request.setContextPath("/");
+		request.setServletPath("/");
+		request.setRequestURI("/tasks");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
+		Assert.assertEquals("http://test:1234", context.getBaseUrl());
+		Assert.assertEquals("/tasks", context.getPath());
+	}
+
+
+	@Test
+	public void testPathInfoShortcutsComputation() {
+		request.setContextPath("context");
+		request.setServletPath("/context/servlet");
+		request.setRequestURI("/context/api/tasks/");
+		request.setPathInfo("/something/");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api/");
+		Assert.assertEquals("http://test:1234/context/api", context.getBaseUrl());
+		Assert.assertEquals("/something/", context.getPath());
 	}
 
 	@Test

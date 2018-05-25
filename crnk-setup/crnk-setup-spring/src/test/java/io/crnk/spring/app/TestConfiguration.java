@@ -36,6 +36,7 @@ public class TestConfiguration implements ApplicationContextAware {
 	@ConditionalOnMissingBean(CrnkBoot.class)
 	public CrnkBoot crnkBoot(ServiceDiscovery serviceDiscovery) {
 		CrnkBoot boot = new CrnkBoot();
+		boot.setWebPathPrefix("/");
 		boot.setServiceDiscovery(serviceDiscovery);
 		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.boot();

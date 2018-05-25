@@ -120,6 +120,8 @@ public class CrnkBoot {
 
 	private Map<String, String> serverInfo = new HashMap<>();
 
+	private String webPathPrefix;
+
 	private static String buildServiceUrl(String resourceDefaultDomain, String webPathPrefix) {
 		return resourceDefaultDomain + (webPathPrefix != null ? webPathPrefix : "");
 	}
@@ -245,7 +247,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -283,7 +286,8 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
 		}
 	}
@@ -458,6 +462,9 @@ public class CrnkBoot {
 	}
 
 	public String getWebPathPrefix() {
+		if (webPathPrefix != null) {
+			return webPathPrefix;
+		}
 		return propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 	}
 
@@ -550,10 +557,12 @@ public class CrnkBoot {
 				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 				if (deserializers.isEmpty()) {
 					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
-				} else {
+				}
+				else {
 					setQuerySpecDeserializerUnchecked(deserializers.get(0));
 				}
-			} else {
+			}
+			else {
 				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
@@ -659,5 +668,9 @@ public class CrnkBoot {
 	public QuerySpecUrlMapper getUrlMapper() {
 		setupQuerySpecUrlMapper();
 		return moduleRegistry.getUrlMapper();
+	}
+
+	public void setWebPathPrefix(String webPathPrefix) {
+		this.webPathPrefix = webPathPrefix;
 	}
 }

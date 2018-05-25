@@ -20,9 +20,12 @@ import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.servlet.internal.legacy.ServletParametersProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServletRequestContext implements HttpRequestContextBase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServletRequestContext.class);
 
 	private final HttpServletRequest servletRequest;
 
@@ -34,28 +37,114 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	private final String defaultCharacterEncoding;
 
+	private final String pathPrefix;
+
+	private String path;
+
+	private String baseUrl;
+
 	private Map<String, Set<String>> parameters;
 
 	private Nullable<byte[]> requestBody = Nullable.empty();
 
 	private HttpResponse response = new HttpResponse();
 
-	private String pathPrefix;
-
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-								 final HttpServletResponse response, String pathPrefix) {
+			final HttpServletResponse response, String pathPrefix) {
 		this(servletContext, request, response, pathPrefix, HttpHeaders.DEFAULT_CHARSET);
 	}
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-								 final HttpServletResponse response, String pathPrefix, String defaultCharacterEncoding) {
-		this.pathPrefix = pathPrefix;
+			final HttpServletResponse response, String pathPrefix, String defaultCharacterEncoding) {
 		this.servletContext = servletContext;
 		this.servletRequest = request;
 		this.servletResponse = response;
 		this.parameterProvider = new ServletParametersProvider(servletContext, request, response);
 		this.defaultCharacterEncoding = Objects.requireNonNull(defaultCharacterEncoding);
 		this.parameters = getParameters(request);
+		this.pathPrefix = normalizePathPrefix(pathPrefix);
+	}
+
+	private String computePath(String baseUrl) {
+		String path = servletRequest.getPathInfo();
+
+		// Serving with Filter, pathInfo can be null.
+		if (path == null || path.isEmpty()) { // spring seems to return empty string
+			String requestUrl = servletRequest.getRequestURL().toString();
+			if (!requestUrl.startsWith(baseUrl)) {
+				throw new IllegalStateException("invalid base url: " + baseUrl + " for request " + requestUrl);
+			}
+			path = requestUrl.substring(baseUrl.length());
+		}
+
+		if (path.isEmpty()) {
+			return "/";
+		}
+
+		return path;
+	}
+
+	private String computeBaseUrl() {
+		String requestUrl = UrlUtils.removeTrailingSlash(servletRequest.getRequestURL().toString());
+
+		String contextPath = UrlUtils.removeTrailingSlash(servletRequest.getContextPath());
+		String basePath = contextPath;
+		String servletPath = UrlUtils.removeTrailingSlash(servletRequest.getServletPath());
+
+		if (pathPrefix != null && pathPrefix.startsWith(contextPath)) {
+			basePath = pathPrefix;
+		}
+		else if (pathPrefix != null) {
+			basePath += pathPrefix;
+		}
+		else if (servletPath != null) {
+			basePath = servletPath;
+		}
+		basePath = UrlUtils.removeTrailingSlash(basePath);
+
+		LOGGER.debug("use basePath={} for contextPath={}, pathPrefix={}, servletPath={}, requestUrl=requestUrl", basePath,
+				contextPath, pathPrefix, servletPath, requestUrl);
+
+		String url;
+		if (basePath.isEmpty()) {
+			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI().toString());
+			if(requestUri.isEmpty()){
+				url = requestUrl;
+			}else {
+				int sep = requestUrl.indexOf(requestUri);
+				if (sep == -1) {
+					throw new IllegalStateException(
+							"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
+									+ servletRequest
+									.getContextPath() + ", servletPath=" + servletPath + ", pathPrefix=" + pathPrefix);
+				}
+				url = requestUrl.substring(0, sep);
+			}
+		}
+		else {
+			int sep = requestUrl.indexOf(basePath);
+			if (sep == -1) {
+				throw new IllegalStateException(
+						"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
+								+ servletRequest
+								.getContextPath() + ", servletPath=" + servletPath + ", pathPrefix=" + pathPrefix);
+			}
+			url = requestUrl.substring(0, sep + basePath.length());
+		}
+
+		return UrlUtils.removeTrailingSlash(url);
+	}
+
+	private static String normalizePathPrefix(String pathPrefix) {
+		if (pathPrefix != null) {
+			if (!pathPrefix.startsWith("/")) {
+				pathPrefix = "/" + pathPrefix;
+			}
+			if (!pathPrefix.endsWith("/")) {
+				pathPrefix = pathPrefix + "/";
+			}
+		}
+		return pathPrefix;
 	}
 
 
@@ -80,7 +169,8 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				characterEncoding = defaultCharacterEncoding;
 				request.setCharacterEncoding(characterEncoding);
 			}
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -113,41 +203,18 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	@Override
 	public String getPath() {
-		String path = servletRequest.getPathInfo();
-
-		// Serving with Filter, pathInfo can be null.
 		if (path == null) {
-			path = servletRequest.getRequestURI().substring(servletRequest.getContextPath().length());
+			path = computePath(getBaseUrl());
 		}
-
-		if (pathPrefix != null && path.startsWith(pathPrefix)) {
-			path = path.substring(pathPrefix.length());
-		}
-
-		if (path.isEmpty()) {
-			return "/";
-		}
-
 		return path;
 	}
 
 	@Override
 	public String getBaseUrl() {
-		String requestUrl = UrlUtils.removeTrailingSlash(servletRequest.getRequestURL().toString());
-		String servletPath = UrlUtils.removeTrailingSlash(servletRequest.getServletPath());
-
-		if (pathPrefix != null && servletPath.startsWith(pathPrefix)) {
-			// harden again invalid servlet paths (e.g. in case of filters)
-			servletPath = pathPrefix;
+		if (baseUrl == null) {
+			baseUrl = computeBaseUrl();
 		}
-		if (servletPath.isEmpty()) {
-			return UrlUtils.removeTrailingSlash(requestUrl);
-		}
-
-		int sep = requestUrl.indexOf(servletPath);
-
-		String url = requestUrl.substring(0, sep + servletPath.length());
-		return UrlUtils.removeTrailingSlash(url);
+		return baseUrl;
 	}
 
 	@Override
@@ -157,10 +224,12 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				InputStream is = servletRequest.getInputStream();
 				if (is != null) {
 					requestBody = Nullable.of(io.crnk.core.engine.internal.utils.IOUtils.readFully(is));
-				} else {
+				}
+				else {
 					requestBody = Nullable.nullValue();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new IllegalStateException(e); // FIXME
 			}
 		}

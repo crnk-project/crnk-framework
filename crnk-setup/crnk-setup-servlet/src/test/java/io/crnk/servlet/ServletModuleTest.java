@@ -39,6 +39,7 @@ public class ServletModuleTest {
 		SecurityProvider securityProvider = boot.getModuleRegistry().getSecurityProvider();
 		ServletContext servletContext = Mockito.mock(ServletContext.class);
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+		request.setRequestURI("/api/tasks");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		request.addUserRole("guest");
