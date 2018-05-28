@@ -1,6 +1,8 @@
 package io.crnk.core.engine.internal.registry;
 
-import io.crnk.core.engine.http.HttpRequestContext;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
@@ -16,9 +18,6 @@ import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Optional;
-
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
@@ -46,7 +45,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	/**
 	 * Adds a new resource definition to a registry.
 	 *
-	 * @param resource      class of a resource
+	 * @param resource class of a resource
 	 * @param registryEntry resource information
 	 */
 	public RegistryEntry addEntry(Class<?> resource, RegistryEntry registryEntry) {
@@ -57,7 +56,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		Optional<Class<?>> resourceClazz = getResourceClass(clazz);
 		if (allowNull && !resourceClazz.isPresent()) {
 			return null;
-		} else if (!resourceClazz.isPresent()) {
+		}
+		else if (!resourceClazz.isPresent()) {
 			throw new RepositoryNotFoundException(clazz.getCanonicalName());
 		}
 		return rootPart.getEntry(resourceClazz.get());
@@ -105,7 +105,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
-		String resourcePath = resourceInformation.getResourcePath() == null ? resourceInformation.getResourceType() : resourceInformation.getResourcePath();
+		String resourcePath = resourceInformation.getResourcePath();
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
@@ -134,7 +134,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(queryContext.getBaseUrl());
-		String resourcePath = resourceInformation.getResourcePath() == null ? resourceInformation.getResourceType() : resourceInformation.getResourcePath();
+		String resourcePath = resourceInformation.getResourcePath();
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
@@ -143,7 +143,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		Optional<Class<?>> type = getResourceClass(resource);
 		if (type.isPresent()) {
 			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
-			return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.getId(resource));
+			return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.getId
+					(resource));
 		}
 
 		throw new InvalidResourceException("Not registered resource found: " + resource);

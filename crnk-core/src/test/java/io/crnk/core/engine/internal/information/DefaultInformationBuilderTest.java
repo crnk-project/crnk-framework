@@ -37,8 +37,7 @@ public class DefaultInformationBuilderTest {
 		resource.superResourceType("superTask");
 		resource.resourceClass(Project.class);
 		Assert.assertEquals("tasks", info.getResourceType());
-		Assert.assertNull(info.getResourcePath());
-
+		Assert.assertEquals("tasks", info.getResourcePath());
 	}
 
 	@Test

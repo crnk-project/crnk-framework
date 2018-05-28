@@ -76,9 +76,15 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			}
 			path = requestUrl.substring(baseUrl.length());
 		}
+		else if (pathPrefix != null && path.startsWith(pathPrefix)) {
+			path = path.substring(pathPrefix.length());
+		}
 
 		if (path.isEmpty()) {
 			return "/";
+		}
+		if (!path.startsWith("/")) {
+			path = "/" + path;
 		}
 
 		return path;
@@ -111,9 +117,10 @@ public class ServletRequestContext implements HttpRequestContextBase {
 		String url;
 		if (basePath.isEmpty()) {
 			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI().toString());
-			if(requestUri.isEmpty()){
+			if (requestUri.isEmpty()) {
 				url = requestUrl;
-			}else {
+			}
+			else {
 				int sep = requestUrl.indexOf(requestUri, serverNameEndIndex);
 				if (sep == -1) {
 					throw new IllegalStateException(

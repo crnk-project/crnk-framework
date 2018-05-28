@@ -118,22 +118,24 @@ public class ResourceInformation {
 	};
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-							   List<ResourceField> fields, PagingBehavior pagingBehavior) {
+			List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingBehavior);
 	}
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath, String superResourceType,
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
+			String superResourceType,
 			List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingBehavior);
 	}
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
-		this(parser,resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingBehavior);
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
+		this(parser, resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingBehavior);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath, String superResourceType,
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
+			String superResourceType,
 			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
@@ -300,6 +302,9 @@ public class ResourceInformation {
 	}
 
 	public String getResourcePath() {
+		if (resourcePath == null) {
+			return resourceType;
+		}
 		return resourcePath;
 	}
 
@@ -364,7 +369,8 @@ public class ResourceInformation {
 			return false;
 		}
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects.equals(resourcePath, that.resourcePath);
+		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects
+				.equals(resourcePath, that.resourcePath);
 	}
 
 	@Override

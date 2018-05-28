@@ -65,6 +65,25 @@ public class ServletRequestContextTest {
 	public void testGetUrlWithPathPrefixOverridingServletPath() {
 		request.setServletPath("");
 
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api/");
+		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+
+	@Test
+	public void testPathPrefixNormalizedOnMissingLeadingSlash() {
+		request.setServletPath("");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "api/");
+		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testPathPrefixNormalizedOnMissingTrailingSlash() {
+		request.setServletPath("");
+
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
 		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 		Assert.assertEquals("/tasks/", context.getPath());
@@ -110,7 +129,7 @@ public class ServletRequestContextTest {
 		request.setContextPath("context");
 		request.setServletPath("/context/servlet");
 		request.setRequestURI("/context/api/tasks/");
-		request.setPathInfo("/something/");
+		request.setPathInfo("/api/something/");
 
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api/");
 		Assert.assertEquals("http://test:1234/context/api", context.getBaseUrl());
