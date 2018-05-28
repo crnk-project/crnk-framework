@@ -20,12 +20,10 @@ public class RelationshipDataDeserializer extends JsonDeserializer<Nullable<Obje
 		if (currentToken == JsonToken.START_ARRAY) {
 			ResourceIdentifier[] resources = jp.readValueAs(ResourceIdentifier[].class);
 			return Nullable.of((Object) Arrays.asList(resources));
-		}
-		else if (currentToken == JsonToken.VALUE_NULL) {
+		} else if (currentToken == JsonToken.VALUE_NULL) {
 			return Nullable.of(null);
-		}
-		else {
-			PreconditionUtil.assertEquals("parsing failed", currentToken, JsonToken.START_OBJECT);
+		} else {
+			PreconditionUtil.verifyEquals(currentToken, JsonToken.START_OBJECT, "parsing failed");
 			return Nullable.of((Object) jp.readValueAs(ResourceIdentifier.class));
 		}
 	}

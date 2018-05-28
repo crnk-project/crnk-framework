@@ -20,15 +20,19 @@ public class PreconditionUtil {
 	 * @param actual   actual value
 	 */
 	public static void assertEquals(String message, Object expected, Object actual) {
+		verifyEquals(expected, actual, message);
+	}
+
+	public static void verifyEquals(Object expected, Object actual, String message, Object... args) {
 		if (!CompareUtils.isEquals(expected, actual)) {
-			fail(format(message, expected, actual));
+			fail(format(message, args, expected, actual));
 		}
 	}
 
-	static String format(String message, Object expected, Object actual) {
+	static String format(String message, Object[] args, Object expected, Object actual) {
 		String formatted = "";
 		if (message != null && !message.equals("")) {
-			formatted = message + " ";
+			formatted = String.format(message, args) + " ";
 		}
 		String expectedString = String.valueOf(expected);
 		String actualString = String.valueOf(actual);
@@ -42,8 +46,8 @@ public class PreconditionUtil {
 	 *                <code>null</code> okay)
 	 * @see AssertionError
 	 */
-	public static void fail(String message) {
-		throw new IllegalStateException(message == null ? "" : message);
+	public static void fail(String message, Object... args) {
+		throw new IllegalStateException(message == null ? "" : String.format(message, args));
 	}
 
 	/**
@@ -69,6 +73,33 @@ public class PreconditionUtil {
 	public static void assertTrue(String message, boolean condition) {
 		verify(condition, message);
 	}
+
+
+	/**
+	 * Asserts that a condition is true. If it isn't it throws an
+	 * {@link AssertionError} with the given message.
+	 *
+	 * @param message   the identifying message for the {@link AssertionError} (
+	 *                  <code>null</code> okay)
+	 * @param condition condition to be checked
+	 */
+	public static void assertTrue(boolean condition, String message, Object... args) {
+		verify(condition, message, args);
+	}
+
+
+	/**
+	 * Asserts that a condition is true. If it isn't it throws an
+	 * {@link AssertionError} with the given message.
+	 *
+	 * @param message   the identifying message for the {@link AssertionError} (
+	 *                  <code>null</code> okay)
+	 * @param condition condition to be checked
+	 */
+	public static void assertFalse(boolean condition, String message, Object... args) {
+		verify(!condition, message, args);
+	}
+
 
 	/**
 	 * Asserts that a condition is false. If it isn't it throws an

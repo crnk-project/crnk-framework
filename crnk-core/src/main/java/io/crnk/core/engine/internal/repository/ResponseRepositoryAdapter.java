@@ -49,7 +49,7 @@ public abstract class ResponseRepositoryAdapter {
 
 	public ResponseRepositoryAdapter(ModuleRegistry moduleRegistry) {
 		this.moduleRegistry = moduleRegistry;
-		PreconditionUtil.assertNotNull("moduleRegistry cannot be null", moduleRegistry);
+		PreconditionUtil.verify(moduleRegistry != null, "moduleRegistry cannot be null");
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -81,7 +81,7 @@ public abstract class ResponseRepositoryAdapter {
 			Iterator<?> iterator = filteredResult.iterator();
 			if (iterator.hasNext()) {
 				resultEntity = iterator.next();
-				PreconditionUtil.assertFalse("expected unique result", iterator.hasNext());
+				PreconditionUtil.verify(! iterator.hasNext(), "expected unique result, got results=%s for request=%s by repository=%s", filteredResult, requestSpec, repository);
 			} else {
 				resultEntity = null;
 			}

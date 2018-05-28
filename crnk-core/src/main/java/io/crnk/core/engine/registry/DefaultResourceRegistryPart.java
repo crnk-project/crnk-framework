@@ -38,13 +38,13 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 		Class<?> resourceClass = resourceInformation.getResourceClass();
 		String resourceType = resourceInformation.getResourceType();
 		String resourcePath = resourceInformation.getResourcePath();
-		PreconditionUtil.assertNotNull("No resourceType set", resourceType);
-		PreconditionUtil.assertFalse("Resource already exists", resourcesByType.containsKey(resourceType));
-		PreconditionUtil.assertFalse("Resource already exists", resourcesByPath.containsKey(resourcePath));
+		PreconditionUtil.verify(resourceType != null, "no resourceType set for entry %d", entry);
+		PreconditionUtil.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %d", resourceType, entry);
+		PreconditionUtil.verify(!resourcesByPath.containsKey(resourcePath), "resourceType '%s' already exists, cannot add entry %d", resourcePath, entry);
 		resourcesByClass.put(resourceClass, entry);
 		resourcesByType.put(resourceType, entry);
 		resourcesByPath.put(resourcePath != null ? resourcePath : resourceType, entry);
-		logger.debug("Added resource {} to ResourceRegistry", entry.getResourceInformation().getResourceType());
+		logger.debug("Added resource '{}' to ResourceRegistry", resourceType);
 		notifyChange();
 		return entry;
 	}
@@ -90,6 +90,8 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 	 * @param resourcePath resource path
 	 * @return registry entry or <i>null</i>
 	 */
-	public RegistryEntry getEntryByPath(String resourcePath) { return resourcesByPath.get(resourcePath); }
+	public RegistryEntry getEntryByPath(String resourcePath) {
+		return resourcesByPath.get(resourcePath);
+	}
 
 }

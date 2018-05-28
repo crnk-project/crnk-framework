@@ -137,7 +137,7 @@ public class CrnkBoot {
 
 	public void setServiceDiscoveryFactory(ServiceDiscoveryFactory factory) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNull("serviceDiscovery already initialized", serviceDiscovery);
+		PreconditionUtil.verify(serviceDiscovery == null, "serviceDiscovery already initialized: %s", serviceDiscovery);
 		this.serviceDiscoveryFactory = factory;
 	}
 
@@ -147,7 +147,7 @@ public class CrnkBoot {
 	 */
 	public void setQueryParamsBuilds(QueryParamsBuilder queryParamsBuilder) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNotNull("A query params builder must be provided, but is null", queryParamsBuilder);
+		PreconditionUtil.verify(queryParamsBuilder != null, "A query params builder must be provided, but was null");
 		this.queryParamsBuilder = queryParamsBuilder;
 		moduleRegistry.setUrlMapper(null);
 	}
@@ -247,8 +247,7 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		}
-		else {
+		} else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -286,8 +285,7 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		}
-		else {
+		} else {
 			return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
 		}
 	}
@@ -414,11 +412,12 @@ public class CrnkBoot {
 	}
 
 	public HttpRequestDispatcherImpl getRequestDispatcher() {
-		PreconditionUtil.assertNotNull("expected requestDispatcher", requestDispatcher);
+		PreconditionUtil.verify(requestDispatcher != null, "requestDispatcher not yet available, initialize CrnkBoot first");
 		return requestDispatcher;
 	}
 
 	public ResourceRegistry getResourceRegistry() {
+		PreconditionUtil.verify(resourceRegistry != null, "resourceRegistry not yet available, initialize CrnkBoot first");
 		return resourceRegistry;
 	}
 
@@ -431,7 +430,7 @@ public class CrnkBoot {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNull("ObjectMapper already set", this.objectMapper);
+		PreconditionUtil.verify(this.objectMapper == null, "ObjectMapper already set");
 		this.objectMapper = objectMapper;
 	}
 
@@ -474,7 +473,7 @@ public class CrnkBoot {
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
 		LOGGER.debug("set service discovery {}", serviceDiscovery);
-		PreconditionUtil.assertNull("already set", this.serviceDiscovery);
+		PreconditionUtil.verify(this.serviceDiscovery == null, "serviceDiscovery already set: %s", this.serviceDiscovery);
 		this.serviceDiscovery = serviceDiscovery;
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 	}
@@ -489,8 +488,8 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
-		PreconditionUtil.assertNull("Setting the default page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
+		PreconditionUtil.verify(queryParamsBuilder == null, "Setting the default page limit requires using the QuerySpecDeserializer, but " +
+				"it is null. Are you using QueryParams instead?");
 		this.defaultPageLimit = defaultPageLimit;
 	}
 
@@ -503,8 +502,8 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
-		PreconditionUtil.assertNull("Setting the max page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?", this.queryParamsBuilder);
+		PreconditionUtil.verify(queryParamsBuilder == null, "Setting the max page limit requires using the QuerySpecDeserializer, but " +
+				"it is null. Are you using QueryParams instead?");
 		this.maxPageLimit = maxPageLimit;
 	}
 
@@ -514,8 +513,8 @@ public class CrnkBoot {
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
 	public void setAllowUnknownAttributes() {
-		PreconditionUtil.assertNull("Allow unknown attributes requires using the QuerySpecDeserializer, but " +
-				"it is null.", this.queryParamsBuilder);
+		PreconditionUtil.verify(queryParamsBuilder == null, "Allow unknown attributes requires using the QuerySpecDeserializer, but " +
+				"it is null.");
 
 		this.allowUnknownAttributes = true;
 	}
@@ -525,8 +524,8 @@ public class CrnkBoot {
 	 * <p>
 	 */
 	public void setAllowUnknownParameters() {
-		PreconditionUtil.assertNull("Allow unknown parameters requires using the QuerySpecDeserializer, but " +
-				"it is null.", this.queryParamsBuilder);
+		PreconditionUtil.verify(queryParamsBuilder == null, "Allow unknown parameters requires using the QuerySpecDeserializer, but " +
+				"it is null.");
 
 		this.allowUnknownParameters = true;
 	}
@@ -557,12 +556,10 @@ public class CrnkBoot {
 				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 				if (deserializers.isEmpty()) {
 					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
-				}
-				else {
+				} else {
 					setQuerySpecDeserializerUnchecked(deserializers.get(0));
 				}
-			}
-			else {
+			} else {
 				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
@@ -625,7 +622,7 @@ public class CrnkBoot {
 	}
 
 	private void setQuerySpecDeserializerUnchecked(QuerySpecDeserializer querySpecDeserializer) {
-		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", querySpecDeserializer);
+		PreconditionUtil.verify(querySpecDeserializer != null, "A query spec deserializer must be provided, but is null");
 		moduleRegistry.setUrlMapper(new UrlMapperAdapter(querySpecDeserializer));
 		this.queryParamsBuilder = null;
 	}
@@ -636,7 +633,7 @@ public class CrnkBoot {
 	 */
 	public void setUrlMapper(QuerySpecUrlMapper urlMapper) {
 		checkNotConfiguredYet();
-		PreconditionUtil.assertNotNull("A query spec deserializer must be provided, but is null", urlMapper);
+		PreconditionUtil.verify(urlMapper != null, "urlMapper parameter must not be null");
 		moduleRegistry.setUrlMapper(urlMapper);
 		this.queryParamsBuilder = null;
 	}

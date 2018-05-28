@@ -45,7 +45,7 @@ public class RegistryEntryImpl implements RegistryEntry {
 		this.resourceRepositoryAdapter = resourceRepositoryAdapter;
 		this.relationshipRepositoryAdapter = relationshipRepositoryAdapters;
 		this.moduleRegistry = moduleRegistry;
-		PreconditionUtil.assertNotNull("no moduleRegistry", moduleRegistry);
+		PreconditionUtil.verify(moduleRegistry != null, "no moduleRegistry");
 	}
 
 	@Override

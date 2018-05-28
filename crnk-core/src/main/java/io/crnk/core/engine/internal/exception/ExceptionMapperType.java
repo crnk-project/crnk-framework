@@ -12,7 +12,7 @@ final class ExceptionMapperType {
 	public ExceptionMapperType(Class<? extends Throwable> exceptionClass, JsonApiExceptionMapper exceptionMapper) {
 		this.exceptionMapper = exceptionMapper;
 		this.exceptionClass = exceptionClass;
-		PreconditionUtil.assertNotNull("exceptionClass must not be null", exceptionClass);
+		PreconditionUtil.verify(exceptionClass != null, "exceptionClass must not be null for mapper=%s", exceptionMapper);
 	}
 
 	public Class<? extends Throwable> getExceptionClass() {

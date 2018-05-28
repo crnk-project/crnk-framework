@@ -25,8 +25,7 @@ public class MetaModuleConfig {
 	}
 
 	private void checkNotInitialized() {
-		PreconditionUtil.assertFalse("configuration is already applied and cannot be changed anymore",
-				initialized);
+		PreconditionUtil.verify(!initialized, "configuration is already applied and cannot be changed anymore");
 	}
 
 	protected List<MetaProvider> getProviders() {

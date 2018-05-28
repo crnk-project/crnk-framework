@@ -132,24 +132,21 @@ public class MetaLookup {
 	}
 
 	public void add(MetaElement element) {
-		PreconditionUtil.assertTrue("no discovering", discovering);
-		PreconditionUtil.assertNotNull("no name provided", element.getName());
+		PreconditionUtil.verify(discovering, "no discovering");
+		PreconditionUtil.verify(element.getName() != null, "no name provided for %s", element);
 
 
 		if (!element.hasId() && element.getParent() != null) {
 			element.setId(element.getParent().getId() + "." + element.getName());
 		}
 
-		PreconditionUtil.assertNull("already exists", idElementMap.get(element.getId()));
+		PreconditionUtil.verify(!idElementMap.contains(element.getId()), "element with id=%d already exists", element.getId());
 
 		//	if (idElementMap.get(element.getId()) != element) {
 		LOGGER.debug("add {} of type {}", element.getId(), element.getClass().getSimpleName());
 
 		// queue for initialization
 		initializationQueue.add(element);
-
-		MetaElement currentElement = idElementMap.get(element.getId());
-		PreconditionUtil.assertNull(element.getId(), currentElement);
 		idElementMap.put(element.getId(), element);
 
 		// add children recursively
@@ -196,12 +193,10 @@ public class MetaLookup {
 			}
 			LOGGER.debug("discovery completed");
 			return result;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.debug("discovery failed", e);
 			throw new IllegalStateException(e);
-		}
-		finally {
+		} finally {
 			discovering = false;
 		}
 	}

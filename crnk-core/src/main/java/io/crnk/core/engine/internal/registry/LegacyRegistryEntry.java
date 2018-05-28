@@ -58,7 +58,7 @@ public class LegacyRegistryEntry implements RegistryEntry {
 	}
 
 	public void initialize(ModuleRegistry moduleRegistry) {
-		PreconditionUtil.assertNotNull("no moduleRegistry", moduleRegistry);
+		PreconditionUtil.verify(moduleRegistry != null, "no moduleRegistry");
 		this.moduleRegistry = moduleRegistry;
 	}
 

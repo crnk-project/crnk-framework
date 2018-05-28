@@ -311,7 +311,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	@Override
 	public ResourceList<T> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
 		MultivaluedMap<I, T> map = findTargets(Arrays.asList(sourceId), fieldName, querySpec);
-		PreconditionUtil.assertTrue("result must always include request for single element", map.containsKey(sourceId));
+		PreconditionUtil.verify(map.containsKey(sourceId), "result must always include request for single element");
 		return (ResourceList<T>) map.getList(sourceId);
 	}
 

@@ -74,7 +74,7 @@ public class QuerySpec {
 	 * TODO currently ignores relations and inclusions, has room for
 	 * improvements
 	 *
-	 * @param <T> the type of resources in this Iterable
+	 * @param <T>       the type of resources in this Iterable
 	 * @param resources resources
 	 * @return sorted, filtered list.
 	 */
@@ -93,8 +93,8 @@ public class QuerySpec {
 	 * <p>
 	 * TODO currently ignores relations and inclusions
 	 *
-	 * @param <T> resource type
-	 * @param resources to apply the querySpec to
+	 * @param <T>        resource type
+	 * @param resources  to apply the querySpec to
 	 * @param resultList used to return the result (including paging meta information)
 	 */
 	public <T> void apply(Iterable<T> resources, ResourceList<T> resultList) {
@@ -143,8 +143,7 @@ public class QuerySpec {
 	public void setLimit(Long limit) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
-		}
-		else {
+		} else {
 			throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
 		}
 	}
@@ -160,8 +159,7 @@ public class QuerySpec {
 	public void setOffset(long offset) {
 		if (pagingSpec instanceof OffsetLimitPagingSpec) {
 			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);
-		}
-		else {
+		} else {
 			throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
 		}
 	}
@@ -243,8 +241,7 @@ public class QuerySpec {
 		for (QuerySpec spec : specs) {
 			if (spec.getResourceClass() != null) {
 				relatedSpecs.put(spec.getResourceClass(), spec);
-			}
-			else {
+			} else {
 				relatedSpecs.put(spec.getResourceType(), spec);
 			}
 		}
@@ -335,8 +332,7 @@ public class QuerySpec {
 	}
 
 	private static void verifyNotNull(Class<?> targetResourceClass, String targetResourceType) {
-		PreconditionUtil.assertNotNull("at least one parameter must not be null",
-				targetResourceClass == null && targetResourceType == null);
+		PreconditionUtil.verify(targetResourceClass != null || targetResourceType != null, "at least one parameter must not be null");
 		if (targetResourceClass == Resource.class && targetResourceType == null) {
 			throw new IllegalArgumentException("must specify resourceType if io.crnk.core.engine.document.Resource is used");
 		}
@@ -359,7 +355,7 @@ public class QuerySpec {
 	}
 
 	public QuerySpec clone() {
-		QuerySpec copy = new QuerySpec(resourceClass);
+		QuerySpec copy = new QuerySpec(resourceClass, resourceType);
 		if (pagingSpec != null) {
 			copy.pagingSpec = pagingSpec.clone();
 		}

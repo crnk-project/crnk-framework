@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -39,7 +40,7 @@ public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 
-		PreconditionUtil.assertNotNull("no resourceSearchPackage configured", resourceSearchPackages);
+		PreconditionUtil.verify(resourceSearchPackages != null, "no resourceSearchPackage configured, use %s property", CrnkProperties.RESOURCE_SEARCH_PACKAGE);
 
 		FilterBuilder filter = new FilterBuilder();
 		for (String resourceSearchPackage : resourceSearchPackages.split(",")) {
@@ -58,7 +59,7 @@ public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 		reflections = new Reflections(builder);
 	}
 
-	public JsonServiceLocator getLocator(){
+	public JsonServiceLocator getLocator() {
 		return locator;
 	}
 

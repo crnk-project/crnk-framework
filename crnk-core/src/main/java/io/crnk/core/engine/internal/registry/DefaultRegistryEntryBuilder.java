@@ -379,8 +379,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
 			} else {
-				PreconditionUtil.assertEquals("unknown behavior", RelationshipRepositoryBehavior
-						.FORWARD_OPPOSITE, behavior);
+				PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
+						.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
 			}

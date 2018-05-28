@@ -90,7 +90,6 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 			String oppositeResourceType = field.getOppositeResourceType();
 			RegistryEntry oppositeRegistryEntry = resourceRegistry.getEntry(oppositeResourceType);
 			if (oppositeRegistryEntry != null) {
-				PreconditionUtil.assertNotNull(oppositeResourceType, oppositeRegistryEntry);
 				ResourceInformation oppositeResourceInformation = oppositeRegistryEntry.getResourceInformation();
 
 				// consider checking more than GET? intersection/union of multiple?

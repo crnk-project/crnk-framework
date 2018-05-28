@@ -1,16 +1,9 @@
 package io.crnk.core.resource.registry;
 
-import java.util.Arrays;
-
 import io.crnk.core.CoreTestContainer;
-import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.User;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.UserRepository;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -21,6 +14,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.Arrays;
 
 @SuppressWarnings("unchecked")
 public class RegistryEntryFacadeTest {

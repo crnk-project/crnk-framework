@@ -72,7 +72,7 @@ public class VertxRequestContext implements HttpRequestContextBase {
 			uri = uri.substring(0, paramSep);
 		}
 		String path = UrlUtils.removeTrailingSlash(getPath());
-		PreconditionUtil.assertTrue(uri, uri.endsWith(path));
+		PreconditionUtil.verify(uri.endsWith(path), "expected %s to end with %s", uri, path);
 		return UrlUtils.removeTrailingSlash(uri.substring(0, uri.length() - path.length()));
 
 	}

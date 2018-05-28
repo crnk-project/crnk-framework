@@ -60,7 +60,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 		Iterator<T> iterator = iterable.iterator();
 		if (iterator.hasNext()) {
 			T resource = iterator.next();
-			PreconditionUtil.assertFalse("expected unique result", iterator.hasNext());
+			PreconditionUtil.verify(!iterator.hasNext(), "expected unique result for id=%s, querySpec=%s", id, querySpec);
 			return resource;
 		} else {
 			throw new ResourceNotFoundException("resource not found");

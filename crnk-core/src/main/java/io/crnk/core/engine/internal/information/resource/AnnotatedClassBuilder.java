@@ -45,26 +45,25 @@ public class AnnotatedClassBuilder {
 	}
 
 	private static AnnotatedClass buildAnnotatedClass(Method method, Class<?> declaringClass,
-			SerializationConfig serializationConfig)
+													  SerializationConfig serializationConfig)
 			throws InvocationTargetException, IllegalAccessException {
 		if (method.getParameterTypes()[0] == Class.class) {
 			return buildOldAnnotatedClass(method, declaringClass, serializationConfig);
-		}
-		else {
-			PreconditionUtil.assertEquals("unexpected method signature", method.getParameterTypes()[0], JavaType.class);
+		} else {
+			PreconditionUtil.verifyEquals(method.getParameterTypes()[0], JavaType.class, "unexpected method signature for %d", method);
 			return buildNewAnnotatedClass(method, declaringClass, serializationConfig);
 		}
 	}
 
 	private static AnnotatedClass buildNewAnnotatedClass(Method method, Class<?> declaringClass,
-			SerializationConfig serializationConfig)
+														 SerializationConfig serializationConfig)
 			throws InvocationTargetException, IllegalAccessException {
 		JavaType declaringType = serializationConfig.constructType(declaringClass);
 		return AnnotatedClass.class.cast(method.invoke(null, declaringType, serializationConfig, serializationConfig));
 	}
 
 	private static AnnotatedClass buildOldAnnotatedClass(Method method, Class<?> declaringClass,
-			SerializationConfig serializationConfig)
+														 SerializationConfig serializationConfig)
 			throws InvocationTargetException, IllegalAccessException {
 		boolean useAnnotations = serializationConfig.isAnnotationProcessingEnabled();
 		AnnotationIntrospector aintr = useAnnotations ? serializationConfig.getAnnotationIntrospector() : null;

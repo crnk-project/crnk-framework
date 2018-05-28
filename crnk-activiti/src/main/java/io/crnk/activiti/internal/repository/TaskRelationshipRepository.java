@@ -66,7 +66,7 @@ public class TaskRelationshipRepository<P extends ProcessInstanceResource, T ext
 			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(TASK_DEFINITION_KEY_FIELD), FilterOperator.EQ, taskDefinitionId));
 
 			ResourceList tasks = taskRepository.findAll(processQuerySpec);
-			PreconditionUtil.assertTrue("unique result expected", tasks.size() <= 1);
+			PreconditionUtil.verify(tasks.size() <= 1, "unique result expected, got %s tasks for sourceId=%s, taskDefinitionId=%s", tasks.size(), sourceId, taskDefinitionId);
 			return tasks.isEmpty() ? null : (T) tasks.get(0);
 		} else {
 			throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");

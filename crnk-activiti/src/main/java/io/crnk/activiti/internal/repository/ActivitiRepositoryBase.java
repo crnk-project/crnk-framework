@@ -40,7 +40,7 @@ public abstract class ActivitiRepositoryBase<T> extends ResourceRepositoryBase<T
 	protected void checkFilter(Object resource, boolean applyAsDefault) {
 
 
-		QuerySpec enforcementSpec = new QuerySpec((String) null);
+		QuerySpec enforcementSpec = new QuerySpec(resource.getClass());
 		for (FilterSpec baseFilter : baseFilters) {
 			enforcementSpec.addFilter(baseFilter);
 

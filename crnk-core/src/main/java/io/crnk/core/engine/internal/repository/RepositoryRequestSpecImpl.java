@@ -46,7 +46,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forDelete(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
-			QueryAdapter queryAdapter, Serializable id) {
+												  QueryAdapter queryAdapter, Serializable id) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = Arrays.asList(id);
@@ -56,8 +56,8 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forSave(ModuleRegistry moduleRegistry, HttpMethod method,
-			ResourceInformation owningResourceInformation, QueryAdapter queryAdapter,
-			Object entity) {
+												ResourceInformation owningResourceInformation, QueryAdapter queryAdapter,
+												Object entity) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.entity = entity;
@@ -67,7 +67,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forFindIds(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
-			QueryAdapter queryAdapter, Iterable<?> ids) {
+												   QueryAdapter queryAdapter, Iterable<?> ids) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
@@ -77,7 +77,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forFindAll(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
-			QueryAdapter queryAdapter) {
+												   QueryAdapter queryAdapter) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.owningResourceInformation = owningResourceInformation;
@@ -86,7 +86,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forFindId(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
-			QueryAdapter queryAdapter, Serializable id) {
+												  QueryAdapter queryAdapter, Serializable id) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = Collections.singleton(id);
@@ -96,20 +96,20 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forFindTarget(ModuleRegistry moduleRegistry,
-			QueryAdapter queryAdapter, List<?> ids,
-			ResourceField relationshipField) {
+													  QueryAdapter queryAdapter, List<?> ids,
+													  ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
 		spec.relationshipField = relationshipField;
 		spec.owningResourceInformation = relationshipField.getParentResourceInformation();
 		spec.method = HttpMethod.GET;
-		PreconditionUtil.assertNotNull("relationshipField is null", relationshipField);
+		PreconditionUtil.verify(relationshipField != null, "relationshipField is null");
 		return spec;
 	}
 
 	public static RepositoryRequestSpecImpl forRelation(ModuleRegistry moduleRegistry, HttpMethod method, Object entity,
-			QueryAdapter queryAdapter, Iterable<?> ids, ResourceField relationshipField) {
+														QueryAdapter queryAdapter, Iterable<?> ids, ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.entity = entity;
 		spec.queryAdapter = queryAdapter;
@@ -117,7 +117,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		spec.relationshipField = relationshipField;
 		spec.owningResourceInformation = relationshipField.getParentResourceInformation();
 		spec.method = method;
-		PreconditionUtil.assertNotNull("relationshipField is null", relationshipField);
+		PreconditionUtil.verify(relationshipField != null, "relationshipField is null");
 		return spec;
 	}
 

@@ -7,7 +7,7 @@ public class ForwardingStrategyBase {
 	protected ForwardingStrategyContext context;
 
 	public void init(ForwardingStrategyContext context) {
-		PreconditionUtil.assertNull("this stategy can only be initialized once", this.context);
+		PreconditionUtil.verify(this.context == null, "this strategy can only be initialized once");
 		this.context = context;
 	}
 

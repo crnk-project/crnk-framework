@@ -64,7 +64,7 @@ public class JpaCriteriaQueryBackend<T> implements JpaQueryBackend<From<?, ?>, O
 		MetaEntity parentEntity = (MetaEntity) parentAttr.getParent();
 		MetaKey primaryKey = parentEntity.getPrimaryKey();
 		List<MetaAttribute> elements = primaryKey.getElements();
-		PreconditionUtil.assertFalse("composite primary keys not supported yet", elements.size() != 1);
+		PreconditionUtil.verify(elements.size() == 1, "composite primary keys for %s not supported yet", parentEntity);
 		MetaAttribute primaryKeyAttr = elements.get(0);
 		return parentFrom.get(primaryKeyAttr.getName());
 	}
