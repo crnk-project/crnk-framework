@@ -100,7 +100,7 @@ public class IncludeRequest {
 		ArrayList<Resource> included = new ArrayList<>();
 		for (ResourceIdentifier inclusionId : inclusions) {
 			Resource includedResource = resourceMap.get(inclusionId);
-			PreconditionUtil.assertNotNull("resource not found", includedResource);
+			PreconditionUtil.verify(includedResource != null, "resource with id=%d not found", inclusionId);
 			included.add(includedResource);
 		}
 		Collections.sort(included);

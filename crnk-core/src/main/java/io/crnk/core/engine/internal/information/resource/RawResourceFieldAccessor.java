@@ -48,7 +48,7 @@ public class RawResourceFieldAccessor implements io.crnk.core.engine.information
 			case META_INFORMATION:
 				return toObject(resource.getMeta());
 			default:
-				PreconditionUtil.assertEquals("invalid type", fieldType, ResourceFieldType.LINKS_INFORMATION);
+				PreconditionUtil.verifyEquals(fieldType, ResourceFieldType.LINKS_INFORMATION, "invalid type");
 				return toObject(resource.getLinks());
 		}
 	}

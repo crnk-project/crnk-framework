@@ -175,8 +175,9 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		baseInformation = entry.getResourceInformation();
 		while (baseInformation.getSuperResourceType() != null) {
 			String superResourceType = baseInformation.getSuperResourceType();
+			String entryResourceType = entry.getResourceInformation().getResourceType();
 			entry = getEntry(superResourceType);
-			PreconditionUtil.assertNotNull(superResourceType, entry);
+			PreconditionUtil.verify(entry != null, "superType=%s not found for resourceType=%s", superResourceType, entryResourceType);
 			baseInformation = entry.getResourceInformation();
 		}
 

@@ -54,7 +54,7 @@ public class MultivaluedMap<K, V> {
 
 	public List<V> getList(K key) {
 		List<V> list = map.get(key);
-		PreconditionUtil.assertNotNull("key not available", list);
+		PreconditionUtil.verify(list != null, "key=%s not available", key);
 		return list;
 	}
 

@@ -100,11 +100,11 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 		} else {
 			T source = (T) property;
 			I sourceId = (I) sourceInformation.getId(source);
-			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains
-					(sourceId));
 			if (sourceId == null) {
 				throw new IllegalStateException("id is null for " + source);
 			}
+			PreconditionUtil.verify(sourceIdSet.contains(sourceId), "filtering not properly implemented in resource repository, expected sourceId=%s to be contained in %d", sourceId, sourceIdSet);
+
 			bulkResult.add(sourceId, result);
 		}
 	}

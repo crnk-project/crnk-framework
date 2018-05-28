@@ -51,7 +51,7 @@ public class ResourceFieldImpl implements ResourceField {
 	private Class idType;
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType) {
+							 Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true, true),
@@ -59,10 +59,10 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
-			LookupIncludeBehavior lookupIncludeBehavior,
-			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
-			RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
+							 Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
+							 LookupIncludeBehavior lookupIncludeBehavior,
+							 ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
+							 RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -114,9 +114,9 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public String getOppositeResourceType() {
-		PreconditionUtil.assertEquals("not an association", ResourceFieldType.RELATIONSHIP, resourceFieldType);
+		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s is not an association", underlyingName);
 		if (getElementType() != Object.class) {
-			PreconditionUtil.assertNotNull("resourceType must not be null", oppositeResourceType);
+			PreconditionUtil.verify(oppositeResourceType != null,"field %s does not have an opposite resource type", underlyingName);
 		}
 		return oppositeResourceType;
 	}
@@ -166,7 +166,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	@Override
 	public ResourceFieldAccessor getAccessor() {
-		PreconditionUtil.assertNotNull("field not properly initialized", accessor);
+		PreconditionUtil.verify( accessor != null, "field %s not properly initialized", underlyingName);
 		return accessor;
 	}
 
@@ -214,8 +214,7 @@ public class ResourceFieldImpl implements ResourceField {
 	public void setResourceInformation(ResourceInformation resourceInformation) {
 		if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
 			this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
-		}
-		else if (this.accessor == null) {
+		} else if (this.accessor == null) {
 			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
 		}
 		if (this.idAccessor == null && idName != null) {
@@ -256,8 +255,7 @@ public class ResourceFieldImpl implements ResourceField {
 		public void setValue(Object resource, Object fieldValue) {
 			if (fieldValue == null || fieldValue instanceof ResourceIdentifier) {
 				super.setValue(resource, fieldValue);
-			}
-			else {
+			} else {
 				// TODO try to get access to opposite ResourceInformation in the future, ok for basic use cases
 				super.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
 			}

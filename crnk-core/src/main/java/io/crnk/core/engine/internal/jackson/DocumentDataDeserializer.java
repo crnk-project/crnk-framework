@@ -20,12 +20,10 @@ public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>>
 		if (currentToken == JsonToken.START_ARRAY) {
 			Resource[] resources = jp.readValueAs(Resource[].class);
 			return Nullable.of((Object) Arrays.asList(resources));
-		}
-		else if (currentToken == JsonToken.VALUE_NULL) {
+		} else if (currentToken == JsonToken.VALUE_NULL) {
 			return Nullable.nullValue();
-		}
-		else {
-			PreconditionUtil.assertEquals("parsing failed", currentToken, JsonToken.START_OBJECT);
+		} else {
+			PreconditionUtil.verifyEquals(currentToken, JsonToken.START_OBJECT, "parsing failed");
 			return Nullable.of((Object) jp.readValueAs(Resource.class));
 		}
 	}

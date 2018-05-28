@@ -27,7 +27,7 @@ public class AnnotatedFieldBuilder {
 	}
 
 	public static AnnotatedField build(final AnnotatedClass annotatedClass, final Field field,
-			final AnnotationMap annotationMap) {
+									   final AnnotationMap annotationMap) {
 		final Constructor<?> constructor = AnnotatedField.class.getConstructors()[0];
 		return ExceptionUtil.wrapCatchedExceptions(new Callable<AnnotatedField>() {
 			@Override
@@ -38,12 +38,12 @@ public class AnnotatedFieldBuilder {
 	}
 
 	private static AnnotatedField buildAnnotatedField(AnnotatedClass annotatedClass, Field field,
-			AnnotationMap annotationMap, Constructor<?> constructor)
+													  AnnotationMap annotationMap, Constructor<?> constructor)
 			throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		Class<?> firstParameterType = constructor.getParameterTypes()[0];
 
-		PreconditionUtil.assertTrue(CANNOT_FIND_PROPER_CONSTRUCTOR, firstParameterType == AnnotatedClass.class ||
-				TypeResolutionContext.class.equals(firstParameterType));
+		PreconditionUtil.verify(firstParameterType == AnnotatedClass.class ||
+				TypeResolutionContext.class.equals(firstParameterType), CANNOT_FIND_PROPER_CONSTRUCTOR);
 		return (AnnotatedField) constructor.newInstance(annotatedClass, field, annotationMap);
 	}
 }

@@ -58,8 +58,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		MetaLookup lookup = new MetaLookup();
 		lookup.addProvider(metaProvider);
 		lookup.initialize();
-
-		PreconditionUtil.assertNotNull("must not be null", metaProvider);
 	}
 
 	@Override
@@ -76,8 +74,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			}
-			else {
+			} else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -86,7 +83,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 		String resourcePath = getResourcePath(resourceClass);
@@ -203,8 +200,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			}
-			else {
+			} else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

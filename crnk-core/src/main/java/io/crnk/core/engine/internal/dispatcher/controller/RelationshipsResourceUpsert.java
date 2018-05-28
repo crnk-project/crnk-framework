@@ -63,7 +63,6 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
 	@Override
 	public final boolean isAcceptable(JsonPath jsonPath, String method) {
-		PreconditionUtil.assertNotNull("jsonPath cannot be null", jsonPath);
 		return !jsonPath.isCollection()
 				&& RelationshipsPath.class.equals(jsonPath.getClass())
 				&& method().name().equals(method);

@@ -179,7 +179,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			throw new ForbiddenException("field '" + fieldName + "' cannot be modified");
 		} else {
 			logger.debug("ignoring field {}", field.getUnderlyingName());
-			PreconditionUtil.assertEquals("unknown behavior", FilterBehavior.IGNORED, filterBehavior);
+			PreconditionUtil.verifyEquals(FilterBehavior.IGNORED, filterBehavior, "unknown behavior");
 			return false;
 		}
 	}

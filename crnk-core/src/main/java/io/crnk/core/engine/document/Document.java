@@ -48,7 +48,7 @@ public class Document implements MetaContainer, LinksContainer {
 	}
 
 	public void setData(Nullable<Object> data) {
-		PreconditionUtil.assertNotNull("make use of Nullable instead of null", data);
+		PreconditionUtil.verify(data != null, "parameter cannot be null, make use of Nullable instead of null");
 		this.data = data;
 	}
 

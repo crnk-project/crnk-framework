@@ -49,7 +49,7 @@ public abstract class BaseController implements Controller {
 			parameterProvider, Document requestDocument) {
 
 		Result<Response> response = handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
-		PreconditionUtil.assertNotNull("no response by controller provided", response);
+		PreconditionUtil.verify(response != null, "no response by controller provided");
 		return response.get();
 	}
 

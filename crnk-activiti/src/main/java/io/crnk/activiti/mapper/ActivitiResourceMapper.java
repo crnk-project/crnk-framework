@@ -126,7 +126,7 @@ public class ActivitiResourceMapper {
 	}
 
 	private void copyStaticField(Object resource, String attributeName, Optional<Object> activitiBean, boolean toResource) {
-		PreconditionUtil.assertNotNull("cannot process nested holder structures", activitiBean);
+		PreconditionUtil.verify(activitiBean != null, "cannot process nested holder structures");
 		// map fields
 		if (activitiBean.isPresent()) {
 			BeanInformation activitiBeanInformation = BeanInformation.get(activitiBean.get().getClass());

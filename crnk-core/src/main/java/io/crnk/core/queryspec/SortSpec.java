@@ -14,7 +14,8 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 
 	public SortSpec(List<String> path, Direction direction) {
 		super(path);
-		PreconditionUtil.assertFalse("Parameters may not be empty", path == null || path.isEmpty() || direction == null);
+		PreconditionUtil.verify(path != null && !path.isEmpty(), "path cannot be empty");
+		PreconditionUtil.verify(direction != null, "direction cannot be null for path %s", path);
 		this.direction = direction;
 	}
 

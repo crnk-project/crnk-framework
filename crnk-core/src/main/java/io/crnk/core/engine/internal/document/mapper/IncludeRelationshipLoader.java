@@ -112,8 +112,7 @@ public class IncludeRelationshipLoader {
 		Set<Object> relatedIdsToLoad = new HashSet<>();
 		for (Resource sourceResource : sourceResources) {
 			Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());
-			PreconditionUtil.assertTrue("expected relationship data to be loaded for @JsonApiResourceId annotated field",
-					relationship.getData().isPresent());
+			PreconditionUtil.verify(relationship.getData().isPresent(),"expected relationship data to be loaded for @JsonApiResourceId annotated field, sourceType=%d sourceId=%d, relationshipName=%s", sourceResource.getType(), sourceResource.getId(), relationshipField.getJsonName());
 
 			if (relationship.getData().get() != null) {
 				for (ResourceIdentifier id : relationship.getCollectionData().get()) {

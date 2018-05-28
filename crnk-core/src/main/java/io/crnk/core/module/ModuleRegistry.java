@@ -279,8 +279,7 @@ public class ModuleRegistry {
 	public SecurityProvider getSecurityProvider() {
 		checkState(InitializedState.INITIALIZED, InitializedState.INITIALIZED);
 		List<SecurityProvider> securityProviders = aggregatedModule.getSecurityProviders();
-		PreconditionUtil.assertEquals("exactly one security provide must be installed, got: " + securityProviders, 1,
-				securityProviders.size());
+		PreconditionUtil.verify(securityProviders.size() == 1, "exactly one security provide must be installed, got: %s", securityProviders);
 		return securityProviders.get(0);
 	}
 
@@ -291,7 +290,7 @@ public class ModuleRegistry {
 	 * @return resource lookup
 	 */
 	public ServiceDiscovery getServiceDiscovery() {
-		PreconditionUtil.assertNotNull("serviceDiscovery not yet available", serviceDiscovery);
+		PreconditionUtil.verify(serviceDiscovery != null, "serviceDiscovery not yet available");
 		return serviceDiscovery;
 	}
 
@@ -323,7 +322,7 @@ public class ModuleRegistry {
 		if (resultFactory == null) {
 			resultFactory = new ImmediateResultFactory();
 		}
-		PreconditionUtil.assertEquals("already initialized", InitializedState.NOT_INITIALIZED, initializedState);
+		PreconditionUtil.verifyEquals(InitializedState.NOT_INITIALIZED, initializedState, "already initialized");
 		this.initializedState = InitializedState.INITIALIZING;
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModules(getJacksonModules());
@@ -380,9 +379,10 @@ public class ModuleRegistry {
 			if (extensionMap.containsKey(module)) {
 				List<ModuleExtension> dependencies = extensionMap.getList(module);
 				for (ModuleExtension dependencyExtension : dependencies) {
-					Optional<? extends Module> dependencyModule = getModule(dependencyExtension.getTargetModule());
-					PreconditionUtil.assertTrue("module dependency not available",
-							dependencyModule.isPresent() || dependencyExtension.isOptional());
+					Class<? extends Module> targetModule = dependencyExtension.getTargetModule();
+					Optional<? extends Module> dependencyModule = getModule(targetModule);
+					PreconditionUtil.verify(dependencyModule.isPresent() || dependencyExtension.isOptional(),
+							"module dependency from %s to %s not available, use CrnkBoot.addModoule(...) or service discovery to add the later", module.getModuleName(), targetModule);
 					if (dependencyModule.isPresent()) {
 						initializeModule(dependencyModule.get(), initializedModules);
 					}
@@ -478,7 +478,7 @@ public class ModuleRegistry {
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {
-		PreconditionUtil.assertNotNull("exceptionMapperRegistry not set", exceptionMapperRegistry);
+		PreconditionUtil.verify(exceptionMapperRegistry != null, "exceptionMapperRegistry not yet available, wait for initialization to complete");
 		return exceptionMapperRegistry;
 	}
 
@@ -757,7 +757,7 @@ public class ModuleRegistry {
 
 		@Override
 		public ObjectMapper getObjectMapper() {
-			PreconditionUtil.assertNotNull("objectMapper is null", objectMapper);
+			PreconditionUtil.verify(objectMapper != null, "objectMapper not yet available before initialization");
 			return ModuleRegistry.this.objectMapper;
 		}
 

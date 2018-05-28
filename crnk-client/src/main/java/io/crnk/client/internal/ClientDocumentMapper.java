@@ -57,8 +57,8 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 			@Override
 			protected void setRelationship(Resource resource, ResourceField field, Object entity,
-					ResourceInformation resourceInformation, QueryAdapter queryAdapter,
-					ResourceMappingConfig mappingConfig) {
+										   ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+										   ResourceMappingConfig mappingConfig) {
 				// we also include relationship data if it is not null and not a
 				// unloaded proxy
 				boolean includeRelation = true;
@@ -77,19 +77,16 @@ public class ClientDocumentMapper extends DocumentMapper {
 							ids.add(oppositeInformation.toResourceIdentifier(elem));
 						}
 						relationshipId = ids;
-					}
-					else if (relationshipValue != null) {
+					} else if (relationshipValue != null) {
 						relationshipId = oppositeInformation.toResourceIdentifier(relationshipValue);
 					}
 
 					includeRelation = relationshipId != null || field.getSerializeType() != SerializeType.LAZY;
-				}
-				else {
+				} else {
 					Object relationshipValue = field.getAccessor().getValue(entity);
 					if (relationshipValue instanceof ObjectProxy) {
 						includeRelation = ((ObjectProxy) relationshipValue).isLoaded();
-					}
-					else {
+					} else {
 						// TODO for fieldSets handling in the future the lazy
 						// handling must be different
 						includeRelation = relationshipValue != null || field.getSerializeType() != SerializeType.LAZY && !field
@@ -99,8 +96,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 					if (relationshipValue != null && includeRelation) {
 						if (relationshipValue instanceof Collection) {
 							relationshipId = util.toResourceIds((Collection<?>) relationshipValue);
-						}
-						else {
+						} else {
 							relationshipId = util.toResourceId(relationshipValue);
 						}
 					}
@@ -125,8 +121,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 		ClientResourceUpsert upsert = new ClientResourceUpsert(proxyFactory);
 		upsert.init(controllerContext);
 
-		PreconditionUtil.assertFalse("document contains json api errors and cannot be processed",
-				document.getErrors() != null && !document.getErrors().isEmpty());
+		PreconditionUtil.verify(document.getErrors() == null || document.getErrors().isEmpty(), "document contains json api errors and cannot be processed, use exception mapper instead");
 
 		if (!document.getData().isPresent()) {
 			return null;
@@ -155,12 +150,11 @@ public class ClientDocumentMapper extends DocumentMapper {
 				resourceList.setMeta(new JsonMetaInformation(document.getMeta(), objectMapper));
 			}
 			return resourceList;
-		}
-		else {
+		} else {
 			if (dataObjects.isEmpty()) {
 				return null;
 			}
-			PreconditionUtil.assertFalse("expected unique result", dataObjects.size() > 1);
+			PreconditionUtil.verify(dataObjects.size() == 1, "expected unique result, got %s", dataObjects);
 			return dataObjects.get(0);
 		}
 	}

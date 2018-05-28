@@ -1,9 +1,8 @@
 package io.crnk.core.engine.document;
 
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import java.util.Objects;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+
+import java.util.Objects;
 
 public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 
@@ -15,9 +14,9 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
 	}
 
 	public ResourceIdentifier(String id, String type) {
-		PreconditionUtil.assertNotNull("id cannot be null", id);
-		PreconditionUtil.assertNotNull("type cannot be null", type);
-		PreconditionUtil.assertFalse("cannot pass ResourceIdentifier as id", id.startsWith("ResourceIdentifier{id="));
+		PreconditionUtil.verify(type != null, "type cannot be null");
+		PreconditionUtil.verify(id != null, "id cannot be null, type=%s", type);
+		PreconditionUtil.verify(!id.startsWith("ResourceIdentifier{id="), "cannot pass ResourceIdentifier as id");
 		this.id = id;
 		this.type = type;
 	}

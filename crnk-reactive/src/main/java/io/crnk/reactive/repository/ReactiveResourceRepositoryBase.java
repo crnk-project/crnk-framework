@@ -45,7 +45,7 @@ public abstract class ReactiveResourceRepositoryBase<T, I> implements ReactiveRe
 	/**
 	 * Forwards to {@link #findAll(QuerySpec)}
 	 *
-	 * @param id of the resource
+	 * @param id        of the resource
 	 * @param querySpec for field and relation inclusion
 	 * @return resource
 	 */
@@ -60,10 +60,9 @@ public abstract class ReactiveResourceRepositoryBase<T, I> implements ReactiveRe
 			Iterator<T> iterator = list.iterator();
 			if (iterator.hasNext()) {
 				T resource = iterator.next();
-				PreconditionUtil.assertFalse("expected single result", iterator.hasNext());
+				PreconditionUtil.verify(!iterator.hasNext(), "expected single result, got resources=%s for id=%s", list, id);
 				return resource;
-			}
-			else {
+			} else {
 				throw new ResourceNotFoundException("resource not found");
 			}
 		});
@@ -72,7 +71,7 @@ public abstract class ReactiveResourceRepositoryBase<T, I> implements ReactiveRe
 	/**
 	 * Forwards to {@link #findAll(QuerySpec)}
 	 *
-	 * @param ids of the resources
+	 * @param ids       of the resources
 	 * @param querySpec for field and relation inclusion
 	 * @return resources
 	 */

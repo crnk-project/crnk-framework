@@ -63,7 +63,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 			}
 
 			List<HttpRequestProcessor> processors = moduleRegistry.getHttpRequestProcessors();
-			PreconditionUtil.assertFalse("no processors available", processors.isEmpty());
+			PreconditionUtil.verify(!processors.isEmpty(), "no processors available");
 			for (HttpRequestProcessor processor : processors) {
 				if (processor.supportsAsync()) {
 					if (processor.accepts(requestContext)) {
