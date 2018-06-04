@@ -9,6 +9,8 @@ public class TSNpmConfiguration {
 
 	private Map<String, String> packageMapping = new HashMap<>();
 
+	private Map<String, String> directoryMapping = new HashMap<>();
+
 	private String packageName;
 
 	private String packageVersion;
@@ -25,7 +27,7 @@ public class TSNpmConfiguration {
 
 	private File outputDir = null;
 
-	private boolean packagingEnabled = true;
+	private boolean packagingEnabled = false;
 
 	public TSNpmConfiguration() {
 		String crnkNpm = "@crnk/angular-ngrx";
@@ -54,7 +56,9 @@ public class TSNpmConfiguration {
 	/**
 	 * @return true if npm package if generated (package.json, tsconfig, etc.). Otherwise the generator will only
 	 * output the generated sources.
+	 * @deprecated create package on your own in empty gradle project, use cases to different to implement by crnk generator
 	 */
+	@Deprecated
 	public boolean isPackagingEnabled() {
 		return packagingEnabled;
 	}
@@ -81,6 +85,15 @@ public class TSNpmConfiguration {
 	public void setPackageMapping(Map<String, String> packageMapping) {
 		this.packageMapping = packageMapping;
 	}
+
+	public Map<String, String> getDirectoryMapping() {
+		return directoryMapping;
+	}
+
+	public void setDirectoryMapping(Map<String, String> directoryMapping) {
+		this.directoryMapping = directoryMapping;
+	}
+
 
 	public String getPackageName() {
 		return packageName;

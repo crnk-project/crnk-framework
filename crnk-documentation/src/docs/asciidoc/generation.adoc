@@ -79,25 +79,25 @@ typescriptGen{
 	}
 
 	npm {
-		packageVersion = '0.0.1'
-		packageName = '@crnk/example-api'
-		description = 'example API to access example backend'
-		gitRepository = 'https://.../bitbucket/scm/crnk/example.git'
-		license = 'MIT'
-		// packagingEnabled = false
-		// outputDir = ...
+		// map given Java package to a subdirectory of genDir
+		directoryMapping['io.myapp.types'] = '/types'
+
+		// map a given package to a third-party library
+		packageMapping['io.other.app'] = '@other/app'
 	}
 
+	// include/exclude elements from generation
 	includes = ['resources.task']
 	excludes = ['resources.project']
 
+	// fork generation into new process to have clean environment
 	forked = true
 
-	packageMapping['resources.something'] = '@crnk/some-other-library'
-	peerDependencies['ngrx-json-api'] = '>=2.2.0'
+	// generate QueryDSL-like expression objects
 	generateExpressions = true
 
-	// genDir = ...
+	// specify location of generated sources
+	genDir = ...
 
 }
 typescriptGen.init()
@@ -105,16 +105,8 @@ typescriptGen.init()
 
 ----
 
-The basic Gradle setup makes use of:
-
-- the `moowork` plugin is used to to gain a `node` setup.
-- `crnk-meta` is used as dependency to gather a meta model of the underlying resources (or a any other type of object
-  like JPA entities). Important to know is that every object is assigned a string-based meta id. By default the
-  meta id matches `resources.<resourceType>`. For example a Task resource with resource type `task` has a
-  `resources.task` meta id.
-- applying `crnk-gen-typescript` results in a new `assembleTypescript` task. Consumers may want to add
-  that task to `assemble` as dependency.
-
+Applying `crnk-gen-typescript` results in a new `generateTypescript` task. Consumers may want to add
+that task to `assemble` as dependency. The sources are then generated to `genDir` as specified.
 
 The plugin is in need for a running application to extract the set of available resources. The `runtime` section provides
 a number of possibilities how this can be achieved. Typically the simplest way to have a running application is to
@@ -129,23 +121,20 @@ if you desire to work in another environment. There are a number of properties t
   class to use. Optionally an `initializerMethod` can be specified that is invoked before the
   Spring application to perform further customization.
 
+The plugin strives for the generated sources to closely resemble the REST layer as possible.
+As a consequence it makes use of the resource types and json names rather than Java names for the generated sources.
+Important to know is that each type is assigned a meta id: for resources it is `resources.<resourceType>` and
+for all other objects the Java package name. Based on the meta id, there are a number of possibilities to influence
+the generation:
+
+- `includes` and `excludes` allow to include and exclude resources from generation based on their meta id.
+- `directoryMapping` allows to specify into which (sub)directory types are generated into. By default
+   will be generated into the root directory.
+- `packageMapping` allows to specify that a given type is obtained from a third-party library.
+
 The plugin allows various further customization options:
 
-- `packageName`, `description`, `license`, `gitRepository` are added to the generated `package.json`.
-- by default the package version matches the npm version.
-- `packagingEnabled`  triggers the generation of a `package.json` and `tsconfig.json` file (`true` as default).
-  Useful to publish the stubs to an NPM repository for use by other projects.
-  Setting it to false will result in the generation of the Typescript files only. This may be used to generate
-   files directly into an existing frontend project. In this case only the `generateTypescript` task is available, there
-   is no assembly taking place.
-- `genDir` specifies where source files are generated to.
-- `npm.outputDirectory` specifies where the compiled NPM package should be placed (`build/npm` as default).
 - `generateExpressions` specifies whether QueryDSL like classes should be generated (`false` as default).
-- `packageMapping` allows to specify into which libraries resources belong to. By default all resources have
-  a `resources.` meta id prefix and go into the currently generated package. In the example above, all resources with a
-  `something/*` resource type resp. `resources.something` meta id prefix are included from a `@crnk/some-demo-library`
-  library and no longer get generated manually.
-- `includes` and `excludes` allow to include and exclude resources from generation based on their meta id.
 - by default the generation takes place in a forked process. Since the generator typically
   runs the application and that may not properly cleanup, it is recommended to let the
   generator fork a new process to avoid resource leakage in Gradle daemons and

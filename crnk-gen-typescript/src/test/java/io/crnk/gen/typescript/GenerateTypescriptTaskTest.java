@@ -67,6 +67,7 @@ public class GenerateTypescriptTaskTest {
 		config.setGenerateExpressions(expressions);
 		String testPackage = "@crnk/gen-typescript-test";
 		config.getRuntime().setConfiguration("test");
+		config.getNpm().setPackagingEnabled(true);
 		config.getNpm().setPackageName(testPackage);
 		config.getNpm().setGitRepository("someThing");
 		config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);

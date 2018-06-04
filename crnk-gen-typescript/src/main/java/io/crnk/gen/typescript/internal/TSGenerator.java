@@ -285,13 +285,31 @@ public class TSGenerator {
 				if (npmName != null) {
 					return idPath.substring(prefix.length()).replace('.', '/');
 				}
+
+				String directoryMapping = config.getNpm().getDirectoryMapping().get(prefix);
+				if (directoryMapping != null) {
+					String suffix = idPath.substring(prefix.length()).replace('.', '/');
+					String directory = normalize(directoryMapping) + "/" + normalize(suffix);
+					return directory.startsWith("/") ? directory : "/" + directory;
+				}
+
 				int sep = prefix.lastIndexOf('.');
 				if (sep == -1) {
-					throw new IllegalStateException("failed to determine NPM package name for " + meta.getId()
-							+ ", configure plugin accordingly with typescriptGen.npm.packageMapping for package '" + idPath + "' or above");
+					// return to root directory by default
+					return "";
 				}
 				prefix = prefix.substring(0, sep);
 			}
+		}
+
+		private String normalize(String directoryMapping) {
+			if (directoryMapping.endsWith("/")) {
+				directoryMapping = directoryMapping.substring(0, directoryMapping.length() - 1);
+			}
+			if (directoryMapping.startsWith("/")) {
+				return directoryMapping.substring(1);
+			}
+			return directoryMapping;
 		}
 
 		@Override
@@ -308,9 +326,8 @@ public class TSGenerator {
 				}
 				int sep = prefix.lastIndexOf('.');
 				if (sep == -1) {
-					throw new IllegalStateException("failed to determine NPM package name for id " + meta.getId() + " of type "
-							+ meta.getClass().getSimpleName()
-							+ ", configure plugin accordingly with typescriptGen.npm.packageMapping for package '" + idPath + "' or above");
+					// by default add to local package
+					return config.getNpm().getPackageName();
 				}
 				prefix = prefix.substring(0, sep);
 			}
@@ -343,5 +360,6 @@ public class TSGenerator {
 			return lookup.getMetaById().get(metaId);
 		}
 	}
+
 
 }

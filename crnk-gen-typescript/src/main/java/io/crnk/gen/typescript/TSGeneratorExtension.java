@@ -20,6 +20,8 @@ public class TSGeneratorExtension extends TSGeneratorConfig {
 		setForked(true);
 		setBuildDir(project.getBuildDir());
 		getExcludes().add("resources.meta");
+
+		getNpm().setPackageName("@packageNameNotSpecified");
 	}
 
 	public void init() {

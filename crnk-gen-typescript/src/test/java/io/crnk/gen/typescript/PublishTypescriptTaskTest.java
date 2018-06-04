@@ -34,6 +34,7 @@ public class PublishTypescriptTaskTest {
 
 		TSGeneratorExtension extension = project.getExtensions().getByType(TSGeneratorExtension.class);
 		extension.getRuntime().setConfiguration(null);
+		extension.getNpm().setPackagingEnabled(true);
 
 		TSGeneratorPlugin plugin = project.getPlugins().getPlugin(TSGeneratorPlugin.class);
 		plugin.init(project);

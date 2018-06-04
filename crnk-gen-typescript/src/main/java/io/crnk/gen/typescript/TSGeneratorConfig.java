@@ -1,11 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.gen.typescript.processor.TSEmptyObjectFactoryProcessor;
 import io.crnk.gen.typescript.processor.TSExpressionObjectProcessor;
@@ -17,6 +11,12 @@ import io.crnk.gen.typescript.transform.TSMetaEnumTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaPrimitiveTypeTransformation;
 import io.crnk.gen.typescript.transform.TSMetaResourceRepositoryTransformation;
 import io.crnk.gen.typescript.writer.TSCodeStyle;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TSGeneratorConfig {
 
