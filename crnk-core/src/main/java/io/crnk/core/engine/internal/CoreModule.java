@@ -8,12 +8,14 @@ import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformatio
 
 public class CoreModule implements Module {
 
+	public static final String NAME = "core";
+
 	private RepositoryInformationProvider defaultRepositoryInformationProvider =
 			new DefaultResourceRepositoryInformationProvider();
 
 	@Override
 	public String getModuleName() {
-		return "core";
+		return NAME;
 	}
 
 	@Override

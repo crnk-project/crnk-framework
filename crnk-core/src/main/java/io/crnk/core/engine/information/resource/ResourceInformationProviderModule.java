@@ -9,16 +9,15 @@ import io.crnk.core.module.SimpleModule;
  * Registers a {@link DefaultResourceInformationProvider} with the context.
  * Make sure to add the module when all paging behaviors have been registered.
  */
-public class ResourceInformationProviderModule extends SimpleModule
-{
-	public ResourceInformationProviderModule()
-	{
-		super("resourceInformationProviderModule");
+public class ResourceInformationProviderModule extends SimpleModule {
+	public static final String NAME = "resourceInformationProviderModule";
+
+	public ResourceInformationProviderModule() {
+		super(NAME);
 	}
 
 	@Override
-	public void setupModule(ModuleContext context)
-	{
+	public void setupModule(ModuleContext context) {
 		DefaultResourceFieldInformationProvider defaultFieldProvider = new DefaultResourceFieldInformationProvider();
 		ResourceFieldInformationProvider jacksonFieldProvider = new JacksonResourceFieldInformationProvider();
 

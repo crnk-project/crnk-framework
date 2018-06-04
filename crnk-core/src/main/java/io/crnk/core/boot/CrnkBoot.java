@@ -1,12 +1,5 @@
 package io.crnk.core.boot;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -73,6 +66,14 @@ import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
  * JAX-RS, etc.).
@@ -81,6 +82,8 @@ import org.slf4j.LoggerFactory;
 public class CrnkBoot {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkBoot.class);
+
+	private static final String DISCOVERY_MODULE_NAME = "discovery";
 
 	private final ModuleRegistry moduleRegistry = new ModuleRegistry();
 
@@ -233,6 +236,33 @@ public class CrnkBoot {
 		setupRepositories(rootPart);
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
+
+		logInfo();
+	}
+
+	private void logInfo() {
+		int numResources = resourceRegistry.getResources().size();
+		List<String> modules = moduleRegistry.getModules().stream().map(Module::getModuleName).collect(Collectors.toList());
+		// hide internal module names
+		modules.remove(ResourceInformationProviderModule.NAME);
+		modules.remove(DISCOVERY_MODULE_NAME);
+		modules.remove(CoreModule.NAME);
+		List<String> securityProviders = toSimpleNames(moduleRegistry.getSecurityProviders());
+		List<String> pagingBehaviors = toSimpleNames(moduleRegistry.getPagingBehaviors());
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		ServiceDiscovery serviceDiscovery = moduleRegistry.getServiceDiscovery();
+
+		LOGGER.info("crnk initialized: numResources={}, usedModules={}, securityProviders={}, pagingBehaviors={}, " +
+						"urlMapper={}, serviceDiscovery={}", numResources, modules, securityProviders, pagingBehaviors, urlMapper.getClass().getSimpleName(),
+				serviceDiscovery.getClass().getSimpleName());
+
+		if (numResources == 0) {
+			LOGGER.warn("no resources found");
+		}
+	}
+
+	private List<String> toSimpleNames(List<?> implementations) {
+		return implementations.stream().map(it -> it.getClass().getSimpleName()).collect(Collectors.toList());
 	}
 
 	private void setupRepositories(ResourceRegistryPart rootPart) {
@@ -331,7 +361,7 @@ public class CrnkBoot {
 		// can be overriden by other modules, like the
 		// JaxrsResourceRepositoryInformationBuilder.
 		LOGGER.debug("performing service discovery with {}", serviceDiscovery);
-		SimpleModule module = new SimpleModule("discovery") {
+		SimpleModule module = new SimpleModule(DISCOVERY_MODULE_NAME) {
 
 			@Override
 			public void setupModule(ModuleContext context) {
