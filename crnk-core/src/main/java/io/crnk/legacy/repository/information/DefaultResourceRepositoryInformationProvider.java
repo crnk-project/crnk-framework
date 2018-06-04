@@ -81,7 +81,9 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 			return typeArgs[0];
 		} else if (repository != null) {
 			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
-			return querySpecRepo.getResourceClass();
+			Class<?> resourceClass = querySpecRepo.getResourceClass();
+			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
+			return resourceClass;
 		} else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
