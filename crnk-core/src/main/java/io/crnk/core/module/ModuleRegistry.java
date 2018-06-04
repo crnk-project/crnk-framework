@@ -279,8 +279,31 @@ public class ModuleRegistry {
 	public SecurityProvider getSecurityProvider() {
 		checkState(InitializedState.INITIALIZED, InitializedState.INITIALIZED);
 		List<SecurityProvider> securityProviders = aggregatedModule.getSecurityProviders();
-		PreconditionUtil.verify(securityProviders.size() == 1, "exactly one security provide must be installed, got: %s", securityProviders);
-		return securityProviders.get(0);
+		return new AggregatedSecurityProvider(securityProviders);
+	}
+
+	public List<SecurityProvider> getSecurityProviders(){
+		return aggregatedModule.getSecurityProviders();
+	}
+
+	class AggregatedSecurityProvider implements SecurityProvider {
+
+		private final List<SecurityProvider> securityProviders;
+
+		public AggregatedSecurityProvider(List<SecurityProvider> securityProviders) {
+			this.securityProviders = securityProviders;
+		}
+
+		@Override
+		public boolean isUserInRole(String role) {
+			PreconditionUtil.verify(securityProviders.size() != 0, "no SecurityProvider installed to check permissions");
+			for (SecurityProvider securityProvider : securityProviders) {
+				if (securityProvider.isUserInRole(role)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/**

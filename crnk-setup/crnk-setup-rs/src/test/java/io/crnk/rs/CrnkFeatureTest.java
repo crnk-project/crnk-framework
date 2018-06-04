@@ -68,15 +68,8 @@ public class CrnkFeatureTest {
 		if (enabled) {
 			SecurityProvider securityProvider = boot.getModuleRegistry().getSecurityProvider();
 			Assert.assertNotNull(securityProvider);
-		}
-		else {
-			try {
-				Assert.assertNull(boot.getModuleRegistry().getSecurityProvider());
-				Assert.fail();
-			}
-			catch (IllegalStateException e) {
-				Assert.assertTrue(e.getMessage().contains("exactly one security provide must be installed"));
-			}
+		} else {
+			Assert.assertEquals(0, boot.getModuleRegistry().getSecurityProviders().size());
 		}
 	}
 }
