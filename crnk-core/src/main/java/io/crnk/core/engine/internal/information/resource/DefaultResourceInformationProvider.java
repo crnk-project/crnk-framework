@@ -29,7 +29,7 @@ import io.crnk.core.utils.Optional;
  */
 public class DefaultResourceInformationProvider extends ResourceInformationProviderBase {
 
-	private final ArrayList<? extends PagingBehavior> pagingBehaviors;
+	private final List<? extends PagingBehavior> pagingBehaviors;
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
 											  PagingBehavior pagingBehavior,
@@ -50,8 +50,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 											  List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		super(propertiesProvider, resourceFieldInformationProviders);
 
-		// order of behaviors must stay the same
-		this.pagingBehaviors = new ArrayList<>(pagingBehaviors);
+		this.pagingBehaviors = pagingBehaviors;
 	}
 
 	@Override
@@ -89,15 +88,16 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		java.util.Optional<? extends PagingBehavior> optPagingBehavior;
 		if (!pagingBehaviorType.equals(VoidPagingBehavior.class)) {
 			optPagingBehavior = pagingBehaviors.stream()
-							.filter(it -> pagingBehaviorType.isInstance(it))
-							.findFirst();
-
+					.filter(it -> pagingBehaviorType.isInstance(it))
+					.findFirst();
 			if (!optPagingBehavior.isPresent()) {
-				throw new IllegalStateException("paging behavior not found: " + pagingBehaviorType);
+				throw new IllegalStateException("no paging behavior registered for: " + pagingBehaviorType);
 			}
-
 		} else {
 			optPagingBehavior = pagingBehaviors.stream().findFirst();
+			if (!optPagingBehavior.isPresent()) {
+				throw new IllegalStateException("no paging behavior registered");
+			}
 		}
 
 		ResourceInformation information = new ResourceInformation(context.getTypeParser(),

@@ -160,7 +160,7 @@ public class CrnkClient {
 		moduleRegistry.getHttpRequestContextProvider().setServiceUrlProvider(serviceUrlProvider);
 		moduleRegistry.addModule(new ClientModule());
 
-		setupPagingBehavior();
+
 		moduleRegistry.addModule(new ResourceInformationProviderModule());
 
 		resourceRegistry = new ClientResourceRegistry(moduleRegistry);
@@ -192,6 +192,11 @@ public class CrnkClient {
 		setProxyFactory(new BasicProxyFactory());
 	}
 
+	public ServiceDiscovery getServiceDiscovery() {
+		setupServiceDiscovery();
+		return serviceDiscovery;
+	}
+
 	private void setupServiceDiscovery() {
 		if (serviceDiscovery == null) {
 			// revert to reflection-based approach if no ServiceDiscovery is
@@ -205,7 +210,7 @@ public class CrnkClient {
 
 	public void setServiceDiscovery(ServiceDiscovery serviceDiscovery) {
 		verifyNotInitialized();
-		PreconditionUtil.verify(serviceDiscovery == null, "service discovery already set");
+		PreconditionUtil.verify(this.serviceDiscovery == null, "service discovery already set");
 		this.serviceDiscovery = serviceDiscovery;
 		moduleRegistry.setServiceDiscovery(serviceDiscovery);
 	}
@@ -220,10 +225,6 @@ public class CrnkClient {
 
 	private void setupPagingBehavior() {
 		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
-			if (this.serviceDiscovery == null) {
-				setupServiceDiscovery();
-			}
-
 			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 
 			if (moduleRegistry.getPagingBehaviors().isEmpty()) {
@@ -328,8 +329,10 @@ public class CrnkClient {
 		}
 		initialized = true;
 
+		setupServiceDiscovery();
 		initHttpAdapter();
 
+		setupPagingBehavior();
 		initModuleRegistry();
 		initExceptionMapperRegistry();
 		initResources();
