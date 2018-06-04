@@ -12,6 +12,7 @@ import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.gradle.api.Project;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +43,13 @@ public class TSGeneratorTest {
 		boot.boot();
 
 		generator = new TSGenerator(outputDir, metaModule.getLookup(), config);
+	}
+
+	@Test
+	public void checkMetaExcludedByDefault() {
+		Project project = Mockito.mock(Project.class);
+		TSGeneratorExtension config = new TSGeneratorExtension(project, null);
+		Assert.assertTrue(config.getExcludes().contains("resources.meta"));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

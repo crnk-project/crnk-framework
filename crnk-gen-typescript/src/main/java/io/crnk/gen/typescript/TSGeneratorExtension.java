@@ -16,9 +16,10 @@ public class TSGeneratorExtension extends TSGeneratorConfig {
 		this.initMethod = initMethod;
 		this.runtime = new TSRuntimeExtension(project);
 
+		// reconfigure within extension, not in TSGeneratorConfig since the later is used also in forked mode
 		setForked(true);
-
 		setBuildDir(project.getBuildDir());
+		getExcludes().add("resources.meta");
 	}
 
 	public void init() {
