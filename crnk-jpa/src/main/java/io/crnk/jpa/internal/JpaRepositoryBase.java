@@ -63,7 +63,8 @@ public abstract class JpaRepositoryBase<T> {
 	}
 
 	protected QuerySpec filterQuerySpec(QuerySpec querySpec) {
-		QuerySpec filteredQuerySpec = querySpec;
+		JpaMapper<Object, T> mapper = repositoryConfig.getMapper();
+		QuerySpec filteredQuerySpec = mapper.unmapQuerySpec(querySpec);
 		for (JpaRepositoryFilter filter : module.getFilters()) {
 			if (filter.accept(repositoryConfig.getResourceClass())) {
 				filteredQuerySpec = filter.filterQuerySpec(this, filteredQuerySpec);

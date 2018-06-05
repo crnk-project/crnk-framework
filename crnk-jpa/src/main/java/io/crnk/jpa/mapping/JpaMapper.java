@@ -1,5 +1,6 @@
 package io.crnk.jpa.mapping;
 
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.jpa.query.Tuple;
 
 /**
@@ -19,12 +20,22 @@ public interface JpaMapper<E, D> {
 
 	/**
 	 * Maps the dto back to the entity. Make sure to return a managed entity instance to support
-	 * proper inserts, updates and deletes. An implementation may choose to lookup the entity
-	 * with the entity manager and create a new instance if it has not been found.
+	 * proper inserts, updates and deletes. In case of an update, an implementation must to lookup the entity
+	 * with the entity manager to obtain a managed instance. In case of a create, it can simple create a new instance.
 	 *
 	 * @param dto to map to an entity.
 	 * @return entity
 	 */
 	E unmap(D dto);
 
+
+	/**
+	 * Maps a DTO-based QuerySpec to a Entity-based QuerySpec. The method can do arbitrary changes, like mapping attribute names
+	 * or changing type, such as translating Enums.
+	 *
+	 * @return mapped QuerySpec
+	 */
+	default QuerySpec unmapQuerySpec(QuerySpec querySpec) {
+		return querySpec;
+	}
 }

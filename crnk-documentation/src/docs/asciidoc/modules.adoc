@@ -232,13 +232,20 @@ Such a mapper might be implemented manually or generated (mostly) automatically
 with tools like MapStruct. If two mapped entities are registered, there
 respective mapped relationships will be automatically registered as well.
 
-The mechanism is not limited to simple mappings, but can also introduce computed
-attributes like in the example depicted here:
+The mapping is performed by `JpaMapper` interface providing methods to
+map and unmap entities to and from DTOs. There is an additional
+`unmapQuerySpec` method that does the same task for query parameters,
+such as renaming attributes or translating types.
+`JpaMapper` may introduce and fill-up new attributes not available on one side.
+Such attributes can either be set in the mapper itself, or
+be derived from a value computed in the database as shown in this example:
 
 [source]
 ----
-	JpaModule module = JpaModule.newServerModule(emFactory, em, transactionRunner);
-				module.setQueryFactory(QuerydslQueryFactory.newInstance());
+    JpaModuleConfig config = new JpaModuleConfig();
+	config.setQueryFactory(QuerydslQueryFactory.newInstance());
+
+	// introduce new computed attribute
 	QuerydslExpressionFactory<QTestEntity> basicComputedValueFactory = new QuerydslExpressionFactory<QTestEntity>() {
 
 		@Override
@@ -246,12 +253,16 @@ attributes like in the example depicted here:
 			return parent.stringValue.upper();
 		}
 	};
-
-	QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) module.getQueryFactory();
+	QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) config.getQueryFactory();
 	queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_UPPER_STRING_VALUE,
 		 String.class, basicComputedValueFactory);
-	module.addRepository(JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager)).build())
 
+	// register repository with DTO mapping
+	config.addRepository(
+	  JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager)).build()
+	);
+
+    JpaModule module = JpaModule.createServerModule(config, em, transactionRunner);
 ----
 
 and
@@ -259,6 +270,10 @@ and
 [source]
 ----
 	public class TestDTOMapper implements JpaMapper<TestEntity, TestDTO> {
+
+		private EntityManager em;
+
+		...
 
 		@Override
 		public TestDTO map(Tuple tuple) {
@@ -271,15 +286,32 @@ and
 			return dto;
 		}
 
-		...
+		@Override
+        public TestEntity unmap(TestDto dto) {
+        	TestEntity entity = em.find(TestEntity.class, dto.getId());
+        	if(entity == null){
+        	  entity = new TestEntity();
+        	}
+        	entity.setStringValue(dto.getStringValue());
 
+        	...
+        }
+
+        @Override
+        public QuerySpec unmapQuerySpec(QuerySpec querySpec) {
+           	...
+        }
 	}
 ----
 
-Some of the regular entity attributes are mapped to the DTO. But there is also a
-`computedUpperStringValue` attribute that is computed with an expression.
-The expression can be written with the Criteria API or QueryDSL depending
-on which query backend is in use.
+The example shows:
+- Some of the regular entity attributes are mapped to the DTO.
+- There is a `computedUpperStringValue` attribute that is computed with an SQL expression.
+  The expression can be written with the Criteria API or QueryDSL depending
+  on which query backend is in use.
+- `unmap` looks up the entity with the `EntityManager`. This is necessary to obtain a JPA-managed
+  instance. Otherwise a JPA implementation may treat existing entities as new entities and fail
+  upon insertion.
 
 Computed attributes are indistinguishable from regular, persisted entity attributes.
 They can be used for selection, sorting and filtering. Both `JpaCriteriaQueryFactory`
@@ -289,9 +321,10 @@ the target entity and a name. To make the computed attribute available
 to consumers, the mapper class has access to it trough the provided
 tuple class. Have a look at https://github.com/crnk-project/crnk-framework/blob/master/crnk-jpa/src/test/java/io/crnk/jpa/mapping/DtoMappingTest.java to see everything in use.
 
-There is currently not yet any support for renaming of attribute. If attributes
+There is currently not yet any automated support for renaming of attribute. If attributes
 are renamed on DTOs, the incoming QuerySpec has to be modified accordingly to
-match again the entity attribute naming.
+match again the entity attribute naming. The same holds for types like Enums or dates. The
+JPA implementation mostly likely will fail with an incorrect type is passed to it.
 
 
 anchor:validation_module[]

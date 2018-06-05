@@ -33,6 +33,7 @@ import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Example of how to do DTO mapping and computed attributes.
@@ -40,6 +41,8 @@ import org.junit.Test;
 public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+
+	private TestDTOMapper dtoMapper;
 
 	@Override
 	@Before
@@ -54,6 +57,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 		if (server) {
 			EntityManager entityManager = module.getEntityManager();
+			dtoMapper = Mockito.spy(new TestDTOMapper(entityManager));
 			QuerydslExpressionFactory<QTestEntity> basicComputedValueFactory = new QuerydslExpressionFactory<QTestEntity>() {
 
 				@Override
@@ -76,8 +80,10 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 					basicComputedValueFactory);
 			queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_NUMBER_OF_SMALLER_IDS, Long.class,
 					complexComputedValueFactory);
+
+
 			module.addRepository(
-					JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager)).build());
+					JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, dtoMapper).build());
 			module.addRepository(JpaRepositoryConfig
 					.builder(RelatedEntity.class, RelatedDTO.class, new RelatedDTOMapper(entityManager)).build());
 
@@ -114,8 +120,10 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		testRepo.create(test);
 
 		// query as regular entity (you may want to disable that in a real application)
-		List<TestEntity> list = testRepo.findAll(new QuerySpec(TestEntity.class));
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		List<TestEntity> list = testRepo.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
+		Mockito.verify(dtoMapper, Mockito.times(0)).unmapQuerySpec(Mockito.any(QuerySpec.class));
 
 		// query the mapped DTO
 		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getQuerySpecRepository(TestDTO.class);
@@ -125,6 +133,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		Assert.assertEquals(2L, dto.getId().longValue());
 		Assert.assertEquals("test", dto.getStringValue());
 		Assert.assertEquals("TEST", dto.getComputedUpperStringValue());
+		Mockito.verify(dtoMapper, Mockito.times(1)).unmapQuerySpec(Mockito.eq(querySpec));
 
 		// update the mapped dto
 		dto.setStringValue("newValue");
