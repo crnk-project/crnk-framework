@@ -1,259 +1,102 @@
-<h4>Experimental support for reactive/async programming</h4>
+The 2.7 release focuses on various usability improvements. Some further updates will be released in the coming weeks.
 
-The new module `crnk-reactive` integrates <a href="https://projectreactor.io/">projectreactor.io/</a> into Crnk
-to support reactive programming. A basic in-memory example looks like:
+
+<h4>use of Jackson to parse filter parameters</h4>
+
+The TypeParser now also makes use of Jackson to deserialize parameters (next to already built-in and custom parsers).
+The behavior can also be disabled by setting:
 
 <pre class="prettyprint">
-<![CDATA[
-public class InMemoryReactiveResourceRepository extends ReactiveResourceRepositoryBase<Task, Long> {
-
-	private Map<Long, Task> resources = new HashMap<>();
-
-	public InMemoryReactiveResourceRepository() {
-		super(Task.class);
-	}
-
-	@Override
-	public Mono<ResourceList<Task>> findAll(QuerySpec querySpec) {
-		return Mono.fromCallable(() -> querySpec.apply(resources.values()));
-	}
-
-	@Override
-	public Mono<Task> create(Task entity) {
-		return save(entity);
-	}
-
-	@Override
-	public Mono<T> save(Task entity) {
-		resources.put(entity.getId(), entity);
-		return Mono.just(entity);
-	}
-
-	@Override
-	public Mono<Boolean> delete(Long id) {
-		return Mono.fromCallable(() -> resources.remove(id) != null);
-	}
-}
-]]>
+ TypeParser.setUseJackson(false).
 </pre>
 
-Main benefits over the traditional API are:
+<h4>INFO log message on startup</h4>
 
-<ul>
-	<li>Individual requests no longer block threads. Instead multiple requests share can share a pool of worker threads.
-		Allows to implement highly concurrent applications.
-	</li>
-	<li>Requests get parallelized automatically. This may happen both within the repository implementation and the crnk
-		engine. For example, inclusions can be
-		requests in parallel. Or a repository may call multiple services in parallel and return the aggregated result.
-	</li>
-</ul>
-
-Currently this is considered experimental. For more information and limitations have a look at the documentation. In particular the lack
-of an asynchronous JDBC/JPA implementation is a bit of a roadblock for some application.
-
-
-<h4>AsyncCrnkServlet</h4>
-
-There is a new
-<span class="highlight">AsyncCrnkServlet</span> that complements crnk-reactive. In contrast to the CrnkServlet, requests
-get processed asynchronous and share a set of worker threads.
-
-<h4>Vert.x</h4>
-
-With support for reactive programming comes experimental support for Vert.x as well.
-
+that summarizes the setup of Crnk.
 
 <pre class="prettyprint">
-<![CDATA[
-VertxOptions options = new VertxOptions();
-options.setMaxEventLoopExecuteTime(Long.MAX_VALUE);
-
-SingleSubject waitSubject = SingleSubject.create();
-Handler<AsyncResult<String>> completionHandler = event -> waitSubject.onSuccess(event.result());
-
-vehicle = new CrnkVerticle(port);
-vertx = Vertx.vertx(options);
-vertx.deployVerticle(vehicle, completionHandler);
-]]>
+09:24:37 INFO  [ost-startStop-1] [    io.crnk.core.boot.CrnkBoot] crnk initialized: numResources=26, usedModules=[jackson, servlet, home, jpa, meta, operations, spring.mvc, ui, validation], securityProviders=[ServletSecurityProvider], pagingBehaviors=[OffsetLimitPagingBehavior], urlMapper=UrlMapperAdapter, serviceDiscovery=SpringServiceDiscovery
 </pre>
 
 
-<h4>Updates to www.crnk.io</h4>
+<h4>CDIServiceDiscovery backs-off in non-CDI environments</h4>
 
-The web page has been been refreshed a bit. Most notably the update of the web page has been integrated into the release process and
-documentation gets published automatically:
-
-<ul>
-	<li>
-		There is a dedicated release page for each minor version. It holds information about the latest release in that
-		minor version. Release versions continue to follow the major.minor.gitTimestamp convention.
-	</li>
-	<li>
-		The
-		<span class="highlight">latest</span>
-		release page points to the current master version including the most current documentation.
-	</li>
-	<li>
-		The
-		<span class="highlight">stable</span>
-		release page points towards the most recent release page.
-	</li>
-</ul>
-
-<h4>Dedicated security chapter</h4>
-
-The documentation hosts a new chapter dedicated to security. It aggregates the various security-related topics in one chapter.
+The CDIServiceDiscovery of crnk-cdi no longer fails if no CDI context is available. Instead an ERROR is added to the LOG.
 
 
-<h4>@JsonProperty support for QuerySpec</h4>
+<h4>QuerySpec mapping support JPA/DTO mapping</h4>
 
-The @JsonProperty annotation allows to rename fields in the JSON response. Since this release the same name mapping is applied
-to filter, sort, field set and inclusion parameters in QuerySpec.
-DefaultQuerySpecUrlMapper.setMapJsonNames allows to disable the behavior.
-
-
-<h4>Refinements to custom PagingBehavior registration</h4>
-
-Registering a custom PagingBehavior implementation makes it the global default in an application. It is no longer necessary to explicitly
-refer to the new implementation in @JsonApiResource.pagingBehavior. @JsonApiResource.pagingBehavior can continue to be used
-if multiple PagingBehavior implementations are used for different resources.
-
-<h4>URL Mapping of QuerySpec</h4>
-
-The functionality of QuerySpecSerializer and QuerySpecDeserializer has been merged into a
-<span class="highlight">new interface QuerySpecUrlMapper</span>.
-The functionality of the two have been closely related and changes usually needed to be applied to both. The new interface simplifies more consistent
-URL handling and eases customizing that behavior.
-
-<h4>Improved exception handling</h4>
-
-<ul>
-	<li>
-		Invalid request parameters now return a 400 BAD_REQUEST_ERROR with a proper source parameter declaration to
-		simplify tracking down the illegal parameter.
-	</li>
-	<li>
-		If JSON API repositories are invoked with an illegal method, a 405 METHOD_NOT_ALLOWED is returned.
-	</li>
-</ul>
-
-
-<h4>Server information</h4>
-
-With
-<span class="highlight">CrnkBoot.putServerInfo(...)
-</span> information about the server can be made available to clients. For example:
+The JpaMapper interface has a new (default) method to map DTO-based QuerySpec to Entity-based QuerySpec instances:
 
 <pre class="prettyprint">
-{
-	"data": [...]
-	"jsonapi": {
-		"vendor":"crnk"
-	}
+default QuerySpec unmapQuerySpec(QuerySpec querySpec) {
+	return querySpec;
 }
 </pre>
 
+It can be used to map filter, inclusion and sort parameters in the same fashion as the DTO/entitiy objects themselves.
 
-<h4>Streamlined project naming</h4>
 
-Setup related projects newly share a crnk-setup prefix:
+<h4>Multiple SecurityProviders</h4>
 
-<table class="example">
-	<tr>
-		<td>
-			Previous name
-		</td>
-		<td>
-			New name
-		</td>
-	</tr>
-	<tr>
-		<td>
-			crnk-cdi
-		</td>
-		<td>
-			crnk-setup-cdi
-		</td>
-	</tr>
-	<tr>
-		<td>
-			crnk-guice
-		</td>
-		<td>
-			crnk-setup-guice
-		</td>
-	</tr>
-	<tr>
-		<td>
-			crnk-rs
-		</td>
-		<td>
-			crnk-setup-rs
-		</td>
-	</tr>
-	<tr>
-		<td>
-			crnk-servlet
-		</td>
-		<td>
-			crnk-setup-servlet
-		</td>
-	</tr>
-	<tr>
-		<td>
-			crnk-spring
-		</td>
-		<td>
-			crnk-setup-spring, crnk-setup-spring-boot1 and crnk-setup-spring-boot2
-		</td>
-	</tr>
-</table>
+Modules can now register multiple SecurityProvider providing roles to users.
 
-<p>
-	The previous projects still exists and point have the new projects as dependency. At some point in the future those
-	projects will be removed.
-</p>
 
-<p>
-	The SpringBoot-related functionality has further been moved into dedicated crnk-setup-spring-boot projects, one for
-	version 1.x and one for version 2.x.
-</p>
+<h4>Simplified Typescript Generation</h4>
 
-<h4>Improved Spring Boot 2 support</h4>
+The configuration of the Typescript generation has been stream-lined:
 
-<span class="highlight">crnk-setup-spring-boot2</span> is a new project dedicated to Spring Boot 2. This includes:
+<pre class="prettyprint">
+typescriptGen{
+	runtime {
+		...
+	}
+
+	npm {
+		// map given Java package to a subdirectory of genDir
+		directoryMapping['io.myapp.types'] = '/types'
+
+		// map a given package to a third-party library
+		packageMapping['io.other.app'] = '@other/app'
+	}
+
+	...
+}
+
+</pre>
 
 <ul>
-	<li>Cleanup of package naming.</li>
-	<li>New interface CrnkBootConfigurer to customize CrnkBoot without having to replace the auto configuration.</li>
-	<li>Support for Typescript generation.</li>
+	<li>Package generation is disabled by default. It is no longer necessary to specify a package name.</li>
+	<li>
+		Objects of unknown type get generated into the root directory. Directory mappings (see above) can be used to control the
+		placement of objects
+		into directories.
+	</li>
+	<li>
+		Package mappings can be used to reference resources from third-party packages.
+	</li>
+	<li>
+		Meta-related resources from crnk-meta are not generated by default. They can be obtained from the @crnk/angular-ngrx library.
+	</li>
 </ul>
 
+Along the way support to generate complete NPM packages has been deprecated since it has been rarely used and
+typically application may want to setup a custom NPM package anyway.
 
-<h4>crnk-bom</h4>
-
-
-<span class="highlight">crnk-bom</span> is a Maven BOM managing the versions of all crnk artifacts.
-
-<h4>Fixes</h4>
-
-<ul>
-	<li>QuerySpec.duplicate also duplicates nested data structures like paging specs and filters.</li>
-	<li>Guava dependencies have been removed from crnk-core.</li>
-	<li>totalResourceCount is omitted from the response if null.</li>
-</ul>
-
-<h4>Move to Bintray</h4>
-
-OSS hosting on Sonatype has proven to be rather unreliable. The project has now moved to JFrog Bintray.
-The repository is available at: <a href="https://bintray.com/crnk-project/maven">https://bintray.com/crnk-project/maven</a>.
+For more information see
+<a href="http://www.crnk.io/releases/stable/documentation/#_typescript">here</a>.
 
 
-<h4>Typescript generator</h4>
+<h4>Hardened URL computation for crnk-servlet</h4>
 
-<ul>
-	<li>Support for Arrays and Map types</li>
-	<li>Use of String-based Enums in Typescript (available in Typescript 2.4+)</li>
-	<li>Log file written to build/tmp/crnk.gen.typescript.log</li>
-</ul>
+The CrnkServlet can be integrated into many different environments, but not all of them behave exactly the same. Sometimes this could lead
+to a broken URL computation that needed to be fixed/overridden manually. The revised implementation is more robust
+against missing slashes and allow to override a broken servlet path with the <i>crnk.config.web.path.prefix</i> property
+or <i>CrnkBoot.setWebPathPrefix(...)</i>.
+
+
+<h4>Lazy Initialization of CrnkClient</h4>
+
+CrnkClient performs more of its initialization in a lazy fashion (in CrnkClient.init). This allows to reconfigure more aspects of CrnkClient, such as
+paging behavior and service discovery.
+
