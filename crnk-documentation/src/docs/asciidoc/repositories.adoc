@@ -320,6 +320,53 @@ is implemented by <<urlmapper,`QuerySpecUrlMapper`>>.
 
 For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
 
+
+### API
+
+The QuerySpec API looks like (further setters available as well):
+
+[source]
+----
+	public class QuerySpec {
+		public <T> List<T> apply(Iterable<T> resources){...}
+
+		public Long getLimit() {...}
+
+		public long getOffset() {...}
+
+		public PagingSpec getPagingSpec() {...}
+
+		public List<FilterSpec> getFilters() {...}
+
+		public List<SortSpec> getSort() {...}
+
+		public List<IncludeFieldSpec> getIncludedFields() {...}
+
+		public List<IncludeRelationSpec> getIncludedRelations() {...}
+
+		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
+
+		...
+	}
+----
+
+There are `Spec` class for all major features:
+
+- `FilterSpec`
+- `SortSpec`
+- `IncludeFieldSpec`
+- `IncludeRelationSpec`
+- `PagingSpec`
+
+More information is given in the subsequent sections.
+
+QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
+on any `java.util.Collection`. It is useful for testing, mocking and on smaller datasets to keep
+the implementation of a repository as simple as possible.
+
+
+
+
 anchor:filtering[]
 
 ### Filtering
@@ -329,17 +376,24 @@ it provides a recommendation that comes by default with Crnk. Depending on the d
 in use, application may choose to extend or replace that default implementation.
 
 Resource filtering can be achieved by providing parameters which start with `filter`.
-The format for filters: `filter[ResourceType][property|operator]([property|operator])* = "value"`
+The format for filters: `filter[ResourceType]?[property|operator]([property|operator])* = "value"`
 
 * `GET /tasks/?filter[name]=Super task`
 * `GET /tasks/?filter[name][EQ]=Super task`
+* `GET /tasks/?filter[address.plz][EQ]=Super task`
+* `GET /tasks/?filter[address.city][EQ]=Super task`
 * `GET /tasks/?filter[tasks][name]=Super task`
 * `GET /tasks/?filter[tasks][name]=Super task&filter[tasks][dueDate]=2015-10-01`
 
-QuerySpec uses the `EQ` operator if no operator was provided.
+A filter parameter is represented by a `FilterSpec`. It holds the path to the attribute,
+the operator and the filter value. Internally Crnk will map filter parameters to
+properly typed `FilterSpec.value`. The type is determined based on the type of
+the filtered attribute. The process can be customized by the `QuerySpecUrlMapper`
+and `TypeParser` implementations that are accessible from `CrnkBoot`.
 
-Operators are represented by the `FilterOperator` class. Crnk comes with a set of
-default filters:
+Operators within `FilterSpec` are represented by the `FilterOperator` class.
+By default, QuerySpec uses the `EQ` operator if no operator was provided.
+Crnk comes with a set of default filters:
 
 [cols="1,3", options="header"]
 |===
@@ -388,22 +442,26 @@ Sorting information for the resources can be achieved by providing `sort` parame
 * `GET /tasks/?sort=name,-shortName`
 * `GET /tasks/?sort[projects]=name,-shortName&include=projects`
 
+Sorting parameters are reprsented by `SortSpec` within `QuerySpec` similar to `FilterSpec` above.
 
 anchor:pagination[]
 
 ### Pagination
 
-Resources pagination strategies defined by <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
+Resources can specify pagination with <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
 By default, each resource has implicit pagination support defined by `OffsetLimitPagingBehavior`.
 It provides a simple strategy of a pair `offset/limit` parameters which can be used for filtering amount of results.
 
-Pagination executed automatically as soon as client provides a  `page` parameter.
 The format for pagination: `page[offset|limit] = "value", where value is an integer`
 
 Example:
 
 * `GET /tasks/?page[offset]=0&page[limit]=10`
 
+Paging parameters are represented by `PagingSpec` within `QuerySpec`.
+
+By default, repositories can access the parameter with `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+In case of custom strategies, `QuerySpec.getPagingSpec` must be used.
 
 The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
 The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
@@ -454,54 +512,11 @@ Examples:
 * `GET /tasks/?include[projects]=task&include[tasks]=comments`
 * `GET /tasks/?include[projects]=task&include=comments` (QuerySpec example)
 
-
-### API
-
-The QuerySpec API looks like (further setters available as well):
-
-[source]
-----
-	public class QuerySpec {
-		public <T> List<T> apply(Iterable<T> resources){...}
-
-		public Long getLimit() {...}
-
-		public long getOffset() {...}
-
-		public PagingSpec getPagingSpec() {...}
-
-		public List<FilterSpec> getFilters() {...}
-
-		public List<SortSpec> getSort() {...}
-
-		public List<IncludeFieldSpec> getIncludedFields() {...}
-
-		public List<IncludeRelationSpec> getIncludedRelations() {...}
-
-		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
-
-		...
-	}
-----
-
-Note that single QuerySpec holds the parameters for a single resource type and,
-in more complex scenarios, request can lead to multiple QuerySpec instances
-(namely when related resources are also filtered, sorted, etc). A repository
-is invoked with the QuerySpec for the requested root type. If related resources are
-included in the request, their QuerySpecs can be obtained by calling `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
-
-`FilterSpec` holds a value of type object. Since URL parameters are passed as String,
-they get converted to the proper types by a <<urlmapper,`QuerySpecUrlMapper`>> implementation. The
-type is determined based on the type of the filtered attribute.
-
-`PagingSpec` holds a value of defined pagination strategy.
-By default, the values can be accessed via `getLimit/getOffset` methods.
-In case of custom strategies, `getPagingSpec` should be used.
-
-QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
-on any `java.util.Collection`. It is useful for testing and on smaller datasets to keep
-the implementation of a repository as simple as possible. It returns a ResourceList
-that carries a PagedMetaInformation that lets Crnk automatically compute pagination links.
+Note that a QuerySpec instance holds the parameters for a single resource type.
+In case of inclusions, the QuerySpec references further
+QuerySpecs, one for each inclusion holding the parameters of that inclusion.
+Repositories are then accessed with the QuerySpec matching the repository.
+The QuerySpec for a particular type can be obtained with `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
 
 
 anchor:urlmapper[]
@@ -707,3 +722,6 @@ include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/exa
 - `getRelationshipFields` introduces the field dynamically instead of statically.
 - `getMatcher` attaches the repository to the historized resources.
 - `findManyTarget` implements the lookup of history elements.
+
+
+

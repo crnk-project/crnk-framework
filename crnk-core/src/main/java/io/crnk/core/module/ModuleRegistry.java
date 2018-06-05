@@ -349,6 +349,7 @@ public class ModuleRegistry {
 		this.initializedState = InitializedState.INITIALIZING;
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModules(getJacksonModules());
+		typeParser.setObjectMapper(objectMapper);
 
 		initializeModules();
 
@@ -515,6 +516,7 @@ public class ModuleRegistry {
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+		typeParser.setObjectMapper(objectMapper);
 	}
 
 	public List<RepositoryAdapterFactory> getRepositoryAdapterFactories() {

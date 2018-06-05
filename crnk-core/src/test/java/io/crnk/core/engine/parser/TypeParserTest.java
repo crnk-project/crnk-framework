@@ -1,26 +1,40 @@
 package io.crnk.core.engine.parser;
 
-import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TypeParserTest {
 
-	private final TypeParser sut = new TypeParser();
+	private ObjectMapper mapper;
+
+	private TypeParser sut;
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
+	@Before
+	public void setup() {
+		sut = new TypeParser();
+		mapper = new ObjectMapper();
+		sut.setObjectMapper(mapper);
+	}
 
 	@Test
 	public void onStringShouldReturnString() throws Exception {
@@ -283,8 +297,22 @@ public class TypeParserTest {
 	}
 
 
-	// CharSequenceParseClass
+	@Test
+	public void localDateShouldBeHandledByJackson() throws Exception {
+		JavaTimeModule module = new JavaTimeModule();
+		mapper.registerModule(module);
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		LocalDateTime dateValue = LocalDateTime.now();
 
+		String jsonValue = mapper.writerFor(LocalDateTime.class).writeValueAsString(dateValue);
+		String stringValue = jsonValue.substring(1, jsonValue.length() - 1);
+
+		LocalDateTime parsedValue = sut.parse(stringValue, LocalDateTime.class);
+		Assert.assertEquals(dateValue, parsedValue);
+
+		StringParser<LocalDateTime> parser = sut.getParser(LocalDateTime.class);
+		Assert.assertTrue(parser instanceof JacksonParser);
+	}
 
 	private enum SampleEnum {
 		SAMPLE_VALUE
