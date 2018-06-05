@@ -1,5 +1,12 @@
 package io.crnk.meta.model;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -8,13 +15,6 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 
 @JsonApiResource(type = "meta/attribute")
 public class MetaAttribute extends MetaElement {
@@ -69,7 +69,7 @@ public class MetaAttribute extends MetaElement {
 			this.field = ClassUtils.findClassField(beanClass, name);
 			this.readMethod = ClassUtils.findGetter(beanClass, name);
 
-			PreconditionUtil.assertFalse("no getter or field found ", field == null && readMethod == null);
+			PreconditionUtil.verify(field != null || readMethod != null, "no getter or field found for %s.%s", beanClass, name);
 
 			Class<?> rawType = field != null ? field.getType() : readMethod.getReturnType();
 			writeMethod = ClassUtils.findSetter(beanClass, name, rawType);

@@ -1,5 +1,9 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.reflect.Type;
+import javax.persistence.Embeddable;
+
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEmbeddable;
 import io.crnk.jpa.meta.MetaEmbeddableAttribute;
@@ -7,9 +11,6 @@ import io.crnk.jpa.query.AnyTypeObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-
-import javax.persistence.Embeddable;
-import java.lang.reflect.Type;
 
 public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbeddable> {
 
@@ -41,6 +42,11 @@ public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbe
 	}
 
 	@Override
+	protected String getMetaName(BeanAttributeInformation attrInformation) {
+		return attrInformation.getName();
+	}
+
+	@Override
 	protected MetaAttribute createAttribute(MetaEmbeddable metaDataObject, String name) {
 		MetaEmbeddableAttribute attr = new MetaEmbeddableAttribute();
 		attr.setParent(metaDataObject, true);
@@ -48,7 +54,8 @@ public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbe
 		attr.setFilterable(true);
 		attr.setSortable(true);
 
-		if (AnyTypeObject.class.isAssignableFrom(metaDataObject.getImplementationClass()) && name.equals(VALUE_ANYTYPE_ATTR_NAME)) {
+		if (AnyTypeObject.class.isAssignableFrom(metaDataObject.getImplementationClass()) && name
+				.equals(VALUE_ANYTYPE_ATTR_NAME)) {
 			attr.setDerived(true);
 		}
 

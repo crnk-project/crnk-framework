@@ -120,12 +120,15 @@ public class BeanAttributeInformation {
 		try {
 			if (getter != null) {
 				return getter.invoke(bean);
-			} else {
+			}
+			else {
 				return field.get(bean);
 			}
-		} catch (IllegalAccessException e) {
+		}
+		catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -134,12 +137,15 @@ public class BeanAttributeInformation {
 		try {
 			if (setter != null) {
 				setter.invoke(bean, value);
-			} else {
+			}
+			else {
 				field.set(bean, value);
 			}
-		} catch (IllegalAccessException e) {
+		}
+		catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -149,11 +155,12 @@ public class BeanAttributeInformation {
 			Optional<JsonProperty> annotation = getAnnotation(JsonProperty.class);
 			if (annotation.isPresent()) {
 				jsonName = annotation.get().value();
-			} else {
+			}
+			else {
 				jsonName = name;
 			}
 		}
-		return jsonName;
+		return jsonName.isEmpty() ? name : jsonName;
 	}
 
 	public Type getImplementationType() {

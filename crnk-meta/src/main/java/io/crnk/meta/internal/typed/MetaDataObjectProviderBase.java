@@ -35,23 +35,30 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 					continue; // contained in super type
 				}
 
-				String jsonName = attrInformation.getJsonName();
+				String metaName = getMetaName(attrInformation);
+				try {
+					MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(metaName));
+					attribute.setReadMethod(attrInformation.getGetter());
+					attribute.setWriteMethod(attrInformation.getSetter());
 
-				MetaAttribute attribute = createAttribute(meta, MetaUtils.firstToLower(jsonName));
-				attribute.setReadMethod(attrInformation.getGetter());
-				attribute.setWriteMethod(attrInformation.getSetter());
+					attribute.setSortable(true);
+					attribute.setFilterable(true);
+					if (attrInformation.getSetter() != null) {
+						attribute.setInsertable(true);
+						attribute.setUpdatable(true);
+					}
 
-				attribute.setSortable(true);
-				attribute.setFilterable(true);
-				if (attrInformation.getSetter() != null) {
-					attribute.setInsertable(true);
-					attribute.setUpdatable(true);
+					initAttribute(attribute);
 				}
-
-				initAttribute(attribute);
+				catch (Exception e) {
+					throw new IllegalStateException(
+							"failed to create attribute " + implClass.getName() + "." + name + " with metaName=" + metaName, e);
+				}
 			}
 		}
 	}
+
+	protected abstract String getMetaName(BeanAttributeInformation attrInformation);
 
 	protected boolean isIgnored(BeanAttributeInformation information) {
 		return false;

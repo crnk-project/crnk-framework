@@ -1,5 +1,26 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Version;
+
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEntityAttribute;
 import io.crnk.jpa.meta.MetaJpaDataObject;
@@ -7,12 +28,6 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
-
-import javax.persistence.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> extends AbstractJpaDataObjectFactory<T> {
 
@@ -37,6 +52,11 @@ public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> ext
 		return meta;
 	}
 
+	@Override
+	protected String getMetaName(BeanAttributeInformation attrInformation) {
+		return attrInformation.getName();
+	}
+
 	private MetaElement getSuperMeta(Class<?> superClazz) {
 		if (superClazz.getAnnotation(Entity.class) != null || superClazz.getAnnotation(MappedSuperclass.class) != null) {
 			return context.allocate(superClazz);
@@ -56,7 +76,8 @@ public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> ext
 					boolean attrGenerated = attr.getAnnotation(GeneratedValue.class) != null;
 					if (pkElements.size() == 1) {
 						generated = attrGenerated;
-					} else if (generated != attrGenerated) {
+					}
+					else if (generated != attrGenerated) {
 						throw new IllegalStateException(
 								"cannot mix generated and not-generated primary key elements for " + meta.getId());
 					}
@@ -157,7 +178,7 @@ public abstract class AbstractEntityMetaFactory<T extends MetaJpaDataObject> ext
 
 
 	private boolean getCascade(ManyToMany manyManyAnnotation, ManyToOne manyOneAnnotation, OneToMany oneManyAnnotation,
-							   OneToOne oneOneAnnotation) {
+			OneToOne oneOneAnnotation) {
 		if (manyManyAnnotation != null) {
 			return getCascade(manyManyAnnotation.cascade());
 		}

@@ -2,6 +2,7 @@ package io.crnk.meta.internal.resource;
 
 import java.lang.reflect.Type;
 
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.internal.typed.MetaDataObjectProvider;
 import io.crnk.meta.model.MetaDataObject;
@@ -28,5 +29,10 @@ public class JsonObjectMetaFactory extends MetaDataObjectProvider {
 	@Override
 	protected Class<? extends MetaElement> getMetaClass() {
 		return MetaJsonObject.class;
+	}
+
+	@Override
+	protected String getMetaName(BeanAttributeInformation attrInformation) {
+		return attrInformation.getJsonName();
 	}
 }
