@@ -187,7 +187,7 @@ request headers (like security), as it has to be done in two places (unfortunate
 
 It is possible to hook into the HTTP implementation used by Crnk ( or Apache).
 Make use of `CrnkClient#getHttpAdapter()` and cast it to either
-`HttpClientAdapter` or `Adapter`. Both implementations provide a
+`HttpAdapter`. Both implementations provide a
 `addListener` method, which in turn gives access to the native builder used to construct
 the respective HTTP client implementation. This allows to cover various use cases:
 
@@ -195,4 +195,9 @@ the respective HTTP client implementation. This allows to cover various use case
 - collect statistics
 - ...
 
-You may have a look at `crnk-brave` for an advanced example.
+Some examples:
+
+- https://github.com/crnk-project/crnk-framework/blob/master/crnk-monitor-brave4/src/main/java/io/crnk/monitor/brave/BraveClientModule.java[crnk-monitor-brave4] for an advanced example.
+- https://stackoverflow.com/questions/32196424/how-to-add-headers-to-okhttp-request-interceptor?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa[How to add
+   headers to OkHttp request interceptor].
+
