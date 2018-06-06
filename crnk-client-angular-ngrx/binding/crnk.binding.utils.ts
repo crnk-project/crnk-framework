@@ -46,36 +46,45 @@ export const assumeNoError = function () {
 	};
 };
 
-export const applyQueryParams = function (query: Query, params: QueryParams) {
-	if (!query.params) {
-		query.params = {};
+export const applyQueryParams = function (baseQuery: Query, additionalParams: QueryParams) {
+	if (!baseQuery.params) {
+		baseQuery.params = {};
 	}
 
-	query.params.limit = params.limit;
-	query.params.offset = params.offset;
-	if (!_.isEmpty(params.include)) {
-		if (!query.params.include) {
-			query.params.include = [];
+	baseQuery.params.limit = additionalParams.limit;
+	baseQuery.params.offset = additionalParams.offset;
+	if (!_.isEmpty(additionalParams.include)) {
+		// combine inclusions
+		if (!baseQuery.params.include) {
+			baseQuery.params.include = [];
 		}
-		query.params.include.push(...params.include);
+		baseQuery.params.include = _.union(baseQuery.params.include, additionalParams.include);
 	}
-	if (!_.isEmpty(params.fields)) {
-		if (!query.params.fields) {
-			query.params.fields = [];
+	if (!_.isEmpty(additionalParams.fields)) {
+		// combine fields
+		if (!baseQuery.params.fields) {
+			baseQuery.params.fields = [];
 		}
-		query.params.fields.push(...params.fields);
+		baseQuery.params.fields = _.union(baseQuery.params.fields, additionalParams.fields);
 	}
-	if (!_.isEmpty(params.sorting)) {
-		if (!query.params.sorting) {
-			query.params.sorting = [];
+	if (additionalParams.sorting != null) {
+		// replace sort (additionalParams.sorting != null check to allow to clear sorting)
+		// unlikely to be a use case to merge sorting params
+		if (!baseQuery.params.sorting) {
+			baseQuery.params.sorting = [];
 		}
-		query.params.sorting.push(...params.sorting);
+		baseQuery.params.sorting = [...additionalParams.sorting];
 	}
-	if (!_.isEmpty(params.filtering)) {
-		if (!query.params.filtering) {
-			query.params.filtering = [];
+	if (!_.isEmpty(additionalParams.filtering)) {
+		// combine filters by replacing duplicates on same attribute
+		if (!baseQuery.params.filtering) {
+			baseQuery.params.filtering = [];
 		}
-		query.params.filtering.push(...params.filtering);
+
+		const filterMap = _.keyBy(baseQuery.params.filtering, 'path');
+		const addFilterMap = _.keyBy(additionalParams.filtering, 'path');
+		Object.assign(filterMap, addFilterMap);
+		baseQuery.params.filtering = _.values(filterMap);
 	}
 };
 
@@ -132,8 +141,8 @@ export class CrnkBindingUtils {
 		return results;
 	}
 
-	public applyQueryParams(query: Query, params: QueryParams) {
-		return applyQueryParams(query, params);
+	public applyQueryParams(baseQuery: Query, additionalParams: QueryParams) {
+		return applyQueryParams(baseQuery, additionalParams);
 	}
 
 
