@@ -1,17 +1,19 @@
 package io.crnk.jpa.meta.internal;
 
+import java.lang.reflect.Type;
+import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaMappedSuperclass;
-
-import javax.persistence.MappedSuperclass;
-import java.lang.reflect.Type;
 
 public class MappedSuperclassMetaFactory extends AbstractEntityMetaFactory<MetaMappedSuperclass> {
 
 
 	@Override
 	public boolean accept(Type type) {
-		return ClassUtils.getRawType(type).getAnnotation(MappedSuperclass.class) != null;
+		Class<?> rawType = ClassUtils.getRawType(type);
+		return rawType.getAnnotation(MappedSuperclass.class) != null && rawType.getAnnotation(Embeddable.class) == null;
 	}
 
 	@Override

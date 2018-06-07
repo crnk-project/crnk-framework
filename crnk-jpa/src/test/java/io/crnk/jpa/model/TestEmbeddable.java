@@ -6,23 +6,26 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class TestEmbeddable {
+public class TestEmbeddable extends TestEmbeddableBase {
 
 	public static final String ATTR_embIntValue = "embIntValue";
+
 	public static final String ATTR_embStringValue = "embStringValue";
+
 	public static final String ATTR_nestedValue = "nestedValue";
+
 	public static final String ATTR_relatedValue = "relatedValue";
+
 	public static final String ATTR_anyValue = "anyValue";
 
-	@Column
-	private Integer embIntValue;
 
 	@Column
 	private String embStringValue;
 
 	@Column
-	@AttributeOverrides({@AttributeOverride(name = "stringValue", column = @Column(name = "anyStringValue")), @AttributeOverride(name = "intValue", column = @Column(name = "anyIntValue")),
-			@AttributeOverride(name = "type", column = @Column(name = "anyTypeValue"))})
+	@AttributeOverrides({ @AttributeOverride(name = "stringValue", column = @Column(name = "anyStringValue")),
+			@AttributeOverride(name = "intValue", column = @Column(name = "anyIntValue")),
+			@AttributeOverride(name = "type", column = @Column(name = "anyTypeValue")) })
 	private TestAnyType anyValue;
 
 	// @ManyToOne(fetch = FetchType.EAGER)
@@ -40,21 +43,13 @@ public class TestEmbeddable {
 		this.anyValue = anyValue;
 	}
 
-//	public RelatedEntity getRelatedValue() {
-//		return relatedValue;
-//	}
-//
-//	public void setRelatedValue(RelatedEntity relatedValue) {
-//		this.relatedValue = relatedValue;
-//	}
-
-	public Integer getEmbIntValue() {
-		return embIntValue;
-	}
-
-	public void setEmbIntValue(Integer embIntValue) {
-		this.embIntValue = embIntValue;
-	}
+	//	public RelatedEntity getRelatedValue() {
+	//		return relatedValue;
+	//	}
+	//
+	//	public void setRelatedValue(RelatedEntity relatedValue) {
+	//		this.relatedValue = relatedValue;
+	//	}
 
 	public String getEmbStringValue() {
 		return embStringValue;

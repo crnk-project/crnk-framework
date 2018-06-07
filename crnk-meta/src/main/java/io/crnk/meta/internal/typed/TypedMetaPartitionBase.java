@@ -1,13 +1,14 @@
 package io.crnk.meta.internal.typed;
 
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaPartitionBase;
-
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class TypedMetaPartitionBase extends MetaPartitionBase {
 
@@ -20,7 +21,9 @@ public abstract class TypedMetaPartitionBase extends MetaPartitionBase {
 			factory.init(new TypedMetaElementFactoryContext() {
 				@Override
 				public MetaElement allocate(Type type) {
-					return TypedMetaPartitionBase.this.allocateMetaElement(type).get();
+					Optional<MetaElement> optMeta = TypedMetaPartitionBase.this.allocateMetaElement(type);
+					PreconditionUtil.verify(optMeta.isPresent(), "unable to generate meta element for %s", type);
+					return  optMeta.get();
 				}
 
 				@Override
