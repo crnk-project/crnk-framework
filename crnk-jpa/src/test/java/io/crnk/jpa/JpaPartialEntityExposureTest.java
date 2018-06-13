@@ -1,17 +1,22 @@
 package io.crnk.jpa;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
 import io.crnk.legacy.queryParams.QueryParams;
-import org.junit.*;
-
-import javax.persistence.EntityManager;
-import java.util.List;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 @Ignore
 public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
@@ -62,7 +67,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testInformationBuilder() {
 		EntityManager em = null;
-		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
+		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior());
 		ResourceInformation info = builder.build(TestEntity.class);
 		List<ResourceField> relationshipFields = info.getRelationshipFields();
 		Assert.assertEquals(0, relationshipFields.size());

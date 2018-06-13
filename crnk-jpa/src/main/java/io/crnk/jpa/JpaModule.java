@@ -1,11 +1,10 @@
 package io.crnk.jpa;
 
-import io.crnk.jpa.internal.JpaRepositoryBase;
-
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.persistence.Entity;
@@ -28,6 +27,8 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
@@ -35,6 +36,8 @@ import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
+import io.crnk.core.utils.Supplier;
+import io.crnk.jpa.internal.JpaRepositoryBase;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.internal.OptimisticLockExceptionMapper;
@@ -290,7 +293,14 @@ public class JpaModule implements InitializingModule {
 			initQueryFactory();
 		}
 
-		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider()));
+		Supplier<PagingBehavior> pagingBehaviorSupplier = () ->{
+			Optional<PagingBehavior> optPagingBehavior = context.getModuleRegistry().getPagingBehaviors()
+					.stream().filter(it -> it instanceof OffsetLimitPagingBehavior).findFirst();
+			PreconditionUtil.verify(optPagingBehavior.isPresent(), "no OffsetLimitPagingBehavior registered, must be available to use crnk-jpa");
+			return (OffsetLimitPagingBehavior) optPagingBehavior.get();
+		};
+
+		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider(), pagingBehaviorSupplier));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
 		context.addExceptionMapper(new PersistenceExceptionMapper(context));
 		context.addExceptionMapper(new PersistenceRollbackExceptionMapper(context));
@@ -513,9 +523,9 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
-	public ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
+	protected ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider, Supplier<PagingBehavior> pagingBehavior) {
 		if (resourceInformationProvider == null) {
-			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider);
+			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider, pagingBehavior);
 		}
 		return resourceInformationProvider;
 	}

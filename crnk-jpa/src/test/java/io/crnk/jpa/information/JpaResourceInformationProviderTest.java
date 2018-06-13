@@ -1,5 +1,12 @@
 package io.crnk.jpa.information;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -7,10 +14,21 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.meta.JpaMetaProvider;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
+import io.crnk.jpa.model.AnnotationTestEntity;
+import io.crnk.jpa.model.JpaTransientTestEntity;
+import io.crnk.jpa.model.ManyToManyOppositeEntity;
+import io.crnk.jpa.model.ManyToManyTestEntity;
+import io.crnk.jpa.model.OneToOneTestEntity;
+import io.crnk.jpa.model.RelatedEntity;
+import io.crnk.jpa.model.RenamedTestEntity;
+import io.crnk.jpa.model.TestEmbeddable;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.jpa.util.ResourceFieldComparator;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.meta.MetaLookup;
@@ -20,17 +38,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 public class JpaResourceInformationProviderTest {
 
 	private JpaResourceInformationProvider builder;
+
 	private MetaLookup lookup;
+
 	private JpaMetaProvider jpaMetaProvider;
 
 	@Before
@@ -38,8 +51,9 @@ public class JpaResourceInformationProviderTest {
 		jpaMetaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
 		lookup = new MetaLookup();
 		lookup.addProvider(jpaMetaProvider);
-		builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
-		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()), new TypeParser(), new ObjectMapper()));
+		builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior());
+		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()),
+				new TypeParser(), new ObjectMapper()));
 	}
 
 	@Test

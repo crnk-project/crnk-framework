@@ -26,6 +26,10 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 
 	private Long maxPageLimit = null;
 
+	public OffsetLimitPagingBehavior(){
+
+	}
+
 	@Override
 	public Map<String, Set<String>> serialize(final OffsetLimitPagingSpec pagingSpec, final String resourceType) {
 		Map<String, Set<String>> values = new HashMap<>();

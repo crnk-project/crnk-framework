@@ -1,5 +1,13 @@
 package io.crnk.jpa.internal;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -12,12 +20,12 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceInstance
 import io.crnk.core.engine.internal.information.resource.ResourceInformationProviderBase;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.utils.Supplier;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
@@ -30,14 +38,6 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
  * annotations take precedence.
@@ -48,11 +48,17 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	private final JpaMetaProvider metaProvider;
 
-	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider) {
+	private final Supplier<PagingBehavior> pagingBehaviorSupplier;
+
+	private PagingBehavior pagingBehavior;
+
+	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider,
+			Supplier<PagingBehavior> pagingBehaviorSupplier) {
 		super(
 				propertiesProvider,
 				Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(),
 						new JacksonResourceFieldInformationProvider()));
+		this.pagingBehaviorSupplier = pagingBehaviorSupplier;
 
 		metaProvider = new JpaMetaProvider((Set) Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
@@ -74,7 +80,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			} else {
+			}
+			else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -83,7 +90,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 		String resourcePath = getResourcePath(resourceClass);
@@ -99,9 +106,14 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				&& superclass.getAnnotation(MappedSuperclass.class) == null ? context.getResourceType(superclass)
 				: null;
 
+		if (pagingBehavior == null) {
+			pagingBehavior = pagingBehaviorSupplier.get();
+		}
+
 		TypeParser typeParser = context.getTypeParser();
-		ResourceInformation info = new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
-				instanceBuilder, fields, new OffsetLimitPagingBehavior());
+		ResourceInformation info =
+				new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
+						instanceBuilder, fields, pagingBehavior);
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
 		info.setIdStringMapper(new JpaIdMapper(meta));
 		return info;
@@ -200,7 +212,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			} else {
+			}
+			else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

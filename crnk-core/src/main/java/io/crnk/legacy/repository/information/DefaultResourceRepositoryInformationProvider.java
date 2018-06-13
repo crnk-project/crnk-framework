@@ -1,6 +1,13 @@
 package io.crnk.legacy.repository.information;
 
-import io.crnk.core.engine.information.repository.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
+import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
@@ -12,9 +19,6 @@ import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 
@@ -44,17 +48,18 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-										RepositoryInformationProviderContext context) {
+			RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
-		PreconditionUtil.assertTrue("cannot get ResourceInformation for " + resourceClass,
-				resourceInformationProvider.accept(resourceClass));
+		PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass),
+				"cannot get resource information for resource class '%s' to setup repository '%s', not annotated with @JsonApiResource?", resourceClass, repository);
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		String path = getPath(resourceInformation, repository);
 
-		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass), getAccess(repository));
+		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass),
+				getAccess(repository));
 	}
 
 	// FIXME
@@ -76,15 +81,18 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 		if (annotation.isPresent()) {
 			return annotation.get().value();
-		} else if (repository instanceof ResourceRepository) {
+		}
+		else if (repository instanceof ResourceRepository) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
 			return typeArgs[0];
-		} else if (repository != null) {
+		}
+		else if (repository != null) {
 			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		} else {
+		}
+		else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}

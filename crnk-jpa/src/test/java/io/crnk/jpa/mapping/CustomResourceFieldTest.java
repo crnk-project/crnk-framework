@@ -1,11 +1,17 @@
 package io.crnk.jpa.mapping;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import javax.persistence.EntityManager;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -22,18 +28,11 @@ import io.crnk.jpa.util.SpringTransactionRunner;
 import io.crnk.rs.type.JsonApiMediaType;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.persistence.EntityManager;
 
 /**
  * Example of how to add a custom ResourceField and in turn change the from an
@@ -94,73 +93,75 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 		super.setupModule(module, server);
 
 		if (server) {
-			module.setResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider()) {
+			module.setResourceInformationProvider(
+					new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior()) {
 
-				@Override
-				protected List<ResourceField> getResourceFields(Class clazz) {
-					List<ResourceField> fields = super.getResourceFields(clazz);
+						@Override
+						protected List<ResourceField> getResourceFields(Class clazz) {
+							List<ResourceField> fields = super.getResourceFields(clazz);
 
-					if (clazz == CountryEntity.class) {
-						List<String> languages = Arrays.asList("en", "de");
-						for (final String language : languages) {
-							ResourceFieldType resourceFieldType = ResourceFieldType.ATTRIBUTE;
-							String name = language + "Text";
-							Class<?> type = String.class;
-							ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, false, false);
+							if (clazz == CountryEntity.class) {
+								List<String> languages = Arrays.asList("en", "de");
+								for (final String language : languages) {
+									ResourceFieldType resourceFieldType = ResourceFieldType.ATTRIBUTE;
+									String name = language + "Text";
+									Class<?> type = String.class;
+									ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, false, false);
 
-							ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
-									null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access, null, null, null,
-									RelationshipRepositoryBehavior.DEFAULT);
-							field.setAccessor(new ResourceFieldAccessor() {
+									ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
+											null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access, null, null, null,
+											RelationshipRepositoryBehavior.DEFAULT);
+									field.setAccessor(new ResourceFieldAccessor() {
 
-								@Override
-								public String getValue(Object resource) {
-									CountryEntity country = (CountryEntity) resource;
-									List<CountryTranslationEntity> translations = country.getTranslations();
-									CountryTranslationEntity translation = getTranslation(translations, language);
-									return translation != null ? translation.getTxt() : null;
-								}
-
-								@Override
-								public void setValue(Object resource, Object fieldValue) {
-									CountryEntity country = (CountryEntity) resource;
-									List<CountryTranslationEntity> translations = country.getTranslations();
-									CountryTranslationEntity translation = getTranslation(translations, language);
-									if (translation == null) {
-
-										EntityManager em = module.getEntityManager();
-										LangEntity langEntity = em.find(LangEntity.class, language);
-										if (langEntity == null) {
-											throw new IllegalStateException("language not found: " + language);
+										@Override
+										public String getValue(Object resource) {
+											CountryEntity country = (CountryEntity) resource;
+											List<CountryTranslationEntity> translations = country.getTranslations();
+											CountryTranslationEntity translation = getTranslation(translations, language);
+											return translation != null ? translation.getTxt() : null;
 										}
 
-										translation = new CountryTranslationEntity();
-										CountryTranslationPK pk = new CountryTranslationPK();
-										pk.setCountry(country);
-										pk.setLang(langEntity);
-										translation.setCountryTranslationPk(pk);
-										translations.add(translation);
-									}
-									translation.setTxt((String) fieldValue);
-								}
+										@Override
+										public void setValue(Object resource, Object fieldValue) {
+											CountryEntity country = (CountryEntity) resource;
+											List<CountryTranslationEntity> translations = country.getTranslations();
+											CountryTranslationEntity translation = getTranslation(translations, language);
+											if (translation == null) {
 
-								private CountryTranslationEntity getTranslation(List<CountryTranslationEntity> translations, String language) {
-									for (CountryTranslationEntity translation : translations) {
-										CountryTranslationPK translationPk = translation.getCountryTranslationPk();
-										String langCd = translationPk.getLang().getLangCd();
-										if (langCd.equals(language)) {
-											return translation;
+												EntityManager em = module.getEntityManager();
+												LangEntity langEntity = em.find(LangEntity.class, language);
+												if (langEntity == null) {
+													throw new IllegalStateException("language not found: " + language);
+												}
+
+												translation = new CountryTranslationEntity();
+												CountryTranslationPK pk = new CountryTranslationPK();
+												pk.setCountry(country);
+												pk.setLang(langEntity);
+												translation.setCountryTranslationPk(pk);
+												translations.add(translation);
+											}
+											translation.setTxt((String) fieldValue);
 										}
-									}
-									return null;
+
+										private CountryTranslationEntity getTranslation(
+												List<CountryTranslationEntity> translations, String language) {
+											for (CountryTranslationEntity translation : translations) {
+												CountryTranslationPK translationPk = translation.getCountryTranslationPk();
+												String langCd = translationPk.getLang().getLangCd();
+												if (langCd.equals(language)) {
+													return translation;
+												}
+											}
+											return null;
+										}
+									});
+									fields.add(field);
 								}
-							});
-							fields.add(field);
+							}
+							return fields;
 						}
-					}
-					return fields;
-				}
-			});
+					});
 		}
 	}
 
@@ -173,9 +174,13 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 		getResponse.then().assertThat().body("data.attributes.deText", Matchers.equalTo("Schweiz"));
 		getResponse.then().assertThat().body("data.attributes.enText", Matchers.equalTo("Switzerland"));
 
-		String patchData = "{'data':{'id':'ch','type':'country','attributes':{'deText':'Test','enText':'Switzerland','ctlActCd':true}}}".replaceAll("'", "\"");
+		String patchData =
+				"{'data':{'id':'ch','type':'country','attributes':{'deText':'Test','enText':'Switzerland','ctlActCd':true}}}"
+						.replaceAll("'", "\"");
 
-		Response patchResponse = RestAssured.given().body(patchData.getBytes()).header("content-type", JsonApiMediaType.APPLICATION_JSON_API).when().patch(url);
+		Response patchResponse =
+				RestAssured.given().body(patchData.getBytes()).header("content-type", JsonApiMediaType.APPLICATION_JSON_API)
+						.when().patch(url);
 		patchResponse.then().statusCode(HttpStatus.SC_OK);
 
 		getResponse = RestAssured.get(url);
