@@ -16,7 +16,7 @@ import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.Tuple;
 import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
-import io.crnk.spring.boot.JpaModuleConfigurer;
+import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import org.springframework.stereotype.Component;
 
 @Component

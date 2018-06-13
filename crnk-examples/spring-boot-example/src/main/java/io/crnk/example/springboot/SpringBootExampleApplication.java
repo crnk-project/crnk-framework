@@ -5,7 +5,6 @@ import java.util.Map;
 
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.spring.boot.v3.CrnkConfigV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 @RestController
 @SpringBootApplication
-@Import({ CrnkConfigV3.class, ExampleJpaModuleConfigurer.class, CorsConfig.class, TestDataLoader.class })
+@Import({ ExampleJpaModuleConfigurer.class, CorsConfig.class, TestDataLoader.class })
 public class SpringBootExampleApplication {
 
 	@Autowired
@@ -28,6 +27,9 @@ public class SpringBootExampleApplication {
 		System.out.println("visit http://127.0.0.1:8080/api/ resp. http://127.0.0.1:8080/browse/ in your browser");
 	}
 
+	/**
+	 * Base example of a Spring MVC service working next to Crnk
+	 */
 	@RequestMapping("/resourcesInfo")
 	public Map<?, ?> getResources() {
 		Map<String, String> result = new HashMap<>();
@@ -37,5 +39,10 @@ public class SpringBootExampleApplication {
 					resourceRegistry.getResourceUrl(entry.getResourceInformation()));
 		}
 		return result;
+	}
+
+	@RequestMapping("/api/hello")
+	public String getHello() {
+		return "World";
 	}
 }
