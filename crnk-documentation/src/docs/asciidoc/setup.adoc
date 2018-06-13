@@ -424,12 +424,19 @@ anchor:CrnkBoot[]
 ## CrnkBoot
 
 `CrnkBoot` is a class shared among all the different integrations that takes care of setting up and starting
-Crnk. Every integration will provide access to it, which in turn allows for virtually any kind of customization.
+Crnk. Every integration will provide access to it:
 
-Some possibilities:
+- `CrnkFeature.getBoot()` for JAX-RS.
+- `@Autowired CrnkBoot boot` for Spring.
+- `CrnkServlet.getBoot()` or `CrnkServlet.initBoot(...)` in case of a subclass.
+- `CrnkVertxHandler.getBoot()` for Vert.x.
+
+
+`CrnkBoot` allows for virtually any kind of customization not directly provided by the integration itself, such as Spring Boot
+auto configurations and properties. Some possibilities:
 
 - `getObjectMapper` allows access to the used Jackson instance.
-- `addModule` allows to add a module.
+- `addModule` allows to add a module. See <modules> and <moduledev,module development> chapters for more information.
 - `setServiceDiscovery` sets a custom service discovery mechanism.
 - `setPropertiesProvider` allows to set how properties are resolved.
 - `getQuerySpecDeserializer` and `setQuerySpecDeserializer` allows to reconfigure how parameters are parsed.
@@ -441,6 +448,12 @@ Some possibilities:
    recommended* to be used as people frequently browse repositories on there own with a web browser and
    fail to provide pagination. As a result, your entire database may get downloaded and may bring down
    your servers depending on the datasize.
+- `setWebPathPrefix` like `/api` to specify the path from where the JSON API endpoint is available.
+- `setUrlMapper` to provide a new url mapping implementation to customize how Crnk generates links.
+- `getResourceRegistry` to access the available JSON API resources and repositories.
+- `setAllowUnknownAttributes` to ignore unknown filter and sort attributes.
+- `setAllowUnknownParameters` to ignore query parameters not specified by JSON API (`filter`, `sort`, etc.).
+
 
 IMPORTANT: Appropriate page limits are vital to protect against denial-of-service attacks when working
 with large data sets! Such attacks may not be of malicious nature, but normal users using a browser

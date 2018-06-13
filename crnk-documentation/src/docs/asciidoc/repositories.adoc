@@ -8,6 +8,15 @@ one of those two repository interfaces:
   * ResourceRepositoryV2 for resources.
   * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for relationships.
 
+The repositories are used to serve `POST`, `GET`, `PATCH` and `DELETE` requests as specified by
+JSON API specification. The repository contract closely resembles the JSON API specification. Subsequent
+sections and chapters outline various possibilities to speed-up and potentially reuse existing
+repository implementations.
+
+IMPORTANT: When accessing repositories, do not forget to use the `application/vnd.api+json` content type.
+
+
+
 anchor:resource_repository[]
 
 ## ResourceRepositoryV2
