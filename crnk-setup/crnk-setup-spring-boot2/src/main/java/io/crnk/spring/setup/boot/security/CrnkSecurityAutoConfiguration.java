@@ -32,9 +32,6 @@ import org.springframework.context.annotation.Import;
 @Import({ CrnkCoreAutoConfiguration.class })
 public class CrnkSecurityAutoConfiguration {
 
-	@Autowired
-	private CrnkSecurityProperties securityProperties;
-
 	@Autowired(required = false)
 	private List<SecurityModuleConfigurer> configurers;
 
@@ -50,6 +47,7 @@ public class CrnkSecurityAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnClass(org.springframework.security.access.AccessDeniedException.class)
 	public SpringSecurityModule springSecurityModule() {
 		return SpringSecurityModule.create();
 	}
