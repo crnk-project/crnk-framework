@@ -2,6 +2,7 @@ package io.crnk.security;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.security.SecurityConfig.Builder;
@@ -10,6 +11,7 @@ import io.crnk.security.model.ProjectRepository;
 import io.crnk.security.model.Task;
 import io.crnk.security.model.TaskRepository;
 import io.crnk.test.mock.ClassTestUtils;
+import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.UnknownResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,6 +59,40 @@ public class SecurityModuleTest {
 	}
 
 	@Test
+	public void testInvalidClassNameThrowsException() {
+		Builder builder = SecurityConfig.builder();
+		builder.permitRole("taskRole", Task.class, ResourcePermission.ALL);
+		securityModule = SecurityModule.newServerModule(builder.build());
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(securityModule);
+		boot.boot();
+		try {
+			securityModule.checkInit();
+			Assert.fail();
+		} catch (RepositoryNotFoundException e) {
+			Assert.assertEquals("Repository for a resource not found: io.crnk.security.model.Task", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testInvalidResourceTypeThrowsException() {
+		Builder builder = SecurityConfig.builder();
+		builder.permitRole("taskRole", "doesNotExist", ResourcePermission.ALL);
+		securityModule = SecurityModule.newServerModule(builder.build());
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(securityModule);
+		boot.boot();
+		try {
+			securityModule.checkInit();
+			Assert.fail();
+		} catch (RepositoryNotFoundException e) {
+			Assert.assertEquals("Repository for a resource not found: doesNotExist", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testModuleName() {
 		Assert.assertEquals("security", securityModule.getModuleName());
 	}
@@ -88,7 +124,7 @@ public class SecurityModuleTest {
 	}
 
 
-	@Test(expected = ResourceNotFoundException.class)
+	@Test(expected = RepositoryNotFoundException.class)
 	public void testBlackListingOfUnknownClass() {
 		securityModule.isAllowed(UnknownResource.class, ResourcePermission.GET);
 	}
