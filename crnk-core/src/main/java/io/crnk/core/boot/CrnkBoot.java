@@ -493,11 +493,23 @@ public class CrnkBoot {
 		setServiceUrlProvider(defaultServiceUrlProvider);
 	}
 
+	/**
+	 * @return prefix like /api where to provide the JSON API endpoint. Always starts with a leading slash, but no trailing slash. Or null if not specified.
+	 */
 	public String getWebPathPrefix() {
+		String pathPrefix = null;
 		if (webPathPrefix != null) {
-			return webPathPrefix;
+			pathPrefix = webPathPrefix;
+		}else {
+			pathPrefix = propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 		}
-		return propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
+		if(pathPrefix != null && !pathPrefix.startsWith("/")){
+			pathPrefix = "/" + pathPrefix;
+		}
+		if(pathPrefix != null && pathPrefix.endsWith("/")){
+			pathPrefix = pathPrefix.substring(0, pathPrefix.length() - 1);
+		}
+		return pathPrefix;
 	}
 
 	public ServiceDiscovery getServiceDiscovery() {

@@ -5,7 +5,6 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.v3.CrnkConfigV3;
@@ -28,7 +27,7 @@ public class CrnkConfigV3Test {
 		properties.setDomainName("testDomain");
 		properties.setDefaultPageLimit(12L);
 		properties.setMaxPageLimit(20L);
-		properties.setPathPrefix("prefix");
+		properties.setPathPrefix("/prefix");
 		properties.setAllowUnknownAttributes(true);
 		properties.setReturn404OnNull(true);
 		properties.setResourcePackage("ch.something");
@@ -44,7 +43,7 @@ public class CrnkConfigV3Test {
 		PropertiesProvider propertiesProvider = boot.getPropertiesProvider();
 		Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
 		Assert.assertEquals("ch.something", propertiesProvider.getProperty(CrnkProperties.RESOURCE_SEARCH_PACKAGE));
-		Assert.assertEquals("prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
+		Assert.assertEquals("/prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
@@ -52,7 +51,7 @@ public class CrnkConfigV3Test {
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();
-		Assert.assertEquals("testDomainprefix", constantServiceUrlProvider.getUrl());
+		Assert.assertEquals("testDomain/prefix", constantServiceUrlProvider.getUrl());
 
 		Assert.assertSame(objectMapper, boot.getObjectMapper());
 

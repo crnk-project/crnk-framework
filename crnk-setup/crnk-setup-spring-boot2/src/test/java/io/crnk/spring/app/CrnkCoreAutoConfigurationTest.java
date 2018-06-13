@@ -27,7 +27,7 @@ public class CrnkCoreAutoConfigurationTest {
 		properties.setDomainName("testDomain");
 		properties.setDefaultPageLimit(12L);
 		properties.setMaxPageLimit(20L);
-		properties.setPathPrefix("prefix");
+		properties.setPathPrefix("/prefix");
 		properties.setAllowUnknownAttributes(true);
 		properties.setReturn404OnNull(true);
 		properties.setResourcePackage("ch.something");
@@ -43,7 +43,7 @@ public class CrnkCoreAutoConfigurationTest {
 		PropertiesProvider propertiesProvider = boot.getPropertiesProvider();
 		Assert.assertEquals("testDomain", propertiesProvider.getProperty(CrnkProperties.RESOURCE_DEFAULT_DOMAIN));
 		Assert.assertEquals("ch.something", propertiesProvider.getProperty(CrnkProperties.RESOURCE_SEARCH_PACKAGE));
-		Assert.assertEquals("prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
+		Assert.assertEquals("/prefix", propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
@@ -51,7 +51,7 @@ public class CrnkCoreAutoConfigurationTest {
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();
-		Assert.assertEquals("testDomainprefix", constantServiceUrlProvider.getUrl());
+		Assert.assertEquals("testDomain/prefix", constantServiceUrlProvider.getUrl());
 
 		Assert.assertSame(objectMapper, boot.getObjectMapper());
 
