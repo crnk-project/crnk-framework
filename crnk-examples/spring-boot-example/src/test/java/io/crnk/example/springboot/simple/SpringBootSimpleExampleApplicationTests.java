@@ -82,10 +82,9 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 		Response response = RestAssured.given().when().get("/api/");
 		response.then().assertThat().statusCode(200);
 		String body = response.getBody().print();
-		Assert.assertTrue(body, body.contains("http://localhost:8080/api/browse/"));
-		Assert.assertTrue(body, body.contains("http://localhost:8080/api/hello"));
-		Assert.assertTrue(body, !body.contains("http://localhost:8080/api/resourceInfo"));
-		Assert.assertTrue(body, !body.contains("http://localhost:8080/resourceInfo"));
+		Assert.assertTrue(body, body.contains("/api/browse/"));
+		Assert.assertTrue(body, body.contains("/api/hello"));
+		Assert.assertTrue(body, !body.contains("/resourceInfo"));
 	}
 
 	@Test
