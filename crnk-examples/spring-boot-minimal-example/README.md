@@ -1,14 +1,14 @@
-# spring-boot-example
+# spring-boot-minimal-example
 
-Showcases a medium-sized Spring Boot setup. Have a look at 
+Showcases a minimal Spring Boot setup. Have a look at 
 https://github.com/crnk-project/crnk-example for a larger application.
 
 In order to run this example do:
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:spring-boot-example:run
+	gradlew :crnk-examples:spring-boot-minimal-example:run
 
 ## The service will be available at
  
- 	http://localhost:8080/api/
+ 	http://localhost:8080/

@@ -23,7 +23,7 @@ public class CrnkCoreProperties {
 	 * <li>When performing method matching</li>
 	 * </ul>
 	 */
-	private String pathPrefix;
+	private String pathPrefix = "/";
 
 	/**
 	 * Default limit of pages.

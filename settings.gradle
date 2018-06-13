@@ -36,6 +36,7 @@ include ':crnk-examples:jersey-example'
 include ':crnk-examples:dropwizard-simple-example'
 include ':crnk-examples:wildfly-example'
 include ':crnk-examples:spring-boot-example'
+include ':crnk-examples:spring-boot-minimal-example'
 include ':crnk-examples:dagger-vertx-example'
 
 include ':crnk-ui'
