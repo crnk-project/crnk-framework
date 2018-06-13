@@ -1,10 +1,12 @@
 package io.crnk.spring.setup.boot.mvc;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtension;
+import io.crnk.spring.setup.boot.core.CrnkCoreProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -13,9 +15,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 public class SpringMvcModule implements Module {
 
-	@Autowired
-	private RequestMappingHandlerMapping handlerMapping;
+	@Autowired(required = false)
+	private Collection<RequestMappingHandlerMapping> handlerMappings;
 
+	@Autowired
+	private CrnkCoreProperties properties;
 
 	@Override
 	public String getModuleName() {
@@ -31,9 +35,12 @@ public class SpringMvcModule implements Module {
 		if (ClassUtils.existsClass("io.crnk.home.HomeModuleExtension")) {
 			try {
 				Class clazz = Class.forName("io.crnk.spring.setup.boot.mvc.internal.SpringMvcHomeModuleExtensionFactory");
-				Method method = clazz.getMethod("create",
-						RequestMappingHandlerMapping.class);
-				ModuleExtension homeExtension = (ModuleExtension) method.invoke(clazz, handlerMapping);
+				Method method = clazz.getMethod("create", String.class,
+						Collection.class);
+
+				String pathPrefix = properties.getPathPrefix();
+
+				ModuleExtension homeExtension = (ModuleExtension) method.invoke(clazz, pathPrefix, handlerMappings);
 				context.addExtension(homeExtension);
 			}
 			catch (Exception e) {
