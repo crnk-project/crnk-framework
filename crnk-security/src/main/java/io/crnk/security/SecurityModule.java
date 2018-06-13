@@ -4,8 +4,8 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.security.SecurityProvider;
-import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.module.InitializingModule;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.module.Module;
 import io.crnk.core.utils.Supplier;
 import io.crnk.security.internal.SecurityRepositoryFilter;
 import io.crnk.security.internal.SecurityResourceFilter;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class SecurityModule implements InitializingModule {
+public class SecurityModule implements Module {
 
 	protected static final String ALL_ROLE = null;
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityModule.class);
@@ -101,12 +101,7 @@ public class SecurityModule implements InitializingModule {
 		return "security";
 	}
 
-	@Override
-	public void init() {
-
-	}
-
-	private void checkInit() {
+	protected void checkInit() {
 		if (config != null && permissions == null) {
 			reconfigure(config);
 		}
@@ -137,6 +132,11 @@ public class SecurityModule implements InitializingModule {
 					configureRule(newPermissions, entryResourceType, rule.getRole(), rule.getPermission());
 				}
 			} else {
+				ResourceRegistry resourceRegistry = context.getResourceRegistry();
+				RegistryEntry entry = resourceRegistry.getEntry(resourceType);
+				if (entry == null) {
+					throw new RepositoryNotFoundException(resourceType);
+				}
 				configureRule(newPermissions, resourceType, rule.getRole(), rule.getPermission());
 			}
 		}
@@ -247,7 +247,7 @@ public class SecurityModule implements InitializingModule {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntryForClass(resourceClass);
 		if (entry == null) {
-			throw new ResourceNotFoundException("resource type not found: " + resourceClass.getName());
+			throw new RepositoryNotFoundException(resourceClass);
 		}
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		return resourceInformation.getResourceType();
