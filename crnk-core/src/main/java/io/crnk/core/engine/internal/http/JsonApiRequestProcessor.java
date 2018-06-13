@@ -60,7 +60,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		if (isPatch || isPost) {
 			String contentType = requestContext.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 			if (contentType == null || !contentType.startsWith(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
-				LOGGER.debug("not a JSON-API request due to content type {}", contentType);
+				LOGGER.warn("not a JSON-API request due to content type {}", contentType);
 				return false;
 			}
 		}
@@ -176,7 +176,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
 		Optional<JsonApiExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 		if (!exceptionMapper.isPresent()) {
-			LOGGER.error("failed to process request", e);
+			LOGGER.error("failed to process request, unknown exception thrown", e);
 			e = new InternalServerErrorException(e.getMessage());
 			exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 			PreconditionUtil
