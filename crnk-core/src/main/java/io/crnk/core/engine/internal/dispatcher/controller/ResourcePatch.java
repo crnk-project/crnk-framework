@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
@@ -42,7 +44,7 @@ public class ResourcePatch extends ResourceUpsert {
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
 		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
 		final Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
@@ -76,11 +78,15 @@ public class ResourcePatch extends ResourceUpsert {
 	}
 
 	private Response toResponse(Document updatedDocument) {
-		return new Response(updatedDocument, 200);
+		List<ErrorData> errors = updatedDocument.getErrors();
+		if (!updatedDocument.getData().isPresent() && (errors == null || errors.isEmpty())) {
+			return new Response(null, HttpStatus.NO_CONTENT_204);
+		}
+		return new Response(updatedDocument, HttpStatus.OK_200);
 	}
 
 	private Result<Document> applyChanges(RegistryEntry registryEntry, Object existingResource, Resource requestResource,
-										  QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 
@@ -89,12 +95,14 @@ public class ResourcePatch extends ResourceUpsert {
 		if (resourceInformation.getResourceClass() == Resource.class) {
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 			updatedResource = resourceRepository.update(requestResource, queryAdapter);
-		} else {
+		}
+		else {
 			QueryContext queryContext = queryAdapter.getQueryContext();
 			setAttributes(requestResource, existingResource, resourceInformation, queryContext);
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 
-			Result<List> relationsResult = setRelationsAsync(existingResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+			Result<List> relationsResult =
+					setRelationsAsync(existingResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
 			updatedResource = relationsResult.merge(it -> resourceRepository.update(existingResource, queryAdapter));
 		}
 

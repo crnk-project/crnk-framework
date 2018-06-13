@@ -11,6 +11,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
@@ -23,7 +24,9 @@ import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.exception.CrnkException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
@@ -113,6 +116,28 @@ public class ResourcePatchTest extends BaseControllerTest {
 				.modifyAttribute(Mockito.any(), Mockito.any(ResourceField.class), Mockito.eq("name"), Mockito.eq("task "
 						+ "updated"));
 
+	}
+
+	@Test
+	public void onRepositoryReturnNullStatusCode204MustBeReturned() throws Exception {
+		ProjectRepository projectRepository = new ProjectRepository();
+		Project project = new Project();
+		project.setId(ProjectRepository.RETURN_NULL_ON_CREATE_ID);
+		project.setName("returns null on update");
+		projectRepository.save(project);
+
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject();
+		data.setId(Long.toString(ProjectRepository.RETURN_NULL_ON_CREATE_ID));
+		newProjectBody.setData(Nullable.of((Object) data));
+
+		JsonPath projectPath = pathBuilder.build("/projects/" + ProjectRepository.RETURN_NULL_ON_CREATE_ID);
+		ResourcePatch sut = new ResourcePatch();
+		sut.init(controllerContext);
+
+		Response response = sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+		Assert.assertEquals(HttpStatus.NO_CONTENT_204, response.getHttpStatus().intValue());
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
