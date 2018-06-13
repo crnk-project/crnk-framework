@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +16,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.TSNpmConfiguration;
 import io.crnk.gen.typescript.model.TSElement;
@@ -270,6 +270,8 @@ public class TSGenerator {
 	protected class TSMetaTransformationContextImpl implements TSMetaTransformationContext {
 
 		private boolean isGenerated(TSSource source) {
+			PreconditionUtil.verify(source != null, "no source provided");
+			PreconditionUtil.verify(source.getNpmPackage() != null, "no package name specified for %s", source.getName());
 			return source.getNpmPackage().equals(config.getNpm().getPackageName());
 		}
 
