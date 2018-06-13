@@ -1,10 +1,19 @@
 package io.crnk.jpa;
 
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.CountryTranslationEntity;
@@ -28,16 +37,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
@@ -85,6 +84,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 	}
 
 	protected void setupModule(JpaModule module, boolean server) {
+
 	}
 
 	@Override
@@ -162,9 +162,15 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			metaModule = MetaModule.createServerModule(metaConfig);
 			feature.addModule(metaModule);
 
+			setupFeature(feature);
+
 			register(feature);
 
 		}
+	}
+
+	protected void setupFeature(CrnkFeature feature) {
+
 	}
 
 }

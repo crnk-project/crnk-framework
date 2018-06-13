@@ -1,5 +1,13 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -65,14 +73,6 @@ import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -253,7 +253,8 @@ public class CrnkBoot {
 		ServiceDiscovery serviceDiscovery = moduleRegistry.getServiceDiscovery();
 
 		LOGGER.info("crnk initialized: numResources={}, usedModules={}, securityProviders={}, pagingBehaviors={}, " +
-						"urlMapper={}, serviceDiscovery={}", numResources, modules, securityProviders, pagingBehaviors, urlMapper.getClass().getSimpleName(),
+						"urlMapper={}, serviceDiscovery={}", numResources, modules, securityProviders, pagingBehaviors,
+				urlMapper.getClass().getSimpleName(),
 				serviceDiscovery.getClass().getSimpleName());
 
 		if (numResources == 0) {
@@ -277,7 +278,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -315,7 +317,8 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
 		}
 	}
@@ -518,8 +521,9 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setDefaultPageLimit(Long defaultPageLimit) {
-		PreconditionUtil.verify(queryParamsBuilder == null, "Setting the default page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?");
+		PreconditionUtil.verify(queryParamsBuilder == null,
+				"Setting the default page limit requires using the QuerySpecDeserializer, but " +
+						"it is null. Are you using QueryParams instead?");
 		this.defaultPageLimit = defaultPageLimit;
 	}
 
@@ -532,8 +536,9 @@ public class CrnkBoot {
 	 * deprecated {@link QueryParamsBuilder}.
 	 */
 	public void setMaxPageLimit(Long maxPageLimit) {
-		PreconditionUtil.verify(queryParamsBuilder == null, "Setting the max page limit requires using the QuerySpecDeserializer, but " +
-				"it is null. Are you using QueryParams instead?");
+		PreconditionUtil
+				.verify(queryParamsBuilder == null, "Setting the max page limit requires using the QuerySpecDeserializer, but " +
+						"it is null. Are you using QueryParams instead?");
 		this.maxPageLimit = maxPageLimit;
 	}
 
@@ -543,8 +548,9 @@ public class CrnkBoot {
 	 * NOTE: Recommend to follow JSON API standards, but this feature can be used for custom implementations.
 	 */
 	public void setAllowUnknownAttributes() {
-		PreconditionUtil.verify(queryParamsBuilder == null, "Allow unknown attributes requires using the QuerySpecDeserializer, but " +
-				"it is null.");
+		PreconditionUtil
+				.verify(queryParamsBuilder == null, "Allow unknown attributes requires using the QuerySpecDeserializer, but " +
+						"it is null.");
 
 		this.allowUnknownAttributes = true;
 	}
@@ -554,8 +560,9 @@ public class CrnkBoot {
 	 * <p>
 	 */
 	public void setAllowUnknownParameters() {
-		PreconditionUtil.verify(queryParamsBuilder == null, "Allow unknown parameters requires using the QuerySpecDeserializer, but " +
-				"it is null.");
+		PreconditionUtil
+				.verify(queryParamsBuilder == null, "Allow unknown parameters requires using the QuerySpecDeserializer, but " +
+						"it is null.");
 
 		this.allowUnknownParameters = true;
 	}
@@ -586,10 +593,12 @@ public class CrnkBoot {
 				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 				if (deserializers.isEmpty()) {
 					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
-				} else {
+				}
+				else {
 					setQuerySpecDeserializerUnchecked(deserializers.get(0));
 				}
-			} else {
+			}
+			else {
 				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
@@ -631,6 +640,12 @@ public class CrnkBoot {
 			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
 				if (defaultPageLimit != null) {
 					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+				}
+				else {
+					LOGGER.warn(
+							"no defaultLimit for paging specified, may lead to denial of service for in proper requests with "
+									+ "large data sets"
+					);
 				}
 				if (maxPageLimit != null) {
 					((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);

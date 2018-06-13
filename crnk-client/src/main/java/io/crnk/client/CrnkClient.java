@@ -226,10 +226,10 @@ public class CrnkClient {
 	private void setupPagingBehavior() {
 		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
 			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
+		}
 
-			if (moduleRegistry.getPagingBehaviors().isEmpty()) {
-				moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
-			}
+		if (!moduleRegistry.getPagingBehaviors().stream().filter(it -> it instanceof OffsetLimitPagingBehavior).findFirst().isPresent()) {
+			moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
 		}
 
 		for (PagingBehavior pagingBehavior : moduleRegistry.getPagingBehaviors()) {

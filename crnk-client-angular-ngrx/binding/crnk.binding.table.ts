@@ -50,10 +50,15 @@ export interface DataTableImplementationAdapter {
 
 export interface DataTableBindingConfig {
 
+	/**
+	 * Query to use from the store to specify sort, filter, page parameters and get results.
+	 */
 	queryId: string;
 
 	/**
-	 * query to use if specified query is not already in the store
+	 * Query to use as base query. Table filter will be applied on top of this query.
+	 * If not specified, the query from the store will be taken based on the specified
+	 * queryId.
 	 */
 	baseQuery?: Query;
 
