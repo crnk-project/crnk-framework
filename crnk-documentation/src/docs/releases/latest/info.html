@@ -1,6 +1,45 @@
 The 2.7 release focuses on various usability improvements. Some further updates will be released in the coming weeks.
 
 
+<h3>Patch Release 14. June</h3>
+
+<h4>WARN log message in case of security misconfigurations</h4>
+
+A WARN message is written to the log if the security module or any other kind of resource filter hides all
+repositories from a user upon a request. Most likely the security module is not properly configured in
+such cases. If a user should not have access to any repositories, the authentication layer should entirely block him.
+
+<h4>WARN log message when using wrong content type</h4>
+
+A WARN message is written to the log if a PATCH or POST request is attempted to a JSON API repository with a content type
+other than application/vnd.api+json. Crnk does not serve such requests and will return a 404. The log message
+will let developer know what is wrong.
+
+<h4>Minimal Spring Boot example application</h4>
+
+<a href="https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-minimal-example">spring-boot-minimal-example</a>
+is a new example application that shows a very minimal setup just based on auto configuration and a single repository.
+
+<h4>Spring Boot 2 upgrade</h4>
+
+The example applications have been upgraded to Spring Boot 2. Spring Boot 1.x continues to be supported.
+
+<h4>PATCH method can return 204 status code</h4>
+
+If a repository returns a null upon a PATCH request, it will result in a HTTP 204 status code without contents. But keep
+in mind that POST requests must always return a resource.
+
+<h4>Default paging fix for crnk-jpa</h4>
+
+The customizable paging behavior introduced in the previous release led to an issue with JPA repositories ignoring the default
+paging limit.
+
+
+<br>
+<br>
+
+<h3>Initial Release 8. June</h3>
+
 <h4>use of Jackson to parse filter parameters</h4>
 
 The TypeParser now also makes use of Jackson to deserialize parameters (next to already built-in and custom parsers).
