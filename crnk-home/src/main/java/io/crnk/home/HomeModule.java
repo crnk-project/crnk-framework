@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtension> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HomeModule.class);
+	protected static Logger LOGGER = LoggerFactory.getLogger(HomeModule.class);
 
 	public static final String JSON_HOME_CONTENT_TYPE = "application/json-home";
 
@@ -46,6 +46,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	private ModuleContext moduleContext;
 
 	private HttpRequestProcessor requestProcessor;
+
+	private boolean potentialFilterIssues = false;
 
 	// protected for CDI
 	protected HomeModule() {
@@ -129,16 +131,19 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				response = writeJsonHome(requestContext, pathList);
 				if (acceptsHome) {
 					response.setContentType(JSON_HOME_CONTENT_TYPE);
-				} else {
+				}
+				else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
-			} else {
+			}
+			else {
 				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 				LOGGER.debug("using JSON API format");
 				response = getResponse(requestContext, pathList);
 				if (jsonapi) {
 					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				} else {
+				}
+				else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
 			}
@@ -156,15 +161,30 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 	public List<String> list(String requestPath, QueryContext queryContext) {
 		Set<String> pathSet = new HashSet<>();
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
+		boolean hasEntries = false;
+		boolean hasUnfilteredEntries = false;
 		for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
 			RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-			if (repositoryInformation != null &&
-					moduleContext.getResourceFilterDirectory().get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext)
-							== FilterBehavior.NONE) {
+			if (repositoryInformation == null) {
+				continue;
+			}
+			hasEntries = true;
+			if (moduleContext.getResourceFilterDirectory()
+					.get(resourceEntry.getResourceInformation(), HttpMethod.GET, queryContext) == FilterBehavior.NONE) {
 				ResourceInformation resourceInformation = resourceEntry.getResourceInformation();
 				String resourceType = resourceInformation.getResourcePath();
 				pathSet.add("/" + resourceType);
+				hasUnfilteredEntries = true;
 			}
+		}
+
+		if (hasEntries && !hasUnfilteredEntries) {
+			potentialFilterIssues = true;
+			LOGGER.warn(
+					"all resources have been filtered for current request/user. Make sure SecurityModule and related modules "
+							+ "are "
+							+ "properly configured."
+			);
 		}
 
 		if (extensions != null) {
@@ -179,6 +199,10 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		List<String> pathList = new ArrayList<>(pathSet);
 		Collections.sort(pathList);
 		return pathList;
+	}
+
+	public boolean hasPotentialFilterIssues() {
+		return potentialFilterIssues;
 	}
 
 	private String getChildName(String requestPath, String it) {
@@ -212,7 +236,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -236,7 +261,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
