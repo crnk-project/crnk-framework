@@ -14,6 +14,7 @@ import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathIds;
@@ -21,7 +22,6 @@ import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
@@ -59,6 +59,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		PathIds resourceIds = jsonPath.getIds();
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
+		ResourceInformation bodyResourceInformation = bodyRegistryEntry.getResourceInformation();
 
 
 		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
@@ -78,11 +79,10 @@ public class FieldResourcePost extends ResourceUpsert {
 		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
 		setAttributes(resourceBody, newResource, relationshipRegistryEntry.getResourceInformation(), queryContext);
 		Result<JsonApiResponse> createdResource = setRelationsAsync(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false)
-				.merge(it -> resourceRepository.create(newResource, queryAdapter));
+				.merge(it -> resourceRepository.create(newResource, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
+
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
-
 		Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(castedResourceId, queryAdapter);
-
 		return createdDocument.zipWith(parentResource,
 				(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, parameterProvider, queryAdapter))
 				.merge(it -> it)

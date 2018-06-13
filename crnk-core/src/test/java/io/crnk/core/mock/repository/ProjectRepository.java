@@ -13,6 +13,8 @@ public class ProjectRepository implements ResourceRepository<Project, Long> {
 
 	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
+	public static final long RETURN_NULL_ON_CREATE_ID = 13412423;
+
 	/**
 	 * That particular ID will be mapped to a fancy project to simulated inheritance
 	 */
@@ -29,6 +31,9 @@ public class ProjectRepository implements ResourceRepository<Project, Long> {
 		}
 		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
+		if(entity.getId() == RETURN_NULL_ON_CREATE_ID){
+			return null;
+		}
 		return entity;
 	}
 
