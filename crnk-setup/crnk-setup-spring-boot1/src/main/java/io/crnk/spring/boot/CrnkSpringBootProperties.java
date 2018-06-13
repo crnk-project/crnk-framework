@@ -3,7 +3,6 @@ package io.crnk.spring.boot;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("crnk")
-@Deprecated
 public class CrnkSpringBootProperties {
 
 	private boolean enabled = true;
