@@ -3,15 +3,17 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
+import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,5 +86,18 @@ public abstract class BaseController implements Controller {
 			throw new RepositoryNotFoundException(resourcePath);
 		}
 		return registryEntry;
+	}
+
+	protected void validateCreatedResponse(ResourceInformation resourceInformation, JsonApiResponse response) {
+		Object entity = response.getEntity();
+		logger.debug("posted resource {}", entity);
+		if (entity == null) {
+			throw new IllegalStateException("upon POST repository for type=" + resourceInformation.getResourceType()
+					+ " must return created resource, not allowed to return null");
+		}
+		Object id = resourceInformation.getId(entity);
+		if (id == null) {
+			throw new IllegalStateException("created resource must have an id");
+		}
 	}
 }

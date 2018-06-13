@@ -34,7 +34,7 @@ public class ResourcePost extends ResourceUpsert {
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
 		String resourcePath = jsonPath.getResourcePath();
 		RegistryEntry endpointRegistryEntry = getRegistryEntryByPath(resourcePath);
@@ -52,11 +52,13 @@ public class ResourcePost extends ResourceUpsert {
 		Result<JsonApiResponse> response;
 		if (Resource.class.equals(resourceInformation.getResourceClass())) {
 			response = resourceRepository.create(requestResource, queryAdapter);
-		} else {
+		}
+		else {
 			Object newResource = newResource(registryEntry.getResourceInformation(), requestResource);
 			setId(requestResource, newResource, registryEntry.getResourceInformation());
 			setAttributes(requestResource, newResource, registryEntry.getResourceInformation(), queryContext);
-			Result zipped = setRelationsAsync(newResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+			Result zipped =
+					setRelationsAsync(newResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
 			response = zipped.merge(it -> resourceRepository.create(newResource, queryAdapter));
 		}
 
@@ -65,7 +67,7 @@ public class ResourcePost extends ResourceUpsert {
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = this.context.getDocumentMapper();
 
-		return response.doWork(it -> validateResponse(resourceInformation, it))
+		return response.doWork(it -> validateCreatedResponse(resourceInformation, it))
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig))
 				.map(this::toResponse);
 	}
@@ -76,17 +78,5 @@ public class ResourcePost extends ResourceUpsert {
 		return response;
 	}
 
-	private void validateResponse(ResourceInformation resourceInformation, JsonApiResponse response) {
-		Object entity = response.getEntity();
-		logger.debug("posted resource {}", entity);
-		if (entity == null) {
-			throw new IllegalStateException("repository did not return the created resource");
-		}
-
-		Object id = resourceInformation.getId(entity);
-		if (id == null) {
-			throw new IllegalStateException("created resource must have an id");
-		}
-	}
 
 }

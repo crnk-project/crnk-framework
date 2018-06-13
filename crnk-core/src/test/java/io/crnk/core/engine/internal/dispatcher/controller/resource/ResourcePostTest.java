@@ -17,16 +17,12 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
-import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
@@ -35,12 +31,11 @@ import io.crnk.core.exception.RequestBodyNotFoundException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.models.Pojo;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -214,6 +209,31 @@ public class ResourcePostTest extends BaseControllerTest {
 	}
 
 	@Test
+	public void onRepositoryReturnNullShouldThrowException() throws Exception {
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject();
+		data.setId(Long.toString(ProjectRepository.RETURN_NULL_ON_CREATE_ID));
+		newProjectBody.setData(Nullable.of((Object) data));
+
+		JsonPath projectPath = pathBuilder.build("/projects");
+		ResourcePost sut = new ResourcePost();
+		sut.init(controllerContext);
+
+		try {
+			// WHEN
+			sut.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+			Assert.fail();
+		}
+		catch (IllegalStateException e) {
+			// THEN
+			Assert.assertEquals(e.getMessage(),
+					"upon POST repository for type=projects must return created resource, not allowed to return null");
+		}
+	}
+
+
+	@Test
 	public void onPostingReadOnlyFieldReturnBadRequestWithFailBehavior() throws Exception {
 		// GIVEN
 		Document requestDocument = new Document();
@@ -233,7 +253,8 @@ public class ResourcePostTest extends BaseControllerTest {
 		try {
 			sut.handle(path, emptyTaskQuery, null, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		} catch (ForbiddenException e) {
+		}
+		catch (ForbiddenException e) {
 			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
 		}
 	}
@@ -365,10 +386,11 @@ public class ResourcePostTest extends BaseControllerTest {
 		JsonPath taskPath = pathBuilder.build("/users");
 
 		// WHEN
-		try{
+		try {
 			sut.handle(taskPath, emptyUserQuery, null, newUserBody);
 			Assert.fail("should not be allowed to create a relationship with an invalid resource");
-		} catch (BadRequestException e) {
+		}
+		catch (BadRequestException e) {
 			Assert.assertEquals("Invalid resource type: notAResource", e.getMessage());
 		}
 	}
@@ -479,6 +501,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		assertThat(persistedMemorandum.getAttributes().get("title").asText()).isEqualTo("sample title");
 		assertThat(persistedMemorandum.getAttributes().get("body").asText()).isEqualTo("sample body");
 	}
+
 
 	@Test
 	@Ignore // TODO support inhertiance
