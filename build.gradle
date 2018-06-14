@@ -209,7 +209,6 @@ gradle.beforeProject { Project project ->
 				}
 			}
 
-
 			bintray {
 				user = System.env.BINTRAY_USER
 				key = System.env.BINTRAY_TOKEN
@@ -217,7 +216,7 @@ gradle.beforeProject { Project project ->
 				publications = ['mavenJava']
 
 				pkg {
-					repo = 'maven'
+					repo = grgit.branch.current().name == 'stable' ? 'maven' : 'mavenLatest'
 					name = project.name
 					userOrg = 'crnk-project'
 					licenses = ['Apache-2.0']
