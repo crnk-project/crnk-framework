@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
@@ -29,7 +28,6 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 class ClientResourceUpsert extends ResourceUpsert {
@@ -72,7 +70,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 	 */
 	@Override
 	protected Result<Object> fetchRelated(RegistryEntry entry, Serializable relationId,
-										  RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
+			RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
 
 		ResultFactory resultFactory = context.getResultFactory();
 
@@ -103,7 +101,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 			RegistryEntry registryEntry = getRegistryEntry(resource.getType());
 			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 
-			Object object = newResource(resourceInformation, resource);
+			Object object = newEntity(resourceInformation, resource);
 			setId(resource, object, resourceInformation);
 			setAttributes(resource, object, resourceInformation, new QueryContext());
 			setLinks(resource, object, resourceInformation);
@@ -115,39 +113,6 @@ class ClientResourceUpsert extends ResourceUpsert {
 			resourceMap.put(uid, object);
 		}
 		return objects;
-	}
-
-	protected void setLinks(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
-		ResourceField linksField = resourceInformation.getLinksField();
-		if (dataBody.getLinks() != null && linksField != null) {
-			JsonNode linksNode = dataBody.getLinks();
-			Class<?> linksClass = linksField.getType();
-			ObjectReader linksMapper = context.getObjectMapper().readerFor(linksClass);
-			try {
-				Object links = linksMapper.readValue(linksNode);
-				linksField.getAccessor().setValue(instance, links);
-			} catch (IOException e) {
-				throw new ResponseBodyException("failed to parse links information", e);
-			}
-		}
-	}
-
-	protected void setMeta(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
-		ResourceField metaField = resourceInformation.getMetaField();
-		if (dataBody.getMeta() != null && metaField != null) {
-			JsonNode metaNode = dataBody.getMeta();
-
-			Class<?> metaClass = metaField.getType();
-
-			ObjectReader metaMapper = context.getObjectMapper().readerFor(metaClass);
-			try {
-				Object meta = metaMapper.readValue(metaNode);
-				metaField.getAccessor().setValue(instance, meta);
-			} catch (IOException e) {
-				throw new ResponseBodyException("failed to parse links information", e);
-			}
-
-		}
 	}
 
 	@Override
@@ -167,9 +132,14 @@ class ClientResourceUpsert extends ResourceUpsert {
 	}
 
 	@Override
+	protected RuntimeException newBodyException(String message, IOException e) {
+		throw new ResponseBodyException(message, e);
+	}
+
+	@Override
 	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
-													  Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
-													  RepositoryMethodParameterProvider parameterProvider) {
+			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
+			RepositoryMethodParameterProvider parameterProvider) {
 
 		Relationship relationship = property.getValue();
 
@@ -191,7 +161,8 @@ class ClientResourceUpsert extends ResourceUpsert {
 						if (hrefNode != null) {
 							url = hrefNode.asText().trim();
 						}
-					} else {
+					}
+					else {
 						url = relatedNode.asText().trim();
 					}
 					Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
@@ -199,14 +170,16 @@ class ClientResourceUpsert extends ResourceUpsert {
 				}
 			}
 			return Optional.empty();
-		} else {
+		}
+		else {
 			// set elements
 			return super.setRelationsFieldAsync(newResource, registryEntry, property, queryAdapter, parameterProvider);
 		}
 	}
 
 	@Override
-	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field, QueryContext queryContext) {
+	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field,
+			QueryContext queryContext) {
 		// nothing to validate during deserialization on client-side
 		// there is only a need to check field access when receiving resources
 		// on the server-side client needs all the data he gets from the server

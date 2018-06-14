@@ -78,7 +78,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		return getRegistryEntryByPath(resourcePath);
 	}
 
-	protected Object newResource(ResourceInformation resourceInformation, Resource dataBody) {
+	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {
 		ResourceInstanceBuilder<?> builder = resourceInformation.getInstanceBuilder();
 		return builder.buildResource(dataBody);
 	}
@@ -104,15 +104,49 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		return result;
 	}
 
+	public void setLinks(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
+		ResourceField linksField = resourceInformation.getLinksField();
+		if (dataBody.getLinks() != null && linksField != null) {
+			JsonNode linksNode = dataBody.getLinks();
+			Class<?> linksClass = linksField.getType();
+			ObjectReader linksMapper = context.getObjectMapper().readerFor(linksClass);
+			try {
+				Object links = linksMapper.readValue(linksNode);
+				linksField.getAccessor().setValue(instance, links);
+			} catch (IOException e) {
+				throw newBodyException("failed to parse links information", e);
+			}
+		}
+	}
+
+	public void setMeta(Resource dataBody, Object instance, ResourceInformation resourceInformation) {
+		ResourceField metaField = resourceInformation.getMetaField();
+		if (dataBody.getMeta() != null && metaField != null) {
+			JsonNode metaNode = dataBody.getMeta();
+
+			Class<?> metaClass = metaField.getType();
+
+			ObjectReader metaMapper = context.getObjectMapper().readerFor(metaClass);
+			try {
+				Object meta = metaMapper.readValue(metaNode);
+				metaField.getAccessor().setValue(instance, meta);
+			} catch (IOException e) {
+				throw newBodyException("failed to parse links information", e);
+			}
+		}
+	}
+
+	protected RuntimeException newBodyException(String message, IOException e) {
+		throw new RequestBodyException(message, e);
+	}
+
 	protected void setAttributes(Resource dataBody, Object instance, ResourceInformation resourceInformation, QueryContext queryContext) {
 		if (dataBody.getAttributes() != null) {
-
 			for (Map.Entry<String, JsonNode> entry : dataBody.getAttributes().entrySet()) {
 				String attributeName = entry.getKey();
 
 				setAttribute(resourceInformation, instance, attributeName, entry.getValue(), queryContext);
 			}
-
 		}
 	}
 

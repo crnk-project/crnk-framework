@@ -68,6 +68,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
 
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
+		ResourceInformation relationshipResourceInformation = relationshipRegistryEntry.getResourceInformation();
 		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 		verifyTypes(HttpMethod.POST, relationshipRegistryEntry, bodyRegistryEntry);
@@ -76,10 +77,13 @@ public class FieldResourcePost extends ResourceUpsert {
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
-		Object newResource = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
-		setAttributes(resourceBody, newResource, relationshipRegistryEntry.getResourceInformation(), queryContext);
-		Result<JsonApiResponse> createdResource = setRelationsAsync(newResource, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false)
-				.merge(it -> resourceRepository.create(newResource, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
+		Object entity = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
+		setAttributes(resourceBody, entity, relationshipResourceInformation, queryContext);
+		setMeta(resourceBody, entity, relationshipResourceInformation);
+		setLinks(resourceBody, entity, relationshipResourceInformation);
+
+		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false)
+				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
 		Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(castedResourceId, queryAdapter);

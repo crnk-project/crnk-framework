@@ -1,5 +1,9 @@
 package io.crnk.test.mock.repository;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -10,10 +14,6 @@ import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Project.ProjectLinks;
 import io.crnk.test.mock.models.Project.ProjectMeta;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectRepository implements ResourceRepository<Project, Long>, MetaRepository<Project>, LinksRepository<Project> {
 
@@ -28,13 +28,19 @@ public class ProjectRepository implements ResourceRepository<Project, Long>, Met
 		entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
 		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
-		ProjectLinks links = new ProjectLinks();
-		links.setValue("someLinkValue");
-		entity.setLinks(links);
+		if (entity.getLinks() == null) {
+			entity.setLinks(new ProjectLinks());
+		}
+		if (entity.getLinks().getValue() == null) {
+			entity.getLinks().setValue("someLinkValue");
+		}
 
-		ProjectMeta meta = new ProjectMeta();
-		meta.setValue("someMetaValue");
-		entity.setMeta(meta);
+		if (entity.getMeta() == null) {
+			entity.setMeta(new ProjectMeta());
+		}
+		if (entity.getMeta().getValue() == null) {
+			entity.getMeta().setValue("someMetaValue");
+		}
 
 		return entity;
 	}
