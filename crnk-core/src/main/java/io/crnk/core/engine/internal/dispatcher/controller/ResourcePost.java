@@ -54,12 +54,14 @@ public class ResourcePost extends ResourceUpsert {
 			response = resourceRepository.create(requestResource, queryAdapter);
 		}
 		else {
-			Object newResource = newResource(registryEntry.getResourceInformation(), requestResource);
-			setId(requestResource, newResource, registryEntry.getResourceInformation());
-			setAttributes(requestResource, newResource, registryEntry.getResourceInformation(), queryContext);
+			Object entity = newEntity(resourceInformation, requestResource);
+			setId(requestResource, entity, resourceInformation);
+			setAttributes(requestResource, entity, resourceInformation, queryContext);
+			setMeta(requestResource, entity, resourceInformation);
+			setLinks(requestResource, entity, resourceInformation);
 			Result zipped =
-					setRelationsAsync(newResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
-			response = zipped.merge(it -> resourceRepository.create(newResource, queryAdapter));
+					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+			response = zipped.merge(it -> resourceRepository.create(entity, queryAdapter));
 		}
 
 		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()

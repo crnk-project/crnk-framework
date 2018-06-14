@@ -16,4 +16,12 @@ public class RequestBodyException extends CrnkMappableException {// NOSONAR igno
 						details, method.name(), resourceName))
 				.build());
 	}
+
+	public RequestBodyException(String details, Throwable cause) {
+		super(HttpStatus.BAD_REQUEST_400, ErrorData.builder()
+				.setStatus(String.valueOf(HttpStatus.BAD_REQUEST_400))
+				.setTitle(TITLE)
+				.setDetail(details)
+				.build(), cause);
+	}
 }

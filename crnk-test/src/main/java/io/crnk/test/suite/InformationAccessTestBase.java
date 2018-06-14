@@ -52,6 +52,39 @@ public abstract class InformationAccessTestBase {
 	}
 
 	@Test
+	public void checkEchoMetaOnPost() {
+		ProjectMeta meta = new ProjectMeta();
+		meta.setValue("metaValue...");
+
+		Project project = new Project();
+		project.setName("test");
+		project.setMeta(meta);
+
+		Project createdProject = projectRepo.create(project);
+		Assert.assertEquals(project.getName(), createdProject.getName());
+		ProjectMeta createdMeta = createdProject.getMeta();
+		Assert.assertEquals(meta.getValue(), createdMeta.getValue());
+	}
+
+	@Test
+	public void checkEchoMetaOnPatch() {
+		ProjectMeta meta = new ProjectMeta();
+		meta.setValue("post...");
+
+		Project project = new Project();
+		project.setName("test");
+		project.setMeta(meta);
+
+		project = projectRepo.create(project);
+		project.getMeta().setValue("patch...");
+
+		Project updatedProject = projectRepo.save(project);
+		Assert.assertEquals(project.getName(), updatedProject.getName());
+		ProjectMeta updatedMeta = updatedProject.getMeta();
+		Assert.assertEquals("patch...", updatedMeta.getValue());
+	}
+
+	@Test
 	public void testLinks() {
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.setLimit(1L);
@@ -62,5 +95,38 @@ public abstract class InformationAccessTestBase {
 		ProjectLinks projectLinks = project.getLinks();
 		Assert.assertNotNull(projectLinks);
 		Assert.assertEquals("someLinkValue", projectLinks.getValue());
+	}
+
+	@Test
+	public void checkEchoLinksOnPost() {
+		ProjectLinks links = new ProjectLinks();
+		links.setValue("linksValue...");
+
+		Project project = new Project();
+		project.setName("test");
+		project.setLinks(links);
+
+		Project createdProject = projectRepo.create(project);
+		Assert.assertEquals(project.getName(), createdProject.getName());
+		ProjectLinks createdLinks = createdProject.getLinks();
+		Assert.assertEquals("linksValue...", createdLinks.getValue());
+	}
+
+	@Test
+	public void checkEchoLinksOnPatch() {
+		ProjectLinks meta = new ProjectLinks();
+		meta.setValue("post...");
+
+		Project project = new Project();
+		project.setName("test");
+		project.setLinks(meta);
+
+		project = projectRepo.create(project);
+		project.getLinks().setValue("patch...");
+
+		Project updatedProject = projectRepo.save(project);
+		Assert.assertEquals(project.getName(), updatedProject.getName());
+		ProjectLinks updatedLinks = updatedProject.getLinks();
+		Assert.assertEquals("patch...", updatedLinks.getValue());
 	}
 }

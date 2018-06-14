@@ -85,7 +85,7 @@ public class ResourcePatch extends ResourceUpsert {
 		return new Response(updatedDocument, HttpStatus.OK_200);
 	}
 
-	private Result<Document> applyChanges(RegistryEntry registryEntry, Object existingResource, Resource requestResource,
+	private Result<Document> applyChanges(RegistryEntry registryEntry, Object entity, Resource requestResource,
 			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
@@ -98,12 +98,15 @@ public class ResourcePatch extends ResourceUpsert {
 		}
 		else {
 			QueryContext queryContext = queryAdapter.getQueryContext();
-			setAttributes(requestResource, existingResource, resourceInformation, queryContext);
+			setAttributes(requestResource, entity, resourceInformation, queryContext);
+			setMeta(requestResource, entity, resourceInformation);
+			setLinks(requestResource, entity, resourceInformation);
+
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 
 			Result<List> relationsResult =
-					setRelationsAsync(existingResource, registryEntry, requestResource, queryAdapter, parameterProvider, false);
-			updatedResource = relationsResult.merge(it -> resourceRepository.update(existingResource, queryAdapter));
+					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+			updatedResource = relationsResult.merge(it -> resourceRepository.update(entity, queryAdapter));
 		}
 
 		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
