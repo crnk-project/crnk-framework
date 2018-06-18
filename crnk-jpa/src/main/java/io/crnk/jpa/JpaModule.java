@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Crnk module that adds support to expose JPA entities as repositories. It
  * supports:
- *
+ * <p>
  * <ul>
  * <li>Sorting</li>
  * <li>Filtering</li>
@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * <p>
  * Not supported so far:
- *
+ * <p>
  * <ul>
  * <li>Selection of fields, always all fields are returned.</li>
  * <li>Sorting and filtering on related resources. Consider doing separate
@@ -147,7 +147,7 @@ public class JpaModule implements InitializingModule {
 	 * default exposed as JSON API resources. Make use of
 	 * {@link #addRepository(JpaRepositoryConfig)} to add resources.
 	 *
-	 * @param em                to use
+	 * @param em to use
 	 * @param transactionRunner to use
 	 * @return created module
 	 * @deprecated use with JpaModuleConfig
@@ -162,15 +162,15 @@ public class JpaModule implements InitializingModule {
 	 * the provided EntityManagerFactory are registered to the module and
 	 * exposed as JSON API resources if not later configured otherwise.
 	 *
-	 * @param emFactory         to retrieve the managed entities.
-	 * @param em                to use
+	 * @param emFactory to retrieve the managed entities.
+	 * @param em to use
 	 * @param transactionRunner to use
 	 * @return created module
 	 * @deprecated use with JpaModuleConfig
 	 */
 	@Deprecated
 	public static JpaModule newServerModule(EntityManagerFactory emFactory, EntityManager em,
-											TransactionRunner transactionRunner) {
+			TransactionRunner transactionRunner) {
 		JpaModuleConfig config = new JpaModuleConfig();
 		config.exposeAllEntities(emFactory);
 		return new JpaModule(config, emFactory, em, transactionRunner);
@@ -181,7 +181,7 @@ public class JpaModule implements InitializingModule {
 	 * default exposed as JSON API resources. Make use of
 	 * {@link #addRepository(JpaRepositoryConfig)} to add resources.
 	 *
-	 * @param em                to use
+	 * @param em to use
 	 * @param transactionRunner to use
 	 * @return created module
 	 */
@@ -246,7 +246,7 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * Removes the resource with the given type from this module.
 	 *
-	 * @param <T>           resourse class (entity or mapped dto)
+	 * @param <T> resourse class (entity or mapped dto)
 	 * @param resourceClass to remove
 	 */
 	public <T> void removeRepository(Class<T> resourceClass) {
@@ -293,14 +293,16 @@ public class JpaModule implements InitializingModule {
 			initQueryFactory();
 		}
 
-		Supplier<PagingBehavior> pagingBehaviorSupplier = () ->{
+		Supplier<PagingBehavior> pagingBehaviorSupplier = () -> {
 			Optional<PagingBehavior> optPagingBehavior = context.getModuleRegistry().getPagingBehaviors()
 					.stream().filter(it -> it instanceof OffsetLimitPagingBehavior).findFirst();
-			PreconditionUtil.verify(optPagingBehavior.isPresent(), "no OffsetLimitPagingBehavior registered, must be available to use crnk-jpa");
+			PreconditionUtil.verify(optPagingBehavior.isPresent(),
+					"no OffsetLimitPagingBehavior registered, must be available to use crnk-jpa");
 			return (OffsetLimitPagingBehavior) optPagingBehavior.get();
 		};
 
-		context.addResourceInformationBuilder(getResourceInformationProvider(context.getPropertiesProvider(), pagingBehaviorSupplier));
+		context.addResourceInformationBuilder(
+				getResourceInformationProvider(context.getPropertiesProvider(), pagingBehaviorSupplier));
 		context.addExceptionMapper(new OptimisticLockExceptionMapper());
 		context.addExceptionMapper(new PersistenceExceptionMapper(context));
 		context.addExceptionMapper(new PersistenceRollbackExceptionMapper(context));
@@ -414,7 +416,16 @@ public class JpaModule implements InitializingModule {
 		}
 
 		Class<?> resourceClass = repositoryConfig.getResourceClass();
-		MetaEntity metaEntity = jpaMetaProvider.getMeta(repositoryConfig.getEntityClass());
+		Class<?> entityClass = repositoryConfig.getEntityClass();
+		MetaEntity metaEntity;
+		try {
+			metaEntity = jpaMetaProvider.getMeta(entityClass);
+		}
+		catch (RuntimeException e) {
+			throw new IllegalStateException(
+					"failed to gather entity informations from " + entityClass
+							+ ", make sure it is probably annotated with JPA annotations", e);
+		}
 		if (isValidEntity(metaEntity)) {
 			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
 			JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this,
@@ -424,7 +435,7 @@ public class JpaModule implements InitializingModule {
 
 			context.addRepository(repository);
 			setupRelationshipRepositories(resourceClass,
-					repositoryConfig.getResourceClass() != repositoryConfig.getEntityClass());
+					repositoryConfig.getResourceClass() != entityClass);
 		}
 	}
 
@@ -439,7 +450,7 @@ public class JpaModule implements InitializingModule {
 	}
 
 	private RelationshipRepositoryV2<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass,
-																			JpaRelationshipRepository<?, ?, ?, ?> repository) {
+			JpaRelationshipRepository<?, ?, ?, ?> repository) {
 		JpaRelationshipRepository<?, ?, ?, ?> filteredRepository = repository;
 		for (JpaRepositoryFilter filter : config.getFilters()) {
 			if (filter.accept(resourceClass)) {
@@ -467,7 +478,8 @@ public class JpaModule implements InitializingModule {
 				boolean isEntity = attrType.getAnnotation(Entity.class) != null;
 				if (isEntity) {
 					setupRelationshipRepositoryForEntity(resourceClass, field);
-				} else {
+				}
+				else {
 					setupRelationshipRepositoryForResource(resourceClass, field);
 				}
 			}
@@ -523,7 +535,8 @@ public class JpaModule implements InitializingModule {
 	/**
 	 * @return ResourceInformationProvider used to describe JPA classes.
 	 */
-	protected ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider, Supplier<PagingBehavior> pagingBehavior) {
+	protected ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider, Supplier
+			<PagingBehavior> pagingBehavior) {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider, pagingBehavior);
 		}
@@ -628,7 +641,7 @@ public class JpaModule implements InitializingModule {
 		}
 
 		private <T> void invokeFilter(JpaRepositoryFilter filter, JpaRequestContext requestContext,
-									  QuerydslTranslationContext<T> translationContext) {
+				QuerydslTranslationContext<T> translationContext) {
 			if (filter instanceof QuerydslRepositoryFilter) {
 				Object repository = requestContext.getRepository();
 				QuerySpec querySpec = requestContext.getQuerySpec();
