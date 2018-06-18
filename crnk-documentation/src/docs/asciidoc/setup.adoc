@@ -40,6 +40,15 @@ repositories {
 Note that due to performance/reliability issues, releases are only intermittently pushed to Maven Central.
 It is highly recommended for project to go with JCenter as well.
 
+Stable releases hosted on Bintray/JCenter are also available from:
+
+https://bintray.com/crnk-project/maven
+
+Most recent builds are available from (for a limited period of time):
+
+https://bintray.com/crnk-project/mavenLatest
+
+
 ## BOM
 
 With `io.crnk:crnk-bom` a Maven BOM is provided that manages the dependencies of all crnk artifacts.
