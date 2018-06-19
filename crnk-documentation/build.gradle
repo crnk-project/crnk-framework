@@ -36,7 +36,6 @@ gitPublish {
 
 	preserve {
 		include '**'
-		exclude 'releases/**'
 	}
 
 	// message used when committing changes
@@ -51,41 +50,41 @@ gitPublishCopy.doLast {
 	}
 }
 
-gitPublishCommit.doFirst {
+gitPublishCopy.doLast {
 	def templateFile = file('src/docs/template/release.html')
-	def versions = new ArrayList()
 
 	def releasesSrcDir = file("${project.projectDir}/src/docs/releases")
 	def releasesWebDir = file("$project.buildDir/website/releases")
+	def latestReleaseDir = file("${releasesSrcDir}/latest")
+
+	if (!latestReleaseDir.isDirectory()) {
+		throw new IllegalStateException("latest release directory not found")
+	}
+	def releaseIndexFile = file("$releasesWebDir/latest/index.html")
+	def releaseInfoFile = file("src/docs/releases/latest/info.html")
+
+	def info =
+			"<div class=\"section\">\n" +
+			"  <div class=\"section-content\">\n" +
+			"      <h3>Latest</h3>" +
+			"      <p>Version: ${project.version}</p>" +
+			"      <p><a href='documentation/'>Documentation</a> (<a href='crnk.pdf'>pdf</a>)</p>" +
+			"      $releaseInfoFile.text\n" +
+			"  </div>\n" +
+			"</div>"
+
+	def content = templateFile.text.replace('${content}', info)
+	content = content.replace('"../crnk', '"../../crnk')
+
+	releaseIndexFile.parentFile.mkdirs()
+	releaseIndexFile.text = content
+
+	def versions = new ArrayList()
 	for (def releaseDir : releasesSrcDir.listFiles()) {
 		if (releaseDir.isDirectory()) {
-			def releaseIndexFile = file("$releasesWebDir/$releaseDir.name/index.html")
-			def releaseInfoFile = file("src/docs/releases/${releaseDir.name}/info.html")
-
-			def releaseVersion = releaseDir.name == 'latest' ? project.version : file("src/docs/releases/${releaseDir.name}/version.txt").text
-
-			def info =
-					"<div class=\"section\">\n" +
-					"  <div class=\"section-content\">\n" +
-					"      <h3>$releaseDir.name</h3>" +
-					"      <p>Version: ${releaseVersion}</p>" +
-					"      <p><a href='documentation/'>Documentation</a> (<a href='crnk.pdf'>pdf</a>)</p>" +
-					"      $releaseInfoFile.text\n" +
-					"  </div>\n" +
-					"</div>"
-
-
-
-
-			def content = templateFile.text.replace('${content}', info)
-			content = content.replace('"../crnk', '"../../crnk')
-
-			releaseIndexFile.parentFile.mkdirs()
-			releaseIndexFile.text = content
 			versions.add(releaseDir.name)
 		}
 	}
-
 	Collections.sort(versions)
 	versions = versions.reverse()
 	versions.remove("latest")
@@ -111,6 +110,7 @@ gitPublishCommit.doFirst {
 }
 
 task promote(type: Copy) {
+	group = 'publishing'
 	from("${project.buildDir}/website/releases/latest"){
 		into("v$BUILD_VERSION_PREFIX")
 	}
@@ -121,17 +121,15 @@ task promote(type: Copy) {
 	into("${project.buildDir}/website/releases")
 
 	doLast {
-		def latestSrc = file("${project.projectDir}/src/docs/releases/latest/info.html")
+		def latestSrc = file("${project.buildDir}/website/releases/latest/index.html")
 
-		def versionSrc = file("${project.projectDir}/src/docs/releases/v$BUILD_VERSION_PREFIX/info.html")
+		def versionSrc = file("${project.buildDir}/website/releases/v$BUILD_VERSION_PREFIX/index.html")
 		versionSrc.parentFile.mkdirs()
 		versionSrc.text = latestSrc.text.replace("<h3>Latest</h3>", "<h3>${project.version}</h3>")
-		file("${project.projectDir}/src/docs/releases/v$BUILD_VERSION_PREFIX/version.txt").text = project.version
 
-		def stableSrc = file("${project.projectDir}/src/docs/releases/stable/info.html")
+		def stableSrc = file("${project.buildDir}/website/releases/stable/index.html")
 		stableSrc.parentFile.mkdirs()
 		stableSrc.text = latestSrc.text.replace("<h3>Latest</h3>", "<h3>${project.version}</h3>")
-		file("${project.projectDir}/src/docs/releases/stable/version.txt").text = project.version
 	}
 }
 
