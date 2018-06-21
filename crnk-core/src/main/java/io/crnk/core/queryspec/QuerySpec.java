@@ -74,7 +74,7 @@ public class QuerySpec {
 	 * TODO currently ignores relations and inclusions, has room for
 	 * improvements
 	 *
-	 * @param <T>       the type of resources in this Iterable
+	 * @param <T> the type of resources in this Iterable
 	 * @param resources resources
 	 * @return sorted, filtered list.
 	 */
@@ -93,8 +93,8 @@ public class QuerySpec {
 	 * <p>
 	 * TODO currently ignores relations and inclusions
 	 *
-	 * @param <T>        resource type
-	 * @param resources  to apply the querySpec to
+	 * @param <T> resource type
+	 * @param resources to apply the querySpec to
 	 * @param resultList used to return the result (including paging meta information)
 	 */
 	public <T> void apply(Iterable<T> resources, ResourceList<T> resultList) {
@@ -133,44 +133,57 @@ public class QuerySpec {
 	}
 
 	public Long getLimit() {
-		if (pagingSpec instanceof OffsetLimitPagingSpec) {
-			return ((OffsetLimitPagingSpec) pagingSpec).getLimit();
-		}
-
-		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
+		OffsetLimitPagingSpec offsetLimitPagingSpec = getPaging(OffsetLimitPagingSpec.class);
+		return offsetLimitPagingSpec.getLimit();
 	}
 
 	public void setLimit(Long limit) {
-		if (pagingSpec instanceof OffsetLimitPagingSpec) {
-			((OffsetLimitPagingSpec) pagingSpec).setLimit(limit);
-		} else {
-			throw new UnsupportedOperationException("Not instance of  OffsetLimitPagingSpec");
-		}
+		OffsetLimitPagingSpec offsetLimitPagingSpec = getPaging(OffsetLimitPagingSpec.class);
+		offsetLimitPagingSpec.setLimit(limit);
 	}
 
 	public long getOffset() {
-		if (pagingSpec instanceof OffsetLimitPagingSpec) {
-			return ((OffsetLimitPagingSpec) pagingSpec).getOffset();
-		}
-
-		throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
+		OffsetLimitPagingSpec offsetLimitPagingSpec = getPaging(OffsetLimitPagingSpec.class);
+		return offsetLimitPagingSpec.getOffset();
 	}
 
 	public void setOffset(long offset) {
-		if (pagingSpec instanceof OffsetLimitPagingSpec) {
-			((OffsetLimitPagingSpec) pagingSpec).setOffset(offset);
-		} else {
-			throw new UnsupportedOperationException("Not instance of OffsetLimitPagingSpec");
-		}
+		OffsetLimitPagingSpec offsetLimitPagingSpec = getPaging(OffsetLimitPagingSpec.class);
+		offsetLimitPagingSpec.setOffset(offset);
 	}
 
+	/**
+	 * @deprecated use getPaging
+	 */
+	@Deprecated
 	public PagingSpec getPagingSpec() {
 		return pagingSpec;
 	}
 
-	public QuerySpec setPagingSpec(final PagingSpec pagingSpec) {
+	public PagingSpec getPaging() {
+		return pagingSpec;
+	}
+
+	public <T extends PagingSpec> T getPaging(Class<T> pagingSpecType) {
+		if (pagingSpec == null) {
+			return null;
+		}
+		if (pagingSpecType.isInstance(pagingSpec)) {
+			return (T) pagingSpec;
+		}
+		return pagingSpec.convert(pagingSpecType);
+	}
+
+	public QuerySpec setPaging(final PagingSpec pagingSpec) {
 		this.pagingSpec = pagingSpec;
 		return this;
+	}
+
+	/**
+	 * @deprecated use setPaging
+	 */
+	public QuerySpec setPagingSpec(final PagingSpec pagingSpec) {
+		return setPaging(pagingSpec);
 	}
 
 	public List<FilterSpec> getFilters() {
@@ -241,7 +254,8 @@ public class QuerySpec {
 		for (QuerySpec spec : specs) {
 			if (spec.getResourceClass() != null) {
 				relatedSpecs.put(spec.getResourceClass(), spec);
-			} else {
+			}
+			else {
 				relatedSpecs.put(spec.getResourceType(), spec);
 			}
 		}
@@ -332,7 +346,8 @@ public class QuerySpec {
 	}
 
 	private static void verifyNotNull(Class<?> targetResourceClass, String targetResourceType) {
-		PreconditionUtil.verify(targetResourceClass != null || targetResourceType != null, "at least one parameter must not be null");
+		PreconditionUtil
+				.verify(targetResourceClass != null || targetResourceType != null, "at least one parameter must not be null");
 		if (targetResourceClass == Resource.class && targetResourceType == null) {
 			throw new IllegalArgumentException("must specify resourceType if io.crnk.core.engine.document.Resource is used");
 		}

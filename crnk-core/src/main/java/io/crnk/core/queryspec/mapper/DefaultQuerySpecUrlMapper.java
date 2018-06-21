@@ -29,6 +29,7 @@ import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -245,7 +246,8 @@ public class DefaultQuerySpecUrlMapper
 		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
 		if (entry != null && entry.getResourceInformation() != null
 				&& entry.getResourceInformation().getPagingBehavior() != null) {
-			map.putAll(entry.getResourceInformation().getPagingBehavior().serialize(querySpec.getPagingSpec(), resourceType));
+			PagingBehavior pagingBehavior = entry.getResourceInformation().getPagingBehavior();
+			map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
 		}
 
 		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
