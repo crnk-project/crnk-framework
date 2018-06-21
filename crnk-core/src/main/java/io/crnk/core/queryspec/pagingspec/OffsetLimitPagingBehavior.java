@@ -11,10 +11,8 @@ import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
-import io.crnk.core.resource.meta.PagedMetaInformation;
 
-public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagingSpec> {
+public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPagingSpec> {
 
 	private final static String OFFSET_PARAMETER = "offset";
 
@@ -22,11 +20,7 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 
 	private long defaultOffset = 0;
 
-	private Long defaultLimit = null;
-
-	private Long maxPageLimit = null;
-
-	public OffsetLimitPagingBehavior(){
+	public OffsetLimitPagingBehavior() {
 
 	}
 
@@ -34,10 +28,12 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 	public Map<String, Set<String>> serialize(final OffsetLimitPagingSpec pagingSpec, final String resourceType) {
 		Map<String, Set<String>> values = new HashMap<>();
 		if (pagingSpec.getOffset() != 0) {
-			values.put(String.format("page[%s]", OFFSET_PARAMETER), new HashSet<>(Arrays.asList(Long.toString(pagingSpec.getOffset()))));
+			values.put(String.format("page[%s]", OFFSET_PARAMETER),
+					new HashSet<>(Arrays.asList(Long.toString(pagingSpec.getOffset()))));
 		}
 		if (pagingSpec.getLimit() != null) {
-			values.put(String.format("page[%s]", LIMIT_PARAMETER), new HashSet<>(Arrays.asList(Long.toString(pagingSpec.getLimit()))));
+			values.put(String.format("page[%s]", LIMIT_PARAMETER),
+					new HashSet<>(Arrays.asList(Long.toString(pagingSpec.getLimit()))));
 		}
 
 		return values;
@@ -50,15 +46,18 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 		for (Map.Entry<String, Set<String>> param : parameters.entrySet()) {
 			if (OFFSET_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				result.setOffset(getValue(param.getKey(), param.getValue()));
-			} else if (LIMIT_PARAMETER.equalsIgnoreCase(param.getKey())) {
+			}
+			else if (LIMIT_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				Long limit = getValue(param.getKey(), param.getValue());
 				if (maxPageLimit != null && limit != null && limit > maxPageLimit) {
 					throw new BadRequestException(
-							String.format("%s legacy value %d is larger than the maximum allowed of %d", LIMIT_PARAMETER, limit, maxPageLimit)
+							String.format("%s value %d is larger than the maximum allowed of %d", LIMIT_PARAMETER, limit,
+									maxPageLimit)
 					);
 				}
 				result.setLimit(limit);
-			} else {
+			}
+			else {
 				throw new ParametersDeserializationException(param.getKey());
 			}
 		}
@@ -78,9 +77,9 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 
 	@Override
 	public void build(final PagedLinksInformation linksInformation,
-					  final ResourceList<?> resources,
-					  final QueryAdapter queryAdapter,
-					  final PagingSpecUrlBuilder urlBuilder) {
+			final ResourceList<?> resources,
+			final QueryAdapter queryAdapter,
+			final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
 		Boolean isNextPageAvailable = isNextPageAvailable(resources);
 		if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(linksInformation)) {
@@ -97,9 +96,9 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 	}
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation linksInformation, Long total,
-											  Boolean isNextPageAvailable, QueryAdapter queryAdapter,
-											  boolean hasResults,
-											  PagingSpecUrlBuilder urlBuilder) {
+			Boolean isNextPageAvailable, QueryAdapter queryAdapter,
+			boolean hasResults,
+			PagingSpecUrlBuilder urlBuilder) {
 		OffsetLimitPagingSpec offsetLimitPagingSpec = (OffsetLimitPagingSpec) queryAdapter.getPagingSpec();
 		long pageSize = offsetLimitPagingSpec.getLimit();
 		long offset = offsetLimitPagingSpec.getOffset();
@@ -135,62 +134,11 @@ public class OffsetLimitPagingBehavior implements PagingBehavior<OffsetLimitPagi
 		}
 	}
 
-	private Long getTotalCount(ResourceList<?> resources) {
-		PagedMetaInformation pagedMeta = resources.getMeta(PagedMetaInformation.class);
-		if (pagedMeta != null) {
-			return pagedMeta.getTotalResourceCount();
-		}
-
-		return null;
-	}
-
-	private Boolean isNextPageAvailable(ResourceList<?> resources) {
-		HasMoreResourcesMetaInformation pagedMeta = resources.getMeta(HasMoreResourcesMetaInformation.class);
-		if (pagedMeta != null) {
-			return pagedMeta.getHasMoreResources();
-		}
-
-		return null;
-	}
-
-	private boolean hasPageLinks(PagedLinksInformation pagedLinksInformation) {
-		return pagedLinksInformation.getFirst() != null || pagedLinksInformation.getLast() != null
-				|| pagedLinksInformation.getPrev() != null || pagedLinksInformation.getNext() != null;
-	}
-
-	private Long getValue(final String name, final Set<String> values) {
-		if (values.size() > 1) {
-			throw new ParametersDeserializationException(name);
-		}
-
-		try {
-			return Long.parseLong(values.iterator().next());
-		} catch (RuntimeException e) {
-			throw new ParametersDeserializationException(name);
-		}
-	}
-
 	public long getDefaultOffset() {
 		return defaultOffset;
 	}
 
 	public void setDefaultOffset(final long defaultOffset) {
 		this.defaultOffset = defaultOffset;
-	}
-
-	public Long getDefaultLimit() {
-		return defaultLimit;
-	}
-
-	public void setDefaultLimit(final Long defaultLimit) {
-		this.defaultLimit = defaultLimit;
-	}
-
-	public Long getMaxPageLimit() {
-		return maxPageLimit;
-	}
-
-	public void setMaxPageLimit(final Long maxPageLimit) {
-		this.maxPageLimit = maxPageLimit;
 	}
 }
