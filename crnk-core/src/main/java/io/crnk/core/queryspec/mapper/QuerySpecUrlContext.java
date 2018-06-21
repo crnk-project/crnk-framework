@@ -9,4 +9,5 @@ public interface QuerySpecUrlContext extends QuerySpecDeserializerContext {
 	ResourceRegistry getResourceRegistry();
 
 	TypeParser getTypeParser();
+
 }

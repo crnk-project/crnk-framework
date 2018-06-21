@@ -20,17 +20,23 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 
 	private final static String SIZE_PARAMETER = "size";
 
-	private int defaultNumber = 0;
+	private int defaultNumber = 1;
 
 
 	public NumberSizePagingBehavior() {
+	}
 
+	@Override
+	public boolean supports(Class<? extends PagingSpec> pagingSpecType) {
+		return pagingSpecType.isAssignableFrom(NumberSizePagingSpec.class) || pagingSpecType == OffsetLimitPagingSpec.class;
 	}
 
 	@Override
 	public Map<String, Set<String>> serialize(final NumberSizePagingSpec pagingSpec, final String resourceType) {
 		Map<String, Set<String>> values = new HashMap<>();
-		if (pagingSpec.getNumber() != 0) {
+
+		// don't show page number if paging is not used
+		if (pagingSpec.getSize() != null || pagingSpec.getNumber() != 1) {
 			values.put(String.format("page[%s]", NUMBER_PARAMETER),
 					new HashSet<>(Arrays.asList(Long.toString(pagingSpec.getNumber()))));
 		}
@@ -95,7 +101,7 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 
 	@Override
 	public boolean isRequired(final NumberSizePagingSpec pagingSpec) {
-		return pagingSpec.getNumber() != 0 || pagingSpec.getSize() != null;
+		return pagingSpec.getNumber() != 1 || pagingSpec.getSize() != null;
 	}
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation linksInformation, Long total,
@@ -106,28 +112,28 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 		int size = pagingSpec.getSize();
 		int number = pagingSpec.getNumber();
 		if (total != null) {
-			isNextPageAvailable = size * number + size < total;
+			isNextPageAvailable = size * number < total;
 		}
 
-		if (number > 0 || hasResults) {
+		if (number > 1 || hasResults) {
 			Long totalPages = total != null ? (total + size - 1) / size : null;
 			QueryAdapter pageSpec = queryAdapter.duplicate();
-			pageSpec.setPagingSpec(new NumberSizePagingSpec(0, size));
+			pageSpec.setPagingSpec(new NumberSizePagingSpec(1, size));
 			linksInformation.setFirst(urlBuilder.build(pageSpec));
 
 			if (totalPages != null && totalPages > 0) {
-				pageSpec.setPagingSpec(new NumberSizePagingSpec((totalPages.intValue() - 1) * size, size));
+				pageSpec.setPagingSpec(new NumberSizePagingSpec(totalPages.intValue(), size));
 				linksInformation.setLast(urlBuilder.build(pageSpec));
 			}
 
-			if (number > 0) {
-				pageSpec.setPagingSpec(new NumberSizePagingSpec((number - 1) * size, size));
+			if (number > 1) {
+				pageSpec.setPagingSpec(new NumberSizePagingSpec(number - 1, size));
 				linksInformation.setPrev(urlBuilder.build(pageSpec));
 			}
 
 
 			if (isNextPageAvailable) {
-				pageSpec.setPagingSpec(new NumberSizePagingSpec((number + 1) * size, size));
+				pageSpec.setPagingSpec(new NumberSizePagingSpec(number + 1, size));
 				linksInformation.setNext(urlBuilder.build(pageSpec));
 			}
 		}

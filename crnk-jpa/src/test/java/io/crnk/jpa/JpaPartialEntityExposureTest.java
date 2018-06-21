@@ -7,7 +7,6 @@ import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -22,6 +21,7 @@ import org.junit.Test;
 public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 
 	protected ResourceRepositoryStub<TestEntity, Long> testRepo;
+
 	private JpaModule module;
 
 	@Override
@@ -67,7 +67,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testInformationBuilder() {
 		EntityManager em = null;
-		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior());
+		JpaResourceInformationProvider builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
 		ResourceInformation info = builder.build(TestEntity.class);
 		List<ResourceField> relationshipFields = info.getRelationshipFields();
 		Assert.assertEquals(0, relationshipFields.size());

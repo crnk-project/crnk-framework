@@ -13,7 +13,7 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
-import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.test.mock.models.Schedule;
 
 // tag::annotation[]
@@ -73,7 +73,7 @@ public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long>
 		public String name = "value";
 	}
 
-	class ScheduleListMeta implements MetaInformation {
+	class ScheduleListMeta extends DefaultPagedMetaInformation {
 
 		public String name = "value";
 

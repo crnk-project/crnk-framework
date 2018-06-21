@@ -94,7 +94,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 
 		if (server) {
 			module.setResourceInformationProvider(
-					new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior()) {
+					new JpaResourceInformationProvider(new NullPropertiesProvider()) {
 
 						@Override
 						protected List<ResourceField> getResourceFields(Class clazz) {

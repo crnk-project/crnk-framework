@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.repository;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -21,20 +27,14 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @Deprecated
 public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuerySpecTest {
@@ -80,6 +80,7 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 		SimpleModule customPagingModule = new SimpleModule("customPaging");
 		customPagingModule.addRepository(new TaskWithPagingBehaviorQuerySpecRepository());
 		customPagingModule.addRepository(new TaskWithPagingBehaviorToProjectRelationshipRepository());
+		customPagingModule.addPagingBehavior(new OffsetLimitPagingBehavior());
 		customPagingModule.addPagingBehavior(new CustomOffsetLimitPagingBehavior());
 		container.addModule(customPagingModule);
 	}

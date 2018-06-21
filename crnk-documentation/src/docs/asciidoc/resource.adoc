@@ -25,20 +25,68 @@ The example below shows a sample class which contains a definition of a resource
 
 where `type` parameter specifies the resource's name.
 
-anchor:jsonApiResourcePagingBehavior[]
-
-The optional `pagingBehavior` parameter allows to set a pagination behavior of the resource.
-In order to do it you have to specify a type which is actually an implementation of a `PagingBehavior` interface.
+By default the type of a resource in a JSON API document and its name within URLs match, for example:
 
 [source]
 ----
-  @JsonApiResource(type = "tasks", pagingBehavior = OffsetLimitPagingBehavior.class)
+{
+  "links": {
+    "self": "http://localhost/api/tasks",
+  },
+  "data": [{
+    "type": "tasks",
+    "id": "1",
+    "attributes": {
+      "title": "Some task"
+    }
+  }
+}
+----
+
+The optional `resourcePath` allows to define separate values, typically with `resourcePath` being plural and
+`type` being singular:
+
+[source]
+----
+  @JsonApiResource(type = "task", resourcePath = "tasks")
   public class Task {
     // fields, getters and setters
   }
 ----
 
-More detailed information about pagination behaviors could be found at <<pagination,Pagination>> section.
+resulting in (notice the self link does not change, but type does):
+
+[source]
+----
+{
+  "links": {
+    "self": "http://localhost/api/tasks",
+  },
+  "data": [{
+    "type": "task",
+    "id": "1",
+    "attributes": {
+      "title": "Some task"
+    }
+  }
+}
+----
+
+anchor:jsonApiResourcePagingBehavior[]
+
+The optional `pagingSpec` parameter allows to set the desired paging specification:
+
+[source]
+----
+  @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
+  public class Task {
+    // fields, getters and setters
+  }
+----
+
+There is built-in support for `OffsetLimitPagingSpec` (default) or `NumberSizePagingSpec`. The paging spec must
+be backed by a matching `PagingBehavior` implementation.  More detailed information about pagination can be
+found at <<pagination,Pagination>> section.
 
 
 ## JsonApiId

@@ -13,7 +13,10 @@ import io.crnk.core.resource.list.ResourceList;
  * It's not a functional implementation of paging. All methods throw an
  * {@link UnsupportedOperationException}. If not overridden per resource,
  * then the first registered {@link PagingBehavior} will be used for pagination.
+ *
+ * @deprecated obsoleted by @JsonApiResource.pagingSpec
  */
+@Deprecated
 public class VoidPagingBehavior implements PagingBehavior<PagingSpec> {
 
 	@Override

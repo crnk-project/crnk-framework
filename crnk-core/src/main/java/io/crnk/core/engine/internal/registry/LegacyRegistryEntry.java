@@ -20,6 +20,8 @@ import io.crnk.core.engine.registry.ResponseRelationshipEntry;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
@@ -46,6 +48,8 @@ public class LegacyRegistryEntry implements RegistryEntry {
 
 	private ModuleRegistry moduleRegistry;
 
+	private PagingBehavior pagingBehavior;
+
 	@Deprecated
 	public LegacyRegistryEntry(ResourceEntry resourceEntry) {
 		this(resourceEntry, new HashMap<>());
@@ -60,6 +64,10 @@ public class LegacyRegistryEntry implements RegistryEntry {
 	public void initialize(ModuleRegistry moduleRegistry) {
 		PreconditionUtil.verify(moduleRegistry != null, "no moduleRegistry");
 		this.moduleRegistry = moduleRegistry;
+
+		ResourceInformation resourceInformation = getResourceInformation();
+		Class<? extends PagingSpec> pagingSpecType = resourceInformation.getPagingSpecType();
+		pagingBehavior = moduleRegistry.findPagingBehavior(pagingSpecType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -175,6 +183,11 @@ public class LegacyRegistryEntry implements RegistryEntry {
 	 */
 	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade() {
 		return (ResourceRepositoryV2<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
+	}
+
+	@Override
+	public PagingBehavior getPagingBehavior() {
+		return pagingBehavior;
 	}
 
 	public Map<ResourceField, ResponseRelationshipEntry> getRelationshipEntries() {

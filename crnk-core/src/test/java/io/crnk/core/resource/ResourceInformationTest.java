@@ -1,5 +1,11 @@
 package io.crnk.core.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Resource;
@@ -13,24 +19,12 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceInformationTest {
 
@@ -43,8 +37,8 @@ public class ResourceInformationTest {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		ResourceField valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
 				String.class, "projects");
-		sut = new ResourceInformation(typeParser, Task.class, "tasks",null, Arrays.asList(idField, valueField),
-				new OffsetLimitPagingBehavior());
+		sut = new ResourceInformation(typeParser, Task.class, "tasks", null, Arrays.asList(idField, valueField),
+				OffsetLimitPagingSpec.class);
 	}
 
 	@Test
@@ -95,7 +89,7 @@ public class ResourceInformationTest {
 	public void checkAnyAccessor() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
-				new OffsetLimitPagingBehavior());
+				OffsetLimitPagingSpec.class);
 
 		ResourceWithAny resource = new ResourceWithAny();
 
@@ -110,7 +104,7 @@ public class ResourceInformationTest {
 	public void checkGetAnyWithInvalidKey() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
-				new OffsetLimitPagingBehavior());
+				OffsetLimitPagingSpec.class);
 
 		ResourceWithAny resource = new ResourceWithAny();
 
@@ -122,7 +116,7 @@ public class ResourceInformationTest {
 	public void checkSetAnyWithInvalidKey() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
-				new OffsetLimitPagingBehavior());
+				OffsetLimitPagingSpec.class);
 
 		ResourceWithAny resource = new ResourceWithAny();
 
@@ -134,7 +128,7 @@ public class ResourceInformationTest {
 	public void checkAnyAccessorWithoutSetterThrowsException() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		new ResourceInformation(typeParser, ResourceWithAnyWithoutSetter.class, "tasks", null, Arrays.asList(idField),
-				new OffsetLimitPagingBehavior());
+				OffsetLimitPagingSpec.class);
 	}
 
 	@JsonApiResource(type = "test")

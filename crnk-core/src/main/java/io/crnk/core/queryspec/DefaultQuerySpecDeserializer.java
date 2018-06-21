@@ -20,6 +20,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.slf4j.Logger;
@@ -143,12 +144,14 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 			}
 		}
 
-		if (resourceInformation.getPagingBehavior() == null && !pageParameters.isEmpty()) {
+		RegistryEntry entry = context.getResourceRegistry().getEntry(resourceInformation.getResourceType());
+		PagingBehavior pagingBehavior = entry.getPagingBehavior();
+		if (pagingBehavior == null && !pageParameters.isEmpty()) {
 			throw new IllegalStateException("Instance of PagingBehavior must be provided");
 		}
 
-		if (resourceInformation.getPagingBehavior() != null) {
-			rootQuerySpec.setPagingSpec(resourceInformation.getPagingBehavior().deserialize(pageParameters));
+		if (pagingBehavior != null) {
+			rootQuerySpec.setPagingSpec(pagingBehavior.deserialize(pageParameters));
 		}
 
 		return rootQuerySpec;

@@ -7,6 +7,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
@@ -67,4 +68,5 @@ public interface RegistryEntry {
 	<T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade();
 
 
+	PagingBehavior getPagingBehavior();
 }

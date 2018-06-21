@@ -25,7 +25,7 @@ import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
 import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
 /**
@@ -65,13 +65,13 @@ public class ResourceInformation {
 	private ResourceField linksField;
 
 	/**
-	 * Type name of the resource. Corresponds to {@link JsonApiResource.type}
+	 * Type name of the resource. Corresponds to {@link JsonApiResource#type}
 	 * for annotated resources.
 	 */
 	private final String resourceType;
 
 	/**
-	 * Type url path of the resource. Corresponds to {@link JsonApiResource.resourcePath}
+	 * Type url path of the resource. Corresponds to {@link JsonApiResource#resourcePath}
 	 * for annotated resources.
 	 */
 	private final String resourcePath;
@@ -98,10 +98,7 @@ public class ResourceInformation {
 
 	private ResourceValidator validator;
 
-	/**
-	 * {@link PagingBehavior} instance
-	 */
-	private PagingBehavior pagingBehavior;
+	private Class<? extends PagingSpec> pagingSpecType;
 
 	private StringMapper idStringMapper = new StringMapper() {
 		@Override
@@ -117,25 +114,25 @@ public class ResourceInformation {
 	};
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			List<ResourceField> fields, PagingBehavior pagingBehavior) {
-		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingBehavior);
+			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
 			String superResourceType,
-			List<ResourceField> fields, PagingBehavior pagingBehavior) {
-		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingBehavior);
+			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
-		this(parser, resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingBehavior);
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+		this(parser, resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingSpecType);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
 			String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, PagingBehavior pagingBehavior) {
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -143,7 +140,7 @@ public class ResourceInformation {
 		this.superResourceType = superResourceType;
 		this.instanceBuilder = instanceBuilder;
 		this.fields = fields;
-		this.pagingBehavior = pagingBehavior;
+		this.pagingSpecType = pagingSpecType;
 
 		initFields();
 		if (this.instanceBuilder == null) {
@@ -451,7 +448,7 @@ public class ResourceInformation {
 		return Collections.unmodifiableList(fields);
 	}
 
-	public PagingBehavior getPagingBehavior() {
-		return pagingBehavior;
+	public Class<? extends PagingSpec> getPagingSpecType() {
+		return pagingSpecType;
 	}
 }

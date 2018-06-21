@@ -393,7 +393,7 @@ public class QuerySpec {
 
 	@Override
 	public String toString() {
-		return "QuerySpec{" +
+		return "QuerySpec[" +
 				(resourceClass != null ? "resourceClass=" + resourceClass.getName() : "") +
 				(resourceType != null && resourceClass != null ? ", " : "") +
 				(resourceType != null ? "resourceType=" + resourceType : "") +
@@ -403,6 +403,6 @@ public class QuerySpec {
 				(!includedFields.isEmpty() ? ", includedFields=" + includedFields : "") +
 				(!includedRelations.isEmpty() ? ", includedRelations=" + includedRelations : "") +
 				(!relatedSpecs.isEmpty() ? ", relatedSpecs=" + relatedSpecs : "") +
-				'}';
+				']';
 	}
 }

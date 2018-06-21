@@ -11,13 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
-import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -60,13 +54,18 @@ import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -282,7 +281,7 @@ public class ModuleRegistry {
 		return new AggregatedSecurityProvider(securityProviders);
 	}
 
-	public List<SecurityProvider> getSecurityProviders(){
+	public List<SecurityProvider> getSecurityProviders() {
 		return aggregatedModule.getSecurityProviders();
 	}
 
@@ -382,7 +381,8 @@ public class ModuleRegistry {
 			Optional<? extends Module> optModule = getModule(extension.getTargetModule());
 			if (optModule.isPresent()) {
 				reverseExtensionMap.add(optModule.get(), extension);
-			} else if (!extension.isOptional()) {
+			}
+			else if (!extension.isOptional()) {
 				throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
 			}
 		}
@@ -406,7 +406,9 @@ public class ModuleRegistry {
 					Class<? extends Module> targetModule = dependencyExtension.getTargetModule();
 					Optional<? extends Module> dependencyModule = getModule(targetModule);
 					PreconditionUtil.verify(dependencyModule.isPresent() || dependencyExtension.isOptional(),
-							"module dependency from %s to %s not available, use CrnkBoot.addModoule(...) or service discovery to add the later", module.getModuleName(), targetModule);
+							"module dependency from %s to %s not available, use CrnkBoot.addModoule(...) or service discovery to"
+									+ " add the later",
+							module.getModuleName(), targetModule);
 					if (dependencyModule.isPresent()) {
 						initializeModule(dependencyModule.get(), initializedModules);
 					}
@@ -424,7 +426,7 @@ public class ModuleRegistry {
 		return httpRequestContextProvider;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void applyRepositoryRegistrations() {
 		Collection<Object> repositories = filterDecorators(aggregatedModule.getRepositories());
 		for (Object repository : repositories) {
@@ -502,7 +504,8 @@ public class ModuleRegistry {
 	}
 
 	public ExceptionMapperRegistry getExceptionMapperRegistry() {
-		PreconditionUtil.verify(exceptionMapperRegistry != null, "exceptionMapperRegistry not yet available, wait for initialization to complete");
+		PreconditionUtil.verify(exceptionMapperRegistry != null,
+				"exceptionMapperRegistry not yet available, wait for initialization to complete");
 		return exceptionMapperRegistry;
 	}
 
@@ -964,4 +967,19 @@ public class ModuleRegistry {
 			});
 		}
 	}
+
+	public PagingBehavior findPagingBehavior(Class<? extends PagingSpec> pagingSpecType) {
+		if (pagingSpecType == null) {
+			return null;
+		}
+		List<PagingBehavior> pagingBehaviors = getPagingBehaviors();
+		PreconditionUtil.verify(!pagingBehaviors.isEmpty(), "no paging behaviors installed");
+		for (PagingBehavior pagingBehavior : pagingBehaviors) {
+			if (pagingSpecType == PagingSpec.class || pagingBehavior.supports(pagingSpecType)) {
+				return pagingBehavior;
+			}
+		}
+		throw new IllegalStateException("no pagingBehavior implementation available for " + pagingSpecType);
+	}
+
 }

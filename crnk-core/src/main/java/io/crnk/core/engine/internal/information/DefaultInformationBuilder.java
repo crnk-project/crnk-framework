@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.information;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -18,17 +24,12 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -138,7 +139,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceValidator validator;
 
-		private PagingBehavior pagingBehavior;
+		private Class<? extends PagingSpec> pagingSpecType;
 
 		@Override
 		public void from(ResourceInformation information) {
@@ -153,7 +154,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 				field.from(fromField);
 				fields.add(field);
 			}
-			pagingBehavior = information.getPagingBehavior();
+			pagingSpecType = information.getPagingSpecType();
 		}
 
 		@Override
@@ -190,8 +191,12 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		@Override
 		public Resource pagingBehavior(PagingBehavior pagingBehavior) {
-			this.pagingBehavior = pagingBehavior;
+			this.pagingSpecType = (Class<PagingSpec>) pagingBehavior.createEmptyPagingSpec().getClass();
+			return this;
+		}
 
+		public Resource pagingSpecType(Class<PagingSpec> pagingSpecType) {
+			this.pagingSpecType = pagingSpecType;
 			return this;
 		}
 
@@ -202,8 +207,9 @@ public class DefaultInformationBuilder implements InformationBuilder {
 				fieldImpls.add(field.build());
 			}
 
-			ResourceInformation information = new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
-					fieldImpls, pagingBehavior);
+			ResourceInformation information =
+					new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
+							fieldImpls, pagingSpecType);
 			if (validator != null) {
 				information.setValidator(validator);
 			}
