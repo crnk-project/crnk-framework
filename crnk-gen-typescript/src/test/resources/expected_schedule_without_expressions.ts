@@ -1,3 +1,4 @@
+import {DefaultPagedMetaInformation} from './default.paged.meta.information';
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {Projects} from './projects';
 import {Tasks} from './tasks';
@@ -36,7 +37,7 @@ export interface ScheduleResult extends OneQueryResult {
 export module ScheduleListResult {
 	export interface ScheduleListLinks extends DefaultPagedLinksInformation {
 	}
-	export interface ScheduleListMeta {
+	export interface ScheduleListMeta extends DefaultPagedMetaInformation {
 	}
 }
 export interface ScheduleListResult extends ManyQueryResult {

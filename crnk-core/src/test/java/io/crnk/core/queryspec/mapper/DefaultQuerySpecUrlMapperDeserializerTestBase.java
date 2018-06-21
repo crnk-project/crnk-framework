@@ -29,6 +29,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.repository.TaskWithPagingBehavior;
 import io.crnk.core.queryspec.repository.TaskWithPagingBehaviorQuerySpecRepository;
@@ -85,6 +86,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		SimpleModule customPagingModule = new SimpleModule("customPaging");
 		customPagingModule.addRepository(new TaskWithPagingBehaviorQuerySpecRepository());
 		customPagingModule.addRepository(new TaskWithPagingBehaviorToProjectRelationshipRepository());
+		customPagingModule.addPagingBehavior(new OffsetLimitPagingBehavior());
 		customPagingModule.addPagingBehavior(new CustomOffsetLimitPagingBehavior());
 		container.addModule(customPagingModule);
 	}

@@ -1,6 +1,40 @@
 The 2.7 release focuses on various usability improvements. Some further updates will be released in the coming weeks.
 
 
+<h3>Patch Release 22. June</h3>
+
+
+<h4>Number/size-based paging support</h4>
+
+NumberSizePagingBehavior and NumberSizePagingSpec are new implementations that bring support for number/size-based paging instead of the default offset/limit paging.
+An example looks like:
+
+<pre class="prettyprint">
+	GET /tasks?page[number]=1&page[size]=10
+<pre class="prettyprint">
+
+For more information see <a href="http://www.crnk.io/releases/stable/documentation/#_pagination">here</a>.
+
+
+<h4>Refined paging support</h4>
+
+@JsonApiResource.pagingSpec is introduced to provide more flexibility for paging. With this it deprecated the former
+@JsonApiResource.pagingBehavior. Motivation is to avoid coupling resources to a given paging implementation. This
+in turn allows, for example, the newly introduced number/size-based paging to be interoperable with existing
+offset/limit-based repositories.
+
+For more information see <a href="http://www.crnk.io/releases/stable/documentation/#_pagination">here</a>.
+
+<h4>Filtering by null</h4>
+
+<pre class="prettyprint">
+	GET /tasks?filter[name]=null
+<pre class="prettyprint">
+
+is now supported out-of-the-box.
+
+
+
 <h3>Patch Release 14. June</h3>
 
 <h4>WARN log message in case of security misconfigurations</h4>

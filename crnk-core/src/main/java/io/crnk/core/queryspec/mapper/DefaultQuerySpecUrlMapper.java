@@ -30,6 +30,7 @@ import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,12 +178,16 @@ public class DefaultQuerySpecUrlMapper
 			}
 		}
 
-		if (resourceInformation.getPagingBehavior() == null && !pageParameters.isEmpty()) {
+		RegistryEntry entry = context.getResourceRegistry().getEntry(resourceInformation.getResourceType());
+		PagingBehavior<PagingSpec> pagingBehavior = entry.getPagingBehavior();
+
+		if (pagingBehavior == null && !pageParameters.isEmpty()) {
 			throw new IllegalStateException("Instance of PagingBehavior must be provided");
 		}
 
-		if (resourceInformation.getPagingBehavior() != null) {
-			rootQuerySpec.setPagingSpec(resourceInformation.getPagingBehavior().deserialize(pageParameters));
+		if (pagingBehavior != null) {
+			PagingSpec pagingSpec = pagingBehavior.deserialize(pageParameters);
+			rootQuerySpec.setPagingSpec(pagingSpec);
 		}
 
 		return rootQuerySpec;
@@ -245,8 +250,8 @@ public class DefaultQuerySpecUrlMapper
 		serializeIncludedRelations(querySpec, resourceInformation, map);
 		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
 		if (entry != null && entry.getResourceInformation() != null
-				&& entry.getResourceInformation().getPagingBehavior() != null) {
-			PagingBehavior pagingBehavior = entry.getResourceInformation().getPagingBehavior();
+				&& entry.getResourceInformation().getPagingSpecType() != null) {
+			PagingBehavior pagingBehavior = entry.getPagingBehavior();
 			map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
 		}
 

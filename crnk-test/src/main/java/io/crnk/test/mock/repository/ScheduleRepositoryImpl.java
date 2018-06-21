@@ -84,9 +84,10 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	@Override
 	public ScheduleList findAll(QuerySpec querySpec) {
 		ScheduleList list = new ScheduleList();
-		list.addAll(querySpec.apply(copyResources(schedules.values())));
-		list.setLinks(new ScheduleListLinks());
+		ScheduleListLinks linksInfo = new ScheduleListLinks();
+		list.setLinks(linksInfo);
 		list.setMeta(new ScheduleListMeta());
+		querySpec.apply(copyResources(schedules.values()), list);
 		return list;
 	}
 

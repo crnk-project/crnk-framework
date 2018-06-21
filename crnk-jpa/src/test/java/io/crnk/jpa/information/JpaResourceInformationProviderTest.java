@@ -51,7 +51,7 @@ public class JpaResourceInformationProviderTest {
 		jpaMetaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
 		lookup = new MetaLookup();
 		lookup.addProvider(jpaMetaProvider);
-		builder = new JpaResourceInformationProvider(new NullPropertiesProvider(), () -> new OffsetLimitPagingBehavior());
+		builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()),
 				new TypeParser(), new ObjectMapper()));
 	}

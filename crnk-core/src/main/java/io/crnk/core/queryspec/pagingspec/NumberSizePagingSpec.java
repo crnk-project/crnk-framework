@@ -1,17 +1,19 @@
 package io.crnk.core.queryspec.pagingspec;
 
 import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
 public class NumberSizePagingSpec implements PagingSpec{
 
 	private Integer size = null;
 
-	private int number = 0;
+	private int number = 1;
 
 	public NumberSizePagingSpec() {
 	}
 
 	public NumberSizePagingSpec(final int number, final Integer size) {
+		PreconditionUtil.verify(number > 0, "number=%s must be larger than zero", number);
 		this.number = number;
 		this.size = size;
 	}
@@ -28,17 +30,17 @@ public class NumberSizePagingSpec implements PagingSpec{
 
 	public <T extends PagingSpec> T convert(Class<T> pagingSpecType) {
 		if (pagingSpecType.equals(OffsetLimitPagingSpec.class)) {
-			if (number == 0 && size == null) {
+			if (number == 1 && size == null) {
 				return (T) new OffsetLimitPagingSpec(0L, null);
 			}
-			else if (number == 0) {
+			else if (number == 1) {
 				return (T) new OffsetLimitPagingSpec(0L, size.longValue());
 			}
-			else if (number != 0 && size == null) {
+			else if (number != 1 && size == null) {
 				throw new UnsupportedOperationException("cannot use page number without page size");
 			}
 			else {
-				return (T) new OffsetLimitPagingSpec(size.longValue() * number, size.longValue());
+				return (T) new OffsetLimitPagingSpec(size.longValue() * (number - 1), size.longValue());
 			}
 		}
 		throw new UnsupportedOperationException("cannot converted to " + pagingSpecType);

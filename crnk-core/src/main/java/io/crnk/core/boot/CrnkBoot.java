@@ -206,7 +206,6 @@ public class CrnkBoot {
 		setupServiceUrlProvider();
 		setupServiceDiscovery();
 		setupQuerySpecUrlMapper();
-		setupPagingBehavior();
 		bootDiscovery();
 
 		LOGGER.debug("completed setup");
@@ -228,6 +227,8 @@ public class CrnkBoot {
 		resourceRegistry = new ResourceRegistryImpl(null, moduleRegistry);
 
 		addModules();
+
+		setupPagingBehavior();
 
 		setupComponents();
 		ResourceRegistryPart rootPart = setupResourceRegistry();
@@ -647,7 +648,7 @@ public class CrnkBoot {
 
 		moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 
-		if (!moduleRegistry.getPagingBehaviors().stream().anyMatch(it -> it instanceof OffsetLimitPagingBehavior)) {
+		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
 			moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
 		}
 

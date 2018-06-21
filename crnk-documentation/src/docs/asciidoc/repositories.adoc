@@ -282,16 +282,35 @@ anchor:pagination[]
 
 ### Pagination
 
-Crnk comes by default with offset/limit pagination support. The format for pagination is
-then `page[offset|limit]="value", where value is an integer`, for example:
+
+#### Offset/Limit Paging
+
+Crnk comes by default with support for offset/limit paging:
 
 `GET /tasks?page[offset]=0&page[limit]=10`
 
-The parameters are then available with `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+The parameters are then available with `QuerySpec.getPaging(type)` or the shortcuts `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+
+
+#### Number/Size Paging
+
+Support for number/size-based paging can be enabled by registering the `NumberSizePagingBehavior` in one of two ways:
+
+- register `NumberSizePagingBehavior.createModule()`
+- register `NumberSizePagingBehavior` directly to service discovery.
+
+Paging parameters can then look like:
+
+`GET /tasks?page[number]=1&page[size]=10`
+
+Internally Crnk is able to translate between offset/limit and number/size-based paging. If
+a repository has been implemented with offset/limit paging, it works equally well when number/size paging is used.
+The conversion takes place automatically when invoking `QuerySpec.getPaging(desiredPagingType)`.
+
 
 #### Pagination Links
 
-The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
+JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
 The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
 by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
 
@@ -312,14 +331,9 @@ This is typically achieved by querying `limit + 1` resources.
 
 #### Custom strategies
 
-Internally offset/limit pagination is implemented with `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec`.
-They implement the more generic `PagingBehavior` and `PagingSpec`. An instance of `PagingSpec`
-is hold by QuerySpec and is, for example, also accessed by `QuerySpec.getLimit` and `QuerySpec.getOffset`.
-`PagingSpec` is directly accessible with `QuerySpec.getPagingSpec` and `QuerySpec.setPagingSpec`.
-
-Applications are free to implement other pagination behaviors implementing `PagingBehavior` and `PagingSpec`.
-JSON API does not mandate the use of a specific strategy and lets application choose the best suited mechanism.
-In order to do so, you would have to perform the following actions:
+`OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` and `NumberSizePagingBehavior` and `NumberSizePagingSpec`
+are two implementations of `PagingBehavior` and `PagingSpec`. Applications are free to add further implementations
+or replace the existing ones. In order to do so, you would have to perform the following actions:
 
 * Provide an instance of a custom `PagingBehavior` implementation.
 * Register the `PagingBehavior` to Spring. There are two possibilities:
@@ -331,17 +345,16 @@ In order to do so, you would have to perform the following actions:
 
 
 * Make use of the new pagination strategy for your resources:
-** by default the new pagination strategy will become the default strategy for all resources.
-** multiple pagination strategies can be registered and then selected for each resource individually with
-  <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
+** by default the first pagination behavior will become the default for all resources.
+** by explicitly specify which resource makes use of which paging specification with
+  <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingSpec>>.
 
-For an example follow the `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` implementation. New implementations may
-extend from those classes to offer compatibility in two different ways:
+For examples have a look at the `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` or
+`NumberSizePagingBehavior` and `NumberSizePagingSpec` implementations.
 
-- maintain support for `offset`, `limit` parameters.
-- translate the custom page parameters to `offset`, `limit` to make existing (potentially third-party) repositories compatible with the custom parameters.
-
-
+There is the possibility for a `PagingBehavior` to serve multiple `PagingSpec`. This is used, for example,
+by `NumberSizePagingBehavior` to translate `number` and `size` to `offset` and `limit` for repositories
+that are based on `OffsetLimitPagingSpec`.
 
 
 ### Sparse Fieldsets

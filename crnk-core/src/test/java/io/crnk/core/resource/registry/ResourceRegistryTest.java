@@ -3,7 +3,6 @@ package io.crnk.core.resource.registry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +26,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import org.junit.Assert;
@@ -36,15 +35,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 public class ResourceRegistryTest {
 
@@ -84,7 +74,7 @@ public class ResourceRegistryTest {
 		fields.add(new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null));
 		ResourceInformation resourceInformation =
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, fields,
-						new OffsetLimitPagingBehavior());
+						OffsetLimitPagingSpec.class);
 		return new LegacyRegistryEntry(new DirectResponseResourceEntry(null,
 				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
 	}
@@ -137,7 +127,7 @@ public class ResourceRegistryTest {
 		ResourceInformation resourceInformation =
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, "tasks", null,
 						Arrays.asList(idField, valueField),
-						new OffsetLimitPagingBehavior());
+						OffsetLimitPagingSpec.class);
 		RegistryEntry registryEntry = new LegacyRegistryEntry(new DirectResponseResourceEntry(null, new
 				ResourceRepositoryInformationImpl
 				("tasks", resourceInformation, RepositoryMethodAccess.ALL)));

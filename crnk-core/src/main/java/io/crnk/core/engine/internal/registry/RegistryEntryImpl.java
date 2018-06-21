@@ -14,6 +14,8 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RelationshipRepositoryNotFoundException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
@@ -38,10 +40,12 @@ public class RegistryEntryImpl implements RegistryEntry {
 
 	private Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapter;
 
+	private PagingBehavior pagingBehavior;
+
 
 	public RegistryEntryImpl(ResourceRepositoryAdapter resourceRepositoryAdapter,
-							 Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
-							 ModuleRegistry moduleRegistry) {
+			Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
+			ModuleRegistry moduleRegistry) {
 		this.resourceRepositoryAdapter = resourceRepositoryAdapter;
 		this.relationshipRepositoryAdapter = relationshipRepositoryAdapters;
 		this.moduleRegistry = moduleRegistry;
@@ -146,6 +150,16 @@ public class RegistryEntryImpl implements RegistryEntry {
 	 */
 	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade() {
 		return (ResourceRepositoryV2<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
+	}
+
+	@Override
+	public PagingBehavior getPagingBehavior() {
+		if (pagingBehavior == null) {
+			ResourceInformation resourceInformation = getResourceInformation();
+			Class<? extends PagingSpec> pagingSpecType = resourceInformation.getPagingSpecType();
+			pagingBehavior = moduleRegistry.findPagingBehavior(pagingSpecType);
+		}
+		return pagingBehavior;
 	}
 
 }

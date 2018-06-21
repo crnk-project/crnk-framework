@@ -34,7 +34,6 @@ public class TSNpmConfiguration {
 		packageMapping.put("io.crnk.meta", crnkNpm);
 		packageMapping.put("io.crnk.meta.resource", crnkNpm);
 		packageMapping.put("io.crnk.jpa", crnkNpm);
-		packageMapping.put("io.crnk.core.resource.links", crnkNpm);
 
 		peerDependencies.put("ngrx-json-api", ">=2.2.0");
 		peerDependencies.put("rxjs", ">=5.2.0");

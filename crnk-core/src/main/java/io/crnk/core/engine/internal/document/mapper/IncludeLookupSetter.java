@@ -16,10 +16,12 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Nullable;
@@ -65,9 +67,12 @@ public class IncludeLookupSetter {
 		if (!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && !queryAdapter.isEmpty()) {
 			// offset/limit cannot properly work for nested inclusions if becomes cyclic
 			inclusionQueryAdapter = queryAdapter.duplicate();
-			if (queryAdapter.getResourceInformation().getPagingBehavior() != null) {
+
+			RegistryEntry entry = resourceRegistry.getEntry(queryAdapter.getResourceInformation().getResourceType());
+			PagingBehavior pagingBehavior = entry.getPagingBehavior();
+			if (pagingBehavior != null) {
 				inclusionQueryAdapter
-						.setPagingSpec(queryAdapter.getResourceInformation().getPagingBehavior().createEmptyPagingSpec());
+						.setPagingSpec(pagingBehavior.createEmptyPagingSpec());
 			}
 		}
 

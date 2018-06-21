@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.repository;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -10,11 +16,8 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ScheduleRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
@@ -22,8 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.*;
 
 public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 
