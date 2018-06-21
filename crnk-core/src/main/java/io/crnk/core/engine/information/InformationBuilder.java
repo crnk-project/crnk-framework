@@ -1,5 +1,7 @@
 package io.crnk.core.engine.information;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -9,12 +11,11 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
@@ -54,7 +55,13 @@ public interface InformationBuilder {
 
 		Resource superResourceType(String superResourceType);
 
+		/**
+		 * @deprecated use pagingSpecType
+		 */
+		@Deprecated
 		Resource pagingBehavior(PagingBehavior pagingBehavior);
+
+		Resource pagingSpecType(Class<PagingSpec> pagingSpecType);
 
 		ResourceInformation build();
 
@@ -108,6 +115,7 @@ public interface InformationBuilder {
 	ResourceRepository createResourceRepository();
 
 	Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+
 	Resource createResource(Class<?> resourceClass, String resourceType);
 
 }

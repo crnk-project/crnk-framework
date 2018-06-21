@@ -46,9 +46,9 @@ public class NumberSizePagingBehaviorTest {
 	@Test
 	public void testSerializeOffset() {
 		NumberSizePagingBehavior pagingBehavior = new NumberSizePagingBehavior();
-		Map<String, Set<String>> result = pagingBehavior.serialize(new NumberSizePagingSpec(1, null), "tasks");
+		Map<String, Set<String>> result = pagingBehavior.serialize(new NumberSizePagingSpec(2, null), "tasks");
 
-		assertEquals(ImmutableSet.of("1"), result.get("page[number]"));
+		assertEquals(ImmutableSet.of("2"), result.get("page[number]"));
 		assertFalse(result.containsKey("page[size]"));
 		assertEquals(1, result.size());
 	}
@@ -56,11 +56,11 @@ public class NumberSizePagingBehaviorTest {
 	@Test
 	public void testSerializeLimit() {
 		NumberSizePagingBehavior pagingBehavior = new NumberSizePagingBehavior();
-		Map<String, Set<String>> result = pagingBehavior.serialize(new NumberSizePagingSpec(0, 30), "tasks");
+		Map<String, Set<String>> result = pagingBehavior.serialize(new NumberSizePagingSpec(1, 30), "tasks");
 
-		assertFalse(result.containsKey("page[number]"));
+		assertTrue(result.containsKey("page[number]"));
 		assertEquals(ImmutableSet.of("30"), result.get("page[size]"));
-		assertEquals(1, result.size());
+		assertEquals(2, result.size());
 	}
 
 	@Test
@@ -78,16 +78,16 @@ public class NumberSizePagingBehaviorTest {
 		NumberSizePagingBehavior pagingBehavior = new NumberSizePagingBehavior();
 		NumberSizePagingSpec result = pagingBehavior.deserialize(Collections.<String, Set<String>>emptyMap());
 
-		assertEquals(new NumberSizePagingSpec(0, null), result);
+		assertEquals(new NumberSizePagingSpec(1, null), result);
 	}
 
 	@Test
 	public void testDeserializeDefaultWithOffset() {
 		NumberSizePagingBehavior pagingBehavior = new NumberSizePagingBehavior();
 		NumberSizePagingSpec result =
-				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("number", ImmutableSet.of("1")));
+				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("number", ImmutableSet.of("2")));
 
-		assertEquals(new NumberSizePagingSpec(1, null), result);
+		assertEquals(new NumberSizePagingSpec(2, null), result);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class NumberSizePagingBehaviorTest {
 		NumberSizePagingSpec result =
 				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("size", ImmutableSet.of("30")));
 
-		assertEquals(new NumberSizePagingSpec(0, 30), result);
+		assertEquals(new NumberSizePagingSpec(1, 30), result);
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class NumberSizePagingBehaviorTest {
 		pagingBehavior.setDefaultLimit(30L);
 		NumberSizePagingSpec result = pagingBehavior.deserialize(Collections.<String, Set<String>>emptyMap());
 
-		assertEquals(new NumberSizePagingSpec(0, 30), result);
+		assertEquals(new NumberSizePagingSpec(1, 30), result);
 	}
 
 	@Test
@@ -154,24 +154,25 @@ public class NumberSizePagingBehaviorTest {
 		NumberSizePagingSpec result =
 				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("size", ImmutableSet.of("10")));
 
-		assertEquals(new NumberSizePagingSpec(0, 10), result);
+		assertEquals(new NumberSizePagingSpec(1, 10), result);
 	}
 
 	@Test
 	public void testDeserialize() {
 		NumberSizePagingBehavior pagingBehavior = new NumberSizePagingBehavior();
 		NumberSizePagingSpec result =
-				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("number", ImmutableSet.of("1"),
+				pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("number", ImmutableSet.of("2"),
 						"size", ImmutableSet.of("30")));
 
-		assertEquals(new NumberSizePagingSpec(1, 30), result);
+		assertEquals(new NumberSizePagingSpec(2, 30), result);
 	}
 
 	@Test
 	public void testIsPagingRequired() {
 		PagingBehavior pagingBehavior = new NumberSizePagingBehavior();
-		assertTrue(pagingBehavior.isRequired(new NumberSizePagingSpec(1, null)));
-		assertTrue(pagingBehavior.isRequired(new NumberSizePagingSpec(0, 30)));
+		assertTrue(pagingBehavior.isRequired(new NumberSizePagingSpec(2, null)));
+		assertTrue(pagingBehavior.isRequired(new NumberSizePagingSpec(1, 30)));
+		assertFalse(pagingBehavior.isRequired(new NumberSizePagingSpec(1, null)));
 	}
 
 	@Test
@@ -183,7 +184,7 @@ public class NumberSizePagingBehaviorTest {
 	public void testBuild() {
 		PagingBehavior pagingBehavior = new NumberSizePagingBehavior();
 
-		NumberSizePagingSpec pagingSpec = new NumberSizePagingSpec(0, 10);
+		NumberSizePagingSpec pagingSpec = new NumberSizePagingSpec(1, 10);
 
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		ResourceRegistry resourceRegistry = new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry);

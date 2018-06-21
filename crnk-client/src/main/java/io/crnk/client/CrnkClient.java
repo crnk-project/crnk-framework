@@ -78,6 +78,7 @@ import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -229,8 +230,7 @@ public class CrnkClient {
 			moduleRegistry.addAllPagingBehaviors(serviceDiscovery.getInstancesByType(PagingBehavior.class));
 		}
 
-		if (!moduleRegistry.getPagingBehaviors().stream().filter(it -> it instanceof OffsetLimitPagingBehavior).findFirst()
-				.isPresent()) {
+		if (moduleRegistry.getPagingBehaviors().isEmpty()) {
 			moduleRegistry.addPagingBehavior(new OffsetLimitPagingBehavior());
 		}
 
@@ -521,7 +521,7 @@ public class CrnkClient {
 						, resourceType
 						, null
 						, null
-						, new OffsetLimitPagingBehavior()
+						, PagingSpec.class
 				);
 		return new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder);
 	}
@@ -535,7 +535,7 @@ public class CrnkClient {
 
 		ResourceInformation sourceResourceInformation =
 				new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
-						new OffsetLimitPagingBehavior());
+						PagingSpec.class);
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}
 

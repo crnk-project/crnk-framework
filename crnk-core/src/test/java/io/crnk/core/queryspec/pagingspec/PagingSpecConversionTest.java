@@ -11,7 +11,7 @@ public class PagingSpecConversionTest {
 	public void checkWithOffsetAndLimit() {
 		OffsetLimitPagingSpec offsetSpec = new OffsetLimitPagingSpec(20L, 10L);
 		NumberSizePagingSpec numberSpec = offsetSpec.convert(NumberSizePagingSpec.class);
-		Assert.assertEquals(2, numberSpec.getNumber());
+		Assert.assertEquals(3, numberSpec.getNumber());
 		Assert.assertEquals(10, numberSpec.getSize().intValue());
 		OffsetLimitPagingSpec convertedOffsetSpec = numberSpec.convert(OffsetLimitPagingSpec.class);
 		Assert.assertEquals(offsetSpec, convertedOffsetSpec);
@@ -21,7 +21,7 @@ public class PagingSpecConversionTest {
 	public void checkEmpty() {
 		OffsetLimitPagingSpec offsetSpec = new OffsetLimitPagingSpec(0L, null);
 		NumberSizePagingSpec numberSpec = offsetSpec.convert(NumberSizePagingSpec.class);
-		Assert.assertEquals(0, numberSpec.getNumber());
+		Assert.assertEquals(1, numberSpec.getNumber());
 		Assert.assertNull(numberSpec.getSize());
 		OffsetLimitPagingSpec convertedOffsetSpec = numberSpec.convert(OffsetLimitPagingSpec.class);
 		Assert.assertEquals(offsetSpec, convertedOffsetSpec);
@@ -31,7 +31,7 @@ public class PagingSpecConversionTest {
 	public void checkWithLimit() {
 		OffsetLimitPagingSpec offsetSpec = new OffsetLimitPagingSpec(0L, 10L);
 		NumberSizePagingSpec numberSpec = offsetSpec.convert(NumberSizePagingSpec.class);
-		Assert.assertEquals(0, numberSpec.getNumber());
+		Assert.assertEquals(1, numberSpec.getNumber());
 		Assert.assertEquals(10, numberSpec.getSize().intValue());
 		OffsetLimitPagingSpec convertedOffsetSpec = numberSpec.convert(OffsetLimitPagingSpec.class);
 		Assert.assertEquals(offsetSpec, convertedOffsetSpec);

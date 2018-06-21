@@ -73,10 +73,10 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	public <T extends PagingSpec> T convert(Class<T> pagingSpecType) {
 		if (pagingSpecType.equals(NumberSizePagingSpec.class)) {
 			if (offset == 0 && limit == null) {
-				return (T) new NumberSizePagingSpec(0, null);
+				return (T) new NumberSizePagingSpec(1, null);
 			}
 			else if (offset == 0) {
-				return (T) new NumberSizePagingSpec(0, limit.intValue());
+				return (T) new NumberSizePagingSpec(1, limit.intValue());
 			}
 			else if (offset != 0 && limit == null) {
 				throw new UnsupportedOperationException("cannot use page offset without page limit");
@@ -88,7 +88,7 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 							String.format("offset=%s must be multiple of limit=%s to support page number/size conversion",
 									offset, limit));
 				}
-				return (T) new NumberSizePagingSpec(number, limit.intValue());
+				return (T) new NumberSizePagingSpec(1 + number, limit.intValue());
 			}
 		}
 		throw new UnsupportedOperationException("cannot converted to " + pagingSpecType);

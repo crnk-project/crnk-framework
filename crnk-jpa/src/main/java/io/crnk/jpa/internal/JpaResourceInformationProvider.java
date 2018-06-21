@@ -23,6 +23,7 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Supplier;
@@ -48,17 +49,12 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	private final JpaMetaProvider metaProvider;
 
-	private final Supplier<PagingBehavior> pagingBehaviorSupplier;
 
-	private PagingBehavior pagingBehavior;
-
-	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider,
-			Supplier<PagingBehavior> pagingBehaviorSupplier) {
+	public JpaResourceInformationProvider(PropertiesProvider propertiesProvider) {
 		super(
 				propertiesProvider,
 				Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(),
 						new JacksonResourceFieldInformationProvider()));
-		this.pagingBehaviorSupplier = pagingBehaviorSupplier;
 
 		metaProvider = new JpaMetaProvider((Set) Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
@@ -106,14 +102,10 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				&& superclass.getAnnotation(MappedSuperclass.class) == null ? context.getResourceType(superclass)
 				: null;
 
-		if (pagingBehavior == null) {
-			pagingBehavior = pagingBehaviorSupplier.get();
-		}
-
 		TypeParser typeParser = context.getTypeParser();
 		ResourceInformation info =
 				new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
-						instanceBuilder, fields, pagingBehavior);
+						instanceBuilder, fields, OffsetLimitPagingSpec.class);
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
 		info.setIdStringMapper(new JpaIdMapper(meta));
 		return info;
