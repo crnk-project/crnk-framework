@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.mapper;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -13,7 +19,15 @@ import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.AbstractQuerySpecTest;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.QuerySpecDeserializerContext;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.repository.TaskWithPagingBehavior;
@@ -24,8 +38,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.*;
 
 public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -259,6 +271,18 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[tasks][name]", "value");
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+		Assert.assertEquals(expectedSpec, actualSpec);
+	}
+
+	@Test
+	public void testFilterByNull() {
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
+		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, null));
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[name]", "null");
 
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);

@@ -380,6 +380,7 @@ public class QuerySpec {
 	public String toString() {
 		return "QuerySpec{" +
 				(resourceClass != null ? "resourceClass=" + resourceClass.getName() : "") +
+				(resourceType != null && resourceClass != null ? ", " : "") +
 				(resourceType != null ? "resourceType=" + resourceType : "") +
 				(pagingSpec != null ? ", paging=" + pagingSpec : "") +
 				(!filters.isEmpty() ? ", filters=" + filters : "") +
