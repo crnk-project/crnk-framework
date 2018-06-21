@@ -1,23 +1,5 @@
 package io.crnk.core.engine.information.resource;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.StringMapper;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
-import io.crnk.core.exception.ResourceDuplicateIdException;
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.resource.annotations.JsonApiResource;
-
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +10,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.parser.StringMapper;
+import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
+import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
+import io.crnk.core.exception.ResourceDuplicateIdException;
+import io.crnk.core.exception.ResourceException;
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 /**
  * Holds information about the type of the resource.

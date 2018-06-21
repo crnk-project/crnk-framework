@@ -1,11 +1,11 @@
 package io.crnk.core.queryspec.pagingspec;
 
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
-
-import java.util.Map;
-import java.util.Set;
 
 public interface PagingBehavior<T extends PagingSpec> {
 
@@ -58,4 +58,13 @@ public interface PagingBehavior<T extends PagingSpec> {
 	 * @return True in case of pagination is required otherwise False
 	 */
 	boolean isRequired(T pagingSpec);
+
+	/**
+	 * @param pagingSpecType
+	 * @return true if the given paging spec can be provided by this behavior.
+	 */
+	default boolean supports(Class<? extends PagingSpec> pagingSpecType){
+		T emptyPagingSpec = createEmptyPagingSpec();
+		return pagingSpecType.isInstance(emptyPagingSpec);
+	}
 }

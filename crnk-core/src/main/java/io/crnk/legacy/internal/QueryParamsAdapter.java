@@ -11,6 +11,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
+import org.slf4j.LoggerFactory;
 
 public class QueryParamsAdapter implements QueryAdapter {
 
@@ -31,6 +32,9 @@ public class QueryParamsAdapter implements QueryAdapter {
 		this.resourceInformation = resourceInformation;
 		this.moduleRegistry = moduleRegistry;
 		this.resourceRegistry = moduleRegistry.getResourceRegistry();
+
+		LoggerFactory.getLogger(QueryParamsAdapter.class)
+				.warn("deprecatedQueryParams still in use, to be removed in the future");
 	}
 
 	public QueryParamsAdapter(QueryParams queryParams) {

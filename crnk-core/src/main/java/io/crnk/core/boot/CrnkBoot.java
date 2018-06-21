@@ -62,6 +62,7 @@ import io.crnk.core.queryspec.internal.UrlMapperAdapter;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.Repository;
@@ -494,19 +495,21 @@ public class CrnkBoot {
 	}
 
 	/**
-	 * @return prefix like /api where to provide the JSON API endpoint. Always starts with a leading slash, but no trailing slash. Or null if not specified.
+	 * @return prefix like /api where to provide the JSON API endpoint. Always starts with a leading slash, but no trailing
+	 * slash. Or null if not specified.
 	 */
 	public String getWebPathPrefix() {
 		String pathPrefix = null;
 		if (webPathPrefix != null) {
 			pathPrefix = webPathPrefix;
-		}else {
+		}
+		else {
 			pathPrefix = propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 		}
-		if(pathPrefix != null && !pathPrefix.startsWith("/")){
+		if (pathPrefix != null && !pathPrefix.startsWith("/")) {
 			pathPrefix = "/" + pathPrefix;
 		}
-		if(pathPrefix != null && pathPrefix.endsWith("/")){
+		if (pathPrefix != null && pathPrefix.endsWith("/")) {
 			pathPrefix = pathPrefix.substring(0, pathPrefix.length() - 1);
 		}
 		return pathPrefix;
@@ -649,9 +652,9 @@ public class CrnkBoot {
 		}
 
 		for (PagingBehavior pagingBehavior : moduleRegistry.getPagingBehaviors()) {
-			if (pagingBehavior instanceof OffsetLimitPagingBehavior) {
+			if (pagingBehavior instanceof LimitBoundedPagingBehavior) {
 				if (defaultPageLimit != null) {
-					((OffsetLimitPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
+					((LimitBoundedPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
 				}
 				else {
 					LOGGER.warn(
@@ -660,7 +663,7 @@ public class CrnkBoot {
 					);
 				}
 				if (maxPageLimit != null) {
-					((OffsetLimitPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
+					((LimitBoundedPagingBehavior) pagingBehavior).setMaxPageLimit(maxPageLimit);
 				}
 			}
 		}

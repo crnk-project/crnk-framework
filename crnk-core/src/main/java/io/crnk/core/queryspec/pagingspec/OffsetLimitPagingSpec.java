@@ -1,6 +1,7 @@
 package io.crnk.core.queryspec.pagingspec;
 
 import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.exception.BadRequestException;
 
 public class OffsetLimitPagingSpec implements PagingSpec {
 
@@ -63,9 +64,33 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 
 	@Override
 	public String toString() {
-		return "OffsetLimitPagingSpec{" +
+		return "OffsetLimitPagingSpec[" +
 				(offset != null ? "offset=" + offset : "") +
 				(limit != null ? ", limit=" + limit : "") +
-				'}';
+				']';
+	}
+
+	public <T extends PagingSpec> T convert(Class<T> pagingSpecType) {
+		if (pagingSpecType.equals(NumberSizePagingSpec.class)) {
+			if (offset == 0 && limit == null) {
+				return (T) new NumberSizePagingSpec(0, null);
+			}
+			else if (offset == 0) {
+				return (T) new NumberSizePagingSpec(0, limit.intValue());
+			}
+			else if (offset != 0 && limit == null) {
+				throw new UnsupportedOperationException("cannot use page offset without page limit");
+			}
+			else {
+				int number = (int) (offset / limit);
+				if (number * limit != offset) {
+					throw new BadRequestException(
+							String.format("offset=%s must be multiple of limit=%s to support page number/size conversion",
+									offset, limit));
+				}
+				return (T) new NumberSizePagingSpec(number, limit.intValue());
+			}
+		}
+		throw new UnsupportedOperationException("cannot converted to " + pagingSpecType);
 	}
 }
