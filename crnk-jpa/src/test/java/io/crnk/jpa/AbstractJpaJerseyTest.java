@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.CountryTranslationEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
@@ -132,8 +131,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 						new SampleJsonServiceLocator());
 			}
 			else {
-				feature = new CrnkFeature(new ObjectMapper(), new DefaultQuerySpecDeserializer(), new SampleJsonServiceLocator
-						());
+				feature = new CrnkFeature();
 			}
 
 			feature.addModule(new TestModule());

@@ -1,5 +1,14 @@
 package io.crnk.core.queryspec.mapper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -9,17 +18,26 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.IncludeRelationSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.QuerySpecDeserializer;
+import io.crnk.core.queryspec.QuerySpecDeserializerContext;
+import io.crnk.core.queryspec.QuerySpecSerializer;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 public class DefaultQuerySpecUrlMapper
 		implements QuerySpecUrlMapper, QuerySpecDeserializer, QuerySpecSerializer, UnkonwnMappingAware {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultQuerySpecUrlMapper.class);
+
+	private static final String NULL_VALUE_STRING = "null";
 
 	private FilterOperator defaultOperator = FilterOperator.EQ;
 
@@ -76,7 +94,8 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	/**
-	 * @return whether to map json to java names in {@link QuerySpec} for sort, filter, include and field parameters. True by default.
+	 * @return whether to map json to java names in {@link QuerySpec} for sort, filter, include and field parameters. True by
+	 * default.
 	 */
 	public boolean getMapJsonNames() {
 		return pathResolver.getMapJsonNames();
@@ -173,7 +192,8 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	private String toJsonPath(ResourceInformation resourceInformation, List<String> attributePath) {
-		QueryPathSpec pathSpec = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JAVA, null);
+		QueryPathSpec pathSpec =
+				pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JAVA, null);
 		return StringUtils.join(".", pathSpec.getAttributePath());
 	}
 
@@ -182,7 +202,10 @@ public class DefaultQuerySpecUrlMapper
 		return type.toString().toLowerCase() + "[" + resourceType + "]" + (key != null ? key : "");
 	}
 
-	private static String serializeValue(Object value) {
+	protected static String serializeValue(Object value) {
+		if (value == null) {
+			return NULL_VALUE_STRING;
+		}
 		return value.toString();
 	}
 
@@ -203,12 +226,14 @@ public class DefaultQuerySpecUrlMapper
 				throw new RepositoryNotFoundException(querySpec.getResourceClass());
 			}
 			resourceInformation = entry.getResourceInformation();
-		} else {
+		}
+		else {
 			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
 			if (entry == null) {
 				// model may not be available on client side in case of dynamic client with Resource.class
 				resourceInformation = null;
-			} else {
+			}
+			else {
 				resourceInformation = entry.getResourceInformation();
 			}
 		}
@@ -233,7 +258,9 @@ public class DefaultQuerySpecUrlMapper
 			if (filterSpec.hasExpressions()) {
 				throw new UnsupportedOperationException("filter expressions like and and or not yet supported");
 			}
-			String attrKey = "[" + toJsonPath(resourceInformation, filterSpec.getAttributePath()) + "][" + filterSpec.getOperator().getName() + "]";
+			String attrKey =
+					"[" + toJsonPath(resourceInformation, filterSpec.getAttributePath()) + "][" + filterSpec.getOperator()
+							.getName() + "]";
 			String key = addResourceType(QueryParameterType.FILTER, attrKey, resourceInformation);
 
 			if (filterSpec.getValue() instanceof Collection) {
@@ -243,7 +270,8 @@ public class DefaultQuerySpecUrlMapper
 					values.add(serializeValue(elem));
 				}
 				map.put(key, values);
-			} else {
+			}
+			else {
 				String value = serializeValue(filterSpec.getValue());
 				put(map, key, value);
 			}
@@ -268,7 +296,8 @@ public class DefaultQuerySpecUrlMapper
 		}
 	}
 
-	protected void serializeIncludedFields(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
+	protected void serializeIncludedFields(QuerySpec querySpec, ResourceInformation resourceInformation,
+			Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedFields().isEmpty()) {
 			String key = addResourceType(QueryParameterType.FIELDS, null, resourceInformation);
 
@@ -283,7 +312,8 @@ public class DefaultQuerySpecUrlMapper
 		}
 	}
 
-	protected void serializeIncludedRelations(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
+	protected void serializeIncludedRelations(QuerySpec querySpec, ResourceInformation resourceInformation,
+			Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedRelations().isEmpty()) {
 			String key = addResourceType(QueryParameterType.INCLUDE, null, resourceInformation);
 
@@ -305,7 +335,8 @@ public class DefaultQuerySpecUrlMapper
 				List<String> attributePath = splitAttributePath(value, parameter);
 
 				ResourceInformation resourceInformation = parameter.getResourceInformation();
-				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				QueryPathSpec resolvedPath = pathResolver
+						.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
 				querySpec.includeRelation(resolvedPath.getAttributePath());
 			}
 		}
@@ -320,7 +351,8 @@ public class DefaultQuerySpecUrlMapper
 		for (String values : parameter.getValues()) {
 			for (String value : splitValues(values)) {
 				List<String> attributePath = splitAttributePath(value, parameter);
-				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				QueryPathSpec resolvedPath = pathResolver
+						.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
 				querySpec.includeField(resolvedPath.getAttributePath());
 			}
 		}
@@ -328,24 +360,32 @@ public class DefaultQuerySpecUrlMapper
 
 	protected void deserializeFilter(QuerySpec querySpec, QueryParameter parameter) {
 		ResourceInformation resourceInformation = parameter.getResourceInformation();
-		QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, parameter.getAttributePath(), QueryPathResolver.NamingType.JSON, parameter.getName());
+		QueryPathSpec resolvedPath = pathResolver
+				.resolve(resourceInformation, parameter.getAttributePath(), QueryPathResolver.NamingType.JSON,
+						parameter.getName());
 		Class attributeType = ClassUtils.getRawType(resolvedPath.getValueType());
 
 		Set<Object> typedValues = new HashSet<>();
 		for (String stringValue : parameter.getValues()) {
 			try {
-				if (attributeType != Object.class) {
+				if (NULL_VALUE_STRING.equals(stringValue)) {
+					typedValues.add(null);
+				}
+				else if (attributeType != Object.class) {
 					TypeParser typeParser = context.getTypeParser();
 					Object value = typeParser.parse(stringValue, (Class) attributeType);
 					typedValues.add(value);
-				} else {
+				}
+				else {
 					typedValues.add(stringValue);
 				}
-			} catch (ParserException e) {
+			}
+			catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				} else {
+				}
+				else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -366,7 +406,8 @@ public class DefaultQuerySpecUrlMapper
 				}
 				List<String> attributePath = splitAttributePath(value, parameter);
 
-				QueryPathSpec resolvedPath = pathResolver.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
+				QueryPathSpec resolvedPath = pathResolver
+						.resolve(resourceInformation, attributePath, QueryPathResolver.NamingType.JSON, parameter.getName());
 
 				Direction dir = desc ? Direction.DESC : Direction.ASC;
 				querySpec.addSort(new SortSpec(resolvedPath.getAttributePath(), dir));
@@ -381,7 +422,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected List<QueryParameter> parseParameters(Map<String, Set<String>> params,
-												   ResourceInformation rootResourceInformation) {
+			ResourceInformation rootResourceInformation) {
 		List<QueryParameter> list = new ArrayList<>();
 		Set<Map.Entry<String, Set<String>>> entrySet = params.entrySet();
 		for (Map.Entry<String, Set<String>> entry : entrySet) {
@@ -391,14 +432,15 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected QueryParameter parseParameter(String parameterName, Set<String> values,
-											ResourceInformation rootResourceInformation) {
+			ResourceInformation rootResourceInformation) {
 		int typeSep = parameterName.indexOf('[');
 		String strParamType = typeSep != -1 ? parameterName.substring(0, typeSep) : parameterName;
 
 		QueryParameterType paramType;
 		try {
 			paramType = QueryParameterType.valueOf(strParamType.toUpperCase());
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			paramType = QueryParameterType.UNKNOWN;
 		}
 
@@ -411,17 +453,22 @@ public class DefaultQuerySpecUrlMapper
 
 		if (paramType == QueryParameterType.FILTER && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		} else if (paramType == QueryParameterType.PAGE && elements.size() == 1) {
+		}
+		else if (paramType == QueryParameterType.PAGE && elements.size() == 1) {
 			param.setResourceInformation(rootResourceInformation);
 			param.setPagingType(elements.get(0));
-		} else if (paramType == QueryParameterType.PAGE && elements.size() == 2) {
+		}
+		else if (paramType == QueryParameterType.PAGE && elements.size() == 2) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), parameterName));
 			param.setPagingType(elements.get(1));
-		} else if (paramType == QueryParameterType.UNKNOWN) {
+		}
+		else if (paramType == QueryParameterType.UNKNOWN) {
 			param.setResourceInformation(null);
-		} else if (elements.size() == 1) {
+		}
+		else if (elements.size() == 1) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), parameterName));
-		} else {
+		}
+		else {
 			param.setResourceInformation(rootResourceInformation);
 		}
 		if (param.getOperator() == null) {
@@ -444,7 +491,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected void parseFilterParameterName(QueryParameter param, List<String> elements,
-											ResourceInformation rootResourceInformation) {
+			ResourceInformation rootResourceInformation) {
 		// check whether last element is an operator
 		parseFilterOperator(param, elements);
 
@@ -459,23 +506,26 @@ public class DefaultQuerySpecUrlMapper
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
 			param.setAttributePath(Arrays.asList(elements.get(1).split("\\.")));
-		} else if (enforceDotPathSeparator && elements.size() == 1) {
+		}
+		else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.setResourceInformation(rootResourceInformation);
 			param.setAttributePath(Arrays.asList(elements.get(0).split("\\.")));
-		} else {
+		}
+		else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
 	protected void legacyParseFilterParameterName(QueryParameter param, List<String> elements,
-												  ResourceInformation rootResourceInformation) {
+			ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
 			elements.remove(0);
-		} else {
+		}
+		else {
 			param.setResourceInformation(rootResourceInformation);
 		}
 		ArrayList<String> attributePath = new ArrayList<>();
@@ -490,7 +540,8 @@ public class DefaultQuerySpecUrlMapper
 		FilterOperator operator = findOperator(lastElement);
 		if (operator != null) {
 			elements.remove(elements.size() - 1);
-		} else {
+		}
+		else {
 			operator = defaultOperator;
 		}
 		param.setOperator(operator);

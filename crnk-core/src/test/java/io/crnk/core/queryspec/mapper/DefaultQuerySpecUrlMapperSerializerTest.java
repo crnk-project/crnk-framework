@@ -1,5 +1,9 @@
 package io.crnk.core.queryspec.mapper;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -10,15 +14,15 @@ import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.queryspec.*;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class DefaultQuerySpecUrlMapperSerializerTest {
 
@@ -155,6 +159,13 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
+	public void testFilterByNull() {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, null));
+		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=null", null, querySpec);
+	}
+
+	@Test
 	public void testFilterByMany() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("value1", "value2")));
@@ -222,7 +233,9 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		querySpec.includeRelation(Arrays.asList("followupProject"));
 		querySpec.addSort(new SortSpec(Arrays.asList("desc"), Direction.ASC));
 		querySpec.addFilter(new FilterSpec(Arrays.asList("desc"), FilterOperator.EQ, "test"));
-		check("http://127.0.0.1/schedules?include[schedules]=followup&filter[schedules][description][EQ]=test&sort[schedules]=description&fields[schedules]=description", null, querySpec);
+		check("http://127.0.0.1/schedules?include[schedules]=followup&filter[schedules][description][EQ]=test&sort[schedules"
+						+ "]=description&fields[schedules]=description",
+				null, querySpec);
 	}
 
 	private void check(String expectedUrl, Object id, QuerySpec querySpec) {

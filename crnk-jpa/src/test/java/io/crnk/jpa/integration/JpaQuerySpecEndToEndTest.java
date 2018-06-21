@@ -40,7 +40,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeOneRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeOneRelations() {
 		addTestWithOneRelation();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -54,7 +54,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeEmptyRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeEmptyRelations() {
 		addTest();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -70,7 +70,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testUpdate() throws InstantiationException, IllegalAccessException {
+	public void testUpdate() {
 		TestEntity test = addTest();
 
 		test.setLongValue(15);
@@ -91,7 +91,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeNested() throws InstantiationException, IllegalAccessException {
+	public void testIncludeNested() {
 		addTestWithManyRelations();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -111,7 +111,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testLazyManyRelation() throws InstantiationException, IllegalAccessException {
+	public void testLazyManyRelation() {
 		addTestWithManyRelations();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -133,7 +133,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeManyRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeManyRelations() {
 		addTestWithManyRelations();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -149,7 +149,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testMappedSuperTypeWithPkOnSuperType() throws InstantiationException, IllegalAccessException {
+	public void testMappedSuperTypeWithPkOnSuperType() {
 		ResourceRepositoryV2<TestSubclassWithSuperclassPk, Serializable> repo =
 				client.getQuerySpecRepository(TestSubclassWithSuperclassPk.class);
 		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
@@ -176,8 +176,31 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertNotNull(superRelatedValue);
 	}
 
+
 	@Test
-	public void testMappedSuperTypeWithPkOnSubclass() throws InstantiationException, IllegalAccessException {
+	public void testFilterByNull() {
+		TestEntity entity = new TestEntity();
+		entity.setId(345345L);
+		entity.setStringValue(null);
+		testRepo.create(entity);
+
+		QuerySpec querySpec = new QuerySpec(TestEntity.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList(TestEntity.ATTR_stringValue), FilterOperator.EQ, null));
+		List<TestEntity> list = testRepo.findAll(querySpec);
+		Assert.assertEquals(1, list.size());
+		TestEntity testEntity = list.get(0);
+		Assert.assertEquals(345345L, testEntity.getId().longValue());
+
+
+		querySpec = new QuerySpec(TestEntity.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList(TestEntity.ATTR_stringValue), FilterOperator.NEQ, null));
+		list = testRepo.findAll(querySpec);
+		Assert.assertEquals(0, list.size());
+	}
+
+
+	@Test
+	public void testMappedSuperTypeWithPkOnSubclass() {
 		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
 
 		RelatedEntity related = new RelatedEntity();
@@ -203,7 +226,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeAndFilterManyRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeAndFilterManyRelations() {
 		addTestWithManyRelations();
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
@@ -225,7 +248,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testFindOneTargetWithNullResult() throws InstantiationException, IllegalAccessException {
+	public void testFindOneTargetWithNullResult() {
 		TestEntity test = new TestEntity();
 		test.setId(2L);
 		test.setStringValue("test");
@@ -240,7 +263,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testFindOneTarget() throws InstantiationException, IllegalAccessException {
+	public void testFindOneTarget() {
 		TestEntity test = addTestWithOneRelation();
 
 		RelationshipRepositoryV2<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
@@ -252,7 +275,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testAddManyRelationWithRelationshipRepository() throws InstantiationException, IllegalAccessException {
+	public void testAddManyRelationWithRelationshipRepository() {
 		testAddManyRelation(false);
 	}
 
@@ -260,11 +283,11 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	@Ignore
 	// TODO bidirectionality not properly handled, see
 	// ResourceUpsert should make use of relationship repositories #130
-	public void testAddManyRelationWithResourceSave() throws InstantiationException, IllegalAccessException {
+	public void testAddManyRelationWithResourceSave() {
 		testAddManyRelation(true);
 	}
 
-	private void testAddManyRelation(boolean onSave) throws InstantiationException, IllegalAccessException {
+	private void testAddManyRelation(boolean onSave) {
 		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
 		RelatedEntity related1 = new RelatedEntity();
 		related1.setId(1L);
@@ -305,7 +328,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testIncludeNoRelations() throws InstantiationException, IllegalAccessException {
+	public void testIncludeNoRelations() {
 		addTestWithOneRelation();
 
 		List<TestEntity> list = testRepo.findAll(new QuerySpec(TestEntity.class));
@@ -491,7 +514,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testEmbeddableIds() throws InstantiationException, IllegalAccessException {
+	public void testEmbeddableIds() {
 		ResourceRepositoryV2<TestEmbeddedIdEntity, Serializable> rep = client
 				.getQuerySpecRepository(TestEmbeddedIdEntity.class);
 
