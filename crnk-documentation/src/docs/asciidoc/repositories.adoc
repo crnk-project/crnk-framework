@@ -130,6 +130,308 @@ the create, delete and update methods. `crnk-meta` accordingly reports
 insertable, updateable, deltable for such repositories as false.
 
 
+
+
+
+
+
+## Query parameters with QuerySpec
+
+Crnk passes JSON API query parameters to repositories trough a QuerySpec parameter. It holds
+request parameters like sorting and filtering specified by JSON API. The subsequent
+sections will provide a number of example.
+
+NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
+are provided as different applications are likely to be in need of different semantics and
+implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
+QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
+is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
+
+For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
+
+
+### API
+
+The QuerySpec API looks like (further setters available as well):
+
+[source]
+----
+	public class QuerySpec {
+		public <T> List<T> apply(Iterable<T> resources){...}
+
+		public Long getLimit() {...}
+
+		public long getOffset() {...}
+
+		public PagingSpec getPagingSpec() {...}
+
+		public List<FilterSpec> getFilters() {...}
+
+		public List<SortSpec> getSort() {...}
+
+		public List<IncludeFieldSpec> getIncludedFields() {...}
+
+		public List<IncludeRelationSpec> getIncludedRelations() {...}
+
+		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
+
+		...
+	}
+----
+
+There are `Spec` class for all major features:
+
+- `FilterSpec`
+- `SortSpec`
+- `IncludeFieldSpec`
+- `IncludeRelationSpec`
+- `PagingSpec`
+
+More information is given in the subsequent sections.
+
+QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
+on any `java.util.Collection`. It is useful for testing, mocking and on smaller datasets to keep
+the implementation of a repository as simple as possible.
+
+
+
+
+anchor:filtering[]
+
+### Filtering
+
+NOTE: The JSON API specification does not a mandate a specific filtering semantic. Instead
+it provides a recommendation that comes by default with Crnk. Depending on the data store
+in use, application may choose to extend or replace that default implementation by extending or
+replacing `DefaultQuerySpecUrlMapper`.
+
+Resource filtering can be achieved by providing parameters which start with `filter`:
+
+* `GET /tasks?filter[name]=Super task` to filter by name with the default `EQ` operator.
+* `GET /tasks?filter[name][EQ]=Super task` to filter by name with the `EQ` operator.
+* `GET /tasks?filter[name][LIKE]=Super` to filter by name with the `LIKE` operator.
+* `GET /tasks?filter[address.plz][EQ]=Super task` to filter by attribute `name` within a structured or related attributes `address`.
+* `GET /tasks?filter[address.city][EQ]=Super task` to filter by attribute `city` within a structured or related attributes `address`.
+* `GET /tasks?filter[name]=Super task&filter[dueDate][GT]=2015-10-01`
+* `GET /tasks?filter[name]=null` to filter by `name` being equals `null`.
+* `GET /tasks?filter[tasks][name]=Super task` is the longer version of `/tasks/?filter[name]=Super task` where the `tasks` type is explicitly stated.
+  See the subsequent <<inclusion>> section how to use this to perform filtering of related resources.
+
+A filter parameter is represented by a `FilterSpec`. It holds the path to the attribute,
+the operator and the filter value. Internally Crnk will map filter parameters to
+properly typed `FilterSpec.value`. The type is determined based on the type of
+the filtered attribute. The process can be customized by the `QuerySpecUrlMapper`
+and `TypeParser` implementations that are accessible from `CrnkBoot`.
+
+Operators within `FilterSpec` are represented by the `FilterOperator` class.
+By default, QuerySpec uses the `EQ` operator if no operator was provided.
+Crnk comes with a set of default filters:
+
+[cols="1,3", options="header"]
+|===
+|Name
+|Descriptor
+
+|`EQ`
+|equals operator where values match exactly.
+
+|`NEQ`
+|not equals where values do not match.
+
+|`LIKE`
+|where the value matches the specified pattern. It is usually
+ not case-sensitive and makes use of `%` as wildclard, but
+ may different depending on the underlying implementation.
+
+|`LT`
+|lower than the specified value
+
+|`LE`
+|lower than or equals the specified value
+
+|`GT`
+|greater than the specified value
+
+|`GE`
+|greater than or equals the specified value
+|===
+
+The application is free to implements its own `FilterOperator`. Next to the name
+a `matches` method can be implemented to support in-memory filtering
+with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
+to handle the various filter operators; usually by translating them
+to datastore-native query expressions. Custom operators can be registered
+with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
+overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
+For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
+
+anchor:sorting[]
+
+### Sorting
+
+Sorting information for the resources can be achieved by providing `sort` parameter.
+
+`GET /tasks?sort=name,-shortName`
+`GET /tasks?sort=assignee.firstName,assignee.lastName`
+
+- Sorting parameters are represented by `SortSpec` within `QuerySpec` similar to `FilterSpec` above.
+- `-` is used to denote to sort in descending order.
+
+
+anchor:pagination[]
+
+### Pagination
+
+Crnk comes by default with offset/limit pagination support. The format for pagination is
+then `page[offset|limit]="value", where value is an integer`, for example:
+
+`GET /tasks?page[offset]=0&page[limit]=10`
+
+The parameters are then available with `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+
+#### Pagination Links
+
+The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
+The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
+by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
+
+There are two ways to let Crnk compute pagination links automatically:
+
+1. The repository returns meta information implementing `PagedMetaInformation`. With this interface the total
+   number of (potentially filtered) resources is passed to Crnk, which in turn allows the computation of the links.
+2. The repository returns meta information implementing `HasMoreResourcesMetaInformation`. This interface
+   only specifies whether further resources are available after the currently requested resources. This
+   lets Crnk compute all except the `last` link.
+
+Note that for both approaches the repository has to return either no links or links information implementing
+`PagedLinksInformation`. If the links are already set, then the computation will be skipped.
+
+The potential benefit of the second over the first approach is that it might be easier to just
+determine whether more resources are available rather than counting all resources.
+This is typically achieved by querying `limit + 1` resources.
+
+#### Custom strategies
+
+Internally offset/limit pagination is implemented with `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec`.
+They implement the more generic `PagingBehavior` and `PagingSpec`. An instance of `PagingSpec`
+is hold by QuerySpec and is, for example, also accessed by `QuerySpec.getLimit` and `QuerySpec.getOffset`.
+`PagingSpec` is directly accessible with `QuerySpec.getPagingSpec` and `QuerySpec.setPagingSpec`.
+
+Applications are free to implement other pagination behaviors implementing `PagingBehavior` and `PagingSpec`.
+JSON API does not mandate the use of a specific strategy and lets application choose the best suited mechanism.
+In order to do so, you would have to perform the following actions:
+
+* Provide an instance of a custom `PagingBehavior` implementation.
+* Register the `PagingBehavior` to Spring. There are two possibilities:
+** through the service discovery mechanism like CDI or Spring.
+** through a new module with:
+
+   SimpleModule module = new SimpleModule("myPaging");
+   module.addPaginationBehavior(new MyPaginationBehavior());
+
+
+* Make use of the new pagination strategy for your resources:
+** by default the new pagination strategy will become the default strategy for all resources.
+** multiple pagination strategies can be registered and then selected for each resource individually with
+  <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
+
+For an example follow the `OffsetLimitPagingBehavior` and `OffsetLimitPagingSpec` implementation. New implementations may
+extend from those classes to offer compatibility in two different ways:
+
+- maintain support for `offset`, `limit` parameters.
+- translate the custom page parameters to `offset`, `limit` to make existing (potentially third-party) repositories compatible with the custom parameters.
+
+
+
+
+### Sparse Fieldsets
+
+Information about fields to include in the response can be achieved by providing `fields` parameter:
+
+`GET /tasks?fields=name,description`
+
+
+anchor:inclusion[]
+
+### Inclusion of Related Resources
+
+Information about relationships to include in the response can be achieved by providing an `include` parameter. Examples:
+
+* `GET /tasks?include=project` performs an inclusion of `project`.
+* `GET /tasks?include=assignee,project` performs an inclusion of `project` and `assignee`.
+* `GET /tasks?include=assignee.address` performs a nested inclusion of `assignee` within `owner`.
+* `GET /tasks/1?include=project` performs an inclusion of `project` for the task with id `1`.
+
+It is not only possible to include related resources, but also to use all other query features like sorting and filtering. In this
+case the parameters must be prefixed with the resource type such as `[project]` to sort and filter the related project:
+
+`GET /tasks?include=project&sort[project]=name&filter[project][name]=someProject`
+
+It is important to note that the requested main resource is NOT affected by `[project]`. To rather sort all tasks by the related project
+make use of:
+
+`GET /tasks?include=project&sort=project.name&filter[project.name]=someProject`
+
+Internally QuerySpec holds the value for a given resource type. If parameters for other resource types, multiple
+QuerySpec instances are used. Repositories are then accessed with the QuerySpec matching the repository.
+The QuerySpec for a particular resource type can be obtained with `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
+
+
+
+anchor:urlmapper[]
+
+### URL Mapping
+
+The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
+With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON API
+specification and recommendations and introduces some further defaults as documented
+in the previous sections (like the filter operators) where the recommendations
+do not go far enough. The used `QuerySpecUrlMapper` can be obtained
+from `CrnkBoot.getUrlMapper()` and `CrnkClient.getUrlMapper()`. Matching setter allow to
+setup a custom implementation.
+
+`DefaultQuerySpecUrlMapper` comes with a number of customization options:
+
+* `setAllowUnknownAttributes(boolean)`
+	`DefaultQuerySpecUrlMapper` validates all passed parameters against the domain model and fails
+	if one of the attributes is unknown. This flag allows to disable that check in case this should be necessary.
+
+* `setAllowUnknownParameters(boolean)`
+	`DefaultQuerySpecUrlMapper` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
+	In case of any custom query parameter `ParametersDeserializationException` will be thrown.
+	This flag allows to disable that check and ignore any unknown ones.
+
+* `setIgnoreParseExceptions(boolean)`
+	`DefaultQuerySpecUrlMapper` attempts to convert all filter parameters to their proper type based on the
+	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
+	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
+	such values and provide them as `String` within `FilterSpec`.
+
+* `setEnforceDotPathSeparator(boolean)`
+	DefaultQuerySpecUrlMapper by default supports by default two URL conventions:
+	 `http://.../resource?filter[task][project][name]=myProject` and
+	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
+	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
+	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
+	 there is danger of introducing ambiguity with resources and attributes are named equally.
+
+* `setMapJsonNames`
+    Whether to map JSON to Java names for `QuerySpec`. Enabled by default. Typically JSON and Java names are equal, but, for example,
+    fields can be renamed with the `@JsonProperty` annotation.
+
+
+* `addSupportedOperator`
+    Adds a new `FilterOperator`. See <<filtering>> for more information.
+
+* `setDefaultOperator`
+    Sets the default `FilterOperator`. See <<filtering>> for more information.
+
+Some of those methods are also available from some of the integrations like `CrnkFeature` for convenience.
+
+
+
+
+
 anchor:relationshipRepository[]
 
 ## RelationshipRepositoryV2
@@ -314,269 +616,6 @@ and used by both servers and clients:
 
 
 
-
-## Query parameters with QuerySpec
-
-Crnk passes JSON API query parameters to repositories trough a QuerySpec parameter. It holds
-request parameters like sorting and filtering specified by JSON API. The subsequent
-sections will provide a number of example.
-
-NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
-are provided as different applications are likely to be in need of different semantics and
-implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
-QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
-is implemented by <<urlmapper,`QuerySpecUrlMapper`>>.
-
-For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
-
-
-### API
-
-The QuerySpec API looks like (further setters available as well):
-
-[source]
-----
-	public class QuerySpec {
-		public <T> List<T> apply(Iterable<T> resources){...}
-
-		public Long getLimit() {...}
-
-		public long getOffset() {...}
-
-		public PagingSpec getPagingSpec() {...}
-
-		public List<FilterSpec> getFilters() {...}
-
-		public List<SortSpec> getSort() {...}
-
-		public List<IncludeFieldSpec> getIncludedFields() {...}
-
-		public List<IncludeRelationSpec> getIncludedRelations() {...}
-
-		public QuerySpec getQuerySpec(Class<?> resourceClass) {...}
-
-		...
-	}
-----
-
-There are `Spec` class for all major features:
-
-- `FilterSpec`
-- `SortSpec`
-- `IncludeFieldSpec`
-- `IncludeRelationSpec`
-- `PagingSpec`
-
-More information is given in the subsequent sections.
-
-QuerySpec provides a method `apply` that allows in-memory sorting, filtering and paging
-on any `java.util.Collection`. It is useful for testing, mocking and on smaller datasets to keep
-the implementation of a repository as simple as possible.
-
-
-
-
-anchor:filtering[]
-
-### Filtering
-
-NOTE: The JSON API specification does not a mandate a specific filtering semantic. Instead
-it provides a recommendation that comes by default with Crnk. Depending on the data store
-in use, application may choose to extend or replace that default implementation.
-
-Resource filtering can be achieved by providing parameters which start with `filter`.
-The format for filters: `filter[ResourceType]?[property|operator]([property|operator])* = "value"`
-
-* `GET /tasks/?filter[name]=Super task`
-* `GET /tasks/?filter[name][EQ]=Super task`
-* `GET /tasks/?filter[address.plz][EQ]=Super task`
-* `GET /tasks/?filter[address.city][EQ]=Super task`
-* `GET /tasks/?filter[tasks][name]=Super task`
-* `GET /tasks/?filter[tasks][name]=Super task&filter[tasks][dueDate]=2015-10-01`
-
-A filter parameter is represented by a `FilterSpec`. It holds the path to the attribute,
-the operator and the filter value. Internally Crnk will map filter parameters to
-properly typed `FilterSpec.value`. The type is determined based on the type of
-the filtered attribute. The process can be customized by the `QuerySpecUrlMapper`
-and `TypeParser` implementations that are accessible from `CrnkBoot`.
-
-Operators within `FilterSpec` are represented by the `FilterOperator` class.
-By default, QuerySpec uses the `EQ` operator if no operator was provided.
-Crnk comes with a set of default filters:
-
-[cols="1,3", options="header"]
-|===
-|Name
-|Descriptor
-
-|`EQ`
-|equals operator where values match exactly.
-
-|`NEQ`
-|not equals where values do not match.
-
-|`LIKE`
-|where the value matches the specified pattern. It is usually
- not case-sensitive and makes use of `%` as wildclard, but
- may different depending on the underlying implementation.
-
-|`LT`
-|lower than the specified value
-
-|`LE`
-|lower than or equals the specified value
-
-|`GT`
-|greater than the specified value
-
-|`GE`
-|greater than or equals the specified value
-|===
-
-The application is free to implements its own `FilterOperator`. Next to the name
-a `matches` method can be implemented to support in-memory filtering
-with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
-to handle the various filter operators; usually by translating them
-to datastore-native query expressions. Custom operators can be registered
-with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
-overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
-For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
-
-anchor:sorting[]
-
-### Sorting
-
-Sorting information for the resources can be achieved by providing `sort` parameter.
-
-* `GET /tasks/?sort=name,-shortName`
-* `GET /tasks/?sort[projects]=name,-shortName&include=projects`
-
-Sorting parameters are reprsented by `SortSpec` within `QuerySpec` similar to `FilterSpec` above.
-
-anchor:pagination[]
-
-### Pagination
-
-Resources can specify pagination with <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>>.
-By default, each resource has implicit pagination support defined by `OffsetLimitPagingBehavior`.
-It provides a simple strategy of a pair `offset/limit` parameters which can be used for filtering amount of results.
-
-The format for pagination: `page[offset|limit] = "value", where value is an integer`
-
-Example:
-
-* `GET /tasks/?page[offset]=0&page[limit]=10`
-
-Paging parameters are represented by `PagingSpec` within `QuerySpec`.
-
-By default, repositories can access the parameter with `QuerySpec.getLimit` and `QuerySpec.getOffset`.
-In case of custom strategies, `QuerySpec.getPagingSpec` must be used.
-
-The JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
-The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
-by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
-
-There are two ways to let Crnk compute pagination links automatically:
-
-1. The repository returns meta information implementing `PagedMetaInformation`. With this interface the total
-   number of (potentially filtered) resources is passed to Crnk, which in turn allows the computation of the links.
-2. The repository returns meta information implementing `HasMoreResourcesMetaInformation`. This interface
-   only specifies whether further resources are available after the currently requested resources. This
-   lets Crnk compute all except the `last` link.
-
-Note that for both approaches the repository has to return either no links or links information implementing
-`PagedLinksInformation`. If the links are already set, then the computation will be skipped.
-
-The potential benefit of the second over the first approach is that it might be easier to just
-determine whether more resources are available rather than counting all resources.
-This is typically achieved by querying `limit + 1` resources.
-
-#### Custom strategies
-
-Resources might have custom pagination strategies. In order to do so, you would have to perform the following actions:
-
-1. Provide an instance of a custom `PagingBehavior` implementation.
-2. Set it up via <<jsonApiResourcePagingBehavior,@JsonApiResource.pagingBehavior>> attribute.
-
-### Sparse Fieldsets
-
-Information about fields to include in the response can be achieved by providing `fields` parameter.
-
-* `GET /tasks/?fields=name`
-* `GET /tasks/?fields[projects]=name,description&include=projects`
-
-
-
-### Inclusion of Related Resources
-
-Information about relationships to include in the response can be achieved by providing `include` parameter.
-The format for fields: `include[ResourceType] = "property(.property)*"`
-
-Examples:
-
-* `GET /tasks/?include[tasks]=project`
-* `GET /tasks/1/?include[tasks]=project`
-* `GET /tasks/?include[tasks]=author`
-* `GET /tasks/?include[tasks][]=author&include[tasks][]=comments`
-* `GET /tasks/?include[projects]=task&include[tasks]=comments`
-* `GET /tasks/?include[projects]=task&include=comments` (QuerySpec example)
-
-Note that a QuerySpec instance holds the parameters for a single resource type.
-In case of inclusions, the QuerySpec references further
-QuerySpecs, one for each inclusion holding the parameters of that inclusion.
-Repositories are then accessed with the QuerySpec matching the repository.
-The QuerySpec for a particular type can be obtained with `QuerySpec.getRelatedSpec(Class)` on the root QuerySpec.
-
-
-anchor:urlmapper[]
-
-### URL Mapping
-
-The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
-With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON API
-specification and recommendations and introduces some further defaults as documented
-in the previous sections (like the filter operators) where the recommendations
-do not go far enough. The used `QuerySpecUrlMapper` can be obtained
-from `CrnkBoot.getUrlMapper()` and `CrnkClient.getUrlMapper()`. Matching setter allow to
-setup a custom implementation.
-
-`DefaultQuerySpecUrlMapper` comes with a number of customization options:
-
-* `setAllowUnknownAttributes(boolean)`
-	`DefaultQuerySpecUrlMapper` validates all passed parameters against the domain model and fails
-	if one of the attributes is unknown. This flag allows to disable that check in case this should be necessary.
-
-* `setAllowUnknownParameters(boolean)`
-	`DefaultQuerySpecUrlMapper` validates all passed parameters to be one of the following types: `filter`, `sort`, `page`, `fields` or `include`.
-	In case of any custom query parameter `ParametersDeserializationException` will be thrown.
-	This flag allows to disable that check and ignore any unknown ones.
-
-* `setIgnoreParseExceptions(boolean)`
-	`DefaultQuerySpecUrlMapper` attempts to convert all filter parameters to their proper type based on the
-	attribute type to be filtered. In some scenarios like dates this behavior may be undesirable as applications
-	introduce expressions like 'now`. Enabling this flag will let `DefaultQuerySpecDeserializer` ignore
-	such values and provide them as `String` within `FilterSpec`.
-
-* `setEnforceDotPathSeparator(boolean)`
-	DefaultQuerySpecUrlMapper by default supports by default two URL conventions:
-	 `http://.../resource?filter[task][project][name]=myProject` and
-	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
-	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
-	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
-	 there is danger of introducing ambiguity with resources and attributes are named equally.
-
-* `setMapJsonNames`
-    Whether to map JSON to Java names for `QuerySpec`. Enabled by default. Typically JSON and Java names are equal, but, for example,
-    fields can be renamed with the `@JsonProperty` annotation.
-
-
-* `addSupportedOperator`
-    Adds a new `FilterOperator`. See <<filtering>> for more information.
-
-* `setDefaultOperator`
-    Sets the default `FilterOperator`. See <<filtering>> for more information.
-
-Some of those methods are also available from some of the integrations like `CrnkFeature` for convenience.
 
 
 ## Error Handling
