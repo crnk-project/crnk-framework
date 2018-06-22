@@ -65,13 +65,13 @@ gitPublishCopy.doLast {
 
 	def info =
 			"<div class=\"section\">\n" +
-			"  <div class=\"section-content\">\n" +
-			"      <h3>Latest</h3>" +
-			"      <p>Version: ${project.version}</p>" +
-			"      <p><a href='documentation/'>Documentation</a> (<a href='crnk.pdf'>pdf</a>)</p>" +
-			"      $releaseInfoFile.text\n" +
-			"  </div>\n" +
-			"</div>"
+					"  <div class=\"section-content\">\n" +
+					"      <h3>Latest</h3>" +
+					"      <p>Version: ${project.version}</p>" +
+					"      <p><a href='documentation/'>Documentation</a> (<a href='crnk.pdf'>pdf</a>)</p>" +
+					"      $releaseInfoFile.text\n" +
+					"  </div>\n" +
+					"</div>"
 
 	def content = templateFile.text.replace('${content}', info)
 	content = content.replace('"../crnk', '"../../crnk')
@@ -89,8 +89,8 @@ gitPublishCopy.doLast {
 	versions = versions.reverse()
 	versions.remove("latest")
 	versions.remove("stable")
-	versions.add(0, "stable")
-	versions.add(1, "latest")
+	versions.add(0, "latest")
+	versions.add(1, "stable")
 
 	def releaseSet = new StringBuilder()
 
@@ -99,9 +99,15 @@ gitPublishCopy.doLast {
 	releaseSet.append("    <h3>Releases</h3>\n")
 	releaseSet.append("    <ul>\n")
 	for (def version : versions) {
-		releaseSet.append("   <li><a href=\"$version/\">$version</a></li>\n")
+		releaseSet.append("   <li>\n")
+		releaseSet.append("     <a href=\"$version/\">$version</a>")
+		if (version == "latest") {
+			releaseSet.append(": temporary, available from <a href=\"https://dl.bintray.com/crnk-project/mavenLatest/\">https://dl.bintray.com/crnk-project/mavenLatest/</a>")
+		}
+		releaseSet.append("   </li>\n")
 	}
 	releaseSet.append("    </ul>\n")
+	releaseSet.append("    </p>")
 	releaseSet.append("  </div>")
 	releaseSet.append("</div>")
 
@@ -111,11 +117,11 @@ gitPublishCopy.doLast {
 
 task promote(type: Copy) {
 	group = 'publishing'
-	from("${project.buildDir}/website/releases/latest"){
+	from("${project.buildDir}/website/releases/latest") {
 		into("v$BUILD_VERSION_PREFIX")
 	}
 
-	from("${project.buildDir}/website/releases/latest"){
+	from("${project.buildDir}/website/releases/latest") {
 		into("stable")
 	}
 	into("${project.buildDir}/website/releases")
