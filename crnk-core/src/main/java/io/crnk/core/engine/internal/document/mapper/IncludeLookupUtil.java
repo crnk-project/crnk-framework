@@ -47,9 +47,14 @@ public class IncludeLookupUtil {
 		return ids;
 	}
 
-	public static LookupIncludeBehavior getGlolbalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
+	public static LookupIncludeBehavior getGlobalLookupIncludeBehavior(PropertiesProvider propertiesProvider) {
 		if (propertiesProvider == null) {
 			return LookupIncludeBehavior.DEFAULT;
+		}
+
+		String strDefaultLookupBehavior = propertiesProvider.getProperty(CrnkProperties.DEFAULT_LOOKUP_BEHAVIOR);
+		if (strDefaultLookupBehavior != null) {
+			return LookupIncludeBehavior.valueOf(strDefaultLookupBehavior);
 		}
 
 		// determine system property for include look up
@@ -63,7 +68,8 @@ public class IncludeLookupUtil {
 
 			if (includeAutomaticallyOverwrite) {
 				return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-			} else if (includeAutomatically) {
+			}
+			else if (includeAutomatically) {
 				return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
 			}
 		}
@@ -157,7 +163,8 @@ public class IncludeLookupUtil {
 
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return isInclusionRequestedForQueryspec(queryAdapter, fieldPath);
-		} else {
+		}
+		else {
 			return isInclusionRequestedForQueryParams(queryAdapter, fieldPath);
 		}
 	}
@@ -166,7 +173,8 @@ public class IncludeLookupUtil {
 		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
 		if (includeBehavior == IncludeBehavior.PER_ROOT_PATH) {
 			return contains(querySpec, toPathList(fieldPath, 0));
-		} else {
+		}
+		else {
 			for (int i = fieldPath.size() - 1; i >= 0; i--) {
 				List<String> path = toPathList(fieldPath, i);
 
@@ -286,7 +294,7 @@ public class IncludeLookupUtil {
 	}
 
 	public List<Resource> findResourcesWithoutRelationshipToLoad(List<Resource> resources, ResourceField resourceField,
-																 IncludeRequest includeRequest) {
+			IncludeRequest includeRequest) {
 		List<Resource> results = new ArrayList<>();
 		for (Resource resource : resources) {
 			Relationship relationship = resource.getRelationships().get(resourceField.getJsonName());
@@ -312,7 +320,8 @@ public class IncludeLookupUtil {
 		}
 		if (objectId instanceof ResourceIdentifier) {
 			return (ResourceIdentifier) objectId;
-		} else {
+		}
+		else {
 			String strId = resourceInformation.toIdString(objectId);
 			return new ResourceIdentifier(strId, resourceInformation.getResourceType());
 		}

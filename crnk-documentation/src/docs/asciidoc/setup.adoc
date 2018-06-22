@@ -490,6 +490,9 @@ provided by `CrnkProperties`:
   inadvertently enable pagination for included resources when doing paging on root resources if data structures
   are cyclic. See `CrnkProperties.INCLUDE_PAGING_ENABLED` fore mor information.
 
+* `crnk.config.lookup.behavior.default` specifies the default lookup behavior for relationships. For more information
+  see <<jsonApiRelation,@JsonApiRelation>>.
+
 * `crnk.config.include.behavior` with possible values `BY_TYPE` (default) and `BY_ROOT_PATH`.
    `BY_ROOT_PATH` specifies that an inclusion can only requested as path from the root
    resource such as `include[tasks]=project.schedule`. While `BY_TYPE` can further request

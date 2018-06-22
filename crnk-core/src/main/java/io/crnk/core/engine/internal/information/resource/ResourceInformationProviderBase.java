@@ -1,5 +1,16 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
@@ -20,17 +31,6 @@ import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
 
@@ -44,7 +44,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 			PropertiesProvider propertiesProvider,
 			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
-		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider);
+		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlobalLookupIncludeBehavior(propertiesProvider);
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package io.crnk.core.boot;
 
 
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 public class CrnkProperties {
 
@@ -58,9 +60,16 @@ public class CrnkProperties {
 	 * Refer to {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically} for only adding it to a specific
 	 * field.
 	 *
-	 * @since 2.8.2
+	 * @deprecated use {@link #DEFAULT_LOOKUP_BEHAVIOR}
 	 */
+	@Deprecated
 	public static final String INCLUDE_AUTOMATICALLY = "crnk.config.include.automatically";
+
+	/**
+	 * Specifies the default {@link LookupIncludeBehavior} to be used for all relationships. For more information see
+	 * {@link JsonApiRelation#lookUp()}.
+	 */
+	public static final String DEFAULT_LOOKUP_BEHAVIOR = "crnk.config.lookup.behavior.default";
 
 	/**
 	 * There are two mechanisms in place to determine whether an inclusion was
@@ -88,8 +97,9 @@ public class CrnkProperties {
 	 * Refer to {@link io.crnk.resource.annotations.JsonApiLookupIncludeAutomatically}.overwrite for only adding it to a
 	 * specific field.
 	 *
-	 * @since 2.8.2
+	 * @deprecated use {@link #DEFAULT_LOOKUP_BEHAVIOR}
 	 */
+	@Deprecated
 	public static final String INCLUDE_AUTOMATICALLY_OVERWRITE = "crnk.config.include.automatically.overwrite";
 
 	/**
@@ -112,13 +122,13 @@ public class CrnkProperties {
 
 	/**
 	 * <p>
-	 * 	 Set a boolean whether Crnk should allow pagination on inclusions. Most to all times application will choose to do
-	 *   a second request. By default this is disabled.
+	 * Set a boolean whether Crnk should allow pagination on inclusions. Most to all times application will choose to do
+	 * a second request. By default this is disabled.
 	 * </p>
 	 * <p>
-	 *   Note that it is currently not possible to specify different paging parameters for the same entity when
-	 *   it is the root resp. an included entity. This can lead to confusion if inclusions are cyclic (not that uncommon).
-	 *   For this reason support is disabled by default.
+	 * Note that it is currently not possible to specify different paging parameters for the same entity when
+	 * it is the root resp. an included entity. This can lead to confusion if inclusions are cyclic (not that uncommon).
+	 * For this reason support is disabled by default.
 	 * </p>
 	 */
 	public static final String INCLUDE_PAGING_ENABLED = "crnk.config.include.paging.enabled";
@@ -155,7 +165,8 @@ public class CrnkProperties {
 	 * <p>Set a boolean whether Crnk should reject <code>application/json</code> requests to JSON-API endpoints.
 	 * Defaults to <code>false</code>.
 	 * </p><p>The
-	 * JSON-API specification mandates the use of the <code>application/vnd.api+json</code> MIME-Type. In cases where frontends or
+	 * JSON-API specification mandates the use of the <code>application/vnd.api+json</code> MIME-Type. In cases where
+	 * frontends or
 	 * intermediate proxies prefer the <code>application/json</code> MIME-Type, that type can be sent in the <code>Accept</code>
 	 * header instead.</p>
 	 * <p>If an application wants to serve a different response depending on whether the client's <code>Accept</code> header
@@ -163,6 +174,7 @@ public class CrnkProperties {
 	 * <p>This <strong>does not affect the <em>payload</em> <code>Content-Type</code></strong>. This means that the response will
 	 * still have <code>Content-Type: application/vnd.api+json</code> and that <code>POST/PATCH</code> requests, too, need to set
 	 * <code>Content-Type: application/vnd.api+json</code> to describe their request body.</p>
+	 *
 	 * @since 2.4
 	 */
 	public static final String REJECT_PLAIN_JSON = "crnk.config.resource.request.rejectPlainJson";
