@@ -1,14 +1,19 @@
 package io.crnk.core.repository.forward;
 
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
@@ -18,9 +23,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class OppositeFowardingRelationshipRepositoryTest {
 
@@ -56,7 +58,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 	}
 
 	@Test
-	public void checkFindOneTargetFromSingleValue() {
+	public void checkFindOneTarget() {
 		RelationIdTestResource parent = new RelationIdTestResource();
 		parent.setId(2L);
 		parent.setName("parent");
@@ -66,6 +68,27 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		child.setName("child");
 
 		parent.setTestNested(child);
+		testRepository.create(parent);
+		testRepository.create(child);
+
+		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
+		Object target = relRepository.findOneTarget(3L, "testNestedOpposite", querySpec);
+
+		Assert.assertNotNull(target);
+	}
+
+
+	@Test
+	public void checkFindOneTargetWithRelationId() {
+		RelationIdTestResource parent = new RelationIdTestResource();
+		parent.setId(2L);
+		parent.setName("parent");
+
+		RelationIdTestResource child = new RelationIdTestResource();
+		child.setId(3L);
+		child.setName("child");
+
+		parent.setTestNestedId(child.getId());
 		testRepository.create(parent);
 		testRepository.create(child);
 
@@ -99,6 +122,32 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		List<Task> tasks = relRepository.findManyTargets(42L, "tasks", querySpec);
 		Assert.assertEquals(1, tasks.size());
 		Assert.assertEquals(13L, tasks.get(0).getId().longValue());
+	}
+
+	@Test
+	public void checkFindManyTargetsWithRelationId() {
+		ProjectRepository projectRepository = new ProjectRepository();
+		Project project = new Project();
+		project.setId(42L);
+		project.setName("project");
+		projectRepository.save(project);
+
+		ScheduleRepositoryImpl scheduleRepository = new ScheduleRepositoryImpl();
+		Schedule schedule = new Schedule();
+		schedule.setId(13L);
+		schedule.setName("schedule");
+		schedule.setProjectId(project.getId());
+		scheduleRepository.save(schedule);
+
+		relRepository = new ForwardingRelationshipRepository(Project.class, null,
+				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+		relRepository.setResourceRegistry(resourceRegistry);
+		relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		List<Schedule> schedules = relRepository.findManyTargets(42L, "schedules", querySpec);
+		Assert.assertEquals(1, schedules.size());
+		Assert.assertEquals(13L, schedules.get(0).getId().longValue());
 	}
 
 
@@ -154,7 +203,8 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null"));
 		}
 	}
@@ -183,8 +233,9 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		} catch (IllegalStateException e) {
-			Assert.assertTrue(e.getMessage().contains("field tasks is null for"));
+		}
+		catch (IllegalStateException e) {
+			Assert.assertTrue(e.getMessage(), e.getMessage().contains("To make use of opposite forwarding behavior for resource lookup"));
 		}
 	}
 
@@ -214,7 +265,8 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null for"));
 		}
 	}

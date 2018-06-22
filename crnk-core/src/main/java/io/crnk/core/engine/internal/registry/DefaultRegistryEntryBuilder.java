@@ -360,6 +360,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		}
 
 		if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
+
+			if(behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+				PreconditionUtil.verify(relationshipField.getOppositeName() != null, "field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
+						+ "behavior.");
+			}
+
 			ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
 
 			ResourceFieldAccess fieldAccess = relationshipField.getAccess();

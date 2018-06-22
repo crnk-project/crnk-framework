@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import io.crnk.core.engine.internal.utils.PropertyException;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.resource.list.ResourceList;
@@ -41,7 +42,7 @@ public class InMemoryEvaluator {
 		if (filterSpec.getAttributePath() == null) {
 			throw new BadRequestException("no attribute specified for filter parameter");
 		}
-		Object value = PropertyUtils.getProperty(object, filterSpec.getAttributePath());
+		Object value = getProperty(object, filterSpec.getAttributePath());
 		FilterOperator operator = filterSpec.getOperator();
 		Object filterValue = filterSpec.getValue();
 		if (value instanceof Collection) {
@@ -50,6 +51,25 @@ public class InMemoryEvaluator {
 		else {
 			return operator.matches(value, filterValue);
 		}
+	}
+
+	private static Object getProperty(Object object, List<String> attributePath) {
+		Object value = PropertyUtils.getProperty(object, attributePath);
+
+		// TODO access to ResourceInformation needed for support of custom naming
+		int pathLength = attributePath.size();
+		if (value == null && pathLength >= 2 && attributePath.get(pathLength - 1).equals("id")) {
+			// check ID field as well for relationships
+			List<String> idAttributePath = new ArrayList<>(attributePath.subList(0, pathLength - 2));
+			idAttributePath.add(attributePath.get(pathLength - 2) + "Id");
+			try {
+				return PropertyUtils.getProperty(object, idAttributePath);
+			}
+			catch (PropertyException e) {
+				return null; // property does not exist
+			}
+		}
+		return value;
 	}
 
 	private static boolean matchesAny(Collection<?> col, FilterOperator operator, Object filterValue) {
@@ -157,8 +177,8 @@ public class InMemoryEvaluator {
 		@SuppressWarnings("unchecked")
 		public int compare(T o1, T o2) {
 			for (SortSpec orderSpec : sortSpecs) {
-				Comparable<Object> value1 = (Comparable<Object>) PropertyUtils.getProperty(o1, orderSpec.getAttributePath());
-				Comparable<Object> value2 = (Comparable<Object>) PropertyUtils.getProperty(o2, orderSpec.getAttributePath());
+				Comparable<Object> value1 = (Comparable<Object>) getProperty(o1, orderSpec.getAttributePath());
+				Comparable<Object> value2 = (Comparable<Object>) getProperty(o2, orderSpec.getAttributePath());
 
 				int d = compare(value1, value2);
 				if (orderSpec.getDirection() == Direction.DESC) {

@@ -1,9 +1,16 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.*;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
 
 @JsonApiResource(type = "projects")
 public class Project {
@@ -35,6 +42,9 @@ public class Project {
 	@JsonApiLookupIncludeAutomatically
 	private Task includedTask;
 
+	@JsonApiRelation(opposite = "project")
+	private Collection<Schedule> schedules;
+
 	public Long getId() {
 		return id;
 	}
@@ -42,6 +52,14 @@ public class Project {
 	public Project setId(Long id) {
 		this.id = id;
 		return this;
+	}
+
+	public Collection<Schedule> getSchedules() {
+		return schedules;
+	}
+
+	public void setSchedules(Collection<Schedule> schedules) {
+		this.schedules = schedules;
 	}
 
 	public String getName() {
