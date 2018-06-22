@@ -13,28 +13,39 @@ public class IncludeLookupUtilTest extends AbstractDocumentMapperTest {
 
 
 	@Test
-	public void checkDefaultLookupIncludeBehavior() {
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior(null));
+	public void checkLegacyDefaultLookupIncludeBehavior() {
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlobalLookupIncludeBehavior(null));
 
 		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlobalLookupIncludeBehavior
 				(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
-				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
+				IncludeLookupUtil.getGlobalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlobalLookupIncludeBehavior
 				(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("true");
 		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
-				IncludeLookupUtil.getGlolbalLookupIncludeBehavior(propertiesProvider));
+				IncludeLookupUtil.getGlobalLookupIncludeBehavior(propertiesProvider));
 
 		Mockito.when(propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)).thenReturn("false");
-		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlolbalLookupIncludeBehavior
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlobalLookupIncludeBehavior
 				(propertiesProvider));
+	}
+
+	@Test
+	public void checkDefaultLookupIncludeBehavior() {
+		Assert.assertEquals(LookupIncludeBehavior.DEFAULT, IncludeLookupUtil.getGlobalLookupIncludeBehavior(null));
+
+		PropertiesProvider propertiesProvider = Mockito.mock(PropertiesProvider.class);
+		Mockito.when(propertiesProvider.getProperty(CrnkProperties.DEFAULT_LOOKUP_BEHAVIOR))
+				.thenReturn(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS.toString());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
+				IncludeLookupUtil.getGlobalLookupIncludeBehavior(propertiesProvider));
 	}
 
 }
