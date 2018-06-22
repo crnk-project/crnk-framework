@@ -1,6 +1,7 @@
 package io.crnk.core.repository.foward.strategy;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -36,7 +38,8 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
+	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec,
+			QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 
@@ -46,7 +49,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 		ResourceField oppositeField =
 				Objects.requireNonNull(targetInformation.findFieldByUnderlyingName(field.getOppositeName()));
 
-		QuerySpec idQuerySpec = querySpec.duplicate();
+		QuerySpec idQuerySpec = querySpec.clone();
 		idQuerySpec.addFilter(
 				new FilterSpec(
 						Arrays.asList(oppositeField.getUnderlyingName(), sourceInformation.getIdField().getUnderlyingName()),
@@ -80,32 +83,96 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I>
 			sourceIdSet, ResourceField oppositeField, ResourceInformation sourceInformation) {
 
-		Object property = oppositeField.getAccessor().getValue(result);
-		if (property == null) {
-			throw new IllegalStateException("field " + oppositeField.getUnderlyingName() + " is null for " + result
-					+ ", make sure to properly implement relationship inclusions");
+
+		if (Collection.class.isAssignableFrom(oppositeField.getType())) {
+			handleCollectionTarget(bulkResult, result, sourceIdSet, oppositeField, sourceInformation);
 		}
-		if (property instanceof Iterable) {
+		else {
+			handleSingleTarget(bulkResult, result, sourceIdSet, oppositeField, sourceInformation);
+		}
+	}
+
+	private void handleSingleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, ResourceField oppositeField,
+			ResourceInformation sourceInformation) {
+		I sourceId;
+		if (oppositeField.hasIdField()) {
+			ResourceFieldAccessor idAccessor = oppositeField.getIdAccessor();
+			sourceId = (I) idAccessor.getValue(result);
+			if (sourceId == null) {
+				throw new IllegalStateException("field " + oppositeField.getIdName() + "Id is null for " + result
+						+ ". To make use of opposite forwarding behavior for resource lookup, the opposite resource "
+						+ "repository "
+						+ "must "
+						+ "return the relationship or its identifier based "
+						+ "on @JsonApiRelationId ");
+			}
+		}
+		else {
+			Object source = oppositeField.getAccessor().getValue(result);
+			if (source == null) {
+				throw new IllegalStateException("field " + oppositeField.getUnderlyingName() + "Id is null for " + result
+						+ ". To make use of opposite forwarding behavior for resource lookup, the opposite resource "
+						+ "repository "
+						+ "must "
+						+ "return the relationship or its identifier based "
+						+ "on @JsonApiRelationId ");
+			}
+			sourceId = (I) sourceInformation.getId(source);
+			if (sourceId == null) {
+				throw new IllegalStateException("id must not be null for resource " + source);
+			}
+		}
+
+		PreconditionUtil.verify(sourceIdSet.contains(sourceId),
+				"filtering not properly implemented in resource repository, expected sourceId=%s to be contained in %d",
+				sourceId, sourceIdSet);
+
+		bulkResult.add(sourceId, result);
+	}
+
+	private void handleCollectionTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet,
+			ResourceField oppositeField,
+			ResourceInformation sourceInformation) {
+		Collection<I> sourceIds;
+		if (oppositeField.hasIdField()) {
+			ResourceFieldAccessor idAccessor = oppositeField.getIdAccessor();
+			sourceIds = (Collection<I>) idAccessor.getValue(result);
+			if (sourceIds == null) {
+				throw new IllegalStateException("field " + oppositeField.getIdName() + "Id is null for " + result
+						+ ". To make use of opposite forwarding behavior for resource lookup, the opposite resource "
+						+ "repository "
+						+ "must "
+						+ "return the relationship or its identifier based "
+						+ "on @JsonApiRelationId ");
+			}
+		}
+		else {
+			sourceIds = new ArrayList<>();
+			Collection property = (Collection) oppositeField.getAccessor().getValue(result);
+			if (property == null) {
+				throw new IllegalStateException("field " + oppositeField.getUnderlyingName() + "Id is null for " + result
+						+ ". To make use of opposite forwarding behavior for resource lookup, the opposite resource "
+						+ "repository "
+						+ "must "
+						+ "return the relationship or its identifier based "
+						+ "on @JsonApiRelationId ");
+			}
+
 			for (T potentialSource : (Iterable<T>) property) {
 				I sourceId = (I) sourceInformation.getId(potentialSource);
 				if (sourceId == null) {
 					throw new IllegalStateException("id is null for " + potentialSource);
 				}
-				// for to-many relations we have to assigned the found resource
-				// to all matching sources
-				if (sourceIdSet.contains(sourceId)) {
-					bulkResult.add(sourceId, result);
-				}
+				sourceIds.add(sourceId);
 			}
-		} else {
-			T source = (T) property;
-			I sourceId = (I) sourceInformation.getId(source);
-			if (sourceId == null) {
-				throw new IllegalStateException("id is null for " + source);
-			}
-			PreconditionUtil.verify(sourceIdSet.contains(sourceId), "filtering not properly implemented in resource repository, expected sourceId=%s to be contained in %d", sourceId, sourceIdSet);
+		}
 
-			bulkResult.add(sourceId, result);
+		for (I sourceId : sourceIds) {
+			// for to-many relations we have to assigned the found resource
+			// to all matching sources
+			if (sourceIdSet.contains(sourceId)) {
+				bulkResult.add(sourceId, result);
+			}
 		}
 	}
 
