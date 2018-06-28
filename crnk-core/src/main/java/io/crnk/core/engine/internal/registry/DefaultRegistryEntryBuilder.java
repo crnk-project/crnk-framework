@@ -131,7 +131,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		}
 	}
 
-
 	@Override
 	public ResourceRepository resourceRepository() {
 		if (resourceRepository == null) {
@@ -165,7 +164,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		}
 		ResourceInformation resourceInformation = buildResource();
 
-		if (isLegacy()) {
+		if (resourceRepository != null && isLegacy()) {
 			ResourceEntry resourceEntry = buildResourceRepository(resourceInformation);
 			Map<ResourceField, ResponseRelationshipEntry> relationshipEntries = buildRelationships(resourceInformation);
 
@@ -176,7 +175,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			ResourceRepositoryAdapter resourceRepositoryAdapter = buildResourceRepositoryAdapter(resourceInformation);
 			Map<ResourceField, RelationshipRepositoryAdapter> relationshipEntries =
 					buildRelationshipAdapters(resourceInformation);
-			return new RegistryEntryImpl(resourceRepositoryAdapter, relationshipEntries, moduleRegistry);
+			return new RegistryEntryImpl(resourceInformation, resourceRepositoryAdapter, relationshipEntries, moduleRegistry);
 		}
 	}
 
@@ -361,7 +360,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 		if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
 
-			if(behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+			if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
 				PreconditionUtil.verify(relationshipField.getOppositeName() != null, "field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
 						+ "behavior.");
 			}
@@ -482,6 +481,9 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private ResourceRepositoryAdapter buildResourceRepositoryAdapter(ResourceInformation resourceInformation) {
+		if (resourceRepository == null) {
+			return null;
+		}
 		resourceRepository.information().setResourceInformation(resourceInformation);
 		ResourceRepositoryInformation repositoryInformation = resourceRepository.information().build();
 

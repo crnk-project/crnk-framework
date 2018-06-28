@@ -88,6 +88,26 @@ There is built-in support for `OffsetLimitPagingSpec` (default) or `NumberSizePa
 be backed by a matching `PagingBehavior` implementation.  More detailed information about pagination can be
 found at <<pagination,Pagination>> section.
 
+The optional `subTypes` parameter allows to specify an inheritance relationship to other resources:
+
+[source]
+----
+  @JsonApiResource(type = "task", subTypes = SpecialTask.class)
+  public class Task {
+    // fields, getters and setters
+  }
+
+  @JsonApiResource(type = "specialTask", resourcePath = "task")
+  public class SpecialTask extends Task{
+    // fields, getters and setters
+  }
+----
+
+In this case the `SpecialTask` extends `Task` but shares the same `resourcePath`, meaning `SpecialTask` does not bring along
+a repository implementation (see next chapter), but is served by the task repository. For a more information have a look at the
+<<inheritance>> section.
+
+
 
 ## JsonApiId
 

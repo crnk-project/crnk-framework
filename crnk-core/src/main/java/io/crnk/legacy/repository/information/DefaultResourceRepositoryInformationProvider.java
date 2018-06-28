@@ -2,6 +2,7 @@ package io.crnk.legacy.repository.information;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
@@ -24,6 +25,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 	@Override
 	public boolean accept(Object repository) {
+		Objects.requireNonNull(repository);
 		Class<? extends Object> repositoryClass = repository.getClass();
 		return accept(repositoryClass);
 	}
@@ -48,7 +50,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-			RepositoryInformationProviderContext context) {
+										RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
@@ -81,18 +83,15 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 		if (annotation.isPresent()) {
 			return annotation.get().value();
-		}
-		else if (repository instanceof ResourceRepository) {
+		} else if (repository instanceof ResourceRepository) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
 			return typeArgs[0];
-		}
-		else if (repository != null) {
+		} else if (repository != null) {
 			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		}
-		else {
+		} else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}

@@ -10,6 +10,8 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 
 /**
  * Defines a resource. Each class annotated with {@link JsonApiResource} must have defined {@link JsonApiResource#type()}.
@@ -49,4 +51,10 @@ public @interface JsonApiResource {
 	 * @return {@link PagingBehavior} definition
 	 */
 	Class<? extends PagingSpec> pagingSpec() default PagingSpec.class;
+
+	/**
+	 * @return list of subtypes of this resource. Providing such a list is only necessary if they do not have a repository on their own.
+	 */
+	Class[] subTypes() default {};
+
 }

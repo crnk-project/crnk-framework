@@ -74,7 +74,7 @@ public class ResourceInformation {
 	 * Type url path of the resource. Corresponds to {@link JsonApiResource#resourcePath}
 	 * for annotated resources.
 	 */
-	private final String resourcePath;
+	private String resourcePath;
 
 	/**
 	 * Creates a new instance of the given resource.
@@ -114,25 +114,25 @@ public class ResourceInformation {
 	};
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
-			String superResourceType,
-			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   String superResourceType,
+							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingSpecType);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
-			String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   String superResourceType,
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -190,8 +190,7 @@ public class ResourceInformation {
 				public Object getValue(Object resource, String name) {
 					try {
 						return jsonAnyGetter.invoke(resource, name);
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
 					}
@@ -201,8 +200,7 @@ public class ResourceInformation {
 				public void setValue(Object resource, String name, Object fieldValue) {
 					try {
 						jsonAnySetter.invoke(resource, name, fieldValue);
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue,
 										e.getMessage()), e);
@@ -243,8 +241,7 @@ public class ResourceInformation {
 				fieldByJsonName.put(resourceField.getJsonName(), resourceField);
 				fieldByUnderlyingName.put(resourceField.getUnderlyingName(), resourceField);
 			}
-		}
-		else {
+		} else {
 			this.relationshipFields = Collections.emptyList();
 			this.attributeFields = Collections.emptyList();
 			this.metaField = null;
@@ -269,8 +266,7 @@ public class ResourceInformation {
 
 		if (metaFields.isEmpty()) {
 			return null;
-		}
-		else if (metaFields.size() > 1) {
+		} else if (metaFields.size() > 1) {
 			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
 		}
 		return metaFields.get(0);
@@ -286,8 +282,7 @@ public class ResourceInformation {
 
 		if (linksFields.isEmpty()) {
 			return null;
-		}
-		else if (linksFields.size() > 1) {
+		} else if (linksFields.size() > 1) {
 			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
 		}
 		return linksFields.get(0);
@@ -407,8 +402,7 @@ public class ResourceInformation {
 		String strId;
 		if (resourceOrId instanceof String) {
 			strId = (String) resourceOrId;
-		}
-		else {
+		} else {
 			strId = toIdString(resourceOrId);
 		}
 		return new ResourceIdentifier(strId, getResourceType());
@@ -421,7 +415,7 @@ public class ResourceInformation {
 	 * @param id stringified id
 	 * @return id
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Serializable parseIdString(String id) {
 		return (Serializable) idStringMapper.parse(id);
 	}

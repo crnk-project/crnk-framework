@@ -1,6 +1,7 @@
 package io.crnk.core.engine.registry;
 
 import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 
 public interface RegistryEntryBuilder {
 

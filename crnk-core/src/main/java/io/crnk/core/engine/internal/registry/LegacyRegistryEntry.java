@@ -190,6 +190,11 @@ public class LegacyRegistryEntry implements RegistryEntry {
 		return pagingBehavior;
 	}
 
+	@Override
+	public boolean hasResourceRepository() {
+		return parentRegistryEntry == null || !parentRegistryEntry.getResourceInformation().getResourcePath().equals(getResourceInformation().getResourcePath());
+	}
+
 	public Map<ResourceField, ResponseRelationshipEntry> getRelationshipEntries() {
 		return relationshipEntries;
 	}

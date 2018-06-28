@@ -1,16 +1,5 @@
 package io.crnk.core.module;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -61,11 +50,23 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -352,7 +353,10 @@ public class ModuleRegistry {
 
 		initializeModules();
 
-		applyRepositoryRegistrations();
+		if (isServer) {
+			applyRepositoryRegistrations();
+			applyResourceRegistrations();
+		}
 
 		ExceptionMapperLookup exceptionMapperLookup = getExceptionMapperLookup();
 		ExceptionMapperRegistryBuilder mapperRegistryBuilder = new ExceptionMapperRegistryBuilder();
@@ -381,8 +385,7 @@ public class ModuleRegistry {
 			Optional<? extends Module> optModule = getModule(extension.getTargetModule());
 			if (optModule.isPresent()) {
 				reverseExtensionMap.add(optModule.get(), extension);
-			}
-			else if (!extension.isOptional()) {
+			} else if (!extension.isOptional()) {
 				throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
 			}
 		}
@@ -426,11 +429,69 @@ public class ModuleRegistry {
 		return httpRequestContextProvider;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void applyRepositoryRegistrations() {
 		Collection<Object> repositories = filterDecorators(aggregatedModule.getRepositories());
 		for (Object repository : repositories) {
 			applyRepositoryRegistration(repository);
+		}
+	}
+
+	protected Set<Class> findResourceClasses() {
+		Set<Class> resourceClasses = new HashSet<>();
+		resourceClasses.addAll(getResourceLookup().getResourceClasses());
+		if (resourceRegistry != null) {
+			resourceClasses.addAll(resourceRegistry.getResources().stream().map(it -> it.getResourceInformation().getResourceClass()).collect(Collectors.toList()));
+		}
+		for (Class resourceClass : new ArrayList<>(resourceClasses)) {
+			findChildResources(resourceClasses, resourceClass);
+		}
+		return resourceClasses;
+	}
+
+	private void applyResourceRegistrations() {
+		Set<Class> resourceClasses = findResourceClasses();
+		for (Class<?> resourceClass : resourceClasses) {
+			if (resourceRegistry.getEntry(resourceClass) == null) {
+				applyResourceRegistration(resourceClass);
+			}
+		}
+	}
+
+	private void findChildResources(Set<Class> resourceClasses, Class clazz) {
+		JsonApiResource annotation = (JsonApiResource) clazz.getDeclaredAnnotation(JsonApiResource.class);
+		if (annotation != null) {
+			Class[] subTypes = annotation.subTypes();
+			for (Class subType : subTypes) {
+				if (!resourceClasses.contains(subType)) {
+					resourceClasses.add(subType);
+					findChildResources(resourceClasses, subType);
+				}
+			}
+		}
+	}
+
+	private void applyResourceRegistration(Class<?> resourceClass) {
+		if (resourceRegistry.getEntry(resourceClass) == null) {
+			Class<?> superclass = resourceClass.getSuperclass();
+			if (resourceInformationProvider.accept(superclass)) {
+				applyResourceRegistration(superclass);
+			}
+
+			LOGGER.debug("adding resource {}", resourceClass);
+			RegistryEntry parentEntry = resourceRegistry.findEntry(resourceClass);
+			PreconditionUtil.verify(parentEntry != null, "unable to find repository for resource type %s, make sure a repository is backing this type or one of its super types", resourceClass);
+			PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass), "make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
+			ResourceInformation information = resourceInformationProvider.build(resourceClass);
+			PreconditionUtil.verify(parentEntry.getResourceInformation().getResourcePath().equals(information.getResourcePath()), "resource type %s without repository implementation must specify a @JsonApiResource.resourcePath matching one of its parent repositories", resourceClass);
+
+			RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
+			entryBuilder.resource().from(information);
+			RegistryEntry entry = entryBuilder.build();
+			entry.setParentRegistryEntry(parentEntry);
+			getContext().addRegistryEntry(entry);
+			Class<?> parentClass = parentEntry.getResourceInformation().getResourceClass();
+			PreconditionUtil.verify(resourceClass.getSuperclass().equals(parentClass), "%s must be a subType of %s", resourceClass, parentClass);
 		}
 	}
 

@@ -42,32 +42,45 @@ public class RegistryEntryImpl implements RegistryEntry {
 
 	private PagingBehavior pagingBehavior;
 
+	private ResourceInformation resourceInformation;
 
-	public RegistryEntryImpl(ResourceRepositoryAdapter resourceRepositoryAdapter,
-			Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
-			ModuleRegistry moduleRegistry) {
+	/**
+	 * Used for resources with repositories (default).
+	 */
+	public RegistryEntryImpl(ResourceInformation resourceInformation, ResourceRepositoryAdapter resourceRepositoryAdapter,
+							 Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
+							 ModuleRegistry moduleRegistry) {
 		this.resourceRepositoryAdapter = resourceRepositoryAdapter;
 		this.relationshipRepositoryAdapter = relationshipRepositoryAdapters;
 		this.moduleRegistry = moduleRegistry;
+		this.resourceInformation = resourceInformation;
+		PreconditionUtil.verify(resourceInformation != null, "resourceInformation must not be null");
 		PreconditionUtil.verify(moduleRegistry != null, "no moduleRegistry");
 	}
 
+
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[type=" + getResourceInformation().getResourceType() + "]";
+		return getClass().getSimpleName() + "[type=" + resourceInformation.getResourceType() + "]";
 	}
 
 	@Override
 	public ResourceRepositoryAdapter getResourceRepository(RepositoryMethodParameterProvider parameterProvider) {
-		return resourceRepositoryAdapter;
+		if (resourceRepositoryAdapter != null) {
+			return resourceRepositoryAdapter;
+		}
+		return parentRegistryEntry.getResourceRepository(parameterProvider);
 	}
 
 	@Override
 	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName, RepositoryMethodParameterProvider
 			parameterProvider) {
 		ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
+		if (field == null && parentRegistryEntry != null) {
+			return parentRegistryEntry.getRelationshipRepository(fieldName, parameterProvider);
+		}
 		if (field == null) {
-			throw new ResourceFieldNotFoundException("field=" + fieldName);
+			throw new ResourceFieldNotFoundException("name=" + fieldName);
 		}
 		return getRelationshipRepository(field, parameterProvider);
 	}
@@ -76,6 +89,9 @@ public class RegistryEntryImpl implements RegistryEntry {
 	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field, RepositoryMethodParameterProvider
 			parameterProvider) {
 		RelationshipRepositoryAdapter adapter = relationshipRepositoryAdapter.get(field);
+		if (adapter == null && parentRegistryEntry != null) {
+			return parentRegistryEntry.getRelationshipRepository(field, parameterProvider);
+		}
 		if (adapter == null) {
 			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
 					field.getUnderlyingName());
@@ -85,16 +101,19 @@ public class RegistryEntryImpl implements RegistryEntry {
 
 	@Override
 	public ResourceInformation getResourceInformation() {
-		return resourceRepositoryAdapter.getRepositoryInformation().getResourceInformation().get();
+		return resourceInformation;
 	}
 
 	@Override
 	public ResourceRepositoryInformation getRepositoryInformation() {
-		return resourceRepositoryAdapter.getRepositoryInformation();
+		return resourceRepositoryAdapter != null ? resourceRepositoryAdapter.getRepositoryInformation() : null;
 	}
 
 	@Override
 	public RegistryEntry getParentRegistryEntry() {
+		if (parentRegistryEntry != null) {
+			return parentRegistryEntry;
+		}
 		ResourceInformation resourceInformation = getResourceInformation();
 		String superResourceType = resourceInformation.getSuperResourceType();
 		if (superResourceType != null) {
@@ -160,6 +179,12 @@ public class RegistryEntryImpl implements RegistryEntry {
 			pagingBehavior = moduleRegistry.findPagingBehavior(pagingSpecType);
 		}
 		return pagingBehavior;
+	}
+
+	@Override
+	public boolean hasResourceRepository() {
+		RegistryEntry parent = getParentRegistryEntry();
+		return parent == null || !parent.getResourceInformation().getResourcePath().equals(getResourceInformation().getResourcePath());
 	}
 
 }

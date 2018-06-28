@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.crnk.core.repository.InMemoryResourceRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -514,6 +515,8 @@ public class ModuleRegistryTest {
 			context.addRepository(new RelationIdTestRepository());
 			context.addRepository(TestResource2.class, new TestRepository2());
 			context.addRepository(TestResource2.class, TestResource2.class, new TestRelationshipRepository2());
+
+			context.addRepository(new InMemoryResourceRepository<>(TestResource.class));
 
 			context.addExceptionMapper(new IllegalStateExceptionMapper());
 			context.addExceptionMapperLookup(new ExceptionMapperLookup() {

@@ -39,11 +39,13 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 		String resourceType = resourceInformation.getResourceType();
 		String resourcePath = resourceInformation.getResourcePath();
 		PreconditionUtil.verify(resourceType != null, "no resourceType set for entry %d", entry);
-		PreconditionUtil.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %d", resourceType, entry);
-		PreconditionUtil.verify(!resourcesByPath.containsKey(resourcePath), "resourceType '%s' already exists, cannot add entry %d", resourcePath, entry);
+		PreconditionUtil.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %s", resourceType, entry);
+		if (entry.hasResourceRepository()) {
+			PreconditionUtil.verify(!resourcesByPath.containsKey(resourcePath), "resourceType '%s' already exists, cannot add entry %s", resourcePath, entry);
+			resourcesByPath.put(resourcePath != null ? resourcePath : resourceType, entry);
+		}
 		resourcesByClass.put(resourceClass, entry);
 		resourcesByType.put(resourceType, entry);
-		resourcesByPath.put(resourcePath != null ? resourcePath : resourceType, entry);
 		logger.debug("Added resource '{}' to ResourceRegistry", resourceType);
 		notifyChange();
 		return entry;

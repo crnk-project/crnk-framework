@@ -69,4 +69,9 @@ public interface RegistryEntry {
 
 
 	PagingBehavior getPagingBehavior();
+
+	/**
+	 * @return true if the resource is backed by a repository. Otherwise there must be a parentEntry to also serve this subtype.
+	 */
+	boolean hasResourceRepository();
 }

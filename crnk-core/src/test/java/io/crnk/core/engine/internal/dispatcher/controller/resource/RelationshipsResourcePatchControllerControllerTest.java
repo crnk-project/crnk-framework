@@ -17,9 +17,9 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -29,7 +29,6 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Nullable;
@@ -37,7 +36,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RelationshipsResourcePatchTest extends BaseControllerTest {
+public class RelationshipsResourcePatchControllerControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = HttpMethod.PATCH.name();
 
@@ -58,7 +57,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -72,7 +71,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -91,7 +90,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -132,7 +131,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
@@ -153,7 +152,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		newUserBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/users");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
@@ -193,7 +192,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.of((Object) Collections.singletonList(data)));
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
@@ -214,7 +213,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -232,7 +231,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.nullValue());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
@@ -256,7 +255,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -298,7 +297,7 @@ public class RelationshipsResourcePatchTest extends BaseControllerTest {
 		assertEquals(2, projectPolymorphicObj.getTasks().size());
 
 		projectPolymorphicTypePath = pathBuilder.build("/" + type + "/" + projectPolymorphic.getId());
-		ResourcePatch resourcePatch = new ResourcePatch();
+		ResourcePatchController resourcePatch = new ResourcePatchController();
 		resourcePatch.init(controllerContext);
 		data = newProjectBody.getSingleData().get();
 		data.setId(projectId.toString());

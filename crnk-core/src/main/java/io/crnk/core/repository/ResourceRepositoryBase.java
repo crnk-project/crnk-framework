@@ -33,7 +33,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 
 	private ResourceRegistry resourceRegistry;
 
-	protected ResourceRepositoryBase(Class<T> resourceClass) {
+	public ResourceRepositoryBase(Class<T> resourceClass) {
 		this.resourceClass = resourceClass;
 	}
 

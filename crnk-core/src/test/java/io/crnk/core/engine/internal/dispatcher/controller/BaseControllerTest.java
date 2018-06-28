@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.boot.CrnkBoot;
@@ -8,15 +9,18 @@ import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilterBase;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
+import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.mock.models.*;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
@@ -68,6 +72,7 @@ public abstract class BaseControllerTest {
 	protected PropertiesProvider propertiesProvider;
 
 	protected CoreTestContainer container;
+	protected CrnkBoot boot;
 
 
 	@Before
@@ -84,9 +89,10 @@ public abstract class BaseControllerTest {
 		container.setDefaultPackage();
 		container.addModule(testModule);
 		container.getBoot().setPropertiesProvider(propertiesProvider);
+		setup(container.getBoot());
 		container.boot();
 
-		CrnkBoot boot = container.getBoot();
+		boot = container.getBoot();
 		objectMapper = boot.getObjectMapper();
 		resourceRegistry = boot.getResourceRegistry();
 		moduleRegistry = boot.getModuleRegistry();
@@ -105,6 +111,19 @@ public abstract class BaseControllerTest {
 		emptyMemorandumQuery = container.toQueryAdapter(new QuerySpec(Memorandum.class));
 	}
 
+	protected void setup(CrnkBoot boot) {
+	}
+
+
+	protected io.crnk.core.engine.document.Document toDocument(Object resource) {
+		DocumentMappingConfig config = new DocumentMappingConfig();
+		JsonApiResponse response = new JsonApiResponse();
+		response.setEntity(resource);
+		Result<io.crnk.core.engine.document.Document> document = boot.getDocumentMapper().toDocument(response, null, config);
+		return document.get();
+	}
+
+
 	public Resource createTask() {
 		Resource data = new Resource();
 		data.setType("tasks");
@@ -116,6 +135,14 @@ public abstract class BaseControllerTest {
 			throw new IllegalStateException(e);
 		}
 		return data;
+	}
+
+	protected JsonNode toJson(String value) {
+		try {
+			return objectMapper.readTree("\"" + value + "\"");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public Resource createUser() {

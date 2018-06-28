@@ -47,7 +47,6 @@ public class HierarchicalResourceRegistryPartTest {
 		Assert.assertEquals(1, resources.size());
 		Assert.assertSame(entry, part.getEntry("test"));
 		Assert.assertSame(entry, part.getEntry(TestResource.class));
-		Assert.assertSame(entry, part.getEntryByPath("path"));
 		Assert.assertTrue(part.hasEntry("test"));
 		Assert.assertTrue(part.hasEntry(TestResource.class));
 	}

@@ -720,6 +720,55 @@ If you want to add meta information along with the responses, all repositories (
 When using annotated versions of repositories, a method that returns a `LinksInformation` object should be annotated with `JsonApiLinks` and the first parameter of the method has to be a list of resources.
 
 
+anchor:inheritance[]
+
+## Inheritance
+
+There are two different kinds of inheritance supported:
+
+
+### Inheritance with a repository per type
+
+Each subtype is served by its own resource repository and each repository has its own URL.
+
+[source]
+----
+  @JsonApiResource(type = "task")
+  public class Task {
+    // fields, getters and setters
+  }
+
+  @JsonApiResource(type = "specialTask")
+  public class SpecialTask extends Task{
+    // fields, getters and setters
+  }
+----
+
+There is no special configuration necessary. But repositories of super types must
+also return resources of subtypes if they match the specified id or filter parameters.
+
+
+### Inheritance with a single repository per type hierarchy
+
+In this case all resources share a repository implementation and URL (except for the identifier part). An example may look like:
+
+[source]
+----
+  @JsonApiResource(type = "task", subTypes = SpecialTask.class)
+  public class Task {
+    // fields, getters and setters
+  }
+
+  @JsonApiResource(type = "specialTask", resourcePath = "task")
+  public class SpecialTask extends Task{
+    // fields, getters and setters
+  }
+----
+
+The `SpecialTask` extends `Task` but is configured to use the same `resourcePath`, meaning `SpecialTask` does not have
+a repository implementation on its own, but is served by the repository of `Task`. For a more detailed example have
+a look at `InheritanceWithoutSubtypeRepositoryClientTest`.
+
 
 ## Payload Size Optimizations
 
