@@ -23,7 +23,7 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 	private Map<Method, Method> interfaceStubMethodMap = new HashMap<>();
 
 	public ClientStubInvocationHandler(Class<?> repositoryInterface,
-									   ResourceRepositoryV2<?, Serializable> repositoryStub, Object actionStub) {
+			ResourceRepositoryV2<?, Serializable> repositoryStub, Object actionStub) {
 		this.repositoryStub = repositoryStub;
 		this.actionStub = actionStub;
 		setupRepositoryMethods(repositoryInterface);
@@ -45,16 +45,21 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 			if (method.getDeclaringClass().isAssignableFrom(ResourceRepositoryV2.class)) {
 				// execute document method
 				return method.invoke(repositoryStub, args);
-			} else if (interfaceStubMethodMap.containsKey(method)) {
+			}
+			else if (interfaceStubMethodMap.containsKey(method)) {
 				return invokeInterfaceMethod(method, args);
-			} else {
-				PreconditionUtil.verify(actionStub != null, "cannot execute non-JSONAPI method, call CrnkClient.setActionStubFactory(...) first, e.g. with JerseyActionStubFactory for JAX-RS",
+			}
+			else {
+				PreconditionUtil.verify(actionStub != null,
+						"cannot execute non-JSONAPI method, call CrnkClient.setActionStubFactory(...) first, e.g. with "
+								+ "JerseyActionStubFactory for JAX-RS",
 						actionStub);
 
 				// execute action
 				return method.invoke(actionStub, args);
 			}
-		} catch (InvocationTargetException e) { // NOSONAR ok this way
+		}
+		catch (InvocationTargetException e) { // NOSONAR ok this way
 			throw e.getCause();
 		}
 	}
@@ -67,14 +72,16 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 		Class<?> returnType = method.getReturnType();
 		if (result == null || returnType.isInstance(result)) {
 			return result;
-		} else if (result instanceof DefaultResourceList) {
+		}
+		else if (result instanceof DefaultResourceList) {
 			return createTypesafeList(result, returnType);
-		} else {
+		}
+		else {
 			throw new IllegalStateException("cannot cast return type " + result + " to " + returnType.getName());
 		}
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object createTypesafeList(Object result, Class<?> returnType) {
 		DefaultResourceList defaultList = (DefaultResourceList) result;
 
@@ -91,6 +98,11 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 
 	private void setupRepositoryMethods(Class<?> repositoryInterface) {
 		Map<String, Method> stubMethods = new HashMap<>();
+		setupRepositoryMethods(stubMethods, repositoryInterface);
+
+	}
+
+	private void setupRepositoryMethods(Map<String, Method> stubMethods, Class<?> repositoryInterface) {
 		for (Method method : ResourceRepositoryV2.class.getMethods()) {
 			stubMethods.put(getMethodId(method), method);
 		}
@@ -101,6 +113,10 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 			if (stubMethod != null) {
 				interfaceStubMethodMap.put(method, stubMethod);
 			}
+		}
+
+		for (Class<?> superInterface : repositoryInterface.getInterfaces()) {
+			setupRepositoryMethods(stubMethods, superInterface);
 		}
 	}
 }
