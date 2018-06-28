@@ -18,7 +18,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-public class CollectionGet extends ResourceIncludeField {
+public class CollectionGetController extends ResourceIncludeField {
 
 	/**
 	 * Check if it is a GET request for a collection of resources.

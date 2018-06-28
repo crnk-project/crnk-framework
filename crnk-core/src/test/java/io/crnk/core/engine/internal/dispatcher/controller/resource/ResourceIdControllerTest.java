@@ -10,23 +10,17 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,7 +95,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		JsonPath postPath = pathBuilder.build("/relationIdTest");
 
 		// WHEN POST
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		Response taskResponse = sut.handle(postPath, emptyTaskQuery, null, newDocument);
@@ -134,7 +128,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		Document newDocument = createDocument(resource);
 
 		// WHEN PATCH
-		ResourcePatch sut = new ResourcePatch();
+		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
 
 		Response taskResponse = sut.handle(path, emptyTaskQuery, null, newDocument);
@@ -165,7 +159,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		Document newDocument = createDocument(scheduleId);
 
 		// WHEN PATCH
-		RelationshipsResourcePatch sut = new RelationshipsResourcePatch();
+		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
 		Response taskResponse = sut.handle(path, emptyTaskQuery, null, newDocument);

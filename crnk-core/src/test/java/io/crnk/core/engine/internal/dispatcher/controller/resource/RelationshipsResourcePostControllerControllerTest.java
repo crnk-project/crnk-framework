@@ -16,8 +16,8 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -35,7 +35,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RelationshipsResourcePostTest extends BaseControllerTest {
+public class RelationshipsResourcePostControllerControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = HttpMethod.POST.name();
 
@@ -54,7 +54,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -68,7 +68,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -81,7 +81,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	@Test(expected = RequestBodyNotFoundException.class)
 	public void onMissingBodyThrowException() throws Exception {
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// do not sent along a body
@@ -93,7 +93,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 	@Test(expected = ResourceFieldNotFoundException.class)
 	public void onInvalidRelationshipThrowException() throws Exception {
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/doesNotExist");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// do not sent along a body
@@ -110,7 +110,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -148,7 +148,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.of((Object) createProject(Long.toString(projectId))));
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
@@ -175,7 +175,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newUserBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/users");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
@@ -218,7 +218,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
@@ -240,7 +240,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskBody.setData(Nullable.of((Object) data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -258,7 +258,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 		newTaskToProjectBody.setData(Nullable.nullValue());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
@@ -282,7 +282,7 @@ public class RelationshipsResourcePostTest extends BaseControllerTest {
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");

@@ -17,7 +17,7 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 
-public class ResourceGet extends ResourceIncludeField {
+public class ResourceGetController extends ResourceIncludeField {
 
 	/**
 	 * {@inheritDoc}

@@ -19,7 +19,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-public class ResourceDelete extends BaseController {
+public class ResourceDeleteController extends BaseController {
 
 	@Override
 	public boolean isAcceptable(JsonPath jsonPath, String method) {

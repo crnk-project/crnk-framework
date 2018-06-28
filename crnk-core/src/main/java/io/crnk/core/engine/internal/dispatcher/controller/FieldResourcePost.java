@@ -32,7 +32,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 /**
- * Creates a new post in a similar manner as in {@link ResourcePost}, but additionally adds a relation to a field.
+ * Creates a new post in a similar manner as in {@link ResourcePostController}, but additionally adds a relation to a field.
  */
 public class FieldResourcePost extends ResourceUpsert {
 

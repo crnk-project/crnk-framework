@@ -20,7 +20,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-public class ResourcePost extends ResourceUpsert {
+public class ResourcePostController extends ResourceUpsert {
 
 	@Override
 	protected HttpMethod getHttpMethod() {

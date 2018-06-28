@@ -8,7 +8,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.mock.models.Project;
@@ -17,7 +17,7 @@ import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
 
-public class FieldResourcePostTest extends BaseControllerTest {
+public class FieldResourcePostControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = HttpMethod.POST.name();
 
@@ -70,7 +70,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN
@@ -115,7 +115,7 @@ public class FieldResourcePostTest extends BaseControllerTest {
 		newTaskDocument.setData(Nullable.of((Object) createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN

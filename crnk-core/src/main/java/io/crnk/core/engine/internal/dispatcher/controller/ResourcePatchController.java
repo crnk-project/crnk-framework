@@ -28,7 +28,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
-public class ResourcePatch extends ResourceUpsert {
+public class ResourcePatchController extends ResourceUpsert {
 
 	@Override
 	protected HttpMethod getHttpMethod() {

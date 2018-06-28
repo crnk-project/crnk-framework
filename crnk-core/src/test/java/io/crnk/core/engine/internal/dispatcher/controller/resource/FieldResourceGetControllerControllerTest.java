@@ -14,7 +14,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -23,12 +23,11 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class FieldResourceGetTest extends BaseControllerTest {
+public class FieldResourceGetControllerControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "GET";
 
@@ -36,7 +35,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -50,7 +49,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onRelationshipRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -64,7 +63,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -79,7 +78,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/project");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -94,7 +93,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -142,7 +141,7 @@ public class FieldResourceGetTest extends BaseControllerTest {
 		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
 		QueryAdapter queryAdapter = container.toQueryAdapter(Project.class, queryParams);
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
-		FieldResourceGet sut = new FieldResourceGet();
+		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
 		Response response = sut.handle(jsonPath, queryAdapter, null, null);

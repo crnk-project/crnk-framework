@@ -30,8 +30,8 @@ import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceAction;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.ActionPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryTest;
@@ -155,7 +155,7 @@ public class HttpRequestDispatcherImplTest {
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
-		CollectionGet controller = mock(CollectionGet.class);
+		CollectionGetController controller = mock(CollectionGetController.class);
 		when(controller.isAcceptable(any(JsonPath.class), eq("GET"))).thenCallRealMethod();
 
 		Response expectedResponse = new Response(null, 200);
@@ -180,7 +180,7 @@ public class HttpRequestDispatcherImplTest {
 		String path = "/tasks/";
 		String requestType = "GET";
 
-		CollectionGet controller = mock(CollectionGet.class);
+		CollectionGetController controller = mock(CollectionGetController.class);
 		ControllerRegistry controllerRegistry = container.getBoot().getControllerRegistry();
 		controllerRegistry.getControllers().clear();
 		controllerRegistry.addController(controller);
@@ -207,7 +207,7 @@ public class HttpRequestDispatcherImplTest {
 		String path = "/tasks/1/relationships/project";
 		String requestType = "GET";
 
-		RelationshipsResourceGet controller = mock(RelationshipsResourceGet.class);
+		RelationshipsResourceGetController controller = mock(RelationshipsResourceGetController.class);
 		ControllerRegistry controllerRegistry = container.getBoot().getControllerRegistry();
 		controllerRegistry.getControllers().clear();
 		controllerRegistry.addController(controller);

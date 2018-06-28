@@ -17,19 +17,19 @@ import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
-import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
-import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDelete;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGet;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceDelete;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatch;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
@@ -334,17 +334,17 @@ public class CrnkBoot {
 
 	protected ControllerRegistry createControllerRegistry() {
 		Set<Controller> controllers = new HashSet<>();
-		controllers.add(new RelationshipsResourceDelete());
-		controllers.add(new RelationshipsResourcePatch());
-		controllers.add(new RelationshipsResourcePost());
-		controllers.add(new ResourceDelete());
-		controllers.add(new CollectionGet());
-		controllers.add(new FieldResourceGet());
-		controllers.add(new RelationshipsResourceGet());
-		controllers.add(new ResourceGet());
+		controllers.add(new RelationshipsResourceDeleteController());
+		controllers.add(new RelationshipsResourcePatchController());
+		controllers.add(new RelationshipsResourcePostController());
+		controllers.add(new ResourceDeleteController());
+		controllers.add(new CollectionGetController());
+		controllers.add(new FieldResourceGetController());
+		controllers.add(new RelationshipsResourceGetController());
+		controllers.add(new ResourceGetController());
 		controllers.add(new FieldResourcePost());
-		controllers.add(new ResourcePatch());
-		controllers.add(new ResourcePost());
+		controllers.add(new ResourcePatchController());
+		controllers.add(new ResourcePostController());
 
 		ControllerContext context = new ControllerContext(moduleRegistry, this::getDocumentMapper);
 		for (Controller controller : controllers) {

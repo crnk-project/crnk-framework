@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceDelete;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceDeleteController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import org.junit.Test;
 
-public class ResourceDeleteTest extends BaseControllerTest {
+public class ResourceDeleteControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "DELETE";
 
@@ -17,7 +17,7 @@ public class ResourceDeleteTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1");
-		ResourceDelete sut = new ResourceDelete();
+		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -31,7 +31,7 @@ public class ResourceDeleteTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
-		ResourceDelete sut = new ResourceDelete();
+		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -46,7 +46,7 @@ public class ResourceDeleteTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1");
-		ResourceDelete sut = new ResourceDelete();
+		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN

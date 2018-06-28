@@ -13,10 +13,10 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.CollectionGet;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceGet;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.Project;
@@ -25,14 +25,13 @@ import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CollectionGetTest extends BaseControllerTest {
+public class CollectionGetControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "GET";
 
@@ -41,7 +40,7 @@ public class CollectionGetTest extends BaseControllerTest {
 	public void onGivenRequestCollectionGetShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		CollectionGet sut = new CollectionGet();
+		CollectionGetController sut = new CollectionGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -55,7 +54,7 @@ public class CollectionGetTest extends BaseControllerTest {
 	public void onGivenRequestCollectionGetShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/2");
-		CollectionGet sut = new CollectionGet();
+		CollectionGetController sut = new CollectionGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -70,7 +69,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		CollectionGet sut = new CollectionGet();
+		CollectionGetController sut = new CollectionGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -85,7 +84,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1,2");
-		CollectionGet sut = new CollectionGet();
+		CollectionGetController sut = new CollectionGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -106,7 +105,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(Long.toString(taskId));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -125,7 +124,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		Resource data = createTask();
 		newTaskBody.setData(Nullable.of((Object) data));
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -165,7 +164,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects");
-		RelationshipsResourcePost sut = new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
@@ -179,7 +178,7 @@ public class CollectionGetTest extends BaseControllerTest {
 
 		// Given
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
-		ResourceGet responseGetResp = new ResourceGet();
+		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
 		Map<String, Set<String>> queryParams = new HashMap<>();
 		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("includedProjects"));
@@ -208,7 +207,7 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -249,8 +248,8 @@ public class CollectionGetTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects");
-		RelationshipsResourcePost sut =
-				new RelationshipsResourcePost();
+		RelationshipsResourcePostController sut =
+				new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
@@ -264,7 +263,7 @@ public class CollectionGetTest extends BaseControllerTest {
 
 		// Given
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
-		ResourceGet responseGetResp = new ResourceGet();
+		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
 		Map<String, Set<String>> queryParams = new HashMap<>();
 		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("[\"projects\"]"));

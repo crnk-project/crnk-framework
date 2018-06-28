@@ -9,9 +9,9 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDelete;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.mock.models.Project;
@@ -19,12 +19,11 @@ import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
 
-public class RelationshipsResourceDeleteTest extends BaseControllerTest {
+public class RelationshipsResourceDeleteControllerControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = HttpMethod.DELETE.name();
 
@@ -37,7 +36,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete();
+		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -51,7 +50,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete();
+		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -70,7 +69,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
@@ -110,11 +109,11 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath projectRelationPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost();
-		relationshipsResourcePost.init(controllerContext);
+		RelationshipsResourcePostController relationshipsResourcePostController = new RelationshipsResourcePostController();
+		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = relationshipsResourcePost.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -125,7 +124,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete();
+		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
@@ -146,7 +145,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		newUserDocument.setData(Nullable.of((Object) createUser()));
 
 		JsonPath taskPath = pathBuilder.build("/users");
-		ResourcePost resourcePost = new ResourcePost();
+		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
@@ -182,11 +181,11 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		newProjectDocument2.setData(Nullable.of((Object) createProject(projectId.toString())));
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePost relationshipsResourcePost = new RelationshipsResourcePost();
-		relationshipsResourcePost.init(controllerContext);
+		RelationshipsResourcePostController relationshipsResourcePostController = new RelationshipsResourcePostController();
+		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
-		Response projectRelationshipResponse = relationshipsResourcePost.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -197,7 +196,7 @@ public class RelationshipsResourceDeleteTest extends BaseControllerTest {
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDelete sut = new RelationshipsResourceDelete();
+		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project

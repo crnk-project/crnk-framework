@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.ReadContext;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGet;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -27,7 +27,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RelationshipsResourceGetTest extends BaseControllerTest {
+public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "GET";
 
@@ -43,7 +43,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		RelationshipsResourceGet sut = new RelationshipsResourceGet();
+		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -57,7 +57,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 	public void onFieldRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks/1/project");
-		RelationshipsResourceGet sut = new RelationshipsResourceGet();
+		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -71,7 +71,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = new ResourcePath("tasks");
-		RelationshipsResourceGet sut = new RelationshipsResourceGet();
+		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -86,7 +86,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project");
-		RelationshipsResourceGet sut = new RelationshipsResourceGet();
+		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -100,7 +100,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 	public void onGivenRequestLinkResourceGetShouldReturnDataField() throws Exception {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project");
-		RelationshipsResourceGet sut = new RelationshipsResourceGet();
+		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 		new TaskToProjectRepository().setRelation(new Task().setId(1L), 42L, "project");
 
@@ -126,7 +126,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 		projectPolymorphicToObjectRepository.setRelation(projectPolymorphic, 42L, "task");
 
 		JsonPath jsonPath = pathBuilder.build("/" + type + "/" + projectId + "/relationships/task");
-		RelationshipsResourceGet resourceGet = new RelationshipsResourceGet();
+		RelationshipsResourceGetController resourceGet = new RelationshipsResourceGetController();
 		resourceGet.init(controllerContext);
 
 		// WHEN
@@ -143,7 +143,7 @@ public class RelationshipsResourceGetTest extends BaseControllerTest {
 		// GIVEN
 		projectPolymorphicToObjectRepository.setRelations(projectPolymorphic, Arrays.asList(44L, 45L), "tasks");
 		jsonPath = pathBuilder.build("/" + type + "/" + projectId + "/relationships/tasks");
-		resourceGet = new RelationshipsResourceGet();
+		resourceGet = new RelationshipsResourceGetController();
 		resourceGet.init(controllerContext);
 
 		// WHEN

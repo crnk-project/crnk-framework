@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RelationshipsResourcePost extends RelationshipsResourceUpsert {
+public class RelationshipsResourcePostController extends RelationshipsResourceUpsert {
 
 	@Override
 	public HttpMethod method() {

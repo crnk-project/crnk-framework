@@ -18,7 +18,7 @@ import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePost;
+import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -44,7 +44,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class ResourcePostTest extends BaseControllerTest {
+public class ResourcePostControllerTest extends BaseControllerTest {
 
 	private static final String REQUEST_TYPE = "POST";
 
@@ -52,7 +52,7 @@ public class ResourcePostTest extends BaseControllerTest {
 	public void onGivenRequestCollectionGetShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/1");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -66,7 +66,7 @@ public class ResourcePostTest extends BaseControllerTest {
 	public void onGivenRequestResourceGetShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -84,7 +84,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectPath = pathBuilder.build("/tasks");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// THEN
@@ -102,7 +102,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) new ArrayList<>()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// THEN
@@ -120,7 +120,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		data.setType("fridges");
 		newProjectBody.setData(Nullable.of((Object) data));
 
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// THEN
@@ -133,7 +133,7 @@ public class ResourcePostTest extends BaseControllerTest {
 	@Test
 	public void onUnknownResourceTypeShouldThrowException() throws Exception {
 		// GIVEN
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// THEN
@@ -146,7 +146,7 @@ public class ResourcePostTest extends BaseControllerTest {
 	@Test
 	public void onNoBodyResourceShouldThrowException() throws Exception {
 		// GIVEN
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// THEN
@@ -164,7 +164,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -217,7 +217,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		try {
@@ -246,7 +246,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		Mockito.when(propertiesProvider.getProperty(Mockito.eq(CrnkProperties.RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR)))
 				.thenReturn(ResourceFieldImmutableWriteBehavior.FAIL.toString());
 
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -278,7 +278,7 @@ public class ResourcePostTest extends BaseControllerTest {
 				return null;
 			}
 		};
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -296,7 +296,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		data.setType("projects");
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -353,7 +353,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		data.setType("projects");
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -404,7 +404,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -454,7 +454,7 @@ public class ResourcePostTest extends BaseControllerTest {
 
 	@Test
 	public void onUnchangedLazyRelationshipDataShouldNotReturnThatData() throws Exception {
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 		Document newProjectBody = new Document();
 		Resource data = createProject();
@@ -488,7 +488,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		data.setAttribute("body", objectMapper.readTree("\"sample body\""));
 
 		JsonPath projectPath = pathBuilder.build("/documents");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -512,7 +512,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -574,7 +574,7 @@ public class ResourcePostTest extends BaseControllerTest {
 		newProjectBody.setData(Nullable.of((Object) data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
-		ResourcePost sut = new ResourcePost();
+		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
 		// WHEN
