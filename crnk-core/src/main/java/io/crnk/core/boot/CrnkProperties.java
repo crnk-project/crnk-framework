@@ -178,4 +178,7 @@ public class CrnkProperties {
 	 * @since 2.4
 	 */
 	public static final String REJECT_PLAIN_JSON = "crnk.config.resource.request.rejectPlainJson";
+
+
+	public static final String THROW_RESOURCE_NOT_FOUND_WHEN_RELATED_IDS_IS_NULL = "crnk.config.serialize.relation.throwResourceNotFound";
 }
