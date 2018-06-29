@@ -421,12 +421,14 @@ setup a custom implementation.
 	such values and provide them as `String` within `FilterSpec`.
 
 * `setEnforceDotPathSeparator(boolean)`
-	DefaultQuerySpecUrlMapper by default supports by default two URL conventions:
-	 `http://.../resource?filter[task][project][name]=myProject` and
-	 `http://.../resource?filter[task][project.name]=myProject`. The later is recommended. The former
-	 still supported for historic reasons. By default the flag is still disabled, but it is recommended
-	 to be enabled and will become the default at some point in the future. Note that without the enforcement,
-	 there is danger of introducing ambiguity with resources and attributes are named equally.
+	DefaultQuerySpecUrlMapper makes use of a dotted URL convetion like
+	 `http://.../resource?filter[task][project.name]=myProject`. But for historic reasons it also
+	 accepts `http://.../resource?filter[task][project][name]=myProject`. The later is not recommended
+	 to be used anymore because  there is danger of introducing ambiguity when resources and attributes
+	 are named equally. By enabling this flag, support for the historic format gets removed and no
+	 ambiguity can occur. While not being the default, it is recommended to do so. With the next
+	 major version, the default will change.
+
 
 * `setMapJsonNames`
     Whether to map JSON to Java names for `QuerySpec`. Enabled by default. Typically JSON and Java names are equal, but, for example,

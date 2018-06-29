@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec.mapper;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -39,6 +33,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -168,6 +168,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertNotNull(projectQuerySpec);
 		Assert.assertEquals(0L, projectQuerySpec.getOffset());
 		Assert.assertNull(projectQuerySpec.getLimit());
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals(serialized, params);
 	}
 
 	@Test
@@ -226,6 +229,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		add(params, "sort[tasks]", "name");
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals(serialized, params);
 	}
 
 	@Test
@@ -240,6 +246,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		add(params, "sort", "data.data");
 		QuerySpec actualSpec = urlMapper.deserialize(projectInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals( new HashSet(Arrays.asList("data.data")), serialized.get("sort[projects]"));
 	}
 
 	@Test
@@ -252,6 +261,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		add(params, "sort[tasks]", "name,id");
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals(serialized, params);
 	}
 
 	@Test
@@ -264,6 +276,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals(serialized, params);
 	}
 
 	@Test
@@ -314,6 +329,9 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals( new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.name][EQ]"));
 	}
 
 	@Test
@@ -325,7 +343,11 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		add(params, "filter[project.task.name]", "value");
 
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+
 		Assert.assertEquals(expectedSpec, actualSpec);
+
+		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
+		Assert.assertEquals( new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.task.name][EQ]"));
 	}
 
 	@Test
