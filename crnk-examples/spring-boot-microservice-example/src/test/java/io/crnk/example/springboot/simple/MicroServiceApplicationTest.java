@@ -3,6 +3,8 @@ package io.crnk.example.springboot.simple;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.response.Response;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -29,11 +31,19 @@ public class MicroServiceApplicationTest {
 		projectApp = MicroServiceApplication.startProjectApplication();
 		taskApp = MicroServiceApplication.startTaskApplication();
 
-		taskClient = new CrnkClient("http://127.0.0.1:" + MicroServiceApplication.TASK_PORT);
+		String url = "http://127.0.0.1:" + MicroServiceApplication.TASK_PORT;
+		taskClient = new CrnkClient(url);
+		RestAssured.baseURI = url;
 	}
 
 	@Test
 	public void test() {
+		checkInclusionOfRemoteResource();
+		checkRemoteProjectNotExposedInHome();
+		checkRemoteProjectNotExposed();
+	}
+
+	private void checkInclusionOfRemoteResource() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.setLimit(10L);
 		querySpec.includeRelation(Arrays.asList("project"));
@@ -47,6 +57,19 @@ public class MicroServiceApplicationTest {
 			Assert.assertNotNull(task.getProject());
 			Assert.assertEquals("http://127.0.0.1:12002/project/" + project.getId(), project.getLinks().getSelf());
 		}
+	}
+
+	private void checkRemoteProjectNotExposedInHome() {
+		Response response = RestAssured.given().when().get("/");
+		response.then().assertThat().statusCode(200);
+		String body = response.getBody().print();
+		Assert.assertTrue(body, body.contains("/task"));
+		Assert.assertTrue(body, !body.contains("/project"));
+	}
+
+	private void checkRemoteProjectNotExposed() {
+		Response response = RestAssured.given().when().get("/project");
+		response.then().assertThat().statusCode(404);
 	}
 
 	@After

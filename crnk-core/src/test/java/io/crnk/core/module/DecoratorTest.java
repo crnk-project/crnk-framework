@@ -20,7 +20,7 @@ public class DecoratorTest {
 		ScheduleRepository repository = Mockito.mock(ScheduleRepository.class);
 		ResourceRepositoryDecoratorBase<Schedule, Long> decorator = new ResourceRepositoryDecoratorBase() {
 		};
-		decorator.setDecoratedObject(repository);
+		decorator.setWrappedRepository(repository);
 
 		decorator.create(null);
 		Mockito.verify(repository, Mockito.times(1)).create(Mockito.any(Schedule.class));

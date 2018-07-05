@@ -37,6 +37,8 @@ public interface InformationBuilder {
 
 		void setAccess(RepositoryMethodAccess access);
 
+		void setExposed(boolean exposed);
+
 		ResourceRepositoryInformation build();
 
 	}

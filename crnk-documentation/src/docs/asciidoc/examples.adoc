@@ -11,6 +11,8 @@ with Crnk, Angular, Spring Boot and ngrx-json-api.
 And there are various simpler example applications that show the integration of Crnk into various frameworks like:
 
 - `spring-boot-example`
+- `spring-boot-minimal-example` showcasing a minimal setup of Crnk with Spring Boot.
+- `spring-boot-microservice-example` showcasing how to connect two separate JSON API endpoints through a relationship with crnk-client.
 - `wildfly-example`
 - `dropwizard-mongo-example`
 - `dropwizard-simple-example`

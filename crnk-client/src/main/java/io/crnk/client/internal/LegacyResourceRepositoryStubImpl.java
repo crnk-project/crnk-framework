@@ -9,6 +9,10 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.legacy.queryParams.QueryParams;
 
+/**
+ * @deprecated to be removed with QueryParams
+ */
+@Deprecated
 public class LegacyResourceRepositoryStubImpl<T, I extends Serializable> extends ResourceRepositoryStubImpl<T, I> implements
 		ResourceRepositoryStub<T, I> {
 

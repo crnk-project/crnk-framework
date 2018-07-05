@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.crnk.client.internal.proxy.ObjectProxy;
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.exception.ResourceNotFoundException;
@@ -414,7 +413,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		test.setStringValue("test");
 		testRepo.create(test);
 
-		ResourceRepositoryStub<RelatedEntity, Long> relatedRepo = client.getQueryParamsRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
@@ -490,7 +489,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testEagerOneRelation() {
-		ResourceRepositoryStub<RelatedEntity, Long> relatedRepo = client.getQueryParamsRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related = new RelatedEntity();
 		related.setId(1L);
 		related.setStringValue("project");

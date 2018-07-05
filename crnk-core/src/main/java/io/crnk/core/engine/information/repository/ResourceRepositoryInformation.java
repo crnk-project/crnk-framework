@@ -1,9 +1,9 @@
 package io.crnk.core.engine.information.repository;
 
+import java.util.Map;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.utils.Optional;
-
-import java.util.Map;
 
 /**
  * Holds information about the type of a resource repository.
@@ -35,4 +35,11 @@ public interface ResourceRepositoryInformation extends RepositoryInformation {
 
 
 	Map<String, RepositoryAction> getActions();
+
+	/**
+	 * @return true if the repository is available from the endpoint. Enabled by default, but not desired in all situations. For
+	 * example in a micro-service architecture, one may want to register a remote repository of another micro service to perform
+	 * relationship lookups.
+	 */
+	boolean isExposed();
 }

@@ -16,6 +16,7 @@ import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.UntypedResourceRepository;
+import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
@@ -50,18 +51,20 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-										RepositoryInformationProviderContext context) {
+			RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
 		PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass),
-				"cannot get resource information for resource class '%s' to setup repository '%s', not annotated with @JsonApiResource?", resourceClass, repository);
+				"cannot get resource information for resource class '%s' to setup repository '%s', not annotated with "
+						+ "@JsonApiResource?",
+				resourceClass, repository);
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		String path = getPath(resourceInformation, repository);
-
+		boolean exposed = repository != null && isExposed(resourceInformation, repository);
 		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass),
-				getAccess(repository));
+				getAccess(repository), exposed);
 	}
 
 	// FIXME
@@ -77,21 +80,30 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 		return resourceInformation.getResourceType();
 	}
 
+	protected boolean isExposed(ResourceInformation resourceInformation, Object repository) {
+		JsonApiExposed annotation = repository.getClass().getAnnotation(JsonApiExposed.class);
+		return annotation == null || annotation.value();
+	}
+
+
 	protected Class<?> getResourceClass(Object repository, Class<?> repositoryClass) {
 		Optional<JsonApiResourceRepository> annotation = ClassUtils.getAnnotation(repositoryClass,
 				JsonApiResourceRepository.class);
 
 		if (annotation.isPresent()) {
 			return annotation.get().value();
-		} else if (repository instanceof ResourceRepository) {
+		}
+		else if (repository instanceof ResourceRepository) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
 			return typeArgs[0];
-		} else if (repository != null) {
+		}
+		else if (repository != null) {
 			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		} else {
+		}
+		else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}

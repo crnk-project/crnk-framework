@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
@@ -76,7 +77,7 @@ public class ResourceRegistryTest {
 				new ResourceInformation(moduleRegistry.getTypeParser(), Task.class, path, null, fields,
 						OffsetLimitPagingSpec.class);
 		return new LegacyRegistryEntry(new DirectResponseResourceEntry(null,
-				new ResourceRepositoryInformationImpl(path, resourceInformation, RepositoryMethodAccess.ALL)));
+				new ResourceRepositoryInformationImpl(path, resourceInformation, new HashMap<>(), RepositoryMethodAccess.ALL, true)));
 	}
 
 	@Test
@@ -130,7 +131,7 @@ public class ResourceRegistryTest {
 						OffsetLimitPagingSpec.class);
 		RegistryEntry registryEntry = new LegacyRegistryEntry(new DirectResponseResourceEntry(null, new
 				ResourceRepositoryInformationImpl
-				("tasks", resourceInformation, RepositoryMethodAccess.ALL)));
+				("tasks", resourceInformation, new HashMap<>(), RepositoryMethodAccess.ALL, true)));
 		resourceRegistry.addEntry(Task.class, registryEntry);
 
 		String resourceUrl = resourceRegistry.getResourceUrl(task);

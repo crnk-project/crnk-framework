@@ -132,7 +132,7 @@ public class HttpRequestDispatcherImplTest {
 					Mockito.when(action.getActionType()).thenReturn(RepositoryAction.RepositoryActionType.RESOURCE);
 					actions.put("someAction", action);
 					RepositoryInformation repositoryInformation = new ResourceRepositoryInformationImpl("actionResource",
-							resourceInformation, actions, RepositoryMethodAccess.ALL);
+							resourceInformation, actions, RepositoryMethodAccess.ALL, true);
 					return repositoryInformation;
 
 				}

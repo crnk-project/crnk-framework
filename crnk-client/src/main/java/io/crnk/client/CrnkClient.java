@@ -19,6 +19,7 @@ import io.crnk.client.http.HttpAdapterProvider;
 import io.crnk.client.http.apache.HttpClientAdapterProvider;
 import io.crnk.client.http.okhttp.OkHttpAdapterProvider;
 import io.crnk.client.internal.ClientDocumentMapper;
+import io.crnk.client.internal.ClientStubBase;
 import io.crnk.client.internal.ClientStubInvocationHandler;
 import io.crnk.client.internal.LegacyResourceRepositoryStubImpl;
 import io.crnk.client.internal.RelationshipRepositoryStubImpl;
@@ -132,6 +133,7 @@ public class CrnkClient {
 
 	private QueryContext queryContext = new QueryContext();
 
+	private boolean queryParamsSupport = false;
 
 	private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
@@ -364,14 +366,18 @@ public class CrnkClient {
 		exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
 		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
-		final ResourceRepositoryStub<T, I> repositoryStub =
-				// TODO remove legacy one
-				new LegacyResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
+		final ClientStubBase repositoryStub;
+		if (queryParamsSupport) {
+			repositoryStub = new LegacyResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
+		}
+		else {
+			repositoryStub = new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder);
+		}
 
 		// create interface for it!
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
@@ -383,7 +389,7 @@ public class CrnkClient {
 		};
 		ResourceRepositoryInformation repositoryInformation =
 				new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-						resourceInformation, RepositoryMethodAccess.ALL);
+						resourceInformation, new HashMap<>(), RepositoryMethodAccess.ALL, true);
 		ResourceEntry resourceEntry = new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
 		Map<ResourceField, ResponseRelationshipEntry> relationshipEntries = new HashMap<>();
 		LegacyRegistryEntry registryEntry = new LegacyRegistryEntry(resourceEntry, relationshipEntries);
@@ -403,7 +409,7 @@ public class CrnkClient {
 		return registryEntry;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void allocateRepositoryRelations(RegistryEntry registryEntry) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
@@ -484,7 +490,7 @@ public class CrnkClient {
 		ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
 		InvocationHandler invocationHandler =
 				new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-		return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepositoryV2.class},
+		return (R) Proxy.newProxyInstance(classLoader, new Class[] { repositoryInterfaceClass, ResourceRepositoryV2.class },
 				invocationHandler);
 	}
 
@@ -493,9 +499,11 @@ public class CrnkClient {
 	 * @return stub for the given resourceClass
 	 * @deprecated make use of QuerySpec
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Deprecated
 	public <T, I extends Serializable> ResourceRepositoryStub<T, I> getQueryParamsRepository(Class<T> resourceClass) {
+		queryParamsSupport = true;
+
 		init();
 
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
@@ -509,7 +517,7 @@ public class CrnkClient {
 	 * @param resourceClass repository class
 	 * @return stub for the given resourceClass
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
 		init();
 
@@ -541,7 +549,7 @@ public class CrnkClient {
 	 * Generic access using {@link Resource} class without type mapping.
 	 */
 	public RelationshipRepositoryV2<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType,
-																							 String targetResourceType) {
+			String targetResourceType) {
 		init();
 
 		ResourceInformation sourceResourceInformation =
@@ -566,10 +574,11 @@ public class CrnkClient {
 	 * class
 	 * @deprecated make use of QuerySpec
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryStub<T, I, D, J>
 	getQueryParamsRepository(
 			Class<T> sourceClass, Class<D> targetClass) {
+		queryParamsSupport = true;
 		init();
 
 		RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
@@ -582,7 +591,7 @@ public class CrnkClient {
 	 * @return stub for the relationship between the given source and target
 	 * class
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();
