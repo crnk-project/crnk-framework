@@ -1,5 +1,11 @@
 package io.crnk.core.boot;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+
+import java.util.Arrays;
+import java.util.Properties;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -8,6 +14,7 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -34,6 +41,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.internal.QuerySpecAdapterBuilder;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
@@ -44,12 +52,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.Properties;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 
@@ -199,9 +201,15 @@ public class CrnkBootTest {
 		boot.setServiceUrlProvider(mock(ServiceUrlProvider.class));
 
 		Module module = mock(Module.class);
+		RepositoryDecoratorFactory decoratorFactory = mock(RepositoryDecoratorFactory.class);
+		ResourceFieldContributor resourceFieldContributor = mock(ResourceFieldContributor.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
 		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(RepositoryDecoratorFactory.class)))
+				.thenReturn(Arrays.asList(decoratorFactory));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(ResourceFieldContributor.class)))
+				.thenReturn(Arrays.asList(resourceFieldContributor));
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(Module.class))).thenReturn(Arrays.asList(module));
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(JsonApiExceptionMapper.class)))
 				.thenReturn(Arrays.asList(exceptionMapper));
@@ -210,6 +218,8 @@ public class CrnkBootTest {
 		ModuleRegistry moduleRegistry = boot.getModuleRegistry();
 		Assert.assertTrue(moduleRegistry.getModules().contains(module));
 		Assert.assertTrue(moduleRegistry.getFilters().contains(filter));
+		Assert.assertTrue(moduleRegistry.getResourceFieldContributors().contains(resourceFieldContributor));
+		Assert.assertTrue(moduleRegistry.getRepositoryDecoratorFactories().contains(decoratorFactory));
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
 	}
 

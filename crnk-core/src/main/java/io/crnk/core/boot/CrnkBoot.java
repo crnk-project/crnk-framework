@@ -14,6 +14,7 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpRequestContextAware;
+import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
@@ -66,6 +67,7 @@ import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.Repository;
+import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
@@ -280,7 +282,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -318,7 +321,8 @@ public class CrnkBoot {
 	protected QueryAdapterBuilder createQueryAdapterBuilder() {
 		if (queryParamsBuilder != null) {
 			return new QueryParamsAdapterBuilder(queryParamsBuilder, moduleRegistry);
-		} else {
+		}
+		else {
 			return new QuerySpecAdapterBuilder(moduleRegistry.getUrlMapper(), moduleRegistry);
 		}
 	}
@@ -385,6 +389,14 @@ public class CrnkBoot {
 		List<Repository> repositories = getInstancesByType(Repository.class);
 		for (Object repository : repositories) {
 			module.addRepository(repository);
+		}
+		List<ResourceFieldContributor> resourceFieldContributors = getInstancesByType(ResourceFieldContributor.class);
+		for (ResourceFieldContributor resourceFieldContributor : resourceFieldContributors) {
+			module.addResourceFieldContributor(resourceFieldContributor);
+		}
+		List<RepositoryDecoratorFactory> decoratorFactories = getInstancesByType(RepositoryDecoratorFactory.class);
+		for (RepositoryDecoratorFactory decoratorFactory : decoratorFactories) {
+			module.addRepositoryDecoratorFactory(decoratorFactory);
 		}
 		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
 			JsonApiResourceRepository annotation =
@@ -501,7 +513,8 @@ public class CrnkBoot {
 		String pathPrefix = null;
 		if (webPathPrefix != null) {
 			pathPrefix = webPathPrefix;
-		} else {
+		}
+		else {
 			pathPrefix = propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 		}
 		if (pathPrefix != null && !pathPrefix.startsWith("/")) {
@@ -606,10 +619,12 @@ public class CrnkBoot {
 				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 				if (deserializers.isEmpty()) {
 					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
-				} else {
+				}
+				else {
 					setQuerySpecDeserializerUnchecked(deserializers.get(0));
 				}
-			} else {
+			}
+			else {
 				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
@@ -651,7 +666,8 @@ public class CrnkBoot {
 			if (pagingBehavior instanceof LimitBoundedPagingBehavior) {
 				if (defaultPageLimit != null) {
 					((LimitBoundedPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
-				} else {
+				}
+				else {
 					LOGGER.warn(
 							"no defaultLimit for paging specified, may lead to denial of service for in proper requests with "
 									+ "large data sets"
