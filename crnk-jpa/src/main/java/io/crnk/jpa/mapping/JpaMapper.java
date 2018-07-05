@@ -35,7 +35,7 @@ public interface JpaMapper<E, D> {
 	 *
 	 * @return mapped QuerySpec
 	 */
-	default QuerySpec unmapQuerySpec(QuerySpec querySpec) {
-		return querySpec;
+	default QuerySpec unmapQuerySpec(QuerySpec dtoQueryspec) {
+		return dtoQueryspec;
 	}
 }
