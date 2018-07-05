@@ -20,6 +20,7 @@ import io.crnk.client.http.apache.HttpClientAdapterProvider;
 import io.crnk.client.http.okhttp.OkHttpAdapterProvider;
 import io.crnk.client.internal.ClientDocumentMapper;
 import io.crnk.client.internal.ClientStubInvocationHandler;
+import io.crnk.client.internal.LegacyResourceRepositoryStubImpl;
 import io.crnk.client.internal.RelationshipRepositoryStubImpl;
 import io.crnk.client.internal.ResourceRepositoryStubImpl;
 import io.crnk.client.internal.proxy.BasicProxyFactory;
@@ -369,7 +370,8 @@ public class CrnkClient {
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		final ResourceRepositoryStub<T, I> repositoryStub =
-				new ResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
+				// TODO remove legacy one
+				new LegacyResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
 
 		// create interface for it!
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {

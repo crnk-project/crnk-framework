@@ -1,12 +1,10 @@
 package io.crnk.client.internal;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
@@ -21,16 +19,15 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.legacy.queryParams.QueryParams;
 
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
-		implements ResourceRepositoryV2<T, I>, ResourceRepositoryStub<T, I> {
+		implements ResourceRepositoryV2<T, I> {
 
-	private ResourceInformation resourceInformation;
+	protected ResourceInformation resourceInformation;
 
 
 	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
-									  JsonApiUrlBuilder urlBuilder) {
+			JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder, resourceClass);
 		this.resourceInformation = resourceInformation;
 	}
@@ -57,23 +54,6 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		return execute(requestUrl, ResponseType.RESOURCE, method, requestBodyValue);
 	}
 
-	@Override
-	public T findOne(I id, QueryParams queryParams) {
-		String url = urlBuilder.buildUrl(resourceInformation, id, queryParams);
-		return findOne(url);
-	}
-
-	@Override
-	public List<T> findAll(QueryParams queryParams) {
-		String url = urlBuilder.buildUrl(resourceInformation, null, queryParams);
-		return findAll(url);
-	}
-
-	@Override
-	public List<T> findAll(Iterable<I> ids, QueryParams queryParams) {
-		String url = urlBuilder.buildUrl(resourceInformation, ids, queryParams);
-		return findAll(url);
-	}
 
 	@Override
 	public <S extends T> S save(S entity) {
@@ -98,9 +78,11 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		}
 		if (create) {
 			return null;
-		} else if (entity instanceof Resource) {
+		}
+		else if (entity instanceof Resource) {
 			return ((Resource) entity).getId();
-		} else {
+		}
+		else {
 			ResourceField idField = resourceInformation.getIdField();
 			return idField.getAccessor().getValue(entity);
 		}
@@ -141,7 +123,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 	}
 
 	@SuppressWarnings("unchecked")
-	private T findOne(String url) {
+	protected T findOne(String url) {
 		return (T) executeGet(url, ResponseType.RESOURCE);
 	}
 

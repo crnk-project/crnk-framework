@@ -1,4 +1,4 @@
-package io.crnk.example.springboot.minimal;
+package io.crnk.example.springboot.microservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package io.crnk.example.springboot.minimal;
+package io.crnk.example.springboot.microservice;
 
 import java.util.HashMap;
 import java.util.Map;

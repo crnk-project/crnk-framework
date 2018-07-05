@@ -7,7 +7,7 @@ import com.jayway.restassured.response.Response;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.example.springboot.minimal.Project;
+import io.crnk.example.springboot.microservice.Project;
 import org.junit.Assert;
 import org.junit.Test;
 
