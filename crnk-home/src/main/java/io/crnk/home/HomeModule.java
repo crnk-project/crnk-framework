@@ -1,6 +1,11 @@
 package io.crnk.home;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,7 +17,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.information.repository.RepositoryInformation;
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
@@ -164,8 +169,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		boolean hasEntries = false;
 		boolean hasUnfilteredEntries = false;
 		for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
-			RepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
-			if (repositoryInformation == null) {
+			ResourceRepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
+			if (repositoryInformation == null || !repositoryInformation.isExposed()) {
 				continue;
 			}
 			hasEntries = true;

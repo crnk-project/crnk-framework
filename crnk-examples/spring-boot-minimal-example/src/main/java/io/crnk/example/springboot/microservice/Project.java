@@ -1,4 +1,4 @@
-package io.crnk.example.springboot.minimal;
+package io.crnk.example.springboot.microservice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;

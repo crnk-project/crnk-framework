@@ -29,12 +29,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SuppressWarnings("unchecked")
 public class RegistryEntryTest {
 
@@ -68,7 +62,7 @@ public class RegistryEntryTest {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		TypeParser typeParser = moduleRegistry.getTypeParser();
 		return new ResourceRepositoryInformationImpl(path, new ResourceInformation(typeParser, Task.class, path,null, null, null),
-				RepositoryMethodAccess.ALL);
+				new HashMap<>(), RepositoryMethodAccess.ALL, true);
 	}
 
 	@Test

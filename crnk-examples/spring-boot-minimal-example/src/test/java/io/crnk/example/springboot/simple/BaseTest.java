@@ -10,7 +10,7 @@ import java.io.InputStream;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ValidatableResponse;
 import io.crnk.client.CrnkClient;
-import io.crnk.example.springboot.minimal.MinimalSpringBootApplication;
+import io.crnk.example.springboot.microservice.MinimalSpringBootApplication;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.runner.RunWith;

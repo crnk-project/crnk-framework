@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -118,7 +119,7 @@ public class PathBuilder {
 						potentialResourceType.append("/");
 					}
 					potentialResourceType.append(strings[currentElementIdx + i]);
-					entry = resourceRegistry.getEntryByPath(potentialResourceType.toString());
+					entry = getEntryByPath(potentialResourceType.toString());
 					if (entry != null) {
 						currentElementIdx += i;
 						elementName = potentialResourceType.toString();
@@ -171,6 +172,17 @@ public class PathBuilder {
 		}
 
 		return currentJsonPath;
+	}
+
+	private RegistryEntry getEntryByPath(String path) {
+		RegistryEntry entry = resourceRegistry.getEntryByPath(path);
+		if(entry != null) {
+			ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
+			if(repositoryInformation == null ||!repositoryInformation.isExposed()){
+				return null;
+			}
+		}
+		return entry;
 	}
 
 	private JsonPath getNonResourcePath(JsonPath previousJsonPath, String elementName, boolean relationshipMark) {

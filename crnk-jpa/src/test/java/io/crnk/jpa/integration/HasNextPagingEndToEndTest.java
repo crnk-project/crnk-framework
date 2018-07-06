@@ -1,8 +1,8 @@
 package io.crnk.jpa.integration;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.queryspec.QuerySpec;
@@ -74,7 +74,7 @@ public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 		test.setStringValue("test");
 		testRepo.create(test);
 
-		ResourceRepositoryStub<RelatedEntity, Long> relatedRepo = client.getQueryParamsRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 

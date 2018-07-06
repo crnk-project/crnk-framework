@@ -20,3 +20,20 @@ SpecialTask extends Task but is configured to use the same resourcePath, meaning
 along its own repository implementation, but is served by the task repository.
 For more information have a look at the documentation.
 
+
+<h4>Microservice example</h4>
+
+There is a new spring-boot-microservice-example application. It showcases how to establish relationships between resources of two separate microservices.
+The relationship supports the full JSON API feature, most notable the use of inclusions. Behind the scenes crnk-client is used to let one Crnk instance
+access another Crnk instance.
+
+
+<h4>@JsonApiExpose annotation</h4>
+
+@JsonApiExpose can be used to hide a resource repository from the JSON API endpoint. It is used by the preceding microservice example to hide the
+remote repositories on the local endpoint while making them available internally to perform relationship inclusions.
+
+<h4>InMemoryResourceRepository default implementation</h4>
+
+There is a default implementation for a in-memory resource repository that is backed by a ConcurrentHashMap. It can be useful to get started quickly,
+use for mocking and work with small data sets.

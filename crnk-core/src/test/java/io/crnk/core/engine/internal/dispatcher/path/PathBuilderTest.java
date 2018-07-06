@@ -1,18 +1,22 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 import io.crnk.core.CoreTestContainer;
-import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.exception.ResourceFieldNotFoundException;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.module.Module;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
+import io.crnk.core.module.SimpleModule;
+import io.crnk.core.repository.InMemoryResourceRepository;
+import io.crnk.core.resource.annotations.JsonApiExposed;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,21 +24,21 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class PathBuilderTest {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
 	private PathBuilder pathBuilder;
 
 	@Before
 	public void prepare() {
+		SimpleModule notExposedModule = new SimpleModule("notExposed");
+		notExposedModule.addRepository(new NotExposedRepository());
+
 		CoreTestContainer container = new CoreTestContainer();
 		container.setDefaultPackage();
+		container.addModule(notExposedModule);
 		container.boot();
 
 		pathBuilder = new PathBuilder(container.getResourceRegistry());
@@ -43,6 +47,29 @@ public class PathBuilderTest {
 		ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 		repositoryInformation.getActions().put("someRepositoryAction", Mockito.mock(RepositoryAction.class));
 		repositoryInformation.getActions().put("someResourceAction", Mockito.mock(RepositoryAction.class));
+	}
+
+	@JsonApiExposed(false)
+	public static class NotExposedRepository extends InMemoryResourceRepository<NotExposedResource, String> {
+
+		public NotExposedRepository() {
+			super(NotExposedResource.class);
+		}
+	}
+
+	@JsonApiResource(type = "notExposed")
+	public static class NotExposedResource {
+
+		@JsonApiId
+		private String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
 	}
 
 	@Test
@@ -320,5 +347,12 @@ public class PathBuilderTest {
 		JsonPath expectedPath = new FieldPath("projects");
 		expectedPath.setParentResource(new ResourcePath("tasks", new PathIds("1")));
 		assertThat(jsonPath).isEqualTo(expectedPath);
+	}
+
+	@Test
+	public void ignoreEntriesNotBeingExposed() {
+		String path = "/notExposed/1/";
+		JsonPath jsonPath = pathBuilder.build(path);
+		Assert.assertNull(jsonPath);
 	}
 }

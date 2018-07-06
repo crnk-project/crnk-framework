@@ -54,8 +54,8 @@ public class IncludeRequest {
 	private Map<ResourceIdentifier, Resource> resourceMap;
 
 	public IncludeRequest(Object entity, Document document, ResourceRegistry resourceRegistry,
-						  DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
-						  IncludeLookupUtil util, ResourceMapper resourceMapper) {
+			DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
+			IncludeLookupUtil util, ResourceMapper resourceMapper) {
 		this.resourceMapper = resourceMapper;
 		this.resourceRegistry = resourceRegistry;
 		this.mappingConfig = mappingConfig;
@@ -81,7 +81,7 @@ public class IncludeRequest {
 	}
 
 	public synchronized boolean isInclusionRequest(List<ResourceField> fieldPath,
-												   ResourceField resourceField) {
+			ResourceField resourceField) {
 		return util.isInclusionRequested(queryAdapter, fieldPath)
 				|| resourceField.getSerializeType() == SerializeType.EAGER;
 	}
@@ -130,7 +130,8 @@ public class IncludeRequest {
 		ResourceIdentifier targetId = targetResource.toIdentifier();
 		if (!resourceMap.containsKey(targetId)) {
 			resourceMap.put(targetId, targetResource);
-		} else {
+		}
+		else {
 			// TODO consider merging
 			targetResource = resourceMap.get(targetId);
 		}
@@ -147,7 +148,8 @@ public class IncludeRequest {
 		Relationship relationship = relationships.get(relationshipName);
 
 		String oppositeType = relationshipField.getOppositeResourceType();
-		RegistryEntry entry = Objects.requireNonNull(resourceRegistry.getEntry(oppositeType));
+		RegistryEntry entry = resourceRegistry.getEntry(oppositeType);
+		PreconditionUtil.verify(entry != null, "opposite type %s not found for relationship %s", oppositeType, relationshipName);
 		ResourceInformation targetResourceInformation = entry.getResourceInformation();
 
 		if (targetEntityId instanceof Iterable) {
@@ -156,14 +158,15 @@ public class IncludeRequest {
 				targetIds.add(util.idToResourceId(targetResourceInformation, targetElementId));
 			}
 			relationship.setData(Nullable.of(targetIds));
-		} else {
+		}
+		else {
 			ResourceIdentifier targetResourceId = util.idToResourceId(targetResourceInformation, targetEntityId);
 			relationship.setData(Nullable.of(targetResourceId));
 		}
 	}
 
 	public synchronized List<Resource> setupRelation(Resource sourceResource, ResourceField relationshipField,
-													 Object targetEntity) {
+			Object targetEntity) {
 		// set the relation
 		String relationshipName = relationshipField.getJsonName();
 		Map<String, Relationship> relationships = sourceResource.getRelationships();
@@ -176,7 +179,8 @@ public class IncludeRequest {
 			}
 			relationship.setData(Nullable.of(util.toIds(targets)));
 			return targets;
-		} else {
+		}
+		else {
 			Resource targetResource = merge(targetEntity);
 			relationship.setData(Nullable.of(targetResource.toIdentifier()));
 			return Collections.singletonList(targetResource);

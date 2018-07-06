@@ -98,10 +98,13 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private RepositoryMethodAccess access = new RepositoryMethodAccess(true, true, true, true);
 
+		private boolean exposed = true;
+
 		@Override
 		public void from(ResourceRepositoryInformation information) {
 			actions.putAll(information.getActions());
 			access = information.getAccess();
+			exposed = information.isExposed();
 			if (information.getResourceInformation().isPresent()) {
 				resourceInformation = information.getResourceInformation().get();
 			}
@@ -117,9 +120,14 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			this.access = access;
 		}
 
+		@Override
+		public void setExposed(boolean exposed){
+			this.exposed = exposed;
+		}
+
 		public ResourceRepositoryInformation build() {
 			return new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-					resourceInformation, actions, access);
+					resourceInformation, actions, access, exposed);
 		}
 	}
 
