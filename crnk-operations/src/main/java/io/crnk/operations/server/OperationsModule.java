@@ -17,6 +17,7 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
@@ -92,9 +93,12 @@ public class OperationsModule implements Module {
 				String path = OperationParameterUtils.parsePath(operation.getPath());
 				JsonPath jsonPath = (new PathBuilder(resourceRegistry)).build(path);
 
+				RegistryEntry entry = resourceRegistry.getEntryByPath(path);
+				String idString = entry.getResourceInformation().toIdString(jsonPath.getIds().getIds().get(0));
+
 				Resource resource = new Resource();
 				resource.setType(jsonPath.getResourcePath());
-				resource.setId(jsonPath.getIds().getIds().get(0));
+				resource.setId(idString);
 				operation.setValue(resource);
 			}
 		}
@@ -225,8 +229,7 @@ public class OperationsModule implements Module {
 			List<OperationFilter> filters = getFilters();
 			if (filterIndex == filters.size()) {
 				return executeOperations(context.getOrderedOperations());
-			}
-			else {
+			} else {
 				OperationFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filter(context, this);

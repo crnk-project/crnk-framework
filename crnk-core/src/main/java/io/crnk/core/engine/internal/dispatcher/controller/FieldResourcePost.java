@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -17,12 +12,10 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -30,6 +23,11 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Creates a new post in a similar manner as in {@link ResourcePostController}, but additionally adds a relation to a field.
@@ -53,19 +51,17 @@ public class FieldResourcePost extends ResourceUpsert {
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
 										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
+		FieldPath fieldPath = (FieldPath) jsonPath;
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		RegistryEntry registryEntry = getRegistryEntry(jsonPath);
+		RegistryEntry registryEntry = jsonPath.getRootEntry();
 		logger.debug("using registry entry {}", registryEntry);
 		Resource resourceBody = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
-		PathIds resourceIds = jsonPath.getIds();
 		RegistryEntry bodyRegistryEntry = resourceRegistry.getEntry(resourceBody.getType());
 		ResourceInformation bodyResourceInformation = bodyRegistryEntry.getResourceInformation();
 
 
-		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
-		ResourceField relationshipField = registryEntry.getResourceInformation()
-				.findRelationshipFieldByName(jsonPath.getElementName());
-		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
+		Serializable id = jsonPath.getId();
+		ResourceField relationshipField = fieldPath.getField();
 
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
 		ResourceInformation relationshipResourceInformation = relationshipRegistryEntry.getResourceInformation();
@@ -86,7 +82,7 @@ public class FieldResourcePost extends ResourceUpsert {
 				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
-		Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(castedResourceId, queryAdapter);
+		Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(id, queryAdapter);
 		return createdDocument.zipWith(parentResource,
 				(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, parameterProvider, queryAdapter))
 				.merge(it -> it)
@@ -135,16 +131,5 @@ public class FieldResourcePost extends ResourceUpsert {
 		return result.map((it) -> createdDocument);
 	}
 
-	private Serializable getResourceId(PathIds resourceIds, RegistryEntry registryEntry) {
-		String resourceId = resourceIds.getIds()
-				.get(0);
-		@SuppressWarnings("unchecked")
-		Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry
-				.getResourceInformation()
-				.getIdField()
-				.getType();
-		TypeParser typeParser = context.getTypeParser();
-		return typeParser.parse(resourceId, idClass);
-	}
 
 }

@@ -6,14 +6,11 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
@@ -33,15 +30,12 @@ public class FieldResourceGetController extends ResourceIncludeField {
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
 			parameterProvider, Document requestBody) {
-		PathIds resourceIds = jsonPath.getIds();
-		String resourcePath = jsonPath.getResourcePath();
-		String resourceName = jsonPath.getElementName();
+		FieldPath fieldPath = (FieldPath) jsonPath;
 
-		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
+		RegistryEntry registryEntry = fieldPath.getRootEntry();
 		logger.debug("using registry entry {}", registryEntry);
-		Serializable castedResourceId = getResourceId(resourceIds, registryEntry);
-		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(resourceName);
-		verifyFieldNotNull(relationshipField, resourceName);
+		Serializable castedResourceId = jsonPath.getId();
+		ResourceField relationshipField = fieldPath.getField();
 
 		// TODO remove Class usage and replace by resourceId
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
@@ -67,16 +61,5 @@ public class FieldResourceGetController extends ResourceIncludeField {
 			document.setData(Nullable.nullValue());
 		}
 		return new Response(document, 200);
-	}
-
-	private Serializable getResourceId(PathIds resourceIds, RegistryEntry registryEntry) {
-		String resourceId = resourceIds.getIds().get(0);
-		@SuppressWarnings("unchecked")
-		Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry
-				.getResourceInformation()
-				.getIdField()
-				.getType();
-		TypeParser typeParser = context.getTypeParser();
-		return typeParser.parse(resourceId, idClass);
 	}
 }

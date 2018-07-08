@@ -54,7 +54,7 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourceType = path.getResourcePath();
+		String resourceType = path.getRootEntry().getResourceInformation().getResourcePath();
 
 		assertRequestDocument(requestDocument, method, resourceType);
 
@@ -71,11 +71,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			throw new RepositoryNotFoundException(resourceBody.getType());
 		}
 		return resourceBody;
-	}
-
-	protected RegistryEntry getRegistryEntry(JsonPath jsonPath) {
-		String resourcePath = jsonPath.getResourcePath();
-		return getRegistryEntryByPath(resourcePath);
 	}
 
 	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {

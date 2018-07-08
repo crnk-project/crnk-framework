@@ -13,7 +13,7 @@ public abstract class AbstractQueryParamsParserContext implements QueryParamsPar
 	private final ResourceInformation resourceInformation;
 
 	protected AbstractQueryParamsParserContext(ResourceRegistry resourceRegistry, JsonPath path) {
-		resourceInformation = resourceRegistry.getEntry(path.getResourcePath()).getResourceInformation();
+		resourceInformation = path.getRootEntry().getResourceInformation();
 	}
 
 	@Override

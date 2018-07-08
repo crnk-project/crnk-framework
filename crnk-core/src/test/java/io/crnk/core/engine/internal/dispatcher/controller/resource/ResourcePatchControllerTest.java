@@ -75,7 +75,8 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		expectedException.expect(RuntimeException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("fridges"), emptyProjectQuery, null, null);
+		JsonPath path = pathBuilder.build("/frides");
+		sut.handle(path, emptyProjectQuery, null, null);
 	}
 
 	@Test
@@ -183,8 +184,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 			JsonPath patchPath = pathBuilder.build("/tasks/" + data.getId());
 			sut.handle(patchPath, emptyTaskQuery, null, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		}
-		catch (ForbiddenException e) {
+		} catch (ForbiddenException e) {
 			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
 		}
 	}
@@ -222,11 +222,9 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		try {
 			response = sut.handle(jsonPath, emptyTaskQuery, null, taskPatch);
 			Assert.fail("Should have recieved exception.");
-		}
-		catch (CrnkException rbe) {
+		} catch (CrnkException rbe) {
 			// Got correct exception
-		}
-		catch (Error ex) {
+		} catch (Error ex) {
 			Assert.fail("Got bad exception: " + ex);
 		}
 	}

@@ -16,9 +16,12 @@ import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
+import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -120,21 +123,17 @@ public class JsonApiRequestProcessorBase {
 	protected JsonPath getJsonPath(HttpRequestContext requestContext) {
 		String path = requestContext.getPath();
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		return new PathBuilder(resourceRegistry).build(path);
+		TypeParser typeParser = moduleContext.getTypeParser();
+		return new PathBuilder(resourceRegistry, typeParser).build(path);
 	}
 
 	protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-		String resourcePath = jsonPath.getResourcePath();
-		RegistryEntry registryEntry = resourceRegistry.getEntryByPath(resourcePath);
-		PreconditionUtil.verify(registryEntry != null, "repository not found for resourcePath=%d, that should have been catched earlier", resourcePath);
-		String elementName = jsonPath.getElementName();
-		if (elementName != null && !elementName.equals(resourcePath)) {
-			ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(elementName);
-			if (relationshipField == null) {
-				throw new ResourceFieldNotFoundException(elementName);
-			}
-			String oppositeResourceType = relationshipField.getOppositeResourceType();
+		RegistryEntry registryEntry = jsonPath.getRootEntry();
+
+		ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship() : jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
+		if (field != null) {
+			String oppositeResourceType = field.getOppositeResourceType();
 			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
 		} else {
 			return registryEntry.getResourceInformation();

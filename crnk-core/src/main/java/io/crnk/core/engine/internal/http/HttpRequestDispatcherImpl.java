@@ -106,7 +106,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 		JsonApiRequestProcessor processor = (JsonApiRequestProcessor) processors.stream()
 				.filter(it -> it instanceof JsonApiRequestProcessor).findFirst().get();
 
-		JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry()).build(path);
+		JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser()).build(path);
 
 		HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
 		QueryContext queryContext = requestContext.getQueryContext();
@@ -117,7 +117,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 
 	@Override
 	public void dispatchAction(String path, String method, Map<String, Set<String>> parameters) {
-		JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry()).build(path);
+		JsonPath jsonPath = new PathBuilder(moduleRegistry.getResourceRegistry(), moduleRegistry.getTypeParser()).build(path);
 
 		// preliminary implementation, more to come in the future
 		ActionFilterChain chain = new ActionFilterChain();

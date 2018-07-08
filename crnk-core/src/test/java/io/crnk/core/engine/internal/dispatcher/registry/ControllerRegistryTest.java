@@ -16,6 +16,7 @@ public class ControllerRegistryTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 	private ResourceRegistry resourceRegistry;
+	private PathBuilder pathBuilder;
 
 	@Before
 	public void prepare() {
@@ -23,12 +24,12 @@ public class ControllerRegistryTest {
 		container.setDefaultPackage();
 		container.boot();
 		resourceRegistry = container.getResourceRegistry();
+		pathBuilder = new PathBuilder(resourceRegistry, container.getModuleRegistry().getTypeParser());
 	}
 
 	@Test
 	public void onUnsupportedRequestRegisterShouldThrowError() {
 		// GIVEN
-		PathBuilder pathBuilder = new PathBuilder(resourceRegistry);
 		JsonPath jsonPath = pathBuilder.build("/tasks/");
 		String requestType = "PATCH";
 		ControllerRegistry sut = new ControllerRegistry(null);

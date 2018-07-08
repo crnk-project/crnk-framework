@@ -8,12 +8,9 @@ import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
@@ -71,17 +68,15 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	@Override
 	public final Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
 											  RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourcePath = jsonPath.getResourcePath();
-		PathIds strResourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
+		RelationshipsPath relationshipsPath = (RelationshipsPath) jsonPath;
+		RegistryEntry registryEntry = relationshipsPath.getRootEntry();
 		logger.debug("using registry entry {}", registryEntry);
 
-		assertRequestDocument(requestBody, HttpMethod.POST, resourcePath);
+		String resourceType = registryEntry.getResourceInformation().getResourceType();
+		assertRequestDocument(requestBody, HttpMethod.POST, resourceType);
 
-		Serializable resourceId = getResourceId(strResourceIds, registryEntry);
-		ResourceField relationshipField = registryEntry.getResourceInformation().findRelationshipFieldByName(jsonPath
-				.getElementName());
-		verifyFieldNotNull(relationshipField, jsonPath.getElementName());
+		Serializable resourceId = jsonPath.getId();
+		ResourceField relationshipField = relationshipsPath.getRelationship();
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
@@ -95,7 +90,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 					relationshipRepositoryForClass);
 		} else {
 			if (requestBody.isMultiple()) {
-				throw new RequestBodyException(HttpMethod.POST, resourcePath, "Multiple data in body");
+				throw new RequestBodyException(HttpMethod.POST, resourceType, "Multiple data in body");
 			}
 			ResourceIdentifier dataBody = (ResourceIdentifier) requestBody.getData().get();
 			result = processToOneRelationship(resource, targetInformation, relationshipField, dataBody, queryAdapter,
@@ -103,16 +98,5 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 		}
 
 		return result.map(it -> new Response(new Document(), HttpStatus.NO_CONTENT_204));
-	}
-
-
-	private Serializable getResourceId(PathIds resourceIds, RegistryEntry registryEntry) {
-		String resourceId = resourceIds.getIds().get(0);
-		@SuppressWarnings("unchecked") Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry
-				.getResourceInformation()
-				.getIdField()
-				.getType();
-		TypeParser typeParser = context.getTypeParser();
-		return typeParser.parse(resourceId, idClass);
 	}
 }

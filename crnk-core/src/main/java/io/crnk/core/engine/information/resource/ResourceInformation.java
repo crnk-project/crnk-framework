@@ -1,5 +1,26 @@
 package io.crnk.core.engine.information.resource;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import io.crnk.core.engine.document.Document;
+import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.parser.StringMapper;
+import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
+import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
+import io.crnk.core.exception.ResourceDuplicateIdException;
+import io.crnk.core.exception.ResourceException;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiResource;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,29 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.document.Resource;
-import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.parser.StringMapper;
-import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
-import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
-import io.crnk.core.exception.ResourceDuplicateIdException;
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.resource.annotations.JsonApiResource;
-
 /**
  * Holds information about the type of the resource.
  */
 public class ResourceInformation {
 
 	private final Class<?> resourceClass;
+
+	private ResourceField nestedField;
 
 	/**
 	 * Found field of the id. Each resource has to contain a field marked by
@@ -148,6 +154,27 @@ public class ResourceInformation {
 		}
 
 		initAny();
+
+		if (idField != null) {
+			BeanInformation beanInformation = BeanInformation.get(idField.getType());
+
+			BeanAttributeInformation parentAttribute = null;
+			for (String attributeName : beanInformation.getAttributeNames()) {
+				BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
+				if (attribute.getAnnotation(JsonApiRelationId.class) != null) {
+					PreconditionUtil.verify(parentAttribute == null, "nested identifiers can only have a single @JsonApiRelationId annotated field, got multiple for %s", beanInformation.getImplementationClass());
+					parentAttribute = attribute;
+				}
+			}
+			if (parentAttribute != null) {
+				PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"), "nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s", parentAttribute.getName());
+				String relationshipName = parentAttribute.getName().substring(parentAttribute.getName().length() - 2);
+
+				nestedField = findRelationshipFieldByName(relationshipName);
+				PreconditionUtil.verify(nestedField != null, "naming of relationship to parent and relationship identifier within resource identifier must match, not found for %s", parentAttribute.getName());
+				PreconditionUtil.verify(nestedField.getOppositeName() != null, "relationship of a nested resource pointing to its parent must have @JsonApiRelation.opposite field defined, not found for %s", parentAttribute.getName());
+			}
+		}
 	}
 
 	@Deprecated
@@ -444,5 +471,13 @@ public class ResourceInformation {
 
 	public Class<? extends PagingSpec> getPagingSpecType() {
 		return pagingSpecType;
+	}
+
+	public boolean isNested() {
+		return nestedField != null;
+	}
+
+	public ResourceField getNestedField() {
+		return nestedField;
 	}
 }

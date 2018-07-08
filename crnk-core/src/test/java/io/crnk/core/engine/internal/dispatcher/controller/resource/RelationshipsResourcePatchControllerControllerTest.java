@@ -70,7 +70,7 @@ public class RelationshipsResourcePatchControllerControllerTest extends BaseCont
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks");
+		JsonPath jsonPath = pathBuilder.build("tasks");
 		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
