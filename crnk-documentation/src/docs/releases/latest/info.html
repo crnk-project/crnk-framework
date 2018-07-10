@@ -37,3 +37,19 @@ remote repositories on the local endpoint while making them available internally
 
 There is a default implementation for a in-memory resource repository that is backed by a ConcurrentHashMap. It can be useful to get started quickly,
 use for mocking and work with small data sets.
+
+
+<h4>Spring Boot Auto Configuration for Tomcat 8.5+</h4>
+
+There is a bit of a controversy about which characters to encode or not encode in URLs based on
+RFC 7230 and RFC 3986. JSON API is affected in that regard due to the use of [ and ].
+Browser vendors have yet to endorse those RFCs. But unfortunately, Tomcat already started
+to enforce the RFCs from their side. As such it is useful to
+relax the [ and ] characters to simplify development with JSON API, like entering
+URLs manually in the browser. For this purpose `relaxedPathChars` can be set to `[]`, for more information
+see <a href="https://stackoverflow.com/questions/41053653/tomcat-8-is-not-able-to-handle-get-request-with-in-query-parameters">
+	https://stackoverflow.com/questions/41053653/tomcat-8-is-not-able-to-handle-get-request-with-in-query-parameters
+</a>
+
+The Spring Boot auto configuration already does this out-of-the-box with this release.
+

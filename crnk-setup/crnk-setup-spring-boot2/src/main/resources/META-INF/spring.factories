@@ -2,6 +2,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   io.crnk.spring.setup.boot.home.CrnkHomeAutoConfiguration,\
   io.crnk.spring.setup.boot.core.CrnkCoreAutoConfiguration,\
+  io.crnk.spring.setup.boot.core.CrnkTomcatAutoConfiguration,\
   io.crnk.spring.setup.boot.jpa.CrnkJpaAutoConfiguration,\
   io.crnk.spring.setup.boot.meta.CrnkMetaAutoConfiguration,\
   io.crnk.spring.setup.boot.operations.CrnkOperationsAutoConfiguration,\

@@ -9,13 +9,13 @@ dependencies {
 	compile project(':crnk-setup:crnk-setup-spring-boot2')
 	compile project(':crnk-home')
 
-	compile 'org.springframework.boot:spring-boot-starter-web:2.0.1.RELEASE'
+	compile 'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'
 
 	testCompile project(':crnk-client')
 	testCompile 'com.squareup.okhttp3:okhttp:3.4.1'
 	testCompile 'com.jayway.restassured:rest-assured:2.9.0'
 	testCompile 'com.jayway.restassured:json-schema-validator:2.9.0'
-	testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.1.RELEASE'
+	testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.3.RELEASE'
 	testCompile 'commons-io:commons-io:1.3.2'
 
 }

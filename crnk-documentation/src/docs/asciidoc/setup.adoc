@@ -348,6 +348,25 @@ include::../../../../crnk-setup/crnk-setup-vertx/src/test/java/io/crnk/setup/ver
 of Crnk. The example makes use of it to register two modules. `CrnkVertxHandler.process` is the main method
 that allows to process `HttpServerRequest` objects of Vert.x.
 
+anchor:tomcatSetup[]
+
+## Tomcat Setup
+
+There is a bit of a controversy about which characters to encode or not encode in URLs based on
+RFC 7230 and RFC 3986. JSON API is affected in that regard due to the use of [ and ].
+Browser vendors have yet to endorse those RFCs. But unfortunately, Tomcat already started
+to enforce the RFCs from their side. As such it is useful to
+relax the [ and ] characters to simplify development with JSON API, like entering
+URLs manually in the browser. For this purpose `relaxedPathChars` can be set to `[]`, for more information
+see:
+
+https://stackoverflow.com/questions/41053653/tomcat-8-is-not-able-to-handle-get-request-with-in-query-parameters
+
+The Spring Boot auto configuration already does this out-of-the-box.
+
+IMPORTANT: There is no weakened security out of this as long as parameters are not used
+  in some obscure fashion.
+
 
 ## Discovery with CDI
 
