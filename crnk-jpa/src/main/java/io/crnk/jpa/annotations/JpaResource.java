@@ -26,4 +26,9 @@ public @interface JpaResource {
 	 * Defines the type of the resource.
 	 */
 	String type();
+
+	/**
+	 * Defines resource path for JPA entity.
+	 */
+	String resourcePath() default "";
 }

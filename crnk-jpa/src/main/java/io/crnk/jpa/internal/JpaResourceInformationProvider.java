@@ -1,13 +1,5 @@
 package io.crnk.jpa.internal;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -24,9 +16,7 @@ import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.utils.Supplier;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
@@ -38,6 +28,14 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
+
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -76,8 +74,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			}
-			else {
+			} else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -86,7 +83,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 		String resourcePath = getResourcePath(resourceClass);
@@ -130,6 +127,12 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	@Override
 	public String getResourcePath(Class<?> entityClass) {
+		JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
+		if (annotation != null) {
+			String path = annotation.resourcePath();
+			return "".equals(path) ? null : path;
+		}
+
 		return null;
 	}
 
@@ -204,8 +207,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			}
-			else {
+			} else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

@@ -1,12 +1,5 @@
 package io.crnk.jpa.information;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -14,12 +7,12 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
-import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
 import io.crnk.jpa.model.AnnotationTestEntity;
+import io.crnk.jpa.model.JpaResourcePathTestEntity;
 import io.crnk.jpa.model.JpaTransientTestEntity;
 import io.crnk.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.jpa.model.ManyToManyTestEntity;
@@ -38,18 +31,23 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 public class JpaResourceInformationProviderTest {
 
 	private JpaResourceInformationProvider builder;
-
-	private MetaLookup lookup;
 
 	private JpaMetaProvider jpaMetaProvider;
 
 	@Before
 	public void setup() {
-		jpaMetaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
-		lookup = new MetaLookup();
+		jpaMetaProvider = new JpaMetaProvider(Collections.emptySet());
+		MetaLookup lookup = new MetaLookup();
 		lookup.addProvider(jpaMetaProvider);
 		builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
 		builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()),
@@ -57,7 +55,7 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void test() throws SecurityException, IllegalArgumentException {
 
 		ResourceInformation info = builder.build(TestEntity.class);
 		ResourceField idField = info.getIdField();
@@ -68,7 +66,7 @@ public class JpaResourceInformationProviderTest {
 		assertEquals(Long.class, idField.getGenericType());
 
 		List<ResourceField> attrFields = new ArrayList<>(info.getAttributeFields());
-		Collections.sort(attrFields, ResourceFieldComparator.INSTANCE);
+		attrFields.sort(ResourceFieldComparator.INSTANCE);
 		assertEquals(5, attrFields.size());
 		ResourceField embField = attrFields.get(1);
 		assertEquals(TestEntity.ATTR_embValue, embField.getJsonName());
@@ -80,8 +78,8 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertTrue(embField.getAccess().isSortable());
 		Assert.assertTrue(embField.getAccess().isFilterable());
 
-		ArrayList<ResourceField> relFields = new ArrayList<ResourceField>(info.getRelationshipFields());
-		Collections.sort(relFields, ResourceFieldComparator.INSTANCE);
+		ArrayList<ResourceField> relFields = new ArrayList<>(info.getRelationshipFields());
+		relFields.sort(ResourceFieldComparator.INSTANCE);
 		assertEquals(4, relFields.size());
 		boolean found = false;
 		for (ResourceField relField : relFields) {
@@ -163,7 +161,6 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertEquals(SerializeType.LAZY, field.getSerializeType());
 	}
 
-
 	@Test
 	public void testManyToManyRelation() {
 		ResourceInformation info = builder.build(ManyToManyTestEntity.class);
@@ -194,7 +191,6 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertNull(field.getOppositeName());
 	}
 
-
 	@Test
 	public void testOneToManyRelation() {
 		ResourceInformation info = builder.build(TestEntity.class);
@@ -206,8 +202,7 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testAttributeAnnotations()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testAttributeAnnotations() throws SecurityException, IllegalArgumentException {
 		ResourceInformation info = builder.build(AnnotationTestEntity.class);
 
 		ResourceField lobField = info.findAttributeFieldByName("lobValue");
@@ -241,8 +236,14 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testReadOnlyField()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testJpaResourceAnnotationPath() {
+		ResourceInformation info = builder.build(JpaResourcePathTestEntity.class);
+		Assert.assertEquals("jpaResourceTestEntity", info.getResourceType());
+		Assert.assertEquals("jpa-resource-test-entity", info.getResourcePath());
+	}
+
+	@Test
+	public void testReadOnlyField() throws SecurityException, IllegalArgumentException {
 		ResourceInformation info = builder.build(AnnotationTestEntity.class);
 
 		ResourceField field = info.findAttributeFieldByName("readOnlyValue");
@@ -258,8 +259,7 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
-	public void testMappedSuperclass()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void testMappedSuperclass() throws SecurityException, IllegalArgumentException {
 		ResourceInformation info = builder.build(AnnotationMappedSuperclassEntity.class);
 
 		Assert.assertNull(info.getResourceType());
@@ -287,5 +287,4 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertTrue(meta.getAttribute("lobValue").isLob());
 		Assert.assertFalse(meta.getAttribute("fieldAnnotatedValue").isLob());
 	}
-
 }
