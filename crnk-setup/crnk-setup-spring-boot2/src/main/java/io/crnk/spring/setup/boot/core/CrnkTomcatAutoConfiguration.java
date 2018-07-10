@@ -1,8 +1,11 @@
 package io.crnk.spring.setup.boot.core;
 
+import io.crnk.core.engine.internal.utils.PropertyUtils;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.web.embedded.tomcat.ConfigurableTomcatWebServerFactory;
 import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
@@ -17,8 +20,12 @@ import org.springframework.core.Ordered;
  * Relaxes tomcat connector for [ and ] till browser vendor properly implement spec (if they ever do so).
  */
 @Configuration
-@ConditionalOnClass(Connector.class)
+@ConditionalOnClass({ Connector.class, AbstractHttp11Protocol.class })
 public class CrnkTomcatAutoConfiguration {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkTomcatAutoConfiguration.class);
+
+	private static final String PROPERTY_NAME = "relaxedQueryChars";
 
 	@Bean
 	public CrnkWebServerFactoryCustomizer tomcatCustomizer() {
@@ -32,12 +39,17 @@ public class CrnkTomcatAutoConfiguration {
 			ProtocolHandler protocolHandler = connector.getProtocolHandler();
 			if (protocolHandler instanceof AbstractHttp11Protocol) {
 				AbstractHttp11Protocol protocol11 = (AbstractHttp11Protocol) protocolHandler;
-				String relaxedQueryChars = protocol11.getRelaxedQueryChars();
-				if (relaxedQueryChars == null) {
-					relaxedQueryChars = "";
+				try {
+					String relaxedQueryChars = (String) PropertyUtils.getProperty(protocol11, PROPERTY_NAME);
+					if (relaxedQueryChars == null) {
+						relaxedQueryChars = "";
+					}
+					relaxedQueryChars += "[]";
+					PropertyUtils.setProperty(protocol11, PROPERTY_NAME, relaxedQueryChars);
 				}
-				relaxedQueryChars += "[]";
-				protocol11.setRelaxedQueryChars(relaxedQueryChars);
+				catch (Exception e) {
+					LOGGER.debug("failed to set relaxed query charts, Tomcat might be outdated");
+				}
 			}
 		}
 	}
