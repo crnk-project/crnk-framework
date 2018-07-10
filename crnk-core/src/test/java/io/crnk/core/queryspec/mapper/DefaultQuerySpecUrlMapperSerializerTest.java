@@ -30,12 +30,16 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 
 	private ResourceRegistry resourceRegistry;
 
+	private DefaultQuerySpecUrlMapper urlMapper;
+
 	@Before
 	public void setup() {
 		CoreTestContainer container = new CoreTestContainer();
 		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
 		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
 		container.boot();
+
+		urlMapper = (DefaultQuerySpecUrlMapper) container.getBoot().getUrlMapper();
 
 		resourceRegistry = container.getResourceRegistry();
 		urlBuilder = new JsonApiUrlBuilder(container.getModuleRegistry(), container.getQueryContext());
@@ -159,6 +163,24 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
+	public void testFilterWithCommaSeparation() {
+		Assert.assertTrue(urlMapper.getAllowCommaSeparatedValue());
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.LIKE, Arrays.asList("john", "jane")));
+		check("http://127.0.0.1/tasks?filter[tasks][name][LIKE]=jane%2Cjohn", null, querySpec);
+	}
+
+	@Test
+	public void testFilterWithoutCommaSeparation() {
+		urlMapper.setAllowCommaSeparatedValue(false);
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("john", "jane")));
+		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=john&filter[tasks][name][EQ]=jane", null, querySpec);
+	}
+
+	@Test
 	public void testFilterByPath() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("project", "name"), FilterOperator.EQ, "value"));
@@ -170,19 +192,6 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, null));
 		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=null", null, querySpec);
-	}
-
-	@Test
-	public void testFilterByMany() {
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("value1", "value2")));
-
-		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
-		String actualUrl = urlBuilder.buildUrl(entry.getResourceInformation(), null, querySpec);
-		String expectedUrl0 = "http://127.0.0.1/tasks?filter[tasks][name][EQ]=value2&filter[tasks][name][EQ]=value1";
-		String expectedUrl1 = "http://127.0.0.1/tasks?filter[tasks][name][EQ]=value1&filter[tasks][name][EQ]=value2";
-
-		Assert.assertTrue(expectedUrl0.equals(actualUrl) || expectedUrl1.equals(actualUrl));
 	}
 
 	@Test

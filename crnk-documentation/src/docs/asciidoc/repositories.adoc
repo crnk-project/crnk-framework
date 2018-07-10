@@ -107,7 +107,8 @@ http://127.0.0.1:8080/api/tasks?sort=-id,name
 http://127.0.0.1:8080/api/tasks?sort=id&page[offset]=0&page[limit]=2
 http://127.0.0.1:8080/api/tasks?filter[name]=Do things
 http://127.0.0.1:8080/api/tasks?filter[name][EQ]=Do things
-http://127.0.0.1:8080/api/tasks?filter[name][LIKE]=Do
+http://127.0.0.1:8080/api/tasks?filter[name][LIKE]=Do%
+http://127.0.0.1:8080/api/tasks?filter[name][EQ]=SomeTask,OtherTask
 http://127.0.0.1:8080/api/tasks?fields=name
 http://127.0.0.1:8080/api/projects
 http://127.0.0.1:8080/api/tasks?include=project
@@ -121,6 +122,7 @@ You may notice that:
 - related `project` gets automatically resolved from `projectId`. No relationship repository is implemented here
   due to the use of `@JsonApiRelationId` (see below).
 - the response gets automatically truncated with the `fields` parameter, ideally suited for bandwidth sensitive applications.
+- multiple values can be separated by comma, typically repositories will then use an `OR` and accept and resource matching any of the values.
 
 This is one small example that *shows the power of native resource-oriented REST libraries*. Implementing a similar API with more
 classical REST libraries can be a substantial amount of work.

@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.mapper;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -33,12 +39,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -332,6 +332,35 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
 		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
 		Assert.assertEquals( new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.name][EQ]"));
+	}
+
+	@Test
+	public void testFilterWithCommaSeparation() {
+		Assert.assertTrue(urlMapper.getAllowCommaSeparatedValue());
+		HashSet<String> values = new HashSet<>();
+		values.add("john");
+		values.add("jane");
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
+		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, values));
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[name]", "john,jane");
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+		Assert.assertEquals(expectedSpec.getFilters(), actualSpec.getFilters());
+	}
+
+	@Test
+	public void testFilterWithoutCommaSeparation() {
+		urlMapper.setAllowCommaSeparatedValue(false);
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
+		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "john,jane"));
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[name]", "john,jane");
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+		Assert.assertEquals(expectedSpec.getFilters(), actualSpec.getFilters());
 	}
 
 	@Test
@@ -651,7 +680,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		urlMapper.deserialize(taskInformation, params);
 	}
 
-	protected void add(Map<String, Set<String>> params, String key, String value) {
+	protected void add(Map<String, Set<String>> params, String key, String... value) {
 		params.put(key, new HashSet<>(Arrays.asList(value)));
 	}
 }

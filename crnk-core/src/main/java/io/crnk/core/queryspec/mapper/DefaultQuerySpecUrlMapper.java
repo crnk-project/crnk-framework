@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -55,6 +56,8 @@ public class DefaultQuerySpecUrlMapper
 
 	protected QueryPathResolver pathResolver = new DefaultQueryPathResolver();
 
+	private boolean allowCommaSeparatedValue = true;
+
 	public DefaultQuerySpecUrlMapper() {
 		supportedOperators.add(FilterOperator.LIKE);
 		supportedOperators.add(FilterOperator.EQ);
@@ -93,6 +96,17 @@ public class DefaultQuerySpecUrlMapper
 
 	public void setAllowUnknownAttributes(boolean allowUnknownAttributes) {
 		pathResolver.setAllowUnknownAttributes(allowUnknownAttributes);
+	}
+
+	/**
+	 * @return true if filter parameters can be separated by comma, resulting in a collection of values typically filtered as OR.
+	 */
+	public boolean getAllowCommaSeparatedValue() {
+		return allowCommaSeparatedValue;
+	}
+
+	public void setAllowCommaSeparatedValue(boolean allowCommaSeparatedValue) {
+		this.allowCommaSeparatedValue = allowCommaSeparatedValue;
 	}
 
 	/**
@@ -276,7 +290,15 @@ public class DefaultQuerySpecUrlMapper
 				for (Object elem : col) {
 					values.add(serializeValue(elem));
 				}
-				map.put(key, values);
+				if (allowCommaSeparatedValue) {
+					String strValue = values.stream().sorted().collect(Collectors.joining(","));
+					HashSet singletonSet = new HashSet();
+					singletonSet.add(strValue);
+					map.put(key, singletonSet);
+				}
+				else {
+					map.put(key, values);
+				}
 			}
 			else {
 				String value = serializeValue(filterSpec.getValue());
@@ -454,12 +476,19 @@ public class DefaultQuerySpecUrlMapper
 			paramType = QueryParameterType.UNKNOWN;
 		}
 
+		if (allowCommaSeparatedValue && paramType == QueryParameterType.FILTER && values.size() == 1) {
+			String value = values.iterator().next();
+			String[] valueArray = value.split("\\,");
+			values = new HashSet<>(Arrays.asList(valueArray));
+		}
+
 		List<String> elements = parseParameterNameArguments(parameterName, typeSep);
 
 		QueryParameter param = new QueryParameter(context.getTypeParser());
 		param.setName(parameterName);
 		param.setType(paramType);
 		param.setValues(values);
+
 
 		if (paramType == QueryParameterType.FILTER && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
