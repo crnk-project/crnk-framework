@@ -211,7 +211,8 @@ Resource filtering can be achieved by providing parameters which start with `fil
 
 * `GET /tasks?filter[name]=Super task` to filter by name with the default `EQ` operator.
 * `GET /tasks?filter[name][EQ]=Super task` to filter by name with the `EQ` operator.
-* `GET /tasks?filter[name][LIKE]=Super` to filter by name with the `LIKE` operator.
+* `GET /tasks?filter[name][EQ]=SomeTask,OtherTask` to filter by multiple `OR`-ed values.
+* `GET /tasks?filter[name][LIKE]=Super%` to filter by name with the `LIKE` operator using `%` as wildcard.
 * `GET /tasks?filter[address.plz][EQ]=Super task` to filter by attribute `name` within a structured or related attributes `address`.
 * `GET /tasks?filter[address.city][EQ]=Super task` to filter by attribute `city` within a structured or related attributes `address`.
 * `GET /tasks?filter[name]=Super task&filter[dueDate][GT]=2015-10-01`
