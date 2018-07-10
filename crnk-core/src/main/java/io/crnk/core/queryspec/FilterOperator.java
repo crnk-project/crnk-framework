@@ -1,8 +1,10 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.CompareUtils;
-
+import java.lang.reflect.Type;
 import java.util.Collection;
+
+import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.queryspec.mapper.QueryParameter;
 
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
@@ -31,6 +33,11 @@ public abstract class FilterOperator {
 	public static final FilterOperator LIKE = new FilterOperator("LIKE") {
 
 		@Override
+		public Type getFilterType(QueryParameter queryParameter, Type attributeType) {
+			return String.class;
+		}
+
+		@Override
 		public boolean matches(Object value1, Object value2) {
 			if (value2 == null) {
 				return false;
@@ -47,9 +54,11 @@ public abstract class FilterOperator {
 				if (escapedCharacters.contains(Character.toString(c))) {
 					pattern.append('\\');
 					pattern.append(c);
-				} else if (c == '%') {
+				}
+				else if (c == '%') {
 					pattern.append(".*");
-				} else {
+				}
+				else {
 					pattern.append(Character.toLowerCase(c));
 				}
 			}
@@ -213,4 +222,14 @@ public abstract class FilterOperator {
 	 */
 	public abstract boolean matches(Object value1, Object value2);
 
+	/**
+	 * Typically the type of a filter parameter and the type of an attribute match. But some operators like LIKE have a type oder
+	 * than Enum (such as String for LIKE).
+	 *
+	 * @param attributeType type of the attribute to be filtered
+	 * @return type of the filter parameter.
+	 */
+	public Type getFilterType(QueryParameter queryParameter, Type attributeType) {
+		return attributeType;
+	}
 }

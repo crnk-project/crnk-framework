@@ -367,10 +367,13 @@ public class DefaultQuerySpecUrlMapper
 
 	protected void deserializeFilter(QuerySpec querySpec, QueryParameter parameter) {
 		ResourceInformation resourceInformation = parameter.getResourceInformation();
+
+		FilterOperator operator = parameter.getOperator();
+
 		QueryPathSpec resolvedPath = pathResolver
 				.resolve(resourceInformation, parameter.getAttributePath(), QueryPathResolver.NamingType.JSON,
 						parameter.getName());
-		Class attributeType = ClassUtils.getRawType(resolvedPath.getValueType());
+		Class filterType = ClassUtils.getRawType(operator.getFilterType(parameter, resolvedPath.getValueType()));
 
 		Set<Object> typedValues = new HashSet<>();
 		for (String stringValue : parameter.getValues()) {
@@ -378,9 +381,9 @@ public class DefaultQuerySpecUrlMapper
 				if (NULL_VALUE_STRING.equals(stringValue)) {
 					typedValues.add(null);
 				}
-				else if (attributeType != Object.class) {
+				else if (filterType != Object.class) {
 					TypeParser typeParser = context.getTypeParser();
-					Object value = typeParser.parse(stringValue, (Class) attributeType);
+					Object value = typeParser.parse(stringValue, filterType);
 					typedValues.add(value);
 				}
 				else {
@@ -399,7 +402,7 @@ public class DefaultQuerySpecUrlMapper
 		}
 		Object value = typedValues.size() == 1 ? typedValues.iterator().next() : typedValues;
 
-		querySpec.addFilter(new FilterSpec(resolvedPath.getAttributePath(), parameter.getOperator(), value));
+		querySpec.addFilter(new FilterSpec(resolvedPath.getAttributePath(), operator, value));
 	}
 
 

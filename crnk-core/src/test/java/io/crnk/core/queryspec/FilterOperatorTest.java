@@ -64,6 +64,20 @@ public class FilterOperatorTest {
 		Assert.assertFalse(FilterOperator.LIKE.matches("*", null));
 	}
 
+	@Test
+	public void testLikeOperatorUsesStringType() {
+		Assert.assertEquals(String.class, FilterOperator.LIKE.getFilterType(null, Integer.class));
+	}
+
+
+	@Test
+	public void testDefaultOperatorsUsesSameType() {
+		Assert.assertEquals(Integer.class, FilterOperator.EQ.getFilterType(null, Integer.class));
+		Assert.assertEquals(Integer.class, FilterOperator.GT.getFilterType(null, Integer.class));
+		Assert.assertEquals(Integer.class, FilterOperator.GE.getFilterType(null, Integer.class));
+		Assert.assertEquals(Boolean.class, FilterOperator.LT.getFilterType(null, Boolean.class));
+		Assert.assertEquals(Long.class, FilterOperator.LE.getFilterType(null, Long.class));
+	}
 
 	@Test
 	public void testEquals() {

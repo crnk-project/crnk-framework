@@ -11,6 +11,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
@@ -68,6 +69,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 	public void setup() {
 		client = new CrnkClient(getBaseUri().toString());
 		client.setPushAlways(false);
+		client.getObjectMapper().registerModule(new JavaTimeModule());
 
 		JpaModule module = JpaModule.newClientModule();
 		setupModule(module, false);
@@ -159,6 +161,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			metaConfig.addMetaProvider(jpaMetaProvider);
 			metaModule = MetaModule.createServerModule(metaConfig);
 			feature.addModule(metaModule);
+			feature.getObjectMapper().registerModule(new JavaTimeModule());
 
 			setupFeature(feature);
 

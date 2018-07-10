@@ -152,6 +152,13 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
+	public void testFilterWithLikeUsesStrings() {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("deleted"), FilterOperator.LIKE, "value"));
+		check("http://127.0.0.1/tasks?filter[tasks][deleted][LIKE]=value", null, querySpec);
+	}
+
+	@Test
 	public void testFilterByPath() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("project", "name"), FilterOperator.EQ, "value"));
