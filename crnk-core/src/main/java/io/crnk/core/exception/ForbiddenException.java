@@ -5,7 +5,7 @@ import io.crnk.core.engine.http.HttpStatus;
 
 public class ForbiddenException extends CrnkMappableException {  // NOSONAR exception hierarchy deep but ok
 
-	private static final String TITLE = "FOBIDDEN";
+	private static final String TITLE = "FORBIDDEN";
 
 	public ForbiddenException(String message) {
 		super(HttpStatus.FORBIDDEN_403, ErrorData.builder().setTitle(TITLE).setDetail(message)
