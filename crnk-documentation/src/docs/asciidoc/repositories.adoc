@@ -221,10 +221,14 @@ Resource filtering can be achieved by providing parameters which start with `fil
   See the subsequent <<inclusion>> section how to use this to perform filtering of related resources.
 
 A filter parameter is represented by a `FilterSpec`. It holds the path to the attribute,
-the operator and the filter value. Internally Crnk will map filter parameters to
-properly typed `FilterSpec.value`. The type is determined based on the type of
-the filtered attribute. The process can be customized by the `QuerySpecUrlMapper`
-and `TypeParser` implementations that are accessible from `CrnkBoot`.
+the operator and the filter value. The attribute specifies what gets filtered. The operator
+specifies how it is filtered. And the value specifies after what should be filtered.
+
+The filter value  `FilterSpec.value` is strongly typed. Typically (by default) it is assumed
+that the filter value matches the attribute type and Crnk will attempt to parse passed String-based
+filter value accordingly. There are exceptions, for example, the LIKE filter operator always requires
+the filter value to be a string to support wildcards for not just String types, but also Enums
+and other types (the underlying `FilterOperator` implementation can specify this with `getFilterType(...)`).
 
 Operators within `FilterSpec` are represented by the `FilterOperator` class.
 By default, QuerySpec uses the `EQ` operator if no operator was provided.
@@ -259,14 +263,30 @@ Crnk comes with a set of default filters:
 |greater than or equals the specified value
 |===
 
-The application is free to implements its own `FilterOperator`. Next to the name
-a `matches` method can be implemented to support in-memory filtering
-with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
-to handle the various filter operators; usually by translating them
-to datastore-native query expressions. Custom operators can be registered
-with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
-overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
-For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
+By default the filtering process is quite opinionated and should fit many typical patterns.
+But there also many possibilities to customize its behavior to the use case at hand.
+For this purpose <<CrnkBoot>> offers access to the `DefaultQuerySpecUrlMapper` with `CrnkBoot.getUrlMapper()`
+and `TypeParser` with `CrnkBoot.getModuleRegistry().getTypeParser()` (or `ModuleContext`).
+For example:
+
+- `TypeParser` allows to register and override the parsing of Strings to other classes.
+  By default it has has built-in parsers for various JRE classes, it looks on the type
+  itself for a String constructor or static `parse(String)` parse method and otherwise
+  fallbacks to Jackson. Further `StringParser` can add support for arbitrary types.
+- `DefaultQuerySpecUrlMapper.setIgnoreParseExceptions(...)` allows to ignore if parsing
+  of a filter value fails. In this case the filter value is left as String and it is
+  assumed the repository itself will take care of the parsing.
+- `CrnkBoot.setAllowUnknownAttributes` ignore unknown attributes and passes them as is to
+  the repositories to handle them. More information in the <<properties>> section.
+- The application is free to implements custom `FilterOperator`. Next to the name
+  a `matches` method can be implemented to support in-memory filtering
+  with `QuerySpec.apply`. Otherwise, it is up to the repository implementation
+  to handle the various filter operators; usually by translating them
+  to datastore-native query expressions. Custom operators can be registered
+  with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
+  overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
+  For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
+
 
 anchor:sorting[]
 
