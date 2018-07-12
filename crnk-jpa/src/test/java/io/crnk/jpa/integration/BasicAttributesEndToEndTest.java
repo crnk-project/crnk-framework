@@ -135,6 +135,32 @@ public class BasicAttributesEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
+	public void testCollectionLikeFilter() {
+		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+				client.getRepositoryForType(BasicAttributesTestEntity.class);
+
+		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
+		test1.setId(1L);
+		test1.setEnumValue(TestEnum.BAR);
+		repo.create(test1);
+
+		BasicAttributesTestEntity test2 = new BasicAttributesTestEntity();
+		test2.setId(2L);
+		test2.setEnumValue(TestEnum.FOO);
+		repo.create(test2);
+
+		BasicAttributesTestEntity test3 = new BasicAttributesTestEntity();
+		test3.setId(3L);
+		test3.setEnumValue(TestEnum.OTHER);
+		repo.create(test3);
+
+		QuerySpec querySpec = new QuerySpec(BasicAttributesTestEntity.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList(BasicAttributesTestEntity.ATTR_enumValue), FilterOperator.LIKE, Arrays.asList("F%", "B%")));
+		List<BasicAttributesTestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(2, list.size());
+	}
+
+	@Test
 	public void testFilterByOffsetDateTime() {
 		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
@@ -152,14 +178,16 @@ public class BasicAttributesEndToEndTest extends AbstractJpaJerseyTest {
 		repo.create(test2);
 
 		QuerySpec querySpec = new QuerySpec(BasicAttributesTestEntity.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList(BasicAttributesTestEntity.ATTR_offsetDateTimeValue), FilterOperator.EQ, now));
+		querySpec.addFilter(
+				new FilterSpec(Arrays.asList(BasicAttributesTestEntity.ATTR_offsetDateTimeValue), FilterOperator.EQ, now));
 		List<BasicAttributesTestEntity> list = repo.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		BasicAttributesTestEntity testEntity = list.get(0);
 		Assert.assertEquals(1L, testEntity.getId().longValue());
 
 		querySpec = new QuerySpec(BasicAttributesTestEntity.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList(BasicAttributesTestEntity.ATTR_offsetDateTimeValue), FilterOperator.GT, now));
+		querySpec.addFilter(
+				new FilterSpec(Arrays.asList(BasicAttributesTestEntity.ATTR_offsetDateTimeValue), FilterOperator.GT, now));
 		list = repo.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		testEntity = list.get(0);

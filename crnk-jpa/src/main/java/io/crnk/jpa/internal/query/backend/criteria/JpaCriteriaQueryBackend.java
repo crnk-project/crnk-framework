@@ -206,7 +206,17 @@ public class JpaCriteriaQueryBackend<T> implements JpaQueryBackend<From<?, ?>, O
 		if (operator == FilterOperator.EQ || operator == FilterOperator.NEQ) {
 			return handleEquals(expression, operator, value);
 		}
-		else if (operator == FilterOperator.LIKE) {
+
+		if (value instanceof Collection) {
+			// map collection to OR statement (expect for EQUALS where a IN is used)
+			List<Predicate> pred = new ArrayList();
+			for (Object element : (Collection) value) {
+				pred.add(handle(expression, operator, element));
+			}
+			return or(pred);
+		}
+
+		if (operator == FilterOperator.LIKE) {
 			return ilike(expression, value.toString());
 		}
 		else if (operator == FilterOperator.GT) {

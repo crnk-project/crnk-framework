@@ -129,6 +129,13 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
+	public void testLikeFilterWithCollectionFilterValue() {
+		assertEquals(2,
+				builder().addFilter(TestEntity.ATTR_stringValue, FilterOperator.LIKE, Arrays.asList("test1", "test2")).buildExecutor().getResultList()
+						.size());
+	}
+
+	@Test
 	public void testUuidLikeFilter() {
 		UUID id = UUID.fromString("805eda6f-fa43-3586-bcd3-0e22a0a8261d");
 		UuidTestEntity entity = new UuidTestEntity();
