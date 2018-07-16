@@ -147,11 +147,19 @@ public class CrnkClient {
 		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)), ClientType.SIMPLE_lINKS);
 	}
 
+	public CrnkClient(String serviceUrl, ObjectMapper objectMapper) {
+		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)), ClientType.SIMPLE_lINKS, objectMapper);
+	}
+
 	public CrnkClient(String serviceUrl, ClientType clientType) {
 		this(new ConstantServiceUrlProvider(UrlUtils.removeTrailingSlash(serviceUrl)), clientType);
 	}
 
 	public CrnkClient(ServiceUrlProvider serviceUrlProvider, ClientType clientType) {
+		this(serviceUrlProvider, clientType, createObjectMapper());
+	}
+
+	public CrnkClient(ServiceUrlProvider serviceUrlProvider, ClientType clientType, ObjectMapper objectMapper) {
 		if (ClassUtils.existsClass(REST_TEMPLATE_PROVIDER_NAME)) {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			Class providerClass = ClassUtils.loadClass(classLoader, REST_TEMPLATE_PROVIDER_NAME);
@@ -174,8 +182,7 @@ public class CrnkClient {
 		urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
 
 
-		objectMapper = new ObjectMapper();
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		this.objectMapper = objectMapper;
 
 		switch (clientType) {
 			case OBJECT_LINKS:
@@ -727,5 +734,11 @@ public class CrnkClient {
 		public boolean isInitialized(Class<?> clazz) {
 			return super.getEntry(clazz) != null;
 		}
+	}
+
+	private static ObjectMapper createObjectMapper() {
+		ObjectMapper result = new ObjectMapper();
+		result.enable(SerializationFeature.INDENT_OUTPUT);
+		return result;
 	}
 }
