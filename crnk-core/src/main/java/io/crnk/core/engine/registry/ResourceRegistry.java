@@ -58,6 +58,8 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 	 */
 	String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation);
 
+	String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id);
+
 	/**
 	 * Retrieves the url of the resource
 	 *

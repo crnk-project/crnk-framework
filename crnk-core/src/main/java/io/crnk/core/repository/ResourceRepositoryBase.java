@@ -63,7 +63,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 			PreconditionUtil.verify(!iterator.hasNext(), "expected unique result for id=%s, querySpec=%s", id, querySpec);
 			return resource;
 		} else {
-			throw new ResourceNotFoundException("resource not found");
+			throw new ResourceNotFoundException("resource not found: " + id);
 		}
 	}
 

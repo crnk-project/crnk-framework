@@ -126,9 +126,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		String baseUrl = queryContext != null ? queryContext.getBaseUrl() : getServiceUrlProvider().getUrl();
 		String url = UrlUtils.removeTrailingSlash(baseUrl);
 		String resourcePath = resourceInformation.getResourcePath();
-		if (resourceInformation.isNested()) {
-			throw new UnsupportedOperationException("method not available for nested resources since id of parent needed");
-		}
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
@@ -149,12 +146,17 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			throw new InvalidResourceException("Not registered resource found: " + resource);
 		}
 		ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return getResourceUrl(queryContext, resourceInformation, id);
+	}
 
+	@Override
+	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id) {
 		if (resourceInformation.isNested()) {
 			ResourceField parentField = resourceInformation.getParentField();
 
-			Object parentId = parentField.getIdAccessor().getValue(resource);
-			Object nestedId = resourceInformation.getNestedIdAccessor().getValue(resource);
+			Object parentId = parentField.getIdAccessor().getValue(id);
+			Object nestedId = resourceInformation.getNestedIdAccessor().getValue(id);
 			PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
 			PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
 
@@ -166,10 +168,10 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
 		}
 
-		Object id = resourceInformation.getId(resource);
-		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), id);
+		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.toIdString(id));
 
 	}
+
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, final Class<?> clazz) {

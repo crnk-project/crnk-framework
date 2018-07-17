@@ -858,5 +858,13 @@ include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/exa
 - `getMatcher` attaches the repository to the historized resources.
 - `findManyTarget` implements the lookup of history elements.
 
+anchor:JsonApiExposed[]
 
+## @JsonApiExposed
+
+A repository may be annotated with `@JsonApiExposed(false)`. In this case the repository is only available internally to other repositories, not
+externally on the JSON API endpoint. There are different use cases for this:
+
+- Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
+- <<nested_resources,nested resources>> can be made accessible only through their parent, such as `http://example.com/posts/1/comments/2` and no longer `http://example.com/comments`
 

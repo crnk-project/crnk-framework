@@ -1,4 +1,4 @@
-# spring-boot-micro-service-example
+# spring-boot-microservice-example
 
 Showcases two minimal Spring Boot micro services for projects and
 tasks that have a JSON API relationship
@@ -11,7 +11,7 @@ In order to run this example do:
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:spring-boot-micro-service-example:run
+	gradlew :crnk-examples:spring-boot-microservice-example:run
 
 ## The service will be available at
  

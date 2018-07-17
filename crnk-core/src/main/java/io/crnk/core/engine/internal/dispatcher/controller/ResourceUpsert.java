@@ -353,7 +353,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		if (relationship.getData().isPresent()) {
 			ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
 
-			ResourceField field = registryEntry.getResourceInformation()
+			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+			ResourceField field = resourceInformation
 					.findRelationshipFieldByName(relationshipName);
 
 			if (field == null) {
@@ -373,7 +374,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						.getType();
 				Serializable typedRelationshipId = parseId(relationshipId, idFieldType);
 
-				if (field.hasIdField()) {
+				if (field.hasIdField() && (!resourceInformation.isNested() || resourceInformation.getParentField() != field)) {
 					field.getIdAccessor().setValue(newResource, typedRelationshipId);
 				}
 				if (decideSetRelationObjectField(entry, typedRelationshipId, field)) {

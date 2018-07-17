@@ -93,7 +93,7 @@ public class OperationsModule implements Module {
 				String path = OperationParameterUtils.parsePath(operation.getPath());
 				JsonPath jsonPath = (new PathBuilder(resourceRegistry, moduleContext.getTypeParser())).build(path);
 
-				RegistryEntry entry = resourceRegistry.getEntryByPath(path);
+				RegistryEntry entry = jsonPath.getRootEntry();
 				String idString = entry.getResourceInformation().toIdString(jsonPath.getId());
 
 				Resource resource = new Resource();

@@ -72,3 +72,10 @@ By default Crnk uses a simplistic model for filtering where the type of a filter
 well in many occasions, but there are also some exceptions. For example, the LIKE operator is always of type String to support wildcards, whereas
 the attribute it self may not. One such example is the LIKE-filtering of Enums. For this reason a FilterOperator.getFilterType() was introduced
 to allow the FilterOperator influence the typing of filter values.
+
+
+<h4>Nested Resources</h4>
+
+Work started to bring support for nested resource having url patterns like http://example.com/posts/1/comments/2. For more information
+you can check out the <i>nested resource</i> section in the documentation. However, this feature is still considered (very) experimental
+and will be refined and more thoroughly tested in subsequent releases. Help to finish it is welcomed.

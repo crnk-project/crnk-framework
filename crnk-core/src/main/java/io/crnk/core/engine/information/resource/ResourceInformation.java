@@ -191,8 +191,12 @@ public class ResourceInformation {
 			ResourceFieldAccessor parentIdAccessor = new ResourceFieldAccessor(){
 
 				@Override
-				public Object getValue(Object resource) {
-					Object id = getIdField().getAccessor().getValue(resource);
+				public Object getValue(Object object) {
+					if(idField.getType().isInstance(object)){
+						return finalParentAttribute.getValue(object);
+					}
+
+					Object id = getIdField().getAccessor().getValue(object);
 					return finalParentAttribute.getValue(id);
 				}
 
@@ -208,8 +212,11 @@ public class ResourceInformation {
 			this.nestedIdAccessor = new ResourceFieldAccessor() {
 
 				@Override
-				public Object getValue(Object resource) {
-					Object id = getIdField().getAccessor().getValue(resource);
+				public Object getValue(Object object) {
+					if(idField.getType().isInstance(object)){
+						return finalIdAttribute.getValue(object);
+					}
+					Object id = getIdField().getAccessor().getValue(object);
 					return finalIdAttribute.getValue(id);
 				}
 
