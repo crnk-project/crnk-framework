@@ -232,9 +232,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						"%s, request type: %s",
 				dataBody.getType(),
 				resourceName);
-		Class resourceClass = registryEntry.getResourceInformation()
-				.getResourceClass();
-		return ClassUtils.newInstance(resourceClass);
+
+		ResourceInstanceBuilder<Object> instanceBuilder = registryEntry.getResourceInformation().getInstanceBuilder();
+		Object entity = instanceBuilder.buildResource(dataBody);
+		logger.debug("created instance %s", entity);
+		return entity;
 	}
 
 	protected Result<List> setRelationsAsync(Object newResource, RegistryEntry registryEntry, Resource resource, QueryAdapter

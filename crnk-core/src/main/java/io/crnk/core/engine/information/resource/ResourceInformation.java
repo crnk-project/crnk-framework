@@ -8,6 +8,8 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
+import io.crnk.core.engine.internal.information.resource.ReflectionFieldAccessor;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.StringMapper;
@@ -18,6 +20,7 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
@@ -39,7 +42,7 @@ public class ResourceInformation {
 
 	private final Class<?> resourceClass;
 
-	private ResourceField nestedField;
+	private ResourceField parentField;
 
 	/**
 	 * Found field of the id. Each resource has to contain a field marked by
@@ -119,6 +122,8 @@ public class ResourceInformation {
 		}
 	};
 
+	private ResourceFieldAccessor nestedIdAccessor;
+
 	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
 							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingSpecType);
@@ -156,24 +161,63 @@ public class ResourceInformation {
 		initAny();
 
 		if (idField != null) {
-			BeanInformation beanInformation = BeanInformation.get(idField.getType());
+			setupNesting();
+		}
+	}
 
-			BeanAttributeInformation parentAttribute = null;
-			for (String attributeName : beanInformation.getAttributeNames()) {
-				BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
-				if (attribute.getAnnotation(JsonApiRelationId.class) != null) {
-					PreconditionUtil.verify(parentAttribute == null, "nested identifiers can only have a single @JsonApiRelationId annotated field, got multiple for %s", beanInformation.getImplementationClass());
-					parentAttribute = attribute;
+	private void setupNesting() {
+		BeanAttributeInformation parentAttribute = null;
+		BeanAttributeInformation idAttribute = null;
+		BeanInformation beanInformation = BeanInformation.get(idField.getType());
+		for (String attributeName : beanInformation.getAttributeNames()) {
+			BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
+			if (attribute.getAnnotation(JsonApiRelationId.class).isPresent()) {
+				PreconditionUtil.verify(parentAttribute == null, "nested identifiers can only have a single @JsonApiRelationId annotated field, got multiple for %s", beanInformation.getImplementationClass());
+				parentAttribute = attribute;
+			} else if (attribute.getAnnotation(JsonApiId.class).isPresent()) {
+				PreconditionUtil.verify(idAttribute == null, "nested identifiers can only one attribute being annotated with @JsonApiId, got multiple for %s", beanInformation.getImplementationClass());
+				idAttribute = attribute;
+			}
+		}
+
+		if (parentAttribute != null || idAttribute != null) {
+			PreconditionUtil.verify(idAttribute != null, "nested identifiers must have attribute annotated with @JsonApiId, got none for %s", beanInformation.getImplementationClass());
+			PreconditionUtil.verify(parentAttribute != null, "nested identifiers must have attribute annotated with @JsonApiRelationId, got none for %s", beanInformation.getImplementationClass());
+			PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"), "nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s", parentAttribute.getName());
+			String relationshipName = parentAttribute.getName().substring(0, parentAttribute.getName().length() - 2);
+
+			parentField = findRelationshipFieldByName(relationshipName);
+			BeanAttributeInformation finalParentAttribute = parentAttribute;
+			ResourceFieldAccessor parentIdAccessor = new ResourceFieldAccessor(){
+
+				@Override
+				public Object getValue(Object resource) {
+					Object id = getIdField().getAccessor().getValue(resource);
+					return finalParentAttribute.getValue(id);
 				}
-			}
-			if (parentAttribute != null) {
-				PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"), "nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s", parentAttribute.getName());
-				String relationshipName = parentAttribute.getName().substring(parentAttribute.getName().length() - 2);
 
-				nestedField = findRelationshipFieldByName(relationshipName);
-				PreconditionUtil.verify(nestedField != null, "naming of relationship to parent and relationship identifier within resource identifier must match, not found for %s", parentAttribute.getName());
-				PreconditionUtil.verify(nestedField.getOppositeName() != null, "relationship of a nested resource pointing to its parent must have @JsonApiRelation.opposite field defined, not found for %s", parentAttribute.getName());
-			}
+				@Override
+				public void setValue(Object resource, Object fieldValue) {
+					throw new UnsupportedOperationException("cannot update nested ids");
+				}
+			};
+			((ResourceFieldImpl) parentField).setIdField(parentAttribute.getName(), parentAttribute.getImplementationClass(), parentIdAccessor);
+			PreconditionUtil.verify(parentField != null, "naming of relationship to parent resource and relationship identifier within resource identifier must match, not found for %s of %s", parentAttribute.getName(), resourceClass);
+			PreconditionUtil.verify(parentField.getOppositeName() != null, "relationship of a nested resource pointing to its parent must have @JsonApiRelation.opposite field defined, not found for '%s' of %s", parentAttribute.getName(), resourceClass);
+			BeanAttributeInformation finalIdAttribute = idAttribute;
+			this.nestedIdAccessor = new ResourceFieldAccessor() {
+
+				@Override
+				public Object getValue(Object resource) {
+					Object id = getIdField().getAccessor().getValue(resource);
+					return finalIdAttribute.getValue(id);
+				}
+
+				@Override
+				public void setValue(Object resource, Object fieldValue) {
+					throw new UnsupportedOperationException("cannot update nested ids");
+				}
+			};
 		}
 	}
 
@@ -473,11 +517,24 @@ public class ResourceInformation {
 		return pagingSpecType;
 	}
 
+	/**
+	 * @return true if this resource is a child of another resource. This will result in nested URLs like /api/foo/1/bar/2 for the nested bar resource.
+	 * The resource may still or may not be accessible from /api/bar/2 depending on @JsonApiExposed.
+	 */
 	public boolean isNested() {
-		return nestedField != null;
+		return parentField != null;
 	}
 
-	public ResourceField getNestedField() {
-		return nestedField;
+	/**
+	 * @return
+	 */
+	public ResourceField getParentField() {
+		PreconditionUtil.verify(parentField != null, "not a nested resource, cannot access parent field");
+		return parentField;
+	}
+
+	public ResourceFieldAccessor getNestedIdAccessor() {
+		PreconditionUtil.verify(parentField != null, "not a nested resource, cannot access nested id accessor");
+		return nestedIdAccessor;
 	}
 }

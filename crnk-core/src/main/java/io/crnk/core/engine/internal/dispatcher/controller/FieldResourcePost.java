@@ -74,6 +74,8 @@ public class FieldResourcePost extends ResourceUpsert {
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
 		Object entity = buildNewResource(relationshipRegistryEntry, resourceBody, relationshipResourceType);
+
+		setId(resourceBody, entity, relationshipResourceInformation);
 		setAttributes(resourceBody, entity, relationshipResourceInformation, queryContext);
 		setMeta(resourceBody, entity, relationshipResourceInformation);
 		setLinks(resourceBody, entity, relationshipResourceInformation);
@@ -82,11 +84,17 @@ public class FieldResourcePost extends ResourceUpsert {
 				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
-		Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(id, queryAdapter);
-		return createdDocument.zipWith(parentResource,
-				(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, parameterProvider, queryAdapter))
-				.merge(it -> it)
-				.map(this::toResponse);
+
+		if (relationshipResourceInformation.isNested()) {
+			// nested resource repositories are assumed to handle attachment to parent by themeselves
+			return createdDocument.map(this::toResponse);
+		} else {
+			Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(id, queryAdapter);
+			return createdDocument.zipWith(parentResource,
+					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, parameterProvider, queryAdapter))
+					.merge(it -> it)
+					.map(this::toResponse);
+		}
 	}
 
 

@@ -58,7 +58,7 @@ public class PathBuilder {
 
 		ResourceInformation resourceInformation = parentField.getParentResourceInformation();
 
-		BeanInformation beanInformation = BeanInformation.get(resourceInformation.getIdField().getClass());
+		BeanInformation beanInformation = BeanInformation.get(resourceInformation.getIdField().getType());
 		BeanAttributeInformation idAttr = beanInformation.getAttribute("id");
 		BeanAttributeInformation parentAttr = beanInformation.getAttribute(parentField.getIdName());
 
@@ -172,6 +172,7 @@ public class PathBuilder {
 			throw new BadRequestException("invalid url, cannot specify ID of related resource");
 		}
 		PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+		PreconditionUtil.verify(oppositeField != null, "nested resource must specify opposite on relationship from parent to child, got null for %s", field);
 
 		Serializable parentId = ids.get(0);
 		List<Serializable> nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);

@@ -91,13 +91,13 @@ public class OperationsModule implements Module {
 		for (Operation operation : operations) {
 			if (operation.getOp().equalsIgnoreCase(HttpMethod.DELETE.toString())) {
 				String path = OperationParameterUtils.parsePath(operation.getPath());
-				JsonPath jsonPath = (new PathBuilder(resourceRegistry)).build(path);
+				JsonPath jsonPath = (new PathBuilder(resourceRegistry, moduleContext.getTypeParser())).build(path);
 
 				RegistryEntry entry = resourceRegistry.getEntryByPath(path);
-				String idString = entry.getResourceInformation().toIdString(jsonPath.getIds().getIds().get(0));
+				String idString = entry.getResourceInformation().toIdString(jsonPath.getId());
 
 				Resource resource = new Resource();
-				resource.setType(jsonPath.getResourcePath());
+				resource.setType(jsonPath.getRootEntry().getResourceInformation().getResourceType());
 				resource.setId(idString);
 				operation.setValue(resource);
 			}

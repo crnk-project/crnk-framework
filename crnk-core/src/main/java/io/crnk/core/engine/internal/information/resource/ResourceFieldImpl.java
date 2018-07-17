@@ -116,7 +116,7 @@ public class ResourceFieldImpl implements ResourceField {
 	public String getOppositeResourceType() {
 		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s is not an association", underlyingName);
 		if (getElementType() != Object.class) {
-			PreconditionUtil.verify(oppositeResourceType != null,"field %s does not have an opposite resource type", underlyingName);
+			PreconditionUtil.verify(oppositeResourceType != null, "field %s does not have an opposite resource type", underlyingName);
 		}
 		return oppositeResourceType;
 	}
@@ -166,7 +166,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	@Override
 	public ResourceFieldAccessor getAccessor() {
-		PreconditionUtil.verify( accessor != null, "field %s not properly initialized", underlyingName);
+		PreconditionUtil.verify(accessor != null, "field %s not properly initialized", underlyingName);
 		return accessor;
 	}
 
@@ -193,9 +193,11 @@ public class ResourceFieldImpl implements ResourceField {
 		return idAccessor;
 	}
 
-	public void setIdAccessor(ResourceFieldAccessor idAccessor) {
+	public void setIdField(String idName, Class idType, ResourceFieldAccessor idAccessor) {
 		assertRelationship();
 		// TODO to be eliminated by a builder pattern soon
+		this.idName = idName;
+		this.idType = idType;
 		this.idAccessor = idAccessor;
 	}
 

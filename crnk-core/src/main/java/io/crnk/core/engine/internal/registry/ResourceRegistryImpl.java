@@ -115,36 +115,31 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
-	public String getResourceUrl(final Object resource) {
-		Optional<Class<?>> type = getResourceClass(resource);
-		if (type.isPresent()) {
-			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
-			return String.format("%s/%s", getResourceUrl(resourceInformation), resourceInformation.getId(resource));
-		}
-
-		throw new InvalidResourceException("Not registered resource found: " + resource);
-	}
-
 	public String getResourceUrl(final Class<?> clazz) {
 		RegistryEntry registryEntry = findEntry(clazz);
 
 		return getResourceUrl(registryEntry.getResourceInformation());
 	}
 
-	public String getResourceUrl(final Class<?> clazz, final String id) {
-		RegistryEntry registryEntry = findEntry(clazz);
-		String typeUrl = getResourceUrl(registryEntry.getResourceInformation());
-		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
-	}
-
 	@Override
 	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
-		String url = UrlUtils.removeTrailingSlash(queryContext.getBaseUrl());
+		String baseUrl = queryContext != null ? queryContext.getBaseUrl() : getServiceUrlProvider().getUrl();
+		String url = UrlUtils.removeTrailingSlash(baseUrl);
 		String resourcePath = resourceInformation.getResourcePath();
 		if (resourceInformation.isNested()) {
 			throw new UnsupportedOperationException("method not available for nested resources since id of parent needed");
 		}
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
+	}
+
+	public String getResourceUrl(final Object resource) {
+		return getResourceUrl(null, resource);
+	}
+
+	public String getResourceUrl(final Class<?> clazz, final String id) {
+		RegistryEntry registryEntry = findEntry(clazz);
+		String typeUrl = getResourceUrl(registryEntry.getResourceInformation());
+		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
 	}
 
 	@Override
@@ -155,24 +150,23 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		}
 		ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
 
-		Object id = resourceInformation.getId(resource);
-		
 		if (resourceInformation.isNested()) {
-			ResourceField nestedField = resourceInformation.getNestedField();
+			ResourceField parentField = resourceInformation.getParentField();
 
-			Object parentId = nestedField.getIdAccessor().getValue(resource);
-			Object nestedId = resourceInformation.getNestedIdAccessor().get();
-			PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + nestedField.getIdName());
+			Object parentId = parentField.getIdAccessor().getValue(resource);
+			Object nestedId = resourceInformation.getNestedIdAccessor().getValue(resource);
+			PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
 			PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
 
-			RegistryEntry parentEntry = getEntry(nestedField.getOppositeResourceType());
+			RegistryEntry parentEntry = getEntry(parentField.getOppositeResourceType());
 			ResourceInformation parentInformation = parentEntry.getResourceInformation();
-			ResourceField parentField = parentInformation.findRelationshipFieldByName(nestedField.getOppositeName());
+			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
 			String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
 
-			return parentUrl + "/" + parentField.getJsonName() + "/" + nestedId;
+			return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
 		}
 
+		Object id = resourceInformation.getId(resource);
 		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), id);
 
 	}
