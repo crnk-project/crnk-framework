@@ -96,8 +96,8 @@ public abstract class BaseControllerTest {
 		objectMapper = boot.getObjectMapper();
 		resourceRegistry = boot.getResourceRegistry();
 		moduleRegistry = boot.getModuleRegistry();
-		pathBuilder = new PathBuilder(resourceRegistry);
 		typeParser = moduleRegistry.getTypeParser();
+		pathBuilder = new PathBuilder(resourceRegistry, typeParser);
 		documentMapper = boot.getDocumentMapper();
 
 		controllerContext = new ControllerContext(moduleRegistry, () -> documentMapper);

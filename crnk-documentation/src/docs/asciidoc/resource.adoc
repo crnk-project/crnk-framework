@@ -382,3 +382,41 @@ Crnk comes with (partial) support for Jackson annotations. Currently supported a
 |===
 
 Support for more annotations will be added in the future. PRs welcomed.
+
+
+anchor:nested_resources[]
+
+## Nested Resources
+
+WARNING: This feature is experimental and will be refined in subsequent releases.
+
+A resource may be nested and belong to a parent resource. In this case the nested resource is access through its parent resource.
+An URL then looks like:
+
+`http://example.com/posts/1/comments/2`
+
+For a resource to become nested, it must make use of a structure identifier:
+
+[source]
+.NestedId.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/NestedId.java[]
+----
+
+The id is setup of two parts:
+
+- the local identifier of the child resource, annotated with `@JsonApiId`. It must be unique among all nested resources having the same parent.
+- the identifier of the parent resource, annotated with a `@JsonApiRelationId`. The nested resource must have matching relationship field (in this case `parent`)`.
+
+`NestedId` further implements `parse`, `toString`, `hashCode` and `equals` to deal with String serialization and equality.
+
+For an example have a look at `NestedRepositoryClientTest` and its parent class. Depending on the use of <<JsonApiExposed>> it
+is or is not be possible to also directly access `http://example.com/comments` without going
+through the parents.
+
+Current Limitations:
+
+- Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
+- When creating new resources with CrnkClient, the nested identifier must be setup in order to let CrnkClient access the parentId.
+- Being experimental.
+

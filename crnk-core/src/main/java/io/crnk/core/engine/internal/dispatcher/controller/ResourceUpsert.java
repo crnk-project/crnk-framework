@@ -54,7 +54,7 @@ import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
 	protected Resource getRequestBody(Document requestDocument, JsonPath path, HttpMethod method) {
-		String resourceType = path.getResourcePath();
+		String resourceType = path.getRootEntry().getResourceInformation().getResourcePath();
 
 		assertRequestDocument(requestDocument, method, resourceType);
 
@@ -71,11 +71,6 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 			throw new RepositoryNotFoundException(resourceBody.getType());
 		}
 		return resourceBody;
-	}
-
-	protected RegistryEntry getRegistryEntry(JsonPath jsonPath) {
-		String resourcePath = jsonPath.getResourcePath();
-		return getRegistryEntryByPath(resourcePath);
 	}
 
 	protected Object newEntity(ResourceInformation resourceInformation, Resource dataBody) {
@@ -237,9 +232,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						"%s, request type: %s",
 				dataBody.getType(),
 				resourceName);
-		Class resourceClass = registryEntry.getResourceInformation()
-				.getResourceClass();
-		return ClassUtils.newInstance(resourceClass);
+
+		ResourceInstanceBuilder<Object> instanceBuilder = registryEntry.getResourceInformation().getInstanceBuilder();
+		Object entity = instanceBuilder.buildResource(dataBody);
+		logger.debug("created instance %s", entity);
+		return entity;
 	}
 
 	protected Result<List> setRelationsAsync(Object newResource, RegistryEntry registryEntry, Resource resource, QueryAdapter
@@ -356,7 +353,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 		if (relationship.getData().isPresent()) {
 			ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
 
-			ResourceField field = registryEntry.getResourceInformation()
+			ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+			ResourceField field = resourceInformation
 					.findRelationshipFieldByName(relationshipName);
 
 			if (field == null) {
@@ -376,7 +374,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						.getType();
 				Serializable typedRelationshipId = parseId(relationshipId, idFieldType);
 
-				if (field.hasIdField()) {
+				if (field.hasIdField() && (!resourceInformation.isNested() || resourceInformation.getParentField() != field)) {
 					field.getIdAccessor().setValue(newResource, typedRelationshipId);
 				}
 				if (decideSetRelationObjectField(entry, typedRelationshipId, field)) {

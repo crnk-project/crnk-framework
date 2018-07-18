@@ -56,7 +56,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 	@Test
 	public void onFieldRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks/1/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/project");
 		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 
@@ -70,7 +70,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks");
+		JsonPath jsonPath = pathBuilder.build("tasks");
 		RelationshipsResourceGetController sut = new RelationshipsResourceGetController();
 		sut.init(controllerContext);
 

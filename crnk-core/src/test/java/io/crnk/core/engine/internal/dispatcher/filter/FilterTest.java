@@ -87,7 +87,7 @@ public class FilterTest {
 		verify(filter, times(1)).filter(any(DocumentFilterContext.class), any(DocumentFilterChain.class));
 
 		DocumentFilterContext value = captor.getValue();
-		Assert.assertEquals("tasks", value.getJsonPath().getElementName());
+		Assert.assertEquals("tasks", value.getJsonPath().getRootEntry().getResourceInformation().getResourceType());
 		Assert.assertEquals(parameterProvider, value.getParameterProvider());
 		Assert.assertEquals(requestBody, value.getRequestBody());
 		Assert.assertEquals("GET", value.getMethod());

@@ -107,7 +107,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 			}
 
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
-			JsonPath jsonPath = new PathBuilder(resourceRegistry).build(path);
+			JsonPath jsonPath = new PathBuilder(resourceRegistry, moduleContext.getTypeParser()).build(path);
 
 			// check no repository with that path
 			if (jsonPath == null) {

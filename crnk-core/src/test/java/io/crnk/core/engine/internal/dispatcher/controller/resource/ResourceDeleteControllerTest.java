@@ -30,7 +30,7 @@ public class ResourceDeleteControllerTest extends BaseControllerTest {
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks/1/relationships/project");
+		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
 		ResourceDeleteController sut = new ResourceDeleteController();
 		sut.init(controllerContext);
 

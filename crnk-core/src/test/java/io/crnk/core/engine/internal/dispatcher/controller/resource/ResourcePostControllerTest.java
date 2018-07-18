@@ -112,36 +112,6 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.handle(projectPath, emptyTaskQuery, null, newProjectBody);
 	}
 
-	@Test
-	public void onNonExistentResourceShouldThrowException() throws Exception {
-		// GIVEN
-		Document newProjectBody = new Document();
-		Resource data = createProject();
-		data.setType("fridges");
-		newProjectBody.setData(Nullable.of((Object) data));
-
-		ResourcePostController sut = new ResourcePostController();
-		sut.init(controllerContext);
-
-		// THEN
-		expectedException.expect(RepositoryNotFoundException.class);
-
-		// WHEN
-		sut.handle(new ResourcePath("fridges"), emptyTaskQuery, null, newProjectBody);
-	}
-
-	@Test
-	public void onUnknownResourceTypeShouldThrowException() throws Exception {
-		// GIVEN
-		ResourcePostController sut = new ResourcePostController();
-		sut.init(controllerContext);
-
-		// THEN
-		expectedException.expect(RepositoryNotFoundException.class);
-
-		// WHEN
-		sut.handle(new ResourcePath("fridges"), emptyTaskQuery, null, null);
-	}
 
 	@Test
 	public void onNoBodyResourceShouldThrowException() throws Exception {
@@ -153,7 +123,8 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		expectedException.expect(RequestBodyNotFoundException.class);
 
 		// WHEN
-		sut.handle(new ResourcePath("tasks"), emptyTaskQuery, null, null);
+		JsonPath path = pathBuilder.build("tasks");
+		sut.handle(path, emptyTaskQuery, null, null);
 	}
 
 	@Test

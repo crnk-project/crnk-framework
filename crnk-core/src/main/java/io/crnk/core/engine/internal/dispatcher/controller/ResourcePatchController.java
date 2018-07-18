@@ -44,18 +44,16 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		RegistryEntry endpointRegistryEntry = getRegistryEntry(jsonPath);
+		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		final Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
 		RegistryEntry registryEntry = context.getResourceRegistry().getEntry(requestResource.getType());
 		logger.debug("using registry entry {}", registryEntry);
 
-		String idString = jsonPath.getIds().getIds().get(0);
+		Serializable resourceId = jsonPath.getId();
 
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-		Serializable resourceId = resourceInformation.parseIdString(idString);
-
 		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
 		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
 		DocumentMapper documentMapper = context.getDocumentMapper();
@@ -86,7 +84,7 @@ public class ResourcePatchController extends ResourceUpsert {
 	}
 
 	private Result<Document> applyChanges(RegistryEntry registryEntry, Object entity, Resource requestResource,
-			QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+										  QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 
@@ -95,8 +93,7 @@ public class ResourcePatchController extends ResourceUpsert {
 		if (resourceInformation.getResourceClass() == Resource.class) {
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 			updatedResource = resourceRepository.update(requestResource, queryAdapter);
-		}
-		else {
+		} else {
 			QueryContext queryContext = queryAdapter.getQueryContext();
 			setAttributes(requestResource, entity, resourceInformation, queryContext);
 			setMeta(requestResource, entity, resourceInformation);

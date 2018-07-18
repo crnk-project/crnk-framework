@@ -67,7 +67,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	@Test
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks");
+		JsonPath jsonPath = pathBuilder.build("tasks");
 		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
 
@@ -89,19 +89,6 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 
 		sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
 	}
-
-	@Test(expected = ResourceFieldNotFoundException.class)
-	public void onInvalidRelationshipThrowException() throws Exception {
-		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/doesNotExist");
-		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
-		sut.init(controllerContext);
-
-		// do not sent along a body
-		Document newTaskToProjectBody = null;
-
-		sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
-	}
-
 
 	@Test
 	public void onExistingResourcesShouldAddToOneRelationship() throws Exception {

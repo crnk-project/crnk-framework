@@ -79,15 +79,6 @@ public abstract class BaseController implements Controller {
 		return registryEntry;
 	}
 
-	protected RegistryEntry getRegistryEntryByPath(String resourcePath) {
-		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		RegistryEntry registryEntry = resourceRegistry.getEntryByPath(resourcePath);
-		if (registryEntry == null) {
-			throw new RepositoryNotFoundException(resourcePath);
-		}
-		return registryEntry;
-	}
-
 	protected void validateCreatedResponse(ResourceInformation resourceInformation, JsonApiResponse response) {
 		Object entity = response.getEntity();
 		logger.debug("posted resource {}", entity);

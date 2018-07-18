@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.Serializable;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -13,10 +11,11 @@ import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
-import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
+
+import java.io.Serializable;
 
 public class CollectionGetController extends ResourceIncludeField {
 
@@ -33,26 +32,18 @@ public class CollectionGetController extends ResourceIncludeField {
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
 			parameterProvider, Document requestBody) {
-		String resourcePath = jsonPath.getElementName();
-		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
-		logger.debug("using registry entry {}", registryEntry);
-		if (registryEntry == null) {
-			throw new ResourceNotFoundException(resourcePath);
-		}
+		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
 		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
 		Result<JsonApiResponse> response;
-		if (jsonPath.getIds() == null || jsonPath.getIds().getIds().isEmpty()) {
+		if (jsonPath.getIds() == null || jsonPath.getIds().isEmpty()) {
 			logger.debug("finding {}", queryAdapter);
 			response = resourceRepository.findAll(queryAdapter);
 		} else {
-			Class<? extends Serializable> idType = (Class<? extends Serializable>) registryEntry
-					.getResourceInformation().getIdField().getType();
-			Iterable<? extends Serializable> parsedIds = context.getTypeParser().parse((Iterable<String>) jsonPath.getIds().getIds(),
-					idType);
+			Iterable<? extends Serializable> parsedIds = jsonPath.getIds();
 			logger.debug("finding {} with ids {}", queryAdapter, parsedIds);
 			response = resourceRepository.findAll(parsedIds, queryAdapter);
 		}

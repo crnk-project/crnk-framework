@@ -117,9 +117,8 @@ public class DocumentMapperUtil {
 
 	public String getRelationshipLink(ResourceInformation resourceInformation, Object entity, ResourceField field,
 									  boolean related, QueryContext queryContext) {
-		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
-		String resourceId = getIdString(entity, resourceInformation);
-		return resourceUrl + "/" + resourceId + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field
+		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, entity);
+		return resourceUrl + (!related ? "/" + PathBuilder.RELATIONSHIP_MARK + "/" : "/") + field
 				.getJsonName();
 	}
 
@@ -179,8 +178,7 @@ public class DocumentMapperUtil {
 	}
 
 	public String getSelfUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object entity) {
-		String resourceUrl = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
-		return resourceUrl + "/" + getIdString(entity, resourceInformation);
+		return resourceRegistry.getResourceUrl(queryContext, entity);
 	}
 
 	public static SerializerUtil getSerializerUtil() {

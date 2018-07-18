@@ -1,6 +1,8 @@
 package io.crnk.jpa.meta.internal;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.utils.Optional;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
@@ -32,7 +34,9 @@ public class JpaMetaFilter extends MetaFilterBase {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
 			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
-			MetaType metaType = (MetaType) partition.allocateMetaElement(implementationType).get();
+			Optional<MetaElement> optMetaType = partition.allocateMetaElement(implementationType);
+			PreconditionUtil.verify(optMetaType.isPresent(), "failed to read %s, make sure it is a properly annotated with JPA annotations", implementationType);
+			MetaType metaType = (MetaType) optMetaType.get();
 			attr.setType(metaType);
 		}
 

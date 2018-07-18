@@ -4,7 +4,6 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathIds;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
@@ -37,22 +36,15 @@ public class ResourceGetController extends ResourceIncludeField {
 	 */
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
-		String resourcePath = jsonPath.getResourcePath();
-		PathIds resourceIds = jsonPath.getIds();
-		RegistryEntry registryEntry = getRegistryEntryByPath(resourcePath);
-		logger.debug("using registry entry {}", registryEntry);
+		Serializable id = jsonPath.getId();
 
-		String id = resourceIds.getIds().get(0);
-
-		@SuppressWarnings("unchecked")
-		Class<? extends Serializable> idClass = (Class<? extends Serializable>) registryEntry.getResourceInformation().getIdField().getType();
-		Serializable castedId = context.getTypeParser().parse(id, idClass);
-		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+		RegistryEntry rootEntry = jsonPath.getRootEntry();
+		ResourceRepositoryAdapter resourceRepository = rootEntry.getResourceRepository(parameterProvider);
 
 		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
-		return resourceRepository.findOne(castedId, queryAdapter)
+		return resourceRepository.findOne(id, queryAdapter)
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, docummentMapperConfig))
 				.map(this::toResponse);
 	}

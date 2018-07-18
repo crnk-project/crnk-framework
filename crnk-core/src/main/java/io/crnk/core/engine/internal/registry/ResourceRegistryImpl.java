@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.registry;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
@@ -45,7 +46,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	/**
 	 * Adds a new resource definition to a registry.
 	 *
-	 * @param resource class of a resource
+	 * @param resource      class of a resource
 	 * @param registryEntry resource information
 	 */
 	public RegistryEntry addEntry(Class<?> resource, RegistryEntry registryEntry) {
@@ -56,8 +57,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		Optional<Class<?>> resourceClazz = getResourceClass(clazz);
 		if (allowNull && !resourceClazz.isPresent()) {
 			return null;
-		}
-		else if (!resourceClazz.isPresent()) {
+		} else if (!resourceClazz.isPresent()) {
 			throw new RepositoryNotFoundException(clazz.getCanonicalName());
 		}
 		return rootPart.getEntry(resourceClazz.get());
@@ -105,24 +105,32 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
+		if (url == null) {
+			return null;
+		}
+		if (resourceInformation.isNested()) {
+			throw new UnsupportedOperationException("method not available for nested resources since id of parent needed");
+		}
 		String resourcePath = resourceInformation.getResourcePath();
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
-	}
-
-	public String getResourceUrl(final Object resource) {
-		Optional<Class<?>> type = getResourceClass(resource);
-		if (type.isPresent()) {
-			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
-			return String.format("%s/%s", getResourceUrl(resourceInformation), resourceInformation.getId(resource));
-		}
-
-		throw new InvalidResourceException("Not registered resource found: " + resource);
 	}
 
 	public String getResourceUrl(final Class<?> clazz) {
 		RegistryEntry registryEntry = findEntry(clazz);
 
 		return getResourceUrl(registryEntry.getResourceInformation());
+	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
+		String baseUrl = queryContext != null ? queryContext.getBaseUrl() : getServiceUrlProvider().getUrl();
+		String url = UrlUtils.removeTrailingSlash(baseUrl);
+		String resourcePath = resourceInformation.getResourcePath();
+		return url != null ? String.format("%s/%s", url, resourcePath) : null;
+	}
+
+	public String getResourceUrl(final Object resource) {
+		return getResourceUrl(null, resource);
 	}
 
 	public String getResourceUrl(final Class<?> clazz, final String id) {
@@ -132,35 +140,50 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
-	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
-		String url = UrlUtils.removeTrailingSlash(queryContext.getBaseUrl());
-		String resourcePath = resourceInformation.getResourcePath();
-		return url != null ? String.format("%s/%s", url, resourcePath) : null;
+	public String getResourceUrl(QueryContext queryContext, final Object resource) {
+		Optional<Class<?>> type = getResourceClass(resource);
+		if (!type.isPresent()) {
+			throw new InvalidResourceException("Not registered resource found: " + resource);
+		}
+		ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
+		Object id = resourceInformation.getId(resource);
+		return getResourceUrl(queryContext, resourceInformation, id);
 	}
 
 	@Override
-	public String getResourceUrl(QueryContext queryContext, final Object resource) {
-		Optional<Class<?>> type = getResourceClass(resource);
-		if (type.isPresent()) {
-			ResourceInformation resourceInformation = findEntry(type.get()).getResourceInformation();
-			return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.getId
-					(resource));
+	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id) {
+		if (resourceInformation.isNested()) {
+			ResourceField parentField = resourceInformation.getParentField();
+
+			Object parentId = parentField.getIdAccessor().getValue(id);
+			Object nestedId = resourceInformation.getNestedIdAccessor().getValue(id);
+			PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
+			PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
+
+			RegistryEntry parentEntry = getEntry(parentField.getOppositeResourceType());
+			ResourceInformation parentInformation = parentEntry.getResourceInformation();
+			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
+			String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
+
+			return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
 		}
 
-		throw new InvalidResourceException("Not registered resource found: " + resource);
+		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.toIdString(id));
+
 	}
+
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, final Class<?> clazz) {
 		RegistryEntry registryEntry = findEntry(clazz);
-
 		return getResourceUrl(queryContext, registryEntry.getResourceInformation());
 	}
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, final Class<?> clazz, final String id) {
 		RegistryEntry registryEntry = findEntry(clazz);
-		String typeUrl = getResourceUrl(queryContext, registryEntry.getResourceInformation());
+		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
+		String typeUrl = getResourceUrl(queryContext, resourceInformation);
 		return typeUrl != null ? String.format("%s/%s", typeUrl, id) : null;
 	}
 

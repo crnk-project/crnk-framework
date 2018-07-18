@@ -83,4 +83,5 @@ public interface ResourceField {
 	ResourceFieldAccess getAccess();
 
 	RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
+
 }

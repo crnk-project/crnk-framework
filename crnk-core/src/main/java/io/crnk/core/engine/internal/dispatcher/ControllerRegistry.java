@@ -52,7 +52,7 @@ public class ControllerRegistry {
 				return controller;
 			}
 		}
-		throw new BadRequestException(PathBuilder.build(jsonPath) + " with method " + method);
+		throw new BadRequestException(jsonPath + " with method " + method);
 	}
 
 	public List<Controller> getControllers() {

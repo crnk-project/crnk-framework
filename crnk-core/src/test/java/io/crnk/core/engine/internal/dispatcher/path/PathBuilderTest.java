@@ -1,16 +1,10 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-import java.util.Collections;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.exception.ResourceException;
-import io.crnk.core.exception.ResourceFieldNotFoundException;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.repository.InMemoryResourceRepository;
@@ -23,6 +17,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathBuilderTest {
 
@@ -41,7 +39,7 @@ public class PathBuilderTest {
 		container.addModule(notExposedModule);
 		container.boot();
 
-		pathBuilder = new PathBuilder(container.getResourceRegistry());
+		pathBuilder = new PathBuilder(container.getResourceRegistry(), container.getBoot().getModuleRegistry().getTypeParser());
 
 		RegistryEntry entry = container.getEntry(Task.class);
 		ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
@@ -93,7 +91,7 @@ public class PathBuilderTest {
 		JsonPath jsonPath = pathBuilder.build(path);
 
 		// THEN
-		assertThat(jsonPath).isEqualTo(new ResourcePath("tasks"));
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		assertThat(jsonPath.isCollection()).isTrue();
 	}
 
@@ -106,7 +104,8 @@ public class PathBuilderTest {
 		JsonPath jsonPath = pathBuilder.build(path);
 
 		// THEN
-		assertThat(jsonPath).isEqualTo(new ResourcePath("tasks", new PathIds("1")));
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		assertThat(jsonPath.getId()).isEqualTo(1L);
 		assertThat(jsonPath.isCollection()).isFalse();
 	}
 
@@ -116,12 +115,12 @@ public class PathBuilderTest {
 		String path = "/tasks/someRepositoryAction";
 
 		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+		ActionPath jsonPath = (ActionPath) pathBuilder.build(path);
 
 		// THEN
-		JsonPath expectedPath = new ActionPath("someRepositoryAction");
-		expectedPath.setParentResource(new ResourcePath("tasks"));
-		assertThat(jsonPath).isEqualTo(expectedPath);
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals("someRepositoryAction", jsonPath.getActionName());
+		Assert.assertNull(jsonPath.getIds());
 	}
 
 	@Test
@@ -130,12 +129,12 @@ public class PathBuilderTest {
 		String path = "/tasks/123/someResourceAction";
 
 		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+		ActionPath jsonPath = (ActionPath) pathBuilder.build(path);
 
 		// THEN
-		JsonPath expectedPath = new ActionPath("someResourceAction");
-		expectedPath.setParentResource(new ResourcePath("tasks", new PathIds("123")));
-		assertThat(jsonPath).isEqualTo(expectedPath);
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals("someResourceAction", jsonPath.getActionName());
+		Assert.assertEquals(123L, jsonPath.getId());
 	}
 
 
@@ -145,12 +144,12 @@ public class PathBuilderTest {
 		String path = "/tasks/1/project";
 
 		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+		FieldPath jsonPath = (FieldPath) pathBuilder.build(path);
 
 		// THEN
-		JsonPath expectedPath = new FieldPath("project");
-		expectedPath.setParentResource(new ResourcePath("tasks", new PathIds("1")));
-		assertThat(jsonPath).isEqualTo(expectedPath);
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals(1L, jsonPath.getId());
+		Assert.assertEquals("project", jsonPath.getField().getJsonName());
 	}
 
 	@Test
@@ -159,8 +158,7 @@ public class PathBuilderTest {
 		String path = "/tasks/1/project/2";
 
 		// THEN
-		expectedException.expect(ResourceException.class);
-		expectedException.expectMessage("RelationshipsPath and FieldPath cannot contain ids");
+		expectedException.expect(BadRequestException.class);
 
 		// WHEN
 		pathBuilder.build(path);
@@ -172,13 +170,12 @@ public class PathBuilderTest {
 		String path = "/tasks/1/relationships/project/";
 
 		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
+		RelationshipsPath jsonPath = (RelationshipsPath) pathBuilder.build(path);
 
 		// THEN
-		JsonPath expectedPath = new RelationshipsPath("project");
-		expectedPath.setParentResource(new ResourcePath("tasks", new PathIds("1")));
-
-		assertThat(jsonPath).isEqualTo(expectedPath);
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals(1L, jsonPath.getId());
+		Assert.assertEquals("project", jsonPath.getRelationship().getJsonName());
 	}
 
 	@Test
@@ -187,8 +184,7 @@ public class PathBuilderTest {
 		String path = "/tasks/1/relationships/name/";
 
 		// THEN
-		expectedException.expect(ResourceFieldNotFoundException.class);
-		expectedException.expectMessage("name");
+		expectedException.expect(BadRequestException.class);
 
 		// WHEN
 		pathBuilder.build(path);
@@ -200,7 +196,7 @@ public class PathBuilderTest {
 		String path = "/users/1/relationships/projects";
 
 		// THEN
-		expectedException.expect(ResourceFieldNotFoundException.class);
+		expectedException.expect(BadRequestException.class);
 		expectedException.expectMessage("projects");
 
 		// WHEN
@@ -213,7 +209,7 @@ public class PathBuilderTest {
 		String path = "/tasks/1/relationships/";
 
 		// THEN
-		expectedException.expect(ResourceFieldNotFoundException.class);
+		expectedException.expect(BadRequestException.class);
 
 		// WHEN
 		pathBuilder.build(path);
@@ -225,8 +221,7 @@ public class PathBuilderTest {
 		String path = "/tasks/1/relationships/project/1";
 
 		// THEN
-		expectedException.expect(ResourceException.class);
-		expectedException.expectMessage("RelationshipsPath and FieldPath cannot contain ids");
+		expectedException.expect(BadRequestException.class);
 
 		// WHEN
 		pathBuilder.build(path);
@@ -238,7 +233,7 @@ public class PathBuilderTest {
 		String path = "/tasks/1/nonExistingField/";
 
 		// THEN
-		expectedException.expect(ResourceFieldNotFoundException.class);
+		expectedException.expect(BadRequestException.class);
 		expectedException.expectMessage("nonExistingField");
 
 		// WHEN
@@ -266,8 +261,8 @@ public class PathBuilderTest {
 		JsonPath jsonPath = pathBuilder.build(path);
 
 		// THEN
-		Assert.assertTrue(jsonPath.isCollection());
-		Assert.assertEquals(jsonPath.getIds().getIds(), Arrays.asList("1", "2"));
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
 	}
 
 	@Test
@@ -279,74 +274,8 @@ public class PathBuilderTest {
 		JsonPath jsonPath = pathBuilder.build(path);
 
 		// THEN
-		Assert.assertTrue(jsonPath.isCollection());
-		Assert.assertEquals(jsonPath.getIds().getIds(), Arrays.asList("1", "2"));
-	}
-
-	@Test
-	public void onSimpleResourcePathShouldReturnCorrectStringPath() {
-		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks");
-
-		// WHEN
-		String result = PathBuilder.build(jsonPath);
-
-		// THEN
-		assertThat(result).isEqualTo("/tasks/");
-	}
-
-	@Test
-	public void onResourcePathWithIdsShouldReturnCorrectStringPath() {
-		// GIVEN
-		JsonPath jsonPath = new ResourcePath("tasks", new PathIds(Arrays.asList("1", "2")));
-
-		// WHEN
-		String result = PathBuilder.build(jsonPath);
-
-		// THEN
-		assertThat(result).isEqualTo("/tasks/1,2/");
-	}
-
-	@Test
-	public void onResourcePathWithIdsAndRelationshipsPathShouldReturnCorrectStringPath() {
-		// GIVEN
-		JsonPath parentJsonPath = new ResourcePath("tasks", new PathIds(Collections.singletonList("1")));
-		JsonPath jsonPath = new RelationshipsPath("project");
-		jsonPath.setParentResource(parentJsonPath);
-
-		// WHEN
-		String result = PathBuilder.build(jsonPath);
-
-		// THEN
-		assertThat(result).isEqualTo("/tasks/1/relationships/project/");
-	}
-
-	@Test
-	public void onResourcePathWithIdsAndFieldPathShouldReturnCorrectStringPath() {
-		// GIVEN
-		JsonPath parentJsonPath = new ResourcePath("tasks", new PathIds(Collections.singletonList("1")));
-		JsonPath jsonPath = new FieldPath("project");
-		jsonPath.setParentResource(parentJsonPath);
-
-		// WHEN
-		String result = PathBuilder.build(jsonPath);
-
-		// THEN
-		assertThat(result).isEqualTo("/tasks/1/project/");
-	}
-
-	@Test
-	public void onFieldNameAsSameAsResourceShouldBuildCorrectPath() {
-		// GIVEN
-		String path = "/tasks/1/projects";
-
-		// WHEN
-		JsonPath jsonPath = pathBuilder.build(path);
-
-		// THEN
-		JsonPath expectedPath = new FieldPath("projects");
-		expectedPath.setParentResource(new ResourcePath("tasks", new PathIds("1")));
-		assertThat(jsonPath).isEqualTo(expectedPath);
+		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
+		Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
 	}
 
 	@Test

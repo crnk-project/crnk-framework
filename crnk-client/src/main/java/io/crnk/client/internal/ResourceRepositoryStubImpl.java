@@ -27,7 +27,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 
 
 	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
-			JsonApiUrlBuilder urlBuilder) {
+									  JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder, resourceClass);
 		this.resourceInformation = resourceInformation;
 	}
@@ -63,7 +63,19 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 	@SuppressWarnings("unchecked")
 	private <S extends T> S modify(S entity, boolean create) {
 		Object id = getId(entity, create);
-		String url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
+
+		String url;
+		if (create && resourceInformation.isNested()) {
+			// TODO align with other cases, consider adding Method/complete object to url computation
+			// workaround to get parentId out of id
+			ResourceField idField = resourceInformation.getIdField();
+			id = idField.getAccessor().getValue(entity);
+			url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
+			url = url.substring(0, url.lastIndexOf('/'));
+		} else {
+			url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
+		}
+
 		return (S) executeUpdate(url, entity, create);
 	}
 
@@ -78,11 +90,9 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		}
 		if (create) {
 			return null;
-		}
-		else if (entity instanceof Resource) {
+		} else if (entity instanceof Resource) {
 			return ((Resource) entity).getId();
-		}
-		else {
+		} else {
 			ResourceField idField = resourceInformation.getIdField();
 			return idField.getAccessor().getValue(entity);
 		}

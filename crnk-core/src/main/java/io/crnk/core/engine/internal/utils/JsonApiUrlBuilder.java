@@ -6,9 +6,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpec;
@@ -45,11 +48,10 @@ public class JsonApiUrlBuilder {
 	}
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter,
-			String relationshipName) {
+						   String relationshipName) {
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
-		}
-		else {
+		} else {
 			return buildUrl(resourceInformation, id, ((QueryParamsAdapter) queryAdapter).getQueryParams(), relationshipName);
 		}
 	}
@@ -64,9 +66,13 @@ public class JsonApiUrlBuilder {
 	}
 
 	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
-		String url = moduleRegistry.getResourceRegistry().getResourceUrl(queryContext, resourceInformation);
-
+		String url;
+		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
 		if (id instanceof Collection) {
+			if (resourceInformation.isNested()) {
+				throw new UnsupportedOperationException("not yet implemented");
+			}
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 			Collection<?> ids = (Collection<?>) id;
 			Collection<String> strIds = new ArrayList<>();
 			for (Object idElem : ids) {
@@ -75,10 +81,10 @@ public class JsonApiUrlBuilder {
 			}
 			url += "/";
 			url += StringUtils.join(",", strIds);
-		}
-		else if (id != null) {
-			String strId = resourceInformation.toIdString(id);
-			url += "/" + strId;
+		} else if (id != null) {
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation, id);
+		} else {
+			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 		}
 		if (relationshipName != null) {
 			url += "/relationships/" + relationshipName;
@@ -89,8 +95,7 @@ public class JsonApiUrlBuilder {
 			QuerySpec querySpec = (QuerySpec) query;
 			QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
 			urlBuilder.addQueryParameters(urlMapper.serialize(querySpec));
-		}
-		else if (query instanceof QueryParams) {
+		} else if (query instanceof QueryParams) {
 			QueryParams queryParams = (QueryParams) query;
 			urlBuilder.addQueryParameters(queryParamsSerializer.serializeFilters(queryParams));
 			urlBuilder.addQueryParameters(queryParamsSerializer.serializeSorting(queryParams));
@@ -134,8 +139,7 @@ public class JsonApiUrlBuilder {
 			if (firstParam) {
 				builder.append("?");
 				firstParam = false;
-			}
-			else {
+			} else {
 				builder.append("&");
 			}
 			builder.append(key);
@@ -154,8 +158,7 @@ public class JsonApiUrlBuilder {
 				for (Object element : (Collection<?>) value) {
 					addQueryParameter(key, (String) element);
 				}
-			}
-			else {
+			} else {
 				addQueryParameter(key, (String) value);
 			}
 		}

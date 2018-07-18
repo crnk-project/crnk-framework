@@ -34,10 +34,9 @@ public class ResourcePostController extends ResourceUpsert {
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-			RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
 
-		String resourcePath = jsonPath.getResourcePath();
-		RegistryEntry endpointRegistryEntry = getRegistryEntryByPath(resourcePath);
+		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry registryEntry = getRegistryEntry(requestResource.getType());
 		logger.debug("using registry entry {}", registryEntry);
@@ -52,8 +51,7 @@ public class ResourcePostController extends ResourceUpsert {
 		Result<JsonApiResponse> response;
 		if (Resource.class.equals(resourceInformation.getResourceClass())) {
 			response = resourceRepository.create(requestResource, queryAdapter);
-		}
-		else {
+		} else {
 			Object entity = newEntity(resourceInformation, requestResource);
 			setId(requestResource, entity, resourceInformation);
 			setAttributes(requestResource, entity, resourceInformation, queryContext);
