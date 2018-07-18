@@ -16,6 +16,7 @@ import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
@@ -110,12 +111,18 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	@Override
 	public String getResourceType(Class<?> entityClass) {
-		JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
-		if (annotation != null) {
-			return annotation.type();
+		JsonApiResource jsonApiResourceAnnotation = entityClass.getAnnotation(JsonApiResource.class);
+		if (jsonApiResourceAnnotation != null) {
+			return jsonApiResourceAnnotation.type();
 		}
+
+		JpaResource jpaResourceAnnotation = entityClass.getAnnotation(JpaResource.class);
+		if (jpaResourceAnnotation != null) {
+			return jpaResourceAnnotation.type();
+		}
+
 		if (entityClass.getAnnotation(MappedSuperclass.class) != null) {
-			return null; // super classes do not have a document type
+			return null; // Super classes do not have a document type.
 		}
 
 		String name = entityClass.getSimpleName();
@@ -127,9 +134,15 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 	@Override
 	public String getResourcePath(Class<?> entityClass) {
-		JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
-		if (annotation != null) {
-			String path = annotation.resourcePath();
+		JsonApiResource jsonApiResourceAnnotation = entityClass.getAnnotation(JsonApiResource.class);
+		if (jsonApiResourceAnnotation != null) {
+			String path = jsonApiResourceAnnotation.resourcePath();
+			return "".equals(path) ? null : path;
+		}
+
+		JpaResource jpaResourceAnnotation = entityClass.getAnnotation(JpaResource.class);
+		if (jpaResourceAnnotation != null) {
+			String path = jpaResourceAnnotation.resourcePath();
 			return "".equals(path) ? null : path;
 		}
 

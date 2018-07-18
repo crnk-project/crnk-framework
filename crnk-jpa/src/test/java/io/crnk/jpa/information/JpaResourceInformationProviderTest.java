@@ -243,6 +243,13 @@ public class JpaResourceInformationProviderTest {
 	}
 
 	@Test
+	public void testJsonApiResourceAnnotationPath() {
+		ResourceInformation info = builder.build(JpaResourcePathTestEntity.class);
+		Assert.assertEquals("json-api-resource-type", info.getResourceType());
+		Assert.assertEquals("json-api-resource-path", info.getResourcePath());
+	}
+
+	@Test
 	public void testReadOnlyField() throws SecurityException, IllegalArgumentException {
 		ResourceInformation info = builder.build(AnnotationTestEntity.class);
 
