@@ -14,6 +14,7 @@ import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
 import io.crnk.jpa.model.AnnotationTestEntity;
 import io.crnk.jpa.model.JpaResourcePathTestEntity;
 import io.crnk.jpa.model.JpaTransientTestEntity;
+import io.crnk.jpa.model.JsonApiResourcePathTestEntity;
 import io.crnk.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.jpa.model.ManyToManyTestEntity;
 import io.crnk.jpa.model.OneToOneTestEntity;
@@ -244,7 +245,7 @@ public class JpaResourceInformationProviderTest {
 
 	@Test
 	public void testJsonApiResourceAnnotationPath() {
-		ResourceInformation info = builder.build(JpaResourcePathTestEntity.class);
+		ResourceInformation info = builder.build(JsonApiResourcePathTestEntity.class);
 		Assert.assertEquals("json-api-resource-type", info.getResourceType());
 		Assert.assertEquals("json-api-resource-path", info.getResourcePath());
 	}
