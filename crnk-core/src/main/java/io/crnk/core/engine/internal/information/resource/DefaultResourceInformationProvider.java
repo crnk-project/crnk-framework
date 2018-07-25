@@ -20,33 +20,36 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
+import io.crnk.core.utils.Prioritizable;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It
  * extracts information about a resource from annotations and information about
  * fields and getters.
  */
-public class DefaultResourceInformationProvider extends ResourceInformationProviderBase {
+public class DefaultResourceInformationProvider extends ResourceInformationProviderBase implements Prioritizable {
+
+	public static final int PRIORITY = 100;
 
 	private final List<? extends PagingBehavior> pagingBehaviors;
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
-			PagingBehavior pagingBehavior,
-			ResourceFieldInformationProvider... resourceFieldInformationProviders) {
+											  PagingBehavior pagingBehavior,
+											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
 		this(propertiesProvider,
 				Collections.unmodifiableList(Arrays.asList(pagingBehavior)),
 				Arrays.asList(resourceFieldInformationProviders));
 	}
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
-			List<? extends PagingBehavior> pagingBehaviors,
-			ResourceFieldInformationProvider... resourceFieldInformationProviders) {
+											  List<? extends PagingBehavior> pagingBehaviors,
+											  ResourceFieldInformationProvider... resourceFieldInformationProviders) {
 		this(propertiesProvider, pagingBehaviors, Arrays.asList(resourceFieldInformationProviders));
 	}
 
 	public DefaultResourceInformationProvider(PropertiesProvider propertiesProvider,
-			List<? extends PagingBehavior> pagingBehaviors,
-			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
+											  List<? extends PagingBehavior> pagingBehaviors,
+											  List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		super(propertiesProvider, resourceFieldInformationProviders);
 
 		this.pagingBehaviors = pagingBehaviors;
@@ -58,7 +61,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 		return annotation != null;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ResourceInformation build(Class<?> resourceClass) {
 		return build(resourceClass, false);
 	}
@@ -101,8 +104,7 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 				if (!optPagingBehavior.isPresent()) {
 					throw new IllegalStateException("no paging behavior registered for: " + pagingBehaviorType);
 				}
-			}
-			else {
+			} else {
 				optPagingBehavior = pagingBehaviors.stream().findFirst();
 				if (!optPagingBehavior.isPresent()) {
 					throw new IllegalStateException("no paging behavior registered");
@@ -156,4 +158,8 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
 	}
 
 
+	@Override
+	public int getPriority() {
+		return PRIORITY;
+	}
 }

@@ -88,8 +88,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				String id = getId(entry.getResourceInformation().getResourceType());
 				if (isMeta) {
 					return id + "$meta";
-				}
-				else {
+				} else {
 					return id + "$links";
 				}
 			}
@@ -111,7 +110,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 				}
 
 				Object resourceRepository = entry.getResourceRepository().getResourceRepository();
-				resourcePackageName = resourceRepository.getClass().getPackage().getName();
+				Package resourcePackage = resourceRepository.getClass().getPackage();
+				resourcePackageName = resourcePackage != null ? resourcePackage.getName() : resourceClass.getPackage().getName();
 				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null
 						|| closedPackageName.length() < resourcePackageName.length())) {
 					closedPackageName = resourcePackageName;
@@ -218,8 +218,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		for (int i = 0; i < resourceType.length(); i++) {
 			if (i == 0 || resourceType.charAt(i - 1) == '/') {
 				name.append(Character.toUpperCase(resourceType.charAt(i)));
-			}
-			else if (resourceType.charAt(i) != '/') {
+			} else if (resourceType.charAt(i) != '/') {
 				name.append(resourceType.charAt(i));
 			}
 		}
@@ -227,7 +226,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	}
 
 	private MetaResourceRepository discoverRepository(ResourceRepositoryInformation repositoryInformation,
-			MetaResource metaResource, ResourceRepositoryAdapter resourceRepository) {
+													  MetaResource metaResource, ResourceRepositoryAdapter resourceRepository) {
 
 		MetaResourceRepository meta = new MetaResourceRepository();
 		meta.setResourceType(metaResource);

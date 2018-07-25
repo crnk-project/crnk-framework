@@ -14,6 +14,9 @@ gradlePlugin {
 dependencies {
 	compile gradleApi()
 
+	compile project(':crnk-meta')
+	compile 'org.reflections:reflections:0.9.9'
+
 	compile 'com.fasterxml.jackson.core:jackson-databind'
 	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 

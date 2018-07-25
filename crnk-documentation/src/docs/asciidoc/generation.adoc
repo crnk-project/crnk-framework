@@ -30,16 +30,15 @@ For an example have a look at the Crnk example application, see https://github.c
 
 ### Setup
 
-Internally the generator has to make use of the running application to gather the necessary information for generation. This
-approach not only supports the typical, manual implement resources and repositories manually, but also
-the ones obtained through third-party modules such the JPA entities exposed by the JPA module. There are different
-possibilities to do that. https://github.com/crnk-project/crnk-framework/blob/master/crnk-client-angular-ngrx/build
-.gradle[crnk-client-angular-ngrx]
-does such a setup manually in Gradle. Alternatively, there is a Gradle plugin taking care of the generator setup. It makes use
-of the JUnit to get
-the application to a running state at built-time. Currently supported are CDI and Spring-based applications.
+Internally the generator supports multiple ways of looking up the set of available resources and repositories
+to generate.
+The simplest way is by scanning the classpath for @JsonApiResource-annotated classes. More elaborate setups
+can also launch an application (e.g. with Spring or CDI) and extract the information from the running application.
+While the former is simpler to setup, the later can deal with all border cases like a repository being backed
+by something different than a @JsonApiResource-annotated class.
 
-Such a setup may look like:
+The configuration looks like:
+
 
 [source]
 ----
@@ -53,7 +52,6 @@ buildscript {
 node {
 	version = '6.9.1'
 	download = true
-	distBaseUrl = "${ADN_NODEJS_MIRROR_BASE_URL}/dist"
 }
 
 apply plugin: 'crnk-gen-typescript'
@@ -68,15 +66,19 @@ dependencies {
 
 typescriptGen{
 
-	runtime {
-		configuration = 'typescriptGenRuntime'
-        spring {
-        	profile = 'test'
-        	configuration = 'ch.adnovum.arch.demo.management.service.ManagementApplication'
-        	initializerMethod = 'someInitMethod'
-        	defaultProperties['someKey'] = 'someValue'
-        }
-	}
+    // scan for resources on the classpath
+    resourcePackages = ['io.crnk.example']
+
+    // launch a Spring application to extract information about available resources
+	// runtime {
+	//	configuration = 'typescriptGenRuntime'
+    //    spring {
+    //    	profile = 'test'
+    //    	configuration = 'io.crnk.example.ExampleApplication'
+    //    	initializerMethod = 'someInitMethod' // optional
+    //    	defaultProperties['someKey'] = 'someValue'
+    //    }
+	// }
 
 	npm {
 		// map given Java package to a subdirectory of genDir
@@ -101,27 +103,18 @@ typescriptGen{
 
 }
 typescriptGen.init()
-
-
 ----
+
+An example is given in https://github.com/crnk-project/crnk-example/blob/master/crnk-example-frontend/build.gradle[crnk-example].
 
 Applying `crnk-gen-typescript` results in a new `generateTypescript` task. Consumers may want to add
 that task to `assemble` as dependency. The sources are then generated to `genDir` as specified.
 
-The plugin is in need for a running application to extract the set of available resources. The `runtime` section provides
-a number of possibilities how this can be achieved. Typically the simplest way to have a running application is to
-run in the same manner as for testing. This can be achieved, for example, by replicating the classpath, configuration,
-environment, Spring profiles, etc. Currently supported are Spring and CDI to achieve this. Please open up a ticket
-if you desire to work in another environment. There are a number of properties to do that:
+`resourcePackages` specifies the package to scan for resources. Alternatively and commented out, it is shown
+how to launch a Spring application to extract the resource information. Typically by running the application
+with a test profile. CDI works equally well if Weld is found on the classpath (such as with Deltaspike).
 
-- `runtime.configuration` sets the Gradle configuration to use to construct a classpath. In the given example
-   `typescriptGenRuntime` is used. You may also use `compile` or anything else.
-- for CDI it will work out-of-the-box if Weld is found on the classpath.
-- for Spring properties allow to set the Spring profile, default properties and configuration
-  class to use. Optionally an `initializerMethod` can be specified that is invoked before the
-  Spring application to perform further customization.
-
-The plugin strives for the generated sources to closely resemble the REST layer as possible.
+The plugin strives for the generated sources to closely resemble the REST layer.
 As a consequence it makes use of the resource types and json names rather than Java names for the generated sources.
 Important to know is that each type is assigned a meta id: for resources it is `resources.<resourceType>` and
 for all other objects the Java package name. Based on the meta id, there are a number of possibilities to influence

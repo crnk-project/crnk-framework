@@ -8,6 +8,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.information.resource.ResourceValidator;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
+import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
 import io.crnk.core.engine.internal.information.resource.ResourceInformationProviderBase;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
@@ -16,7 +17,9 @@ import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.utils.Prioritizable;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
@@ -41,7 +44,7 @@ import java.util.Set;
  * Extracts resource information from JPA and Crnk annotations. Crnk
  * annotations take precedence.
  */
-public class JpaResourceInformationProvider extends ResourceInformationProviderBase {
+public class JpaResourceInformationProvider extends ResourceInformationProviderBase implements Prioritizable {
 
 	private static final String ENTITY_NAME_SUFFIX = "Entity";
 
@@ -114,6 +117,10 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		if (annotation != null) {
 			return annotation.type();
 		}
+		JsonApiResource annotation1 = entityClass.getAnnotation(JsonApiResource.class);
+		if (annotation1 != null) {
+			return annotation1.type();
+		}
 		if (entityClass.getAnnotation(MappedSuperclass.class) != null) {
 			return null; // super classes do not have a document type
 		}
@@ -128,12 +135,16 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	@Override
 	public String getResourcePath(Class<?> entityClass) {
 		JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
-		if (annotation != null) {
-			String path = annotation.resourcePath();
-			return "".equals(path) ? null : path;
+		if (annotation != null && !"".equals(annotation.resourcePath())) {
+			return annotation.resourcePath();
 		}
 
-		return null;
+		JsonApiResource annotation1 = entityClass.getAnnotation(JsonApiResource.class);
+		if (annotation1 != null && !"".equals(annotation1.resourcePath())) {
+			return annotation1.resourcePath();
+		}
+
+		return getResourceType(entityClass);
 	}
 
 	@Override
@@ -145,6 +156,11 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	@Override
 	public void init(ResourceInformationProviderContext context) {
 		super.init(context);
+	}
+
+	@Override
+	public int getPriority() {
+		return DefaultResourceInformationProvider.PRIORITY - 10;
 	}
 
 	class JpaOptimisticLockingValidator implements ResourceValidator {
