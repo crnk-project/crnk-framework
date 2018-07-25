@@ -65,8 +65,8 @@ public class GenerateTypescriptTaskTest {
 		TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
 		config.setForked(false);
 		config.setGenerateExpressions(expressions);
+		configure(config);
 		String testPackage = "@crnk/gen-typescript-test";
-		config.getRuntime().setConfiguration("test");
 		config.getNpm().setPackagingEnabled(true);
 		config.getNpm().setPackageName(testPackage);
 		config.getNpm().setGitRepository("someThing");
@@ -104,6 +104,10 @@ public class GenerateTypescriptTaskTest {
 		}
 	}
 
+	protected void configure(TSGeneratorExtension config) {
+		config.getRuntime().setConfiguration("test");
+	}
+
 	private void checkProjectData() throws IOException {
 		String expectedSourceFileName = "expected_project_data.ts";
 		String actualSourcePath = "build/generated/source/typescript/src/types/project.data.ts";
@@ -135,9 +139,9 @@ public class GenerateTypescriptTaskTest {
 
 		LoggerFactory.getLogger(getClass()).info(actualSource);
 
-		LOGGER.info(actualSource);
-
 		System.out.println(actualSource);
+
+		LOGGER.info(actualSource);
 
 		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
 		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');

@@ -1,11 +1,8 @@
 package io.crnk.jpa.model;
 
-import io.crnk.core.resource.annotations.JsonApiResource;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-@JsonApiResource(type = "tablePerClassChild")
 @Entity
 public class JoinedTableChildEntity extends JoinedTableBaseEntity {
 

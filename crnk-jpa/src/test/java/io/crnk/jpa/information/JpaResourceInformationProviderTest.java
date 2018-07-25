@@ -14,6 +14,7 @@ import io.crnk.jpa.model.AnnotationMappedSuperclassEntity;
 import io.crnk.jpa.model.AnnotationTestEntity;
 import io.crnk.jpa.model.JpaResourcePathTestEntity;
 import io.crnk.jpa.model.JpaTransientTestEntity;
+import io.crnk.jpa.model.JsonapiResourcePathTestEntity;
 import io.crnk.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.jpa.model.ManyToManyTestEntity;
 import io.crnk.jpa.model.OneToOneTestEntity;
@@ -241,6 +242,15 @@ public class JpaResourceInformationProviderTest {
 		Assert.assertEquals("jpaResourceTestEntity", info.getResourceType());
 		Assert.assertEquals("jpa-resource-test-entity", info.getResourcePath());
 	}
+
+
+	@Test
+	public void testJsonapiResourceAnnotationPath() {
+		ResourceInformation info = builder.build(JsonapiResourcePathTestEntity.class);
+		Assert.assertEquals("jsonapiResourceTestEntity", info.getResourceType());
+		Assert.assertEquals("jsonapi-resource-test-entity", info.getResourcePath());
+	}
+
 
 	@Test
 	public void testReadOnlyField() throws SecurityException, IllegalArgumentException {

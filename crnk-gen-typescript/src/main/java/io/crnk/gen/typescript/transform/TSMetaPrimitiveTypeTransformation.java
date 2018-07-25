@@ -14,12 +14,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.gen.typescript.model.TSAny;
 import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSObjectType;
 import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSType;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TSMetaDataObjectTransformation.class);
 
 	private HashMap<Class<?>, TSType> primitiveMapping;
 
@@ -34,8 +39,8 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		primitiveMapping.put(String.class, TSPrimitiveType.STRING);
 		primitiveMapping.put(Boolean.class, TSPrimitiveType.BOOLEAN);
 		primitiveMapping.put(boolean.class, TSPrimitiveType.BOOLEAN);
-		primitiveMapping.put(long.class, TSPrimitiveType.NUMBER);
-		primitiveMapping.put(Long.class, TSPrimitiveType.NUMBER);
+		primitiveMapping.put(short.class, TSPrimitiveType.NUMBER);
+		primitiveMapping.put(Short.class, TSPrimitiveType.NUMBER);
 		primitiveMapping.put(float.class, TSPrimitiveType.NUMBER);
 		primitiveMapping.put(Float.class, TSPrimitiveType.NUMBER);
 		primitiveMapping.put(double.class, TSPrimitiveType.NUMBER);
@@ -76,7 +81,8 @@ public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 		if (primitiveMapping.containsKey(implClass)) {
 			return primitiveMapping.get(implClass);
 		}
-		throw new IllegalStateException("unexpected element: " + element + " of type " + implClass.getName());
+		LOGGER.error("unexpected element: {} of type {}", element, implClass.getName());
+		return TSAny.INSTANCE;
 	}
 
 	@Override

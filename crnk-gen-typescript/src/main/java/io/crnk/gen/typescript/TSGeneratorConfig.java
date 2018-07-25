@@ -32,6 +32,8 @@ public class TSGeneratorConfig {
 
 	private Set<String> excludes = new HashSet<>();
 
+	private List<String> resourcePackages;
+
 	private boolean forked = false;
 
 	private TSNpmConfiguration npm = new TSNpmConfiguration();
@@ -58,6 +60,18 @@ public class TSGeneratorConfig {
 		metaTransformationClassNames.add(TSMetaEnumTypeTransformation.class.getName());
 		metaTransformationClassNames.add(TSMetaPrimitiveTypeTransformation.class.getName());
 		metaTransformationClassNames.add(TSMetaResourceRepositoryTransformation.class.getName());
+	}
+
+	/**
+	 * @return scans the given package with reflection and generates those resources.
+	 * Provides a quick way of generation without having to start the full application (CDI, Spring, etc.)
+	 */
+	public List<String> getResourcePackages() {
+		return resourcePackages;
+	}
+
+	public void setResourcePackages(List<String> resourcePackages) {
+		this.resourcePackages = resourcePackages;
 	}
 
 	/**
@@ -180,6 +194,9 @@ public class TSGeneratorConfig {
 	protected String computeMetaResolverClassName() {
 		if (metaResolverClassName != null) {
 			return metaResolverClassName;
+		}
+		if (getResourcePackages() != null) {
+			return "io.crnk.gen.runtime.reflections.ReflectionsMetaResolver";
 		}
 		if (runtime.getSpring().getConfiguration() != null) {
 			return "io.crnk.gen.runtime.spring.SpringMetaResolver";

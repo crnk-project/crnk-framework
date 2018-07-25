@@ -17,9 +17,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * but with the additional benefit of reading JPA annotations to detect primary
  * keys, relationships, etc. without having to define redudant Crnk
  * annotations.
+ *
+ * @deprecated use the regular @JsonApiResource
  */
 @Retention(RUNTIME)
 @Target(TYPE)
+@Deprecated
 public @interface JpaResource {
 
 	/**

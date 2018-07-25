@@ -234,7 +234,7 @@ public class ModuleRegistry {
 	public ResourceInformationProvider getResourceInformationBuilder() {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider =
-					new CombinedResourceInformationProvider(aggregatedModule.getResourceInformationProviders());
+					new CombinedResourceInformationProvider(prioritze(aggregatedModule.getResourceInformationProviders()));
 			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,

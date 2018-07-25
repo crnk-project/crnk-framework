@@ -1,12 +1,14 @@
 package io.crnk.jpa.model;
 
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 @Entity
-@JsonApiResource(type = "tablePerClassBase")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class JoinedTableBaseEntity {
 
