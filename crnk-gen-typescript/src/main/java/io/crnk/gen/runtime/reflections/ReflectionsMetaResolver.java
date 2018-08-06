@@ -1,6 +1,15 @@
 package io.crnk.gen.runtime.reflections;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.core.repository.InMemoryResourceRepository;
@@ -9,6 +18,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
 import io.crnk.gen.typescript.TSGeneratorConfig;
+import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
@@ -21,18 +31,13 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 
 	@Override
 	public void run(GeneratorTrigger context, ClassLoader classLoader) {
 		try {
+			DefaultRegistryEntryBuilder.WARN_MISSING_RELATIONSHIP_REPOSITORIES = false;
+
 			TSGeneratorConfig config = context.getConfig();
 			List<String> resourcePackages = config.getResourcePackages();
 
@@ -59,8 +64,10 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 			for (Class repositoryClass : repositoryClasses) {
 				if (repositoryClass.isInterface()) {
 					Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
-					Class<?> resourceClass = typeArgs[0];
-					resourceRepositoryMap.put(resourceClass, repositoryClass);
+					if (typeArgs != null) {
+						Class<?> resourceClass = typeArgs[0];
+						resourceRepositoryMap.put(resourceClass, repositoryClass);
+					}
 				}
 			}
 
@@ -75,9 +82,10 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 						}
 						throw new UnsupportedOperationException();
 					};
-					Object repository = Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterface}, handler);
+					Object repository = Proxy.newProxyInstance(classLoader, new Class[] { repositoryInterface }, handler);
 					reflectionsModule.addRepository(repository);
-				} else {
+				}
+				else {
 					reflectionsModule.addRepository(new InMemoryResourceRepository<>(resourceClass));
 				}
 			}
@@ -86,7 +94,12 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 			metaConfig.addMetaProvider(new ResourceMetaProvider());
 			MetaModule metaModule = MetaModule.createServerModule(metaConfig);
 
+			SimpleModule jpaInfoModule = new SimpleModule("jpa.info");
+			jpaInfoModule.addResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider()));
+
 			CrnkBoot boot = new CrnkBoot();
+			boot.setDefaultPageLimit(10L);
+			boot.addModule(jpaInfoModule);
 			boot.addModule(reflectionsModule);
 			boot.addModule(metaModule);
 			boot.setServiceDiscovery(new EmptyServiceDiscovery());
@@ -94,7 +107,8 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 
 			MetaLookup lookup = metaModule.getLookup();
 			context.generate(lookup);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}

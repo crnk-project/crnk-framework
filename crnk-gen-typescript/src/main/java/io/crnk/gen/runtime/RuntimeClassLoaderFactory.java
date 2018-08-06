@@ -46,16 +46,22 @@ public class RuntimeClassLoaderFactory {
 		this.project = project;
 	}
 
-	public URLClassLoader createClassLoader(ClassLoader parentClassLoader) {
+	public URLClassLoader createClassLoader(ClassLoader parentClassLoader, boolean isolate) {
 		Set<URL> classURLs = new HashSet<>(); // NOSONAR URL needed by URLClassLoader
 		classURLs.addAll(getProjectLibraryUrls());
 		classURLs.add(getPluginUrl());
 
-		// do not expose the gradle classpath, so we use the bootstrap classloader instead
-		ClassLoader bootstrapClassLaoder = ClassLoader.getSystemClassLoader().getParent();
-
 		// some classes still need to be shared between plugin and generation
-		ClassLoader sharedClassLoader = new SharedClassLoader(bootstrapClassLaoder, parentClassLoader);
+		ClassLoader sharedClassLoader;
+		if (isolate) {
+			// do not expose the gradle classpath, so we use the bootstrap classloader instead
+			ClassLoader bootstrapClassLaoder = ClassLoader.getSystemClassLoader().getParent();
+
+			sharedClassLoader = new SharedClassLoader(bootstrapClassLaoder, parentClassLoader);
+		}
+		else {
+			sharedClassLoader = parentClassLoader;
+		}
 
 		return new URLClassLoader(classURLs.toArray(new URL[0]), sharedClassLoader);
 	}
@@ -134,7 +140,7 @@ public class RuntimeClassLoaderFactory {
 			for (String sourceSetName : Arrays.asList("main", "test", "integrationTest")) {
 				if (availableSourceSetNames.contains(sourceSetName)) {
 					SourceSet sourceSet = sourceSets.getByName(sourceSetName);
-					classpath.add(sourceSet.getOutput().getClassesDir());
+					classpath.addAll(sourceSet.getOutput().getClassesDirs().getFiles());
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package io.crnk.gen.typescript;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLClassLoader;
 import javax.naming.Context;
 
@@ -53,7 +52,7 @@ public class RuntimeClassoaderFactoryTest {
 
 		factory = new RuntimeClassLoaderFactory(project);
 		ClassLoader parentClassLoader = getClass().getClassLoader();
-		classLoader = factory.createClassLoader(parentClassLoader);
+		classLoader = factory.createClassLoader(parentClassLoader, true);
 		sharedClassLoader = (RuntimeClassLoaderFactory.SharedClassLoader) classLoader.getParent();
 
 	}
@@ -88,7 +87,7 @@ public class RuntimeClassoaderFactoryTest {
 	@Test(expected = IllegalStateException.class)
 	public void defaultLogbackTestNotProvidedWithInvalidParentClassLoader() throws IOException, ClassNotFoundException {
 		ClassLoader bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent();
-		classLoader = factory.createClassLoader(bootstrapClassLoader);
+		classLoader = factory.createClassLoader(bootstrapClassLoader, true);
 		Assert.assertNull(bootstrapClassLoader.getResource("logback-test.xml"));
 		Assert.assertNull(classLoader.getResource("logback-test.xml"));
 	}

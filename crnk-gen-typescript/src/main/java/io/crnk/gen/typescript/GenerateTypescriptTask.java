@@ -38,7 +38,9 @@ public class GenerateTypescriptTask extends DefaultTask {
 		TSGeneratorConfig config = getConfig();
 		setupDefaultConfig(config);
 
-		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader);
+		// no isolation needed when using classpath scanning
+		boolean isolate = config.getResourcePackages() == null;
+		URLClassLoader classloader = classLoaderFactory.createClassLoader(contextClassLoader, isolate);
 		try {
 			thread.setContextClassLoader(classloader);
 			runGeneration(classloader);
