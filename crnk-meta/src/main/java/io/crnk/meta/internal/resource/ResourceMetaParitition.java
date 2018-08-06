@@ -209,7 +209,14 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	}
 
 	protected String getId(String resourceType) {
-		return idPrefix + resourceType.replace('/', '.');
+		ResourceRegistry resourceRegistry = this.context.getModuleContext().getResourceRegistry();
+		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
+		if(idPrefix != null) {
+			return idPrefix + resourceType.replace('/', '.');
+		}else{
+			Class<?> resourceClass = entry.getResourceInformation().getResourceClass();
+			return resourceClass.getName();
+		}
 	}
 
 	private String getName(ResourceInformation information) {

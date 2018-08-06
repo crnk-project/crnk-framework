@@ -53,6 +53,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRegistryEntryBuilder.class);
 
+	/**
+	 * @deprecated find better solution
+	 */
+	@Deprecated
+	public static boolean WARN_MISSING_RELATIONSHIP_REPOSITORIES = true;
+
 	private final DefaultInformationBuilder informationBuilder;
 
 	private ModuleRegistry moduleRegistry;
@@ -171,7 +177,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			LegacyRegistryEntry entry = new LegacyRegistryEntry(resourceEntry, relationshipEntries);
 			entry.initialize(moduleRegistry);
 			return entry;
-		} else {
+		}
+		else {
 			ResourceRepositoryAdapter resourceRepositoryAdapter = buildResourceRepositoryAdapter(resourceInformation);
 			Map<ResourceField, RelationshipRepositoryAdapter> relationshipEntries =
 					buildRelationshipAdapters(resourceInformation);
@@ -199,7 +206,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	private Map<ResourceField, RelationshipRepositoryAdapter> buildRelationshipAdapters(ResourceInformation
-																								resourceInformation) {
+			resourceInformation) {
 		checkRelationshipNaming(resourceInformation);
 
 		Map<ResourceField, RelationshipRepositoryAdapter> map = new HashMap<>();
@@ -207,7 +214,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getAdapter());
-			} else {
+			}
+			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -224,7 +232,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getLegacyEntry());
-			} else {
+			}
+			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -319,7 +328,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ResourceEntry buildResourceRepository(ResourceInformation resourceInformation) {
 		resourceRepository.information().setResourceInformation(resourceInformation);
 		ResourceRepositoryInformation repositoryInformation = resourceRepository.information().build();
@@ -336,7 +345,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
 			return new AnnotatedResourceEntry(repositoryInstanceBuilder, repositoryInformation);
-		} else {
+		}
+		else {
 			return new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
 		}
 	}
@@ -347,7 +357,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (relationshipField.hasIdField()
 					|| relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
 				behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
-			} else {
+			}
+			else {
 				behavior = RelationshipRepositoryBehavior.CUSTOM;
 			}
 		}
@@ -360,9 +371,11 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 		if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
 
-			if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
-				PreconditionUtil.verify(relationshipField.getOppositeName() != null, "field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
-						+ "behavior.", relationshipField.getUnderlyingName());
+			if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE
+					|| behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+				PreconditionUtil.verify(relationshipField.getOppositeName() != null,
+						"field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
+								+ "behavior.", relationshipField.getUnderlyingName());
 			}
 
 			ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
@@ -381,10 +394,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OWNER, ForwardingDirection.OWNER);
-			} else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+			}
+			else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
-			} else {
+			}
+			else {
 				PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
 						.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
@@ -393,12 +408,13 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
 			repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
 			return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object decorateRepository(Object repository) {
 		Object decoratedRepository = repository;
 		List<RepositoryDecoratorFactory> repositoryDecorators = moduleRegistry.getRepositoryDecoratorFactories();
@@ -423,14 +439,14 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		private final Object relRepository;
 
 		public MatchedRelationship(final ResourceField relationshipField,
-								   RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
+				RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
 			this.relationshipField = relationshipField;
 			this.relationshipRepositoryInformation = relationshipRepositoryInformation;
 			this.relRepository = relRepository;
 		}
 
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private ResponseRelationshipEntry getLegacyEntry() {
 
 			final Object decoratedRepository = decorateRepository(relRepository);
@@ -445,7 +461,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 			if (ClassUtils.getAnnotation(relRepository.getClass(), JsonApiRelationshipRepository.class).isPresent()) {
 				return new AnnotatedRelationshipEntryBuilder(moduleRegistry, relationshipInstanceBuilder);
-			} else {
+			}
+			else {
 				final String targetResourceType = relationshipField.getOppositeResourceType();
 				return new DirectResponseRelationshipEntry(relationshipInstanceBuilder) {
 
@@ -463,7 +480,9 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			RelationshipRepositoryAdapter adapter = null;
 			for (RepositoryAdapterFactory adapterFactory : adapterFactories) {
 				if (adapterFactory.accepts(decoratedRepository)) {
-					adapter = adapterFactory.createRelationshipRepositoryAdapter(relationshipField, relationshipRepositoryInformation, decoratedRepository);
+					adapter = adapterFactory
+							.createRelationshipRepositoryAdapter(relationshipField, relationshipRepositoryInformation,
+									decoratedRepository);
 					break;
 				}
 			}
@@ -479,7 +498,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ResourceRepositoryAdapter buildResourceRepositoryAdapter(ResourceInformation resourceInformation) {
 		if (resourceRepository == null) {
 			return null;

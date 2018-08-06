@@ -114,9 +114,9 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public String getOppositeResourceType() {
-		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s is not an association", underlyingName);
+		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association", underlyingName, parentResourceInformation.getResourceType());
 		if (getElementType() != Object.class) {
-			PreconditionUtil.verify(oppositeResourceType != null, "field %s does not have an opposite resource type", underlyingName);
+			PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type", underlyingName, parentResourceInformation.getResourceType());
 		}
 		return oppositeResourceType;
 	}

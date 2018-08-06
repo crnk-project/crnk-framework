@@ -14,14 +14,15 @@ gradlePlugin {
 dependencies {
 	compile gradleApi()
 
+	// TODO use shade plugin
 	compile project(':crnk-meta')
+	compile project(':crnk-jpa')
+	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
 	compile 'org.reflections:reflections:0.9.9'
 
 	compile 'com.fasterxml.jackson.core:jackson-databind'
 	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
 
-	compileOnly project(':crnk-core')
-	compileOnly project(':crnk-meta')
 
 	compileOnly 'junit:junit:4.12'
 	compileOnly 'org.apache.deltaspike.modules:deltaspike-test-control-module-api:1.7.1'
