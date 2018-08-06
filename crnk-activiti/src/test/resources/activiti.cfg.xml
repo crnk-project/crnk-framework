@@ -4,6 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
+
 	<bean id="approvalManagerFactory" class="io.crnk.activiti.example.approval.ApprovalManagerFactory" />
 
 	<bean id="approvalManager" factory-bean="approvalManagerFactory" factory-method="getInstance"></bean>
@@ -16,6 +17,8 @@
 
 		<property name="databaseType" value="h2" />
 		<property name="databaseSchemaUpdate" value="true" />
+
+		<property name="history" value="audit" />
 	</bean>
 
 

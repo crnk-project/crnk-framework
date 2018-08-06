@@ -17,12 +17,23 @@ public class TaskRepositoryConfig {
 
 	private List<FilterSpec> baseFilters = new ArrayList<>();
 
+	private Class<? extends TaskResource> historyClass;
+
 	public TaskRepositoryConfig(Class<? extends TaskResource> taskClass) {
 		this.taskClass = taskClass;
 	}
 
+	public TaskRepositoryConfig historized(Class<? extends TaskResource> historyClass) {
+		this.historyClass = historyClass;
+		return this;
+	}
+
 	public void setForm(Class<? extends FormResource> formClass) {
 		this.formClass = formClass;
+	}
+
+	protected Class<? extends TaskResource> getHistoryClass() {
+		return historyClass;
 	}
 
 	protected Class<? extends TaskResource> getTaskClass() {

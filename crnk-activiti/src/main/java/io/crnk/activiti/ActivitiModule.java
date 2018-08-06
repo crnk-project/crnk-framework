@@ -2,7 +2,9 @@ package io.crnk.activiti;
 
 import io.crnk.activiti.internal.repository.FormRelationshipRepository;
 import io.crnk.activiti.internal.repository.FormResourceRepository;
+import io.crnk.activiti.internal.repository.ProcessInstanceHistoryResourceRepository;
 import io.crnk.activiti.internal.repository.ProcessInstanceResourceRepository;
+import io.crnk.activiti.internal.repository.TaskHistoryResourceRepository;
 import io.crnk.activiti.internal.repository.TaskRelationshipRepository;
 import io.crnk.activiti.internal.repository.TaskResourceRepository;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
@@ -15,6 +17,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import org.activiti.engine.FormService;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -89,6 +92,15 @@ public class ActivitiModule implements Module {
 					new ProcessInstanceResourceRepository(runtimeService, resourceMapper,
 							processInstanceConfig.getProcessInstanceClass(), processInstanceConfig.getBaseFilters()));
 
+			Class<? extends ProcessInstanceResource> historyClass = processInstanceConfig.getHistoryClass();
+			if (historyClass != null) {
+				HistoryService historyService = processEngine.getHistoryService();
+				context.addRepository(
+						new ProcessInstanceHistoryResourceRepository(historyService, resourceMapper, historyClass,
+								processInstanceConfig.getBaseFilters())
+				);
+			}
+
 			for (ProcessInstanceConfig.TaskRelationshipConfig taskRel : processInstanceConfig.getTaskRelationships().values()) {
 				context.addRepository(new TaskRelationshipRepository(processInstanceConfig.getProcessInstanceClass(),
 						taskRel.getTaskClass(), taskRel.getRelationshipName(), taskRel.getTaskDefinitionKey()));
@@ -98,6 +110,14 @@ public class ActivitiModule implements Module {
 		for (TaskRepositoryConfig taskConfig : config.getTasks().values()) {
 			context.addRepository(new TaskResourceRepository(taskService, resourceMapper,
 					taskConfig.getTaskClass(), taskConfig.getBaseFilters()));
+
+			Class<? extends TaskResource> historyClass = taskConfig.getHistoryClass();
+			if (historyClass != null) {
+				HistoryService historyService = processEngine.getHistoryService();
+				context.addRepository(
+						new TaskHistoryResourceRepository(historyService, resourceMapper, historyClass, taskConfig.getBaseFilters())
+				);
+			}
 
 			Class<? extends FormResource> formClass = taskConfig.getFormClass();
 			if (formClass != null) {

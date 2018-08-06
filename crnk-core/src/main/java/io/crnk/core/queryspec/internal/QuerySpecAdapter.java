@@ -1,5 +1,10 @@
 package io.crnk.core.queryspec.internal;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -17,8 +22,6 @@ import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
 
-import java.util.*;
-
 public class QuerySpecAdapter implements QueryAdapter {
 
 	private final QueryContext queryContext;
@@ -32,7 +35,7 @@ public class QuerySpecAdapter implements QueryAdapter {
 	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry, QueryContext queryContext) {
 		this.querySpec = querySpec;
 		this.resourceRegistry = resourceRegistry;
-		this.queryContext = Objects.requireNonNull(queryContext);
+		this.queryContext = queryContext;
 	}
 
 	public QuerySpec getQuerySpec() {

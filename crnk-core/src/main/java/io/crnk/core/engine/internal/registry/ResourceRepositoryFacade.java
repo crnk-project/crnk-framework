@@ -87,7 +87,7 @@ class ResourceRepositoryFacade implements ResourceRepositoryV2<Object, Serializa
 	private QueryAdapter toAdapter(QuerySpec querySpec) {
 		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
 		HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
-		QueryContext queryContext = requestContext.getQueryContext();
+		QueryContext queryContext = requestContext != null ? requestContext.getQueryContext() : null;
 		return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 	}
 

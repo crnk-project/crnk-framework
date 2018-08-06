@@ -20,8 +20,18 @@ public class ProcessInstanceConfig {
 
 	private final Map<String, TaskRelationshipConfig> taskRelationships = new HashMap<>();
 
+	private Class<? extends ProcessInstanceResource> historyClass;
+
 	public ProcessInstanceConfig(Class<? extends ProcessInstanceResource> processInstanceClass) {
 		this.processInstanceClass = processInstanceClass;
+	}
+
+	public void historized(Class<? extends ProcessInstanceResource> historyClass) {
+		this.historyClass = historyClass;
+	}
+
+	protected Class<? extends ProcessInstanceResource> getHistoryClass() {
+		return historyClass;
 	}
 
 	public void addTaskRelationship(String relationshipName, Class<? extends TaskResource> taskClass, String taskDefinitionKey) {

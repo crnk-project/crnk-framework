@@ -2,7 +2,6 @@ package io.crnk.core.engine.result;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Executes all operators on the current thread.
@@ -34,7 +33,7 @@ public class ImmediateResultFactory implements ResultFactory {
 	}
 
 	public Object getThreadContext() {
-		return Objects.requireNonNull(threadLocal.get());
+		return threadLocal.get();
 	}
 
 	@Override
