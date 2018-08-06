@@ -7,6 +7,8 @@ import java.util.List;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
@@ -346,5 +348,32 @@ public abstract class BasicRepositoryAccessTestBase {
 		relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
 		Assert.assertEquals(0, relProjects.size());
 		*/
+	}
+
+	@Test
+	public void testRenaming() {
+		for (int i = 0; i < 10; i++) {
+			Schedule schedule = new Schedule();
+			schedule.setId((long) i);
+			schedule.setName("schedule" + i);
+			schedule.setDesc("description" + i);
+			scheduleRepo.create(schedule);
+		}
+
+		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		querySpec.addSort(new SortSpec(Arrays.asList("desc"), Direction.DESC));
+		querySpec.includeField(Arrays.asList("desc"));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("desc"), FilterOperator.EQ,
+				Arrays.asList("description0", "description1", "description2")));
+
+		List<Schedule> schedules = scheduleRepo.findAll(querySpec);
+		Assert.assertEquals(3, schedules.size());
+
+		for (int i = 0; i < schedules.size(); i++) {
+			Schedule schedule = schedules.get(schedules.size() - 1 - i);
+			Assert.assertEquals("description" + i, schedule.getDesc());
+			Assert.assertNull(schedule.getName());
+		}
+
 	}
 }

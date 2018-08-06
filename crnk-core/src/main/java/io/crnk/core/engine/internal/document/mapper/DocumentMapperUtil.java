@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
@@ -89,7 +88,8 @@ public class DocumentMapperUtil {
 
 		List<ResourceField> results = new ArrayList<>();
 		for (ResourceField field : fields) {
-			if (includedFieldNames.contains(field.getJsonName())) {
+			// TODO remove use of field.getJsonName, here to maintain backward compatibility
+			if (includedFieldNames.contains(field.getUnderlyingName()) || includedFieldNames.contains(field.getJsonName())) {
 				results.add(field);
 			}
 		}
