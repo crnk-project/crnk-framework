@@ -97,6 +97,7 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 			Schedule copy = new Schedule();
 			copy.setId(schedule.getId());
 			copy.setName(schedule.getName());
+			copy.setDesc(schedule.getDesc());
 			copy.setTasks(schedule.getTasks());
 			copy.setDelayed(schedule.isDelayed());
 			copy.setLazyTask(schedule.getLazyTask());
