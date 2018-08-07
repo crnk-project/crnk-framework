@@ -932,7 +932,7 @@ include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/Approv
   the relationship field, meaning that the original application resource does not have to declare the
   relationship. This may or may not be useful depending on how much control there is over the original resource
   (for example there is no control over JPA entities).
-
+- `historic(...)` method specify the historic resource counterparts to query the history.
 
 The chosen setup leads to an approval system that is *fully transparent* to the actual repository implementations
 and can be added to any kind of repository.
@@ -943,11 +943,14 @@ starting the approval process, submitting a form and then verifying the changes 
 
 ### Limitations
 
-- Currently the main entities of Activiti have been exposed. History and configuration-related repositories
+- Currently the main entities of Activiti have been exposed. Configuration-related repositories
   could be exposed as well in the future.
+- Historic repositories are still considered being experimental.
 - Activiti has a limited query API that is inherited by the application. Potentially `crnk-jpa` could help
   out a bit in this area.
 - Multi-tenancy is not yet done out-of-the-box.
+- Activiti has been forked to Flowable. As of yet it is unclear whether one or both project
+  will survive in the long-term.
 
 
 

@@ -1,5 +1,9 @@
 package io.crnk.core.module.internal;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -8,17 +12,11 @@ import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
@@ -30,7 +28,8 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
 	private final ResourceRegistry resourceRegistry;
 
-	public ResourceFilterDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider, ResourceRegistry resourceRegistry) {
+	public ResourceFilterDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider,
+			ResourceRegistry resourceRegistry) {
 		this.filters = filters;
 		this.requestContextProvider = requestContextProvider;
 		this.resourceRegistry = resourceRegistry;
@@ -45,20 +44,23 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 	@Override
 	public FilterBehavior get(ResourceInformation resourceInformation, HttpMethod method, QueryContext queryContext) {
 		Map<Object, FilterBehavior> map = getCache(method, queryContext);
-
-		FilterBehavior behavior = map.get(resourceInformation);
-		if (behavior != null) {
-			return behavior;
+		if (queryContext != null) {
+			FilterBehavior behavior = map.get(resourceInformation);
+			if (behavior != null) {
+				return behavior;
+			}
 		}
 
-		behavior = FilterBehavior.NONE;
+		FilterBehavior behavior = FilterBehavior.NONE;
 		for (ResourceFilter filter : filters) {
 			behavior = behavior.merge(filter.filterResource(resourceInformation, method));
 			if (behavior == FilterBehavior.FORBIDDEN) {
 				break;
 			}
 		}
-		map.put(resourceInformation, behavior);
+		if (queryContext != null) {
+			map.put(resourceInformation, behavior);
+		}
 		return behavior;
 	}
 
@@ -94,7 +96,8 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
 				// consider checking more than GET? intersection/union of multiple?
 				behavior = behavior.merge(get(oppositeResourceInformation, HttpMethod.GET, queryContext));
-			} else {
+			}
+			else {
 				LOGGER.warn("opposite side {} not found", oppositeResourceType);
 			}
 		}
@@ -104,6 +107,9 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 	}
 
 	private Map<Object, FilterBehavior> getCache(HttpMethod method, QueryContext queryContext) {
+		if (queryContext == null) {
+			return null; // no caching without context
+		}
 		String key = ResourceFilterDirectoryImpl.class.getSimpleName() + method;
 		Map<Object, FilterBehavior> cache = (Map<Object, FilterBehavior>) queryContext.getAttribute(key);
 		if (cache == null) {

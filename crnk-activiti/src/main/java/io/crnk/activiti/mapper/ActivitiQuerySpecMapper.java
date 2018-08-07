@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.crnk.activiti.resource.HistoricProcessInstanceResource;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -36,13 +37,16 @@ public class ActivitiQuerySpecMapper {
 			Long limit = querySpec.getLimit();
 			if (limit != null) {
 				return activitiQuery.listPage((int) querySpec.getOffset(), querySpec.getLimit().intValue());
-			} else {
+			}
+			else {
 				PreconditionUtil.verifyEquals(Long.valueOf(0L), querySpec.getOffset(), "page offset not supported");
 				return activitiQuery.list();
 			}
-		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		}
+		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw new BadRequestException(e.getMessage(), e);
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 	}
@@ -70,9 +74,11 @@ public class ActivitiQuerySpecMapper {
 
 			Method method = getMethod(activitiQuery.getClass(), attributeName);
 			if (method.getParameterCount() == 0) {
-				PreconditionUtil.verifyEquals(Boolean.TRUE, value, "only filtering by true supported for boolean values, attributeName=%s", attributeName);
+				PreconditionUtil.verifyEquals(Boolean.TRUE, value,
+						"only filtering by true supported for boolean values, attributeName=%s", attributeName);
 				method.invoke(activitiQuery);
-			} else {
+			}
+			else {
 				Class<?> expectedType = method.getParameterTypes()[0];
 				method.invoke(activitiQuery, unmapValue(value, expectedType));
 			}
@@ -100,7 +106,7 @@ public class ActivitiQuerySpecMapper {
 	}
 
 	private static String mapAttributeName(String attributeName, Class<?> resourceClass, FilterOperator operator,
-										   Class valueClass) {
+			Class valueClass) {
 		String name = attributeName;
 
 		boolean many = Collection.class.isAssignableFrom(valueClass);
@@ -109,22 +115,29 @@ public class ActivitiQuerySpecMapper {
 		if (operator.equals(FilterOperator.EQ) && many) {
 			if (name.toLowerCase().endsWith("id")) {
 				name = name + "s";
-			} else {
+			}
+			else {
 				name = name + "Ids";
 			}
-		} else if (operator.equals(FilterOperator.LIKE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.LIKE) && !many) {
 			name = name + "LikeIgnoreCase";
-		} else if (operator.equals(FilterOperator.GT) && isDate) {
+		}
+		else if (operator.equals(FilterOperator.GT) && isDate) {
 			name = mapDateTimeName(name);
 			name = name + "After";
-		} else if (operator.equals(FilterOperator.LT) && isDate) {
+		}
+		else if (operator.equals(FilterOperator.LT) && isDate) {
 			name = mapDateTimeName(name);
 			name = name + "Before";
-		} else if (operator.equals(FilterOperator.GE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.GE) && !many) {
 			name = "min" + firstToUpper(name);
-		} else if (operator.equals(FilterOperator.LE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.LE) && !many) {
 			name = "max" + firstToUpper(name);
-		} else if (!operator.equals(FilterOperator.EQ)) {
+		}
+		else if (!operator.equals(FilterOperator.EQ)) {
 			throw new BadRequestException("filter operator '" + operator + "' not supported");
 		}
 
@@ -158,7 +171,8 @@ public class ActivitiQuerySpecMapper {
 
 			if (orderSpec.getDirection() == Direction.DESC) {
 				activitiQuery.desc();
-			} else {
+			}
+			else {
 				activitiQuery.asc();
 			}
 		}
@@ -169,7 +183,8 @@ public class ActivitiQuerySpecMapper {
 			if (TaskResource.class.isAssignableFrom(resourceClass)) {
 				return "task" + firstToUpper(attributeName);
 			}
-			if (ProcessInstanceResource.class.isAssignableFrom(resourceClass)) {
+			if (HistoricProcessInstanceResource.class.isAssignableFrom(resourceClass) || ProcessInstanceResource.class
+					.isAssignableFrom(resourceClass)) {
 				return "processInstance" + firstToUpper(attributeName);
 			}
 		}

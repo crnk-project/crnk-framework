@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.crnk.activiti.resource.FormResource;
+import io.crnk.activiti.resource.HistoricTaskResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -17,12 +18,23 @@ public class TaskRepositoryConfig {
 
 	private List<FilterSpec> baseFilters = new ArrayList<>();
 
+	private Class<? extends HistoricTaskResource> historyClass;
+
 	public TaskRepositoryConfig(Class<? extends TaskResource> taskClass) {
 		this.taskClass = taskClass;
 	}
 
+	public TaskRepositoryConfig historic(Class<? extends HistoricTaskResource> historyClass) {
+		this.historyClass = historyClass;
+		return this;
+	}
+
 	public void setForm(Class<? extends FormResource> formClass) {
 		this.formClass = formClass;
+	}
+
+	protected Class<? extends HistoricTaskResource> getHistoryClass() {
+		return historyClass;
 	}
 
 	protected Class<? extends TaskResource> getTaskClass() {

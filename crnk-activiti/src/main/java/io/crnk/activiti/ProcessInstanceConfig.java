@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.crnk.activiti.resource.HistoricProcessInstanceResource;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterOperator;
@@ -20,8 +21,18 @@ public class ProcessInstanceConfig {
 
 	private final Map<String, TaskRelationshipConfig> taskRelationships = new HashMap<>();
 
+	private Class<? extends HistoricProcessInstanceResource> historyClass;
+
 	public ProcessInstanceConfig(Class<? extends ProcessInstanceResource> processInstanceClass) {
 		this.processInstanceClass = processInstanceClass;
+	}
+
+	public void historic(Class<? extends HistoricProcessInstanceResource> historyClass) {
+		this.historyClass = historyClass;
+	}
+
+	protected Class<? extends HistoricProcessInstanceResource> getHistoryClass() {
+		return historyClass;
 	}
 
 	public void addTaskRelationship(String relationshipName, Class<? extends TaskResource> taskClass, String taskDefinitionKey) {

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import io.crnk.activiti.resource.ExecutionResource;
 import io.crnk.activiti.resource.FormResource;
+import io.crnk.activiti.resource.HistoricProcessInstanceResource;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
@@ -25,6 +26,7 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskInfo;
@@ -50,6 +52,14 @@ public class ActivitiResourceMapper {
 	}
 
 	public <T extends ProcessInstanceResource> T mapToResource(Class<T> resourceClass, ProcessInstance processInstance) {
+		T resource = io.crnk.core.engine.internal.utils.ClassUtils.newInstance(resourceClass);
+		Map<String, Object> processVariables = processInstance.getProcessVariables();
+		copyInternal(resource, null, processVariables, true, Optional.of(processInstance));
+		return resource;
+	}
+
+	public <T extends HistoricProcessInstanceResource> T mapToResource(Class<T> resourceClass,
+			HistoricProcessInstance processInstance) {
 		T resource = io.crnk.core.engine.internal.utils.ClassUtils.newInstance(resourceClass);
 		Map<String, Object> processVariables = processInstance.getProcessVariables();
 		copyInternal(resource, null, processVariables, true, Optional.of(processInstance));
@@ -131,18 +141,31 @@ public class ActivitiResourceMapper {
 		if (activitiBean.isPresent()) {
 			BeanInformation activitiBeanInformation = BeanInformation.get(activitiBean.get().getClass());
 			if (toResource) {
-				Object value = PropertyUtils.getProperty(activitiBean.get(), attributeName);
+				Object value = PropertyUtils.getProperty(activitiBean.get(), unmapName(attributeName));
 				PropertyUtils.setProperty(resource, attributeName, mapValue(value));
 			}
 			else {
-
 				BeanAttributeInformation attribute = activitiBeanInformation.getAttribute(attributeName);
 				if (attribute != null && attribute.getSetter() != null) {
-					Object value = PropertyUtils.getProperty(resource, attributeName);
+					Object value = PropertyUtils.getProperty(resource, unmapName(attributeName));
 					PropertyUtils.setProperty(activitiBean.get(), attributeName, unmapValue(value));
 				}
 			}
 		}
+	}
+
+	private String mapName(String attributeName) {
+		if (attributeName.equals("durationInMillis")) {
+			return "duration";
+		}
+		return attributeName;
+	}
+
+	private String unmapName(String attributeName) {
+		if (attributeName.equals("duration")) {
+			return "durationInMillis";
+		}
+		return attributeName;
 	}
 
 	private void copyDynamicField(Object resource, BeanAttributeInformation attribute, Optional<Object> variableHolder,

@@ -23,6 +23,7 @@ public class TaskResourceRepository<T extends TaskResource> extends ActivitiRepo
 
 	@Override
 	protected TaskQuery createQuery() {
+
 		return taskService.createTaskQuery().includeTaskLocalVariables();
 	}
 

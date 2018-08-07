@@ -281,7 +281,12 @@ public class PropertyUtils {
 		if (foundField != null) {
 			if (!Modifier.isPublic(foundField.getModifiers())) {
 				Method setter = getSetter(bean, foundField.getName(), foundField.getType());
-				setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));
+				try {
+					setter.invoke(bean, prepareValue(value, setter.getParameterTypes()[0]));
+				}
+				catch (IllegalArgumentException e) {
+					throw new IllegalStateException(setter.toString() + " with value " + value, e);
+				}
 			}
 			else {
 				foundField.set(bean, prepareValue(value, foundField.getType()));

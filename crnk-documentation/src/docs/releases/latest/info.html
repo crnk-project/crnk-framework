@@ -28,3 +28,17 @@ of Entity-based resources. This is no longer necessary and @JsonApiResource can 
 with classes annotated with @Entity.
 
 
+<h4>Historic Activiti repositories</h4>
+
+There is initial experimental support for historic resource repositories of Activiti tasks and processes.
+
+<pre class="prettyprint">
+ActivitiModuleConfig config = new ActivitiModuleConfig();
+ProcessInstanceConfig processConfig = config.addProcessInstance(ScheduleApprovalProcessInstance.class);
+processConfig.historic(HistoricScheduleApprovalProcessInstance.class);
+
+TaskRepositoryConfig taskConfig = config.addTask(ApproveTask.class);
+taskConfig.historic(HistoricApproveTask.class);
+taskConfig.filterBy("description", ENFORCED_DESCRIPTION);
+return ActivitiModule.create(processEngine, config);
+</pre>

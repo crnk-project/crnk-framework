@@ -2,11 +2,15 @@ package io.crnk.activiti;
 
 import io.crnk.activiti.internal.repository.FormRelationshipRepository;
 import io.crnk.activiti.internal.repository.FormResourceRepository;
+import io.crnk.activiti.internal.repository.HistoricProcessInstanceResourceRepository;
+import io.crnk.activiti.internal.repository.HistoricTaskResourceRepository;
 import io.crnk.activiti.internal.repository.ProcessInstanceResourceRepository;
 import io.crnk.activiti.internal.repository.TaskRelationshipRepository;
 import io.crnk.activiti.internal.repository.TaskResourceRepository;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.FormResource;
+import io.crnk.activiti.resource.HistoricProcessInstanceResource;
+import io.crnk.activiti.resource.HistoricTaskResource;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -15,6 +19,7 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import org.activiti.engine.FormService;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -49,6 +54,10 @@ public class ActivitiModule implements Module {
 		return getRepository(resourceClass);
 	}
 
+	public <T extends HistoricTaskResource> ResourceRepositoryV2<T, String> getHistoricTaskRepository(Class<T> resourceClass) {
+		return getRepository(resourceClass);
+	}
+
 	public <T extends FormResource> ResourceRepositoryV2<T, String> getFormRepository(Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
@@ -57,6 +66,12 @@ public class ActivitiModule implements Module {
 			Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
+
+	public <T extends HistoricProcessInstanceResource> ResourceRepositoryV2<T, String> getHistoricProcessInstanceRepository(
+			Class<T> resourceClass) {
+		return getRepository(resourceClass);
+	}
+
 
 	private <T> ResourceRepositoryV2<T, String> getRepository(Class<T> resourceClass) {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
@@ -89,6 +104,15 @@ public class ActivitiModule implements Module {
 					new ProcessInstanceResourceRepository(runtimeService, resourceMapper,
 							processInstanceConfig.getProcessInstanceClass(), processInstanceConfig.getBaseFilters()));
 
+			Class<? extends HistoricProcessInstanceResource> historyClass = processInstanceConfig.getHistoryClass();
+			if (historyClass != null) {
+				HistoryService historyService = processEngine.getHistoryService();
+				context.addRepository(
+						new HistoricProcessInstanceResourceRepository(historyService, resourceMapper, historyClass,
+								processInstanceConfig.getBaseFilters())
+				);
+			}
+
 			for (ProcessInstanceConfig.TaskRelationshipConfig taskRel : processInstanceConfig.getTaskRelationships().values()) {
 				context.addRepository(new TaskRelationshipRepository(processInstanceConfig.getProcessInstanceClass(),
 						taskRel.getTaskClass(), taskRel.getRelationshipName(), taskRel.getTaskDefinitionKey()));
@@ -98,6 +122,15 @@ public class ActivitiModule implements Module {
 		for (TaskRepositoryConfig taskConfig : config.getTasks().values()) {
 			context.addRepository(new TaskResourceRepository(taskService, resourceMapper,
 					taskConfig.getTaskClass(), taskConfig.getBaseFilters()));
+
+			Class<? extends TaskResource> historyClass = taskConfig.getHistoryClass();
+			if (historyClass != null) {
+				HistoryService historyService = processEngine.getHistoryService();
+				context.addRepository(
+						new HistoricTaskResourceRepository(historyService, resourceMapper, historyClass,
+								taskConfig.getBaseFilters())
+				);
+			}
 
 			Class<? extends FormResource> formClass = taskConfig.getFormClass();
 			if (formClass != null) {
