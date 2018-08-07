@@ -80,10 +80,12 @@ public class TaskHistoryResourceRepositoryTest extends ActivitiTestBase {
 	@Test
 	public void checkEqualsAssignee() {
 		QuerySpec querySpec = new QuerySpec(HistoricApproveTask.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, task.getId()));
 		querySpec.addFilter(new FilterSpec(Arrays.asList("assignee"), FilterOperator.EQ, "john"));
 		Assert.assertEquals(1, historicTaskRepository.findAll(querySpec).size());
 
 		querySpec = new QuerySpec(HistoricApproveTask.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, task.getId()));
 		querySpec.addFilter(new FilterSpec(Arrays.asList("assignee"), FilterOperator.EQ, "doesNotExists"));
 		Assert.assertEquals(0, historicTaskRepository.findAll(querySpec).size());
 	}
