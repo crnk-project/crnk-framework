@@ -4,8 +4,11 @@ import java.util.Arrays;
 
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.ActivitiModuleConfig;
+import io.crnk.activiti.ProcessInstanceConfig;
+import io.crnk.activiti.TaskRepositoryConfig;
 import io.crnk.activiti.example.model.ApproveTask;
-import io.crnk.activiti.example.model.HistorizedApproveTask;
+import io.crnk.activiti.example.model.HistoricApproveTask;
+import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.FilterOperator;
@@ -26,7 +29,7 @@ public class TaskHistoryResourceRepositoryTest extends ActivitiTestBase {
 
 	private Task isolatedTask;
 
-	private ResourceRepositoryV2<HistorizedApproveTask, String> taskHistoryRepository;
+	private ResourceRepositoryV2<HistoricApproveTask, String> historicTaskRepository;
 
 	private ResourceRepositoryV2<ScheduleApprovalProcessInstance, String> processInstanceRepository;
 
@@ -44,41 +47,44 @@ public class TaskHistoryResourceRepositoryTest extends ActivitiTestBase {
 		taskService.saveTask(isolatedTask);
 
 		ActivitiModule activitiModule = boot.getModuleRegistry().getModule(ActivitiModule.class).get();
-		taskHistoryRepository = activitiModule.getTaskRepository(HistorizedApproveTask.class);
+		historicTaskRepository = activitiModule.getHistoricTaskRepository(HistoricApproveTask.class);
 		processInstanceRepository = activitiModule.getProcessInstanceRepository(ScheduleApprovalProcessInstance.class);
 	}
 
 	@Override
 	protected Module createActivitiModule() {
 		ActivitiModuleConfig config = new ActivitiModuleConfig();
-		config.addProcessInstance(ScheduleApprovalProcessInstance.class);
+		ProcessInstanceConfig processConfig = config.addProcessInstance(ScheduleApprovalProcessInstance.class);
+		processConfig.historic(HistoricScheduleApprovalProcessInstance.class);
 
-		config.addTask(ApproveTask.class).historized(HistorizedApproveTask.class).filterBy("description", ENFORCED_DESCRIPTION);
+		TaskRepositoryConfig taskConfig = config.addTask(ApproveTask.class);
+		taskConfig.historic(HistoricApproveTask.class);
+		taskConfig.filterBy("description", ENFORCED_DESCRIPTION);
 		return ActivitiModule.create(processEngine, config);
 	}
 
 	@Test
 	public void checkCompletedTaskNotFoundByMainRepository() {
-		QuerySpec querySpec = new QuerySpec(HistorizedApproveTask.class);
+		QuerySpec querySpec = new QuerySpec(HistoricApproveTask.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, task.getId()));
 		Assert.assertEquals(0, taskRepository.findAll(querySpec).size());
 	}
 
 	@Test
 	public void checkEqualsName() {
-		QuerySpec querySpec = new QuerySpec(HistorizedApproveTask.class);
+		QuerySpec querySpec = new QuerySpec(HistoricApproveTask.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, task.getId()));
-		Assert.assertEquals(1, taskHistoryRepository.findAll(querySpec).size());
+		Assert.assertEquals(1, historicTaskRepository.findAll(querySpec).size());
 	}
 
 	@Test
 	public void checkEqualsAssignee() {
-		QuerySpec querySpec = new QuerySpec(HistorizedApproveTask.class);
+		QuerySpec querySpec = new QuerySpec(HistoricApproveTask.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("assignee"), FilterOperator.EQ, "john"));
-		Assert.assertEquals(1, taskHistoryRepository.findAll(querySpec).size());
+		Assert.assertEquals(1, historicTaskRepository.findAll(querySpec).size());
 
-		querySpec = new QuerySpec(HistorizedApproveTask.class);
+		querySpec = new QuerySpec(HistoricApproveTask.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("assignee"), FilterOperator.EQ, "doesNotExists"));
-		Assert.assertEquals(0, taskHistoryRepository.findAll(querySpec).size());
+		Assert.assertEquals(0, historicTaskRepository.findAll(querySpec).size());
 	}
 }

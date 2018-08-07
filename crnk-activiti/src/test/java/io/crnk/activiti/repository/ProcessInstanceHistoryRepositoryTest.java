@@ -6,14 +6,16 @@ import java.util.Map;
 
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.example.ApprovalTestApplication;
-import io.crnk.activiti.example.model.HistorizedScheduleApprovalProcessInstance;
+import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalValues;
 import io.crnk.activiti.internal.repository.ProcessInstanceResourceRepository;
 import io.crnk.core.module.Module;
+import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -26,15 +28,12 @@ import org.junit.Test;
 public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 
 
-	private static final String ENFORCED_DESCRIPTION = "testDescription";
-
-
 	private ProcessInstance processInstance;
 
 	private RuntimeService runtimeService;
 
 
-	private ResourceRepositoryV2<HistorizedScheduleApprovalProcessInstance, String> processHistoryRepository;
+	private ResourceRepositoryV2<HistoricScheduleApprovalProcessInstance, String> processHistoryRepository;
 
 	private ResourceRepositoryV2<ScheduleApprovalProcessInstance, String> processRepository;
 
@@ -49,7 +48,8 @@ public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 
 		ActivitiModule activitiModule = boot.getModuleRegistry().getModule(ActivitiModule.class).get();
 		processRepository = activitiModule.getProcessInstanceRepository(ScheduleApprovalProcessInstance.class);
-		processHistoryRepository = activitiModule.getProcessInstanceRepository(HistorizedScheduleApprovalProcessInstance.class);
+		processHistoryRepository =
+				activitiModule.getHistoricProcessInstanceRepository(HistoricScheduleApprovalProcessInstance.class);
 
 		processInstance = addCompletedProcessInstance();
 	}
@@ -99,12 +99,20 @@ public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 
 	@Test
 	public void checkEqualId() {
-		QuerySpec querySpec = new QuerySpec(HistorizedScheduleApprovalProcessInstance.class);
+		QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
-		Assert.assertEquals(1, processRepository.findAll(querySpec).size());
+		Assert.assertEquals(1, processHistoryRepository.findAll(querySpec).size());
 
-		querySpec = new QuerySpec(HistorizedScheduleApprovalProcessInstance.class);
+		querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "doesNotExists"));
-		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+		Assert.assertEquals(0, processHistoryRepository.findAll(querySpec).size());
+	}
+
+	@Test
+	public void checkOrderByDuration() {
+		QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
+		querySpec.addSort(new SortSpec(Arrays.asList("duration"), Direction.DESC));
+		Assert.assertNotEquals(0, processHistoryRepository.findAll(querySpec).size());
+
 	}
 }

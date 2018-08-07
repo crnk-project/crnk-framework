@@ -19,8 +19,8 @@ import io.crnk.activiti.example.approval.ApprovalRelationshipRepository;
 import io.crnk.activiti.example.approval.ApprovalRepositoryDecorator;
 import io.crnk.activiti.example.model.ApproveForm;
 import io.crnk.activiti.example.model.ApproveTask;
-import io.crnk.activiti.example.model.HistorizedApproveTask;
-import io.crnk.activiti.example.model.HistorizedScheduleApprovalProcessInstance;
+import io.crnk.activiti.example.model.HistoricApproveTask;
+import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.mapper.DefaultDateTimeMapper;
@@ -101,13 +101,13 @@ public class ApprovalTestApplication extends ResourceConfig {
 	public static ActivitiModule createActivitiModule(ProcessEngine processEngine) {
 		ActivitiModuleConfig config = new ActivitiModuleConfig();
 		ProcessInstanceConfig processConfig = config.addProcessInstance(ScheduleApprovalProcessInstance.class);
-		processConfig.historized(HistorizedScheduleApprovalProcessInstance.class);
+		processConfig.historic(HistoricScheduleApprovalProcessInstance.class);
 		processConfig.filterByProcessDefinitionKey("scheduleChange");
 		processConfig.addTaskRelationship(
 				"approveTask", ApproveTask.class, "approveScheduleTask"
 		);
 		TaskRepositoryConfig taskConfig = config.addTask(ApproveTask.class);
-		taskConfig.historized(HistorizedApproveTask.class);
+		taskConfig.historic(HistoricApproveTask.class);
 		taskConfig.filterByTaskDefinitionKey("approveScheduleTask");
 		taskConfig.setForm(ApproveForm.class);
 		return ActivitiModule.create(processEngine, config);

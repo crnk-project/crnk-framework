@@ -1,21 +1,21 @@
 package io.crnk.activiti.example.model;
 
-import io.crnk.activiti.example.approval.ApprovalProcessInstance;
 import io.crnk.activiti.example.approval.ApprovalValues;
+import io.crnk.activiti.example.approval.HistoricApprovalProcessInstance;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 // tag::docs1[]
 @JsonApiResource(type = "approval/scheduleHistory")
-public class HistorizedScheduleApprovalProcessInstance extends ApprovalProcessInstance {
+public class HistoricScheduleApprovalProcessInstance extends HistoricApprovalProcessInstance {
 
 	private ScheduleApprovalValues newValues;
 
 	private ScheduleApprovalValues previousValues;
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
-	private HistorizedApproveTask approveTask;
+	private HistoricApproveTask approveTask;
 
 	public ScheduleApprovalValues getNewValues() {
 		return newValues;
@@ -33,11 +33,11 @@ public class HistorizedScheduleApprovalProcessInstance extends ApprovalProcessIn
 		this.previousValues = (ScheduleApprovalValues) previousValues;
 	}
 
-	public HistorizedApproveTask getApproveTask() {
+	public HistoricApproveTask getApproveTask() {
 		return approveTask;
 	}
 
-	public void setApproveTask(HistorizedApproveTask approveTask) {
+	public void setApproveTask(HistoricApproveTask approveTask) {
 		this.approveTask = approveTask;
 	}
 	// tag::docs2[]

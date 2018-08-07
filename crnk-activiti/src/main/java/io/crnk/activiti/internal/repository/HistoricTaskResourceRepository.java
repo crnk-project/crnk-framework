@@ -4,30 +4,30 @@ package io.crnk.activiti.internal.repository;
 import java.util.List;
 
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
-import io.crnk.activiti.resource.ProcessInstanceResource;
+import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterSpec;
 import org.activiti.engine.HistoryService;
-import org.activiti.engine.history.HistoricProcessInstanceQuery;
-import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.task.TaskInfo;
 
-public class ProcessInstanceHistoryResourceRepository<T extends ProcessInstanceResource> extends ActivitiRepositoryBase<T> {
+public class HistoricTaskResourceRepository<T extends TaskResource> extends ActivitiRepositoryBase<T> {
 
 	private final HistoryService historyService;
 
-	public ProcessInstanceHistoryResourceRepository(HistoryService historyService, ActivitiResourceMapper resourceMapper,
+	public HistoricTaskResourceRepository(HistoryService historyService, ActivitiResourceMapper resourceMapper,
 			Class<T> resourceClass, List<FilterSpec> baseFilters) {
 		super(resourceMapper, resourceClass, baseFilters);
 		this.historyService = historyService;
 	}
 
 	@Override
-	protected HistoricProcessInstanceQuery createQuery() {
-		return historyService.createHistoricProcessInstanceQuery().includeProcessVariables();
+	protected HistoricTaskInstanceQuery createQuery() {
+		return historyService.createHistoricTaskInstanceQuery().includeTaskLocalVariables();
 	}
 
 	@Override
 	protected T mapResult(Object result) {
-		return resourceMapper.mapToResource(getResourceClass(), (ProcessInstance) result);
+		return resourceMapper.mapToResource(getResourceClass(), (TaskInfo) result);
 	}
 
 	@Override
