@@ -482,7 +482,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		assertThat(response.getDocument().getSingleData().get().getAttributes().get("containedPojo").get("updateableProperty1")
 				.asText()).isEqualTo("updated value");
 		assertThat(response.getDocument().getSingleData().get().getAttributes().get("containedPojo").get("updateableProperty2")
-				.asText()).isEqualTo("value from repository mock");
+				.asText()).isEqualTo("updateableValue2");
 		assertThat(response.getDocument().getSingleData().get().getAttributes().get("updateableProperty").asText())
 				.isEqualTo("wasNullBefore");
 	}

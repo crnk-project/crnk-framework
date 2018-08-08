@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -160,7 +162,11 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					if (valueNode != null) {
 						JavaType jacksonValueType = objectMapper.getTypeFactory().constructType(valueType);
 						ObjectReader reader = objectMapper.reader().forType(jacksonValueType);
-						value = reader.readValue(valueNode);
+						if (valueType.getTypeName().equalsIgnoreCase(String.class.getTypeName()) || valueNode instanceof ObjectNode) {
+							value = reader.readValue(valueNode);
+						} else {
+							value = reader.readValue(valueNode.asText());
+						}
 					} else {
 						value = null;
 					}

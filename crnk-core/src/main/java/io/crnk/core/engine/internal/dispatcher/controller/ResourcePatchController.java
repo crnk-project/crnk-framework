@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
@@ -178,7 +179,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	}
 
-	private void updateValues(Map<String, Object> source, Map<String, Object> updates) {
+	private void updateValues(Map<String, Object> source, Map<String, Object> updates) throws JsonProcessingException {
 
 		for (Map.Entry<String, Object> entry : updates.entrySet()) {
 			String fieldName = entry.getKey();
@@ -192,8 +193,7 @@ public class ResourcePatchController extends ResourceUpsert {
 					source.put(fieldName, new HashMap<>());
 				}
 
-				Object sourceMap = source.get(fieldName);
-				updateValues((Map<String, Object>) sourceMap, (Map<String, Object>) updatedValue);
+				source.put(fieldName, updatedValue);
 				continue;
 			}
 
