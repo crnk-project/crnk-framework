@@ -5,9 +5,9 @@ dependencies {
 	compile 'org.slf4j:slf4j-api:1.7.25'
 	compile 'com.fasterxml.jackson.core:jackson-databind'
 	compile 'com.fasterxml.jackson.core:jackson-annotations'
-	compileOnly 'org.reflections:reflections:0.9.9'
+	compileOnly 'org.reflections:reflections'
 
-	testCompile 'org.reflections:reflections:0.9.9'
+	testCompile 'org.reflections:reflections'
 	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
 	testCompile 'nl.jqno.equalsverifier:equalsverifier:1.7.2'
 	testCompile 'com.jayway.jsonpath:json-path:2.2.0'

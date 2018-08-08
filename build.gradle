@@ -100,6 +100,8 @@ gradle.beforeProject { Project project ->
 						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.5'
 						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.5'
 						dependency 'com.fasterxml.jackson.core:jackson-core:2.9.5'
+
+						dependency 'org.reflections:reflections:0.9.11'
 					}
 				}
 			}

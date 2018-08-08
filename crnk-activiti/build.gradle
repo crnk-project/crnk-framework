@@ -19,5 +19,5 @@ dependencies {
 	compileOnly 'org.activiti:activiti-engine:6.0.0'
 	testCompile 'org.activiti:activiti-engine:6.0.0'
 	testCompile 'org.springframework:spring-context:3.0.3.RELEASE'
-	testCompile 'com.google.guava:guava:18.0'
+	testCompile 'com.google.guava:guava:26.0-jre'
 }

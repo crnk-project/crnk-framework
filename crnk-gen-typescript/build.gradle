@@ -18,7 +18,7 @@ dependencies {
 	compile project(':crnk-meta')
 	compile project(':crnk-jpa')
 	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
-	compile 'org.reflections:reflections:0.9.9'
+	compile 'org.reflections:reflections'
 
 	compile 'com.fasterxml.jackson.core:jackson-databind'
 	compile 'com.moowork.gradle:gradle-node-plugin:1.1.1'
