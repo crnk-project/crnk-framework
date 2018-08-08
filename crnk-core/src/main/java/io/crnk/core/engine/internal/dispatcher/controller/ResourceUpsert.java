@@ -162,11 +162,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					if (valueNode != null) {
 						JavaType jacksonValueType = objectMapper.getTypeFactory().constructType(valueType);
 						ObjectReader reader = objectMapper.reader().forType(jacksonValueType);
-						if (valueType.getTypeName().equalsIgnoreCase(String.class.getTypeName()) || valueNode instanceof ObjectNode) {
-							value = reader.readValue(valueNode);
-						} else {
-							value = reader.readValue(valueNode.asText());
-						}
+						value = reader.readValue(valueNode);
 					} else {
 						value = null;
 					}
