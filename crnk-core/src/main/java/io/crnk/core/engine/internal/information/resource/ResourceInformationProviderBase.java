@@ -27,6 +27,7 @@ import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -98,6 +99,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		ResourceFieldType fieldType = getFieldType(attributeDesc);
 		fieldBuilder.fieldType(fieldType);
 		fieldBuilder.access(getAccess(attributeDesc, fieldType));
+		fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
 		fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
 		fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc));
 		fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
@@ -288,7 +290,6 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		return setter == null && (field == null || !Modifier.isPublic(field.getModifiers()));
 	}
 
-
 	private boolean isIgnored(BeanAttributeInformation attributeDesc) {
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
 			Optional<Boolean> ignored = fieldInformationProvider.isIgnored(attributeDesc);
@@ -299,6 +300,21 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		return false;
 	}
 
+	private PatchStrategy getPatchStrategy(BeanAttributeInformation attributeDesc) {
+		PatchStrategy strategy = PatchStrategy.DEFAULT;
+		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+			Optional<PatchStrategy> patchStrategy = fieldInformationProvider.getPatchStrategy(attributeDesc);
+			if (patchStrategy.isPresent()) {
+				strategy = patchStrategy.get();
+				break;
+			}
+		}
+		if (strategy == PatchStrategy.DEFAULT) {
+			strategy = PatchStrategy.MERGE;
+		}
+
+		return strategy;
+	}
 
 	private ResourceFieldType getFieldType(BeanAttributeInformation attributeDesc) {
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {

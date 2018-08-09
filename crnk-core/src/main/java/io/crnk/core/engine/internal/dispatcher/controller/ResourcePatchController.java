@@ -27,6 +27,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class ResourcePatchController extends ResourceUpsert {
@@ -68,7 +69,7 @@ public class ResourcePatchController extends ResourceUpsert {
 					resourceInformation.verify(existingEntity, requestDocument);
 					return documentMapper.toDocument(existingResponse, queryAdapter, mappingConfig)
 							.map(it -> it.getSingleData().get())
-							.doWork(existing -> mergeNestedAttribute(existing, requestResource))
+							.doWork(existing -> mergeNestedAttribute(existing, requestResource, resourceInformation))
 							.map(it -> existingEntity);
 				})
 				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter,
@@ -117,14 +118,14 @@ public class ResourcePatchController extends ResourceUpsert {
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
 	}
 
-	private void mergeNestedAttribute(Resource existingReseource, Resource requestResource) {
+	private void mergeNestedAttribute(Resource existingResource, Resource requestResource, ResourceInformation resourceInformation) {
 		// extract current attributes from findOne without any manipulation by query params (such as sparse fieldsets)
 		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
 				ObjectMapper objectMapper = context.getObjectMapper();
 
-				String attributesFromFindOne = extractAttributesFromResourceAsJson(existingReseource);
+				String attributesFromFindOne = extractAttributesFromResourceAsJson(existingResource);
 				Map<String, Object> attributesToUpdate =
 						new HashMap<>(emptyIfNull(objectMapper.readValue(attributesFromFindOne, Map.class)));
 
@@ -142,7 +143,7 @@ public class ResourcePatchController extends ResourceUpsert {
 				}
 
 				// walk the source map and apply target values from request
-				updateValues(attributesToUpdate, attributesFromRequest);
+				updateValues(attributesToUpdate, attributesFromRequest, resourceInformation);
 				Map<String, JsonNode> upsertedAttributes = new HashMap<>();
 				for (Map.Entry<String, Object> entry : attributesToUpdate.entrySet()) {
 					JsonNode value = objectMapper.valueToTree(entry.getValue());
@@ -179,7 +180,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	}
 
-	private void updateValues(Map<String, Object> source, Map<String, Object> updates) throws JsonProcessingException {
+	private void updateValues(Map<String, Object> source, Map<String, Object> updates, ResourceInformation resourceInformation) throws JsonProcessingException {
 
 		for (Map.Entry<String, Object> entry : updates.entrySet()) {
 			String fieldName = entry.getKey();
@@ -193,7 +194,12 @@ public class ResourcePatchController extends ResourceUpsert {
 					source.put(fieldName, new HashMap<>());
 				}
 
-				source.put(fieldName, updatedValue);
+				if (resourceInformation.findFieldByName(fieldName).getPatchStrategy() == PatchStrategy.SET) {
+					source.put(fieldName, updatedValue);
+				} else {
+					Object sourceMap = source.get(fieldName);
+					updateValues((Map<String, Object>) sourceMap, (Map<String, Object>) updatedValue, resourceInformation);
+				}
 				continue;
 			}
 

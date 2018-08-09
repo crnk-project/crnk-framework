@@ -36,4 +36,9 @@ public @interface JsonApiField {
 	 * @return true if the attribute can be read with a GET request.
 	 */
 	boolean readable() default true;
+
+	/**
+	 * @return Patch strategy.
+	 */
+	PatchStrategy patchStrategy() default PatchStrategy.DEFAULT;
 }

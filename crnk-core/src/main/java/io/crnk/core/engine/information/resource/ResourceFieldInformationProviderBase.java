@@ -2,6 +2,7 @@ package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -77,6 +78,11 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
 
 	@Override
 	public Optional<RelationshipRepositoryBehavior> getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<PatchStrategy> getPatchStrategy(BeanAttributeInformation attributeDesc) {
 		return Optional.empty();
 	}
 }
