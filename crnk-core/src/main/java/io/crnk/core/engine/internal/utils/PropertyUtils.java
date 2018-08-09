@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import io.crnk.core.exception.RepositoryMethodException;
@@ -191,6 +192,10 @@ public class PropertyUtils {
 
 	private Object getPropertyValue(Object bean, String fieldName)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+		if (bean instanceof Map) {
+			return ((Map) bean).get(fieldName);
+		}
 
 		Field foundField = findField(bean.getClass(), fieldName);
 		if (foundField != null) {

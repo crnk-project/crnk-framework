@@ -25,6 +25,7 @@ export module Schedule {
 		name?: string;
 		description?: string;
 		delayed?: boolean;
+		customData?: { [key: string]: string };
 	}
 }
 export interface Schedule extends CrnkStoreResource {

@@ -3,6 +3,7 @@ package io.crnk.test.mock.models;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,8 +51,9 @@ public class Schedule {
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
 	private List<Project> projects = new ArrayList<>();
 
-
 	private boolean delayed;
+
+	private Map<String, String> customData;
 
 	public boolean isDelayed() {
 		return delayed;
@@ -159,5 +161,13 @@ public class Schedule {
 
 	public void setDesc(String desc) {
 		this.desc = desc;
+	}
+
+	public Map<String, String> getCustomData() {
+		return customData;
+	}
+
+	public void setCustomData(Map<String, String> customData) {
+		this.customData = customData;
 	}
 }

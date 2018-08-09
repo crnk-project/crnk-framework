@@ -166,6 +166,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("project", fields.get(7).getUnderlyingName());
 		Assert.assertEquals("projects", fields.get(8).getUnderlyingName());
 		Assert.assertEquals("delayed", fields.get(9).getUnderlyingName());
+		Assert.assertEquals("customData", fields.get(10).getUnderlyingName());
 
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 		List<? extends MetaAttribute> attributes = meta.getAttributes();
@@ -179,6 +180,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("project", attributes.get(7).getName());
 		Assert.assertEquals("projects", attributes.get(8).getName());
 		Assert.assertEquals("delayed", attributes.get(9).getName());
+		Assert.assertEquals("customData", attributes.get(10).getName());
 	}
 
 	@Test
