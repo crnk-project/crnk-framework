@@ -359,7 +359,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void patchNestedAttribute() throws Exception {
+	public void mergeNestedAttributeWithDefaultPatchStrategy() throws Exception {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
@@ -386,6 +386,47 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		Document projectPatch = new Document();
 		projectPatch.setData(Nullable.of((Object) data));
 		JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
+		ResourcePatchController sut = new ResourcePatchController();
+		sut.init(controllerContext);
+
+		// WHEN
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null, projectPatch);
+
+		// THEN
+		assertThat(response.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("sample "
+				+ "project");
+		assertThat(response.getDocument().getSingleData().get().getAttributes().get("data").get("data").asText())
+				.isEqualTo("updated data");
+
+	}
+
+	@Test
+	public void replaceNestedAttributeWithCustomPatchStrategy() throws Exception {
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject(Long.toString(PROJECT_ID), "projects-patch-strategy");
+		newProjectBody.setData(Nullable.of((Object) data));
+		JsonPath taskPath = pathBuilder.build("/projects-patch-strategy");
+
+		// WHEN
+		ResourcePostController resourcePost = new ResourcePostController();
+		resourcePost.init(controllerContext);
+		Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, null, newProjectBody);
+		Resource savedProject = projectResponse.getDocument().getSingleData().get();
+		assertThat(savedProject.getType()).isEqualTo("projects-patch-strategy");
+		assertThat(projectResponse.getDocument().getSingleData().get().getAttributes().get("data").get("data").asText()).isEqualTo("asd");
+		Long projectId = Long.parseLong(projectResponse.getDocument().getSingleData().get().getId());
+		assertThat(projectId).isNotNull();
+
+		// GIVEN
+		data = new Resource();
+		data.setType("projects-patch-strategy");
+		data.setId(savedProject.getId());
+		data.setAttribute("data", objectMapper.readTree("{\"data\" : \"updated data\"}"));
+
+		Document projectPatch = new Document();
+		projectPatch.setData(Nullable.of((Object) data));
+		JsonPath jsonPath = pathBuilder.build(taskPath + "/" + projectId);
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
 
@@ -554,5 +595,4 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		Assert.assertEquals("Mary Joe", task.getName());
 		Assert.assertEquals("TestCategory", task.getCategory());
 	}
-
 }

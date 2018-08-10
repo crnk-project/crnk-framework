@@ -26,6 +26,8 @@ import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceDuplicateIdException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.ProjectPatchStrategy;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
@@ -38,6 +40,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 
@@ -766,5 +769,19 @@ public class DefaultResourceInformationProviderTest {
 
 		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 		public AlphabeticResource relationship;
+	}
+
+	@Test
+	public void checkJsonApiDefaultPatchStrategy() throws Exception {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(Project.class);
+		ResourceField field = resourceInformation.findAttributeFieldByName("data");
+		Assert.assertEquals(PatchStrategy.MERGE, field.getPatchStrategy());
+	}
+
+	@Test
+	public void checkJsonApiPatchStrategy() throws Exception {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(ProjectPatchStrategy.class);
+		ResourceField field = resourceInformation.findAttributeFieldByName("data");
+		Assert.assertEquals(PatchStrategy.SET, field.getPatchStrategy());
 	}
 }

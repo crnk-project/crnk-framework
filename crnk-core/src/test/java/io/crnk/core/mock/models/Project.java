@@ -24,7 +24,6 @@ public class Project {
 
 	private String description;
 
-	@JsonApiField(patchStrategy = PatchStrategy.SET)
 	private ProjectData data;
 
 	@JsonApiToMany(opposite = "project")
