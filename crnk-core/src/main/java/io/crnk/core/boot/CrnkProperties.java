@@ -179,6 +179,15 @@ public class CrnkProperties {
 	 */
 	public static final String REJECT_PLAIN_JSON = "crnk.config.resource.request.rejectPlainJson";
 
+	/**
+	 *     <center><strong>Setting this option is not recommended.</strong></center><br>
+	 *     <p>Missing resources should be avoided, please use placeholders instead.</p>
+	 *     <p>
+	 *         Set a boolean whether Crnk should throw
+	 *         {@link io.crnk.core.exception.ResourceNotFoundException ResourceNotFoundException} if related resources are missing.
+	 *     </p>
+	 *     <p>Set this to <code>false</code> to ignore missing related resources.</p>
+	 */
+	public static final String EXCEPTION_ON_MISSING_RELATED_RESOURCE = "crnk.config.serialize.relation.exceptionOnMissingRelatedResource";
 
-	public static final String THROW_RESOURCE_NOT_FOUND_WHEN_RELATED_IDS_IS_NULL = "crnk.config.serialize.relation.throwResourceNotFound";
 }

@@ -38,15 +38,15 @@ public class IncludeRelationshipLoader {
 
 	private PropertiesProvider propertiesProvider;
 
-	private boolean throwResourceNotFoundWhenRelatedIdsIsNull = true;
+	private boolean exceptionOnMissingRelatedResource = true;
 
 	public IncludeRelationshipLoader(ResourceRegistry resourceRegistry, ResultFactory resultFactory, PropertiesProvider propertiesProvider) {
 		this.resourceRegistry = resourceRegistry;
 		this.resultFactory = resultFactory;
 		this.propertiesProvider = propertiesProvider;
 
-		if (propertiesProvider != null && propertiesProvider.getProperty(CrnkProperties.THROW_RESOURCE_NOT_FOUND_WHEN_RELATED_IDS_IS_NULL) != null) {
-			throwResourceNotFoundWhenRelatedIdsIsNull = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.THROW_RESOURCE_NOT_FOUND_WHEN_RELATED_IDS_IS_NULL));
+		if (propertiesProvider != null && propertiesProvider.getProperty(CrnkProperties.EXCEPTION_ON_MISSING_RELATED_RESOURCE) != null) {
+			exceptionOnMissingRelatedResource = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.EXCEPTION_ON_MISSING_RELATED_RESOURCE));
 		}
 
 	}
@@ -151,11 +151,9 @@ public class IncludeRelationshipLoader {
 					Object responseEntityId = oppositeResourceInformation.getId(responseEntity);
 					relatedIdsToLoad.remove(responseEntityId);
 				}
-				if (throwResourceNotFoundWhenRelatedIdsIsNull) {
-					if (!relatedIdsToLoad.isEmpty()) {
-						throw new ResourceNotFoundException("type=" + relationshipField.getOppositeResourceType() + ", "
-								+ "ids=" + relatedIdsToLoad);
-					}
+				if (!relatedIdsToLoad.isEmpty() && exceptionOnMissingRelatedResource) {
+					throw new ResourceNotFoundException("type=" + relationshipField.getOppositeResourceType() + ", "
+							+ "ids=" + relatedIdsToLoad);
 				}
 				return related;
 			});
