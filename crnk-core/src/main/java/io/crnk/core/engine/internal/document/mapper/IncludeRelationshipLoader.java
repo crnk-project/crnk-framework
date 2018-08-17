@@ -1,14 +1,6 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -17,6 +9,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -28,15 +21,34 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class IncludeRelationshipLoader {
 
 	private final ResultFactory resultFactory;
 
 	private ResourceRegistry resourceRegistry;
 
-	public IncludeRelationshipLoader(ResourceRegistry resourceRegistry, ResultFactory resultFactory) {
+	private PropertiesProvider propertiesProvider;
+
+	private boolean exceptionOnMissingRelatedResource = true;
+
+	public IncludeRelationshipLoader(ResourceRegistry resourceRegistry, ResultFactory resultFactory, PropertiesProvider propertiesProvider) {
 		this.resourceRegistry = resourceRegistry;
 		this.resultFactory = resultFactory;
+		this.propertiesProvider = propertiesProvider;
+
+		if (propertiesProvider != null && propertiesProvider.getProperty(CrnkProperties.EXCEPTION_ON_MISSING_RELATED_RESOURCE) != null) {
+			exceptionOnMissingRelatedResource = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.EXCEPTION_ON_MISSING_RELATED_RESOURCE));
+		}
+
 	}
 
 	/**
@@ -139,7 +151,7 @@ public class IncludeRelationshipLoader {
 					Object responseEntityId = oppositeResourceInformation.getId(responseEntity);
 					relatedIdsToLoad.remove(responseEntityId);
 				}
-				if (!relatedIdsToLoad.isEmpty()) {
+				if (!relatedIdsToLoad.isEmpty() && exceptionOnMissingRelatedResource) {
 					throw new ResourceNotFoundException("type=" + relationshipField.getOppositeResourceType() + ", "
 							+ "ids=" + relatedIdsToLoad);
 				}

@@ -1,12 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -28,6 +21,13 @@ import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class IncludeLookupSetter {
 
@@ -52,7 +52,7 @@ public class IncludeLookupSetter {
 		this.resourceRegistry = resourceRegistry;
 		this.resultFactory = resultFactory;
 
-		this.relationshipLoader = new IncludeRelationshipLoader(resourceRegistry, resultFactory);
+		this.relationshipLoader = new IncludeRelationshipLoader(resourceRegistry, resultFactory, propertiesProvider);
 
 		IncludeBehavior includeBehavior = IncludeLookupUtil.getIncludeBehavior(propertiesProvider);
 		this.util = new IncludeLookupUtil(resourceRegistry, includeBehavior);
