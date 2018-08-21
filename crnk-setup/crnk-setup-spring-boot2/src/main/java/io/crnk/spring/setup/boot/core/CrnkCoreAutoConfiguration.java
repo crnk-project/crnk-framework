@@ -103,6 +103,13 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 			}
 		}
 
+		if (properties.getEnforceDotSeparator() != null) {
+			QuerySpecUrlMapper urlMapper = boot.getUrlMapper();
+			if (urlMapper instanceof DefaultQuerySpecUrlMapper) {
+				((DefaultQuerySpecUrlMapper) urlMapper).setEnforceDotPathSeparator(properties.getEnforceDotSeparator());
+			}
+		}
+
 		boot.boot();
 		return boot;
 	}
