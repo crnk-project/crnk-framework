@@ -15,6 +15,7 @@ import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
+import io.crnk.jpa.model.CustomTypeTestEntity;
 import io.crnk.jpa.model.OtherRelatedEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEmbeddedIdEntity;
@@ -620,4 +621,24 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 		return test;
 	}
+
+	@Test
+	public void testCustomType() {
+		ResourceRepositoryV2<CustomTypeTestEntity, Serializable> repo =
+				client.getRepositoryForType(CustomTypeTestEntity.class);
+
+		CustomTypeTestEntity.CustomType customValue = new CustomTypeTestEntity.CustomType();
+		customValue.setValue("test");
+
+		CustomTypeTestEntity entity = new CustomTypeTestEntity();
+		entity.setId(13L);
+		entity.setValue(customValue);
+		repo.create(entity);
+
+		QuerySpec querySpec = new QuerySpec(CustomTypeTestEntity.class);
+		List<CustomTypeTestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(1, list.size());
+		Assert.assertEquals("test", list.get(0).getValue().getValue());
+	}
+
 }

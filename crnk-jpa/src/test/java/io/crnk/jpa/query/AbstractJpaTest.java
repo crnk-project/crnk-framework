@@ -1,18 +1,41 @@
 package io.crnk.jpa.query;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.internal.CoreModule;
-import io.crnk.core.engine.internal.jackson.JacksonModule;
-import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.meta.JpaMetaProvider;
-import io.crnk.jpa.model.*;
+import io.crnk.jpa.model.BasicAttributesTestEntity;
+import io.crnk.jpa.model.CountryEntity;
+import io.crnk.jpa.model.CountryTranslationEntity;
+import io.crnk.jpa.model.CustomTypeTestEntity;
+import io.crnk.jpa.model.JoinedTableBaseEntity;
+import io.crnk.jpa.model.JoinedTableChildEntity;
+import io.crnk.jpa.model.JpaTransientTestEntity;
+import io.crnk.jpa.model.LangEntity;
+import io.crnk.jpa.model.ManyToManyOppositeEntity;
+import io.crnk.jpa.model.ManyToManyTestEntity;
+import io.crnk.jpa.model.OneToOneTestEntity;
+import io.crnk.jpa.model.OtherRelatedEntity;
+import io.crnk.jpa.model.RelatedEntity;
+import io.crnk.jpa.model.RenamedTestEntity;
+import io.crnk.jpa.model.SingleTableBaseEntity;
+import io.crnk.jpa.model.SingleTableChildEntity;
+import io.crnk.jpa.model.TablePerClassBaseEntity;
+import io.crnk.jpa.model.TablePerClassChildEntity;
+import io.crnk.jpa.model.TestAnyType;
+import io.crnk.jpa.model.TestEmbeddable;
+import io.crnk.jpa.model.TestEmbeddedIdEntity;
+import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.TestIdEmbeddable;
+import io.crnk.jpa.model.TestNestedEmbeddable;
+import io.crnk.jpa.model.TestSubclassWithSuperclassPk;
+import io.crnk.jpa.model.UuidTestEntity;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.util.JpaTestConfig;
 import io.crnk.jpa.util.SpringTransactionRunner;
@@ -24,11 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = JpaTestConfig.class)
@@ -85,6 +103,7 @@ public abstract class AbstractJpaTest {
 		clear(em, factory.query(RenamedTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(UuidTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(JpaTransientTestEntity.class).buildExecutor().getResultList());
+		clear(em, factory.query(CustomTypeTestEntity.class).buildExecutor().getResultList());
 		em.flush();
 		em.clear();
 	}
