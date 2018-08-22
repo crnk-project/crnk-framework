@@ -1,15 +1,28 @@
 package io.crnk.jpa.internal;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.information.resource.ResourceValidator;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.information.resource.ResourceInformationProviderBase;
 import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -17,6 +30,7 @@ import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Prioritizable;
@@ -31,14 +45,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
-
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -77,7 +83,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			} else {
+			}
+			else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -86,16 +93,16 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 		String resourcePath = getResourcePath(resourceClass);
-
 
 		MetaDataObject meta = metaProvider.discoverMeta(resourceClass).asDataObject();
 		DefaultResourceInstanceBuilder instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
 		List<ResourceField> fields = getResourceFields(resourceClass);
+		handleIdOverride(resourceClass, fields);
 
 		Class<?> superclass = resourceClass.getSuperclass();
 		String superResourceType = superclass != Object.class
@@ -109,6 +116,32 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
 		info.setIdStringMapper(new JpaIdMapper(meta));
 		return info;
+	}
+
+	/**
+	 * make sure that @JsonApiId wins over @Id and @EmbeddedId of JPA.
+	 */
+	private void handleIdOverride(Class<?> resourceClass, List<ResourceField> fields) {
+		List<ResourceField> idFields = fields.stream()
+				.filter(field -> field.getResourceFieldType() == ResourceFieldType.ID)
+				.collect(Collectors.toList());
+		if (idFields.size() == 2) {
+			ResourceField field0 = idFields.get(0);
+			ResourceField field1 = idFields.get(1);
+
+			BeanInformation beanInformation = BeanInformation.get(resourceClass);
+			BeanAttributeInformation attr0 = beanInformation.getAttribute(field0.getUnderlyingName());
+			BeanAttributeInformation attr1 = beanInformation.getAttribute(field1.getUnderlyingName());
+
+			boolean jsonApiId0 = attr0.getAnnotation(JsonApiId.class).isPresent();
+			boolean jsonApiId1 = attr1.getAnnotation(JsonApiId.class).isPresent();
+			if (jsonApiId0 && !jsonApiId1) {
+				((ResourceFieldImpl) field1).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
+			}
+			else if (!jsonApiId0 && jsonApiId1) {
+				((ResourceFieldImpl) field0).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
+			}
+		}
 	}
 
 	@Override
@@ -223,7 +256,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			// => support compound keys with unique ids
 			if (type instanceof MetaDataObject) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
-			} else {
+			}
+			else {
 				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 			}
 		}

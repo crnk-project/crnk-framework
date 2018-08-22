@@ -42,6 +42,7 @@
 		<class>io.crnk.jpa.model.TestEmbeddedIdEntity</class>
 		<class>io.crnk.jpa.model.MethodAnnotatedEntity</class>
 		<class>io.crnk.jpa.model.CustomTypeTestEntity</class>
+		<class>io.crnk.jpa.model.OverrideIdTestEntity</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />

@@ -39,15 +39,15 @@ public abstract class JpaRepositoryBase<T> {
 				&& PagedMetaInformation.class.isAssignableFrom(repositoryConfig.getListMetaClass());
 	}
 
-	protected static <D> D getUnique(List<D> list, Object id) {
+	protected  <D> D getUnique(List<D> list, Object id) {
 		if (list.isEmpty()) {
-			throw new ResourceNotFoundException("resource not found: id=" + id);
+			throw new ResourceNotFoundException("resource not found: type=" + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
 		}
 		else if (list.size() == 1) {
 			return list.get(0);
 		}
 		else {
-			throw new IllegalStateException("unique result expected");
+			throw new IllegalStateException("unique result expected: " + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
 		}
 	}
 

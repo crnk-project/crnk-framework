@@ -22,6 +22,7 @@ import io.crnk.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.jpa.model.ManyToManyTestEntity;
 import io.crnk.jpa.model.OneToOneTestEntity;
 import io.crnk.jpa.model.OtherRelatedEntity;
+import io.crnk.jpa.model.OverrideIdTestEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.RenamedTestEntity;
 import io.crnk.jpa.model.SingleTableBaseEntity;
@@ -104,6 +105,7 @@ public abstract class AbstractJpaTest {
 		clear(em, factory.query(UuidTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(JpaTransientTestEntity.class).buildExecutor().getResultList());
 		clear(em, factory.query(CustomTypeTestEntity.class).buildExecutor().getResultList());
+		clear(em, factory.query(OverrideIdTestEntity.class).buildExecutor().getResultList());
 		em.flush();
 		em.clear();
 	}
