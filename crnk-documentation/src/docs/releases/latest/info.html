@@ -42,3 +42,10 @@ taskConfig.historic(HistoricApproveTask.class);
 taskConfig.filterBy("description", ENFORCED_DESCRIPTION);
 return ActivitiModule.create(processEngine, config);
 </pre>
+
+
+<h4>Simplified customizations of Criteria-based crnk-jpa repositories</h4>
+
+There is a new interface JpaCriteriaRepositoryFilter and base class JpaCriteriaRepositoryFilterBase that allow
+easy customization of CriteriaQuery objects. The interfaces are a specialization of JpaRepositoryFilter
+and can be used in the same manner by registering it to the JpaModuleConfig.

@@ -221,6 +221,8 @@ A filter looks like:
 
 
 The various filter methods allow a wide variety of customizations or also to replace the passed object in question.
+With `JpaCriteriaRepositoryFilter` and `QuerydslRepositoryFilter` there are two specialization of
+`JpaRepositoryFilter` that allow further customizations specific to respective query mechanism.
 
 anchor:dto_mapping[]
 

@@ -1,19 +1,24 @@
 package io.crnk.jpa.internal.query.backend.criteria;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
+
 import io.crnk.jpa.internal.query.AbstractQueryExecutorImpl;
 import io.crnk.jpa.internal.query.QueryUtil;
 import io.crnk.jpa.internal.query.backend.querydsl.ObjectArrayTupleImpl;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryExecutor;
 import io.crnk.meta.model.MetaDataObject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class JpaCriteriaQueryExecutorImpl<T> extends AbstractQueryExecutorImpl<T> implements JpaCriteriaQueryExecutor<T> {
 
@@ -73,6 +78,7 @@ public class JpaCriteriaQueryExecutorImpl<T> extends AbstractQueryExecutorImpl<T
 			countExpr = builder.count(root);
 			query.multiselect(countExpr);
 			query.orderBy(new ArrayList<Order>());
+
 			TypedQuery countQuery = em.createQuery(query);
 
 			return (Long) countQuery.getSingleResult();

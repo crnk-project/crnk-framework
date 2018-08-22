@@ -1,6 +1,7 @@
 package io.crnk.jpa.internal;
 
 import java.util.List;
+import javax.persistence.criteria.CriteriaQuery;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -14,6 +15,8 @@ import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.Tuple;
+import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilter;
+import io.crnk.jpa.query.criteria.JpaCriteriaQueryExecutor;
 
 public abstract class JpaRepositoryBase<T> {
 
@@ -39,15 +42,17 @@ public abstract class JpaRepositoryBase<T> {
 				&& PagedMetaInformation.class.isAssignableFrom(repositoryConfig.getListMetaClass());
 	}
 
-	protected  <D> D getUnique(List<D> list, Object id) {
+	protected <D> D getUnique(List<D> list, Object id) {
 		if (list.isEmpty()) {
-			throw new ResourceNotFoundException("resource not found: type=" + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
+			throw new ResourceNotFoundException(
+					"resource not found: type=" + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
 		}
 		else if (list.size() == 1) {
 			return list.get(0);
 		}
 		else {
-			throw new IllegalStateException("unique result expected: " + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
+			throw new IllegalStateException(
+					"unique result expected: " + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
 		}
 	}
 
@@ -88,6 +93,12 @@ public abstract class JpaRepositoryBase<T> {
 		for (JpaRepositoryFilter filter : module.getFilters()) {
 			if (filter.accept(repositoryConfig.getResourceClass())) {
 				filteredExecutor = filter.filterExecutor(this, querySpec, filteredExecutor);
+
+				if (filter instanceof JpaCriteriaRepositoryFilter && executor instanceof JpaCriteriaQueryExecutor) {
+					JpaCriteriaRepositoryFilter criteriaFilter = (JpaCriteriaRepositoryFilter) filter;
+					CriteriaQuery criteriaQuery = ((JpaCriteriaQueryExecutor<E>) executor).getQuery();
+					criteriaFilter.filterCriteriaQuery(this, querySpec, criteriaQuery);
+				}
 			}
 		}
 		return filteredExecutor;
