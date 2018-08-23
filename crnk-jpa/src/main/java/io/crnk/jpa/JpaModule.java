@@ -31,6 +31,7 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.jpa.internal.JpaRepositoryBase;
@@ -51,6 +52,7 @@ import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModuleExtension;
+import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -509,6 +511,12 @@ public class JpaModule implements InitializingModule {
 
 
 	private boolean isValidEntity(MetaEntity metaEntity) {
+		for (MetaAttribute attribute : metaEntity.getAttributes()) {
+			if (attribute.getAnnotation(JsonApiId.class) != null) {
+				return true;
+			}
+		}
+
 		if (metaEntity.getPrimaryKey() == null) {
 			logger.warn("{} has no primary key and will be ignored", metaEntity.getName());
 			return false;

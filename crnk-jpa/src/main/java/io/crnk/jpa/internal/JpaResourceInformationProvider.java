@@ -1,11 +1,11 @@
 package io.crnk.jpa.internal;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.persistence.EmbeddedId;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OptimisticLockException;
 
@@ -101,6 +101,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		MetaDataObject meta = metaProvider.discoverMeta(resourceClass).asDataObject();
 		DefaultResourceInstanceBuilder instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
+		BeanInformation beanInformation = BeanInformation.get(resourceClass);
+
 		List<ResourceField> fields = getResourceFields(resourceClass);
 		handleIdOverride(resourceClass, fields);
 
@@ -114,7 +116,13 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
 						instanceBuilder, fields, OffsetLimitPagingSpec.class);
 		info.setValidator(new JpaOptimisticLockingValidator(meta));
-		info.setIdStringMapper(new JpaIdMapper(meta));
+
+
+		ResourceField idField = info.getIdField();
+		BeanAttributeInformation idAttr = beanInformation.getAttribute(idField.getUnderlyingName());
+		if(idAttr.getAnnotation(EmbeddedId.class).isPresent()){
+			info.setIdStringMapper(new JpaIdMapper(meta));
+		}
 		return info;
 	}
 
@@ -249,7 +257,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 		public Object parse(String input) {
 			MetaKey primaryKey = jpaMeta.getPrimaryKey();
 			MetaAttribute attr = primaryKey.getUniqueElement();
-			return (Serializable) fromKeyString(attr.getType(), input);
+			return fromKeyString(attr.getType(), input);
 		}
 
 		private Object fromKeyString(MetaType type, String idString) {
