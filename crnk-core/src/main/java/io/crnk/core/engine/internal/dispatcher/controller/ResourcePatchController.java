@@ -90,7 +90,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 		Set<String> loadedRelationshipNames;
 		Result<JsonApiResponse> updatedResource;
-		if (resourceInformation.getResourceClass() == Resource.class) {
+		if (resourceInformation.getImplementationClass() == Resource.class) {
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 			updatedResource = resourceRepository.update(requestResource, queryAdapter);
 		} else {

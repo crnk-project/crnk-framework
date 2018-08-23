@@ -49,7 +49,7 @@ public class ResourcePostController extends ResourceUpsert {
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
 		Result<JsonApiResponse> response;
-		if (Resource.class.equals(resourceInformation.getResourceClass())) {
+		if (Resource.class.equals(resourceInformation.getImplementationClass())) {
 			response = resourceRepository.create(requestResource, queryAdapter);
 		} else {
 			Object entity = newEntity(resourceInformation, requestResource);

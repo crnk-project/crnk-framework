@@ -47,9 +47,17 @@ public interface InformationBuilder {
 
 		void from(ResourceInformation information);
 
+		InformationBuilder.Field addField();
+
 		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
 
+		/**
+		 * @deprecated use {@link #implementationType(Type)}
+		 */
+		@Deprecated
 		Resource resourceClass(Class<?> resourceClass);
+
+		Resource implementationType(Type implementationType);
 
 		Resource resourceType(String resourceType);
 

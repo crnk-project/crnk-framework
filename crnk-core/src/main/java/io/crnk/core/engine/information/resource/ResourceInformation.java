@@ -1,5 +1,17 @@
 package io.crnk.core.engine.information.resource;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
@@ -8,7 +20,6 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.information.resource.DefaultResourceInstanceBuilder;
-import io.crnk.core.engine.internal.information.resource.ReflectionFieldAccessor;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -24,23 +35,14 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 /**
  * Holds information about the type of the resource.
  */
 public class ResourceInformation {
 
-	private final Class<?> resourceClass;
+	private final Class<?> implementationClass;
+
+	private final Type implementationType;
 
 	private ResourceField parentField;
 
@@ -124,28 +126,29 @@ public class ResourceInformation {
 
 	private ResourceFieldAccessor nestedIdAccessor;
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
 							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
-		this(parser, resourceClass, resourceType, null, superResourceType, null, fields, pagingSpecType);
+		this(parser, implementationType, resourceType, null, superResourceType, null, fields, pagingSpecType);
 	}
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
+	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String resourcePath,
 							   String superResourceType,
 							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
-		this(parser, resourceClass, resourceType, resourcePath, superResourceType, null, fields, pagingSpecType);
+		this(parser, implementationType, resourceType, resourcePath, superResourceType, null, fields, pagingSpecType);
 	}
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
 							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
-		this(parser, resourceClass, resourceType, null, superResourceType, instanceBuilder, fields, pagingSpecType);
+		this(parser, implementationType, resourceType, null, superResourceType, instanceBuilder, fields, pagingSpecType);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String resourcePath,
+	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String resourcePath,
 							   String superResourceType,
 							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this.parser = parser;
-		this.resourceClass = resourceClass;
+		this.implementationClass = ClassUtils.getRawType(implementationType);
+		this.implementationType = implementationType;
 		this.resourceType = resourceType;
 		this.resourcePath = resourcePath;
 		this.superResourceType = superResourceType;
@@ -155,7 +158,7 @@ public class ResourceInformation {
 
 		initFields();
 		if (this.instanceBuilder == null) {
-			this.instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
+			this.instanceBuilder = new DefaultResourceInstanceBuilder(implementationClass);
 		}
 
 		initAny();
@@ -205,9 +208,11 @@ public class ResourceInformation {
 					throw new UnsupportedOperationException("cannot update nested ids");
 				}
 			};
+			PreconditionUtil.verify(parentField != null, "naming of relationship to parent resource and relationship identifier within resource identifier must match, not found for %s of %s", parentAttribute.getName(),
+					implementationClass);
+			PreconditionUtil.verify(parentField.getOppositeName() != null, "relationship of a nested resource pointing to its parent must have @JsonApiRelation.opposite defined, not found for '%s' of %s", parentAttribute.getName(),
+					implementationClass);
 			((ResourceFieldImpl) parentField).setIdField(parentAttribute.getName(), parentAttribute.getImplementationClass(), parentIdAccessor);
-			PreconditionUtil.verify(parentField != null, "naming of relationship to parent resource and relationship identifier within resource identifier must match, not found for %s of %s", parentAttribute.getName(), resourceClass);
-			PreconditionUtil.verify(parentField.getOppositeName() != null, "relationship of a nested resource pointing to its parent must have @JsonApiRelation.opposite field defined, not found for '%s' of %s", parentAttribute.getName(), resourceClass);
 			BeanAttributeInformation finalIdAttribute = idAttribute;
 			this.nestedIdAccessor = new ResourceFieldAccessor() {
 
@@ -252,13 +257,13 @@ public class ResourceInformation {
 	}
 
 	private void initAny() {
-		final Method jsonAnyGetter = ClassUtils.findMethodWith(resourceClass, JsonAnyGetter.class);
-		final Method jsonAnySetter = ClassUtils.findMethodWith(resourceClass, JsonAnySetter.class);
+		final Method jsonAnyGetter = ClassUtils.findMethodWith(implementationClass, JsonAnyGetter.class);
+		final Method jsonAnySetter = ClassUtils.findMethodWith(implementationClass, JsonAnySetter.class);
 
 		if (absentAnySetter(jsonAnyGetter, jsonAnySetter)) {
 			throw new InvalidResourceException(
 					String.format("A resource %s has to have both methods annotated with @JsonAnySetter and @JsonAnyGetter",
-							resourceClass.getCanonicalName()));
+							implementationClass.getCanonicalName()));
 		}
 
 		if (jsonAnyGetter != null) {
@@ -303,7 +308,7 @@ public class ResourceInformation {
 		if (fields != null) {
 			List<ResourceField> idFields = ResourceFieldType.ID.filter(fields);
 			if (idFields.size() > 1) {
-				throw new ResourceDuplicateIdException(resourceClass.getCanonicalName());
+				throw new ResourceDuplicateIdException(implementationClass.getCanonicalName());
 			}
 
 			this.idField = idFields.isEmpty() ? null : idFields.get(0);
@@ -311,8 +316,8 @@ public class ResourceInformation {
 			this.attributeFields = ResourceFieldType.ATTRIBUTE.filter(fields);
 			this.relationshipFields = ResourceFieldType.RELATIONSHIP.filter(fields);
 
-			this.metaField = getMetaField(resourceClass, fields);
-			this.linksField = getLinksField(resourceClass, fields);
+			this.metaField = getMetaField(implementationClass, fields);
+			this.linksField = getLinksField(implementationClass, fields);
 
 			for (ResourceField resourceField : fields) {
 				resourceField.setResourceInformation(this);
@@ -385,8 +390,19 @@ public class ResourceInformation {
 		return (ResourceInstanceBuilder<T>) instanceBuilder;
 	}
 
+	public Type getImplementationType() {
+		return implementationType;
+	}
+
+	public Class<?> getImplementationClass() {
+		return implementationClass;
+	}
+
+	/**
+	 * @Deprecated use {@link #getImplementationClass()}
+	 */
 	public Class<?> getResourceClass() {
-		return resourceClass;
+		return getImplementationClass();
 	}
 
 	public ResourceField getIdField() {
@@ -438,13 +454,13 @@ public class ResourceInformation {
 			return false;
 		}
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects
+		return Objects.equals(implementationClass, that.implementationClass) && Objects.equals(resourceType, that.resourceType) && Objects
 				.equals(resourcePath, that.resourcePath);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(resourceClass, resourceType, resourcePath);
+		return Objects.hash(implementationClass, resourceType, resourcePath);
 	}
 
 	/**
@@ -471,7 +487,7 @@ public class ResourceInformation {
 		if (resourceOrId instanceof Resource) {
 			return ((Resource) resourceOrId).toIdentifier();
 		}
-		if (resourceClass.isInstance(resourceOrId)) {
+		if (implementationClass.isInstance(resourceOrId)) {
 			resourceOrId = getId(resourceOrId);
 		}
 		if (resourceOrId instanceof ResourceIdentifier) {

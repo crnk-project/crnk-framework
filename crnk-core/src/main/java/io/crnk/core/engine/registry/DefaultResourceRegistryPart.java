@@ -1,5 +1,6 @@
 package io.crnk.core.engine.registry;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,41 +18,51 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 
-	private final Logger logger = LoggerFactory.getLogger(ResourceRegistryImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(DefaultResourceRegistryPart.class);
 
 	private final Map<String, RegistryEntry> resourcesByType;
 
 	private final Map<String, RegistryEntry> resourcesByPath;
 
-	private final Map<Class, RegistryEntry> resourcesByClass;
+	private final Map<Type, RegistryEntry> resourcesByImplementationType;
 
 	public DefaultResourceRegistryPart() {
 		this.resourcesByType = new HashMap<>();
 		this.resourcesByPath = new HashMap<>();
-		this.resourcesByClass = new HashMap<>();
+		this.resourcesByImplementationType = new HashMap<>();
 	}
 
 	@Override
 	public RegistryEntry addEntry(RegistryEntry entry) {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
-		Class<?> resourceClass = resourceInformation.getResourceClass();
+		Type implementationType = resourceInformation.getImplementationType();
 		String resourceType = resourceInformation.getResourceType();
 		String resourcePath = resourceInformation.getResourcePath();
 		PreconditionUtil.verify(resourceType != null, "no resourceType set for entry %d", entry);
-		PreconditionUtil.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %s", resourceType, entry);
+		PreconditionUtil
+				.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %s",
+						resourceType, entry);
 		if (entry.hasResourceRepository()) {
-			PreconditionUtil.verify(!resourcesByPath.containsKey(resourcePath), "resourceType '%s' already exists, cannot add entry %s", resourcePath, entry);
+			PreconditionUtil
+					.verify(!resourcesByPath.containsKey(resourcePath), "resourceType '%s' already exists, cannot add entry %s",
+							resourcePath, entry);
 			resourcesByPath.put(resourcePath != null ? resourcePath : resourceType, entry);
 		}
-		resourcesByClass.put(resourceClass, entry);
+		resourcesByImplementationType.put(implementationType, entry);
 		resourcesByType.put(resourceType, entry);
 		logger.debug("Added resource '{}' to ResourceRegistry", resourceType);
 		notifyChange();
 		return entry;
 	}
 
-	public boolean hasEntry(Class<?> clazz) {
-		return getEntry(clazz) != null;
+	@Override
+	public boolean hasEntry(Class<?> implementationClass) {
+		return getEntry(implementationClass) != null;
+	}
+
+	@Override
+	public boolean hasEntry(Type implementationType) {
+		return getEntry(implementationType) != null;
 	}
 
 	@Override
@@ -60,8 +70,14 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 		return this.getEntry(resourceType) != null;
 	}
 
-	public RegistryEntry getEntry(Class<?> resourceClass) {
-		return resourcesByClass.get(resourceClass);
+	@Override
+	public RegistryEntry getEntry(Class<?> implementationClass) {
+		return resourcesByImplementationType.get(implementationClass);
+	}
+
+	@Override
+	public RegistryEntry getEntry(Type implementationType) {
+		return resourcesByImplementationType.get(implementationType);
 	}
 
 	/**
