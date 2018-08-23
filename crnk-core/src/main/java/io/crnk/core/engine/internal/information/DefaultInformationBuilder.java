@@ -100,6 +100,10 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private boolean exposed = true;
 
+		private boolean isVersioned;
+
+		private int version;
+
 		@Override
 		public void from(ResourceRepositoryInformation information) {
 			actions.putAll(information.getActions());
@@ -108,6 +112,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			if (information.getResourceInformation().isPresent()) {
 				resourceInformation = information.getResourceInformation().get();
 			}
+			isVersioned = information.isVersioned();
+			version = information.getVersion();
 		}
 
 		@Override
@@ -127,7 +133,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		public ResourceRepositoryInformation build() {
 			return new ResourceRepositoryInformationImpl(resourceInformation.getResourceType(),
-					resourceInformation, actions, access, exposed);
+					resourceInformation, actions, access, exposed, isVersioned, version);
 		}
 	}
 

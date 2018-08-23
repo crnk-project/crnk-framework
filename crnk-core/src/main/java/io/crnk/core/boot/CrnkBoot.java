@@ -42,11 +42,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapterBuilder;
-import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
-import io.crnk.core.engine.registry.HierarchicalResourceRegistryPart;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.registry.*;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
@@ -281,7 +277,8 @@ public class CrnkBoot {
 
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
-			rootPart = new DefaultResourceRegistryPart();
+			//rootPart = new DefaultResourceRegistryPart();
+			rootPart = new VersionedResourceRegistryPart();
 		}
 		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();

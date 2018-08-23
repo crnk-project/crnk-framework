@@ -1,11 +1,32 @@
 package io.crnk.core.engine.registry;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.Collection;
 
 
 public interface ResourceRegistryPart {
 
-	RegistryEntry addEntry(RegistryEntry entry);
+    default RegistryEntry getEntryByPath(String path, int version) {
+        //noop;
+        //throw new NotImplementedException();
+		return null;
+    }
+
+    default RegistryEntry getEntry(Class<?> clazz, int version) {
+        //noop;
+		//throw new NotImplementedException();
+		return null;
+    }
+
+    default RegistryEntry getEntry(String resourceType, int version) {
+        //noop;
+		//throw new NotImplementedException();
+		return null;
+    }
+
+
+    RegistryEntry addEntry(RegistryEntry entry);
 
 	boolean hasEntry(Class<?> clazz);
 

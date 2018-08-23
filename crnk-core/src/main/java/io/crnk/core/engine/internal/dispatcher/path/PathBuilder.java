@@ -37,10 +37,18 @@ public class PathBuilder {
 	private final ResourceRegistry resourceRegistry;
 	private final TypeParser parser;
 
+	private int version;
+
 	public PathBuilder(ResourceRegistry resourceRegistry, TypeParser parser) {
 		this.resourceRegistry = resourceRegistry;
 		this.parser = parser;
+		this.version = 0;
 	}
+
+    public PathBuilder(ResourceRegistry resourceRegistry, TypeParser parser, int version) {
+        this(resourceRegistry, parser);
+        this.version = version;
+    }
 
 	private static List<Serializable> parseIds(String idsString, ResourceInformation resourceInformation) {
 		List<String> strPathIds = Arrays.asList(idsString.split(JsonPath.ID_SEPARATOR_PATTERN));
@@ -205,7 +213,8 @@ public class PathBuilder {
 
 
 	private RegistryEntry getEntryByPath(String path) {
-		RegistryEntry entry = resourceRegistry.getEntryByPath(path);
+        RegistryEntry entry = resourceRegistry.getEntryByPath(path, version);
+
 		if (entry != null) {
 			ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 			if (repositoryInformation == null || !repositoryInformation.isExposed()) {

@@ -79,6 +79,21 @@ public abstract class BaseController implements Controller {
 		return registryEntry;
 	}
 
+    protected RegistryEntry getRegistryEntry(String resource, int version) {
+        if (version == 0) {
+            return getRegistryEntry(resource);
+        }
+
+        ResourceRegistry resourceRegistry = context.getResourceRegistry();
+        RegistryEntry registryEntry = resourceRegistry.getEntry(resource, version);
+        if (registryEntry == null) {
+            throw new BadRequestException(
+                    String.format("Invalid resource type: %s", resource)
+            );
+        }
+        return registryEntry;
+    }
+
 	protected void validateCreatedResponse(ResourceInformation resourceInformation, JsonApiResponse response) {
 		Object entity = response.getEntity();
 		logger.debug("posted resource {}", entity);

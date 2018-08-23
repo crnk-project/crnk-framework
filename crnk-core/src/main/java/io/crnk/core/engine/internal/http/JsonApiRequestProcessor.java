@@ -58,8 +58,9 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		boolean isPatch = method.equals(HttpMethod.PATCH.toString());
 		boolean isPost = method.equals(HttpMethod.POST.toString());
 		if (isPatch || isPost) {
+		    //TODO validation if versioned content_type
 			String contentType = requestContext.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE);
-			if (contentType == null || !contentType.startsWith(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
+			if (contentType == null) {
 				LOGGER.warn("not a JSON-API request due to content type {}", contentType);
 				return false;
 			}

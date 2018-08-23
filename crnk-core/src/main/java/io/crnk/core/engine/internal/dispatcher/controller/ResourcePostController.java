@@ -38,7 +38,10 @@ public class ResourcePostController extends ResourceUpsert {
 
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
-		RegistryEntry registryEntry = getRegistryEntry(requestResource.getType());
+        int version = jsonPath.getRootEntry()
+                              .getRepositoryInformation()
+                              .getVersion();
+        RegistryEntry registryEntry = getRegistryEntry(requestResource.getType(), version);
 		logger.debug("using registry entry {}", registryEntry);
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.POST, endpointRegistryEntry, registryEntry);

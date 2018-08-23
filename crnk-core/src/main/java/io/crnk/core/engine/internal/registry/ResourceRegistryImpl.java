@@ -28,12 +28,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	private ResourceRegistryPart rootPart;
 
-	private ResourceRegistryPartListener rootListener = new ResourceRegistryPartListener() {
-		@Override
-		public void onChanged(ResourceRegistryPartEvent event) {
-			notifyChange();
-		}
-	};
+	private ResourceRegistryPartListener rootListener = event -> notifyChange();
 
 	public ResourceRegistryImpl(ResourceRegistryPart rootPart, ModuleRegistry moduleRegistry) {
 		this.rootPart = rootPart;
@@ -234,7 +229,22 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return rootPart.getEntryByPath(resourcePath);
 	}
 
-	@Override
+    @Override
+    public RegistryEntry getEntryByPath(String path, int version) {
+        return rootPart.getEntryByPath(path, version);
+    }
+
+    @Override
+    public RegistryEntry getEntry(Class<?> clazz, int version) {
+        return rootPart.getEntry(clazz, version);
+    }
+
+    @Override
+    public RegistryEntry getEntry(String resourceType, int version) {
+        return rootPart.getEntry(resourceType, version);
+    }
+
+    @Override
 	public Collection<RegistryEntry> getResources() {
 		return rootPart.getResources();
 	}

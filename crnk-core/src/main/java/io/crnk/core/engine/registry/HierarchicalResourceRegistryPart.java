@@ -17,12 +17,7 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 
 	private List<ResourceRegistryPart> partList = new ArrayList<>();
 
-	private ResourceRegistryPartListener childListener = new ResourceRegistryPartListener() {
-		@Override
-		public void onChanged(ResourceRegistryPartEvent event) {
-			notifyChange();
-		}
-	};
+	private ResourceRegistryPartListener childListener = event -> notifyChange();
 
 	public void putPart(String prefix, ResourceRegistryPart part) {
 		if (partMap.containsKey(prefix)) {

@@ -42,4 +42,6 @@ public interface ResourceRepositoryInformation extends RepositoryInformation {
 	 * relationship lookups.
 	 */
 	boolean isExposed();
+	boolean isVersioned();
+	int getVersion();
 }

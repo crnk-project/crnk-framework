@@ -21,6 +21,10 @@ public class ResourceRepositoryInformationImpl implements ResourceRepositoryInfo
 
 	private boolean exposed;
 
+	private boolean isVersioned;
+
+	private int version;
+
 	public ResourceRepositoryInformationImpl(String path,
 			ResourceInformation resourceInformation, Map<String, RepositoryAction> actions,
 			RepositoryMethodAccess access, boolean exposed) {
@@ -30,6 +34,14 @@ public class ResourceRepositoryInformationImpl implements ResourceRepositoryInfo
 		this.access = access;
 		this.exposed = exposed;
 	}
+
+    public ResourceRepositoryInformationImpl(String path,
+                                             ResourceInformation resourceInformation, Map<String, RepositoryAction> actions,
+                                             RepositoryMethodAccess access, boolean exposed, boolean isVersioned, int version) {
+        this(path, resourceInformation, actions, access, exposed);
+        this.isVersioned = isVersioned;
+        this.version = version;
+    }
 
 	@Override
 	public Optional<ResourceInformation> getResourceInformation() {
@@ -65,4 +77,14 @@ public class ResourceRepositoryInformationImpl implements ResourceRepositoryInfo
 	public RepositoryMethodAccess getAccess() {
 		return access;
 	}
+
+	@Override
+    public boolean isVersioned() {
+        return isVersioned;
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
+    }
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import io.crnk.core.engine.document.Version;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
@@ -63,8 +64,10 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		String path = getPath(resourceInformation, repository);
 		boolean exposed = repository != null && isExposed(resourceInformation, repository);
+		boolean isVersioned = repositoryClass.isAnnotationPresent(Version.class);
+		int version = isVersioned ? repositoryClass.getAnnotation(Version.class).from() : 0;
 		return new ResourceRepositoryInformationImpl(path, resourceInformation, buildActions(repositoryClass),
-				getAccess(repository), exposed);
+				getAccess(repository), exposed, isVersioned, version);
 	}
 
 	// FIXME
