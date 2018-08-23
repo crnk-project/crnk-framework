@@ -54,7 +54,7 @@ public class InMemoryEvaluatorTest {
 	@Test
 	public void testNoAttributePathGivesError() {
 		QuerySpec spec = new QuerySpec(Task.class);
-		spec.addFilter(new FilterSpec(null, FilterOperator.EQ, "test"));
+		spec.addFilter(new FilterSpec((PathSpec)null, FilterOperator.EQ, "test"));
 		try {
 			spec.apply(tasks).size();
 			Assert.fail();

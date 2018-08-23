@@ -3,6 +3,7 @@ package io.crnk.core.queryspec;
 import java.util.Arrays;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,7 +18,7 @@ public class SortSpecTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void testThrowExceptionOnNullPathArgument() {
-		new SortSpec(null, Direction.ASC);
+		new SortSpec((PathSpec)null, Direction.ASC);
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -42,7 +43,7 @@ public class SortSpecTest {
 
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(SortSpec.class).usingGetClass().verify();
+		EqualsVerifier.forClass(SortSpec.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 
 		SortSpec spec1 = new SortSpec(Arrays.asList("name1"), Direction.ASC);
 		SortSpec spec2 = new SortSpec(Arrays.asList("name1"), Direction.ASC);

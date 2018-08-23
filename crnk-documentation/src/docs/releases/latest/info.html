@@ -49,3 +49,15 @@ return ActivitiModule.create(processEngine, config);
 There is a new interface JpaCriteriaRepositoryFilter and base class JpaCriteriaRepositoryFilterBase that allow
 easy customization of CriteriaQuery objects. The interfaces are a specialization of JpaRepositoryFilter
 and can be used in the same manner by registering it to the JpaModuleConfig.
+
+<h4>PathSpec within QuerySpec</h4>
+
+All the QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path
+as PathSpec. PathSpec facilitate working with paths compared to the previous List&lt;String&gt; solution.
+All the previous API remains unchanged and supported (no deprecations).
+
+<h4>QuerySpecVisitor</h4>
+
+The new QuerySpecVisitor and QuerySpecVisitorBase classes allow to visit
+a QuerySpec by calling QuerySpec.accept(QuerySpecVisitor). Visitors can be used, for example,
+to easily modify attribute paths within a QuerySpc.

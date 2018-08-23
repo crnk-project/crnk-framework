@@ -1,9 +1,9 @@
 package io.crnk.core.queryspec;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class IncludeFieldSpecTest {
 
@@ -15,7 +15,7 @@ public class IncludeFieldSpecTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testThrowExceptionOnNullArgument() {
-		new IncludeFieldSpec(null);
+		new IncludeFieldSpec((PathSpec)null);
 	}
 
 	@Test

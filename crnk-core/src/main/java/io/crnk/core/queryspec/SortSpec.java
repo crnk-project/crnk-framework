@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class SortSpec extends AbstractPathSpec implements Serializable {
 
@@ -13,6 +12,10 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 	private final Direction direction;
 
 	public SortSpec(List<String> path, Direction direction) {
+		this(PathSpec.of(path), direction);
+	}
+
+	public SortSpec(PathSpec path, Direction direction) {
 		super(path);
 		PreconditionUtil.verify(path != null && !path.isEmpty(), "path cannot be empty");
 		PreconditionUtil.verify(direction != null, "direction cannot be null for path %s", path);
@@ -32,7 +35,7 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 	}
 
 	public SortSpec reverse() {
-		return new SortSpec(attributePath, direction == Direction.ASC ? Direction.DESC : Direction.ASC);
+		return new SortSpec(path, direction == Direction.ASC ? Direction.DESC : Direction.ASC);
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append(StringUtils.join(".", attributePath));
+		b.append(path.toString());
 		b.append(' ');
 		b.append(direction);
 		return b.toString();
@@ -66,6 +69,6 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 
 	@Override
 	public SortSpec clone() {
-		return new SortSpec(attributePath, direction);
+		return new SortSpec(path, direction);
 	}
 }
