@@ -1,18 +1,20 @@
 package io.crnk.jpa.internal;
 
+import java.util.Arrays;
+import java.util.Set;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
+import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.jpa.JpaRepositoryConfig;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
-
-import java.util.*;
 
 public class JpaRepositoryUtils {
 
@@ -66,5 +68,18 @@ public class JpaRepositoryUtils {
 			}
 			executor.setLimit((int) querySpec.getLimit().longValue());
 		}
+	}
+
+	public static void setDefaultConfig(JpaModuleConfig moduleConfig, JpaRepositoryConfig<?> repositoryConfig) {
+		if (!repositoryConfig.hasQueryFactory()) {
+			repositoryConfig.setQueryFactory(moduleConfig::getQueryFactory);
+		}
+		if (!repositoryConfig.hasTotalAvailable()) {
+			repositoryConfig.setTotalAvailable(moduleConfig.isTotalResourceCountUsed());
+		}
+
+		moduleConfig.getFilters().stream()
+				.filter(filter -> !repositoryConfig.getFilters().contains(filter))
+				.forEach(filter -> repositoryConfig.addFilter(filter));
 	}
 }

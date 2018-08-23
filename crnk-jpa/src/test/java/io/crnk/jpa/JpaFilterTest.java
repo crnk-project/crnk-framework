@@ -28,7 +28,6 @@ public class JpaFilterTest extends AbstractJpaJerseyTest {
 
 	@Override
 	protected void setupModule(JpaModule module, boolean server) {
-		super.setupModule(module, server);
 		if (server) {
 			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
 			filter = Mockito.spy(new JpaCriteriaRepositoryFilterBase());

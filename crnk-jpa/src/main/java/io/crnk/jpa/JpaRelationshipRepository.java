@@ -1,7 +1,5 @@
 package io.crnk.jpa;
 
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.repository.RelationshipMatcher;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,12 +7,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
 
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
@@ -56,13 +55,14 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	public JpaRelationshipRepository(JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T>
 			repositoryConfig) {
 		super(module, repositoryConfig);
+
 		this.sourceResourceClass = (Class<S>) resourceField.getParentResourceInformation().getResourceClass();
 		this.resourceField = resourceField;
 
 		JpaRepositoryConfig<S> sourceMapping = module.getRepositoryConfig(sourceResourceClass);
 		this.sourceEntityClass = sourceMapping.getEntityClass();
 		this.sourceMapper = sourceMapping.getMapper();
-		this.entityMeta = module.getJpaMetaProvider().getMeta(sourceEntityClass);
+		this.entityMeta = module.getJpaMetaProvider().discoverMeta(sourceEntityClass);
 	}
 
 	@Override
@@ -78,7 +78,6 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
-		EntityManager em = module.getEntityManager();
 		Object target = targetId != null ? em.find(targetType, targetId) : null;
 		attrMeta.setValue(sourceEntity, target);
 
@@ -101,7 +100,6 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
-		EntityManager em = module.getEntityManager();
 		Collection<Object> targets = attrMeta.getType().asCollection().newInstance();
 		for (J targetId : targetIds) {
 
@@ -158,7 +156,6 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
-		EntityManager em = module.getEntityManager();
 		for (J targetId : targetIds) {
 			Object target = em.find(targetType, targetId);
 			attrMeta.addValue(sourceEntity, target);
@@ -184,7 +181,6 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
-		EntityManager em = module.getEntityManager();
 		for (J targetId : targetIds) {
 			Object target = em.find(targetType, targetId);
 			attrMeta.removeValue(sourceEntity, target);
@@ -219,7 +215,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		QuerySpec filteredQuerySpec = filterQuerySpec(bulkQuerySpec);
 
-		JpaQueryFactory queryFactory = module.getQueryFactory();
+		JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
 		JpaQuery<?> query = queryFactory.query(sourceEntityClass, fieldName, sourceIdLists);
 		query.setPrivateData(new JpaRequestContext(this, querySpec));
 		query.addParentIdSelection();

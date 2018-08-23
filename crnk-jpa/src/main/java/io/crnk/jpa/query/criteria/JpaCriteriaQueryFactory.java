@@ -1,11 +1,12 @@
 package io.crnk.jpa.query.criteria;
 
+import java.lang.reflect.Type;
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import io.crnk.jpa.internal.JpaQueryFactoryBase;
 import io.crnk.jpa.internal.query.backend.criteria.JpaCriteriaQueryImpl;
 import io.crnk.jpa.query.JpaQueryFactory;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 public class JpaCriteriaQueryFactory extends JpaQueryFactoryBase implements JpaQueryFactory {
 
@@ -14,6 +15,12 @@ public class JpaCriteriaQueryFactory extends JpaQueryFactoryBase implements JpaQ
 
 	public static JpaCriteriaQueryFactory newInstance() {
 		return new JpaCriteriaQueryFactory();
+	}
+
+	public static JpaCriteriaQueryFactory newInstance(EntityManager em) {
+		JpaCriteriaQueryFactory factory = new JpaCriteriaQueryFactory();
+		factory.initalize(createDefaultContext(em));
+		return factory;
 	}
 
 	@Override
@@ -27,7 +34,7 @@ public class JpaCriteriaQueryFactory extends JpaQueryFactoryBase implements JpaQ
 	}
 
 	public void registerComputedAttribute(Class<?> targetClass, String attributeName, Type attributeType,
-										  JpaCriteriaExpressionFactory<?> expressionFactory) {
+			JpaCriteriaExpressionFactory<?> expressionFactory) {
 		computedAttrs.register(targetClass, attributeName, expressionFactory, attributeType);
 	}
 

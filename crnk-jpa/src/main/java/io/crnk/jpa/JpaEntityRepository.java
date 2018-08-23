@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
 
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -25,14 +25,12 @@ import io.crnk.jpa.internal.JpaRepositoryBase;
 import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.mapping.JpaMapper;
+import io.crnk.jpa.meta.internal.JpaMetaUtils;
 import io.crnk.jpa.query.ComputedAttributeRegistry;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.Tuple;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimaryKey;
 
 /**
  * Exposes a JPA entity as ResourceRepository.
@@ -40,16 +38,22 @@ import io.crnk.meta.model.MetaPrimaryKey;
 public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositoryBase<T> implements ResourceRepositoryV2<T, I>,
 		ResourceRegistryAware {
 
-	private final MetaPrimaryKey primaryKey;
+	private final BeanAttributeInformation primaryKeyAttribute;
 
 	private ResourceRegistry resourceRegistry;
 
-
+	/**
+	 * @deprecated use other constructor. Deprecated to remove JpaModule dependency and allow using this class stand-alone.
+	 */
+	@Deprecated
 	public JpaEntityRepository(JpaModule module, JpaRepositoryConfig<T> config) {
 		super(module, config);
-		MetaElement metaEntity = module.getJpaMetaProvider().getMeta(config.getEntityClass());
-		primaryKey = metaEntity.asDataObject().getPrimaryKey();
+		primaryKeyAttribute = JpaMetaUtils.getUniquePrimaryKey(config.getEntityClass());
+	}
 
+	public JpaEntityRepository(JpaRepositoryConfig<T> config) {
+		super(config);
+		primaryKeyAttribute = JpaMetaUtils.getUniquePrimaryKey(config.getEntityClass());
 	}
 
 
@@ -74,7 +78,7 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 	public ResourceList<T> findAll(QuerySpec querySpec) {
 		Class<?> entityClass = repositoryConfig.getEntityClass();
 		QuerySpec filteredQuerySpec = filterQuerySpec(querySpec);
-		JpaQueryFactory queryFactory = module.getQueryFactory();
+		JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
 		JpaQuery<?> query = queryFactory.query(entityClass);
 		query.setPrivateData(new JpaRequestContext(this, querySpec));
 
@@ -141,7 +145,6 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 
 		// PATCH reads, updates and saves entities, needs reattachment during
 		// save since reads do a detach
-		EntityManager em = module.getEntityManager();
 		em.persist(entity);
 		Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
 
@@ -158,17 +161,14 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 
 	@Override
 	public void delete(I id) {
-		EntityManager em = module.getEntityManager();
-		MetaAttribute pkField = primaryKey.getUniqueElement();
-
 		Object pk;
 		ResourceField idField = getIdField();
-		if (idField.getUnderlyingName().equals(pkField.getName())) {
+		if (idField.getUnderlyingName().equals(primaryKeyAttribute.getName())) {
 			pk = id;
 		}
 		else {
 			T resource = findOne(id, new QuerySpec(getResourceClass()));
-			pk = PropertyUtils.getProperty(resource, pkField.getName());
+			pk = PropertyUtils.getProperty(resource, primaryKeyAttribute.getName());
 			if (pk == null) {
 				throw new IllegalStateException(
 						"no primary key available for type=" + getResourceClass().getSimpleName() + " id=" + id);

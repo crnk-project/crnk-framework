@@ -122,14 +122,13 @@ public abstract class AbstractJpaTest {
 
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
 		module = JpaModule.newServerModule(emFactory, em, transactionRunner);
+		queryFactory = createQueryFactory(em);
+		module.setQueryFactory(queryFactory);
+
 		setupModule(module);
 		boot.addModule(module);
 		boot.boot();
 		resourceRegistry = boot.getResourceRegistry();
-
-		queryFactory = createQueryFactory(em);
-		module.setQueryFactory(queryFactory);
-
 
 		clear();
 		for (int i = 0; i < numTestEntities; i++) {
@@ -205,9 +204,6 @@ public abstract class AbstractJpaTest {
 		}
 		em.flush();
 		em.clear();
-
-		queryFactory = createQueryFactory(em);
-		module.setQueryFactory(queryFactory);
 	}
 
 	/**

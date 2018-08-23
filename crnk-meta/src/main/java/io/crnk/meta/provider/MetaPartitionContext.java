@@ -1,5 +1,7 @@
 package io.crnk.meta.provider;
 
+import java.util.concurrent.Callable;
+
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
@@ -13,4 +15,6 @@ public interface MetaPartitionContext {
 	Optional<MetaElement> getMetaElement(String id);
 
 	MetaPartition getBasePartition();
+
+	<T> T runDiscovery(Callable<T> callable);
 }
