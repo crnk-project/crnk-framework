@@ -1,5 +1,6 @@
 package io.crnk.core.engine.registry;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 
@@ -9,6 +10,8 @@ public interface ResourceRegistryPart {
 
 	boolean hasEntry(Class<?> clazz);
 
+	boolean hasEntry(Type type);
+
 	boolean hasEntry(String resourceType);
 
 	RegistryEntry getEntry(String resourceType);
@@ -16,6 +19,8 @@ public interface ResourceRegistryPart {
 	Collection<RegistryEntry> getResources();
 
 	RegistryEntry getEntry(Class<?> clazz);
+
+	RegistryEntry getEntry(Type type);
 
 	RegistryEntry getEntryByPath(String resourcePath);
 

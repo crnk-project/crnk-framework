@@ -15,6 +15,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class QuerySpecTest {
 
@@ -259,4 +260,30 @@ public class QuerySpecTest {
 		Assert.assertNotEquals(spec1, "someOtherType");
 	}
 
+	@Test
+	public void testVisitor() {
+		FilterSpec filterSpec = new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test");
+		SortSpec sortSpec = new SortSpec(Arrays.asList("sortAttr"), Direction.ASC);
+		IncludeFieldSpec fieldSpec = new IncludeFieldSpec(PathSpec.of("includedField"));
+		IncludeRelationSpec relationSpec = new IncludeRelationSpec(PathSpec.of("includedRelation"));
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addFilter(filterSpec);
+		spec.addSort(sortSpec);
+		spec.getIncludedFields().add(fieldSpec);
+		spec.getIncludedRelations().add(relationSpec);
+		spec.setOffset(1);
+
+		QuerySpecVisitorBase visitor = Mockito.spy(QuerySpecVisitorBase.class);
+		spec.accept(visitor);
+
+		Mockito.verify(visitor, Mockito.times(1)).visitStart(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(1)).visitEnd(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(1)).visitField(Mockito.eq(fieldSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitFilterStart(Mockito.eq(filterSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitFilterEnd(Mockito.eq(filterSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitInclude(Mockito.eq(relationSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitSort(Mockito.eq(sortSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitPaging(Mockito.eq(spec.getPaging()));
+		Mockito.verify(visitor, Mockito.times(4)).visitPath(Mockito.any(PathSpec.class));
+	}
 }

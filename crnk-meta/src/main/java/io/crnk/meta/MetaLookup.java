@@ -110,6 +110,11 @@ public class MetaLookup {
 			public MetaPartition getBasePartition() {
 				return basePartition;
 			}
+
+			@Override
+			public <T> T runDiscovery(Callable<T> callable) {
+				return discover(callable);
+			}
 		});
 	}
 
@@ -179,9 +184,22 @@ public class MetaLookup {
 	}
 
 	private <T> T discover(Callable<T> callable) {
-		LOGGER.debug("discovery started");
-		discovering = true;
+		if (discovering) {
+			try {
+				return callable.call();
+			}
+			catch (RuntimeException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				LOGGER.debug("discovery failed", e);
+				throw new IllegalStateException(e);
+			}
+		}
 		try {
+			LOGGER.debug("discovery started");
+			discovering = true;
+
 			T result = callable.call();
 
 			while (!initializationQueue.isEmpty()) {
@@ -193,10 +211,15 @@ public class MetaLookup {
 			}
 			LOGGER.debug("discovery completed");
 			return result;
-		} catch (Exception e) {
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			LOGGER.debug("discovery failed", e);
 			throw new IllegalStateException(e);
-		} finally {
+		}
+		finally {
 			discovering = false;
 		}
 	}

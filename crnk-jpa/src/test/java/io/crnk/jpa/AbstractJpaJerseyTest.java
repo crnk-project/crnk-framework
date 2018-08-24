@@ -139,7 +139,6 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			feature.addModule(new TestModule());
 
 			JpaModule module = JpaModule.newServerModule(em, transactionRunner);
-			module.setQueryFactory(QuerydslQueryFactory.newInstance());
 			setupModule(module, true);
 
 			Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();

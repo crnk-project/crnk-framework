@@ -1,11 +1,15 @@
 package io.crnk.jpa.internal;
 
+import java.util.Collections;
+import javax.persistence.EntityManager;
+
 import io.crnk.jpa.internal.query.ComputedAttributeRegistryImpl;
+import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.query.ComputedAttributeRegistry;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
-
-import javax.persistence.EntityManager;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.provider.MetaPartition;
 
 public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 
@@ -14,7 +18,6 @@ public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 	protected ComputedAttributeRegistryImpl computedAttrs = new ComputedAttributeRegistryImpl();
 
 	protected JpaQueryFactoryContext context;
-
 
 	@Override
 	public void initalize(JpaQueryFactoryContext context) {
@@ -30,4 +33,22 @@ public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 	public ComputedAttributeRegistry getComputedAttributes() {
 		return computedAttrs;
 	}
+
+	protected static JpaQueryFactoryContext createDefaultContext(EntityManager em) {
+		JpaMetaProvider jpaMetaProvider = new JpaMetaProvider(Collections.emptySet());
+		MetaLookup metaLookup = new MetaLookup();
+		metaLookup.addProvider(jpaMetaProvider);
+		return new JpaQueryFactoryContext() {
+			@Override
+			public EntityManager getEntityManager() {
+				return em;
+			}
+
+			@Override
+			public MetaPartition getMetaPartition() {
+				return jpaMetaProvider.getPartition();
+			}
+		};
+	}
+
 }

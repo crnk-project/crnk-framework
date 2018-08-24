@@ -136,7 +136,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private List<DefaultField> fields = new ArrayList<>();
 
-		private Class<?> resourceClass;
+		private Type implementationType;
 
 		private String resourceType;
 
@@ -152,7 +152,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		@Override
 		public void from(ResourceInformation information) {
-			resourceClass = information.getResourceClass();
+			implementationType = information.getImplementationType();
 			resourceType = information.getResourceType();
 			resourcePath = information.getResourcePath();
 			superResourceType = information.getSuperResourceType();
@@ -167,6 +167,13 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 
 		@Override
+		public DefaultField addField() {
+			DefaultField field = new DefaultField();
+			fields.add(field);
+			return field;
+		}
+
+		@Override
 		public DefaultField addField(String name, ResourceFieldType type, Class<?> clazz) {
 			DefaultField field = new DefaultField();
 			field.jsonName(name);
@@ -178,21 +185,31 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return field;
 		}
 
+		@Override
 		public DefaultResource resourceClass(Class<?> resourceClass) {
-			this.resourceClass = resourceClass;
+			this.implementationType = resourceClass;
 			return this;
 		}
 
+		@Override
+		public DefaultResource implementationType(Type implementationType) {
+			this.implementationType = implementationType;
+			return this;
+		}
+
+		@Override
 		public DefaultResource resourceType(String resourceType) {
 			this.resourceType = resourceType;
 			return this;
 		}
 
+		@Override
 		public DefaultResource resourcePath(String resourcePath) {
 			this.resourcePath = resourcePath;
 			return this;
 		}
 
+		@Override
 		public DefaultResource superResourceType(String superResourceType) {
 			this.superResourceType = superResourceType;
 			return this;
@@ -217,7 +234,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			}
 
 			ResourceInformation information =
-					new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
+					new ResourceInformation(typeParser, implementationType, resourceType, resourcePath, superResourceType,
 							fieldImpls, pagingSpecType);
 			if (validator != null) {
 				information.setValidator(validator);

@@ -25,8 +25,6 @@ public class JpaModuleConfig {
 	private JpaRepositoryFactory repositoryFactory = new DefaultJpaRepositoryFactory();
 
 	public JpaModuleConfig() {
-		QueryFactoryDiscovery queryFactoryDiscovery = new QueryFactoryDiscovery();
-		setQueryFactory(queryFactoryDiscovery.discoverDefaultFactory());
 	}
 
 	public void setRepositoryFactory(JpaRepositoryFactory repositoryFactory) {
@@ -44,7 +42,8 @@ public class JpaModuleConfig {
 
 	/**
 	 * Adds the given filter to this module. Filter will be used by all
-	 * repositories managed by this module.
+	 * repositories managed by this module. Filters can also be configured
+	 * per-repository with {@link JpaRepositoryConfig#addFilter(JpaRepositoryFilter)}.
 	 *
 	 * @param filter to add
 	 */
@@ -78,6 +77,8 @@ public class JpaModuleConfig {
 	 * This flag allows enable (default) or disable totalResourceCount computation. If it is disabled,
 	 * limit + 1 resources are fetched and the presence of the last one determines whether a pagination next
 	 * link will be provided.
+	 * <p>
+	 * The behavior can also be configured per-repository with {@link JpaRepositoryConfig#setTotalAvailable(Boolean)}.
 	 */
 	public void setTotalResourceCountUsed(boolean totalResourceCountUsed) {
 		this.totalResourceCountUsed = totalResourceCountUsed;
@@ -162,10 +163,17 @@ public class JpaModuleConfig {
 	 * queries.
 	 */
 	public JpaQueryFactory getQueryFactory() {
+		if(queryFactory == null){
+			QueryFactoryDiscovery queryFactoryDiscovery = new QueryFactoryDiscovery();
+			setQueryFactory(queryFactoryDiscovery.discoverDefaultFactory());
+		}
 		return queryFactory;
 	}
 
 	public void setQueryFactory(JpaQueryFactory queryFactory) {
+		if(this.queryFactory != null){
+			throw new IllegalStateException("queryFactory already set");
+		}
 		this.queryFactory = queryFactory;
 	}
 }

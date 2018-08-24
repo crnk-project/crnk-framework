@@ -40,7 +40,7 @@ class ResourceRepositoryFacade implements ResourceRepositoryV2<Object, Serializa
 
 	@Override
 	public Class getResourceClass() {
-		return entry.getResourceInformation().getResourceClass();
+		return entry.getResourceInformation().getImplementationClass();
 	}
 
 	@Override

@@ -21,6 +21,12 @@ public class RelationIdTestResource {
 	private String name;
 
 	@JsonApiRelationId
+	private Long testRenamedDifferent;
+
+	@JsonApiRelation(idField = "testRenamedDifferent")
+	private Schedule testRenamed;
+
+	@JsonApiRelationId
 	private Long testLookupAlwaysId;
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
@@ -77,6 +83,22 @@ public class RelationIdTestResource {
 
 	public Long getId() {
 		return id;
+	}
+
+	public Long getTestRenamedDifferent() {
+		return testRenamedDifferent;
+	}
+
+	public void setTestRenamedDifferent(Long testRenamedDifferent) {
+		this.testRenamedDifferent = testRenamedDifferent;
+	}
+
+	public Schedule getTestRenamed() {
+		return testRenamed;
+	}
+
+	public void setTestRenamed(Schedule testRenamed) {
+		this.testRenamed = testRenamed;
 	}
 
 	public void setId(Long id) {

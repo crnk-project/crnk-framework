@@ -4,42 +4,60 @@ import java.util.List;
 
 public class AbstractPathSpec {
 
-	protected final List<String> attributePath;
+	protected PathSpec path;
 
 	protected AbstractPathSpec() {
-		this.attributePath = null;
+		this.path = null;
 	}
 
 	protected AbstractPathSpec(List<String> attributePath) {
-		this.attributePath = attributePath;
+		this.path = PathSpec.of(attributePath);
+	}
+
+	protected AbstractPathSpec(PathSpec path) {
+		this.path = path;
+	}
+
+	public PathSpec getPath() {
+		return path;
+	}
+
+	public void setPath(PathSpec path) {
+		this.path = path;
 	}
 
 	public List<String> getAttributePath() {
-		return attributePath;
+		return path != null ? path.getElements() : null;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((attributePath == null) ? 0 : attributePath.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		AbstractPathSpec other = (AbstractPathSpec) obj;
-		if (attributePath == null) {
-			if (other.attributePath != null)
+		if (path == null) {
+			if (other.path != null) {
 				return false;
-		} else if (!attributePath.equals(other.attributePath))
+			}
+		}
+		else if (!path.equals(other.path)) {
 			return false;
+		}
 		return true;
 	}
 

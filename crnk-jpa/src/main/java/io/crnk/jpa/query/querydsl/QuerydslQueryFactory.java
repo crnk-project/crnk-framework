@@ -1,12 +1,13 @@
 package io.crnk.jpa.query.querydsl;
 
-import io.crnk.jpa.internal.JpaQueryFactoryBase;
-import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
-import io.crnk.jpa.query.JpaQueryFactory;
-
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.persistence.EntityManager;
+
+import io.crnk.jpa.internal.JpaQueryFactoryBase;
+import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
+import io.crnk.jpa.query.JpaQueryFactory;
 
 public class QuerydslQueryFactory extends JpaQueryFactoryBase implements JpaQueryFactory {
 
@@ -19,6 +20,12 @@ public class QuerydslQueryFactory extends JpaQueryFactoryBase implements JpaQuer
 		return new QuerydslQueryFactory();
 	}
 
+	public static QuerydslQueryFactory newInstance(EntityManager em) {
+		QuerydslQueryFactory factory = new QuerydslQueryFactory();
+		factory.initalize(createDefaultContext(em));
+		return factory;
+	}
+
 	public void addInterceptor(QuerydslTranslationInterceptor interceptor) {
 		interceptors.add(interceptor);
 	}
@@ -28,14 +35,15 @@ public class QuerydslQueryFactory extends JpaQueryFactoryBase implements JpaQuer
 		return new QuerydslQueryImpl<>(context.getMetaPartition(), em, entityClass, computedAttrs, interceptors);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public <T> QuerydslQuery<T> query(Class<?> entityClass, String attrName, List<?> entityIds) {
-		return new QuerydslQueryImpl(context.getMetaPartition(), em, entityClass, computedAttrs, interceptors, attrName, entityIds);
+		return new QuerydslQueryImpl(context.getMetaPartition(), em, entityClass, computedAttrs, interceptors, attrName,
+				entityIds);
 	}
 
 	public void registerComputedAttribute(Class<?> targetClass, String attributeName, Type attributeType,
-										  QuerydslExpressionFactory<?> expressionFactory) {
+			QuerydslExpressionFactory<?> expressionFactory) {
 		computedAttrs.register(targetClass, attributeName, expressionFactory, attributeType);
 	}
 }

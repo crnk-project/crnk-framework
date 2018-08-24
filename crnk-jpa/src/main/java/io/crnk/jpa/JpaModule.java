@@ -31,9 +31,11 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
+import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.jpa.internal.JpaRepositoryBase;
+import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.internal.OptimisticLockExceptionMapper;
@@ -51,6 +53,7 @@ import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationInterceptor;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModuleExtension;
+import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,6 +197,7 @@ public class JpaModule implements InitializingModule {
 	 */
 	@Deprecated
 	public void addFilter(JpaRepositoryFilter filter) {
+		checkNotInitialized();
 		config.addFilter(filter);
 	}
 
@@ -202,6 +206,7 @@ public class JpaModule implements InitializingModule {
 	 */
 	@Deprecated
 	public void removeFilter(JpaRepositoryFilter filter) {
+		checkNotInitialized();
 		config.removeFilter(filter);
 	}
 
@@ -416,6 +421,9 @@ public class JpaModule implements InitializingModule {
 		}
 		if (isValidEntity(metaEntity)) {
 			JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
+
+			JpaRepositoryUtils.setDefaultConfig(config, repositoryConfig);
+
 			JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this,
 					repositoryConfig);
 
@@ -509,6 +517,12 @@ public class JpaModule implements InitializingModule {
 
 
 	private boolean isValidEntity(MetaEntity metaEntity) {
+		for (MetaAttribute attribute : metaEntity.getAttributes()) {
+			if (attribute.getAnnotation(JsonApiId.class) != null) {
+				return true;
+			}
+		}
+
 		if (metaEntity.getPrimaryKey() == null) {
 			logger.warn("{} has no primary key and will be ignored", metaEntity.getName());
 			return false;
@@ -554,6 +568,7 @@ public class JpaModule implements InitializingModule {
 	 */
 	@Deprecated
 	public void setQueryFactory(JpaQueryFactory queryFactory) {
+		checkNotInitialized();
 		config.setQueryFactory(queryFactory);
 		if (context != null) {
 			initQueryFactory();
@@ -599,6 +614,7 @@ public class JpaModule implements InitializingModule {
 	 * @deprecated use {@link JpaModuleConfig}
 	 */
 	public void setTotalResourceCountUsed(boolean totalResourceCountUsed) {
+		checkNotInitialized();
 		config.setTotalResourceCountUsed(totalResourceCountUsed);
 	}
 
@@ -612,6 +628,10 @@ public class JpaModule implements InitializingModule {
 
 	public JpaMetaProvider getJpaMetaProvider() {
 		return jpaMetaProvider;
+	}
+
+	public JpaModuleConfig getConfig() {
+		return config;
 	}
 
 	private final class JpaQuerydslTranslationInterceptor implements QuerydslTranslationInterceptor {

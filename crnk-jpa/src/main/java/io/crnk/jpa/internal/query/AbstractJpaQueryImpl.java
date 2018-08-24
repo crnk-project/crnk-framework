@@ -1,16 +1,27 @@
 package io.crnk.jpa.internal.query;
 
-import io.crnk.core.queryspec.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.JoinType;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.SortSpec;
+import io.crnk.core.utils.Optional;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaPartition;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.JoinType;
-import java.util.*;
 
 public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?, ?>> implements JpaQuery<T> {
 
@@ -51,8 +62,11 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 								   ComputedAttributeRegistryImpl computedAttrs) {
 		this.em = em;
 		this.clazz = clazz;
-		this.meta = (MetaDataObject) metaPartition.getMeta(clazz);
 		this.computedAttrs = computedAttrs;
+
+		Optional<MetaElement> optMetaElement = metaPartition.allocateMetaElement(clazz);
+		PreconditionUtil.verify(optMetaElement.isPresent(), "failed to JPA meta information for {}, make sure the class is properly annotated with JPA annotations.", clazz);
+		this.meta = optMetaElement.get().asDataObject();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -194,7 +208,6 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 		executorFactory.applyFilterSpec();
 		executorFactory.applySortSpec();
 		int numAutoSelections = executorFactory.applyDistinct();
-
 		return newExecutor(backend, numAutoSelections, selectionBindings);
 	}
 

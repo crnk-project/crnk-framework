@@ -1,5 +1,9 @@
 package io.crnk.jpa.repository;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -22,10 +26,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 @Transactional
 public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 
@@ -36,6 +36,7 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	public void setup() {
 		super.setup();
 		repo = new JpaEntityRepository<>(module, JpaRepositoryConfig.create(TestEntity.class));
+		repo.setResourceRegistry(resourceRegistry);
 	}
 
 	@Test
@@ -163,6 +164,7 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	public void testJpaTransientFieldIgnored() {
 		QuerySpec querySpec = new QuerySpec(JpaTransientTestEntity.class);
 		JpaEntityRepository<JpaTransientTestEntity, Serializable> transientRepo = new JpaEntityRepository<>(module, JpaRepositoryConfig.create(JpaTransientTestEntity.class));
+		transientRepo.setResourceRegistry(resourceRegistry);
 
 		JpaTransientTestEntity entity = new JpaTransientTestEntity();
 		entity.setId(12L);
@@ -345,6 +347,7 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	public void testSequencePrimaryKey() {
 		JpaEntityRepository<SequenceEntity, Long> sequenceRepo = new JpaEntityRepository<>(module,
 				JpaRepositoryConfig.create(SequenceEntity.class));
+		sequenceRepo.setResourceRegistry(resourceRegistry);
 		QuerySpec querySpec = new QuerySpec(SequenceEntity.class);
 		List<SequenceEntity> list = sequenceRepo.findAll(querySpec);
 		Assert.assertEquals(0, list.size());

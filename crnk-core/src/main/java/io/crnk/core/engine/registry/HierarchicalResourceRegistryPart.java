@@ -1,5 +1,6 @@
 package io.crnk.core.engine.registry;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,9 +46,19 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 	}
 
 	@Override
-	public boolean hasEntry(Class<?> clazz) {
+	public boolean hasEntry(Class<?> implementationClass) {
 		for (ResourceRegistryPart part : partList) {
-			if (part.hasEntry(clazz)) {
+			if (part.hasEntry(implementationClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasEntry(Type implementationType) {
+		for (ResourceRegistryPart part : partList) {
+			if (part.hasEntry(implementationType)) {
 				return true;
 			}
 		}
@@ -104,10 +115,20 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 	}
 
 	@Override
-	public RegistryEntry getEntry(Class<?> clazz) {
+	public RegistryEntry getEntry(Class<?> implementationClass) {
 		for (ResourceRegistryPart part : partList) {
-			if (part.hasEntry(clazz)) {
-				return part.getEntry(clazz);
+			if (part.hasEntry(implementationClass)) {
+				return part.getEntry(implementationClass);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public RegistryEntry getEntry(Type implementationType) {
+		for (ResourceRegistryPart part : partList) {
+			if (part.hasEntry(implementationType)) {
+				return part.getEntry(implementationType);
 			}
 		}
 		return null;

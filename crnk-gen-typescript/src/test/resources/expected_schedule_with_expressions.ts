@@ -12,6 +12,7 @@ import {
 	BeanPath,
 	BooleanPath,
 	CrnkStoreResource,
+	MapPath,
 	QTypedManyResourceRelationship,
 	QTypedOneResourceRelationship,
 	StringPath
@@ -38,6 +39,7 @@ export module Schedule {
 		name?: string;
 		description?: string;
 		delayed?: boolean;
+		customData?: { [key: string]: string };
 	}
 }
 export interface Schedule extends CrnkStoreResource {
@@ -120,6 +122,7 @@ export module QSchedule {
 		name: StringPath = this.createString('name');
 		description: StringPath = this.createString('description');
 		delayed: BooleanPath = this.createBoolean('delayed');
+		customData: MapPath<StringPath, string> = new MapPath(this, 'customData', StringPath);
 	}
 }
 export let createEmptySchedule = function(id: string): Schedule {

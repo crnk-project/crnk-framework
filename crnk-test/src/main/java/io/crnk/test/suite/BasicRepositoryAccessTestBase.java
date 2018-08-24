@@ -2,7 +2,9 @@ package io.crnk.test.suite;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ResourceNotFoundException;
@@ -175,6 +177,29 @@ public abstract class BasicRepositoryAccessTestBase {
 		Assert.assertEquals(task.getId(), savedTask.getId());
 		Assert.assertEquals(task.getName(), savedTask.getName());
 	}
+
+	@Test
+	public void testFindByMap() {
+		for (int i = 0; i < 10; i++) {
+			Map<String, String> map = new HashMap<>();
+			map.put("a", "b" + i);
+
+			Schedule project = new Schedule();
+			project.setId((long) i);
+			project.setName("test" + i);
+			project.setCustomData(map);
+			scheduleRepo.create(project);
+		}
+
+		QuerySpec querySpec = new QuerySpec(Schedule.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("customData", "a"), FilterOperator.EQ, "b1"));
+		List<Schedule> matches = scheduleRepo.findAll(querySpec);
+
+		Assert.assertEquals(1, matches.size());
+		Schedule match = matches.get(0);
+		Assert.assertEquals(1L, match.getId().longValue());
+	}
+
 
 	@Test
 	public void testGeneratedId() {

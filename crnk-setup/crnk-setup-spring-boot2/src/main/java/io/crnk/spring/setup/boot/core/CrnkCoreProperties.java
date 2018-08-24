@@ -50,6 +50,11 @@ public class CrnkCoreProperties {
 	 */
 	private Boolean return404OnNull;
 
+	/**
+	 * Disabled by default to maintain compatibility, but recommended to enable.
+	 */
+	private Boolean enforceDotSeparator;
+
 	public String getResourcePackage() {
 		return resourcePackage;
 	}
@@ -60,6 +65,14 @@ public class CrnkCoreProperties {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public Boolean getEnforceDotSeparator() {
+		return enforceDotSeparator;
+	}
+
+	public void setEnforceDotSeparator(Boolean enforceDotSeparator) {
+		this.enforceDotSeparator = enforceDotSeparator;
 	}
 
 	/**

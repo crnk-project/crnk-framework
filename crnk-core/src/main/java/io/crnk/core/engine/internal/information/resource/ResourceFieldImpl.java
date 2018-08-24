@@ -33,7 +33,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private final LookupIncludeBehavior lookupIncludeBehavior;
 
-	private final ResourceFieldType resourceFieldType;
+	private ResourceFieldType resourceFieldType;
 
 	private final String oppositeName;
 
@@ -54,7 +54,7 @@ public class ResourceFieldImpl implements ResourceField {
 	private PatchStrategy patchStrategy;
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType) {
+			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true, true),
@@ -62,11 +62,10 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-							 Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
-							 LookupIncludeBehavior lookupIncludeBehavior,
-							 ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
-							 RelationshipRepositoryBehavior relationshipRepositoryBehavior,
-							 PatchStrategy patchStrategy) {
+			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
+			LookupIncludeBehavior lookupIncludeBehavior,
+			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
+			RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -82,6 +81,11 @@ public class ResourceFieldImpl implements ResourceField {
 		this.idAccessor = idAccessor;
 		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
 		this.patchStrategy = patchStrategy;
+	}
+
+	@Deprecated
+	public void setResourceFieldType(ResourceFieldType resourceFieldType) {
+		this.resourceFieldType = resourceFieldType;
 	}
 
 	public ResourceFieldType getResourceFieldType() {
@@ -119,9 +123,11 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 	public String getOppositeResourceType() {
-		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association", underlyingName, parentResourceInformation.getResourceType());
+		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association",
+				underlyingName, parentResourceInformation.getResourceType());
 		if (getElementType() != Object.class) {
-			PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type", underlyingName, parentResourceInformation.getResourceType());
+			PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type",
+					underlyingName, parentResourceInformation.getResourceType());
 		}
 		return oppositeResourceType;
 	}
@@ -221,7 +227,8 @@ public class ResourceFieldImpl implements ResourceField {
 	public void setResourceInformation(ResourceInformation resourceInformation) {
 		if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
 			this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
-		} else if (this.accessor == null) {
+		}
+		else if (this.accessor == null) {
 			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
 		}
 		if (this.idAccessor == null && idName != null) {
@@ -232,6 +239,7 @@ public class ResourceFieldImpl implements ResourceField {
 		}
 		this.parentResourceInformation = resourceInformation;
 	}
+
 
 	static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
 
@@ -262,7 +270,8 @@ public class ResourceFieldImpl implements ResourceField {
 		public void setValue(Object resource, Object fieldValue) {
 			if (fieldValue == null || fieldValue instanceof ResourceIdentifier) {
 				super.setValue(resource, fieldValue);
-			} else {
+			}
+			else {
 				// TODO try to get access to opposite ResourceInformation in the future, ok for basic use cases
 				super.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
 			}

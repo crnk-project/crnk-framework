@@ -29,6 +29,10 @@ public class BeanAttributeInformation {
 		this.beanInformation = beanInformation;
 	}
 
+	public BeanInformation getBeanInformation() {
+		return beanInformation;
+	}
+
 	public Field getField() {
 		return field;
 	}

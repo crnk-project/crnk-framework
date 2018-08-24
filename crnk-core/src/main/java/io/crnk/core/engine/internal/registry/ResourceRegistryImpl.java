@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -220,6 +221,11 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
+	public boolean hasEntry(Type type) {
+		return rootPart.hasEntry(type);
+	}
+
+	@Override
 	public boolean hasEntry(String resourceType) {
 		return rootPart.hasEntry(resourceType);
 	}
@@ -230,6 +236,16 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
+	public RegistryEntry getEntry(Class<?> clazz) {
+		return rootPart.getEntry(clazz);
+	}
+
+	@Override
+	public RegistryEntry getEntry(Type type) {
+		return rootPart.getEntry(type);
+	}
+
+	@Override
 	public RegistryEntry getEntryByPath(String resourcePath) {
 		return rootPart.getEntryByPath(resourcePath);
 	}
@@ -237,11 +253,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	@Override
 	public Collection<RegistryEntry> getResources() {
 		return rootPart.getResources();
-	}
-
-	@Override
-	public RegistryEntry getEntry(Class<?> clazz) {
-		return rootPart.getEntry(clazz);
 	}
 
 	public void setRootPart(ResourceRegistryPart rootPart) {

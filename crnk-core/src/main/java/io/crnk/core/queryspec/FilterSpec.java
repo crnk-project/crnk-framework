@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import io.crnk.core.engine.internal.utils.CompareUtils;
-import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpec> {
 
@@ -34,15 +33,19 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	}
 
 	public FilterSpec(List<String> attributePath, FilterOperator operator, Object value) {
-		super(attributePath);
+		this(PathSpec.of(attributePath), operator, value);
+	}
+
+	public FilterSpec(PathSpec path, FilterOperator operator, Object value) {
+		super(path);
 		this.operator = operator;
 		this.value = value;
 		assertOperator();
 		assertNotExpressions();
 	}
 
-	private FilterSpec(List<String> attributePath, FilterOperator operator, Object value, List<FilterSpec> expressions) {
-		super(attributePath);
+	private FilterSpec(PathSpec pathSpec, FilterOperator operator, Object value, List<FilterSpec> expressions) {
+		super(pathSpec);
 		this.operator = operator;
 		this.value = value;
 		this.expressions = expressions;
@@ -169,7 +172,7 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 		if (obj == null || getClass() != obj.getClass())
 			return false;
 		FilterSpec other = (FilterSpec) obj;
-		return CompareUtils.isEquals(attributePath, other.attributePath)
+		return CompareUtils.isEquals(path, other.path)
 				&& CompareUtils.isEquals(operator, other.operator) && CompareUtils.isEquals(value, other.value)
 				&& CompareUtils.isEquals(expressions, other.expressions);
 	}
@@ -184,8 +187,8 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 			} else {
 				appendExpressions(b, nExprs);
 			}
-		} else if (attributePath != null) {
-			b.append(StringUtils.join(".", attributePath));
+		} else if (path != null) {
+			b.append(path);
 			b.append(' ');
 			b.append(operator.name());
 			b.append(' ');
@@ -234,7 +237,7 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	public FilterSpec normalize() {
 		List<FilterSpec>  clonedExpressions = expressions != null ? cloneExpressions(expressions, true) : null;
 
-		FilterSpec copy = new FilterSpec(attributePath, operator, value, clonedExpressions);
+		FilterSpec copy = new FilterSpec(path, operator, value, clonedExpressions);
 		return copy;
 	}
 

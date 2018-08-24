@@ -1,12 +1,25 @@
 package io.crnk.meta.provider;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.utils.Optional;
-import io.crnk.meta.model.*;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.utils.Optional;
+import io.crnk.meta.model.MetaArrayType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaEnumType;
+import io.crnk.meta.model.MetaListType;
+import io.crnk.meta.model.MetaLiteral;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaPrimitiveType;
+import io.crnk.meta.model.MetaSetType;
+import io.crnk.meta.model.MetaType;
 
 public abstract class MetaPartitionBase implements MetaPartition {
 
@@ -28,7 +41,7 @@ public abstract class MetaPartitionBase implements MetaPartition {
 		if (metaElement == null && parent != null) {
 			metaElement = parent.getMeta(type);
 		}
-		PreconditionUtil.assertNotNull("should not be null", metaElement);
+		PreconditionUtil.verify(metaElement != null, "meta element not found for %s", type);
 		return metaElement;
 	}
 
@@ -43,7 +56,8 @@ public abstract class MetaPartitionBase implements MetaPartition {
 			if (typeMapping.containsKey(type)) {
 				nonUniqueTypes.add(type);
 				typeMapping.remove(type);
-			} else {
+			}
+			else {
 				typeMapping.put(type, element);
 			}
 		}
@@ -51,42 +65,50 @@ public abstract class MetaPartitionBase implements MetaPartition {
 	}
 
 	public final Optional<MetaElement> allocateMetaElement(Type type) {
-		if (parent != null) {
-			Optional<MetaElement> element = parent.allocateMetaElement(type);
-			if (element.isPresent()) {
-				return element;
+		return context.runDiscovery(new Callable<Optional<MetaElement>>() {
+
+			@Override
+			public Optional<MetaElement> call() {
+				if (parent != null) {
+					Optional<MetaElement> element = parent.allocateMetaElement(type);
+					if (element.isPresent()) {
+						return element;
+					}
+				}
+
+				if (typeMapping.containsKey(type)) {
+					return Optional.of(typeMapping.get(type));
+				}
+
+				if (type instanceof ParameterizedType) {
+					Optional<MetaElement> element = allocateMap((ParameterizedType) type);
+					if (element.isPresent()) {
+						return element;
+					}
+				}
+
+				Optional<MetaElement> element = allocateCollectionType(type);
+				if (element.isPresent()) {
+					return element;
+				}
+
+				element = allocateEnumType(type);
+				if (element.isPresent()) {
+					return element;
+				}
+
+
+				Optional<MetaElement> optElement = doAllocateMetaElement(type);
+				PreconditionUtil.assertNotNull("must be not null", optElement);
+				if (optElement.isPresent() && !optElement.get().hasId() && optElement.get() instanceof MetaType) {
+					PreconditionUtil.assertTrue("must have an id", optElement.get().hasId());
+				}
+
+				return optElement;
 			}
-		}
-
-		if (typeMapping.containsKey(type)) {
-			return Optional.of(typeMapping.get(type));
-		}
-
-		if (type instanceof ParameterizedType) {
-			Optional<MetaElement> element = allocateMap((ParameterizedType) type);
-			if (element.isPresent()) {
-				return element;
-			}
-		}
-
-		Optional<MetaElement> element = allocateCollectionType(type);
-		if (element.isPresent()) {
-			return element;
-		}
-
-		element = allocateEnumType(type);
-		if (element.isPresent()) {
-			return element;
-		}
+		});
 
 
-		Optional<MetaElement> optElement = doAllocateMetaElement(type);
-		PreconditionUtil.assertNotNull("must be not null", optElement);
-		if (optElement.isPresent() && !optElement.get().hasId() && optElement.get() instanceof MetaType) {
-			PreconditionUtil.assertTrue("must have an id", optElement.get().hasId());
-		}
-
-		return optElement;
 	}
 
 	protected abstract Optional<MetaElement> doAllocateMetaElement(Type type);
@@ -171,7 +193,8 @@ public abstract class MetaPartitionBase implements MetaPartition {
 				if (primitiveKey || !primitiveValue) {
 					mapMeta.setName(valueType.getName() + "$mappedBy$" + keyType.getName());
 					mapMeta.setId(valueType.getId() + "$mappedBy$" + keyType.getName());
-				} else {
+				}
+				else {
 					mapMeta.setName(keyType.getName() + "$map$" + valueType.getName());
 					mapMeta.setId(keyType.getId() + "$map$" + valueType.getName());
 				}

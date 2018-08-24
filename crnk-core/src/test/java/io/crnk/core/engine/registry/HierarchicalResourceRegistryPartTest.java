@@ -36,7 +36,8 @@ public class HierarchicalResourceRegistryPartTest {
 
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("test");
-		Mockito.when(information.getResourceClass()).thenReturn((Class) TestResource.class);
+		Mockito.when(information.getImplementationClass()).thenReturn((Class) TestResource.class);
+		Mockito.when(information.getImplementationType()).thenReturn((Class) TestResource.class);
 		Mockito.when(information.getResourcePath()).thenReturn("path");
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
@@ -61,7 +62,7 @@ public class HierarchicalResourceRegistryPartTest {
 
 		ResourceInformation information = Mockito.mock(ResourceInformation.class);
 		Mockito.when(information.getResourceType()).thenReturn("child/test");
-		Mockito.when(information.getResourceClass()).thenReturn((Class) TestResource.class);
+		Mockito.when(information.getImplementationType()).thenReturn((Class) TestResource.class);
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		Mockito.when(entry.getResourceInformation()).thenReturn(information);
 		RegistryEntry savedEntry = part.addEntry(entry);

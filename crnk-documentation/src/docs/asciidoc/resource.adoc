@@ -424,7 +424,7 @@ An URL then looks like:
 
 `http://example.com/posts/1/comments/2`
 
-For a resource to become nested, it must make use of a structure identifier:
+For a resource to become nested, it must make use of a structured identifier:
 
 [source]
 .NestedId.java

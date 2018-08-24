@@ -15,7 +15,9 @@ import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
+import io.crnk.jpa.model.CustomTypeTestEntity;
 import io.crnk.jpa.model.OtherRelatedEntity;
+import io.crnk.jpa.model.OverrideIdTestEntity;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEmbeddedIdEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -619,5 +621,58 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		otherRelRepo.setRelation(related3, other3.getId(), RelatedEntity.ATTR_otherEntity);
 
 		return test;
+	}
+
+	@Test
+	public void testCustomType() {
+		ResourceRepositoryV2<CustomTypeTestEntity, Serializable> repo =
+				client.getRepositoryForType(CustomTypeTestEntity.class);
+
+		CustomTypeTestEntity.CustomType customValue = new CustomTypeTestEntity.CustomType();
+		customValue.setValue("test");
+
+		CustomTypeTestEntity entity = new CustomTypeTestEntity();
+		entity.setId(13L);
+		entity.setValue(customValue);
+		repo.create(entity);
+
+		QuerySpec querySpec = new QuerySpec(CustomTypeTestEntity.class);
+		List<CustomTypeTestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(1, list.size());
+		Assert.assertEquals("test", list.get(0).getValue().getValue());
+	}
+
+	@Test
+	public void testOverridenPrimaryKey() {
+		ResourceRepositoryV2<OverrideIdTestEntity, Serializable> repo =
+				client.getRepositoryForType(OverrideIdTestEntity.class);
+
+		OverrideIdTestEntity entity = new OverrideIdTestEntity();
+		entity.setId(13L);
+		entity.setPk(42L);
+		OverrideIdTestEntity createdEntity = repo.create(entity);
+		checkResource(createdEntity);
+
+		QuerySpec querySpec = new QuerySpec(OverrideIdTestEntity.class);
+		List<OverrideIdTestEntity> list = repo.findAll(querySpec);
+		Assert.assertEquals(1, list.size());
+		checkResource(list.get(0));
+
+		OverrideIdTestEntity findOneEntity = repo.findOne(13L, querySpec);
+		checkResource(findOneEntity);
+
+		createdEntity.setValue("newValue");
+		OverrideIdTestEntity savedEntity = repo.save(createdEntity);
+		checkResource(entity);
+		Assert.assertEquals("newValue", savedEntity.getValue());
+
+		repo.delete(entity.getId());
+		list = repo.findAll(querySpec);
+		Assert.assertEquals(0, list.size());
+	}
+
+	private void checkResource(OverrideIdTestEntity entity) {
+		Assert.assertEquals(13L, entity.getId().longValue());
+		Assert.assertEquals(42L, entity.getPk().longValue());
 	}
 }

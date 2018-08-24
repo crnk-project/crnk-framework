@@ -1,6 +1,7 @@
 package io.crnk.jpa.query;
 
 import java.util.List;
+import javax.persistence.EntityManager;
 
 public interface JpaQueryFactory {
 
@@ -36,5 +37,7 @@ public interface JpaQueryFactory {
 	 * @return ComputedAttributeRegistry holding registered computed attributes
 	 */
 	ComputedAttributeRegistry getComputedAttributes();
+
+	EntityManager getEntityManager();
 
 }

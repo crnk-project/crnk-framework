@@ -79,7 +79,7 @@ public class CrnkJpaAutoConfiguration {
 			}
 		}
 
-		if (jpaProperties.getExposeAll()) {
+		if (jpaProperties.getExposeAll() && config.getRepositories().isEmpty()) {
 			config.exposeAllEntities(emf);
 		}
 

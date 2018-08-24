@@ -145,30 +145,37 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 	public Result<Response> processAsync(JsonPath jsonPath, String method, Map<String, Set<String>> parameters,
 			RepositoryMethodParameterProvider parameterProvider,
 			Document requestDocument, QueryContext queryContext) {
-		ResultFactory resultFactory = moduleContext.getResultFactory();
-		ResourceInformation resourceInformation = getRequestedResource(jsonPath);
-		QueryAdapter queryAdapter = queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
+		try {
+			ResultFactory resultFactory = moduleContext.getResultFactory();
+			ResourceInformation resourceInformation = getRequestedResource(jsonPath);
+			QueryAdapter queryAdapter = queryAdapterBuilder.build(resourceInformation, parameters, queryContext);
 
-		if (resultFactory instanceof ImmediateResultFactory) {
-			LOGGER.debug("processing synchronously");
-			// not that document filters are not compatible with async programming
-			DocumentFilterContextImpl filterContext =
-					new DocumentFilterContextImpl(jsonPath, queryAdapter, parameterProvider, requestDocument, method);
-			try {
-				DocumentFilterChain filterChain = getFilterChain(jsonPath, method);
-				Response response = filterChain.doFilter(filterContext);
-				return resultFactory.just(response);
+			if (resultFactory instanceof ImmediateResultFactory) {
+				LOGGER.debug("processing synchronously");
+				// not that document filters are not compatible with async programming
+				DocumentFilterContextImpl filterContext =
+						new DocumentFilterContextImpl(jsonPath, queryAdapter, parameterProvider, requestDocument, method);
+				try {
+					DocumentFilterChain filterChain = getFilterChain(jsonPath, method);
+					Response response = filterChain.doFilter(filterContext);
+					return resultFactory.just(response);
+				}
+				catch (Exception e) {
+					Response response = toErrorResponse(e);
+					return resultFactory.just(response);
+				}
 			}
-			catch (Exception e) {
-				Response response = toErrorResponse(e);
-				return resultFactory.just(response);
+			else {
+				LOGGER.debug("processing asynchronously");
+				Controller controller = controllerRegistry.getController(jsonPath, method);
+				Result<Response> responseResult =
+						controller.handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
+				return responseResult.onErrorResume(this::toErrorResponse);
 			}
 		}
-		else {
-			LOGGER.debug("processing asynchronously");
-			Controller controller = controllerRegistry.getController(jsonPath, method);
-			Result<Response> responseResult = controller.handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
-			return responseResult.onErrorResume(this::toErrorResponse);
+		catch (Exception e) {
+			ResultFactory resultFactory = moduleContext.getResultFactory();
+			return resultFactory.just(toErrorResponse(e));
 		}
 	}
 

@@ -1,8 +1,11 @@
 package io.crnk.jpa.repository;
 
+import javax.persistence.EntityManager;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.JpaEntityRepository;
+import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.JpaRepositoryConfig;
 import io.crnk.jpa.JpaRepositoryFilterBase;
 import io.crnk.jpa.model.TestEntity;
@@ -17,12 +20,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-
 @Transactional
-public class JpaListenerTest extends AbstractJpaTest {
+public class JpaRepositoryFilterTest extends AbstractJpaTest {
 
 	private JpaEntityRepository<TestEntity, Long> repo;
+
+	private JpaRepositoryFilterBase filter;
 
 	@Override
 	@Before
@@ -33,11 +36,7 @@ public class JpaListenerTest extends AbstractJpaTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void test() throws InstantiationException, IllegalAccessException {
-
-		JpaRepositoryFilterBase filter = Mockito.spy(new JpaRepositoryFilterBase());
-		module.addFilter(filter);
-
+	public void test() {
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
 		ResourceList<TestEntity> list = repo.findAll(querySpec);
 		Assert.assertEquals(5, list.size());
@@ -51,13 +50,10 @@ public class JpaListenerTest extends AbstractJpaTest {
 				Mockito.any(JpaQuery.class));
 	}
 
-	@Test
-	public void testaAddRemove() throws InstantiationException, IllegalAccessException {
-		JpaRepositoryFilterBase filter = Mockito.spy(new JpaRepositoryFilterBase());
+	@Override
+	protected void setupModule(JpaModule module) {
+		filter = Mockito.spy(new JpaRepositoryFilterBase());
 		module.addFilter(filter);
-		Assert.assertEquals(1, module.getFilters().size());
-		module.removeFilter(filter);
-		Assert.assertEquals(0, module.getFilters().size());
 	}
 
 	@Override

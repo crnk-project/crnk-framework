@@ -5,7 +5,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.utils.Optional;
 import io.crnk.jpa.meta.MetaJpaDataObject;
@@ -15,9 +14,12 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JpaMetaFilter extends MetaFilterBase {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(JpaMetaFilter.class);
 
 	private final MetaProviderContext context;
 	private final JpaMetaPartition partition;
@@ -35,9 +37,11 @@ public class JpaMetaFilter extends MetaFilterBase {
 			MetaDataObject parent = attr.getParent();
 			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
 			Optional<MetaElement> optMetaType = partition.allocateMetaElement(implementationType);
-			PreconditionUtil.verify(optMetaType.isPresent(), "failed to read %s, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or "
-							+ "@Embeddable",
-					implementationType);
+			if(!optMetaType.isPresent()){
+				LOGGER.warn("unknown type {} for {}, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or @Embeddable",
+						implementationType, attr.getId());
+				optMetaType = partition.allocateMetaElement(Object.class);
+			}
 			MetaType metaType = (MetaType) optMetaType.get();
 			attr.setType(metaType);
 		}

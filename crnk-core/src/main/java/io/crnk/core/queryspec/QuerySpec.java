@@ -59,6 +59,41 @@ public class QuerySpec {
 		this(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
 	}
 
+	public void accept(QuerySpecVisitor visitor) {
+		visitor.visitStart(this);
+		visitFilters(visitor, filters);
+		for (SortSpec spec : sort) {
+			visitor.visitSort(spec);
+			visitor.visitPath(spec.getPath());
+		}
+		for (IncludeFieldSpec spec : includedFields) {
+			visitor.visitField(spec);
+			visitor.visitPath(spec.getPath());
+		}
+		for (IncludeRelationSpec spec : includedRelations) {
+			visitor.visitInclude(spec);
+			visitor.visitPath(spec.getPath());
+		}
+		if (pagingSpec != null) {
+			visitor.visitPaging(pagingSpec);
+		}
+		relatedSpecs.values().forEach(it -> it.accept(visitor));
+		visitor.visitEnd(this);
+	}
+
+	private void visitFilters(QuerySpecVisitor visitor, List<FilterSpec> filters) {
+		for (FilterSpec spec : filters) {
+			visitor.visitFilterStart(spec);
+			if (spec.hasExpressions()) {
+				visitFilters(visitor, spec.getExpression());
+			}
+			else {
+				visitor.visitPath(spec.getPath());
+			}
+			visitor.visitFilterEnd(spec);
+		}
+	}
+
 	public String getResourceType() {
 		return resourceType;
 	}
@@ -275,11 +310,19 @@ public class QuerySpec {
 	}
 
 	public void includeField(List<String> attrPath) {
-		this.includedFields.add(new IncludeFieldSpec(attrPath));
+		includeField(PathSpec.of(attrPath));
+	}
+
+	public void includeField(PathSpec path) {
+		this.includedFields.add(new IncludeFieldSpec(path));
 	}
 
 	public void includeRelation(List<String> attrPath) {
-		this.includedRelations.add(new IncludeRelationSpec(attrPath));
+		includeRelation(PathSpec.of(attrPath));
+	}
+
+	public void includeRelation(PathSpec path) {
+		this.includedRelations.add(new IncludeRelationSpec(path));
 	}
 
 	public QuerySpec getQuerySpec(String resourceType) {
