@@ -1,14 +1,12 @@
 package io.crnk.core.repository.foward;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.QuerySpec;
@@ -22,8 +20,6 @@ import io.crnk.core.repository.foward.strategy.GetFromOwnerStrategy;
 import io.crnk.core.repository.foward.strategy.SetOppositeStrategy;
 import io.crnk.core.repository.foward.strategy.SetOwnerStrategy;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
-import io.crnk.core.resource.list.DefaultResourceList;
-import io.crnk.core.resource.list.ResourceList;
 
 /**
  * Implements a RelationshipRepository for relationships making use of one or both adjacent resource repositories.
@@ -62,14 +58,14 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingDirection getDirection,
-											ForwardingDirection setDirection) {
+			ForwardingDirection setDirection) {
 		this(sourceClass, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
 			getStrategy,
-											ForwardingSetStrategy<T, I, D, J> setStrategy) {
+			ForwardingSetStrategy<T, I, D, J> setStrategy) {
 		this.sourceClass = sourceClass;
 		this.matcher = matcher;
 		this.getStrategy = getStrategy;
@@ -77,7 +73,7 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingDirection getDirection,
-											ForwardingDirection setDirection) {
+			ForwardingDirection setDirection) {
 		this(sourceType, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
@@ -146,25 +142,6 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
 		setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
 	}
-
-	@Override
-	public final D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
-		MultivaluedMap<I, D> map = findTargets(Arrays.asList(sourceId), fieldName, querySpec);
-		if (map.isEmpty()) {
-			return null;
-		}
-		return map.getUnique(sourceId);
-	}
-
-	@Override
-	public final ResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
-		MultivaluedMap<I, D> map = findTargets(Arrays.asList(sourceId), fieldName, querySpec);
-		if (map.isEmpty()) {
-			return new DefaultResourceList<>();
-		}
-		return (ResourceList<D>) map.getList(sourceId);
-	}
-
 
 	@Override
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
