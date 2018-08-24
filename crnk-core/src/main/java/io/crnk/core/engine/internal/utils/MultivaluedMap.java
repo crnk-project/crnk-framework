@@ -1,6 +1,13 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import io.crnk.core.queryspec.PathSpec;
 
 /**
  * @param <K> key
@@ -9,6 +16,16 @@ import java.util.*;
 public class MultivaluedMap<K, V> {
 
 	private Map<K, List<V>> map = new HashMap<>();
+
+	public static <K, V> MultivaluedMap<K, V> fromCollection(Collection<V> values, PathSpec keyPath) {
+		MultivaluedMap<K, V> map = new MultivaluedMap<>();
+		for (V value : values) {
+			K key = (K) PropertyUtils.getProperty(value, keyPath.getElements());
+			PreconditionUtil.verify(key != null, "key must not be null for {}", value);
+			map.add(key, value);
+		}
+		return map;
+	}
 
 	public void add(K key, V value) {
 		List<V> list = map.get(key);
