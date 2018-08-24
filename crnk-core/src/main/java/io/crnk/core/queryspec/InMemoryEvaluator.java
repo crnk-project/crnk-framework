@@ -7,21 +7,49 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyException;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.core.resource.meta.MetaInformation;
+import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
+import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 
 /**
  * Applies the given QuerySpec to the provided list in memory. Result available
  * with getResult(). Use QuerySpec.apply to make use of this class.
+ * <p>
+ * InMemoryEvaluator can be used in two different ways: standalone or backed by a ResourceRegistry.
+ * In the later
+ * case it also properly supportes @JsonApiRelationId and customized resources (like custom ResourceFieldAccessor implementation).
+ * Without a ResourceRegistry, the implementation makes use of heuristics that work well for typical/default use cases.
  */
 public class InMemoryEvaluator {
 
+	private ResourceRegistry resourceRegistry;
+
+	public InMemoryEvaluator() {
+
+	}
+
+	public InMemoryEvaluator(ResourceRegistry resourceRegistry) {
+		this.resourceRegistry = resourceRegistry;
+	}
+
 	public static boolean matches(Object object, FilterSpec filterSpec) {
+		InMemoryEvaluator evaluator = new InMemoryEvaluator();
+		return evaluator.matchesFilter(object, filterSpec);
+	}
+
+	public boolean matchesFilter(Object object, FilterSpec filterSpec) {
 		List<FilterSpec> expressions = filterSpec.getExpression();
 		if (expressions == null) {
 			return matchesPrimitiveOperator(object, filterSpec);
@@ -33,12 +61,12 @@ public class InMemoryEvaluator {
 			return matchesAnd(object, expressions);
 		}
 		else if (filterSpec.getOperator() == FilterOperator.NOT) {
-			return !matches(object, FilterSpec.and(expressions));
+			return !matchesFilter(object, FilterSpec.and(expressions));
 		}
 		throw new UnsupportedOperationException("not implemented " + filterSpec);
 	}
 
-	private static boolean matchesPrimitiveOperator(Object object, FilterSpec filterSpec) {
+	protected boolean matchesPrimitiveOperator(Object object, FilterSpec filterSpec) {
 		if (filterSpec.getAttributePath() == null) {
 			throw new BadRequestException("no attribute specified for filter parameter");
 		}
@@ -53,15 +81,24 @@ public class InMemoryEvaluator {
 		}
 	}
 
-	private static Object getProperty(Object object, List<String> attributePath) {
-		Object value = PropertyUtils.getProperty(object, attributePath);
+	protected Object getProperty(Object object, List<String> pathElements) {
+		if (pathElements.isEmpty()) {
+			return object;
+		}
+		Class<?> clazz = object.getClass();
+		if (resourceRegistry != null && resourceRegistry.hasEntry(clazz)) {
+			return getResourceProperty(object, pathElements);
+		}
+
+
+		Object value = PropertyUtils.getProperty(object, pathElements);
 
 		// TODO access to ResourceInformation needed for support of custom naming
-		int pathLength = attributePath.size();
-		if (value == null && pathLength >= 2 && attributePath.get(pathLength - 1).equals("id")) {
+		int pathLength = pathElements.size();
+		if (value == null && pathLength >= 2 && pathElements.get(pathLength - 1).equals("id")) {
 			// check ID field as well for relationships
-			List<String> idAttributePath = new ArrayList<>(attributePath.subList(0, pathLength - 2));
-			idAttributePath.add(attributePath.get(pathLength - 2) + "Id");
+			List<String> idAttributePath = new ArrayList<>(pathElements.subList(0, pathLength - 2));
+			idAttributePath.add(pathElements.get(pathLength - 2) + "Id");
 			try {
 				return PropertyUtils.getProperty(object, idAttributePath);
 			}
@@ -72,7 +109,34 @@ public class InMemoryEvaluator {
 		return value;
 	}
 
-	private static boolean matchesAny(Collection<?> col, FilterOperator operator, Object filterValue) {
+	private Object getResourceProperty(Object object, List<String> pathElements) {
+		Class<?> clazz = object.getClass();
+		RegistryEntry entry = resourceRegistry.getEntry(clazz);
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+
+		int consumedElements = 1;
+		String firstPathElement = pathElements.get(0);
+		ResourceField resourceField = resourceInformation.findFieldByUnderlyingName(firstPathElement);
+		PreconditionUtil.verify(resourceField != null, "resource field {} in {} not found", firstPathElement, clazz);
+
+		Object value = resourceField.getAccessor().getValue(object);
+		boolean isRelationship = resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP;
+		if (value == null && pathElements.size() >= 2 && isRelationship && resourceField.hasIdField()) {
+			String secondPathElement = pathElements.get(1);
+
+			RegistryEntry oppositeEntry = resourceRegistry.getEntry(resourceField.getOppositeResourceType());
+			ResourceField idField = oppositeEntry.getResourceInformation().getIdField();
+			if (secondPathElement.equals(idField.getUnderlyingName())) {
+				value = resourceField.getIdAccessor().getValue(object);
+				consumedElements++;
+			}
+		}
+
+		List<String> childElements = pathElements.subList(consumedElements, pathElements.size());
+		return getProperty(value, childElements);
+	}
+
+	protected boolean matchesAny(Collection<?> col, FilterOperator operator, Object filterValue) {
 		for (Object elem : col) {
 			boolean matches = operator.matches(elem, filterValue);
 			if (matches) {
@@ -82,22 +146,29 @@ public class InMemoryEvaluator {
 		return false;
 	}
 
-	private static boolean matchesOr(Object object, List<FilterSpec> expressions) {
+	protected boolean matchesOr(Object object, List<FilterSpec> expressions) {
 		for (FilterSpec expr : expressions) {
-			if (matches(object, expr)) {
+			if (matchesFilter(object, expr)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static boolean matchesAnd(Object object, List<FilterSpec> expressions) {
+	protected boolean matchesAnd(Object object, List<FilterSpec> expressions) {
 		for (FilterSpec expr : expressions) {
-			if (!matches(object, expr)) {
+			if (!matchesFilter(object, expr)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	public <T> ResourceList<T> eval(Iterable<T> resources, QuerySpec querySpec) {
+		DefaultResourceList<T> resultList = new DefaultResourceList<>();
+		resultList.setMeta(new DefaultPagedMetaInformation());
+		eval(resources, querySpec, resultList);
+		return resultList;
 	}
 
 	public <T> void eval(Iterable<T> resources, QuerySpec querySpec, ResourceList<T> resultList) {
@@ -133,13 +204,13 @@ public class InMemoryEvaluator {
 		}
 	}
 
-	private <T> void applySorting(List<T> results, List<SortSpec> sortSpec) {
+	protected <T> void applySorting(List<T> results, List<SortSpec> sortSpec) {
 		if (!sortSpec.isEmpty()) {
 			Collections.sort(results, new SortSpecComparator<>(sortSpec));
 		}
 	}
 
-	private <T> void applyPaging(List<T> results, QuerySpec querySpec) {
+	protected <T> void applyPaging(List<T> results, QuerySpec querySpec) {
 		int offset = (int) Math.min(querySpec.getOffset(), Integer.MAX_VALUE);
 		int limit = (int) Math.min(Integer.MAX_VALUE, querySpec.getLimit() != null ? querySpec.getLimit() : Integer.MAX_VALUE);
 		if (offset > results.size()) {
@@ -153,19 +224,19 @@ public class InMemoryEvaluator {
 		}
 	}
 
-	private <T> void applyFilter(List<T> results, FilterSpec filterSpec) {
+	protected <T> void applyFilter(List<T> results, FilterSpec filterSpec) {
 		if (filterSpec != null) {
 			Iterator<T> iterator = results.iterator();
 			while (iterator.hasNext()) {
 				T next = iterator.next();
-				if (!matches(next, filterSpec)) {
+				if (!matchesFilter(next, filterSpec)) {
 					iterator.remove();
 				}
 			}
 		}
 	}
 
-	static class SortSpecComparator<T> implements Comparator<T> {
+	class SortSpecComparator<T> implements Comparator<T> {
 
 		private List<SortSpec> sortSpecs;
 
