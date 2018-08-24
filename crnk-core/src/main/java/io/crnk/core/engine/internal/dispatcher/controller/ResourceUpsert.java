@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;

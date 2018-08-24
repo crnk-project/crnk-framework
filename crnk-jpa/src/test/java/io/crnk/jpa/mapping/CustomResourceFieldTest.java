@@ -13,6 +13,7 @@ import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.jpa.AbstractJpaJerseyTest;
@@ -110,7 +111,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 
 									ResourceFieldImpl field = new ResourceFieldImpl(name, name, resourceFieldType, type, type,
 											null, null, SerializeType.LAZY, LookupIncludeBehavior.NONE, access, null, null, null,
-											RelationshipRepositoryBehavior.DEFAULT);
+											RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
 									field.setAccessor(new ResourceFieldAccessor() {
 
 										@Override

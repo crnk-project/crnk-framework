@@ -159,12 +159,16 @@ public abstract class BaseControllerTest {
 	}
 
 	public Resource createProject() {
-		return createProject(Long.toString(PROJECT_ID));
+		return createProject(Long.toString(PROJECT_ID), "projects");
 	}
 
 	public Resource createProject(String id) {
+		return createProject(id, "projects");
+	}
+
+	public Resource createProject(String id, String type) {
 		Resource data = new Resource();
-		data.setType("projects");
+		data.setType(type);
 		data.setId(id);
 
 		try {

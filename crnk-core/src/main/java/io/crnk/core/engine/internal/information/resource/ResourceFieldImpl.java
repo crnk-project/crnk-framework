@@ -13,6 +13,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -50,19 +51,21 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private Class idType;
 
+	private PatchStrategy patchStrategy;
+
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true, true),
-				null, null, null, RelationshipRepositoryBehavior.DEFAULT);
+				null, null, null, RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
 			LookupIncludeBehavior lookupIncludeBehavior,
 			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
-			RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
+			RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
@@ -77,6 +80,7 @@ public class ResourceFieldImpl implements ResourceField {
 		this.idType = idType;
 		this.idAccessor = idAccessor;
 		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+		this.patchStrategy = patchStrategy;
 	}
 
 	@Deprecated
@@ -237,7 +241,6 @@ public class ResourceFieldImpl implements ResourceField {
 	}
 
 
-
 	static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
 
 		protected final ResourceFieldAccessor wrappedAccessor;
@@ -294,5 +297,10 @@ public class ResourceFieldImpl implements ResourceField {
 	@Override
 	public ResourceFieldAccess getAccess() {
 		return access;
+	}
+
+	@Override
+	public PatchStrategy getPatchStrategy() {
+		return patchStrategy;
 	}
 }

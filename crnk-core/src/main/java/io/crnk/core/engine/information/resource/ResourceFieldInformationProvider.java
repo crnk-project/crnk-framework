@@ -2,6 +2,7 @@ package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
@@ -26,27 +27,27 @@ public interface ResourceFieldInformationProvider {
 	Optional<String> getJsonName(BeanAttributeInformation attributeDesc);
 
 	/**
-	 * Returns whether they field can be modified upon a POST request.
+	 * Returns whether the field can be modified upon a POST request.
 	 */
 	Optional<Boolean> isPostable(BeanAttributeInformation attributeDesc);
 
 	/**
-	 * Returns whether they field can be modified upon a PATCH request.
+	 * Returns whether the field can be modified upon a PATCH request.
 	 */
 	Optional<Boolean> isPatchable(BeanAttributeInformation attributeDesc);
 
 	/**
-	 * Returns whether they field can be read.
+	 * Returns whether the field can be read.
 	 */
 	Optional<Boolean> isReadable(BeanAttributeInformation attributeDesc);
 
 	/**
-	 * Returns whether they field can be sorted.
+	 * Returns whether the field can be sorted.
 	 */
 	Optional<Boolean> isSortable(BeanAttributeInformation attributeDesc);
 
 	/**
-	 * Returns whether they field can be filtered.
+	 * Returns whether the field can be filtered.
 	 */
 	Optional<Boolean> isFilterable(BeanAttributeInformation attributeDesc);
 
@@ -80,4 +81,9 @@ public interface ResourceFieldInformationProvider {
 	 * Returns the RelationshipRepositoryBehavior to use.
 	 */
 	Optional<RelationshipRepositoryBehavior> getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc);
+
+	/**
+	 * Returns patch strategy.
+	 */
+	Optional<PatchStrategy> getPatchStrategy(BeanAttributeInformation attributeDesc);
 }

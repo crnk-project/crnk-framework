@@ -355,7 +355,36 @@ With `crnk.config.serialize.object.links=true` links get serialized as:
 ----
 
 
+anchor:jsonApiField[]
 
+
+## JsonApiField
+
+Field or getter annotated with `JsonApiField` allows to define  the behavior of an individual attribute. Example:
+
+
+[source]
+----
+	@JsonApiResource(type = "projects")
+	public class Project {
+
+		...
+
+		@JsonApiField(postable = true, patchable = false)
+		private Long projectId;
+
+		...
+	}
+----
+
+Following options are supported:
+
+- `sortable` defines whether an attribute can be sorted.
+- `filterable` defines whether an attribute can be filtered.
+- `postable` defines whether an attribute can be set with a POST request.
+- `patchable` defines whether an attribute can be changed with a PATCH request.
+- `readable` defines whether an attribute can be read with a GET request.
+- `patchStrategy` defines the behavior of value with PATCH request. It can be either `MERGE` if you want the value be merged with an original one or `SET` if you want the value be totaly replaced with a new one.
 
 anchor:jackson_annotations[]
 

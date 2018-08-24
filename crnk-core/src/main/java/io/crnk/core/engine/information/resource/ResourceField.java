@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -84,4 +85,5 @@ public interface ResourceField {
 
 	RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
 
+	PatchStrategy getPatchStrategy();
 }

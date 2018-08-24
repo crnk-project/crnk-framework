@@ -28,6 +28,7 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -277,6 +278,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private RelationshipRepositoryBehavior relationshipRepositoryBehavior = RelationshipRepositoryBehavior.DEFAULT;
 
+		private PatchStrategy patchStrategy = PatchStrategy.DEFAULT;
+
 		@Override
 		public void from(ResourceField field) {
 			jsonName = field.getJsonName();
@@ -298,6 +301,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 					idAccessor = field.getIdAccessor();
 				}
 			}
+			patchStrategy = field.getPatchStrategy();
 		}
 
 
@@ -315,7 +319,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
 					genericType, oppositeResourceType, oppositeName, serializeType,
 					lookupIncludeBehavior,
-					access, idName, idType, idAccessor, relationshipRepositoryBehavior);
+					access, idName, idType, idAccessor, relationshipRepositoryBehavior, this.patchStrategy);
 			if (accessor != null) {
 				impl.setAccessor(accessor);
 			}
@@ -421,6 +425,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			return this;
 		}
 
+		@Override
+		public Field patchStrategy(PatchStrategy patchStrategy) {
+			this.patchStrategy = patchStrategy;
+			return this;
+		}
 
 		@Override
 		public DefaultField access(ResourceFieldAccess access) {

@@ -14,6 +14,7 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
@@ -116,6 +117,7 @@ public interface InformationBuilder {
 
 		Field idType(Class idType);
 
+		Field patchStrategy(PatchStrategy patchStrategy);
 	}
 
 	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
