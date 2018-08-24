@@ -60,37 +60,42 @@ public class QuerySpec {
 	}
 
 	public void accept(QuerySpecVisitor visitor) {
-		visitor.visitStart(this);
-		visitFilters(visitor, filters);
-		for (SortSpec spec : sort) {
-			visitor.visitSort(spec);
-			visitor.visitPath(spec.getPath());
+		if (visitor.visitStart(this)) {
+			visitFilters(visitor, filters);
+			for (SortSpec spec : sort) {
+				if (visitor.visitSort(spec)) {
+					visitor.visitPath(spec.getPath());
+				}
+			}
+			for (IncludeFieldSpec spec : includedFields) {
+				if (visitor.visitField(spec)) {
+					visitor.visitPath(spec.getPath());
+				}
+			}
+			for (IncludeRelationSpec spec : includedRelations) {
+				if (visitor.visitInclude(spec)) {
+					visitor.visitPath(spec.getPath());
+				}
+			}
+			if (pagingSpec != null) {
+				visitor.visitPaging(pagingSpec);
+			}
+			relatedSpecs.values().forEach(it -> it.accept(visitor));
+			visitor.visitEnd(this);
 		}
-		for (IncludeFieldSpec spec : includedFields) {
-			visitor.visitField(spec);
-			visitor.visitPath(spec.getPath());
-		}
-		for (IncludeRelationSpec spec : includedRelations) {
-			visitor.visitInclude(spec);
-			visitor.visitPath(spec.getPath());
-		}
-		if (pagingSpec != null) {
-			visitor.visitPaging(pagingSpec);
-		}
-		relatedSpecs.values().forEach(it -> it.accept(visitor));
-		visitor.visitEnd(this);
 	}
 
 	private void visitFilters(QuerySpecVisitor visitor, List<FilterSpec> filters) {
 		for (FilterSpec spec : filters) {
-			visitor.visitFilterStart(spec);
-			if (spec.hasExpressions()) {
-				visitFilters(visitor, spec.getExpression());
+			if (visitor.visitFilterStart(spec)) {
+				if (spec.hasExpressions()) {
+					visitFilters(visitor, spec.getExpression());
+				}
+				else {
+					visitor.visitPath(spec.getPath());
+				}
+				visitor.visitFilterEnd(spec);
 			}
-			else {
-				visitor.visitPath(spec.getPath());
-			}
-			visitor.visitFilterEnd(spec);
 		}
 	}
 

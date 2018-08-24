@@ -11,6 +11,7 @@ import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
@@ -260,8 +261,7 @@ public class QuerySpecTest {
 		Assert.assertNotEquals(spec1, "someOtherType");
 	}
 
-	@Test
-	public void testVisitor() {
+	private static QuerySpec createTestQueySpec() {
 		FilterSpec filterSpec = new FilterSpec(Arrays.asList("filterAttr"), FilterOperator.EQ, "test");
 		SortSpec sortSpec = new SortSpec(Arrays.asList("sortAttr"), Direction.ASC);
 		IncludeFieldSpec fieldSpec = new IncludeFieldSpec(PathSpec.of("includedField"));
@@ -272,18 +272,102 @@ public class QuerySpecTest {
 		spec.getIncludedFields().add(fieldSpec);
 		spec.getIncludedRelations().add(relationSpec);
 		spec.setOffset(1);
+		return spec;
+	}
+
+	@Test
+	public void testVisitor() {
+		QuerySpec spec = createTestQueySpec();
 
 		QuerySpecVisitorBase visitor = Mockito.spy(QuerySpecVisitorBase.class);
 		spec.accept(visitor);
 
 		Mockito.verify(visitor, Mockito.times(1)).visitStart(Mockito.eq(spec));
 		Mockito.verify(visitor, Mockito.times(1)).visitEnd(Mockito.eq(spec));
-		Mockito.verify(visitor, Mockito.times(1)).visitField(Mockito.eq(fieldSpec));
-		Mockito.verify(visitor, Mockito.times(1)).visitFilterStart(Mockito.eq(filterSpec));
-		Mockito.verify(visitor, Mockito.times(1)).visitFilterEnd(Mockito.eq(filterSpec));
-		Mockito.verify(visitor, Mockito.times(1)).visitInclude(Mockito.eq(relationSpec));
-		Mockito.verify(visitor, Mockito.times(1)).visitSort(Mockito.eq(sortSpec));
+		Mockito.verify(visitor, Mockito.times(1)).visitField(Mockito.eq(spec.getIncludedFields().get(0)));
+		Mockito.verify(visitor, Mockito.times(1)).visitFilterStart(Mockito.eq(spec.getFilters().get(0)));
+		Mockito.verify(visitor, Mockito.times(1)).visitFilterEnd(Mockito.eq(spec.getFilters().get(0)));
+		Mockito.verify(visitor, Mockito.times(1)).visitInclude(Mockito.eq(spec.getIncludedRelations().get(0)));
+		Mockito.verify(visitor, Mockito.times(1)).visitSort(Mockito.eq(spec.getSort().get(0)));
 		Mockito.verify(visitor, Mockito.times(1)).visitPaging(Mockito.eq(spec.getPaging()));
 		Mockito.verify(visitor, Mockito.times(4)).visitPath(Mockito.any(PathSpec.class));
 	}
+
+	@Test
+	public void testVisitorWithFilterAbort() {
+		QuerySpec spec = createTestQueySpec();
+
+		QuerySpecVisitorBase visitor = Mockito.mock(QuerySpecVisitorBase.class);
+		Mockito.when(visitor.visitStart(Mockito.any(QuerySpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitFilterStart(Mockito.any(FilterSpec.class))).thenReturn(false);
+		Mockito.when(visitor.visitSort(Mockito.any(SortSpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitField(Mockito.any(IncludeFieldSpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitInclude(Mockito.any(IncludeRelationSpec.class))).thenReturn(true);
+		spec.accept(visitor);
+
+		Mockito.verify(visitor, Mockito.times(1)).visitStart(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(1)).visitEnd(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(1)).visitField(Mockito.any(IncludeFieldSpec.class));
+		Mockito.verify(visitor, Mockito.times(1)).visitFilterStart(Mockito.any(FilterSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitFilterEnd(Mockito.any(FilterSpec.class));
+		Mockito.verify(visitor, Mockito.times(1)).visitInclude(Mockito.any(IncludeRelationSpec.class));
+		Mockito.verify(visitor, Mockito.times(1)).visitSort(Mockito.any(SortSpec.class));
+		Mockito.verify(visitor, Mockito.times(1)).visitPaging(Mockito.any(PagingSpec.class));
+
+		// filter path will not be visited
+		Mockito.verify(visitor, Mockito.times(3)).visitPath(Mockito.any(PathSpec.class));
+	}
+
+	@Test
+	public void testVisitorWithSortAbort() {
+		QuerySpec spec = createTestQueySpec();
+
+		QuerySpecVisitorBase visitor = Mockito.mock(QuerySpecVisitorBase.class);
+		Mockito.when(visitor.visitStart(Mockito.any(QuerySpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitFilterStart(Mockito.any(FilterSpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitSort(Mockito.any(SortSpec.class))).thenReturn(false);
+		Mockito.when(visitor.visitField(Mockito.any(IncludeFieldSpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitInclude(Mockito.any(IncludeRelationSpec.class))).thenReturn(true);
+		spec.accept(visitor);
+
+		// sort path will not be visited
+		Mockito.verify(visitor, Mockito.times(3)).visitPath(Mockito.any(PathSpec.class));
+	}
+
+	@Test
+	public void testVisitorWithMultipleAbort() {
+		QuerySpec spec = createTestQueySpec();
+
+		QuerySpecVisitorBase visitor = Mockito.mock(QuerySpecVisitorBase.class);
+		Mockito.when(visitor.visitStart(Mockito.any(QuerySpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitFilterStart(Mockito.any(FilterSpec.class))).thenReturn(true);
+		Mockito.when(visitor.visitSort(Mockito.any(SortSpec.class))).thenReturn(false);
+		Mockito.when(visitor.visitField(Mockito.any(IncludeFieldSpec.class))).thenReturn(false);
+		Mockito.when(visitor.visitInclude(Mockito.any(IncludeRelationSpec.class))).thenReturn(false);
+		spec.accept(visitor);
+
+		// sort path will not be visited
+		Mockito.verify(visitor, Mockito.times(1)).visitPath(Mockito.any(PathSpec.class));
+	}
+
+
+	@Test
+	public void testVisitorWithAbort() {
+		QuerySpec spec = createTestQueySpec();
+
+		QuerySpecVisitorBase visitor = Mockito.mock(QuerySpecVisitorBase.class);
+		Mockito.when(visitor.visitStart(Mockito.any(QuerySpec.class))).thenReturn(false);
+		spec.accept(visitor);
+
+		Mockito.verify(visitor, Mockito.times(1)).visitStart(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(0)).visitEnd(Mockito.eq(spec));
+		Mockito.verify(visitor, Mockito.times(0)).visitField(Mockito.any(IncludeFieldSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitFilterStart(Mockito.any(FilterSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitFilterEnd(Mockito.any(FilterSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitInclude(Mockito.any(IncludeRelationSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitSort(Mockito.any(SortSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitPaging(Mockito.any(PagingSpec.class));
+		Mockito.verify(visitor, Mockito.times(0)).visitPath(Mockito.any(PathSpec.class));
+	}
 }
+
