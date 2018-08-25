@@ -49,7 +49,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 
 			QuerySpec idQuerySpec = new QuerySpec(targetInformation);
 			ResourceRepositoryAdapter targetAdapter = targetEntry.getResourceRepository();
-			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(idQuerySpec, queryContext)).get();
+			JsonApiResponse response = targetAdapter.findAll(targetIds, context.createQueryAdapter(querySpec, queryContext)).get();
 			targets = (List<D>) response.getEntity();
 			return toResult(field, targetInformation, sources, targets);
 		} else {
@@ -98,6 +98,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 			Object sourceId = field.getParentResourceInformation().getId(source);
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
+				((Collection) targetId).retainAll((Collection)targetMap.keySet());
 				for (Object targetElementId : (Collection) targetId) {
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}
