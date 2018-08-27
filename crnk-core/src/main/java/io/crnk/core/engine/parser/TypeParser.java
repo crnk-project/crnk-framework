@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -52,7 +53,7 @@ public class TypeParser {
 	private ObjectMapper objectMapper;
 
 	public TypeParser() {
-		parsers = new HashMap<>();
+		parsers = new ConcurrentHashMap<>();
 		parsers.putAll(DefaultStringParsers.get());
 	}
 
@@ -80,8 +81,8 @@ public class TypeParser {
 	 * parsed values.
 	 *
 	 * @param inputs list of Strings
-	 * @param clazz type to be parsed to
-	 * @param <T> type of class
+	 * @param clazz  type to be parsed to
+	 * @param <T>    type of class
 	 * @return {@link Iterable} of parsed values
 	 */
 	public <T extends Serializable> Iterable<T> parse(Iterable<String> inputs, Class<T> clazz) {
@@ -98,57 +99,80 @@ public class TypeParser {
 	 *
 	 * @param input String value
 	 * @param clazz type to be parsed to
-	 * @param <T> type of class
+	 * @param <T>   type of class
 	 * @return instance of parsed value
 	 */
 	public <T> T parse(String input, Class<T> clazz) {
 		try {
 			return parseInput(input, clazz);
-		}
-		catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException |
-				NumberFormatException | ParserException e) {
+		} catch (ParserException e) {
+			throw e;
+		} catch (NumberFormatException e) {
 			throw new ParserException(e.getMessage());
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T parseInput(final String input, final Class<T> clazz)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+	private <T> T parseInput(final String input, final Class<T> clazz) {
 		if (String.class.equals(clazz)) {
 			return (T) input;
 		}
 
-		if (!parsers.containsKey(clazz)) {
-			StringParser parser = setupParser(clazz, input);
-			LOGGER.debug("using parser {} for type {}", parser, clazz);
-			parsers.put(clazz, parser);
+		StringParser<T> parser = getParser(clazz, input);
+		if (parser == null) {
+			throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
 		}
 
-		StringParser parser = parsers.get(clazz);
 		return (T) parser.parse(input);
 	}
 
-	private <T> StringParser<T> setupParser(Class<T> clazz, String input) throws NoSuchMethodException {
+	private <T> StringParser<T> getParser(Class<T> clazz, String input) {
+		if (parsers.containsKey(clazz)) {
+			return parsers.get(clazz);
+
+		}
+		StringParser parser = setupParser(clazz, input);
+		if (parser != null) {
+			LOGGER.debug("using parser {} for type {}", parser, clazz);
+			parsers.put(clazz, parser);
+			return parser;
+		}
+		return null;
+	}
+
+	public boolean supports(Class<?> clazz) {
+		return getParser(clazz, null) != null;
+	}
+
+	private <T> StringParser<T> setupParser(Class<T> clazz, String input) {
+		if (parsers.containsKey(clazz)) {
+			return parsers.get(clazz);
+		}
+
 		if (isEnum(clazz)) {
 			return new EnumParser<>(clazz);
 		}
 
-		if (useJackson) {
+		// TODO cleanup this input dependency
+		if (useJackson && input != null) {
 			ObjectReader reader = objectMapper.readerFor(clazz);
 			try {
 				JacksonParser parser = new JacksonParser(reader);
 				parser.parse(input);
 				return parser;
-			}
-			catch (RuntimeException e) {
+			} catch (RuntimeException e) {
 				LOGGER.debug("Jackson not applicable to {} based on input {}", clazz, input);
 				LOGGER.trace("Jackson error", e);
 			}
 		}
 
-		if (containsStringConstructor(clazz)) {
-			Constructor<T> constructor = clazz.getDeclaredConstructor(String.class);
-			return new ConstructorBasedParser(constructor);
+		try {
+			if (containsStringConstructor(clazz)) {
+				Constructor<T> constructor = clazz.getDeclaredConstructor(String.class);
+				return new ConstructorBasedParser(constructor);
+			}
+		} catch (NoSuchMethodException e) {
+			throw new IllegalStateException(e);
 		}
 
 		Optional<Method> method = methodCache.find(clazz, "parse", String.class);
@@ -159,10 +183,10 @@ public class TypeParser {
 			return new MethodBasedParser(method.get(), clazz);
 		}
 
-		throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
+		return null;
 	}
 
-	private boolean containsStringConstructor(Class<?> clazz) throws NoSuchMethodException {
+	private boolean containsStringConstructor(Class<?> clazz) {
 		boolean result = false;
 		for (Constructor constructor : clazz.getDeclaredConstructors()) {
 			if (!Modifier.isPrivate(constructor.getModifiers()) && constructor.getParameterTypes().length == 1
