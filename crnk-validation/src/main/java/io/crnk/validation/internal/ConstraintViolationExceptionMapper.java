@@ -22,6 +22,8 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.ExceptionMapperHelper;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -166,17 +168,37 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 	}
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ConstraintViolationException fromErrorResponse(ErrorResponse errorResponse) {
 		Set violations = new HashSet();
+
+		StringBuilder message = new StringBuilder();
 
 		Iterable<ErrorData> errors = errorResponse.getErrors();
 		for (ErrorData error : errors) {
 			ConstraintViolationImpl violation = ConstraintViolationImpl.fromError(context.getResourceRegistry(), error);
 			violations.add(violation);
+
+			// TODO cleanup message handling
+			if (message.length() > 0) {
+				message.append(", ");
+			}
+			if (violation.getMessage() != null) {
+				message.append(violation.getMessage());
+			}
+			else if (error.getDetail() != null) {
+				message.append(error.getDetail());
+			}
+			else {
+				message.append(error.getCode());
+			}
+			String sourcePointer = error.getSourcePointer();
+			if (sourcePointer != null) {
+				message.append(" (" + sourcePointer + ")");
+			}
 		}
 
-		return new ConstraintViolationException(null, violations);
+		return new ConstraintViolationException(message.toString(), violations);
 	}
 
 	@Override
@@ -280,9 +302,30 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		}
 
 		public Object visitProperty(Object nodeObject, Node node) {
+			ResourceRegistry resourceRegistry = context.getResourceRegistry();
+			Class nodeClass = nodeObject.getClass();
+			ResourceInformation resourceInformation = null;
+			if (resourceRegistry.hasEntry(nodeClass)) {
+				RegistryEntry entry = resourceRegistry.getEntry(nodeClass);
+				resourceInformation = entry.getResourceInformation();
+			}
+
+			String name = node.getName();
+
 			Object next;
 			if (node.getKind() == ElementKind.PROPERTY) {
-				next = PropertyUtils.getProperty(nodeObject, node.getName());
+				if (resourceRegistry.hasEntry(nodeClass)) {
+					ResourceFieldAccessor accessor = resourceInformation.getAccessor(name);
+					if (accessor != null) {
+						next = accessor.getValue(nodeObject);
+					}
+					else {
+						next = PropertyUtils.getProperty(nodeObject, name);
+					}
+				}
+				else {
+					next = PropertyUtils.getProperty(nodeObject, name);
+				}
 			}
 			else if (node.getKind() == ElementKind.BEAN) {
 				next = nodeObject;
@@ -291,20 +334,29 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				throw new UnsupportedOperationException("unknown node: " + node);
 			}
 
-			if (node.getName() != null) {
-				appendSeparator();
-				if (!isResource(nodeObject.getClass()) || isPrimaryKey(nodeObject.getClass(), node.getName())) {
-					// continue along attributes path or primary key on root
-					appendSourcePointer(node.getName());
+			if (name != null) {
+				ResourceField resourceField =
+						resourceInformation != null ? resourceInformation.findFieldByUnderlyingName(name) : null;
+
+				String mappedName = name;
+				if (resourceField != null) {
+					// in case of @JsonApiRelationId it will be mapped to original name
+					mappedName = resourceField.getUnderlyingName();
 				}
-				else if (isAssociation(nodeObject.getClass(), node.getName())) {
+
+				appendSeparator();
+				if (resourceField == null || resourceField.getResourceFieldType() == ResourceFieldType.ID) {
+					// continue along attributes path or primary key on root
+					appendSourcePointer(mappedName);
+				}
+				else if (resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 					appendSourcePointer("/data/relationships/");
-					appendSourcePointer(node.getName());
+					appendSourcePointer(mappedName);
 				}
 				else {
 
 					appendSourcePointer("/data/attributes/");
-					appendSourcePointer(node.getName());
+					appendSourcePointer(mappedName);
 				}
 			}
 			return next;
@@ -358,32 +410,6 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 		private void appendSeparator() {
 			if (leafSourcePointer.length() > 0) {
 				appendSourcePointer("/");
-			}
-		}
-
-		private boolean isPrimaryKey(Class<? extends Object> clazz, String name) {
-			ResourceRegistry resourceRegistry = context.getResourceRegistry();
-			RegistryEntry entry = resourceRegistry.findEntry(clazz);
-			if (entry != null) {
-				ResourceInformation resourceInformation = entry.getResourceInformation();
-				ResourceField idField = resourceInformation.getIdField();
-				return idField.getUnderlyingName().equals(name);
-			}
-			else {
-				return DEFAULT_PRIMARY_KEY_NAME.equals(name);
-			}
-		}
-
-		private boolean isAssociation(Class<? extends Object> clazz, String name) {
-			ResourceRegistry resourceRegistry = context.getResourceRegistry();
-			RegistryEntry entry = resourceRegistry.findEntry(clazz);
-			if (entry != null) {
-				ResourceInformation resourceInformation = entry.getResourceInformation();
-				ResourceField relationshipField = resourceInformation.findRelationshipFieldByName(name);
-				return relationshipField != null;
-			}
-			else {
-				return false;
 			}
 		}
 

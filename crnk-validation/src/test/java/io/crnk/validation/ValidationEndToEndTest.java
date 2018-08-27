@@ -1,29 +1,30 @@
 package io.crnk.validation;
 
-import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.validation.internal.ConstraintViolationImpl;
-import io.crnk.validation.mock.ComplexValidator;
-import io.crnk.validation.mock.models.Project;
-import io.crnk.validation.mock.models.ProjectData;
-import io.crnk.validation.mock.models.Task;
-
-import org.junit.Assert;
-import org.junit.Test;
-
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+
+import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.legacy.queryParams.QueryParams;
+import io.crnk.validation.internal.ConstraintViolationImpl;
+import io.crnk.validation.mock.ComplexValidator;
+import io.crnk.validation.mock.models.Project;
+import io.crnk.validation.mock.models.ProjectData;
+import io.crnk.validation.mock.models.Schedule;
+import io.crnk.validation.mock.models.Task;
+import org.junit.Assert;
+import org.junit.Test;
 
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
 public class ValidationEndToEndTest extends AbstractValidationTest {
@@ -233,6 +234,32 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("tasks[0]", violation.getPropertyPath().toString());
 			Assert.assertEquals("/data/relationships/tasks/0", violation.getErrorData().getSourcePointer());
+		}
+	}
+
+
+	@Test
+	public void testPropertyOnRelationId() {
+
+		ResourceRepositoryV2<Schedule, Serializable> scheduleRepo = client.getRepositoryForType(Schedule.class);
+
+		Project project = new Project();
+		project.setId(2L);
+		project.setName("test");
+
+		Schedule schedule = new Schedule();
+		schedule.setId(1L);
+		schedule.setName("test");
+		schedule.setProjectId(null);
+		try {
+			scheduleRepo.create(schedule);
+		} catch (ConstraintViolationException e) {
+			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+			Assert.assertEquals(1, violations.size());
+			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
+			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
+			Assert.assertEquals("project", violation.getPropertyPath().toString());
+			Assert.assertEquals("/data/relationships/project", violation.getErrorData().getSourcePointer());
 		}
 	}
 
