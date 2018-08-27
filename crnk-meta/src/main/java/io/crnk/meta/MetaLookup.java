@@ -148,7 +148,7 @@ public class MetaLookup {
 		PreconditionUtil.verify(!idElementMap.contains(element.getId()), "element with id=%d already exists", element.getId());
 
 		//	if (idElementMap.get(element.getId()) != element) {
-		LOGGER.debug("add {} of type {}", element.getId(), element.getClass().getSimpleName());
+		LOGGER.trace("trace {} of type {}", element.getId(), element.getClass().getSimpleName());
 
 		// queue for initialization
 		initializationQueue.add(element);
@@ -197,7 +197,7 @@ public class MetaLookup {
 			}
 		}
 		try {
-			LOGGER.debug("discovery started");
+			LOGGER.trace("discovery started");
 			discovering = true;
 
 			T result = callable.call();
@@ -209,14 +209,14 @@ public class MetaLookup {
 					initialize(element);
 				}
 			}
-			LOGGER.debug("discovery completed");
+			LOGGER.trace("discovery completed");
 			return result;
 		}
 		catch (RuntimeException e) {
 			throw e;
 		}
 		catch (Exception e) {
-			LOGGER.debug("discovery failed", e);
+			LOGGER.trace("discovery failed", e);
 			throw new IllegalStateException(e);
 		}
 		finally {
@@ -225,7 +225,7 @@ public class MetaLookup {
 	}
 
 	private void initialize(MetaElement element) {
-		LOGGER.debug("discovering {}", element.getId());
+		LOGGER.trace("discovering {}", element.getId());
 
 		for (MetaFilter filter : filters) {
 			filter.onInitializing(element);
@@ -238,7 +238,7 @@ public class MetaLookup {
 		for (MetaFilter filter : filters) {
 			filter.onInitialized(element);
 		}
-		LOGGER.debug("added {}", element.getId());
+		LOGGER.trace("added {}", element.getId());
 	}
 
 
