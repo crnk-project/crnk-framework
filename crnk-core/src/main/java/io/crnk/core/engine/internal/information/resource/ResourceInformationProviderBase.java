@@ -69,8 +69,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 				InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
 				buildResourceField(beanDesc, attributeDesc, fieldBuilder);
 				fields.add(fieldBuilder.build());
-			}
-			else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
+			} else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
 				relationIdFields.add(attributeDesc.getName());
 			}
 		}
@@ -108,8 +107,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		if (useFieldType(attributeDesc)) {
 			fieldBuilder.type(attributeDesc.getField().getType());
 			genericType = attributeDesc.getField().getGenericType();
-		}
-		else {
+		} else {
 			fieldBuilder.type(attributeDesc.getGetter().getReturnType());
 			genericType = attributeDesc.getGetter().getGenericReturnType();
 		}
@@ -119,31 +117,30 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 			fieldBuilder.oppositeName(getOppositeName(attributeDesc));
 
 			Optional<JsonApiRelation> relationAnnotation = attributeDesc.getAnnotation(JsonApiRelation.class);
-			if (relationAnnotation.isPresent()) {
-				boolean multiValued = Collection.class.isAssignableFrom(attributeDesc.getImplementationClass());
-				String suffix = multiValued ? "Ids" : "Id";
-				String idFieldName;
-				if (relationAnnotation.get().idField().length() > 0) {
-					idFieldName = relationAnnotation.get().idField();
+			boolean multiValued = Collection.class.isAssignableFrom(attributeDesc.getImplementationClass());
+			String suffix = multiValued ? "Ids" : "Id";
+			String idFieldName;
+			boolean hasIdNameReference =  relationAnnotation.isPresent() && relationAnnotation.get().idField().length() > 0;
+			if (hasIdNameReference) {
+				idFieldName = relationAnnotation.get().idField();
+			} else {
+				idFieldName = attributeDesc.getName() + suffix;
+			}
+			BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);
+			if (idAttribute == null && multiValued && attributeDesc.getName().endsWith("s")) {
+				// also try to correlate by removing ending s
+				String idFieldNameTemp = attributeDesc.getName().substring(0, attributeDesc.getName().length() - 1) + suffix;
+				BeanAttributeInformation idAttributeTemp = beanDesc.getAttribute(idFieldNameTemp);
+				// make sure there are no custom get-named methods
+				if (idAttributeTemp != null && attributeDesc.getGetter() != null && idAttributeTemp.getGetter().getReturnType().equals(attributeDesc.getGetter().getReturnType())) {
+					idFieldName = idFieldNameTemp;
+					idAttribute = idAttributeTemp;
 				}
-				else {
-					idFieldName = attributeDesc.getName() + suffix;
-				}
-				BeanAttributeInformation idAttribute = beanDesc.getAttribute(idFieldName);
-				if (idAttribute == null && multiValued && attributeDesc.getName().endsWith("s")) {
-					// also try to correlate by removing ending s
-					String idFieldNameTemp = attributeDesc.getName().substring(0, attributeDesc.getName().length() - 1) + suffix;
-					BeanAttributeInformation idAttributeTemp = beanDesc.getAttribute(idFieldNameTemp);
-					// make sure there are no custom get-named methods
-					if (idAttributeTemp != null && attributeDesc.getGetter() != null && idAttributeTemp.getGetter().getReturnType().equals(attributeDesc.getGetter().getReturnType())) {
-						idFieldName = idFieldNameTemp;
-						idAttribute = idAttributeTemp;
-					}
-				}
-				if (idAttribute != null && idAttribute.getAnnotation(JsonApiRelationId.class).isPresent()) {
-					fieldBuilder.idName(idFieldName);
-					fieldBuilder.idType(idAttribute.getImplementationClass());
-				}
+			}
+
+			if (idAttribute != null && (hasIdNameReference || idAttribute.getAnnotation(JsonApiRelationId.class).isPresent())) {
+				fieldBuilder.idName(idFieldName);
+				fieldBuilder.idType(idAttribute.getImplementationClass());
 			}
 		}
 	}
