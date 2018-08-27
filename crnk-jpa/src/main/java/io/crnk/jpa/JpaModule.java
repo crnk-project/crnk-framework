@@ -461,7 +461,7 @@ public class JpaModule implements InitializingModule {
 	 * of a mapper the resource class might not correspond to the entity class.
 	 */
 	private void setupRelationshipRepositories(Class<?> resourceClass, boolean mapped) {
-		if (context.getResourceInformationBuilder().accept(resourceClass)) {
+		if (config.getRelationshipsEnabled() && context.getResourceInformationBuilder().accept(resourceClass)) {
 			ResourceInformation information = context.getResourceInformationBuilder().build(resourceClass);
 
 

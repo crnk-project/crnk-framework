@@ -24,6 +24,8 @@ public class JpaModuleConfig {
 
 	private JpaRepositoryFactory repositoryFactory = new DefaultJpaRepositoryFactory();
 
+	private boolean relationshipsEnabled = true;
+
 	public JpaModuleConfig() {
 	}
 
@@ -133,7 +135,7 @@ public class JpaModuleConfig {
 	/**
 	 * Removes the resource with the given type from this module.
 	 *
-	 * @param <T> resourse class (entity or mapped dto)
+	 * @param <T>           resourse class (entity or mapped dto)
 	 * @param resourceClass to remove
 	 */
 	public <T> void removeRepository(Class<T> resourceClass) {
@@ -163,7 +165,7 @@ public class JpaModuleConfig {
 	 * queries.
 	 */
 	public JpaQueryFactory getQueryFactory() {
-		if(queryFactory == null){
+		if (queryFactory == null) {
 			QueryFactoryDiscovery queryFactoryDiscovery = new QueryFactoryDiscovery();
 			setQueryFactory(queryFactoryDiscovery.discoverDefaultFactory());
 		}
@@ -171,9 +173,17 @@ public class JpaModuleConfig {
 	}
 
 	public void setQueryFactory(JpaQueryFactory queryFactory) {
-		if(this.queryFactory != null){
+		if (this.queryFactory != null) {
 			throw new IllegalStateException("queryFactory already set");
 		}
 		this.queryFactory = queryFactory;
+	}
+
+	public boolean getRelationshipsEnabled() {
+		return relationshipsEnabled;
+	}
+
+	public void setRelationshipsEnabled(boolean relationshipsEnabled) {
+		this.relationshipsEnabled = relationshipsEnabled;
 	}
 }
