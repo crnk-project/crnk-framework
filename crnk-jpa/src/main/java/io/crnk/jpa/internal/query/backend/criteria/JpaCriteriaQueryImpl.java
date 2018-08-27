@@ -19,8 +19,8 @@ public class JpaCriteriaQueryImpl<T> extends AbstractJpaQueryImpl<T, JpaCriteria
 	}
 
 	public JpaCriteriaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> clazz,
-								ComputedAttributeRegistryImpl virtualAttrs, String attrName, List<?> entityIds) {
-		super(metaPartition, em, clazz, virtualAttrs, attrName, entityIds);
+								ComputedAttributeRegistryImpl virtualAttrs, String attrName, String parentKey, List<?> entityIds) {
+		super(metaPartition, em, clazz, virtualAttrs, attrName, parentKey, entityIds);
 	}
 
 	public CriteriaQuery<T> buildQuery() {
@@ -34,7 +34,7 @@ public class JpaCriteriaQueryImpl<T> extends AbstractJpaQueryImpl<T, JpaCriteria
 
 	@Override
 	protected JpaCriteriaQueryBackend<T> newBackend() {
-		return new JpaCriteriaQueryBackend<>(this, em, clazz, parentMeta, parentAttr, parentIdSelection);
+		return new JpaCriteriaQueryBackend<>(this, em, clazz, parentMeta, parentAttr, parentKey, parentIdSelection);
 	}
 
 	@Override

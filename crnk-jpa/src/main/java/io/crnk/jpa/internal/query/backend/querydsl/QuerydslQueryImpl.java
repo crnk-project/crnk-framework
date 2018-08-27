@@ -25,8 +25,8 @@ public class QuerydslQueryImpl<T> extends AbstractJpaQueryImpl<T, QuerydslQueryB
 	}
 
 	public QuerydslQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> clazz, ComputedAttributeRegistryImpl virtualAttrs,
-							 List<QuerydslTranslationInterceptor> translationInterceptors, String attrName, List<?> entityIds) {
-		super(metaPartition, em, clazz, virtualAttrs, attrName, entityIds);
+							 List<QuerydslTranslationInterceptor> translationInterceptors, String attrName, String parentKey, List<?> entityIds) {
+		super(metaPartition, em, clazz, virtualAttrs, attrName, parentKey, entityIds);
 		this.translationInterceptors = translationInterceptors;
 		queryFactory = new JPAQueryFactory(em);
 	}

@@ -21,6 +21,7 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.provider.MetaPartition;
 
 public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?, ?>> implements JpaQuery<T> {
@@ -54,6 +55,8 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	protected boolean parentIdSelection;
 
+	protected String parentKey;
+
 	private ComputedAttributeRegistryImpl computedAttrs;
 
 	private Object privateData;
@@ -71,7 +74,7 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	@SuppressWarnings("unchecked")
 	public AbstractJpaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> entityClass,
-								ComputedAttributeRegistryImpl virtualAttrs, String attrName, List<?> entityIds) {
+								ComputedAttributeRegistryImpl virtualAttrs, String attrName, String parentKey, List<?> entityIds) {
 		this.em = em;
 		this.computedAttrs = virtualAttrs;
 
@@ -86,6 +89,7 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 		this.parentAttr = attrMeta;
 		this.parentIds = entityIds;
+		this.parentKey = parentKey;
 	}
 
 	public Object getPrivateData() {

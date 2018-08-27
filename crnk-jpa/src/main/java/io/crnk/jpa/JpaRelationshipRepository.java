@@ -37,6 +37,8 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 	private final ResourceField resourceField;
 
+	private final String sourceKeyName;
+
 	private Class<S> sourceResourceClass;
 
 	private Class<?> sourceEntityClass;
@@ -58,6 +60,8 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		this.sourceResourceClass = (Class<S>) resourceField.getParentResourceInformation().getResourceClass();
 		this.resourceField = resourceField;
+		this.sourceKeyName = resourceField.getParentResourceInformation().getIdField().getUnderlyingName();
+
 
 		JpaRepositoryConfig<S> sourceMapping = module.getRepositoryConfig(sourceResourceClass);
 		this.sourceEntityClass = sourceMapping.getEntityClass();
@@ -216,7 +220,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		QuerySpec filteredQuerySpec = filterQuerySpec(bulkQuerySpec);
 
 		JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
-		JpaQuery<?> query = queryFactory.query(sourceEntityClass, fieldName, sourceIdLists);
+		JpaQuery<?> query = queryFactory.query(sourceEntityClass, fieldName, sourceKeyName, sourceIdLists);
 		query.setPrivateData(new JpaRequestContext(this, querySpec));
 		query.addParentIdSelection();
 		query = filterQuery(filteredQuerySpec, query);

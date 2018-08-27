@@ -83,8 +83,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				MetaEntity metaEntity = (MetaEntity) meta;
 				MetaKey primaryKey = metaEntity.getPrimaryKey();
 				return primaryKey != null && primaryKey.getElements().size() == 1;
-			}
-			else {
+			} else {
 				// note that DTOs cannot be handled here
 				return meta instanceof MetaJpaDataObject;
 			}
@@ -93,7 +92,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ResourceInformation build(final Class<?> resourceClass) {
 		String resourceType = getResourceType(resourceClass);
 		String resourcePath = getResourcePath(resourceClass);
@@ -120,7 +119,8 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 		ResourceField idField = info.getIdField();
 		BeanAttributeInformation idAttr = beanInformation.getAttribute(idField.getUnderlyingName());
-		if(idAttr.getAnnotation(EmbeddedId.class).isPresent()){
+
+		if (idAttr.getAnnotation(EmbeddedId.class).isPresent()) {
 			info.setIdStringMapper(new JpaIdMapper(meta));
 		}
 		return info;
@@ -145,8 +145,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			boolean jsonApiId1 = attr1.getAnnotation(JsonApiId.class).isPresent();
 			if (jsonApiId0 && !jsonApiId1) {
 				((ResourceFieldImpl) field1).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
-			}
-			else if (!jsonApiId0 && jsonApiId1) {
+			} else if (!jsonApiId0 && jsonApiId1) {
 				((ResourceFieldImpl) field0).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
 			}
 		}
@@ -262,12 +261,10 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 		private Object fromKeyString(MetaType type, String idString) {
 			// => support compound keys with unique ids
-			if (type instanceof MetaDataObject) {
+			if (type instanceof MetaDataObject && !context.getTypeParser().supports(type.getImplementationClass())) {
 				return parseEmbeddableString((MetaDataObject) type, idString);
 			}
-			else {
-				return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
-			}
+			return context.getTypeParser().parse(idString, (Class) type.getImplementationClass());
 		}
 
 		private Object parseEmbeddableString(MetaDataObject embType, String idString) {

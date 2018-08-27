@@ -31,7 +31,7 @@ public interface JpaQueryFactory {
 	 * @param parentIds         to retrieve the children from
 	 * @return query
 	 */
-	<T> JpaQuery<T> query(Class<?> parentEntityClass, String childrenAttrName, List<?> parentIds);
+	<T> JpaQuery<T> query(Class<?> parentEntityClass, String childrenAttrName, String parentKey, List<?> parentIds);
 
 	/**
 	 * @return ComputedAttributeRegistry holding registered computed attributes
