@@ -45,7 +45,9 @@ class ClientResourceUpsert extends ResourceUpsert {
 	}
 
 	public String getUID(RegistryEntry entry, Serializable id) {
-		return entry.getResourceInformation().getResourceType() + "#" + id;
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+		String idString = resourceInformation.toIdString(id);
+		return resourceInformation.getResourceType() + "#" + idString;
 	}
 
 	public void setRelations(List<Resource> resources) {

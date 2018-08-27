@@ -1,7 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
@@ -10,12 +8,16 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 public class ClientResourceUpsertTest {
 
@@ -33,6 +35,18 @@ public class ClientResourceUpsertTest {
 		ControllerContext controllerContext = new ControllerContext(boot.getModuleRegistry(), boot::getDocumentMapper);
 		upsert = new ClientResourceUpsert(proxyFactory);
 		upsert.init(controllerContext);
+	}
+
+	@Test
+	public void testUIDComputation(){
+		Serializable id = "test";
+		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
+		ResourceInformation resourceInformation = Mockito.mock(ResourceInformation.class);
+		Mockito.when(resourceInformation.getResourceType()).thenReturn("someType");
+		Mockito.when(resourceInformation.toIdString(Mockito.eq(id))).thenReturn("someId");
+		Mockito.when(entry.getResourceInformation()).thenReturn(resourceInformation);
+		String uid = upsert.getUID(entry, id);
+		Assert.assertEquals("someType#someId", uid);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
