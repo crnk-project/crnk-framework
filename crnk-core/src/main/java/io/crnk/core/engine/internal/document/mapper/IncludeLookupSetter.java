@@ -222,8 +222,7 @@ public class IncludeLookupSetter {
 						throw new InternalServerErrorException(
 								id + " relationship field collection '" + relationshipField.getJsonName()
 										+ "' can not be null. Either set the relationship as an empty "
-										+ Iterable.class.getCanonicalName() + " or add annotation @"
-										+ JsonApiLookupIncludeAutomatically.class.getCanonicalName());
+										+ Iterable.class.getCanonicalName() + " or use LookupIncludeBehavior.AUTOMATICALLY_ALWAYS");
 					}
 				}
 

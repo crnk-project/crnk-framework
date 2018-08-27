@@ -40,7 +40,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	@Test
 	public void testRelations() {
 		List<Long> ids = Arrays.asList(1L);
-		JpaQuery<RelatedEntity> builder = queryFactory.query(TestEntity.class, TestEntity.ATTR_oneRelatedValue, ids);
+		JpaQuery<RelatedEntity> builder = queryFactory.query(TestEntity.class, TestEntity.ATTR_oneRelatedValue, "id", ids);
 		RelatedEntity relatedEntity = builder.buildExecutor().getUniqueResult(false);
 		assertEquals(101L, relatedEntity.getId().longValue());
 	}
@@ -48,7 +48,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	@Test
 	public void testRelationsWithParentIdSelection() {
 		List<Long> ids = Arrays.asList(1L);
-		JpaQuery<RelatedEntity> builder = queryFactory.query(TestEntity.class, TestEntity.ATTR_oneRelatedValue, ids);
+		JpaQuery<RelatedEntity> builder = queryFactory.query(TestEntity.class, TestEntity.ATTR_oneRelatedValue, "id", ids);
 		builder.addParentIdSelection();
 		List<Tuple> tuples = builder.buildExecutor().getResultTuples();
 		Assert.assertEquals(1, tuples.size());
@@ -595,7 +595,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		Assert.assertEquals("testId", testEntity.getId());
 
 		JpaQuery<Object> relatedQuery =
-				queryFactory.query(TestSubclassWithSuperclassPk.class, "superRelatedValue", Arrays.asList("testId"));
+					queryFactory.query(TestSubclassWithSuperclassPk.class, "superRelatedValue", "id", Arrays.asList("testId"));
 		relatedQuery.addParentIdSelection();
 		JpaQueryExecutor<Object> relatedExecutor = relatedQuery.buildExecutor();
 		List<Tuple> resultTuples = relatedExecutor.getResultTuples();
