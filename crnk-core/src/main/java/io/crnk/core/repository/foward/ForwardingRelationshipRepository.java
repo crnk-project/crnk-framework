@@ -58,14 +58,14 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingDirection getDirection,
-			ForwardingDirection setDirection) {
+											ForwardingDirection setDirection) {
 		this(sourceClass, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
 
 	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
 			getStrategy,
-			ForwardingSetStrategy<T, I, D, J> setStrategy) {
+											ForwardingSetStrategy<T, I, D, J> setStrategy) {
 		this.sourceClass = sourceClass;
 		this.matcher = matcher;
 		this.getStrategy = getStrategy;
@@ -73,7 +73,7 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingDirection getDirection,
-			ForwardingDirection setDirection) {
+											ForwardingDirection setDirection) {
 		this(sourceType, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
 	}
 
@@ -121,33 +121,37 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 
 	@Override
 	public void setRelation(T source, J targetId, String fieldName) {
-		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryContext queryContext = getQueryContext();
 		setStrategy.setRelation(source, targetId, fieldName, queryContext);
 	}
 
 	@Override
 	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryContext queryContext = getQueryContext();
 		setStrategy.setRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
 	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryContext queryContext = getQueryContext();
 		setStrategy.addRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
 	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
+		QueryContext queryContext = getQueryContext();
 		setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
-		QueryContext queryContext = requestContext.getQueryContext();
+		QueryContext queryContext = getQueryContext();
 		return getStrategy.findTargets(sourceIds, fieldName, querySpec, queryContext);
+	}
+
+	protected QueryContext getQueryContext() {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+		return requestContext != null ? requestContext.getQueryContext() : new QueryContext();
 	}
 
 	@Override
