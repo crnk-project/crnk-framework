@@ -9,6 +9,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -72,6 +73,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 				if (field != null) {
 					if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 						RegistryEntry entry = resourceRegistry.getEntry(field.getOppositeResourceType());
+						PreconditionUtil.verify(entry != null, "resourceType=%s not found for field=%s", field.getOppositeResourceType(), field.getUnderlyingName());
 						resourceInformation = entry.getResourceInformation();
 						valueType = resourceInformation.getResourceClass();
 					} else {
