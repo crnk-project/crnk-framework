@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
@@ -31,8 +27,13 @@ import io.crnk.core.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonApiRequestProcessorBase {
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+public class JsonApiRequestProcessorBase {
+	private final static Pattern pattern = Pattern.compile("application/vnd\\.api\\.v(\\d+)\\+json");
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected Module.ModuleContext moduleContext;
@@ -121,27 +122,28 @@ public class JsonApiRequestProcessorBase {
 
 
 	protected JsonPath getJsonPath(HttpRequestContext requestContext) {
-	    int version = obtainVersion(requestContext);
+		int version = obtainVersion(requestContext);
 		String path = requestContext.getPath();
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 		TypeParser typeParser = moduleContext.getTypeParser();
 		return new PathBuilder(resourceRegistry, typeParser, version).build(path);
 	}
 
-    protected int obtainVersion(HttpRequestContext requestContext) {
-        String requestHeader = requestContext.getRequestHeader("Content-Type");
-        if (StringUtils.isBlank(requestHeader)) {
-            return 0;
-        }
+	protected int obtainVersion(HttpRequestContext requestContext) {
+		String requestHeader = requestContext.getRequestHeader("Content-Type");
+		if (StringUtils.isBlank(requestHeader)) {
+			return 0;
+		}
 
-        try {
-            return Integer.valueOf(requestHeader.substring(21).replace("+json", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
+		Matcher matcher = pattern.matcher(requestHeader);
+		if (matcher.find()) {
+			return Integer.valueOf(matcher.group(1));
+		}
 
-    protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
+		return 0;
+	}
+
+	protected ResourceInformation getRequestedResource(JsonPath jsonPath) {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
