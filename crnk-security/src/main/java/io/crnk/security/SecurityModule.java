@@ -191,7 +191,11 @@ public class SecurityModule implements Module {
 		}
 
 		boolean allowed = missingPermission.isEmpty();
-		LOGGER.debug("isAllowed returns {} for permission {} due to missing {}", allowed, permission, missingPermission);
+		if(allowed) {
+			LOGGER.debug("isAllowed returns {} for permission", allowed, permission);
+		}else{
+			LOGGER.debug("isAllowed returns {} for permission {} due to missing permission {}", allowed, permission, missingPermission);
+		}
 		return allowed;
 	}
 
