@@ -1,5 +1,23 @@
 
 
+<h4>Simplified QuerySpec with new PathSpec</h4>
+
+All the QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path
+as PathSpec. PathSpec facilitate working with paths compared to the previous List&lt;String&gt; solution.
+All the previous API remains unchanged and supported (no deprecations).
+
+<p>PathSpec offers various of(...) methods to quickly create an instance. It further offers
+	filter(...) and sort(...) methods to construct FilterSpec and SortSpecs out of the current path.
+
+
+
+<h4>QuerySpecVisitor</h4>
+
+The new QuerySpecVisitor and QuerySpecVisitorBase classes allow to visit
+a QuerySpec by calling QuerySpec.accept(QuerySpecVisitor). Visitors can be used, for example,
+to easily modify attribute paths within a QuerySpc.
+
+
 <h4>Classpath scanning for Typescript generator</h4>
 
 The Typescript generator used to need a running application to extract information about the set
@@ -50,17 +68,6 @@ There is a new interface JpaCriteriaRepositoryFilter and base class JpaCriteriaR
 easy customization of CriteriaQuery objects. The interfaces are a specialization of JpaRepositoryFilter
 and can be used in the same manner by registering it to the JpaModuleConfig.
 
-<h4>PathSpec within QuerySpec</h4>
-
-All the QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path
-as PathSpec. PathSpec facilitate working with paths compared to the previous List&lt;String&gt; solution.
-All the previous API remains unchanged and supported (no deprecations).
-
-<h4>QuerySpecVisitor</h4>
-
-The new QuerySpecVisitor and QuerySpecVisitorBase classes allow to visit
-a QuerySpec by calling QuerySpec.accept(QuerySpecVisitor). Visitors can be used, for example,
-to easily modify attribute paths within a QuerySpc.
 
 <h4>InMemoryEvaluator</h4>
 
@@ -68,3 +75,23 @@ InMemoryEvaluator gained a new constructor that takes a ResourceRegistry. This a
 when accessing resources. This allows its use with more customized resources and relationships, like the use of
 @JsonApiRelationId and custom ResourceFieldAccessors instead of just basic plain Java beans. Note that QuerySpec.apply(...)
 does not have access to a ResourceRegistry and, consequently, continues to use the traditional behavior.
+
+<h4>Logging in crnk-meta</h4>
+
+Various logging statements have been reduced to level TRACE to make the general DEBUG log level of io.crnk a bit less noisy.
+
+<h4>@JsonApiRelationId supported by crnk-validation</h4>
+
+Validation errors on relationship identifiers annotated with @JsonApiRelationId now correctly carry the relationship name (without the
+typical "id" suffix) in the JSON API error.
+
+
+<h4>Simplified BulkRelationshipRepositoryV2</h4>
+
+The BulkRelationshipRepositoryV2 interface implements two default methods that allow the implementation of a single findTargets method.
+A future V3 version of the interface will likely move this into crnk-core to keep the interface this simple without having to rely
+on default methods.
+
+<h4>simplified crnk-jpa setup in Spring Boot</h4>
+
+The exposeAll behavior automatically backs-off if a repository is registered manually. Setting the properly to false is no longer necessary.

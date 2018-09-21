@@ -62,7 +62,8 @@ The methods of `ResourceRepositoryV2` look as follows:
   notable exceptions. First, resources are updated but are not allowed to be inserted.
   A `ResourceNotFoundException` must be thrown if the resource does not exist. Second, the `PATCH` request
   allows for partial updates. Internally Crnk will get the current state of a resource, patch it and pass it to this `save`
-  method. API to distinguish patched from un-patched fields is not yet (directly) available, feel free to open a ticket.
+  method. A `ResourceModificationFilter` can be registered to collect information about modified fields and relationships and this way,
+  for example, distinguish patched from un-patched fields.
 
 
 
@@ -224,6 +225,14 @@ A filter parameter is represented by a `FilterSpec`. It holds the path to the at
 the operator and the filter value. The attribute specifies what gets filtered. The operator
 specifies how it is filtered. And the value specifies after what should be filtered.
 
+An example looks like:
+
+[source]
+----
+FilterSpec filterSpec = PathSpec.of("person", "address", "city").filter(FilterOperator.EQ, "Zurich");
+Filterspec filterSpec = new FilterSpec(PathSpec.of("person.address.city"), FilterOperator.NEQ, "Zurich");
+----
+
 The filter value  `FilterSpec.value` is strongly typed. Typically (by default) it is assumed
 that the filter value matches the attribute type and Crnk will attempt to parse passed String-based
 filter value accordingly. There are exceptions, for example, the LIKE filter operator always requires
@@ -300,6 +309,13 @@ Sorting information for the resources can be achieved by providing `sort` parame
 - Sorting parameters are represented by `SortSpec` within `QuerySpec` similar to `FilterSpec` above.
 - `-` is used to denote to sort in descending order.
 
+An example in Java looks like:
+
+[source]
+----
+SortSpec sortSpec = PathSpec.of("person", "address", "city").sort(Direction.ASC);
+SortSpec sortSpec = new SortSpec(PathSpec.of("person.address.city"), Direction.DESC);
+----
 
 anchor:pagination[]
 

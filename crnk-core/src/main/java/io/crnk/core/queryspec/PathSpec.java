@@ -13,8 +13,12 @@ public class PathSpec {
 	private PathSpec() {
 	}
 
+	public static PathSpec of(String... elements) {
+		return elements != null ? of(Arrays.asList(elements)) : null;
+	}
+
 	public static PathSpec of(List<String> elements) {
-		if(elements == null){
+		if (elements == null) {
 			return null;
 		}
 		PathSpec pathSpec = new PathSpec();
@@ -57,5 +61,13 @@ public class PathSpec {
 
 	public boolean isEmpty() {
 		return elements.isEmpty();
+	}
+
+	public SortSpec sort(Direction dir) {
+		return new SortSpec(this, dir);
+	}
+
+	public FilterSpec filter(FilterOperator operator, Object value) {
+		return new FilterSpec(this, operator, value);
 	}
 }

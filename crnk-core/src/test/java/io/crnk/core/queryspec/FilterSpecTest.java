@@ -18,6 +18,14 @@ public class FilterSpecTest {
 		Assert.assertEquals("newValue", spec.getValue());
 	}
 
+	@Test
+	public void fromPathSpec(){
+		FilterSpec filter = PathSpec.of("a", "b").filter(FilterOperator.EQ, "12");
+		Assert.assertEquals("12", filter.getValue());
+		Assert.assertEquals(FilterOperator.EQ, filter.getOperator());
+		Assert.assertEquals("a.b", filter.getPath().toString());
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullOperatorThrowsException() {
 		new FilterSpec(Arrays.asList("name"), null, "test");

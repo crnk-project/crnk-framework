@@ -18,12 +18,20 @@ public class SortSpecTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void testThrowExceptionOnNullPathArgument() {
-		new SortSpec((PathSpec)null, Direction.ASC);
+		new SortSpec((PathSpec) null, Direction.ASC);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testThrowExceptionOnNullDirArgument() {
 		new SortSpec(Arrays.asList("test"), null);
+	}
+
+
+	@Test
+	public void fromPathSpec() {
+		SortSpec sort = PathSpec.of("a", "b").sort(Direction.ASC);
+		Assert.assertEquals(Direction.ASC, sort.getDirection());
+		Assert.assertEquals("a.b", sort.getPath().toString());
 	}
 
 	@Test
