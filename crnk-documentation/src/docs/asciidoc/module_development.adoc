@@ -1,7 +1,7 @@
 
 anchor:moduledev[]
 
-# Module Development
+# Advanced Customizations through Modules
 
 Crnk has a module API that allows to extend the core functionality by third-party contributions.
 The mentioned JPA module in the next section is an example for that. The API is similar in spirit

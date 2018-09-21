@@ -1,0 +1,152 @@
+
+# Bulk Updates with Operations Module
+
+By its nature RESTful applications are limited to the insertion, update and deletion of single resources. As such, developers
+have to design resources accordingly while having to consider aspects like transaction handling and atomicity. It is not
+uncommon to combine multiple data objects on the server-side and expose it as single resource to clients. It is a simple
+approach, but can also mean quite a substantial overhead when having to implement potentially redudant repositories.
+Furthermore, things like validation handling, relationships and supporting complex object graphs can get tricky when a single
+resource starts holding complex object graphs again.
+
+For all the before mentioned reason support for http://jsonpatch.com/[jsonpatch.com] is provided. It allows to send multiple
+insertions, updates and deletions with a single request and provides the results for each such executed operation.
+Note that numerous attempts and discussions have taken place and are still ongoing to establish a common JSON API standard,
+but that does not seem to make much progress. With  http://jsonpatch.com/[jsonpatch.com] there is already an estabilished
+standard that fits well for many use cases.
+
+The implementation is provided as `OperationsModule` and the setup looks like:
+
+
+[source]
+----
+		OperationsModule operationsModule = OperationsModule.create();
+		...
+----
+
+Further filters can be applied to intercept incoming requests. Typically applications will make use of that to start a new
+transaction spanning all requests. This looks as follows:
+
+[source]
+.AbstractOperationsTest.java
+----
+include::../../../../crnk-operations/src/test/java/io/crnk/operations/AbstractOperationsTest.java[tags=transaction]
+----
+
+There is further an operations client implementation that works along the regular JSON API client implementation:
+
+[source]
+.OperationsPostTest.java
+----
+include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
+----
+
+An example request in JSON looks like:
+
+[source]
+----
+[ {
+  "op" : "POST",
+  "path" : "movie",
+  "value" : {
+    "id" : "43e7903e-9b14-4610-96f5-69d6f2fa347d",
+    "type" : "movie",
+    "attributes" : {
+      "title" : "test",
+      ...
+    },
+    "relationships" : {
+      ...
+    }
+  }
+}, {
+  "op" : "POST",
+  "path" : "person",
+  "value" : {
+    "id" : "b25bfdbd-8dd6-4abd-a859-f1dedf85246b",
+    "type" : "person",
+    "attributes" : {
+      "name" : "1",
+      "version" : null
+    }
+  }
+}, {
+  "op" : "POST",
+  "path" : "person",
+  "value" : {
+    "id" : "f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6",
+    "type" : "person",
+    "attributes" : {
+      "name" : "2",
+      "version" : null
+    }
+  }
+} ]
+----
+
+and an example response JSON looks as follows:
+
+[source]
+----
+[ {
+  "data" : {
+    "id" : "43e7903e-9b14-4610-96f5-69d6f2fa347d",
+    "type" : "movie",
+    "attributes" : {
+      "title" : "test",
+      ...
+    },
+    "relationships" : {
+      ..
+    },
+    "links" : {
+      "self" : "http://localhost:58367/movie/43e7903e-9b14-4610-96f5-69d6f2fa347d"
+    }
+  },
+  "status" : 201
+}, {
+  "data" : {
+    "id" : "b25bfdbd-8dd6-4abd-a859-f1dedf85246b",
+    "type" : "person",
+    "attributes" : {
+      "name" : "1",
+      "version" : 0
+    },
+    "relationships" : {
+      ...
+    },
+    "links" : {
+      "self" : "http://localhost:58367/person/b25bfdbd-8dd6-4abd-a859-f1dedf85246b"
+    }
+  },
+  "status" : 201
+}, {
+  "data" : {
+    "id" : "f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6",
+    "type" : "person",
+    "attributes" : {
+      "name" : "2",
+      "version" : 0
+    },
+    "relationships" : {
+      ...
+    },
+    "links" : {
+      "self" : "http://localhost:58367/person/f9d2bda5-d2f4-4c0c-85c7-cc56b6ea91e6"
+    }
+  },
+  "status" : 201
+} ]
+----
+
+Notice in the response a status code for each request. It is import for the `Content-Type` and `Accept` HTTP headers
+to have `application/json-patch+json`, otherwise the `OperationsModule` will ignore such requests.
+
+The current limitations of the implementation are:
+
+- So far does not support bulk `GET` operations.
+- Does so far not support bulk update of relationships.
+
+With support for `POST`, `PATCH` and `DELETE` operations the most important building blocks should be in place.
+The limitations are expected to be addressed at some point as well, contributions welcomed.
+
+
