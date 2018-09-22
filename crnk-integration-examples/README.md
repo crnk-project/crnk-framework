@@ -1,4 +1,4 @@
-# crnk-examples
+# crnk-integration-examples
 
 Various example applications showcasing the integration of crnk into different frameworks.
 Also have a look at https://github.com/crnk-project/crnk-example as our main example

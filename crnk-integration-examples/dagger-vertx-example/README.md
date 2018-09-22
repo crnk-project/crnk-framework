@@ -28,7 +28,7 @@ the application and third-party libraries that then get packaged into a docker i
 
 To run the minimized version use:
 
-	gradlew :crnk-examples:dagger-vertx-example:runMin
+	gradlew :crnk-integration-examples:dagger-vertx-example:runMin
 	
 To run from an IDE launch:
 	
@@ -36,7 +36,7 @@ To run from an IDE launch:
     
 To launch with docker:
 
-    gradlew :crnk-examples:dagger-vertx-example:dockerBuildImage
+    gradlew :crnk-integration-examples:dagger-vertx-example:dockerBuildImage
     docker run --name=crnk -p 8080:8080 crnk/example-dagger-vertx:0.0.0-SNAPSHOT
     docker stats
     
