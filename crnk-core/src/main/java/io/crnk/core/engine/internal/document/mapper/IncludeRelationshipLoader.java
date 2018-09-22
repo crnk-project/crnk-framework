@@ -19,7 +19,6 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -111,9 +110,8 @@ public class IncludeRelationshipLoader {
 		if (oppositeEntry == null) {
 			throw new RepositoryNotFoundException("no resource with type " + oppositeResourceType + " found");
 		}
-		RepositoryMethodParameterProvider parameterProvider = request.getParameterProvider();
 		ResourceInformation oppositeResourceInformation = oppositeEntry.getResourceInformation();
-		ResourceRepositoryAdapter oppositeResourceRepository = oppositeEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter oppositeResourceRepository = oppositeEntry.getResourceRepository();
 		if (oppositeResourceRepository == null) {
 			throw new RepositoryNotFoundException(
 					"no relationship repository found for " + oppositeResourceInformation.getResourceType());
@@ -170,10 +168,9 @@ public class IncludeRelationshipLoader {
 		List<Serializable> resourceIds = IncludeLookupUtil.getIds(sourceResources, resourceInformation);
 		boolean isMany = Iterable.class.isAssignableFrom(relationshipField.getType());
 
-		RepositoryMethodParameterProvider parameterProvider = request.getParameterProvider();
 		QueryAdapter queryAdapter = request.getQueryAdapter();
 		RelationshipRepositoryAdapter relationshipRepository =
-				registyEntry.getRelationshipRepository(relationshipField, parameterProvider);
+				registyEntry.getRelationshipRepository(relationshipField);
 		if (relationshipRepository == null) {
 			throw new RepositoryNotFoundException("no relationship repository found for " + resourceInformation.getResourceType
 					() + "." + relationshipField.getUnderlyingName());

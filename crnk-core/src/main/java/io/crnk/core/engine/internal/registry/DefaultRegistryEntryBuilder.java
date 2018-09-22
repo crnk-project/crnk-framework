@@ -41,11 +41,7 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
-import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
-import io.crnk.legacy.registry.AnnotatedResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,29 +166,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		}
 		ResourceInformation resourceInformation = buildResource();
 
-		if (resourceRepository != null && isLegacy()) {
-			ResourceEntry resourceEntry = buildResourceRepository(resourceInformation);
-			Map<ResourceField, ResponseRelationshipEntry> relationshipEntries = buildRelationships(resourceInformation);
-
-			LegacyRegistryEntry entry = new LegacyRegistryEntry(resourceEntry, relationshipEntries);
-			entry.initialize(moduleRegistry);
-			return entry;
-		}
-		else {
-			ResourceRepositoryAdapter resourceRepositoryAdapter = buildResourceRepositoryAdapter(resourceInformation);
-			Map<ResourceField, RelationshipRepositoryAdapter> relationshipEntries =
-					buildRelationshipAdapters(resourceInformation);
-			return new RegistryEntryImpl(resourceInformation, resourceRepositoryAdapter, relationshipEntries, moduleRegistry);
-		}
+		ResourceRepositoryAdapter resourceRepositoryAdapter = buildResourceRepositoryAdapter(resourceInformation);
+		Map<ResourceField, RelationshipRepositoryAdapter> relationshipEntries =
+				buildRelationshipAdapters(resourceInformation);
+		return new RegistryEntryImpl(resourceInformation, resourceRepositoryAdapter, relationshipEntries, moduleRegistry);
 	}
 
-	private boolean isLegacy() {
-		return isLegacy(resourceRepository.instance);
-	}
-
-	private boolean isLegacy(Object instance) {
-		return ClassUtils.getAnnotation(instance.getClass(), JsonApiResourceRepository.class).isPresent();
-	}
 
 	private void checkRelationshipNaming(ResourceInformation resourceInformation) {
 		for (String relationshipName : relationshipRepositoryMap.keySet()) {
@@ -206,7 +185,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	private Map<ResourceField, RelationshipRepositoryAdapter> buildRelationshipAdapters(ResourceInformation
-			resourceInformation) {
+																								resourceInformation) {
 		checkRelationshipNaming(resourceInformation);
 
 		Map<ResourceField, RelationshipRepositoryAdapter> map = new HashMap<>();
@@ -214,8 +193,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getAdapter());
-			}
-			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
+			} else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -232,8 +210,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getLegacyEntry());
-			}
-			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
+			} else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -328,7 +305,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private ResourceEntry buildResourceRepository(ResourceInformation resourceInformation) {
 		resourceRepository.information().setResourceInformation(resourceInformation);
 		ResourceRepositoryInformation repositoryInformation = resourceRepository.information().build();
@@ -343,12 +320,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			}
 		};
 
-		if (ClassUtils.getAnnotation(decoratedRepository.getClass(), JsonApiResourceRepository.class).isPresent()) {
-			return new AnnotatedResourceEntry(repositoryInstanceBuilder, repositoryInformation);
-		}
-		else {
-			return new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
-		}
+		return new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
 	}
 
 	private MatchedRelationship setupImplicitRelationshipRepository(ResourceField relationshipField) {
@@ -357,8 +329,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (relationshipField.hasIdField()
 					|| relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
 				behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
-			}
-			else {
+			} else {
 				behavior = RelationshipRepositoryBehavior.CUSTOM;
 			}
 		}
@@ -394,12 +365,10 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OWNER, ForwardingDirection.OWNER);
-			}
-			else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+			} else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
-			}
-			else {
+			} else {
 				PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
 						.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
@@ -408,13 +377,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
 			repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
 			return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Object decorateRepository(Object repository) {
 		Object decoratedRepository = repository;
 		List<RepositoryDecoratorFactory> repositoryDecorators = moduleRegistry.getRepositoryDecoratorFactories();
@@ -439,14 +407,14 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		private final Object relRepository;
 
 		public MatchedRelationship(final ResourceField relationshipField,
-				RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
+								   RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
 			this.relationshipField = relationshipField;
 			this.relationshipRepositoryInformation = relationshipRepositoryInformation;
 			this.relRepository = relRepository;
 		}
 
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private ResponseRelationshipEntry getLegacyEntry() {
 
 			final Object decoratedRepository = decorateRepository(relRepository);
@@ -459,19 +427,15 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 						}
 					};
 
-			if (ClassUtils.getAnnotation(relRepository.getClass(), JsonApiRelationshipRepository.class).isPresent()) {
-				return new AnnotatedRelationshipEntryBuilder(moduleRegistry, relationshipInstanceBuilder);
-			}
-			else {
-				final String targetResourceType = relationshipField.getOppositeResourceType();
-				return new DirectResponseRelationshipEntry(relationshipInstanceBuilder) {
 
-					@Override
-					public String getTargetResourceType() {
-						return targetResourceType;
-					}
-				};
-			}
+			final String targetResourceType = relationshipField.getOppositeResourceType();
+			return new DirectResponseRelationshipEntry(relationshipInstanceBuilder) {
+
+				@Override
+				public String getTargetResourceType() {
+					return targetResourceType;
+				}
+			};
 		}
 
 		private RelationshipRepositoryAdapter getAdapter() {
@@ -498,7 +462,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private ResourceRepositoryAdapter buildResourceRepositoryAdapter(ResourceInformation resourceInformation) {
 		if (resourceRepository == null) {
 			return null;

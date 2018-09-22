@@ -1,43 +1,36 @@
 package io.crnk.test.mock.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.repository.annotations.*;
+import io.crnk.core.repository.ResourceRepositoryBase;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.TaskSubType;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-@JsonApiResourceRepository(TaskSubType.class)
-public class TaskSubtypeRepository {
+public class TaskSubtypeRepository extends ResourceRepositoryBase<TaskSubType, Long> {
 
-	private static final ConcurrentHashMap<Long, TaskSubType> map = new ConcurrentHashMap<>();
 	private TaskRepository repo = new TaskRepository();
 
-	public static void clear() {
-		map.clear();
+	public TaskSubtypeRepository() {
+		super(TaskSubType.class);
 	}
 
-	@JsonApiSave
+
+	@Override
+	public ResourceList<TaskSubType> findAll(QuerySpec querySpec) {
+		return querySpec.apply(repo.findAll(querySpec).stream().filter(it -> it instanceof TaskSubType).map(it -> (TaskSubType) it).collect(Collectors.toList()));
+	}
+
+	@Override
 	public <S extends TaskSubType> S save(S entity) {
-		return repo.save(entity);
+		repo.save(entity);
+		return null;
 	}
 
-	@JsonApiFindOne
-	public TaskSubType findOne(Long aLong, QuerySpec querySpec) {
-		return (TaskSubType) repo.findOne(aLong, querySpec);
-	}
-
-	@JsonApiFindAll
-	public Iterable<TaskSubType> findAll(QuerySpec queryParams) {
-		throw new UnsupportedOperationException();
-	}
-
-	@JsonApiFindAllWithIds
-	public Iterable<TaskSubType> findAll(Iterable<Long> ids, QuerySpec queryParams) {
-		throw new UnsupportedOperationException();
-	}
-
-	@JsonApiDelete
-	public void delete(Long aLong) {
-		throw new UnsupportedOperationException();
+	@Override
+	public void delete(Long id) {
+		repo.delete(id);
 	}
 }

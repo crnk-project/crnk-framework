@@ -82,7 +82,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -97,7 +97,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -108,14 +108,14 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 	public void onGivenIncludeRequestFieldResourcesGetShouldHandleIt() throws Exception {
 
 		// get repositories
-		ResourceRepositoryAdapter userRepo = resourceRegistry.getEntry(User.class).getResourceRepository(null);
-		ResourceRepositoryAdapter projectRepo = resourceRegistry.getEntry(Project.class).getResourceRepository(null);
-		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository(null);
+		ResourceRepositoryAdapter userRepo = resourceRegistry.getEntry(User.class).getResourceRepository();
+		ResourceRepositoryAdapter projectRepo = resourceRegistry.getEntry(Project.class).getResourceRepository();
+		ResourceRepositoryAdapter taskRepo = resourceRegistry.getEntry(Task.class).getResourceRepository();
 
 		RelationshipRepositoryAdapter relRepositoryUserToProject =
-				resourceRegistry.getEntry(User.class).getRelationshipRepository("assignedProjects", null);
+				resourceRegistry.getEntry(User.class).getRelationshipRepository("assignedProjects");
 		RelationshipRepositoryAdapter relRepositoryProjectToTask =
-				resourceRegistry.getEntry(Project.class).getRelationshipRepository("tasks", null);
+				resourceRegistry.getEntry(Project.class).getRelationshipRepository("tasks");
 
 		ResourceInformation userInfo = resourceRegistry.getEntry(User.class).getResourceInformation();
 		ResourceInformation projectInfo = resourceRegistry.getEntry(Project.class).getResourceInformation();
@@ -144,7 +144,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);
 
-		Response response = sut.handle(jsonPath, queryAdapter, null, null);
+		Response response = sut.handle(jsonPath, queryAdapter, null);
 
 		// THEN
 		Assert.assertNotNull(response);

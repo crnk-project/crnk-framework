@@ -1,5 +1,14 @@
 package io.crnk.rs;
 
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.utils.Nullable;
+
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,18 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.rs.internal.legacy.JaxrsParameterProvider;
 
 public class JaxrsRequestContext implements HttpRequestContextBase {
 
@@ -34,8 +31,6 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 
 	private Nullable<byte[]> requestBody = Nullable.empty();
 
-	private RepositoryMethodParameterProvider requestParameterProvider;
-
 	private HttpResponse response = new HttpResponse();
 
 	JaxrsRequestContext(ContainerRequestContext requestContext, CrnkFeature feature) {
@@ -45,10 +40,6 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 		UriInfo uriInfo = requestContext.getUriInfo();
 		this.path = buildPath(uriInfo);
 		this.parameters = getParameters(uriInfo);
-
-		ObjectMapper objectMapper = feature.getBoot().getObjectMapper();
-		requestParameterProvider =
-				new JaxrsParameterProvider(objectMapper, requestContext, feature.getParameterProviderRegistry());
 	}
 
 	@Override
@@ -64,11 +55,6 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 	@Override
 	public void setResponse(HttpResponse response) {
 		this.response = response;
-	}
-
-	@Override
-	public RepositoryMethodParameterProvider getRequestParameterProvider() {
-		return requestParameterProvider;
 	}
 
 	@Override

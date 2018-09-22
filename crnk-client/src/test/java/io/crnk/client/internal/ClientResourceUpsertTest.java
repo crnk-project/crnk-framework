@@ -56,7 +56,7 @@ public class ClientResourceUpsertTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void handleNotSupported() {
-		upsert.handle(null, null, null, null);
+		upsert.handle(null,  null, null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

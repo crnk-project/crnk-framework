@@ -50,7 +50,7 @@ public class ResourceDeleteControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery,  null);
 
 		// THEN
 		assertThat(response.getDocument()).isNull();

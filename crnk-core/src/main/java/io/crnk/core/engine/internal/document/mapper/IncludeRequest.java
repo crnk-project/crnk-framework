@@ -22,7 +22,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,10 +184,6 @@ public class IncludeRequest {
 			relationship.setData(Nullable.of(targetResource.toIdentifier()));
 			return Collections.singletonList(targetResource);
 		}
-	}
-
-	public synchronized RepositoryMethodParameterProvider getParameterProvider() {
-		return mappingConfig.getParameterProvider();
 	}
 
 	public synchronized QueryAdapter getQueryAdapter() {

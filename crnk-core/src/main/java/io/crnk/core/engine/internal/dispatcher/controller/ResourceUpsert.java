@@ -17,8 +17,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -35,7 +33,6 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInstanceBuilder;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -51,7 +48,6 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
@@ -242,7 +238,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected Result<List> setRelationsAsync(Object newResource, RegistryEntry registryEntry, Resource resource, QueryAdapter
-			queryAdapter, RepositoryMethodParameterProvider parameterProvider, boolean ignoreMissing) {
+			queryAdapter, boolean ignoreMissing) {
 
 		List<Result> results = new ArrayList<>();
 		if (resource.getRelationships() != null) {
@@ -266,12 +262,10 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 						result = setRelationsFieldAsync(newResource,
 								registryEntry,
 								entry,
-								queryAdapter,
-								parameterProvider);
+								queryAdapter);
 					} else {
 						//noinspection unchecked
-						result = setRelationFieldAsync(newResource, registryEntry, relationshipName, relationship, queryAdapter,
-								parameterProvider);
+						result = setRelationFieldAsync(newResource, registryEntry, relationshipName, relationship, queryAdapter);
 					}
 					if (result.isPresent()) {
 						results.add(result.get());
@@ -285,8 +279,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
-													  Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
-													  RepositoryMethodParameterProvider parameterProvider) {
+													  Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
 		Relationship relationship = property.getValue();
 		if (relationship.getData().isPresent()) {
 			String propertyName = property.getKey();
@@ -325,7 +318,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					ResourceIdentifier resourceId = relationshipIds.get(i);
 					Serializable typedRelationshipId = (Serializable) relationshipTypedIds.get(i);
 					RegistryEntry entry = resourceRegistry.getEntry(resourceId.getType());
-					relatedResults.add(fetchRelated(entry, typedRelationshipId, parameterProvider, queryAdapter));
+					relatedResults.add(fetchRelated(entry, typedRelationshipId,  queryAdapter));
 				}
 
 				if (relatedResults.isEmpty()) {
@@ -349,8 +342,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected Optional<Result> setRelationFieldAsync(Object newResource, RegistryEntry registryEntry,
-													 String relationshipName, Relationship relationship, QueryAdapter queryAdapter,
-													 RepositoryMethodParameterProvider parameterProvider) {
+													 String relationshipName, Relationship relationship, QueryAdapter queryAdapter) {
 
 		if (relationship.getData().isPresent()) {
 			ResourceIdentifier relationshipId = (ResourceIdentifier) relationship.getData().get();
@@ -380,7 +372,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					field.getIdAccessor().setValue(newResource, typedRelationshipId);
 				}
 				if (decideSetRelationObjectField(entry, typedRelationshipId, field)) {
-					Result<Object> result = fetchRelated(entry, typedRelationshipId, parameterProvider, queryAdapter)
+					Result<Object> result = fetchRelated(entry, typedRelationshipId, queryAdapter)
 							.doWork(relatedObject -> field.getAccessor().setValue(newResource, relatedObject));
 					return Optional.of(result);
 				}
@@ -403,9 +395,8 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 	}
 
 	protected Result<Object> fetchRelated(RegistryEntry entry, Serializable relationId,
-										  RepositoryMethodParameterProvider parameterProvider,
 										  QueryAdapter queryAdapter) {
-		return entry.getResourceRepository(parameterProvider).findOne(relationId, queryAdapter)
+		return entry.getResourceRepository().findOne(relationId, queryAdapter)
 				.map(JsonApiResponse::getEntity);
 	}
 

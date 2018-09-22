@@ -35,7 +35,7 @@ public class NonReactiveButImmediateTest extends ReactiveTestBase {
 	@Test
 	public void shouldRunWithoutWorkerThread() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(SlowTask.class);
-		ResourceRepositoryAdapter adapter = entry.getResourceRepository(null);
+		ResourceRepositoryAdapter adapter = entry.getResourceRepository();
 
 		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(SlowTask.class), boot.getResourceRegistry(), queryContext);
 		HttpRequestContextProvider httpRequestContextProvider = boot.getModuleRegistry().getHttpRequestContextProvider();

@@ -8,8 +8,6 @@ import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.repository.RelationshipRepository;
 import io.crnk.legacy.repository.ResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 
 import java.util.Objects;
 
@@ -25,9 +23,7 @@ public class DefaultRepositoryAdapterFactory implements RepositoryAdapterFactory
 	public boolean accepts(Object repository) {
 		Objects.requireNonNull(repository);
 		return repository instanceof ResourceRepository || repository instanceof ResourceRepositoryV2
-				|| repository instanceof RelationshipRepository || repository instanceof RelationshipRepositoryV2
-				|| repository.getClass().getAnnotation(JsonApiResourceRepository.class) != null
-				|| repository.getClass().getAnnotation(JsonApiRelationshipRepository.class) != null;
+				|| repository instanceof RelationshipRepository || repository instanceof RelationshipRepositoryV2;
 	}
 
 	@Override

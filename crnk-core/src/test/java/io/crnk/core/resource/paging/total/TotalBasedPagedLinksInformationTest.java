@@ -24,10 +24,10 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
 
 		super.setup();
 		RegistryEntry registryEntry = resourceRegistry.findEntry(Task.class);
-		TotalResourceCountTestRepository repo = (TotalResourceCountTestRepository) registryEntry.getResourceRepository(null)
+		TotalResourceCountTestRepository repo = (TotalResourceCountTestRepository) registryEntry.getResourceRepository()
 				.getResourceRepository();
 
-		adapter = registryEntry.getResourceRepository(null);
+		adapter = registryEntry.getResourceRepository();
 
 		QueryAdapter queryAdapter = container.toQueryAdapter(querySpec());
 		for (long i = 0; i < 5; i++) {

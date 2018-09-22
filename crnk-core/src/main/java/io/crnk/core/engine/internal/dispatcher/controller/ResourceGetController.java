@@ -12,7 +12,6 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 
@@ -35,13 +34,13 @@ public class ResourceGetController extends ResourceIncludeField {
 	 * Passes the request to controller method.
 	 */
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		Serializable id = jsonPath.getId();
 
 		RegistryEntry rootEntry = jsonPath.getRootEntry();
-		ResourceRepositoryAdapter resourceRepository = rootEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = rootEntry.getResourceRepository();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		return resourceRepository.findOne(id, queryAdapter)

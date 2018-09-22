@@ -22,7 +22,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,8 +47,7 @@ public class FieldResourcePost extends ResourceUpsert {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 
 		FieldPath fieldPath = (FieldPath) jsonPath;
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
@@ -65,11 +63,11 @@ public class FieldResourcePost extends ResourceUpsert {
 
 		RegistryEntry relationshipRegistryEntry = resourceRegistry.getEntry(relationshipField.getOppositeResourceType());
 		ResourceInformation relationshipResourceInformation = relationshipRegistryEntry.getResourceInformation();
-		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = relationshipRegistryEntry.getResourceRepository();
 		String relationshipResourceType = relationshipField.getOppositeResourceType();
 		verifyTypes(HttpMethod.POST, relationshipRegistryEntry, bodyRegistryEntry);
 
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		QueryContext queryContext = queryAdapter.getQueryContext();
@@ -80,7 +78,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		setMeta(resourceBody, entity, relationshipResourceInformation);
 		setLinks(resourceBody, entity, relationshipResourceInformation);
 
-		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, parameterProvider, false)
+		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter,  false)
 				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
@@ -89,9 +87,9 @@ public class FieldResourcePost extends ResourceUpsert {
 			// nested resource repositories are assumed to handle attachment to parent by themeselves
 			return createdDocument.map(this::toResponse);
 		} else {
-			Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository(parameterProvider).findOne(id, queryAdapter);
+			Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository().findOne(id, queryAdapter);
 			return createdDocument.zipWith(parentResource,
-					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, parameterProvider, queryAdapter))
+					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created,  queryAdapter))
 					.merge(it -> it)
 					.map(this::toResponse);
 		}
@@ -102,11 +100,10 @@ public class FieldResourcePost extends ResourceUpsert {
 		return new Response(document, HttpStatus.CREATED_201);
 	}
 
-	private Result<Document> attachToParent(JsonApiResponse parent, RegistryEntry endpointRegistryEntry, ResourceField relationshipField, Document createdDocument, RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
+	private Result<Document> attachToParent(JsonApiResponse parent, RegistryEntry endpointRegistryEntry, ResourceField relationshipField, Document createdDocument, QueryAdapter queryAdapter) {
 		ResourceIdentifier resourceId1 = createdDocument.getSingleData().get();
 
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = endpointRegistryEntry
-				.getRelationshipRepository(relationshipField, parameterProvider);
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = endpointRegistryEntry.getRelationshipRepository(relationshipField);
 
 		Class<?> baseRelationshipFieldClass = relationshipField.getType();
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();

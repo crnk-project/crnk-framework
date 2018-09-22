@@ -19,7 +19,6 @@ import io.crnk.core.repository.UntypedResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import net.jodah.typetools.TypeResolver;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
@@ -35,9 +34,8 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	public boolean accept(Class<?> repositoryClass) {
 		boolean legacyRepo = ResourceRepository.class.isAssignableFrom(repositoryClass);
 		boolean interfaceRepo = ResourceRepositoryV2.class.isAssignableFrom(repositoryClass);
-		boolean anontationRepo = ClassUtils.getAnnotation(repositoryClass, JsonApiResourceRepository.class).isPresent();
 		boolean untypedRepo = UntypedResourceRepository.class.isAssignableFrom(repositoryClass);
-		return (legacyRepo || interfaceRepo || anontationRepo) && !untypedRepo;
+		return (legacyRepo || interfaceRepo) && !untypedRepo;
 	}
 
 	@Override
@@ -87,13 +85,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 
 	protected Class<?> getResourceClass(Object repository, Class<?> repositoryClass) {
-		Optional<JsonApiResourceRepository> annotation = ClassUtils.getAnnotation(repositoryClass,
-				JsonApiResourceRepository.class);
-
-		if (annotation.isPresent()) {
-			return annotation.get().value();
-		}
-		else if (repository instanceof ResourceRepository) {
+		if (repository instanceof ResourceRepository) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
 			return typeArgs[0];
 		}

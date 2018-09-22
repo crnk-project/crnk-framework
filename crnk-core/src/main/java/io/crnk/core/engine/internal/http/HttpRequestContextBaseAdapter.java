@@ -6,7 +6,6 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -129,11 +128,6 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 			return c == ' ' || c == ';';
 		}
 		return false;
-	}
-
-	@Override
-	public RepositoryMethodParameterProvider getRequestParameterProvider() {
-		return base.getRequestParameterProvider();
 	}
 
 	@Override

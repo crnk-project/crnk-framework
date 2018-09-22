@@ -96,7 +96,7 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 			String resourceType = resourceEntry.getResourceInformation().getResourceType();
 
 			ResourceRepositoryV2 processRepository =
-					(ResourceRepositoryV2) processEntry.getResourceRepository(null).getResourceRepository();
+					(ResourceRepositoryV2) processEntry.getResourceRepository().getResourceRepository();
 
 			QuerySpec processQuerySpec = querySpec.duplicate();
 			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_ID_FIELD), FilterOperator.EQ, sourceId.toString()));

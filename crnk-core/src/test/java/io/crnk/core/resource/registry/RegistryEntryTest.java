@@ -51,7 +51,7 @@ public class RegistryEntryTest {
 		expectedException.expect(ResourceFieldNotFoundException.class);
 
 		// WHEN
-		sut.getRelationshipRepository("users", null);
+		sut.getRelationshipRepository("users");
 	}
 
 	private ResourceEntry newResourceEntry(Class repositoryClass, String path) {

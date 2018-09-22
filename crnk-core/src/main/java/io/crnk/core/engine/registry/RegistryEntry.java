@@ -9,20 +9,17 @@ import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public interface RegistryEntry {
 
 
 	@SuppressWarnings("unchecked")
-	ResourceRepositoryAdapter getResourceRepository(RepositoryMethodParameterProvider parameterProvider);
+	ResourceRepositoryAdapter getResourceRepository();
 
-	RelationshipRepositoryAdapter getRelationshipRepository(String fieldName,
-			RepositoryMethodParameterProvider parameterProvider);
+	RelationshipRepositoryAdapter getRelationshipRepository(String fieldName);
 
 	@SuppressWarnings("unchecked")
-	RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field, RepositoryMethodParameterProvider
-			parameterProvider);
+	RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field);
 
 
 	ResourceInformation getResourceInformation();
@@ -48,12 +45,6 @@ public interface RegistryEntry {
 	 */
 	boolean isParent(RegistryEntry registryEntry);
 
-
-	/**
-	 * @return we may or may should not have a public facing ResourceRepositoryAdapter
-	 */
-	@Deprecated
-	ResourceRepositoryAdapter getResourceRepository();
 
 
 	/**

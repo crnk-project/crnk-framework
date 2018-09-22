@@ -25,8 +25,7 @@ class DocumentFilterChainImpl implements DocumentFilterChain {
 	public Response doFilter(DocumentFilterContext context) {
 		List<DocumentFilter> filters = moduleContext.getDocumentFilters();
 		if (filterIndex == filters.size()) {
-			return controller.handle(context.getJsonPath(), context.getQueryAdapter(), context.getParameterProvider(),
-					context.getRequestBody());
+			return controller.handle(context.getJsonPath(), context.getQueryAdapter(), context.getRequestBody());
 		} else {
 			DocumentFilter filter = filters.get(filterIndex);
 			filterIndex++;

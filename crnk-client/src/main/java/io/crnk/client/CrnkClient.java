@@ -509,7 +509,7 @@ public class CrnkClient {
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 
 		// TODO fix this in crnk, should be able to get original document
-		ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository(null);
+		ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
 		return (ResourceRepositoryStub<T, I>) repositoryAdapter.getResourceRepository();
 	}
 
@@ -522,7 +522,7 @@ public class CrnkClient {
 		init();
 
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
-		ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository(null);
+		ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
 		return (ResourceRepositoryV2<T, I>) repositoryAdapter.getResourceRepository();
 
 	}

@@ -22,7 +22,6 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +98,6 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 	@Override
 	@Deprecated
 	public Response dispatchRequest(String path, String method, Map<String, Set<String>> parameters,
-									RepositoryMethodParameterProvider parameterProvider,
 									Document requestBody) {
 
 		List<HttpRequestProcessor> processors = moduleRegistry.getHttpRequestProcessors();
@@ -110,8 +108,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 
 		HttpRequestContext requestContext = moduleRegistry.getHttpRequestContextProvider().getRequestContext();
 		QueryContext queryContext = requestContext.getQueryContext();
-		return processor.processAsync(jsonPath, method, parameters,
-				parameterProvider, requestBody, queryContext).get();
+		return processor.processAsync(jsonPath, method, parameters, requestBody, queryContext).get();
 	}
 
 
@@ -122,7 +119,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 		// preliminary implementation, more to come in the future
 		ActionFilterChain chain = new ActionFilterChain();
 
-		DocumentFilterContextImpl context = new DocumentFilterContextImpl(jsonPath, null, null, null, method);
+		DocumentFilterContextImpl context = new DocumentFilterContextImpl(jsonPath, null, null, method);
 		chain.doFilter(context);
 	}
 

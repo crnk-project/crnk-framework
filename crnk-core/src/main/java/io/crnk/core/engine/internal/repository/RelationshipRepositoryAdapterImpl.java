@@ -22,7 +22,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.AnnotatedRelationshipRepositoryAdapter;
 import io.crnk.legacy.repository.RelationshipRepository;
 
 /**
@@ -33,7 +32,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 
 	private final Object relationshipRepository;
 
-	private final boolean isAnnotated;
 	private final ResourceField field;
 
 	public RelationshipRepositoryAdapterImpl(ResourceField field, ModuleRegistry moduleRegistry,
@@ -41,7 +39,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 		super(moduleRegistry);
 		this.field = field;
 		this.relationshipRepository = relationshipRepository;
-		this.isAnnotated = relationshipRepository instanceof AnnotatedRelationshipRepositoryAdapter;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -54,11 +51,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Serializable targetId = request.getId();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
-				if (isAnnotated) {
-					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.setRelation(source, targetId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
 				} else {
 					((RelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
@@ -83,10 +76,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
-				if (isAnnotated) {
-					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.setRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.setRelations(source, targetIds, field.getUnderlyingName());
 				} else {
@@ -112,10 +102,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
-				if (isAnnotated) {
-					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.addRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.addRelations(source, targetIds, field.getUnderlyingName());
 				} else {
@@ -141,10 +128,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
-				if (isAnnotated) {
-					((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.removeRelations(source, targetIds, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.removeRelations(source, targetIds, field.getUnderlyingName());
 				} else {
@@ -171,10 +155,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 
 				Object resource;
-				if (isAnnotated) {
-					resource = ((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.findOneTarget(sourceId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
@@ -201,13 +182,9 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				RepositoryRequestSpec request = context.getRequest();
 				Serializable sourceId = request.getId();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 
 				Object resources;
-				if (isAnnotated) {
-					resources = ((AnnotatedRelationshipRepositoryAdapter) relationshipRepository)
-							.findManyTargets(sourceId, field.getUnderlyingName(), queryAdapter);
-				} else if (relationshipRepository instanceof RelationshipRepositoryV2) {
+				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
@@ -241,8 +218,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 
 					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
 					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-									.getResourceInformation();
+							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
 					QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
 					MultivaluedMap targetsMap = bulkRepository.findTargets(sourceIds, field.getUnderlyingName(), querySpec);
 					return toResponses(targetsMap, true, queryAdapter, field, HttpMethod.GET);

@@ -90,7 +90,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -105,7 +105,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		new TaskToProjectRepository().setRelation(new Task().setId(1L), 42L, "project");
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -132,7 +132,6 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		// WHEN
 		Response baseResponseContext = resourceGet.handle(jsonPath,
 				emptyTaskQuery,
-				null,
 				null);
 		// THEN
 		Assert.assertNotNull(baseResponseContext);
@@ -149,7 +148,6 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		// WHEN
 		baseResponseContext = resourceGet.handle(jsonPath,
 				emptyTaskQuery,
-				null,
 				null);
 		Assert.assertNotNull(baseResponseContext);
 

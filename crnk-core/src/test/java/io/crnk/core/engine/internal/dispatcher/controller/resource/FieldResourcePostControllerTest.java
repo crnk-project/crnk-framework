@@ -74,7 +74,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskDocument);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -92,7 +92,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectDocument);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery,  newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -119,7 +119,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskDocument);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -137,7 +137,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, null, newProjectDocument);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery,  newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);

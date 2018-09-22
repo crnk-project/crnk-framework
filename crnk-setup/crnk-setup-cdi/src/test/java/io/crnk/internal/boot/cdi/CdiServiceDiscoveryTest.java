@@ -10,11 +10,11 @@ import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.repository.Repository;
+import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.utils.Optional;
 import io.crnk.internal.boot.cdi.model.CdiTestExceptionMapper;
 import io.crnk.internal.boot.cdi.model.ProjectRepository;
 import io.crnk.internal.boot.cdi.model.TaskRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class CdiServiceDiscoveryTest {
 		Assert.assertEquals(1, repositories.size());
 		Assert.assertTrue(repositories.get(0) instanceof ProjectRepository);
 
-		repositories = instance.getInstancesByAnnotation(JsonApiResourceRepository.class);
+		repositories = instance.getInstancesByAnnotation(JsonApiExposed.class);
 		Assert.assertEquals(1, repositories.size());
 		Assert.assertTrue(repositories.get(0) instanceof TaskRepository);
 	}

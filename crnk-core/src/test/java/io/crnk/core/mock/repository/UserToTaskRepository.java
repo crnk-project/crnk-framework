@@ -8,7 +8,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.legacy.repository.annotations.JsonApiFindManyTargets;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,7 +90,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 		return null;
 	}
 
-	@JsonApiFindManyTargets
+	@Override
 	public ResourceList<Task> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
 		ResourceList<Task> projects = new DefaultResourceList<>();
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {

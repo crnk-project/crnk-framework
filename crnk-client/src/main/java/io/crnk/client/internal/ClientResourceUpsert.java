@@ -28,7 +28,6 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -60,10 +59,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 			// no need for any query parameters when doing POST/PATCH
 			QueryAdapter queryAdapter = null;
 
-			// no in use on the client side
-			RepositoryMethodParameterProvider parameterProvider = null;
-
-			setRelationsAsync(object, registryEntry, resource, queryAdapter, parameterProvider, true).get();
+			setRelationsAsync(object, registryEntry, resource, queryAdapter, true).get();
 		}
 	}
 
@@ -71,8 +67,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 	 * Get relations from includes section or create a remote proxy
 	 */
 	@Override
-	protected Result<Object> fetchRelated(RegistryEntry entry, Serializable relationId,
-			RepositoryMethodParameterProvider parameterProvider, QueryAdapter queryAdapter) {
+	protected Result<Object> fetchRelated(RegistryEntry entry, Serializable relationId, QueryAdapter queryAdapter) {
 
 		ResultFactory resultFactory = context.getResultFactory();
 
@@ -125,8 +120,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
-			parameterProvider, Document requestDocument) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 		// no in use on client side, consider refactoring ResourceUpsert to
 		// separate from controllers
 		throw new UnsupportedOperationException();
@@ -140,8 +134,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 	@Override
 	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
-			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter,
-			RepositoryMethodParameterProvider parameterProvider) {
+			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
 
 		Relationship relationship = property.getValue();
 
@@ -175,7 +168,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 		}
 		else {
 			// set elements
-			return super.setRelationsFieldAsync(newResource, registryEntry, property, queryAdapter, parameterProvider);
+			return super.setRelationsFieldAsync(newResource, registryEntry, property, queryAdapter);
 		}
 	}
 

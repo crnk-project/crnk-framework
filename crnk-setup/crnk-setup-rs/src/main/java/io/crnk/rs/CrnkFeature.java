@@ -1,14 +1,5 @@
 package io.crnk.rs;
 
-import java.util.Collection;
-import javax.ws.rs.ConstrainedTo;
-import javax.ws.rs.RuntimeType;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -24,10 +15,17 @@ import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.internal.JaxrsModule;
-import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistry;
-import io.crnk.rs.internal.legacy.RequestContextParameterProviderRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.ConstrainedTo;
+import javax.ws.rs.RuntimeType;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
+import java.util.Collection;
 
 /**
  * Basic Crnk feature that initializes core classes and provides a starting point to use the framework in
@@ -42,8 +40,6 @@ public class CrnkFeature implements Feature {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkFeature.class);
 
 	private CrnkBoot boot = new CrnkBoot();
-
-	private RequestContextParameterProviderRegistry parameterProviderRegistry;
 
 	@Context
 	protected SecurityContext securityContext;
@@ -89,8 +85,6 @@ public class CrnkFeature implements Feature {
 
 		boot.boot();
 
-		parameterProviderRegistry = buildParameterProviderRegistry();
-
 		CrnkFilter crnkFilter = createCrnkFilter();
 		context.register(crnkFilter);
 
@@ -119,16 +113,11 @@ public class CrnkFeature implements Feature {
 		for (RegistryEntry registryEntry : registryEntries) {
 			ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
 			if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {
-				ResourceRepositoryAdapter repositoryAdapter = registryEntry.getResourceRepository(null);
+				ResourceRepositoryAdapter repositoryAdapter = registryEntry.getResourceRepository();
 				Object resourceRepository = repositoryAdapter.getResourceRepository();
 				context.register(resourceRepository);
 			}
 		}
-	}
-
-	private RequestContextParameterProviderRegistry buildParameterProviderRegistry() {
-		RequestContextParameterProviderRegistryBuilder builder = new RequestContextParameterProviderRegistryBuilder();
-		return builder.build(boot.getServiceDiscovery());
 	}
 
 	protected CrnkFilter createCrnkFilter() {
@@ -156,10 +145,6 @@ public class CrnkFeature implements Feature {
 
 	public CrnkBoot getBoot() {
 		return boot;
-	}
-
-	public RequestContextParameterProviderRegistry getParameterProviderRegistry() {
-		return parameterProviderRegistry;
 	}
 
 	public String getWebPathPrefix() {

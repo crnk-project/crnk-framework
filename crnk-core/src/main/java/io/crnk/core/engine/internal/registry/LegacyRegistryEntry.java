@@ -25,9 +25,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.legacy.registry.AnnotatedRelationshipEntryBuilder;
-import io.crnk.legacy.registry.AnnotatedResourceEntry;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -71,12 +68,10 @@ public class LegacyRegistryEntry implements RegistryEntry {
 	}
 
 	@SuppressWarnings("unchecked")
-	public ResourceRepositoryAdapter getResourceRepository(RepositoryMethodParameterProvider parameterProvider) {
+	public ResourceRepositoryAdapter getResourceRepository() {
 		Object repoInstance = null;
 		if (resourceEntry instanceof DirectResponseResourceEntry) {
 			repoInstance = ((DirectResponseResourceEntry) resourceEntry).getResourceRepository();
-		} else if (resourceEntry instanceof AnnotatedResourceEntry) {
-			repoInstance = ((AnnotatedResourceEntry) resourceEntry).build(parameterProvider);
 		}
 
 		if (repoInstance instanceof ResourceRegistryAware) {
@@ -87,30 +82,23 @@ public class LegacyRegistryEntry implements RegistryEntry {
 		return new ResourceRepositoryAdapterImpl(information, moduleRegistry, repoInstance);
 	}
 
-	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName, RepositoryMethodParameterProvider
-			parameterProvider) {
+	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName) {
 		ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
 		if (field == null) {
 			throw new ResourceFieldNotFoundException("field=" + fieldName);
 		}
-		return getRelationshipRepository(field, parameterProvider);
+		return getRelationshipRepository(field);
 	}
 
 	@SuppressWarnings("unchecked")
-	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field, RepositoryMethodParameterProvider
-			parameterProvider) {
+	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field) {
 		ResponseRelationshipEntry relationshipEntry = relationshipEntries.get(field);
 		if (relationshipEntry == null) {
 			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
 					field.getUnderlyingName());
 		}
 
-		Object repoInstance;
-		if (relationshipEntry instanceof AnnotatedRelationshipEntryBuilder) {
-			repoInstance = ((AnnotatedRelationshipEntryBuilder) relationshipEntry).build(parameterProvider);
-		} else {
-			repoInstance = ((DirectResponseRelationshipEntry) relationshipEntry).getRepositoryInstanceBuilder();
-		}
+		Object repoInstance = ((DirectResponseRelationshipEntry) relationshipEntry).getRepositoryInstanceBuilder();
 
 		if (repoInstance instanceof ResourceRegistryAware) {
 			((ResourceRegistryAware) repoInstance).setResourceRegistry(moduleRegistry.getResourceRegistry());
@@ -161,15 +149,6 @@ public class LegacyRegistryEntry implements RegistryEntry {
 			entry = entry.getParentRegistryEntry();
 		}
 		return false;
-	}
-
-
-	/**
-	 * @return we may or may should not have a public facing ResourceRepositoryAdapter
-	 */
-	@Deprecated
-	public ResourceRepositoryAdapter getResourceRepository() {
-		return getResourceRepository(null);
 	}
 
 	/**

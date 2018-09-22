@@ -28,7 +28,6 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.internal.AnnotatedRepositoryAdapter;
 import io.crnk.legacy.repository.LinksRepository;
 import io.crnk.legacy.repository.MetaRepository;
 
@@ -81,7 +80,7 @@ public abstract class ResponseRepositoryAdapter {
 			Iterator<?> iterator = filteredResult.iterator();
 			if (iterator.hasNext()) {
 				resultEntity = iterator.next();
-				PreconditionUtil.verify(! iterator.hasNext(), "expected unique result, got results=%s for request=%s by repository=%s", filteredResult, requestSpec, repository);
+				PreconditionUtil.verify(!iterator.hasNext(), "expected unique result, got results=%s for request=%s by repository=%s", filteredResult, requestSpec, repository);
 			} else {
 				resultEntity = null;
 			}
@@ -103,11 +102,7 @@ public abstract class ResponseRepositoryAdapter {
 			return resourceList.getMeta();
 		}
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
-		if (repository instanceof AnnotatedRepositoryAdapter) {
-			if (((AnnotatedRepositoryAdapter) repository).metaRepositoryAvailable()) {
-				return ((AnnotatedRepositoryAdapter) repository).getMetaInformation(resources, queryAdapter);
-			}
-		} else if (repository instanceof MetaRepositoryV2) {
+		if (repository instanceof MetaRepositoryV2) {
 			return ((MetaRepositoryV2) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
 		} else if (repository instanceof MetaRepository) {
 			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
@@ -144,11 +139,7 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		LinksInformation linksInformation = null;
-		if (repository instanceof AnnotatedRepositoryAdapter) {
-			if (((AnnotatedRepositoryAdapter) repository).linksRepositoryAvailable()) {
-				linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
-			}
-		} else if (repository instanceof LinksRepositoryV2) {
+		if (repository instanceof LinksRepositoryV2) {
 			linksInformation =
 					((LinksRepositoryV2) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
 		} else if (repository instanceof LinksRepository) {

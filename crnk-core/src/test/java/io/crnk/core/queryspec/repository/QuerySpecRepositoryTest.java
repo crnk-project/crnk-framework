@@ -48,15 +48,15 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
 		RegistryEntry projectEntry = resourceRegistry.getEntry(Project.class);
 		RegistryEntry scheduleEntry = resourceRegistry.getEntry(Schedule.class);
-		TaskQuerySpecRepository repo = (TaskQuerySpecRepository) taskEntry.getResourceRepository(null).getResourceRepository();
+		TaskQuerySpecRepository repo = (TaskQuerySpecRepository) taskEntry.getResourceRepository().getResourceRepository();
 
 		repo = Mockito.spy(repo);
 
-		scheduleAdapter = scheduleEntry.getResourceRepository(null);
-		projectAdapter = projectEntry.getResourceRepository(null);
-		taskAdapter = taskEntry.getResourceRepository(null);
-		projectRelAdapter = taskEntry.getRelationshipRepository("projects", null);
-		tasksRelAdapter = projectEntry.getRelationshipRepository("tasks", null);
+		scheduleAdapter = scheduleEntry.getResourceRepository();
+		projectAdapter = projectEntry.getResourceRepository();
+		taskAdapter = taskEntry.getResourceRepository();
+		projectRelAdapter = taskEntry.getRelationshipRepository("projects");
+		tasksRelAdapter = projectEntry.getRelationshipRepository("tasks");
 	}
 
 	@Test

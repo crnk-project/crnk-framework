@@ -46,7 +46,6 @@ import io.crnk.core.module.Module;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -159,8 +158,7 @@ public class HttpRequestDispatcherImplTest {
 		when(controller.isAcceptable(any(JsonPath.class), eq("GET"))).thenCallRealMethod();
 
 		Response expectedResponse = new Response(null, 200);
-		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
-				any(Document.class))).thenReturn(new ImmediateResult<>(expectedResponse));
+		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class))).thenReturn(new ImmediateResult<>(expectedResponse));
 
 		ControllerRegistry controllerRegistry = container.getBoot().getControllerRegistry();
 		controllerRegistry.getControllers().clear();
@@ -170,8 +168,7 @@ public class HttpRequestDispatcherImplTest {
 		sut.process(requestContext);
 
 		verify(controller, times(1))
-				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
-						any(Document.class));
+				.handleAsync(any(JsonPath.class), any(QueryAdapter.class),any(Document.class));
 	}
 
 	@Test
@@ -189,16 +186,15 @@ public class HttpRequestDispatcherImplTest {
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
-		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
+		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class),
 				any(Document.class))).thenReturn(new ImmediateResult<>(null));
 
 		Map<String, Set<String>> parameters = new HashMap<>();
-		sut.dispatchRequest(path, requestType, parameters, null, null);
+		sut.dispatchRequest(path, requestType, parameters, null);
 
 		// THEN
 		verify(controller, times(1))
-				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
-						any(Document.class));
+				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
 	}
 
 	@Test
@@ -216,16 +212,15 @@ public class HttpRequestDispatcherImplTest {
 
 		// WHEN
 		when(controller.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
-		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
+		when(controller.handleAsync(any(JsonPath.class), any(QueryAdapter.class),
 				any(Document.class))).thenReturn(new ImmediateResult<>(null));
 
 		Map<String, Set<String>> parameters = new HashMap<>();
-		sut.dispatchRequest(path, requestType, parameters, null, null);
+		sut.dispatchRequest(path, requestType, parameters,  null);
 
 		// THEN
 		verify(controller, times(1))
-				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
-						any(Document.class));
+				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), 	any(Document.class));
 	}
 
 	@Ignore // FIXME reasonable action contributions
@@ -264,7 +259,7 @@ public class HttpRequestDispatcherImplTest {
 				ExceptionMapperRegistryTest.exceptionMapperRegistry);
 
 		Map<String, Set<String>> params = new HashMap<>();
-		Response response = requestDispatcher.dispatchRequest("tasks", HttpMethod.GET.toString(), params, null, null);
+		Response response = requestDispatcher.dispatchRequest("tasks", HttpMethod.GET.toString(), params,  null);
 		assertThat(response).isNotNull();
 		assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
 	}
@@ -280,7 +275,7 @@ public class HttpRequestDispatcherImplTest {
 				new HttpRequestDispatcherImpl(container.getModuleRegistry(), ExceptionMapperRegistryTest.exceptionMapperRegistry);
 
 		Map<String, Set<String>> params = new HashMap<>();
-		Response response = requestDispatcher.dispatchRequest("tasks", HttpMethod.GET.toString(), params, null, null);
+		Response response = requestDispatcher.dispatchRequest("tasks", HttpMethod.GET.toString(), params, null);
 		Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getHttpStatus().intValue());
 	}
 }

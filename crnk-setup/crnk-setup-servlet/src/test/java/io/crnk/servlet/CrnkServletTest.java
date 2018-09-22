@@ -16,26 +16,8 @@
  */
 package io.crnk.servlet;
 
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonNodePresent;
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.servlet.resource.model.Locale;
 import io.crnk.servlet.resource.model.Node;
 import io.crnk.servlet.resource.model.NodeComment;
@@ -50,6 +32,23 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonNodePresent;
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CrnkServletTest {
 

@@ -18,8 +18,6 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-import io.crnk.servlet.internal.legacy.ServletParametersProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +28,6 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	private final HttpServletRequest servletRequest;
 
 	private final HttpServletResponse servletResponse;
-
-	private final ServletParametersProvider parameterProvider;
 
 	private final ServletContext servletContext;
 
@@ -59,7 +55,6 @@ public class ServletRequestContext implements HttpRequestContextBase {
 		this.servletContext = servletContext;
 		this.servletRequest = request;
 		this.servletResponse = response;
-		this.parameterProvider = new ServletParametersProvider(servletContext, request, response);
 		this.defaultCharacterEncoding = Objects.requireNonNull(defaultCharacterEncoding);
 		this.parameters = getParameters(request);
 		this.pathPrefix = normalizePathPrefix(pathPrefix);
@@ -193,12 +188,6 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			queryParameters.put(queryEntry.getKey(), paramValues);
 		}
 		return queryParameters;
-	}
-
-
-	@Override
-	public RepositoryMethodParameterProvider getRequestParameterProvider() {
-		return parameterProvider;
 	}
 
 	@Override
