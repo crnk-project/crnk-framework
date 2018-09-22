@@ -34,7 +34,7 @@ public class NonReactiveWithWorkerTest extends ReactiveTestBase {
 	@Test
 	public void shouldRunInParallelWithElasticWorkerThreads() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(SlowTask.class);
-		ResourceRepositoryAdapter adapter = entry.getResourceRepository(null);
+		ResourceRepositoryAdapter adapter = entry.getResourceRepository();
 
 		QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(SlowTask.class), boot.getResourceRegistry(), queryContext);
 

@@ -28,7 +28,6 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.PatchStrategy;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class ResourcePatchController extends ResourceUpsert {
 
@@ -45,8 +44,7 @@ public class ResourcePatchController extends ResourceUpsert {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		final Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.PATCH);
@@ -57,10 +55,10 @@ public class ResourcePatchController extends ResourceUpsert {
 
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.PATCH, endpointRegistryEntry, registryEntry);
-		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
-		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
 		return resourceRepository
 				.findOne(resourceId, queryAdapter)
 				.merge(existingResponse -> {
@@ -72,8 +70,7 @@ public class ResourcePatchController extends ResourceUpsert {
 							.doWork(existing -> mergeNestedAttribute(existing, requestResource, resourceInformation))
 							.map(it -> existingEntity);
 				})
-				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter,
-						parameterProvider))
+				.merge(existingEntity -> applyChanges(registryEntry, existingEntity, requestResource, queryAdapter))
 				.map(this::toResponse);
 	}
 
@@ -86,9 +83,9 @@ public class ResourcePatchController extends ResourceUpsert {
 	}
 
 	private Result<Document> applyChanges(RegistryEntry registryEntry, Object entity, Resource requestResource,
-										  QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider) {
+										  QueryAdapter queryAdapter) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
-		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
 
 		Set<String> loadedRelationshipNames;
 		Result<JsonApiResponse> updatedResource;
@@ -104,12 +101,11 @@ public class ResourcePatchController extends ResourceUpsert {
 			loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 
 			Result<List> relationsResult =
-					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, false);
 			updatedResource = relationsResult.merge(it -> resourceRepository.update(entity, queryAdapter));
 		}
 
 		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
-				.setParameterProvider(parameterProvider)
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = context.getDocumentMapper();
 

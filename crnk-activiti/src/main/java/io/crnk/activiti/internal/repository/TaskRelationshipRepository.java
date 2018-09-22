@@ -58,7 +58,7 @@ public class TaskRelationshipRepository<P extends ProcessInstanceResource, T ext
 		if (relationshipName.equals(fieldName)) {
 			RegistryEntry taskEntry = resourceRegistry.getEntry(taskClass);
 			ResourceRepositoryV2 taskRepository =
-					(ResourceRepositoryV2) taskEntry.getResourceRepository(null).getResourceRepository();
+					(ResourceRepositoryV2) taskEntry.getResourceRepository().getResourceRepository();
 
 			QuerySpec processQuerySpec = querySpec.duplicate();
 

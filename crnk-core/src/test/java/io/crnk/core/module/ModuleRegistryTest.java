@@ -412,7 +412,7 @@ public class ModuleRegistryTest {
 		Assert.assertEquals(2, decorators.size());
 
 		RegistryEntry entry = this.resourceRegistry.getEntry(Schedule.class);
-		Object resourceRepository = entry.getResourceRepository(null).getResourceRepository();
+		Object resourceRepository = entry.getResourceRepository().getResourceRepository();
 		Assert.assertNotNull(resourceRepository);
 		Assert.assertTrue(resourceRepository instanceof ScheduleRepository);
 		Assert.assertTrue(resourceRepository instanceof DecoratedScheduleRepository);
@@ -431,8 +431,8 @@ public class ModuleRegistryTest {
 		ResourceInformation info = entry.getResourceInformation();
 		Assert.assertEquals(TestResource2.class, info.getResourceClass());
 
-		Assert.assertNotNull(entry.getResourceRepository(null));
-		RelationshipRepositoryAdapter relationshipRepositoryAdapter = entry.getRelationshipRepository("parent", null);
+		Assert.assertNotNull(entry.getResourceRepository());
+		RelationshipRepositoryAdapter relationshipRepositoryAdapter = entry.getRelationshipRepository("parent");
 		Assert.assertNotNull(relationshipRepositoryAdapter);
 	}
 

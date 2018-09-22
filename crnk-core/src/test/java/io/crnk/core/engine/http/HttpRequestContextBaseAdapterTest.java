@@ -62,12 +62,6 @@ public class HttpRequestContextBaseAdapterTest {
 	}
 
 	@Test
-	public void getRequestParameterProvider() throws IOException {
-		adapter.getRequestParameterProvider();
-		Mockito.verify(base, Mockito.times(1)).getRequestParameterProvider();
-	}
-
-	@Test
 	public void getRequestHeader() throws IOException {
 		adapter.getRequestHeader("a");
 		Mockito.verify(base, Mockito.times(1)).getRequestHeader(Mockito.eq("a"));

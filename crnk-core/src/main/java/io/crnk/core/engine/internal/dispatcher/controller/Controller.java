@@ -5,7 +5,6 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.Result;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public interface Controller {
 
@@ -21,9 +20,7 @@ public interface Controller {
 	boolean isAcceptable(JsonPath jsonPath, String method);
 
 	@Deprecated
-	Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
-			parameterProvider, Document requestDocument);
+	Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument);
 
-	Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
-			parameterProvider, Document requestDocument);
+	Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument);
 }

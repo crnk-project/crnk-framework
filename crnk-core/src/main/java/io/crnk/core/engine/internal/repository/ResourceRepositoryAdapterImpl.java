@@ -16,7 +16,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.AnnotatedResourceRepositoryAdapter;
 import io.crnk.legacy.repository.ResourceRepository;
 
 /**
@@ -26,8 +25,6 @@ import io.crnk.legacy.repository.ResourceRepository;
 public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter implements ResourceRepositoryAdapter {
 
 	private final Object resourceRepository;
-
-	private final boolean isAnnotated;
 
 	private final ResourceRepositoryInformation repositoryInformation;
 	private final ResourceInformation resourceInformation;
@@ -40,7 +37,6 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 		this.resourceInformation = repositoryInformation.getResource();
 		this.repositoryInformation = repositoryInformation;
 		this.resourceRepository = resourceRepository;
-		this.isAnnotated = resourceRepository instanceof AnnotatedResourceRepositoryAdapter;
 		return404OnNull =
 				Boolean.parseBoolean(moduleRegistry.getPropertiesProvider().getProperty(CrnkProperties.RETURN_404_ON_NULL));
 	}
@@ -62,9 +58,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Serializable id = request.getId();
 				Object resource;
-				if (isAnnotated) {
-					resource = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findOne(id, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepositoryV2) {
 					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec
 							(resourceInformation));
 				} else {
@@ -92,9 +86,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				RepositoryRequestSpec request = context.getRequest();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Object resources;
-				if (isAnnotated) {
-					resources = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findAll(queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepositoryV2) {
 					QuerySpec querySpec = request.getQuerySpec(resourceInformation);
 					resources = ((ResourceRepositoryV2) resourceRepository).findAll(querySpec);
 				} else {
@@ -120,9 +112,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Iterable<?> ids = request.getIds();
 				Object resources;
-				if (isAnnotated) {
-					resources = ((AnnotatedResourceRepositoryAdapter) resourceRepository).findAll(ids, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepositoryV2) {
 					resources =
 							((ResourceRepositoryV2) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
 				} else {
@@ -157,9 +147,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				Object entity = request.getEntity();
 
 				Object resource;
-				if (isAnnotated) {
-					resource = ((AnnotatedResourceRepositoryAdapter) resourceRepository).save(entity);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepositoryV2) {
 					if (method == HttpMethod.POST) {
 						resource = ((ResourceRepositoryV2) resourceRepository).create(entity);
 					} else {
@@ -185,11 +173,8 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			@Override
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Serializable id = request.getId();
-				if (isAnnotated) {
-					((AnnotatedResourceRepositoryAdapter) resourceRepository).delete(id, queryAdapter);
-				} else if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepositoryV2) {
 					((ResourceRepositoryV2) resourceRepository).delete(id);
 				} else {
 					((ResourceRepository) resourceRepository).delete(id);

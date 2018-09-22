@@ -72,8 +72,6 @@ import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
-import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -397,17 +395,6 @@ public class CrnkBoot {
 		List<RepositoryDecoratorFactory> decoratorFactories = getInstancesByType(RepositoryDecoratorFactory.class);
 		for (RepositoryDecoratorFactory decoratorFactory : decoratorFactories) {
 			module.addRepositoryDecoratorFactory(decoratorFactory);
-		}
-		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiResourceRepository.class)) {
-			JsonApiResourceRepository annotation =
-					ClassUtils.getAnnotation(repository.getClass(), JsonApiResourceRepository.class).get();
-			Class<?> resourceClass = annotation.value();
-			module.addRepository(resourceClass, repository);
-		}
-		for (Object repository : serviceDiscovery.getInstancesByAnnotation(JsonApiRelationshipRepository.class)) {
-			JsonApiRelationshipRepository annotation =
-					ClassUtils.getAnnotation(repository.getClass(), JsonApiRelationshipRepository.class).get();
-			module.addRepository(annotation.source(), annotation.target(), repository);
 		}
 
 		moduleRegistry.addModule(module);

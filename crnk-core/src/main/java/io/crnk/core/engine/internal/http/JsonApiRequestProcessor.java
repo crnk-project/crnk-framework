@@ -30,7 +30,6 @@ import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.Module;
 import io.crnk.core.utils.Optional;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +103,6 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		JsonPath jsonPath = getJsonPath(requestContext);
 		LOGGER.debug("processing JSON API request path={}, method={}", jsonPath, method);
 		Map<String, Set<String>> parameters = requestContext.getRequestParameters();
-		RepositoryMethodParameterProvider parameterProvider = requestContext.getRequestParameterProvider();
 
 		if (jsonPath instanceof ActionPath) {
 			// inital implementation, has to improve
@@ -121,7 +119,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 				return resultFactory.just(getErrorResponse(e));
 			}
 			QueryContext queryContext = requestContext.getQueryContext();
-			return processAsync(jsonPath, method, parameters, parameterProvider, requestDocument, queryContext)
+			return processAsync(jsonPath, method, parameters, requestDocument, queryContext)
 					.map(this::toHttpResponse);
 		}
 		return resultFactory.just(buildMethodNotAllowedResponse(method));
@@ -143,7 +141,6 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
 
 	public Result<Response> processAsync(JsonPath jsonPath, String method, Map<String, Set<String>> parameters,
-			RepositoryMethodParameterProvider parameterProvider,
 			Document requestDocument, QueryContext queryContext) {
 		try {
 			ResultFactory resultFactory = moduleContext.getResultFactory();
@@ -154,7 +151,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 				LOGGER.debug("processing synchronously");
 				// not that document filters are not compatible with async programming
 				DocumentFilterContextImpl filterContext =
-						new DocumentFilterContextImpl(jsonPath, queryAdapter, parameterProvider, requestDocument, method);
+						new DocumentFilterContextImpl(jsonPath, queryAdapter, requestDocument, method);
 				try {
 					DocumentFilterChain filterChain = getFilterChain(jsonPath, method);
 					Response response = filterChain.doFilter(filterContext);
@@ -169,7 +166,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 				LOGGER.debug("processing asynchronously");
 				Controller controller = controllerRegistry.getController(jsonPath, method);
 				Result<Response> responseResult =
-						controller.handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
+						controller.handleAsync(jsonPath, queryAdapter, requestDocument);
 				return responseResult.onErrorResume(this::toErrorResponse);
 			}
 		}

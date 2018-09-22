@@ -1,23 +1,20 @@
 package io.crnk.test.mock.repository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.repository.annotations.JsonApiDelete;
-import io.crnk.legacy.repository.annotations.JsonApiFindAll;
-import io.crnk.legacy.repository.annotations.JsonApiFindAllWithIds;
-import io.crnk.legacy.repository.annotations.JsonApiFindOne;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiSave;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.resource.annotations.JsonApiExposed;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.UnknownException;
 import io.crnk.test.mock.models.Task;
 
-@JsonApiResourceRepository(Task.class)
-public class TaskRepository {
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+@JsonApiExposed
+public class TaskRepository implements ResourceRepositoryV2<Task, Long> {
 
 	private static final ConcurrentHashMap<Long, Task> map = new ConcurrentHashMap<>();
 
@@ -25,7 +22,6 @@ public class TaskRepository {
 		map.clear();
 	}
 
-	@JsonApiSave
 	public <S extends Task> S save(S entity) {
 
 		if (entity.getId() == null) {
@@ -43,7 +39,16 @@ public class TaskRepository {
 		return entity;
 	}
 
-	@JsonApiFindOne
+	@Override
+	public <S extends Task> S create(S resource) {
+		return save(resource);
+	}
+
+	@Override
+	public Class<Task> getResourceClass() {
+		return Task.class;
+	}
+
 	public Task findOne(Long aLong, QuerySpec querySpec) {
 		if (aLong == 10000) {
 			throw new TestException("msg");
@@ -59,20 +64,20 @@ public class TaskRepository {
 		return task;
 	}
 
-	@JsonApiFindAll
-	public Iterable<Task> findAll(QuerySpec queryParams) {
-		return queryParams.apply(map.values());
+	@Override
+	public ResourceList<Task> findAll(QuerySpec querySpec) {
+		return querySpec.apply(map.values());
 	}
 
-	@JsonApiFindAllWithIds
-	public Iterable<Task> findAll(Iterable<Long> ids, QuerySpec queryParams) {
-		List<Task> values = new LinkedList<>();
+	@Override
+	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec queryParams) {
+		List<Task> querySpec = new LinkedList<>();
 		for (Task value : map.values()) {
 			if (contains(value, ids)) {
-				values.add(value);
+				querySpec.add(value);
 			}
 		}
-		return values;
+		return queryParams.apply(querySpec);
 	}
 
 	private boolean contains(Task value, Iterable<Long> ids) {
@@ -85,7 +90,7 @@ public class TaskRepository {
 		return false;
 	}
 
-	@JsonApiDelete
+	@Override
 	public void delete(Long aLong) {
 		map.remove(aLong);
 	}

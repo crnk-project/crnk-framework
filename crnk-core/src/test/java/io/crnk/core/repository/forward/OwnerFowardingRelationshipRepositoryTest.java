@@ -66,7 +66,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 		RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
 		relRepository =
-				(ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager", null)
+				(ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager")
 						.getRelationshipRepository();
 
 		RelationshipMatcher taskProjectMatcher = new RelationshipMatcher().rule().source(Task.class).target(Project.class).add();

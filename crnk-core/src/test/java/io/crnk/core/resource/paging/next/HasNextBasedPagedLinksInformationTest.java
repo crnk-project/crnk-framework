@@ -27,12 +27,12 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
 
 		super.setup();
 		RegistryEntry registryEntry = resourceRegistry.getEntry(Task.class);
-		HasNextPageTestRepository repo = (HasNextPageTestRepository) registryEntry.getResourceRepository(null)
+		HasNextPageTestRepository repo = (HasNextPageTestRepository) registryEntry.getResourceRepository()
 				.getResourceRepository();
 
 		repo = Mockito.spy(repo);
 
-		adapter = registryEntry.getResourceRepository(null);
+		adapter = registryEntry.getResourceRepository();
 
 		QueryAdapter queryAdapter = container.toQueryAdapter(querySpec());
 		for (long i = 0; i < 5; i++) {

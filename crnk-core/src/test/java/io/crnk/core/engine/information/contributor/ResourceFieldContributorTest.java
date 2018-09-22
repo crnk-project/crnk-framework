@@ -84,7 +84,7 @@ public class ResourceFieldContributorTest {
 
 		Map<String, Set<String>> parameters = new HashMap<>();
 		parameters.put("include", Sets.newHashSet("contributedProject"));
-		Response response = requestDispatcher.dispatchRequest("tasks", "GET", parameters, null, null);
+		Response response = requestDispatcher.dispatchRequest("tasks", "GET", parameters,  null);
 
 		Document document = response.getDocument();
 		Resource resource = document.getCollectionData().get().get(0);

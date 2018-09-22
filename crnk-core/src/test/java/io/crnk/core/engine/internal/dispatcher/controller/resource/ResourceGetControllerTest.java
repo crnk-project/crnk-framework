@@ -97,7 +97,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		// WHEN
 		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskBody);
 		assertThat(taskResponse.getDocument().getData().get()).isExactlyInstanceOf(Resource.class);
 		String taskId = ((Resource) taskResponse.getDocument().getData().get()).getId();
 		assertThat(taskId).isNotNull();
@@ -108,7 +108,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -122,7 +122,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery,  null);
 
 		// THEN
 		Assert.assertNull(response);
@@ -140,7 +140,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 
 		// WHEN
 		QueryParamsAdapter queryParamsAdapter = container.toQueryAdapter(TaskWithLookup.class, queryParamsObject);
-		Response response = responseGetResp.handle(jsonPath, queryParamsAdapter, null, null);
+		Response response = responseGetResp.handle(jsonPath, queryParamsAdapter,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -165,7 +165,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get()).isExactlyInstanceOf(Resource.class);
@@ -181,7 +181,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get()).isExactlyInstanceOf(Resource.class);
@@ -203,7 +203,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery,  newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -220,7 +220,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		QueryParams requestParams = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
 
 		// WHEN
-		Response response = responseGetResp.handle(jsonPath, container.toQueryAdapter(Task.class, requestParams), null, null);
+		Response response = responseGetResp.handle(jsonPath, container.toQueryAdapter(Task.class, requestParams),  null);
 
 		// THEN
 		Assert.assertNotNull(response);

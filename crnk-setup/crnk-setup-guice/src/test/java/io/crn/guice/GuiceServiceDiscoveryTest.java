@@ -6,9 +6,9 @@ import com.google.inject.Injector;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.repository.Repository;
+import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.utils.Optional;
 import io.crnk.guice.GuiceServiceDiscovery;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.TestExceptionMapper;
 import io.crnk.test.mock.repository.ProjectRepository;
@@ -42,10 +42,10 @@ public class GuiceServiceDiscoveryTest {
 	@Test
 	public void repositoryDiscovery() {
 		List<?> repositories = discovery.getInstancesByType(Repository.class);
-		Assert.assertEquals(1, repositories.size());
+		Assert.assertEquals(2, repositories.size());
 		Assert.assertTrue(repositories.get(0) instanceof ProjectRepository);
 
-		repositories = discovery.getInstancesByAnnotation(JsonApiResourceRepository.class);
+		repositories = discovery.getInstancesByAnnotation(JsonApiExposed.class);
 		Assert.assertEquals(1, repositories.size());
 		Assert.assertTrue(repositories.get(0) instanceof TaskRepository);
 	}

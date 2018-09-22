@@ -13,7 +13,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 
@@ -30,14 +29,13 @@ public class CollectionGetController extends ResourceIncludeField {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
-			parameterProvider, Document requestBody) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
-		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMappingConfig docummentMapperConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
-		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
 		Result<JsonApiResponse> response;
 		if (jsonPath.getIds() == null || jsonPath.getIds().isEmpty()) {
 			logger.debug("finding {}", queryAdapter);

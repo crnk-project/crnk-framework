@@ -17,7 +17,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,32 +64,30 @@ public class RegistryEntryImpl implements RegistryEntry {
 	}
 
 	@Override
-	public ResourceRepositoryAdapter getResourceRepository(RepositoryMethodParameterProvider parameterProvider) {
+	public ResourceRepositoryAdapter getResourceRepository() {
 		if (resourceRepositoryAdapter != null) {
 			return resourceRepositoryAdapter;
 		}
-		return parentRegistryEntry.getResourceRepository(parameterProvider);
+		return parentRegistryEntry.getResourceRepository();
 	}
 
 	@Override
-	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName, RepositoryMethodParameterProvider
-			parameterProvider) {
+	public RelationshipRepositoryAdapter getRelationshipRepository(String fieldName) {
 		ResourceField field = getResourceInformation().findFieldByUnderlyingName(fieldName);
 		if (field == null && parentRegistryEntry != null) {
-			return parentRegistryEntry.getRelationshipRepository(fieldName, parameterProvider);
+			return parentRegistryEntry.getRelationshipRepository(fieldName);
 		}
 		if (field == null) {
 			throw new ResourceFieldNotFoundException("name=" + fieldName);
 		}
-		return getRelationshipRepository(field, parameterProvider);
+		return getRelationshipRepository(field);
 	}
 
 	@Override
-	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field, RepositoryMethodParameterProvider
-			parameterProvider) {
+	public RelationshipRepositoryAdapter getRelationshipRepository(ResourceField field) {
 		RelationshipRepositoryAdapter adapter = relationshipRepositoryAdapter.get(field);
 		if (adapter == null && parentRegistryEntry != null) {
-			return parentRegistryEntry.getRelationshipRepository(field, parameterProvider);
+			return parentRegistryEntry.getRelationshipRepository(field);
 		}
 		if (adapter == null) {
 			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
@@ -147,15 +144,6 @@ public class RegistryEntryImpl implements RegistryEntry {
 			entry = entry.getParentRegistryEntry();
 		}
 		return false;
-	}
-
-
-	/**
-	 * @return we may or may should not have a public facing ResourceRepositoryAdapter
-	 */
-	@Deprecated
-	public ResourceRepositoryAdapter getResourceRepository() {
-		return getResourceRepository(null);
 	}
 
 	/**

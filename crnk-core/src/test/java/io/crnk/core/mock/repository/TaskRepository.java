@@ -7,18 +7,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.MetaRepositoryV2;
+import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.annotations.JsonApiDelete;
-import io.crnk.legacy.repository.annotations.JsonApiFindAll;
-import io.crnk.legacy.repository.annotations.JsonApiFindAllWithIds;
-import io.crnk.legacy.repository.annotations.JsonApiFindOne;
-import io.crnk.legacy.repository.annotations.JsonApiMeta;
-import io.crnk.legacy.repository.annotations.JsonApiResourceRepository;
-import io.crnk.legacy.repository.annotations.JsonApiSave;
 
-@JsonApiResourceRepository(Task.class)
-public class TaskRepository {
+public class TaskRepository implements ResourceRepositoryV2<Task, Long>, MetaRepositoryV2<Task> {
 
 	private static final ConcurrentHashMap<Long, Task> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -26,7 +23,7 @@ public class TaskRepository {
 		THREAD_LOCAL_REPOSITORY.clear();
 	}
 
-	@JsonApiSave
+	@Override
 	public <S extends Task> S save(S entity) {
 		if ("badName".equals(entity.getName())) {
 			throw new BadRequestException("badName not a valid name");
@@ -39,8 +36,18 @@ public class TaskRepository {
 		return entity;
 	}
 
-	@JsonApiFindOne
-	public Task findOne(Long aLong, QueryParams queryParams) {
+	@Override
+	public <S extends Task> S create(S resource) {
+		return save(resource);
+	}
+
+	@Override
+	public Class<Task> getResourceClass() {
+		return Task.class;
+	}
+
+	@Override
+	public Task findOne(Long aLong, QuerySpec querySpec) {
 		Task task = THREAD_LOCAL_REPOSITORY.get(aLong);
 		if (task == null) {
 			throw new ResourceNotFoundException("");
@@ -48,21 +55,25 @@ public class TaskRepository {
 		return task;
 	}
 
-	@JsonApiFindAll
-	public Iterable<Task> findAll(QueryParams queryParams) {
-		return THREAD_LOCAL_REPOSITORY.values();
+	@Override
+	public ResourceList<Task> findAll(QuerySpec querySpec) {
+		DefaultResourceList<Task> list = new DefaultResourceList<>();
+		list.addAll(THREAD_LOCAL_REPOSITORY.values());
+		return list;
 	}
 
-
-	@JsonApiFindAllWithIds
-	public Iterable<Task> findAll(Iterable<Long> ids, QueryParams queryParams) {
+	@Override
+	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
 		List<Task> values = new LinkedList<>();
 		for (Task value : THREAD_LOCAL_REPOSITORY.values()) {
 			if (contains(value, ids)) {
 				values.add(value);
 			}
 		}
-		return values;
+
+		DefaultResourceList<Task> list = new DefaultResourceList<>();
+		list.addAll(values);
+		return list;
 	}
 
 	private boolean contains(Task value, Iterable<Long> ids) {
@@ -75,13 +86,13 @@ public class TaskRepository {
 		return false;
 	}
 
-	@JsonApiDelete
+	@Override
 	public void delete(Long aLong) {
 		THREAD_LOCAL_REPOSITORY.remove(aLong);
 	}
 
-	@JsonApiMeta
-	public MetaInformation getMetaInformation(Iterable<Task> resources, QueryParams queryParams) {
+	@Override
+	public MetaInformation getMetaInformation(Iterable<Task> resources, QuerySpec querySpec) {
 		return new MetaData();
 	}
 

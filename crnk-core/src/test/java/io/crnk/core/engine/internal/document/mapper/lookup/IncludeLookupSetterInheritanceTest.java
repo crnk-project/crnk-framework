@@ -38,10 +38,10 @@ public class IncludeLookupSetterInheritanceTest extends AbstractDocumentMapperTe
 		super.setup();
 
 		// get repositories
-		ResourceRepositoryAdapter taskRepository = container.getEntry(Task.class).getResourceRepository(null);
+		ResourceRepositoryAdapter taskRepository = container.getEntry(Task.class).getResourceRepository();
 		RelationshipRepositoryAdapter relRepositoryTaskToProject =
-				container.getEntry(Task.class).getRelationshipRepository("projects", null);
-		ResourceRepositoryAdapter projectRepository = container.getEntry(Project.class).getResourceRepository(null);
+				container.getEntry(Task.class).getRelationshipRepository("projects");
+		ResourceRepositoryAdapter projectRepository = container.getEntry(Project.class).getResourceRepository();
 
 		// setup test data
 		ResourceInformation taskInfo = container.getEntry(Task.class).getResourceInformation();

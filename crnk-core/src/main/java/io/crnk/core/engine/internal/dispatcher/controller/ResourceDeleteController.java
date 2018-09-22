@@ -11,7 +11,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,8 +27,7 @@ public class ResourceDeleteController extends BaseController {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 		Collection<Serializable> ids = jsonPath.getIds();
 		logger.debug("using registry entry {}", registryEntry);
@@ -37,7 +35,7 @@ public class ResourceDeleteController extends BaseController {
 
 		List<Result<JsonApiResponse>> results = new ArrayList<>();
 		for (Serializable id : ids) {
-			ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+			ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
 			Result<JsonApiResponse> result = resourceRepository.delete(id, queryAdapter);
 			results.add(result);
 		}

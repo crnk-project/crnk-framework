@@ -41,7 +41,7 @@ public abstract class AbstractIncludeBehaviorTest extends AbstractDocumentMapper
 
 		super.setup();
 
-		ResourceRepositoryAdapter hierarchicalTaskRepository = container.getEntry(HierarchicalTask.class).getResourceRepository(null);
+		ResourceRepositoryAdapter hierarchicalTaskRepository = container.getEntry(HierarchicalTask.class).getResourceRepository();
 
 		h = new HierarchicalTask();
 		h.setId(1L);

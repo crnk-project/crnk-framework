@@ -4,7 +4,6 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.result.Result;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -20,7 +19,6 @@ public interface RequestDispatcher {
 	 */
 	@Deprecated
 	Response dispatchRequest(String jsonPath, String method, Map<String, Set<String>> parameters,
-							 RepositoryMethodParameterProvider parameterProvider,
 							 Document requestBody);
 
 	/**

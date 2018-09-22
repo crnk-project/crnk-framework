@@ -87,9 +87,9 @@ public class RepositoryFilterTest {
 
 		scheduleInfo = container.getEntry(Schedule.class).getResourceInformation();
 		RegistryEntry userEntry = container.getEntry(User.class);
-		resourceAdapter = userEntry.getResourceRepository(null);
-		projectRelationAdapter = userEntry.getRelationshipRepository("assignedProjects", null);
-		taskRelationAdapter = userEntry.getRelationshipRepository("assignedTasks", null);
+		resourceAdapter = userEntry.getResourceRepository();
+		projectRelationAdapter = userEntry.getRelationshipRepository("assignedProjects");
+		taskRelationAdapter = userEntry.getRelationshipRepository("assignedTasks");
 		userInfo = userEntry.getResourceInformation();
 
 		UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
@@ -117,7 +117,7 @@ public class RepositoryFilterTest {
 	public void findAllWithResourceListResult() throws Exception {
 
 		RegistryEntry scheduleRegistry = container.getEntry(Schedule.class);
-		ResourceRepositoryAdapter scheduleResourceAdapter = scheduleRegistry.getResourceRepository(null);
+		ResourceRepositoryAdapter scheduleResourceAdapter = scheduleRegistry.getResourceRepository();
 
 		querySpec = new QuerySpec(Schedule.class);
 		querySpec.setPagingSpec(new OffsetLimitPagingSpec());

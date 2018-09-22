@@ -356,7 +356,7 @@ public class CrnkBootTest {
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
-		ResourceRepositoryAdapter repositoryAdapter = taskEntry.getResourceRepository(null);
+		ResourceRepositoryAdapter repositoryAdapter = taskEntry.getResourceRepository();
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
 		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(),
 				new QueryParams(), boot.getModuleRegistry(), queryContext)).get();

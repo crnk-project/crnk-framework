@@ -4,7 +4,6 @@ import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.core.http.HttpServerRequest;
 
@@ -31,11 +30,6 @@ public class VertxRequestContext implements HttpRequestContextBase {
 
 	public void setRequestBody(byte[] requestBody) {
 		this.requestBody = requestBody;
-	}
-
-	@Override
-	public RepositoryMethodParameterProvider getRequestParameterProvider() {
-		return null;
 	}
 
 	@Override

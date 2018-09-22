@@ -16,7 +16,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -66,8 +65,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 	}
 
 	@Override
-	public final Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-											  RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public final Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RelationshipsPath relationshipsPath = (RelationshipsPath) jsonPath;
 		RegistryEntry registryEntry = relationshipsPath.getRootEntry();
 		logger.debug("using registry entry {}", registryEntry);
@@ -77,9 +75,9 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
 
 		Serializable resourceId = jsonPath.getId();
 		ResourceField relationshipField = relationshipsPath.getRelationship();
-		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = registryEntry.getResourceRepository();
 		ResourceInformation targetInformation = getRegistryEntry(relationshipField.getOppositeResourceType()).getResourceInformation();
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField);
 
 		Result<Object> resource = resourceRepository.findOne(resourceId, queryAdapter).map(JsonApiResponse::getEntity);
 

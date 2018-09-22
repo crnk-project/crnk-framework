@@ -11,10 +11,8 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,17 +38,15 @@ public abstract class BaseController implements Controller {
 	 *
 	 * @param jsonPath          Requested resource path
 	 * @param queryAdapter      QueryAdapter
-	 * @param parameterProvider repository method legacy provider
 	 * @param requestDocument   Top-level JSON object from method's body of the request passed as {@link Document}
 	 * @return BaseResponseContext object
-	 * @deprecated in favor of {@link #handleAsync(JsonPath, QueryAdapter, RepositoryMethodParameterProvider, Document)}
+	 * @deprecated in favor of {@link #handleAsync(JsonPath, QueryAdapter, Document)}
 	 */
 	@Override
 	@Deprecated
-	public final Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider
-			parameterProvider, Document requestDocument) {
+	public final Response handle(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 
-		Result<Response> response = handleAsync(jsonPath, queryAdapter, parameterProvider, requestDocument);
+		Result<Response> response = handleAsync(jsonPath, queryAdapter, requestDocument);
 		PreconditionUtil.verify(response != null, "no response by controller provided");
 		return response.get();
 	}

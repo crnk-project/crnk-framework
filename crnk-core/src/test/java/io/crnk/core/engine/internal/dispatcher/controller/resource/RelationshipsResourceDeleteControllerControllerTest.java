@@ -73,7 +73,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -90,7 +90,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -113,7 +113,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery,  newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -128,7 +128,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
-		Response result = sut.handle(projectRelationPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response result = sut.handle(projectRelationPath, emptyProjectQuery,  newTaskToProjectBody);
 		assertThat(result).isNotNull();
 		taskToProjectRepository.removeRelations("project");
 
@@ -149,7 +149,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
-		Response taskResponse = resourcePost.handle(taskPath, container.toQueryAdapter(new QuerySpec(User.class)), null, newUserDocument);
+		Response taskResponse = resourcePost.handle(taskPath, container.toQueryAdapter(new QuerySpec(User.class)),  newUserDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("users");
@@ -165,7 +165,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectDocument);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -185,7 +185,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery,  newProjectDocument2);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -200,7 +200,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
-		Response result = sut.handle(savedTaskPath, emptyProjectQuery, null, newProjectDocument2);
+		Response result = sut.handle(savedTaskPath, emptyProjectQuery,  newProjectDocument2);
 		assertThat(result).isNotNull();
 
 		// THEN

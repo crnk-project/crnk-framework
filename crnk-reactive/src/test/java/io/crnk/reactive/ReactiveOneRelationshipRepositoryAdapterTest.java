@@ -32,7 +32,7 @@ public class ReactiveOneRelationshipRepositoryAdapterTest extends ReactiveTestBa
 
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntry(ReactiveTask.class);
-		adapter = (ReactiveOneRelationshipRepositoryAdapter) entry.getRelationshipRepository("project", null);
+		adapter = (ReactiveOneRelationshipRepositoryAdapter) entry.getRelationshipRepository("project");
 	}
 
 	@Test

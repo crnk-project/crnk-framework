@@ -1,15 +1,11 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
-
 import java.util.HashSet;
 import java.util.Set;
 
 public class DocumentMappingConfig {
 
 	private Set<String> fieldsWithEnforceIdSerialization = new HashSet<>();
-
-	private RepositoryMethodParameterProvider parameterProvider;
 
 	private ResourceMappingConfig resourceMapping = new ResourceMappingConfig();
 
@@ -23,15 +19,6 @@ public class DocumentMappingConfig {
 
 	public DocumentMappingConfig setFieldsWithEnforcedIdSerialization(Set<String> fieldsWithEnforceIdSerialization) {
 		this.fieldsWithEnforceIdSerialization = fieldsWithEnforceIdSerialization;
-		return this;
-	}
-
-	public RepositoryMethodParameterProvider getParameterProvider() {
-		return parameterProvider;
-	}
-
-	public DocumentMappingConfig setParameterProvider(RepositoryMethodParameterProvider parameterProvider) {
-		this.parameterProvider = parameterProvider;
 		return this;
 	}
 

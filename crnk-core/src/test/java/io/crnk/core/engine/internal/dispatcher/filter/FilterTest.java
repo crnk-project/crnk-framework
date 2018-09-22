@@ -10,10 +10,8 @@ import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetControlle
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.repository.mock.NewInstanceRepositoryMethodParameterProvider;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,26 +67,22 @@ public class FilterTest {
 		ArgumentCaptor<DocumentFilterContext> captor = ArgumentCaptor.forClass(DocumentFilterContext.class);
 		when(collectionGetController.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
 		when(collectionGetController.isAcceptable(any(JsonPath.class), eq(requestType))).thenCallRealMethod();
-		when(collectionGetController.handleAsync(any(JsonPath.class), any(QueryAdapter.class),
-				any(RepositoryMethodParameterProvider.class), any(Document.class))).thenReturn(new ImmediateResult<>(null));
+		when(collectionGetController.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class))).thenReturn(new ImmediateResult<>(null));
 
 		when(filter.filter(any(DocumentFilterContext.class), any(DocumentFilterChain.class))).thenCallRealMethod();
 
 		Map<String, Set<String>> queryParams = new HashMap<>();
-		RepositoryMethodParameterProvider parameterProvider = new NewInstanceRepositoryMethodParameterProvider();
 		Document requestBody = new Document();
-		dispatcher.dispatchRequest(path, requestType, queryParams, parameterProvider, requestBody);
+		dispatcher.dispatchRequest(path, requestType, queryParams,  requestBody);
 
 		// THEN
 		verify(filter).filter(captor.capture(), any(DocumentFilterChain.class));
 		verify(collectionGetController, times(1))
-				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(RepositoryMethodParameterProvider.class),
-						any(Document.class));
+				.handleAsync(any(JsonPath.class), any(QueryAdapter.class), any(Document.class));
 		verify(filter, times(1)).filter(any(DocumentFilterContext.class), any(DocumentFilterChain.class));
 
 		DocumentFilterContext value = captor.getValue();
 		Assert.assertEquals("tasks", value.getJsonPath().getRootEntry().getResourceInformation().getResourceType());
-		Assert.assertEquals(parameterProvider, value.getParameterProvider());
 		Assert.assertEquals(requestBody, value.getRequestBody());
 		Assert.assertEquals("GET", value.getMethod());
 	}

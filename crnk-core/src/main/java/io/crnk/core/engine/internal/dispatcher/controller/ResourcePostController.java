@@ -18,7 +18,6 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 public class ResourcePostController extends ResourceUpsert {
 
@@ -33,8 +32,7 @@ public class ResourcePostController extends ResourceUpsert {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter,
-										RepositoryMethodParameterProvider parameterProvider, Document requestDocument) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
 
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
@@ -43,7 +41,7 @@ public class ResourcePostController extends ResourceUpsert {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		verifyTypes(HttpMethod.POST, endpointRegistryEntry, registryEntry);
 
-		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository(parameterProvider);
+		ResourceRepositoryAdapter resourceRepository = endpointRegistryEntry.getResourceRepository();
 
 		Set<String> loadedRelationshipNames = getLoadedRelationshipNames(requestResource);
 
@@ -58,12 +56,11 @@ public class ResourcePostController extends ResourceUpsert {
 			setMeta(requestResource, entity, resourceInformation);
 			setLinks(requestResource, entity, resourceInformation);
 			Result zipped =
-					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, parameterProvider, false);
+					setRelationsAsync(entity, registryEntry, requestResource, queryAdapter, false);
 			response = zipped.merge(it -> resourceRepository.create(entity, queryAdapter));
 		}
 
 		DocumentMappingConfig mappingConfig = DocumentMappingConfig.create()
-				.setParameterProvider(parameterProvider)
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = this.context.getDocumentMapper();
 

@@ -13,7 +13,6 @@ import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.UntypedRelationshipRepository;
 import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.RelationshipRepository;
-import io.crnk.legacy.repository.annotations.JsonApiRelationshipRepository;
 import net.jodah.typetools.TypeResolver;
 
 public class DefaultRelationshipRepositoryInformationProvider implements RepositoryInformationProvider {
@@ -28,8 +27,7 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	public boolean accept(Class<?> repositoryClass) {
 		return !UntypedRelationshipRepository.class.isAssignableFrom(repositoryClass) && (
 				RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class
-						.isAssignableFrom(repositoryClass)
-						|| ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class).isPresent());
+						.isAssignableFrom(repositoryClass));
 	}
 
 	@Override
@@ -71,13 +69,7 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	}
 
 	public Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
-		Optional<JsonApiRelationshipRepository> annotation =
-				ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class);
-
-		if (annotation.isPresent()) {
-			return annotation.get().source();
-		}
-		else if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
+		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[0];
 		}
@@ -92,13 +84,7 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	}
 
 	protected Class<?> getTargetResourceClass(Object repository, Class<?> repositoryClass) {
-		Optional<JsonApiRelationshipRepository> annotation =
-				ClassUtils.getAnnotation(repositoryClass, JsonApiRelationshipRepository.class);
-
-		if (annotation.isPresent()) {
-			return annotation.get().target();
-		}
-		else if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
+		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[2];
 		}

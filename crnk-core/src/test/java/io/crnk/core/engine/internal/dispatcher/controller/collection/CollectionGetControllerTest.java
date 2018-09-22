@@ -73,7 +73,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery,  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -88,7 +88,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery, null, null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -109,7 +109,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, Document);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  Document);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -128,7 +128,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -144,7 +144,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -168,7 +168,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery,  newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -186,7 +186,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 
 		// WHEN
 		Response response = responseGetResp.handle(jsonPath,
-				container.toQueryAdapter(Task.class, queryParams1), null, null);
+				container.toQueryAdapter(Task.class, queryParams1),  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -211,7 +211,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, null, newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -228,7 +228,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, null, newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -253,7 +253,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery, null, newTaskToProjectBody);
+		Response projectRelationshipResponse = sut.handle(savedTaskPath, emptyProjectQuery,  newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -271,7 +271,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 
 		// WHEN
 		Response response = responseGetResp.handle(jsonPath,
-				container.toQueryAdapter(Task.class, requestParams), null, null);
+				container.toQueryAdapter(Task.class, requestParams), null);
 
 		// THEN
 		Assert.assertNotNull(response);

@@ -2,15 +2,15 @@ package io.crnk.internal.boot.cdi.model;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.repository.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiExposed;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@JsonApiResourceRepository(Task.class)
 @ApplicationScoped
+@JsonApiExposed
 public class TaskRepository {
 
 	private static final ConcurrentHashMap<Long, Task> map = new ConcurrentHashMap<>();
@@ -19,7 +19,6 @@ public class TaskRepository {
 		map.clear();
 	}
 
-	@JsonApiSave
 	public <S extends Task> S save(S entity) {
 
 		if (entity.getId() == null) {
@@ -30,7 +29,6 @@ public class TaskRepository {
 		return entity;
 	}
 
-	@JsonApiFindOne
 	public Task findOne(Long aLong, QuerySpec querySpec) {
 		Task task = map.get(aLong);
 		if (task == null) {
@@ -39,12 +37,10 @@ public class TaskRepository {
 		return task;
 	}
 
-	@JsonApiFindAll
 	public Iterable<Task> findAll(QuerySpec queryParams) {
 		return queryParams.apply(map.values());
 	}
 
-	@JsonApiFindAllWithIds
 	public Iterable<Task> findAll(Iterable<Long> ids, QuerySpec queryParams) {
 		List<Task> values = new LinkedList<>();
 		for (Task value : map.values()) {
@@ -65,7 +61,6 @@ public class TaskRepository {
 		return false;
 	}
 
-	@JsonApiDelete
 	public void delete(Long aLong) {
 		map.remove(aLong);
 	}

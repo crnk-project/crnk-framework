@@ -14,7 +14,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 
 import java.io.Serializable;
 
@@ -26,18 +25,18 @@ public class RelationshipsResourceGetController extends ResourceIncludeField {
 	}
 
 	@Override
-	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, RepositoryMethodParameterProvider parameterProvider, Document requestBody) {
+	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestBody) {
 		RelationshipsPath relationshipsPath = (RelationshipsPath) jsonPath;
 		RegistryEntry registryEntry = relationshipsPath.getRootEntry();
 
 		Serializable id = jsonPath.getId();
 		ResourceField relationshipField = relationshipsPath.getRelationship();
 
-		DocumentMappingConfig documentMapperConfig = DocumentMappingConfig.create().setParameterProvider(parameterProvider);
+		DocumentMappingConfig documentMapperConfig = DocumentMappingConfig.create();
 		DocumentMapper documentMapper = context.getDocumentMapper();
 
 		boolean isCollection = Iterable.class.isAssignableFrom(relationshipField.getType());
-		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField, parameterProvider);
+		RelationshipRepositoryAdapter relationshipRepositoryForClass = registryEntry.getRelationshipRepository(relationshipField);
 		Result<JsonApiResponse> response;
 		if (isCollection) {
 			response = relationshipRepositoryForClass.findManyTargets(id, relationshipField, queryAdapter);

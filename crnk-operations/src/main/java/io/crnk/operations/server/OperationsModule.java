@@ -22,7 +22,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.RepositoryMethodParameterProvider;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
 import io.crnk.operations.internal.OperationParameterUtils;
@@ -151,13 +150,12 @@ public class OperationsModule implements Module {
 
 				String path = resource.getType() + "/" + resource.getId();
 				String method = HttpMethod.GET.toString();
-				RepositoryMethodParameterProvider parameterProvider = null;
 
 				Map<String, Set<String>> parameters = new HashMap<>();
 				parameters.put("include", getLoadedRelationshipNames(resource));
 
 				Response response =
-						requestDispatcher.dispatchRequest(path, method, parameters, parameterProvider, null);
+						requestDispatcher.dispatchRequest(path, method, parameters, null);
 				copyDocument(operationResponse, response.getDocument());
 				operationResponse.setIncluded(null);
 			}
@@ -170,12 +168,11 @@ public class OperationsModule implements Module {
 		String path = OperationParameterUtils.parsePath(operation.getPath());
 		Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
 		String method = operation.getOp();
-		RepositoryMethodParameterProvider parameterProvider = null;
 		Document requestBody = new Document();
 		requestBody.setData((Nullable) Nullable.of(operation.getValue()));
 
 		Response response =
-				requestDispatcher.dispatchRequest(path, method, parameters, parameterProvider, requestBody);
+				requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
 		OperationResponse operationResponse = new OperationResponse();
 		operationResponse.setStatus(response.getHttpStatus());
 		copyDocument(operationResponse, response.getDocument());
