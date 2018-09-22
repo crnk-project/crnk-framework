@@ -44,8 +44,6 @@ import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

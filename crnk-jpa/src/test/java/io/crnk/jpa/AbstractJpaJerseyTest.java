@@ -1,16 +1,5 @@
 package io.crnk.jpa;
 
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -18,13 +7,9 @@ import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.CountryTranslationEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
-import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
 import io.crnk.jpa.util.EntityManagerProducer;
 import io.crnk.jpa.util.JpaTestConfig;
 import io.crnk.jpa.util.SpringTransactionRunner;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -38,6 +23,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
 	protected ResourceMetaProvider resourceMetaProvider;
@@ -45,8 +40,6 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 	protected JpaMetaProvider jpaMetaProvider;
 
 	protected CrnkClient client;
-
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
 	protected AnnotationConfigApplicationContext context;
 

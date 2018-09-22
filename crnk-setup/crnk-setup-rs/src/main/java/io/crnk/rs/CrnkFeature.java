@@ -13,7 +13,6 @@ import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.internal.JaxrsModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

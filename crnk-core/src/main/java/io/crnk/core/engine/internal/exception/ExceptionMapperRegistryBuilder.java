@@ -2,7 +2,6 @@ package io.crnk.core.engine.internal.exception;
 
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.legacy.internal.DefaultExceptionMapperLookup;
 
 import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.ParameterizedType;
@@ -12,10 +11,6 @@ import java.util.Set;
 
 public final class ExceptionMapperRegistryBuilder {
 	private final Set<ExceptionMapperType> exceptionMappers = new HashSet<>();
-
-	public ExceptionMapperRegistry build(String resourceSearchPackage) {
-		return build(new DefaultExceptionMapperLookup(resourceSearchPackage));
-	}
 
 	public ExceptionMapperRegistry build(ExceptionMapperLookup exceptionMapperLookup) {
 		addDefaultMappers();

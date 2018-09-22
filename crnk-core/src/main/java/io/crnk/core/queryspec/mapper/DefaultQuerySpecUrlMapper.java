@@ -238,39 +238,39 @@ public class DefaultQuerySpecUrlMapper
 
 	protected void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		String resourceType = querySpec.getResourceType();
-		ResourceInformation resourceInformation;
-		if (resourceType == null) {
-			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
-			if (entry == null) {
-				throw new RepositoryNotFoundException(querySpec.getResourceClass());
-			}
-			resourceInformation = entry.getResourceInformation();
-		}
-		else {
-			RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
-			if (entry == null) {
-				// model may not be available on client side in case of dynamic client with Resource.class
-				resourceInformation = null;
-			}
-			else {
+		if(querySpec != null) {
+			String resourceType = querySpec.getResourceType();
+			ResourceInformation resourceInformation;
+			if (resourceType == null) {
+				RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceClass());
+				if (entry == null) {
+					throw new RepositoryNotFoundException(querySpec.getResourceClass());
+				}
 				resourceInformation = entry.getResourceInformation();
+			} else {
+				RegistryEntry entry = resourceRegistry.getEntry(querySpec.getResourceType());
+				if (entry == null) {
+					// model may not be available on client side in case of dynamic client with Resource.class
+					resourceInformation = null;
+				} else {
+					resourceInformation = entry.getResourceInformation();
+				}
 			}
-		}
 
-		serializeFilters(querySpec, resourceInformation, map);
-		serializeSorting(querySpec, resourceInformation, map);
-		serializeIncludedFields(querySpec, resourceInformation, map);
-		serializeIncludedRelations(querySpec, resourceInformation, map);
-		RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
-		if (entry != null && entry.getResourceInformation() != null
-				&& entry.getResourceInformation().getPagingSpecType() != null) {
-			PagingBehavior pagingBehavior = entry.getPagingBehavior();
-			map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
-		}
+			serializeFilters(querySpec, resourceInformation, map);
+			serializeSorting(querySpec, resourceInformation, map);
+			serializeIncludedFields(querySpec, resourceInformation, map);
+			serializeIncludedRelations(querySpec, resourceInformation, map);
+			RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
+			if (entry != null && entry.getResourceInformation() != null
+					&& entry.getResourceInformation().getPagingSpecType() != null) {
+				PagingBehavior pagingBehavior = entry.getPagingBehavior();
+				map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
+			}
 
-		for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
-			serialize(relatedSpec, map, querySpec);
+			for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
+				serialize(relatedSpec, map, querySpec);
+			}
 		}
 	}
 

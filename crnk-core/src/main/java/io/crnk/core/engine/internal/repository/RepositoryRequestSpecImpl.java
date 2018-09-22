@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -17,8 +11,13 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.legacy.internal.DefaultQuerySpecConverter;
 import io.crnk.legacy.queryParams.QueryParams;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Add some point maybe a more prominent api is necessary for this. But i likely
@@ -160,14 +159,8 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public QuerySpec getQuerySpec(ResourceInformation targetResourceInformation) {
-		if (queryAdapter instanceof QuerySpecAdapter) {
-			QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
-			return querySpec.getOrCreateQuerySpec(targetResourceInformation);
-		}
-		Class<?> targetResourceClass = targetResourceInformation.getResourceClass();
-		QueryParams queryParams = getQueryParams();
-		DefaultQuerySpecConverter converter = new DefaultQuerySpecConverter(moduleRegistry);
-		return converter.fromParams(targetResourceClass, queryParams);
+		QuerySpec querySpec = ((QuerySpecAdapter) queryAdapter).getQuerySpec();
+		return querySpec.getOrCreateQuerySpec(targetResourceInformation);
 	}
 
 	@Override

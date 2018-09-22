@@ -1,12 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller.collection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -24,14 +17,15 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollectionGetControllerTest extends BaseControllerTest {
 
