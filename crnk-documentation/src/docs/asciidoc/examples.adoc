@@ -19,7 +19,7 @@ And there are various simpler example applications that show the integration of 
 - `jersey-example`
 - `dagger-vertx-example` showcasing a very lightweight setup with Dagger, Vert.x, Proguard, OpenJ9 VM having a small size, startup time and memory footprint.
 
-available from https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/[crnk-examples].
+available from https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/[crnk-integration-examples].
 
 The impatient may also directly want to jump to <<resource_repository,ResourceRepositoryV2>>, but it is highly recommended to
 familiarize one self with the architecture and annotations as well. Unlike traditional REST libraries, Crnk comes with a lot of

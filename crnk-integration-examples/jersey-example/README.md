@@ -2,7 +2,7 @@
 
 ## How to run with Gradle
 
-   gradlew :crnk-examples:jersey-example:run
+   gradlew :crnk-integration-examples:jersey-example:run
 
 ## Visit in your browser: 
 

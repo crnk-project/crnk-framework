@@ -76,9 +76,9 @@ implementation can then look as simple as:
 [source]
 .Task.java
 ----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc1]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc1]
    ...
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc2]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/Task.java[tag=doc2]
 ----
 
 and
@@ -86,11 +86,11 @@ and
 [source]
 .TaskRepositoryImpl.java
 ----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/TaskRepositoryImpl.java[tag=doc]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/TaskRepositoryImpl.java[tag=doc]
 ----
 
 The example is taken from
-https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository[crnk-examples/spring-boot-example].
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository[crnk-integration-examples/spring-boot-example].
 (the basic Spring boot example from crnk-framework, not the dedicated full-blown one from crnk-example).
 
 Together with matching project repository, some URLs to checkout:
@@ -534,7 +534,7 @@ are multiple relationships between two resources.
 [source]
 .HistoryRelationshipRepository
 ----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryRelationshipRepository.java[tag=docs]
 ----
 
 
@@ -862,12 +862,12 @@ Any type of field can be added: meta, links, attribute and relationship fields. 
 an application may make use of `RelationshipMatcher` to provide repository serving those fields.
 Notice the `accessor` property that is used to obtain the value of that field
 (make sure this method is efficient to execute). An example is given by the `HistoryRelationshipRepository` in
-https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-example[crnk-examples/spring-boot-example]:
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-example[crnk-integration-examples/spring-boot-example]:
 
 [source]
 .HistoryFieldContributor
 ----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryFieldContributor.java[tag=docs]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/HistoryFieldContributor.java[tag=docs]
 ----
 
 - `getRelationshipFields` introduces the field dynamically instead of statically.
@@ -881,6 +881,6 @@ anchor:JsonApiExposed[]
 A repository may be annotated with `@JsonApiExposed(false)`. In this case the repository is only available internally to other repositories, not
 externally on the JSON API endpoint. There are different use cases for this:
 
-- Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
+- Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
 - <<nested_resources,nested resources>> can be made accessible only through their parent, such as `http://example.com/posts/1/comments/2` and no longer `http://example.com/comments`
 

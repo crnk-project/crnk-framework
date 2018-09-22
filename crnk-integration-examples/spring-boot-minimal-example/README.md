@@ -7,7 +7,7 @@ In order to run this example do:
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:spring-boot-minimal-example:run
+	gradlew :crnk-integration-examples:spring-boot-minimal-example:run
 
 ## The service will be available at
  

@@ -8,7 +8,7 @@ Update configuration.yml to point to your MongoDB installation.
 
 ## How to run with Gradle
 
-	gradlew :crnk-examples:dropwizard-mongo-example:run
+	gradlew :crnk-integration-examples:dropwizard-mongo-example:run
 
 ## The service will be available at
  

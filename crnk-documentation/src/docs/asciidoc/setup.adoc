@@ -340,7 +340,7 @@ For example:
 [source]
 .ExampleJpaModuleConfigurer.java
 ----
-include::../../../../crnk-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/ExampleJpaModuleConfigurer.java[]
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/ExampleJpaModuleConfigurer.java[]
 ----
 
 Next to all the auto configurations there are also a number of further Spring-specific modules:
@@ -425,7 +425,7 @@ it is highly recommended to set the `BeanManager manually`.
 
 A `GuiceServiceDiscovery` implementation is provided. The various integrations like `CrnkFeature` provide
 a `setServiceDiscovery` method to set the instance. For an example have a look at the dropwizard example
-application (https://github.com/crnk-project/crnk-framework/tree/master/crnk-examples/dropwizard-simple-example).
+application (https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/dropwizard-simple-example).
 
 
 ## Discovery with Spring
@@ -478,7 +478,7 @@ and other features through modules. A simple example looks like:
 [source]
 .DropwizardService
 ----
-include::../../../../crnk-examples/dropwizard-simple-example/src/main/java/io/crnk/example/dropwizard/simple/DropwizardService.java[tags=docs]
+include::../../../../crnk-integration-examples/dropwizard-simple-example/src/main/java/io/crnk/example/dropwizard/simple/DropwizardService.java[tags=docs]
 ----
 
 Have a look at the various <<modules>> chapters for more information.
