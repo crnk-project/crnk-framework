@@ -4,9 +4,7 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ErrorResponseBuilder;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
-import io.crnk.legacy.queryParams.errorhandling.ExceptionMapperProvider;
 
-@ExceptionMapperProvider
 public class SomeExceptionMapper implements JsonApiExceptionMapper<SomeExceptionMapper.SomeException> {
 
 	@Override

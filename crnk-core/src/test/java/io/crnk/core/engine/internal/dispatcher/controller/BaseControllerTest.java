@@ -14,21 +14,27 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
-import io.crnk.core.mock.models.*;
+import io.crnk.core.mock.models.ComplexPojo;
+import io.crnk.core.mock.models.Memorandum;
+import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
+import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseControllerTest {
 
@@ -48,8 +54,6 @@ public abstract class BaseControllerTest {
 	protected TypeParser typeParser;
 
 	protected DocumentMapper documentMapper;
-
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
 	protected ModuleRegistry moduleRegistry;
 

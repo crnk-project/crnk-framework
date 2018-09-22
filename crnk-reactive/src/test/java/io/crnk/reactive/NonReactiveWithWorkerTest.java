@@ -56,7 +56,7 @@ public class NonReactiveWithWorkerTest extends ReactiveTestBase {
 		Assert.assertEquals(n, responses.size());
 
 		// should incur delay only once since all n items are run in parallel
-		int cpuIgnoreMargin = 2500;
+		int cpuIgnoreMargin = 5500;
 		Assert.assertTrue("dt=" + dt, dt < SlowResourceRepository.DELAY + cpuIgnoreMargin);
 		Assert.assertTrue("dt=" + dt, dt > SlowResourceRepository.DELAY - cpuIgnoreMargin);
 

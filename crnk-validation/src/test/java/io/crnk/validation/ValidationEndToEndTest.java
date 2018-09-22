@@ -286,15 +286,4 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("/data/relationships/task", violation.getErrorData().getSourcePointer());
 		}
 	}
-
-	private QueryParams buildIncludes(String root, String... relations) {
-		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
-		addParams(params, "include[" + root + "]", StringUtils.join(",", Arrays.asList(relations)));
-		return queryParamsBuilder.buildQueryParams(params);
-	}
-
-	private void addParams(Map<String, Set<String>> params, String key, String value) {
-		params.put(key, new HashSet<String>(Arrays.asList(value)));
-	}
-
 }

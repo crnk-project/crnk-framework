@@ -11,9 +11,7 @@ import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.internal.UrlMapperAdapter;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.QueryParamsSerializer;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -27,7 +25,6 @@ public class JsonApiUrlBuilder {
 
 	private final ModuleRegistry moduleRegistry;
 
-	private QueryParamsSerializer queryParamsSerializer = new DefaultQueryParamsSerializer();
 
 	public JsonApiUrlBuilder(ModuleRegistry moduleRegistry, QueryContext queryContext) {
 		this.queryContext = queryContext;
@@ -82,19 +79,11 @@ public class JsonApiUrlBuilder {
 		}
 
 		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
-		if (query instanceof QuerySpec) {
-			QuerySpec querySpec = (QuerySpec) query;
-			QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
-			urlBuilder.addQueryParameters(urlMapper.serialize(querySpec));
-		} else if (query instanceof QueryParams) {
-			QueryParams queryParams = (QueryParams) query;
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializeFilters(queryParams));
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializeSorting(queryParams));
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializeGrouping(queryParams));
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializePagination(queryParams));
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializeIncludedFields(queryParams));
-			urlBuilder.addQueryParameters(queryParamsSerializer.serializeIncludedRelations(queryParams));
-		}
+
+		QuerySpec querySpec = (QuerySpec) query;
+		QuerySpecUrlMapper urlMapper = moduleRegistry.getUrlMapper();
+		urlBuilder.addQueryParameters(urlMapper.serialize(querySpec));
+
 		return urlBuilder.toString();
 	}
 

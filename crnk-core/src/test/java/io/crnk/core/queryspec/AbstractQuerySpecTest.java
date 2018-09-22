@@ -15,19 +15,17 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.legacy.internal.DefaultQuerySpecConverter;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Before;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractQuerySpecTest {
 
-	protected DefaultQuerySpecConverter querySpecConverter;
-
-	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
 	protected ResourceRegistry resourceRegistry;
 
@@ -82,7 +80,6 @@ public abstract class AbstractQuerySpecTest {
 		container.boot();
 
 		moduleRegistry = container.getModuleRegistry();
-		querySpecConverter = new DefaultQuerySpecConverter(moduleRegistry);
 		resourceRegistry = container.getResourceRegistry();
 	}
 
