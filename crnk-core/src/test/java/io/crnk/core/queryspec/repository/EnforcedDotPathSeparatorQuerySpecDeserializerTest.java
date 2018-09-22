@@ -25,14 +25,14 @@ public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQu
 	}
 
 	@Test(expected = ParametersDeserializationException.class)
-	public void testDotNotationDisallowsBrackets() throws InstantiationException, IllegalAccessException {
+	public void testDotNotationDisallowsBrackets() {
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "filter[projects][tasks][name]", "test");
 		deserializer.deserialize(taskInformation, params);
 	}
 
 	@Test
-	public void testNoAmbiguityForType() throws InstantiationException, IllegalAccessException {
+	public void testNoAmbiguityForType() {
 		Map<String, Set<String>> params = new HashMap<>();
 		// note that there is both a type and an attribute on tasks called
 		// projects
@@ -46,7 +46,7 @@ public class EnforcedDotPathSeparatorQuerySpecDeserializerTest extends DefaultQu
 	}
 
 	@Test
-	public void testNoAmbiguityForAttribute() throws InstantiationException, IllegalAccessException {
+	public void testNoAmbiguityForAttribute() {
 		// note that there is both a type and an attribute on tasks called
 		// projects, here the attribute should match
 		Map<String, Set<String>> params = new HashMap<>();

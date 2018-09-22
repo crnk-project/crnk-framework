@@ -22,7 +22,7 @@ public class ProjectRepository implements ResourceRepositoryV2<Project, ObjectId
 	}
 
 	public <S extends Project> S save(S entity) {
-		Key<Project> saveKey = (Key<Project>) datastore.save(entity);
+		Key<Project> saveKey = datastore.save(entity);
 		return (S) datastore.getByKey(Project.class, saveKey);
 	}
 

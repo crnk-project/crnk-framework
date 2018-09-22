@@ -18,13 +18,13 @@ public class FieldOrderedComparatorTest {
 	ResourceField fieldB;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		fieldA = new ResourceFieldImpl("a", "a", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
 		fieldB = new ResourceFieldImpl("b", "b", ResourceFieldType.ATTRIBUTE, String.class, String.class, null);
 	}
 
 	@Test
-	public void onTwoFieldsShouldSortCorrectly() throws Exception {
+	public void onTwoFieldsShouldSortCorrectly() {
 		// GIVEN
 		Set<ResourceField> fields = new TreeSet<>(new FieldOrderedComparator(new String[]{
 				"b", "a"
@@ -39,7 +39,7 @@ public class FieldOrderedComparatorTest {
 	}
 
 	@Test
-	public void onOneFieldShouldSortCorrectly() throws Exception {
+	public void onOneFieldShouldSortCorrectly() {
 		// GIVEN
 		Set<ResourceField> fields = new TreeSet<>(new FieldOrderedComparator(new String[]{
 				"b"
@@ -54,7 +54,7 @@ public class FieldOrderedComparatorTest {
 	}
 
 	@Test
-	public void onNoOrderShouldPersistInsertionOrder() throws Exception {
+	public void onNoOrderShouldPersistInsertionOrder() {
 		// GIVEN
 		Set<ResourceField> fields = new TreeSet<>(new FieldOrderedComparator(new String[]{}, false));
 
@@ -67,7 +67,7 @@ public class FieldOrderedComparatorTest {
 	}
 
 	@Test
-	public void onAlphabeticOrderShouldSortCorrectly() throws Exception {
+	public void onAlphabeticOrderShouldSortCorrectly() {
 		// GIVEN
 		Set<ResourceField> fields = new TreeSet<>(new FieldOrderedComparator(new String[]{}, true));
 

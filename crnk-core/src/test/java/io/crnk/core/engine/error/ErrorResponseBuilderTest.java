@@ -10,7 +10,7 @@ public class ErrorResponseBuilderTest {
 	private static final int STATUS = 500;
 
 	@Test
-	public void shouldSetStatus() throws Exception {
+	public void shouldSetStatus() {
 		ErrorResponse response = ErrorResponse.builder()
 				.setStatus(STATUS)
 				.build();
@@ -19,7 +19,7 @@ public class ErrorResponseBuilderTest {
 	}
 
 	@Test
-	public void shouldSetSingleErrorData() throws Exception {
+	public void shouldSetSingleErrorData() {
 		ErrorResponse response = ErrorResponse.builder()
 				.setSingleErrorData(ErrorDataMother.fullyPopulatedErrorData())
 				.build();
@@ -30,7 +30,7 @@ public class ErrorResponseBuilderTest {
 	}
 
 	@Test
-	public void shouldSetErrorDataCollection() throws Exception {
+	public void shouldSetErrorDataCollection() {
 		ErrorResponse response = ErrorResponse.builder()
 				.setErrorData(ErrorDataMother.oneSizeCollectionOfErrorData())
 				.build();

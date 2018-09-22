@@ -91,10 +91,10 @@ public class VertxTestContainer implements TestContainer {
 	@Override
 	public <T> T getTestData(Class<T> clazz, Object id) {
 		if (clazz == Schedule.class) {
-			return (T) vehicle.testModule.getScheduleRepository().getMap().get((Long) id);
+			return (T) vehicle.testModule.getScheduleRepository().getMap().get(id);
 		}
 		if (clazz == RelationIdTestResource.class) {
-			return (T) vehicle.testModule.getRelationIdTestRepository().getMap().get((Long) id);
+			return (T) vehicle.testModule.getRelationIdTestRepository().getMap().get(id);
 		}
 		throw new UnsupportedOperationException();
 	}

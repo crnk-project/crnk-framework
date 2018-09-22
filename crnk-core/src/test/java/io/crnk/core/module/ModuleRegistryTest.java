@@ -331,7 +331,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testInformationBuilder() throws Exception {
+	public void testInformationBuilder() {
 		ResourceInformationProvider informationProvider = moduleRegistry.getResourceInformationBuilder();
 
 		Assert.assertTrue(informationProvider.accept(ComplexPojo.class));
@@ -374,7 +374,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testResourceLookup() throws Exception {
+	public void testResourceLookup() {
 		ResourceLookup resourceLookup = moduleRegistry.getResourceLookup();
 
 		Assert.assertFalse(resourceLookup.getResourceClasses().contains(Object.class));
@@ -383,7 +383,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testJacksonModule() throws Exception {
+	public void testJacksonModule() {
 		List<com.fasterxml.jackson.databind.Module> jacksonModules = moduleRegistry.getJacksonModules();
 		Assert.assertEquals(1, jacksonModules.size());
 		com.fasterxml.jackson.databind.Module jacksonModule = jacksonModules.get(0);
@@ -391,7 +391,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testFilter() throws Exception {
+	public void testFilter() {
 		List<DocumentFilter> filters = moduleRegistry.getFilters();
 		Assert.assertEquals(1, filters.size());
 	}
@@ -404,7 +404,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testDecorators() throws Exception {
+	public void testDecorators() {
 		List<RepositoryDecoratorFactory> decorators = moduleRegistry.getRepositoryDecoratorFactories();
 		Assert.assertEquals(2, decorators.size());
 
@@ -416,7 +416,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void testSecurityProvider() throws Exception {
+	public void testSecurityProvider() {
 		Assert.assertTrue(moduleRegistry.getSecurityProvider().isUserInRole("testRole"));
 		Assert.assertFalse(moduleRegistry.getSecurityProvider().isUserInRole("nonExistingRole"));
 		Assert.assertTrue(testModule.getContext().getSecurityProvider().isUserInRole("testRole"));

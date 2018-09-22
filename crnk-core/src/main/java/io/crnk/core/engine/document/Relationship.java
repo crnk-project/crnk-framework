@@ -36,11 +36,11 @@ public class Relationship implements MetaContainer, LinksContainer {
 	}
 
 	public Relationship(ResourceIdentifier resourceId) {
-		this.data = Nullable.of((Object) resourceId);
+		this.data = Nullable.of(resourceId);
 	}
 
 	public Relationship(List<ResourceIdentifier> resourceIds) {
-		this.data = Nullable.of((Object) resourceIds);
+		this.data = Nullable.of(resourceIds);
 	}
 
 	@Override

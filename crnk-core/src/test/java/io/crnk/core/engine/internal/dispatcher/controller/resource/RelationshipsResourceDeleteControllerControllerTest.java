@@ -60,11 +60,11 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 	}
 
 	@Test
-	public void onExistingToOneRelationshipShouldRemoveIt() throws Exception {
+	public void onExistingToOneRelationshipShouldRemoveIt() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -84,7 +84,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		// GIVEN
 		Document newProjectBody = new Document();
 		data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 
@@ -103,7 +103,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
 		data = new Resource();
-		newTaskToProjectBody.setData(Nullable.of((Object) data));
+		newTaskToProjectBody.setData(Nullable.of(data));
 		data.setType("projects");
 		data.setId(projectId.toString());
 
@@ -138,10 +138,10 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 	}
 
 	@Test
-	public void onExistingToManyRelationshipShouldRemoveIt() throws Exception {
+	public void onExistingToManyRelationshipShouldRemoveIt() {
 		// GIVEN
 		Document newUserDocument = new Document();
-		newUserDocument.setData(Nullable.of((Object) createUser()));
+		newUserDocument.setData(Nullable.of(createUser()));
 
 		JsonPath taskPath = pathBuilder.build("/users");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -159,7 +159,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 
 		// GIVEN
 		Document newProjectDocument = new Document();
-		newProjectDocument.setData(Nullable.of((Object) createProject()));
+		newProjectDocument.setData(Nullable.of(createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 
@@ -177,7 +177,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 
 		// GIVEN
 		Document newProjectDocument2 = new Document();
-		newProjectDocument2.setData(Nullable.of((Object) createProject(projectId.toString())));
+		newProjectDocument2.setData(Nullable.of(createProject(projectId.toString())));
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
 		RelationshipsResourcePostController relationshipsResourcePostController = new RelationshipsResourcePostController();

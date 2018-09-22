@@ -44,7 +44,7 @@ public class CrnkFilter implements Filter {
 	}
 
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
+	public void init(FilterConfig filterConfig) {
 		this.filterConfig = filterConfig;
 
 		if (boot == null) {

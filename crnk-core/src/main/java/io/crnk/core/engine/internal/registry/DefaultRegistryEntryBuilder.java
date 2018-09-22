@@ -102,7 +102,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 		public DefaultRelationshipRepository(String fieldName) {
 			this.fieldName = fieldName;
-			this.information = informationBuilder.createRelationshipRepository((RelationshipMatcher) null);
+			this.information = informationBuilder.createRelationshipRepository(null);
 		}
 
 		@Override

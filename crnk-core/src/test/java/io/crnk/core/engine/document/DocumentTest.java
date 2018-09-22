@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class DocumentTest {
 
 	@Test
-	public void testDocumentEqualsContract() throws NoSuchFieldException {
+	public void testDocumentEqualsContract() {
 		EqualsVerifier.forClass(Document.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
@@ -30,11 +30,11 @@ public class DocumentTest {
 		Assert.assertTrue(doc.getCollectionData().get().isEmpty());
 
 		Resource resource1 = Mockito.mock(Resource.class);
-		doc.setData(Nullable.of((Object) resource1));
+		doc.setData(Nullable.of(resource1));
 		Assert.assertEquals(1, doc.getCollectionData().get().size());
 
 		Resource resource2 = Mockito.mock(Resource.class);
-		doc.setData(Nullable.of((Object) Arrays.asList(resource1, resource2)));
+		doc.setData(Nullable.of(Arrays.asList(resource1, resource2)));
 		Assert.assertEquals(2, doc.getCollectionData().get().size());
 
 	}

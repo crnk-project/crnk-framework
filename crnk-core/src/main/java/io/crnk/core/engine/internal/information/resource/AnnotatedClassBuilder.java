@@ -59,7 +59,7 @@ public class AnnotatedClassBuilder {
 														 SerializationConfig serializationConfig)
 			throws InvocationTargetException, IllegalAccessException {
 		JavaType declaringType = serializationConfig.constructType(declaringClass);
-		return AnnotatedClass.class.cast(method.invoke(null, declaringType, serializationConfig, serializationConfig));
+		return (AnnotatedClass) method.invoke(null, declaringType, serializationConfig, serializationConfig);
 	}
 
 	private static AnnotatedClass buildOldAnnotatedClass(Method method, Class<?> declaringClass,
@@ -67,6 +67,6 @@ public class AnnotatedClassBuilder {
 			throws InvocationTargetException, IllegalAccessException {
 		boolean useAnnotations = serializationConfig.isAnnotationProcessingEnabled();
 		AnnotationIntrospector aintr = useAnnotations ? serializationConfig.getAnnotationIntrospector() : null;
-		return AnnotatedClass.class.cast(method.invoke(null, declaringClass, aintr, serializationConfig));
+		return (AnnotatedClass) method.invoke(null, declaringClass, aintr, serializationConfig);
 	}
 }

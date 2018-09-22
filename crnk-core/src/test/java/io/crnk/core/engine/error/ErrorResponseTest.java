@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ErrorResponseTest {
 
 	@Test
-	public void shouldFulfillHashcodeEqualsContract() throws Exception {
+	public void shouldFulfillHashcodeEqualsContract() {
 		EqualsVerifier.forClass(ErrorResponse.class).verify();
 	}
 }

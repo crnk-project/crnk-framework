@@ -13,145 +13,145 @@ import java.util.Hashtable;
 public class DummyInitialContextFactory implements InitialContextFactory {
 
 	@Override
-	public Context getInitialContext(Hashtable<?, ?> arg0) throws NamingException {
+	public Context getInitialContext(Hashtable<?, ?> arg0) {
 		return new DummyContext();
 	}
 
 	class DummyContext implements Context {
 
 		@Override
-		public Object addToEnvironment(String propName, Object propVal) throws NamingException {
+		public Object addToEnvironment(String propName, Object propVal) {
 			return null;
 		}
 
 		@Override
-		public void bind(Name name, Object obj) throws NamingException {
+		public void bind(Name name, Object obj) {
 		}
 
 		@Override
-		public void bind(String name, Object obj) throws NamingException {
+		public void bind(String name, Object obj) {
 		}
 
 		@Override
-		public void close() throws NamingException {
+		public void close() {
 		}
 
 		@Override
-		public Name composeName(Name name, Name prefix) throws NamingException {
+		public Name composeName(Name name, Name prefix) {
 			return null;
 		}
 
 		@Override
-		public String composeName(String name, String prefix) throws NamingException {
+		public String composeName(String name, String prefix) {
 			return null;
 		}
 
 		@Override
-		public Context createSubcontext(Name name) throws NamingException {
+		public Context createSubcontext(Name name) {
 			return null;
 		}
 
 		@Override
-		public Context createSubcontext(String name) throws NamingException {
+		public Context createSubcontext(String name) {
 			return null;
 		}
 
 		@Override
-		public void destroySubcontext(Name name) throws NamingException {
+		public void destroySubcontext(Name name) {
 
 		}
 
 		@Override
-		public void destroySubcontext(String name) throws NamingException {
+		public void destroySubcontext(String name) {
 		}
 
 		@Override
-		public Hashtable<?, ?> getEnvironment() throws NamingException {
+		public Hashtable<?, ?> getEnvironment() {
 			return null;
 		}
 
 		@Override
-		public String getNameInNamespace() throws NamingException {
+		public String getNameInNamespace() {
 			return null;
 		}
 
 		@Override
-		public NameParser getNameParser(Name name) throws NamingException {
+		public NameParser getNameParser(Name name) {
 			return null;
 		}
 
 		@Override
-		public NameParser getNameParser(String name) throws NamingException {
+		public NameParser getNameParser(String name) {
 			return null;
 		}
 
 		@Override
-		public NamingEnumeration<NameClassPair> list(Name name) throws NamingException {
+		public NamingEnumeration<NameClassPair> list(Name name) {
 			return null;
 		}
 
 		@Override
-		public NamingEnumeration<NameClassPair> list(String name) throws NamingException {
+		public NamingEnumeration<NameClassPair> list(String name) {
 			return null;
 		}
 
 		@Override
-		public NamingEnumeration<Binding> listBindings(Name name) throws NamingException {
+		public NamingEnumeration<Binding> listBindings(Name name) {
 			return null;
 		}
 
 		@Override
-		public NamingEnumeration<Binding> listBindings(String name) throws NamingException {
+		public NamingEnumeration<Binding> listBindings(String name) {
 			return null;
 		}
 
 		@Override
-		public Object lookup(Name name) throws NamingException {
+		public Object lookup(Name name) {
 			return null;
 		}
 
 		@Override
-		public Object lookup(String name) throws NamingException {
+		public Object lookup(String name) {
 			return null;
 		}
 
 		@Override
-		public Object lookupLink(Name name) throws NamingException {
+		public Object lookupLink(Name name) {
 			return null;
 		}
 
 		@Override
-		public Object lookupLink(String name) throws NamingException {
+		public Object lookupLink(String name) {
 			return null;
 		}
 
 		@Override
-		public void rebind(Name name, Object obj) throws NamingException {
+		public void rebind(Name name, Object obj) {
 		}
 
 		@Override
-		public void rebind(String name, Object obj) throws NamingException {
+		public void rebind(String name, Object obj) {
 		}
 
 		@Override
-		public Object removeFromEnvironment(String propName) throws NamingException {
+		public Object removeFromEnvironment(String propName) {
 			return null;
 		}
 
 		@Override
-		public void rename(Name oldName, Name newName) throws NamingException {
+		public void rename(Name oldName, Name newName) {
 		}
 
 		@Override
-		public void rename(String oldName, String newName) throws NamingException {
+		public void rename(String oldName, String newName) {
 		}
 
 		@Override
-		public void unbind(Name name) throws NamingException {
+		public void unbind(Name name) {
 		}
 
 		@Override
-		public void unbind(String name) throws NamingException {
+		public void unbind(String name) {
 		}
 	}
 }

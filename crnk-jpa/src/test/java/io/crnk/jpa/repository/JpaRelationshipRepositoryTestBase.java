@@ -47,7 +47,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testFindOneTarget() throws InstantiationException, IllegalAccessException {
+	public void testFindOneTarget() {
 		RelatedEntity relatedEntity = repo.findOneTarget(1L, TestEntity.ATTR_oneRelatedValue, new QuerySpec(RelatedEntity
 				.class));
 		Assert.assertNotNull(relatedEntity);
@@ -56,7 +56,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 
 
 	@Test
-	public void testFindNulledOneTarget() throws InstantiationException, IllegalAccessException {
+	public void testFindNulledOneTarget() {
 		long nulledEntityId = numTestEntities - 1;
 
 		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
@@ -69,7 +69,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	 * Note that implementation behaves slightly differently with a LIMIT in place. Does only work for single requests.
 	 */
 	@Test
-	public void testFindNulledOneTargetWithLimit() throws InstantiationException, IllegalAccessException {
+	public void testFindNulledOneTargetWithLimit() {
 		long nulledEntityId = numTestEntities - 1;
 
 		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
@@ -87,7 +87,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testFindManyTarget() throws InstantiationException, IllegalAccessException {
+	public void testFindManyTarget() {
 		Iterable<RelatedEntity> relatedEntities = repo.findManyTargets(1L, TestEntity.ATTR_oneRelatedValue,
 				new QuerySpec(RelatedEntity.class));
 		Iterator<RelatedEntity> iterator = relatedEntities.iterator();
@@ -98,7 +98,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testFindManyTargetWithFilter() throws InstantiationException, IllegalAccessException {
+	public void testFindManyTargetWithFilter() {
 		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 101));
 
@@ -111,7 +111,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testFindManyTargetWithUnmatchedFilter() throws InstantiationException, IllegalAccessException {
+	public void testFindManyTargetWithUnmatchedFilter() {
 		QuerySpec querySpec = new QuerySpec(RelatedEntity.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 9999));
 
@@ -121,7 +121,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testAddRemoveRelations() throws InstantiationException, IllegalAccessException {
+	public void testAddRemoveRelations() {
 		TestEntity test = em.find(TestEntity.class, 1L);
 		Assert.assertEquals(0, test.getManyRelatedValues().size());
 		repo.addRelations(test, Arrays.asList(101L), TestEntity.ATTR_manyRelatedValues);
@@ -171,7 +171,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testSetRelation() throws InstantiationException, IllegalAccessException {
+	public void testSetRelation() {
 		RelatedEntity related = em.find(RelatedEntity.class, 101L);
 		TestEntity test = em.find(TestEntity.class, 1L);
 		Assert.assertNull(related.getTestEntity());
@@ -209,7 +209,7 @@ public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest 
 	}
 
 	@Test
-	public void testGetManyRelationWithPaging() throws InstantiationException, IllegalAccessException {
+	public void testGetManyRelationWithPaging() {
 		TestEntity test = setupManyRelation(Arrays.asList(100L, 101L, 102L, 103L, 104L));
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);

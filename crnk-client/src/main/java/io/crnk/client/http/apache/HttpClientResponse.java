@@ -30,7 +30,7 @@ public class HttpClientResponse implements HttpAdapterResponse {
 	}
 
 	@Override
-	public String body() throws IOException {
+	public String body() {
 		return body;
 	}
 

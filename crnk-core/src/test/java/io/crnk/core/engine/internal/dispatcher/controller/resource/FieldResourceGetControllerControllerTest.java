@@ -71,7 +71,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 	}
 
 	@Test
-	public void onGivenRequestFieldResourceGetShouldHandleIt() throws Exception {
+	public void onGivenRequestFieldResourceGetShouldHandleIt() {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/project");
@@ -86,7 +86,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 	}
 
 	@Test
-	public void onGivenRequestFieldResourcesGetShouldHandleIt() throws Exception {
+	public void onGivenRequestFieldResourcesGetShouldHandleIt() {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
@@ -102,7 +102,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public void onGivenIncludeRequestFieldResourcesGetShouldHandleIt() throws Exception {
+	public void onGivenIncludeRequestFieldResourcesGetShouldHandleIt() {
 
 		// get repositories
 		ResourceRepositoryAdapter userRepo = resourceRegistry.getEntry(User.class).getResourceRepository();

@@ -64,10 +64,7 @@ public class TestIdEmbeddable implements Serializable {
 		} else if (!embIntValue.equals(other.embIntValue))
 			return false;
 		if (embStringValue == null) {
-			if (other.embStringValue != null)
-				return false;
-		} else if (!embStringValue.equals(other.embStringValue))
-			return false;
-		return true;
+			return other.embStringValue == null;
+		} else return embStringValue.equals(other.embStringValue);
 	}
 }

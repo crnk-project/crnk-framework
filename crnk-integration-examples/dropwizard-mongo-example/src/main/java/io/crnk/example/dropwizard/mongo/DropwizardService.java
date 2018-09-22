@@ -49,7 +49,7 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 	}
 
 	@Override
-	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) throws Exception {
+	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) {
 		environment.lifecycle().manage(guiceBundle.getInjector().getInstance(MongoManaged.class));
 
 		CrnkFeature crnkFeature = new CrnkFeature();

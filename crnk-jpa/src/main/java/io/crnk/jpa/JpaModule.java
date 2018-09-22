@@ -386,7 +386,7 @@ public class JpaModule implements InitializingModule {
 				return transactionRunner.doInTransaction(new Callable<Response>() {
 
 					@Override
-					public Response call() throws Exception {
+					public Response call() {
 						return chain.doFilter(context);
 					}
 				});

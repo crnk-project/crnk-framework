@@ -91,14 +91,14 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		for (Object targetId : targetIds) {
 			resourceIdentifiers.add(sourceResourceInformation.toResourceIdentifier(targetId));
 		}
-		document.setData(Nullable.of((Object) resourceIdentifiers));
+		document.setData(Nullable.of(resourceIdentifiers));
 		doExecute(requestUrl, method, document);
 	}
 
 	private void executeWithId(String requestUrl, HttpMethod method, Object targetId) {
 		Document document = new Document();
 		ResourceIdentifier resourceIdentifier = sourceResourceInformation.toResourceIdentifier(targetId);
-		document.setData(Nullable.of((Object) resourceIdentifier));
+		document.setData(Nullable.of(resourceIdentifier));
 		doExecute(requestUrl, method, document);
 	}
 

@@ -78,7 +78,7 @@ public class JsonApiRequestProcessorTest {
 	}
 
 	@Test
-	public void ignoreRequestForContentTypeMismatch() throws IOException {
+	public void ignoreRequestForContentTypeMismatch() {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept"))
@@ -91,7 +91,7 @@ public class JsonApiRequestProcessorTest {
 
 
 	@Test
-	public void acceptPlainJsonDependingOnFlag() throws IOException {
+	public void acceptPlainJsonDependingOnFlag() {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept"))
@@ -103,7 +103,7 @@ public class JsonApiRequestProcessorTest {
 	}
 
 	@Test
-	public void handleRequestForGetAndWildcardContentType() throws IOException {
+	public void handleRequestForGetAndWildcardContentType() {
 		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
 		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
 		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");

@@ -75,7 +75,7 @@ public abstract class ControllerTest extends JerseyTestBase {
 	}
 
 	@Test
-	public void shouldReturnErrorResponseWhenMappedExceptionThrown() throws IOException {
+	public void shouldReturnErrorResponseWhenMappedExceptionThrown() {
 
 		//Getting task of id = 10000, simulates error and is throwing an exception we want to check.
 		Response errorResponse = target(getPrefixForPath() + "tasks/10000")

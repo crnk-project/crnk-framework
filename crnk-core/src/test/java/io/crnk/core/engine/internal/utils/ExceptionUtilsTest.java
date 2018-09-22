@@ -18,13 +18,13 @@ public class ExceptionUtilsTest {
 	public void testNoError() {
 		Assert.assertEquals(13, ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				return 13;
 			}
 		}));
 		Assert.assertEquals(13, ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				return 13;
 			}
 		}, "test"));
@@ -35,7 +35,7 @@ public class ExceptionUtilsTest {
 	public void testRuntimeException() {
 		ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				throw new IllegalArgumentException();
 			}
 		});
@@ -57,7 +57,7 @@ public class ExceptionUtilsTest {
 		try {
 			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 				@Override
-				public Object call() throws Exception {
+				public Object call() {
 					throw new IllegalArgumentException();
 				}
 			}, "test %s", 13);

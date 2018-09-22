@@ -105,7 +105,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 
 	@Test
-	public void checkFilterRelationship() throws IOException {
+	public void checkFilterRelationship() {
 		RegistryEntry projectEntry = boot.getResourceRegistry().getEntry(Project.class);
 		ResourceInformation projectResourceInformation = projectEntry.getResourceInformation();
 
@@ -123,7 +123,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 
 	@Test
-	public void checkReadOnlyAttribute() throws IOException {
+	public void checkReadOnlyAttribute() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(Task.class);
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 
@@ -144,7 +144,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 	}
 
 	@Test
-	public void checkInsertableAttribute() throws IOException {
+	public void checkInsertableAttribute() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(Task.class);
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 
@@ -165,7 +165,7 @@ public class MetaFilteringTest extends AbstractMetaJerseyTest {
 	}
 
 
-	private void checkResourceMeta(boolean readable, boolean insertable, boolean updatable, boolean deletable) throws IOException {
+	private void checkResourceMeta(boolean readable, boolean insertable, boolean updatable, boolean deletable) {
 		QuerySpec querySpec = new QuerySpec(MetaResource.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "Tasks"));
 		ResourceList<MetaResource> list = repository.findAll(querySpec);

@@ -11,7 +11,7 @@ import org.junit.Test;
 public class ResourcePermissionTest {
 
 	@Test
-	public void testEquals() throws NoSuchFieldException {
+	public void testEquals() {
 		EqualsVerifier.forClass(ResourceIdentifier.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 
 		Assert.assertEquals(ResourcePermission.ALL, ResourcePermission.ALL);
@@ -26,7 +26,7 @@ public class ResourcePermissionTest {
 	}
 
 	@Test
-	public void testHashCode() throws NoSuchFieldException {
+	public void testHashCode() {
 		Assert.assertEquals(ResourcePermission.ALL.hashCode(), ResourcePermission.ALL.hashCode());
 		Assert.assertNotEquals(ResourcePermission.DELETE.hashCode(), ResourcePermission.ALL.hashCode());
 		Assert.assertNotEquals(ResourcePermission.GET.hashCode(), ResourcePermission.ALL.hashCode());

@@ -56,7 +56,7 @@ public class SerializerUtil {
 		return readStringIfExists(fieldName, jsonNode);
 	}
 
-	public static String readStringIfExists(String fieldName, JsonNode jsonNode) throws IOException {
+	public static String readStringIfExists(String fieldName, JsonNode jsonNode) {
 		JsonNode node = jsonNode.get(fieldName);
 		if (node != null) {
 			return node.asText();

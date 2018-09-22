@@ -33,7 +33,7 @@ public class JpaModuleTest extends AbstractJpaTest {
 	}
 
 	@Test
-	public void test() throws InstantiationException, IllegalAccessException {
+	public void test() {
 		Assert.assertEquals(0, module.getResourceClasses().size());
 
 		Assert.assertEquals("jpa", module.getModuleName());

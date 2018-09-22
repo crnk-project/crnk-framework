@@ -76,7 +76,7 @@ public class OffsetLimitPagingBehaviorTest {
 	@Test
 	public void testDeserializeDefaultWithNoParameters() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.<String, Set<String>>emptyMap());
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.emptyMap());
 
 		assertEquals(new OffsetLimitPagingSpec(0L, null), result);
 	}
@@ -84,7 +84,7 @@ public class OffsetLimitPagingBehaviorTest {
 	@Test
 	public void testDeserializeDefaultWithOffset() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("offset", ImmutableSet.of("1")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("offset", ImmutableSet.of("1")));
 
 		assertEquals(new OffsetLimitPagingSpec(1L, null), result);
 	}
@@ -92,7 +92,7 @@ public class OffsetLimitPagingBehaviorTest {
 	@Test
 	public void testDeserializeDefaultWithLimit() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("limit", ImmutableSet.of("30")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("limit", ImmutableSet.of("30")));
 
 		assertEquals(new OffsetLimitPagingSpec(0L, 30L), result);
 	}
@@ -101,7 +101,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeOffsetWithNoParameters() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultOffset(1L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.<String, Set<String>>emptyMap());
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.emptyMap());
 
 		assertEquals(new OffsetLimitPagingSpec(1L, null), result);
 	}
@@ -110,7 +110,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeOffsetWithOffset() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultOffset(1L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("offset", ImmutableSet.of("1")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("offset", ImmutableSet.of("1")));
 
 		assertEquals(new OffsetLimitPagingSpec(1L, null), result);
 	}
@@ -119,7 +119,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeOffsetWithLimit() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultOffset(1L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("limit", ImmutableSet.of("30")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("limit", ImmutableSet.of("30")));
 
 		assertEquals(new OffsetLimitPagingSpec(1L, 30L), result);
 	}
@@ -128,7 +128,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeLimitWithNoParameters() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultLimit(30L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.<String, Set<String>>emptyMap());
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(Collections.emptyMap());
 
 		assertEquals(new OffsetLimitPagingSpec(0L, 30L), result);
 	}
@@ -137,7 +137,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeLimitWithOffset() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultLimit(30L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("offset", ImmutableSet.of("1")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("offset", ImmutableSet.of("1")));
 
 		assertEquals(new OffsetLimitPagingSpec(1L, 30L), result);
 	}
@@ -146,7 +146,7 @@ public class OffsetLimitPagingBehaviorTest {
 	public void testDeserializeLimitWithLimit() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
 		pagingBehavior.setDefaultLimit(30L);
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("limit", ImmutableSet.of("10")));
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("limit", ImmutableSet.of("10")));
 
 		assertEquals(new OffsetLimitPagingSpec(0L, 10L), result);
 	}
@@ -154,7 +154,7 @@ public class OffsetLimitPagingBehaviorTest {
 	@Test
 	public void testDeserialize() {
 		OffsetLimitPagingBehavior pagingBehavior = new OffsetLimitPagingBehavior();
-		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.<String, Set<String>>of("offset", ImmutableSet.of("1"),
+		OffsetLimitPagingSpec result = pagingBehavior.deserialize(ImmutableMap.of("offset", ImmutableSet.of("1"),
 				"limit", ImmutableSet.of("30")));
 
 		assertEquals(new OffsetLimitPagingSpec(1L, 30L), result);

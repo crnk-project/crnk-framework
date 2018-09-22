@@ -84,7 +84,7 @@ public class CrnkFilterTest {
 	}
 
 	@After
-	public void after() throws Exception {
+	public void after() {
 		filter.destroy();
 	}
 

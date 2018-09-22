@@ -148,7 +148,7 @@ public class DocumentMapperUtil {
 	public void setLinks(LinksContainer container, LinksInformation linksInformation, QueryAdapter queryAdapter) {
 		if (linksInformation != null) {
 			LOGGER.debug("adding links information {}", linksInformation);
-			container.setLinks((ObjectNode) objectMapper.valueToTree(linksInformation));
+			container.setLinks(objectMapper.valueToTree(linksInformation));
 		}
 		if (queryAdapter != null && queryAdapter.getCompactMode()) {
 			ObjectNode links = container.getLinks();
@@ -165,7 +165,7 @@ public class DocumentMapperUtil {
 	public void setMeta(MetaContainer container, MetaInformation metaInformation) {
 		if (metaInformation != null) {
 			LOGGER.debug("adding meta information {}", metaInformation);
-			container.setMeta((ObjectNode) objectMapper.valueToTree(metaInformation));
+			container.setMeta(objectMapper.valueToTree(metaInformation));
 		}
 	}
 

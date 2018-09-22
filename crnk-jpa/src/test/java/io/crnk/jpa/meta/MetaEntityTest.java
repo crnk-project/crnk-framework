@@ -18,7 +18,7 @@ public class MetaEntityTest {
 
 	@Before
 	public void setup() {
-		metaProvider = new JpaMetaProvider(Collections.<Class>emptySet());
+		metaProvider = new JpaMetaProvider(Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
 		lookup.addProvider(metaProvider);
 	}

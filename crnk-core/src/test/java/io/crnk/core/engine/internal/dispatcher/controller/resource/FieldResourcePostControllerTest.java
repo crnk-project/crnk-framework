@@ -63,10 +63,10 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onExistingParentResourceShouldSaveIt() throws Exception {
+	public void onExistingParentResourceShouldSaveIt() {
 		// GIVEN
 		Document newTaskDocument = new Document();
-		newTaskDocument.setData(Nullable.of((Object) createTask()));
+		newTaskDocument.setData(Nullable.of(createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -84,7 +84,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 
 		// GIVEN
 		Document newProjectDocument = new Document();
-		newProjectDocument.setData(Nullable.of((Object) createProject()));
+		newProjectDocument.setData(Nullable.of(createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/project");
 		FieldResourcePost sut = new FieldResourcePost();
@@ -108,10 +108,10 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onExistingParentResourceShouldSaveToToMany() throws Exception {
+	public void onExistingParentResourceShouldSaveToToMany() {
 		// GIVEN
 		Document newTaskDocument = new Document();
-		newTaskDocument.setData(Nullable.of((Object) createTask()));
+		newTaskDocument.setData(Nullable.of(createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -129,7 +129,7 @@ public class FieldResourcePostControllerTest extends BaseControllerTest {
 
 		// GIVEN
 		Document newProjectDocument = new Document();
-		newProjectDocument.setData(Nullable.of((Object) createProject()));
+		newProjectDocument.setData(Nullable.of(createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks/" + taskId + "/projects");
 		FieldResourcePost sut = new FieldResourcePost();

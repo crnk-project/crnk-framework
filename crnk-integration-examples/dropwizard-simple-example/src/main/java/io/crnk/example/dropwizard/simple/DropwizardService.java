@@ -15,7 +15,7 @@ public class DropwizardService extends Application<DropwizardConfiguration> {
 	}
 
 	@Override
-	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) throws Exception {
+	public void run(DropwizardConfiguration dropwizardConfiguration, Environment environment) {
 		// here we make use of a module as example instead of using service discovery (CDI, Spring, etc.)
 		// tag::docs[]
 		SimpleModule module = new SimpleModule("example");

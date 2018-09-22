@@ -19,10 +19,10 @@ public class MongoManaged implements Managed {
 		return datastore;
 	}
 
-	public void start() throws Exception {
+	public void start() {
 	}
 
-	public void stop() throws Exception {
+	public void stop() {
 		mongoClient.close();
 	}
 }

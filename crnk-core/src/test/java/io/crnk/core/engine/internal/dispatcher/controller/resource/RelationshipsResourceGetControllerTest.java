@@ -33,7 +33,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 	private TaskToProjectRepository localTaskToProjectRepository;
 
 	@Before
-	public void prepareTest() throws Exception {
+	public void prepareTest() {
 		localTaskToProjectRepository = new TaskToProjectRepository();
 		localTaskToProjectRepository.removeRelations("project");
 	}
@@ -81,7 +81,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestLinkResourceGetShouldReturnNullData() throws Exception {
+	public void onGivenRequestLinkResourceGetShouldReturnNullData() {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1/relationships/project");

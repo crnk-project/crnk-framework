@@ -171,7 +171,7 @@ public class MetaLookup {
 		discover(new Callable<Object>() {
 
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				if (!discovered) {
 					for (MetaPartition provider : partitions) {
 						provider.discoverElements();

@@ -35,7 +35,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 	private static final String REQUEST_TYPE = "GET";
 
 	@Before
-	public void before() throws IOException {
+	public void before() {
 		this.prepare();
 	}
 
@@ -82,11 +82,11 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceGetShouldHandleIt() throws Exception {
+	public void onGivenRequestResourceGetShouldHandleIt() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
@@ -111,7 +111,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
-	public void onGivenRequestResourceGetShouldThrowError() throws Exception {
+	public void onGivenRequestResourceGetShouldThrowError() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + -1);
 		ResourceGetController sut = new ResourceGetController();
@@ -125,7 +125,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceShouldLoadAutoIncludeFields() throws Exception {
+	public void onGivenRequestResourceShouldLoadAutoIncludeFields() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("/task-with-lookup/1");
 		ResourceGetController responseGetResp = new ResourceGetController();
@@ -154,11 +154,11 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceShouldNotLoadAutoIncludeFields() throws Exception {
+	public void onGivenRequestResourceShouldNotLoadAutoIncludeFields() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -176,7 +176,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 
 		// GIVEN
 		Document newProjectBody = new Document();
-		newProjectBody.setData(Nullable.of((Object) createProject()));
+		newProjectBody.setData(Nullable.of(createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 
@@ -194,7 +194,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
 		ResourceIdentifier reldata = new ResourceIdentifier();
-		newTaskToProjectBody.setData(Nullable.of((Object) data));
+		newTaskToProjectBody.setData(Nullable.of(data));
 		data.setType("projects");
 		data.setId("2");
 

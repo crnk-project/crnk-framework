@@ -77,7 +77,7 @@ public class CrnkBootTest {
 
 		DefaultQuerySpecDeserializer instance = new DefaultQuerySpecDeserializer();
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(QuerySpecDeserializer.class)))
-				.thenReturn(Arrays.<QuerySpecDeserializer>asList(instance));
+				.thenReturn(Arrays.asList(instance));
 		boot.boot();
 		Assert.assertSame(instance, boot.getQuerySpecDeserializer());
 	}

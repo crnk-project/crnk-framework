@@ -63,7 +63,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				Arrays.asList(new DefaultResourceFieldInformationProvider(), new JpaResourceFieldInformationProvider(),
 						new JacksonResourceFieldInformationProvider()));
 
-		metaProvider = new JpaMetaProvider((Set) Collections.emptySet());
+		metaProvider = new JpaMetaProvider(Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
 		lookup.addProvider(metaProvider);
 		lookup.initialize();

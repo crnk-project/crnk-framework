@@ -37,49 +37,49 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void onStringShouldReturnString() throws Exception {
+	public void onStringShouldReturnString() {
 		String result = sut.parse("String", String.class);
 		assertThat(result).isExactlyInstanceOf(String.class);
 		assertThat(result).isEqualTo("String");
 	}
 
 	@Test(expected = ParserException.class)
-	public void onInvalidCharacterThrowException() throws Exception {
+	public void onInvalidCharacterThrowException() {
 		sut.parse("NOT a single character", Character.class);
 	}
 
 	@Test(expected = ParserException.class)
-	public void onInvalidBooleanThrowException() throws Exception {
+	public void onInvalidBooleanThrowException() {
 		sut.parse("NOT a boolean", Character.class);
 	}
 
 	@Test
-	public void onBooleanFReturnFalse() throws Exception {
+	public void onBooleanFReturnFalse() {
 		Assert.assertFalse(sut.parse("f", Boolean.class));
 	}
 
 	@Test
-	public void onNullStringShouldReturnNullString() throws Exception {
+	public void onNullStringShouldReturnNullString() {
 		String result = sut.parse((String) null, String.class);
 		assertThat(result).isNull();
 	}
 
 	@Test
-	public void onCharacterShouldReturnCharacter() throws Exception {
+	public void onCharacterShouldReturnCharacter() {
 		Character result = sut.parse("a", Character.class);
 		assertThat(result).isExactlyInstanceOf(Character.class);
 		assertThat(result).isEqualTo('a');
 	}
 
 	@Test
-	public void onCharacterPrimitiveShouldReturnCharacter() throws Exception {
+	public void onCharacterPrimitiveShouldReturnCharacter() {
 		Character result = sut.parse("a", char.class);
 		assertThat(result).isExactlyInstanceOf(Character.class);
 		assertThat(result).isEqualTo('a');
 	}
 
 	@Test
-	public void onLongCharacterShouldThrowException() throws Exception {
+	public void onLongCharacterShouldThrowException() {
 		// THEN
 		expectedException.expect(ParserException.class);
 
@@ -88,47 +88,47 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void onUUIDStringShouldReturnUUID() throws Exception {
+	public void onUUIDStringShouldReturnUUID() {
 		UUID result = sut.parse("de305d54-75b4-431b-adb2-eb6b9e546014", UUID.class);
 		assertThat(result).isExactlyInstanceOf(UUID.class);
 		assertThat(result).isEqualTo(UUID.fromString("de305d54-75b4-431b-adb2-eb6b9e546014"));
 	}
 
 	@Test(expected = ParserException.class)
-	public void onInvalidUUIDStringShouldThrowParserException() throws Exception {
+	public void onInvalidUUIDStringShouldThrowParserException() {
 		sut.parse("invalid", UUID.class);
 	}
 
 	@Test
-	public void onBooleanTrueShouldReturnBoolean() throws Exception {
+	public void onBooleanTrueShouldReturnBoolean() {
 		Boolean result = sut.parse("true", Boolean.class);
 		assertThat(result).isExactlyInstanceOf(Boolean.class);
 		assertThat(result).isEqualTo(true);
 	}
 
 	@Test
-	public void onBooleanTShouldReturnBoolean() throws Exception {
+	public void onBooleanTShouldReturnBoolean() {
 		Boolean result = sut.parse("t", Boolean.class);
 		assertThat(result).isExactlyInstanceOf(Boolean.class);
 		assertThat(result).isEqualTo(true);
 	}
 
 	@Test
-	public void onBooleanFalseShouldReturnBoolean() throws Exception {
+	public void onBooleanFalseShouldReturnBoolean() {
 		Boolean result = sut.parse("false", Boolean.class);
 		assertThat(result).isExactlyInstanceOf(Boolean.class);
 		assertThat(result).isEqualTo(false);
 	}
 
 	@Test
-	public void onBooleanFShouldReturnBoolean() throws Exception {
+	public void onBooleanFShouldReturnBoolean() {
 		Boolean result = sut.parse("f", Boolean.class);
 		assertThat(result).isExactlyInstanceOf(Boolean.class);
 		assertThat(result).isEqualTo(false);
 	}
 
 	@Test
-	public void onBadBooleanShouldThrowException() throws Exception {
+	public void onBadBooleanShouldThrowException() {
 		// THEN
 		expectedException.expect(ParserException.class);
 
@@ -137,112 +137,112 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void onByteShouldReturnByte() throws Exception {
+	public void onByteShouldReturnByte() {
 		Byte result = sut.parse("1", Byte.class);
 		assertThat(result).isExactlyInstanceOf(Byte.class);
 		assertThat(result).isEqualTo((byte) 1);
 	}
 
 	@Test
-	public void onBytePrimitiveShouldReturnByte() throws Exception {
+	public void onBytePrimitiveShouldReturnByte() {
 		Byte result = sut.parse("1", byte.class);
 		assertThat(result).isExactlyInstanceOf(Byte.class);
 		assertThat(result).isEqualTo((byte) 1);
 	}
 
 	@Test
-	public void onShortShouldReturnShort() throws Exception {
+	public void onShortShouldReturnShort() {
 		Short result = sut.parse("1", Short.class);
 		assertThat(result).isExactlyInstanceOf(Short.class);
 		assertThat(result).isEqualTo((short) 1);
 	}
 
 	@Test
-	public void onShortPrimitiveShouldReturnShort() throws Exception {
+	public void onShortPrimitiveShouldReturnShort() {
 		Short result = sut.parse("1", short.class);
 		assertThat(result).isExactlyInstanceOf(Short.class);
 		assertThat(result).isEqualTo((short) 1);
 	}
 
 	@Test
-	public void onIntegerShouldReturnInteger() throws Exception {
+	public void onIntegerShouldReturnInteger() {
 		Integer result = sut.parse("1", Integer.class);
 		assertThat(result).isExactlyInstanceOf(Integer.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onIntegerPrimitiveShouldReturnInteger() throws Exception {
+	public void onIntegerPrimitiveShouldReturnInteger() {
 		Integer result = sut.parse("1", int.class);
 		assertThat(result).isExactlyInstanceOf(Integer.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onLongShouldReturnLong() throws Exception {
+	public void onLongShouldReturnLong() {
 		Long result = sut.parse("1", Long.class);
 		assertThat(result).isExactlyInstanceOf(Long.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onLongPrimitiveShouldReturnLong() throws Exception {
+	public void onLongPrimitiveShouldReturnLong() {
 		Long result = sut.parse("1", long.class);
 		assertThat(result).isExactlyInstanceOf(Long.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onFloatShouldReturnFloat() throws Exception {
+	public void onFloatShouldReturnFloat() {
 		Float result = sut.parse("1", Float.class);
 		assertThat(result).isExactlyInstanceOf(Float.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onFloatPrimitiveShouldReturnFloat() throws Exception {
+	public void onFloatPrimitiveShouldReturnFloat() {
 		Float result = sut.parse("1", float.class);
 		assertThat(result).isExactlyInstanceOf(Float.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onDoubleShouldReturnDouble() throws Exception {
+	public void onDoubleShouldReturnDouble() {
 		Double result = sut.parse("1", Double.class);
 		assertThat(result).isExactlyInstanceOf(Double.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onDoublePrimitiveShouldReturnDouble() throws Exception {
+	public void onDoublePrimitiveShouldReturnDouble() {
 		Double result = sut.parse("1", double.class);
 		assertThat(result).isExactlyInstanceOf(Double.class);
 		assertThat(result).isEqualTo(1);
 	}
 
 	@Test
-	public void onBigIntegerShouldReturnBigInteger() throws Exception {
+	public void onBigIntegerShouldReturnBigInteger() {
 		BigInteger result = sut.parse("1", BigInteger.class);
 		assertThat(result).isExactlyInstanceOf(BigInteger.class);
 		assertThat(result).isEqualTo(new BigInteger("1"));
 	}
 
 	@Test
-	public void onBigDecimalShouldReturnBigDecimal() throws Exception {
+	public void onBigDecimalShouldReturnBigDecimal() {
 		BigDecimal result = sut.parse("1", BigDecimal.class);
 		assertThat(result).isExactlyInstanceOf(BigDecimal.class);
 		assertThat(result).isEqualTo(new BigDecimal("1"));
 	}
 
 	@Test
-	public void onEnumShouldReturnEnumValue() throws Exception {
+	public void onEnumShouldReturnEnumValue() {
 		SampleEnum result = sut.parse("SAMPLE_VALUE", SampleEnum.class);
 		assertThat(result).isExactlyInstanceOf(SampleEnum.class);
 		assertThat(result).isEqualTo(SampleEnum.SAMPLE_VALUE);
 	}
 
 	@Test
-	public void onClassWithStringConstructorShouldReturnClassInstance() throws Exception {
+	public void onClassWithStringConstructorShouldReturnClassInstance() {
 		SampleClass result = sut.parse("input", SampleClass.class);
 		assertThat(result).isExactlyInstanceOf(SampleClass.class);
 		assertThat(result).isEqualTo(new SampleClass("input"));
@@ -254,7 +254,7 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void onUnknownClassShouldThrowException() throws Exception {
+	public void onUnknownClassShouldThrowException() {
 		// THEN
 		expectedException.expect(ParserException.class);
 
@@ -263,7 +263,7 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void testAddParser() throws Exception {
+	public void testAddParser() {
 		sut.addParser(Boolean.class, new StringParser<Boolean>() {
 			@Override
 			public Boolean parse(String input) {
@@ -275,7 +275,7 @@ public class TypeParserTest {
 	}
 
 	@Test
-	public void onListOfLongsShouldReturnListOfLongs() throws Exception {
+	public void onListOfLongsShouldReturnListOfLongs() {
 		Iterable<Long> result = sut.parse(Collections.singletonList("1"), Long.class);
 		assertThat(result).hasSize(1);
 		assertThat(result.iterator().next()).isEqualTo(1L);
@@ -283,14 +283,14 @@ public class TypeParserTest {
 
 
 	@Test
-	public void shouldMakeUseofParseCharSequenceMethod() throws Exception {
+	public void shouldMakeUseofParseCharSequenceMethod() {
 		StaticParseCharSequenceClass result = sut.parse("1", StaticParseCharSequenceClass.class);
 		assertThat(result).isExactlyInstanceOf(StaticParseCharSequenceClass.class);
 		assertThat(result.toString()).isEqualTo("1");
 	}
 
 	@Test
-	public void shouldMakeUseofParseStringMethod() throws Exception {
+	public void shouldMakeUseofParseStringMethod() {
 		StaticParseStringClass result = sut.parse("1", StaticParseStringClass.class);
 		assertThat(result).isExactlyInstanceOf(StaticParseStringClass.class);
 		assertThat(result.toString()).isEqualTo("1");

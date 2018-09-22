@@ -43,7 +43,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 	 * Creates JSON API responses for custom JAX-RS actions returning Crnk resources.
 	 */
 	@Override
-	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 		Object response = responseContext.getEntity();
 		if (response == null) {
 			if (feature.getBoot().isNullDataResponseEnabled()) {
@@ -52,7 +52,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setEntity(document);
 				responseContext.setStatus(Response.Status.OK.getStatusCode());
 				responseContext.getHeaders().put("Content-Type",
-						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
+						Collections.singletonList(JsonApiMediaType.APPLICATION_JSON_API));
 			}
 			return;
 		}
@@ -74,7 +74,7 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				QueryAdapter queryAdapter = new QuerySpecAdapter(null, null, context.getQueryContext());
 				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, queryAdapter, mappingConfig).get());
 				responseContext.getHeaders().put("Content-Type",
-						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
+						Collections.singletonList(JsonApiMediaType.APPLICATION_JSON_API));
 			} finally {
 				httpRequestContextProvider.onRequestFinished();
 			}

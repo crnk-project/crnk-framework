@@ -49,7 +49,7 @@ public class DocumentSerializerTest {
 		resource.setId("2");
 		resource.setType("tasks");
 		resource.setAttribute("name", objectMapper.readTree("\"sample task\""));
-		doc.setData(Nullable.of((Object) resource));
+		doc.setData(Nullable.of(resource));
 
 		String json = writer.writeValueAsString(doc);
 
@@ -140,11 +140,11 @@ public class DocumentSerializerTest {
 		resource.setId("2");
 		resource.setType("tasks");
 		Relationship relationship = new Relationship();
-		relationship.setData(Nullable.of((Object) new ResourceIdentifier("3", "projects")));
+		relationship.setData(Nullable.of(new ResourceIdentifier("3", "projects")));
 		relationship.setMeta((ObjectNode) objectMapper.readTree("{\"metaName\" : \"metaValue\"}"));
 		relationship.setLinks((ObjectNode) objectMapper.readTree("{\"linkName\" : \"linkValue\"}"));
 		resource.getRelationships().put("project", relationship);
-		doc.setData(Nullable.of((Object) resource));
+		doc.setData(Nullable.of(resource));
 
 		String json = writer.writeValueAsString(doc);
 
@@ -181,7 +181,7 @@ public class DocumentSerializerTest {
 		relationship.setMeta((ObjectNode) objectMapper.readTree("{\"metaName\" : \"metaValue\"}"));
 		relationship.setLinks((ObjectNode) objectMapper.readTree("{\"linkName\" : \"linkValue\"}"));
 		resource.getRelationships().put("project", relationship);
-		doc.setData(Nullable.of((Object) resource));
+		doc.setData(Nullable.of(resource));
 
 		String json = writer.writeValueAsString(doc);
 
@@ -218,7 +218,7 @@ public class DocumentSerializerTest {
 		relationship.setMeta((ObjectNode) objectMapper.readTree("{\"metaName\" : \"metaValue\"}"));
 		relationship.setLinks((ObjectNode) objectMapper.readTree("{\"linkName\" : \"linkValue\"}"));
 		resource.getRelationships().put("project", relationship);
-		doc.setData(Nullable.of((Object) resource));
+		doc.setData(Nullable.of(resource));
 
 		String json = writer.writeValueAsString(doc);
 
@@ -247,7 +247,7 @@ public class DocumentSerializerTest {
 	@Test
 	public void testMultiValuedRelationship() throws IOException {
 		Relationship relationship = new Relationship();
-		relationship.setData(Nullable.of((Object) Arrays.asList(new ResourceIdentifier("3", "projects"), new ResourceIdentifier("4", "projects"))));
+		relationship.setData(Nullable.of(Arrays.asList(new ResourceIdentifier("3", "projects"), new ResourceIdentifier("4", "projects"))));
 		relationship.setMeta((ObjectNode) objectMapper.readTree("{\"metaName\" : \"metaValue\"}"));
 		relationship.setLinks((ObjectNode) objectMapper.readTree("{\"linkName\" : \"linkValue\"}"));
 
@@ -284,7 +284,7 @@ public class DocumentSerializerTest {
 		resource2.setType("tasks");
 		resource2.setAttribute("name", objectMapper.readTree("\"sample task2\""));
 
-		doc.setData(Nullable.of((Object) Arrays.asList(resource1, resource2)));
+		doc.setData(Nullable.of(Arrays.asList(resource1, resource2)));
 
 		String json = writer.writeValueAsString(doc);
 

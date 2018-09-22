@@ -105,7 +105,7 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 				if (includeRelation) {
 					Relationship relationship = new Relationship();
-					relationship.setData(Nullable.of((Object) relationshipId));
+					relationship.setData(Nullable.of(relationshipId));
 					resource.getRelationships().put(field.getJsonName(), relationship);
 				}
 			}

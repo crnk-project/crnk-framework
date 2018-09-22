@@ -63,7 +63,7 @@ public class DocumentMapper {
 		this.includeLookupSetter = newIncludeLookupSetter(resourceRegistry, resourceMapper, propertiesProvider);
 
 		if (serverInfo != null && !serverInfo.isEmpty()) {
-			jsonapi = (ObjectNode) objectMapper.valueToTree(serverInfo);
+			jsonapi = objectMapper.valueToTree(serverInfo);
 		}
 	}
 
@@ -160,9 +160,9 @@ public class DocumentMapper {
 				for (Object obj : (Iterable<?>) entity) {
 					dataList.add(resourceMapper.toData(obj, queryAdapter, resourceMappingConfig));
 				}
-				doc.setData(Nullable.of((Object) dataList));
+				doc.setData(Nullable.of(dataList));
 			} else {
-				doc.setData(Nullable.of((Object) resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
+				doc.setData(Nullable.of(resourceMapper.toData(entity, queryAdapter, resourceMappingConfig)));
 			}
 		}
 	}

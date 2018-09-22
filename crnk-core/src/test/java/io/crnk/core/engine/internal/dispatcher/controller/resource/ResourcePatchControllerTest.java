@@ -65,7 +65,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onNoBodyResourceShouldThrowException() throws Exception {
+	public void onNoBodyResourceShouldThrowException() {
 		// GIVEN
 		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
@@ -83,7 +83,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
@@ -98,7 +98,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document taskPatch = new Document();
 		data = createTask();
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
 		ResourcePatchController sut = new ResourcePatchController();
@@ -119,7 +119,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onRepositoryReturnNullStatusCode204MustBeReturned() throws Exception {
+	public void onRepositoryReturnNullStatusCode204MustBeReturned() {
 		ProjectRepository projectRepository = new ProjectRepository();
 		Project project = new Project();
 		project.setId(ProjectRepository.RETURN_NULL_ON_CREATE_ID);
@@ -130,7 +130,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		Document newProjectBody = new Document();
 		Resource data = createProject();
 		data.setId(Long.toString(ProjectRepository.RETURN_NULL_ON_CREATE_ID));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects/" + ProjectRepository.RETURN_NULL_ON_CREATE_ID);
 		ResourcePatchController sut = new ResourcePatchController();
@@ -145,11 +145,11 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		Document taskPatch = new Document();
 		data = createTask();
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/1234567");
 		ResourcePatchController sut = new ResourcePatchController();
@@ -164,7 +164,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document requestDocument = new Document();
 		Resource data = createTask();
-		requestDocument.setData(Nullable.of((Object) data));
+		requestDocument.setData(Nullable.of(data));
 
 		JsonPath postPath = pathBuilder.build("/tasks");
 		ResourcePostController post = new ResourcePostController();
@@ -193,7 +193,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -209,7 +209,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document taskPatch = new Document();
 		data = new Resource();
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		data.setType("WRONG_AND_MISSING_TYPE");
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
@@ -234,7 +234,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document memorandumBody = new Document();
 		Resource data = new Resource();
-		memorandumBody.setData(Nullable.of((Object) data));
+		memorandumBody.setData(Nullable.of(data));
 		data.setType("memoranda");
 		data.setAttribute("title", objectMapper.readTree("\"some title\""));
 		data.setAttribute("body", objectMapper.readTree("\"sample body\""));
@@ -257,7 +257,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		memorandumBody = new Document();
 		data = new Resource();
-		memorandumBody.setData(Nullable.of((Object) data));
+		memorandumBody.setData(Nullable.of(data));
 		data.setType("memoranda");
 		data.setAttribute("title", objectMapper.readTree("\"new title\""));
 		data.setAttribute("body", objectMapper.readTree("\"new body\""));
@@ -281,7 +281,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
@@ -298,7 +298,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data = createTask();
 		data.setAttribute("name", objectMapper.readTree("\"task updated\""));
 		data.getRelationships().put("project", null);
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
@@ -314,11 +314,11 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onUpdatedLazyRelationshipDataShouldReturnThatData() throws Exception {
+	public void onUpdatedLazyRelationshipDataShouldReturnThatData() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -332,7 +332,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data.setType("projects");
 		data.getRelationships()
 				.put("tasks", new Relationship(Collections.singletonList(new ResourceIdentifier(taskId.toString(), "tasks"))));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
 		Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, newProjectBody);
@@ -344,7 +344,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		ResourcePatchController patch = new ResourcePatchController();
 		patch.init(controllerContext);
 
-		Nullable<Object> emptyRelation = Nullable.of((Object) new ArrayList<ResourceIdentifier>());
+		Nullable<Object> emptyRelation = Nullable.of(new ArrayList<ResourceIdentifier>());
 		data.getRelationships().get("tasks").setData(emptyRelation);
 		projectsResponse =
 				patch.handle(pathBuilder.build("/projects/2"), emptyProjectQuery, newProjectBody);
@@ -363,7 +363,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		Document newProjectBody = new Document();
 		Resource data = createProject();
 		data.getAttributes().remove("data");
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		JsonPath taskPath = pathBuilder.build("/projects");
 
 		// WHEN
@@ -383,7 +383,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data.setAttribute("data", objectMapper.readTree("{\"data\" : \"updated data\"}"));
 
 		Document projectPatch = new Document();
-		projectPatch.setData(Nullable.of((Object) data));
+		projectPatch.setData(Nullable.of(data));
 		JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
@@ -404,7 +404,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject(Long.toString(PROJECT_ID), "projects-patch-strategy");
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		JsonPath taskPath = pathBuilder.build("/projects-patch-strategy");
 
 		// WHEN
@@ -424,7 +424,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data.setAttribute("data", objectMapper.readTree("{\"data\" : \"updated data\"}"));
 
 		Document projectPatch = new Document();
-		projectPatch.setData(Nullable.of((Object) data));
+		projectPatch.setData(Nullable.of(data));
 		JsonPath jsonPath = pathBuilder.build(taskPath + "/" + projectId);
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
@@ -445,7 +445,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -459,7 +459,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data.setType("projects");
 		data.getRelationships()
 				.put("tasks", new Relationship(Collections.singletonList(new ResourceIdentifier(taskId.toString(), "tasks"))));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
 		Response projectsResponse = post.handle(projectsPath, emptyProjectQuery, newProjectBody);
@@ -501,7 +501,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document complexPojoPatch = new Document();
 		Resource data = new Resource();
-		complexPojoPatch.setData(Nullable.of((Object) data));
+		complexPojoPatch.setData(Nullable.of(data));
 		data.setType("complexpojos");
 
 		String rawContainedPatchData = "  {" + "    'updateableProperty1':'updated value'" + "  }";
@@ -542,7 +542,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document taskPatch = new Document();
 		Resource data = new Resource();
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		data.setType("tasks");
 		data.setAttribute("name", objectMapper.readTree("\"Mary Jane\""));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
@@ -576,7 +576,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
 		data.setType("tasks");
 		data.setAttribute("category", objectMapper.readTree("\"TestCategory\""));
 		Document taskPatch = new Document();
-		taskPatch.setData(Nullable.of((Object) data));
+		taskPatch.setData(Nullable.of(data));
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + task.getId());
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);

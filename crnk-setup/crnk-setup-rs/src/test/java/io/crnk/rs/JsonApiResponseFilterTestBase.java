@@ -90,7 +90,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testNullResponseNotWrapped() throws Exception {
+	public void testNullResponseNotWrapped() {
 		// GIVEN
 		// mapping of null responses to JSON-API enabled, but method produces text/plain -> no wrapping
 		Assume.assumeFalse(enableNullResponse);
@@ -114,7 +114,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testNullResponseJsonApi() throws Exception {
+	public void testNullResponseJsonApi() {
 		// GIVEN
 		// mapping of null responses to JSON-API enabled
 		Assume.assumeTrue(enableNullResponse);
@@ -138,7 +138,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testNullResponse() throws Exception {
+	public void testNullResponse() {
 		// GIVEN
 		// mapping of null responses to JSON-API disabled
 		Assume.assumeFalse(enableNullResponse);
@@ -158,7 +158,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testNonInterfaceMethodWithNullResponseJsonApi() throws Exception {
+	public void testNonInterfaceMethodWithNullResponseJsonApi() {
 		// GIVEN
 		// mapping of null responses to JSON-API disabled
 		Assume.assumeFalse(enableNullResponse);
@@ -178,7 +178,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testNonInterfaceMethodWithNullResponseJsonApiWrapped() throws Exception {
+	public void testNonInterfaceMethodWithNullResponseJsonApiWrapped() {
 		// GIVEN
 		// mapping of null responses to JSON-API enabled
 		Assume.assumeTrue(enableNullResponse);
@@ -203,7 +203,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testStringResponse() throws Exception {
+	public void testStringResponse() {
 		// GIVEN
 		Map<String, String> queryParams = new HashMap<>();
 		queryParams.put("msg", "msg");
@@ -228,7 +228,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testStringResponseWrapped() throws Exception {
+	public void testStringResponseWrapped() {
 		// GIVEN
 		Map<String, String> queryParams = new HashMap<>();
 		queryParams.put("msg", "msg");
@@ -253,7 +253,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testErrorResponse() throws Exception {
+	public void testErrorResponse() {
 		// GIVEN
 
 		// WHEN
@@ -276,7 +276,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testJsonApiResourceListResponse() throws Exception {
+	public void testJsonApiResourceListResponse() {
 		// GIVEN
 
 		// WHEN
@@ -302,7 +302,7 @@ public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {
 	}
 
 	@Test
-	public void testJsonApiResourceResponse() throws Exception {
+	public void testJsonApiResourceResponse() {
 		// GIVEN
 
 		// WHEN

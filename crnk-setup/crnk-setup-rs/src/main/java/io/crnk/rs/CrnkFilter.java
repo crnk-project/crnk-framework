@@ -41,7 +41,7 @@ public class CrnkFilter implements ContainerRequestFilter {
 	}
 
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IOException {
+	public void filter(ContainerRequestContext requestContext) {
 		try {
 			LOGGER.debug("CrnkFilter entered");
 			JaxrsRequestContext context = new JaxrsRequestContext(requestContext, feature);

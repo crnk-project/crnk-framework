@@ -51,13 +51,8 @@ public class AbstractPathSpec {
 		}
 		AbstractPathSpec other = (AbstractPathSpec) obj;
 		if (path == null) {
-			if (other.path != null) {
-				return false;
-			}
-		} else if (!path.equals(other.path)) {
-			return false;
-		}
-		return true;
+			return other.path == null;
+		} else return path.equals(other.path);
 	}
 
 }

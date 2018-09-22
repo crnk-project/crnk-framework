@@ -79,7 +79,7 @@ public class CrnkServletRejectJsonTest {
 	}
 
 	@After
-	public void after() throws Exception {
+	public void after() {
 		servlet.destroy();
 		nodeRepository.clearRepo();
 	}

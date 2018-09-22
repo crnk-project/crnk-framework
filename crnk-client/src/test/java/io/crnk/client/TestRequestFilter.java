@@ -29,8 +29,7 @@ public class TestRequestFilter implements ContainerRequestFilter {
 	 * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
 	 */
 	@Override
-	public void filter(ContainerRequestContext requestContext)
-			throws IOException {
+	public void filter(ContainerRequestContext requestContext) {
 		this.lastReceivedHeaders = requestContext.getHeaders();
 	}
 

@@ -80,14 +80,14 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveResourceClassInfoForValidResource() throws Exception {
+	public void shouldHaveResourceClassInfoForValidResource() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		assertThat(resourceInformation.getResourceClass()).isNotNull().isEqualTo(Task.class);
 	}
 
 	@Test
-	public void checkJsonApiAttributeAnnotation() throws Exception {
+	public void checkJsonApiAttributeAnnotation() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		ResourceField field = resourceInformation.findAttributeFieldByName("status");
 		Assert.assertFalse(field.getAccess().isPatchable());
@@ -95,7 +95,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldDiscardParametrizedTypeWithJsonIgnore() throws Exception {
+	public void shouldDiscardParametrizedTypeWithJsonIgnore() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(ShapeResource.class);
 
 		// if we get this far, that is good, it means parsing the class didn't trigger the
@@ -109,20 +109,20 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveGetterBooleanWithGetPrefix() throws Exception {
+	public void shouldHaveGetterBooleanWithGetPrefix() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		assertThat(containsFieldWithName(resourceInformation, "deleted")).isTrue();
 		assertThat(containsFieldWithName(resourceInformation, "tDeleted")).isFalse();
 	}
 
 	@Test
-	public void shouldHaveGetterBooleanWithIsPrefix() throws Exception {
+	public void shouldHaveGetterBooleanWithIsPrefix() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		assertThat(containsFieldWithName(resourceInformation, "completed")).isTrue();
 	}
 
 	@Test
-	public void shouldNotHaveIgnoredField() throws Exception {
+	public void shouldNotHaveIgnoredField() {
 		// GIVEN a field that has the JsonIgnore annotation, and a corresponding getter that does not
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		// THEN we should not pick up the java bean property
@@ -151,7 +151,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void checkJsonPropertyAccessPolicy() throws Exception {
+	public void checkJsonPropertyAccessPolicy() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonIgnoreTestResource.class);
 		ResourceField defaultAttribute = resourceInformation.findAttributeFieldByName("defaultAttribute");
 		ResourceField readOnlyAttribute = resourceInformation.findAttributeFieldByName("readOnlyAttribute");
@@ -171,7 +171,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void checkJsonApiAttributeAnnotationDefaults() throws Exception {
+	public void checkJsonApiAttributeAnnotationDefaults() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		ResourceField field = resourceInformation.findAttributeFieldByName("name");
 		Assert.assertTrue(field.getAccess().isPatchable());
@@ -179,7 +179,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void checkJsonApiAttributeAnnotationDefaultsForIds() throws Exception {
+	public void checkJsonApiAttributeAnnotationDefaultsForIds() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		ResourceField field = resourceInformation.getIdField();
 		Assert.assertFalse(field.getAccess().isPatchable());
@@ -188,14 +188,14 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveIdFieldInfoForValidResource() throws Exception {
+	public void shouldHaveIdFieldInfoForValidResource() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		assertThat(resourceInformation.getIdField().getUnderlyingName()).isNotNull().isEqualTo("id");
 	}
 
 	@Test
-	public void shouldBeReadableButNotPostableOrPatchableWithoutSetter() throws Exception {
+	public void shouldBeReadableButNotPostableOrPatchableWithoutSetter() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		ResourceField field = resourceInformation.findAttributeFieldByName("readOnlyValue");
@@ -205,7 +205,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldBeReadableAndPostableAndPatchableWithSetter() throws Exception {
+	public void shouldBeReadableAndPostableAndPatchableWithSetter() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		ResourceField field = resourceInformation.findAttributeFieldByName("name");
@@ -222,7 +222,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldThrowExceptionWhenMoreThan1IdAnnotationFound() throws Exception {
+	public void shouldThrowExceptionWhenMoreThan1IdAnnotationFound() {
 		expectedException.expect(ResourceDuplicateIdException.class);
 		expectedException.expectMessage("Duplicated Id field found in class");
 
@@ -230,7 +230,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveProperRelationshipFieldInfoForValidResource() throws Exception {
+	public void shouldHaveProperRelationshipFieldInfoForValidResource() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(5).extracting(NAME_PROPERTY)
@@ -245,82 +245,82 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldReturnIdFieldBasedOnFieldGetter() throws Exception {
+	public void shouldReturnIdFieldBasedOnFieldGetter() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(IdFieldWithAccessorGetterResource.class);
 
 		assertThat(resourceInformation.getIdField()).isNotNull();
 	}
 
 	@Test
-	public void shouldNotIncludeIgnoredInterfaceMethod() throws Exception {
+	public void shouldNotIncludeIgnoredInterfaceMethod() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonIgnoreMethodImpl.class);
 
 		assertThat(resourceInformation.findFieldByName("ignoredMember")).isNull();
 	}
 
 	@Test
-	public void shouldReturnMergedAnnotationsOnAnnotationsOnFieldAndMethod() throws Exception {
+	public void shouldReturnMergedAnnotationsOnAnnotationsOnFieldAndMethod() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(AnnotationOnFieldAndMethodResource.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(0);
 	}
 
 	@Test
-	public void shouldContainMetaInformationField() throws Exception {
+	public void shouldContainMetaInformationField() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		assertThat(resourceInformation.getMetaField().getUnderlyingName()).isEqualTo("metaInformation");
 	}
 
 	@Test
-	public void shouldThrowExceptionOnMultipleMetaInformationFields() throws Exception {
+	public void shouldThrowExceptionOnMultipleMetaInformationFields() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
 		assertThat(resourceInformation.getMetaField().getUnderlyingName()).isEqualTo("metaInformation");
 	}
 
 	@Test
-	public void shouldIgnoreTransientAttributes() throws Exception {
+	public void shouldIgnoreTransientAttributes() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(IgnoredTransientAttributeResource.class);
 		Assert.assertNull(resourceInformation.findFieldByName("attribute"));
 	}
 
 	@Test
-	public void shouldIgnoreStaticAttributes() throws Exception {
+	public void shouldIgnoreStaticAttributes() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(IgnoredStaticAttributeResource.class);
 		Assert.assertNull(resourceInformation.findFieldByName("attribute"));
 	}
 
 	@Test
-	public void checkWriteOnlyAttributesCurrentlyNotSupported() throws Exception {
+	public void checkWriteOnlyAttributesCurrentlyNotSupported() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(WriteOnlyAttributeResource.class);
 		Assert.assertNull(resourceInformation.findAttributeFieldByName("attribute"));
 	}
 
 
 	@Test
-	public void shouldContainLinksInformationField() throws Exception {
+	public void shouldContainLinksInformationField() {
 		expectedException.expect(MultipleJsonApiMetaInformationException.class);
 
 		resourceInformationProvider.build(MultipleMetaInformationResource.class);
 	}
 
 	@Test
-	public void shouldThrowExceptionOnMultipleLinksInformationFields() throws Exception {
+	public void shouldThrowExceptionOnMultipleLinksInformationFields() {
 		expectedException.expect(MultipleJsonApiLinksInformationException.class);
 
 		resourceInformationProvider.build(MultipleLinksInformationResource.class);
 	}
 
 	@Test
-	public void shouldHaveProperTypeWhenFieldAndGetterTypesDiffer() throws Exception {
+	public void shouldHaveProperTypeWhenFieldAndGetterTypesDiffer() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(DifferentTypes.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(1).extracting("type").contains(String.class);
 	}
 
 	@Test
-	public void shouldHaveNoneForDefaultLookupBehavior() throws Exception {
+	public void shouldHaveNoneForDefaultLookupBehavior() {
 		ResourceInformation resourceInformation =
 				resourceInformationProvider.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
 
@@ -329,7 +329,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldInheritGlobalForDefaultLookupBehaviorWhenDefault() throws Exception {
+	public void shouldInheritGlobalForDefaultLookupBehaviorWhenDefault() {
 		ResourceInformationProvider resourceInformationProviderWithProperty =
 				getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
 		ResourceInformation resourceInformation =
@@ -340,7 +340,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldOverrideGlobalLookupBehavior() throws Exception {
+	public void shouldOverrideGlobalLookupBehavior() {
 		ResourceInformationProvider resourceInformationProviderWithProperty =
 				getResourceInformationProviderWithProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE, "true");
 		ResourceInformation resourceInformation =
@@ -367,14 +367,14 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveProperTypeWhenFieldAndGetterTypesDifferV2() throws Exception {
+	public void shouldHaveProperTypeWhenFieldAndGetterTypesDifferV2() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(DifferentTypes.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(1).extracting("type").contains(String.class);
 	}
 
 	@Test
-	public void shouldRecognizeJsonAPIRelationTypeWithDefaults() throws Exception {
+	public void shouldRecognizeJsonAPIRelationTypeWithDefaults() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationType.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotEmpty().hasSize(2).extracting("type").contains(Future.class)
@@ -388,7 +388,7 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldRecognizeJsonAPIRelationTypeWithNonDefaults() throws Exception {
+	public void shouldRecognizeJsonAPIRelationTypeWithNonDefaults() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(JsonApiRelationTypeNonDefaults.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).isNotEmpty().hasSize(2).extracting("type").contains(Future.class)
@@ -770,14 +770,14 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void checkJsonApiDefaultPatchStrategy() throws Exception {
+	public void checkJsonApiDefaultPatchStrategy() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Project.class);
 		ResourceField field = resourceInformation.findAttributeFieldByName("data");
 		Assert.assertEquals(PatchStrategy.MERGE, field.getPatchStrategy());
 	}
 
 	@Test
-	public void checkJsonApiPatchStrategy() throws Exception {
+	public void checkJsonApiPatchStrategy() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(ProjectPatchStrategy.class);
 		ResourceField field = resourceInformation.findAttributeFieldByName("data");
 		Assert.assertEquals(PatchStrategy.SET, field.getPatchStrategy());

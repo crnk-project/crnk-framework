@@ -28,7 +28,7 @@ public class SaveRelationshipWithResourceEndToEndTest extends AbstractJpaJerseyT
 	}
 
 	@Test
-	public void testOneToOne() throws InstantiationException, IllegalAccessException {
+	public void testOneToOne() {
 		RelatedEntity related = new RelatedEntity();
 		related.setId(12L);
 		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
@@ -50,7 +50,7 @@ public class SaveRelationshipWithResourceEndToEndTest extends AbstractJpaJerseyT
 	}
 
 	@Test
-	public void testManyToMany() throws InstantiationException, IllegalAccessException {
+	public void testManyToMany() {
 		ManyToManyOppositeEntity related = new ManyToManyOppositeEntity();
 		related.setId(12L);
 		ResourceRepositoryV2<ManyToManyOppositeEntity, Serializable> relatedRepo =

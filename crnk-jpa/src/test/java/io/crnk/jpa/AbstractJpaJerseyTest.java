@@ -88,7 +88,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 		transactionRunner.doInTransaction(new Callable<Object>() {
 
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
 				AbstractJpaTest.clear(em);
 				return null;

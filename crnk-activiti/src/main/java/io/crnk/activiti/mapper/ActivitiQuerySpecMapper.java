@@ -50,7 +50,7 @@ public class ActivitiQuerySpecMapper {
 
 
 	private static void applyFilterSpec(Query activitiQuery, QuerySpec querySpec, List<FilterSpec> baseFilters)
-			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+			throws InvocationTargetException, IllegalAccessException {
 
 		List<FilterSpec> filters = new ArrayList<>();
 		filters.addAll(baseFilters);

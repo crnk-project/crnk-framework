@@ -21,7 +21,7 @@ public class ServiceDiscoveryClientTest {
 	}
 
 	@Test
-	public void allowOverrideServiceDiscovery() throws NoSuchFieldException, IllegalAccessException {
+	public void allowOverrideServiceDiscovery() {
 		ServiceDiscovery mock = Mockito.mock(ServiceDiscovery.class);
 		CrnkClient client = new CrnkClient("");
 		client.setServiceDiscovery(mock);

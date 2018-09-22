@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,6 @@ public class HttpResponseTest {
 	public void checkBodyUtf8Encoding() throws UnsupportedEncodingException {
 		response.setBody("aäöü");
 		Assert.assertNotEquals(4, response.getBody().length);
-		Assert.assertEquals("aäöü", new String(response.getBody(), "UTF8"));
+		Assert.assertEquals("aäöü", new String(response.getBody(), StandardCharsets.UTF_8));
 	}
 }

@@ -42,7 +42,7 @@ public class PathBuilder {
 	}
 
 	private static List<Serializable> parseIds(String idsString, ResourceInformation resourceInformation) {
-		List<String> strPathIds = Arrays.asList(idsString.split(JsonPath.ID_SEPARATOR_PATTERN));
+		String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
 		List<Serializable> pathIds = new ArrayList<>();
 		for (String strPathId : strPathIds) {
@@ -53,7 +53,7 @@ public class PathBuilder {
 	}
 
 	private List<Serializable> parseNestedIds(String idsString, Serializable parentId, ResourceField parentField) {
-		List<String> strPathIds = Arrays.asList(idsString.split(JsonPath.ID_SEPARATOR_PATTERN));
+		String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
 		ResourceInformation resourceInformation = parentField.getParentResourceInformation();
 
@@ -77,7 +77,7 @@ public class PathBuilder {
 			path = path.substring(1);
 		}
 		if (path.endsWith(SEPARATOR)) {
-			path = path.substring(0, path.length());
+			path = path;
 		}
 		return path.split(SEPARATOR);
 	}

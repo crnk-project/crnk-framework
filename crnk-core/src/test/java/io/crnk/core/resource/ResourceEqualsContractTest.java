@@ -9,12 +9,12 @@ import org.junit.Test;
 public class ResourceEqualsContractTest {
 
 	@Test
-	public void testResourceIdEqualsContract() throws NoSuchFieldException {
+	public void testResourceIdEqualsContract() {
 		EqualsVerifier.forClass(ResourceIdentifier.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 	@Test
-	public void testResourceEqualsContract() throws NoSuchFieldException {
+	public void testResourceEqualsContract() {
 		EqualsVerifier.forClass(Resource.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 

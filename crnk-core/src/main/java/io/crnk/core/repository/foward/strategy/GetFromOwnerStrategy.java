@@ -97,7 +97,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 			Object sourceId = field.getParentResourceInformation().getId(source);
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
-				((Collection) targetId).retainAll((Collection) targetMap.keySet());
+				((Collection) targetId).retainAll(targetMap.keySet());
 				for (Object targetElementId : (Collection) targetId) {
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}

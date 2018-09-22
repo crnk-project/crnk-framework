@@ -14,21 +14,21 @@ import java.util.Arrays;
 public class RelationshipTest {
 
 	@Test
-	public void testResourceEqualsContract() throws NoSuchFieldException {
+	public void testResourceEqualsContract() {
 		EqualsVerifier.forClass(Relationship.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 	@Test
 	public void serializeArray() throws IOException {
 		Relationship relationship = new Relationship();
-		relationship.setData(Nullable.of((Object) Arrays.asList(new ResourceIdentifier("a", "b"))));
+		relationship.setData(Nullable.of(Arrays.asList(new ResourceIdentifier("a", "b"))));
 		checkSerialize(relationship);
 	}
 
 	@Test
 	public void serializeSingleData() throws IOException {
 		Relationship relationship = new Relationship();
-		relationship.setData(Nullable.of((Object) new ResourceIdentifier("a", "b")));
+		relationship.setData(Nullable.of(new ResourceIdentifier("a", "b")));
 		checkSerialize(relationship);
 	}
 
@@ -40,17 +40,17 @@ public class RelationshipTest {
 	}
 
 	@Test
-	public void getCollectionDataReturnsListForSingleElement() throws IOException {
+	public void getCollectionDataReturnsListForSingleElement() {
 		Relationship relationship = new Relationship();
 		ResourceIdentifier id = new ResourceIdentifier("a", "b");
-		relationship.setData(Nullable.of((Object) id));
+		relationship.setData(Nullable.of(id));
 		Assert.assertEquals(Arrays.asList(id), relationship.getCollectionData().get());
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void setInvalidDataThrowsException() throws IOException {
+	public void setInvalidDataThrowsException() {
 		Relationship relationship = new Relationship();
-		relationship.setData(Nullable.of((Object) "not a ResourceIdentifier"));
+		relationship.setData(Nullable.of("not a ResourceIdentifier"));
 	}
 
 
