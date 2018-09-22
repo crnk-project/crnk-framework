@@ -172,7 +172,7 @@ public class HttpRequestDispatcherImplTest {
 	}
 
 	@Test
-	public void onGivenPathAndRequestTypeControllerShouldHandleRequest() throws Exception {
+	public void onGivenPathAndRequestTypeControllerShouldHandleRequest() {
 		// GIVEN
 		String path = "/tasks/";
 		String requestType = "GET";
@@ -198,7 +198,7 @@ public class HttpRequestDispatcherImplTest {
 	}
 
 	@Test
-	public void shouldHandleRelationshipRequest() throws Exception {
+	public void shouldHandleRelationshipRequest() {
 		// GIVEN
 		String path = "/tasks/1/relationships/project";
 		String requestType = "GET";
@@ -225,7 +225,7 @@ public class HttpRequestDispatcherImplTest {
 
 	@Ignore // FIXME reasonable action contributions
 	@Test
-	public void shouldNotifyWhenActionIsExeecuted() throws Exception {
+	public void shouldNotifyWhenActionIsExeecuted() {
 		// GIVEN
 		String path = "/actionResource/1/someAction";
 		String requestType = "GET";
@@ -249,7 +249,7 @@ public class HttpRequestDispatcherImplTest {
 
 
 	@Test
-	public void shouldMapExceptionToErrorResponseIfMapperIsAvailable() throws Exception {
+	public void shouldMapExceptionToErrorResponseIfMapperIsAvailable() {
 		ControllerRegistry controllerRegistry = mock(ControllerRegistry.class);
 		// noinspection unchecked
 		when(controllerRegistry.getController(any(JsonPath.class), anyString())).thenThrow(new BadRequestException("test"));

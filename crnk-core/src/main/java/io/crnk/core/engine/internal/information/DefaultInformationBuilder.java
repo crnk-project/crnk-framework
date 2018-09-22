@@ -217,7 +217,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		@Override
 		public Resource pagingBehavior(PagingBehavior pagingBehavior) {
-			this.pagingSpecType = (Class<PagingSpec>) pagingBehavior.createEmptyPagingSpec().getClass();
+			this.pagingSpecType = pagingBehavior.createEmptyPagingSpec().getClass();
 			return this;
 		}
 

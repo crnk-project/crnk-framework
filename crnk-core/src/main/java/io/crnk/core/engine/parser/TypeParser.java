@@ -121,7 +121,7 @@ public class TypeParser {
 			throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
 		}
 
-		return (T) parser.parse(input);
+		return parser.parse(input);
 	}
 
 	private <T> StringParser<T> getParser(Class<T> clazz, String input) {

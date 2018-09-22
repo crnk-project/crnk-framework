@@ -21,12 +21,12 @@ import static org.junit.Assert.assertNull;
 public class QuerySpecTest {
 
 	@Test
-	public void testEqualContract() throws NoSuchFieldException {
+	public void testEqualContract() {
 		EqualsVerifier.forClass(QuerySpec.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 	@Test
-	public void testGetOrCreate() throws NoSuchFieldException {
+	public void testGetOrCreate() {
 		QuerySpec querySpec = new QuerySpec(Task.class, "tasks");
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec(Task.class));
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec("tasks"));

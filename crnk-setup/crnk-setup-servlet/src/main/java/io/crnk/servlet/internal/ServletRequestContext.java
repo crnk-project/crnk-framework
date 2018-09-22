@@ -108,7 +108,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 		String url;
 		if (basePath.isEmpty()) {
-			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI().toString());
+			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI());
 			if (requestUri.isEmpty()) {
 				url = requestUrl;
 			} else {

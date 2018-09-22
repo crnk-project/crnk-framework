@@ -14,5 +14,5 @@ public enum PatchStrategy {
 	/**
 	 * Defines that content is overriden.
 	 */
-	SET;
+	SET
 }

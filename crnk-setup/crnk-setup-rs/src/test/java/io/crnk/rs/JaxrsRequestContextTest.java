@@ -48,7 +48,7 @@ public class JaxrsRequestContextTest {
 	}
 
 	@Test
-	public void testRepeatedGetBody() throws IOException {
+	public void testRepeatedGetBody() {
 		byte[] body = "Hello World".getBytes();
 		Mockito.when(requestContext.getEntityStream()).thenReturn(new ByteArrayInputStream(body));
 

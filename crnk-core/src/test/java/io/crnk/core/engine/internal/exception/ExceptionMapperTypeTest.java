@@ -9,12 +9,12 @@ import org.mockito.Mockito;
 public class ExceptionMapperTypeTest {
 
 	@Test
-	public void shouldFulfillHashCodeEqualsContract() throws Exception {
+	public void shouldFulfillHashCodeEqualsContract() {
 		EqualsVerifier.forClass(ExceptionMapperType.class).verify();
 	}
 
 	@Test
-	public void checkToString() throws Exception {
+	public void checkToString() {
 		JsonApiExceptionMapper mapper = Mockito.mock(JsonApiExceptionMapper.class);
 		Mockito.when(mapper.toString()).thenReturn("customMapper");
 		ExceptionMapperType type = new ExceptionMapperType(IllegalStateException.class, mapper);

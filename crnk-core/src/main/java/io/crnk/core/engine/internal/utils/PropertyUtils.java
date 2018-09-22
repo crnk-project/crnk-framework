@@ -261,7 +261,7 @@ public class PropertyUtils {
 		return null;
 	}
 
-	private Method getGetter(Class<?> beanClass, String fieldName) throws NoSuchMethodException {
+	private Method getGetter(Class<?> beanClass, String fieldName) {
 		Method getter = ClassUtils.findGetter(beanClass, fieldName);
 		if (getter != null) {
 			return getter;
@@ -295,7 +295,7 @@ public class PropertyUtils {
 		}
 	}
 
-	private Method getSetter(Object bean, String fieldName, Class<?> fieldType) throws NoSuchMethodException {
+	private Method getSetter(Object bean, String fieldName, Class<?> fieldType) {
 		Class<? extends Object> beanClass = bean.getClass();
 		Method setter = ClassUtils.findSetter(beanClass, fieldName, fieldType);
 		if (setter != null) {

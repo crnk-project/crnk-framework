@@ -30,7 +30,7 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	private BeanInformation beanDesc;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		objectMapper = new ObjectMapper();
 
 		context = Mockito.mock(ResourceInformationProviderContext.class);
@@ -50,13 +50,13 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	}
 
 	@Test
-	public void onFieldWithoutJsonPropertyShouldReturnBaseName() throws Exception {
+	public void onFieldWithoutJsonPropertyShouldReturnBaseName() {
 		BeanAttributeInformation field = beanDesc.getAttribute("field");
 		assertThat(sut.getJsonName(field).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onFieldWithJsonPropertyShouldReturnCustomName() throws Exception {
+	public void onFieldWithJsonPropertyShouldReturnCustomName() {
 		// GIVEN
 		BeanAttributeInformation field = beanDesc.getAttribute("fieldWithJsonProperty");
 
@@ -68,26 +68,26 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	}
 
 	@Test
-	public void onFieldWithDefaultJsonPropertyShouldReturnBaseName() throws Exception {
+	public void onFieldWithDefaultJsonPropertyShouldReturnBaseName() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("fieldWithDefaultJsonProperty");
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onWrappedBooleanFieldShouldReturnFieldNameBasedOnGetter() throws Exception {
+	public void onWrappedBooleanFieldShouldReturnFieldNameBasedOnGetter() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("accessorField");
 
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onWrappedFieldShouldReturnFieldNameBasedOnGetter() throws Exception {
+	public void onWrappedFieldShouldReturnFieldNameBasedOnGetter() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("booleanProperty");
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
 	@Test
-	public void onNoSerializationConfigShouldSerializeField() throws Exception {
+	public void onNoSerializationConfigShouldSerializeField() {
 		sut = new JacksonResourceFieldInformationProvider();
 		sut.init(context);
 		BeanAttributeInformation field = beanDesc.getAttribute("namingStrategyTest");

@@ -169,7 +169,7 @@ public class OperationsModule implements Module {
 		Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
 		String method = operation.getOp();
 		Document requestBody = new Document();
-		requestBody.setData((Nullable) Nullable.of(operation.getValue()));
+		requestBody.setData(Nullable.of(operation.getValue()));
 
 		Response response =
 				requestDispatcher.dispatchRequest(path, method, parameters, requestBody);

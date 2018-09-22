@@ -181,7 +181,7 @@ public class ResourcePatchController extends ResourceUpsert {
 
 	}
 
-	private void updateValues(Map<String, Object> source, Map<String, Object> updates, ResourceInformation resourceInformation) throws JsonProcessingException {
+	private void updateValues(Map<String, Object> source, Map<String, Object> updates, ResourceInformation resourceInformation) {
 
 		for (Map.Entry<String, Object> entry : updates.entrySet()) {
 			String fieldName = entry.getKey();

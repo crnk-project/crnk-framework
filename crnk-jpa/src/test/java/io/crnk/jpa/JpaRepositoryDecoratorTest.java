@@ -45,7 +45,7 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void test() throws InstantiationException, IllegalAccessException {
+	public void test() {
 		addTestWithOneRelation();
 
 		Mockito.verify(resourceDecorator, Mockito.timeout(1)).create(Mockito.any(TestEntity.class));

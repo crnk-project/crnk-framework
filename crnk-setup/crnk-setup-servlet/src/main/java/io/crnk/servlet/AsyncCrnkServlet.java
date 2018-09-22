@@ -99,7 +99,7 @@ public class AsyncCrnkServlet extends HttpServlet {
 			asyncCtx.addListener(new AsyncAdapter() {
 
 				@Override
-				public void onTimeout(AsyncEvent event) throws IOException {
+				public void onTimeout(AsyncEvent event) {
 					LOGGER.error("timeout for request {}", event);
 					httpResponse.setStatus(HttpStatus.GATEWAY_TIMEOUT_504);
 

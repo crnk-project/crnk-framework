@@ -66,7 +66,7 @@ public class IncludeLookupSetterInheritanceTest extends AbstractDocumentMapperTe
 	}
 
 	@Test
-	public void testPolymorhRelationship() throws Exception {
+	public void testPolymorhRelationship() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("includedProjects"));
 

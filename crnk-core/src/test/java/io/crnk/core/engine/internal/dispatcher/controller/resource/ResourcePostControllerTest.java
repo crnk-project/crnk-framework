@@ -73,11 +73,11 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onInconsistentResourceTypesShouldThrowException() throws Exception {
+	public void onInconsistentResourceTypesShouldThrowException() {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/tasks");
 		ResourcePostController sut = new ResourcePostController();
@@ -91,11 +91,11 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onMultipleDataThrowException() throws Exception {
+	public void onMultipleDataThrowException() {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) new ArrayList<>()));
+		newProjectBody.setData(Nullable.of(new ArrayList<>()));
 
 		JsonPath projectPath = pathBuilder.build("/tasks");
 		ResourcePostController sut = new ResourcePostController();
@@ -110,7 +110,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 
 	@Test
-	public void onNoBodyResourceShouldThrowException() throws Exception {
+	public void onNoBodyResourceShouldThrowException() {
 		// GIVEN
 		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
@@ -124,11 +124,11 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onNewResourcesAndRelationshipShouldPersistThoseData() throws Exception {
+	public void onNewResourcesAndRelationshipShouldPersistThoseData() {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 		ResourcePostController sut = new ResourcePostController();
@@ -153,7 +153,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		// GIVEN
 		Document newTasksBody = new Document();
-		newTasksBody.setData(Nullable.of((Object) createTask()));
+		newTasksBody.setData(Nullable.of(createTask()));
 		newTasksBody.getSingleData().get().getRelationships()
 				.put("project", new Relationship(new ResourceIdentifier(projectId.toString(), "projects")));
 
@@ -176,12 +176,12 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onRepositoryReturnNullShouldThrowException() throws Exception {
+	public void onRepositoryReturnNullShouldThrowException() {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
 		data.setId(Long.toString(ProjectRepository.RETURN_NULL_ON_CREATE_ID));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 		ResourcePostController sut = new ResourcePostController();
@@ -205,7 +205,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		Document requestDocument = new Document();
 		Resource data = createTask();
 		data.getAttributes().put("readOnlyValue", objectMapper.readTree("\"newValue\""));
-		requestDocument.setData(Nullable.of((Object) data));
+		requestDocument.setData(Nullable.of(data));
 
 		JsonPath path = pathBuilder.build("/tasks");
 
@@ -230,7 +230,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		Document requestDocument = new Document();
 		Resource data = createTask();
 		data.getAttributes().put("readOnlyValue", objectMapper.readTree("\"newValue\""));
-		requestDocument.setData(Nullable.of((Object) data));
+		requestDocument.setData(Nullable.of(data));
 
 		JsonPath path = pathBuilder.build("/tasks");
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
@@ -257,7 +257,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		data.setType("projects");
 
 		JsonPath projectPath = pathBuilder.build("/projects");
@@ -282,7 +282,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newUserBody = new Document();
 		data = new Resource();
-		newUserBody.setData(Nullable.of((Object) data));
+		newUserBody.setData(Nullable.of(data));
 		data.setType("users");
 		data.setAttribute("name", objectMapper.readTree("\"some user\""));
 		List<ResourceIdentifier> projectIds = Collections.singletonList(new ResourceIdentifier(projectId.toString(),
@@ -314,7 +314,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		data.setType("projects");
 
 		JsonPath projectPath = pathBuilder.build("/projects");
@@ -339,7 +339,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newUserBody = new Document();
 		data = new Resource();
-		newUserBody.setData(Nullable.of((Object) data));
+		newUserBody.setData(Nullable.of(data));
 		data.setType("users");
 		data.setAttribute("name", objectMapper.readTree("\"some user\""));
 		// give a bad resource name inside the relationship
@@ -360,11 +360,11 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onUpdatedLazyRelationshipDataShouldReturnThatData() throws Exception {
+	public void onUpdatedLazyRelationshipDataShouldReturnThatData() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -390,7 +390,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		data.setType("projects");
 		List<ResourceIdentifier> taskIds = Collections.singletonList(new ResourceIdentifier(taskId.toString(), "tasks"));
 		data.getRelationships().put("tasks", new Relationship(taskIds));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
@@ -417,13 +417,13 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 
 	@Test
-	public void onUnchangedLazyRelationshipDataShouldNotReturnThatData() throws Exception {
+	public void onUnchangedLazyRelationshipDataShouldNotReturnThatData() {
 		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 		Document newProjectBody = new Document();
 		Resource data = createProject();
 		data.setType("projects");
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
@@ -446,7 +446,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newMemorandumBody = new Document();
 		Resource data = new Resource();
-		newMemorandumBody.setData(Nullable.of((Object) data));
+		newMemorandumBody.setData(Nullable.of(data));
 		data.setType("memoranda");
 		data.setAttribute("title", objectMapper.readTree("\"sample title\""));
 		data.setAttribute("body", objectMapper.readTree("\"sample body\""));
@@ -469,11 +469,11 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 	@Test
 	@Ignore // TODO support inhertiance
-	public void onResourceWithCustomNamesShouldSaveParametersCorrectly() throws Exception {
+	public void onResourceWithCustomNamesShouldSaveParametersCorrectly() {
 		// GIVEN - creating sample project id
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 		ResourcePostController sut = new ResourcePostController();
@@ -494,7 +494,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document pojoBody = new Document();
 		Resource pojoData = new Resource();
-		pojoBody.setData(Nullable.of((Object) pojoData));
+		pojoBody.setData(Nullable.of(pojoData));
 		pojoData.setType("pojo");
 		JsonNode put = objectMapper.createObjectNode().put("value", "hello");
 		pojoData.setAttribute("other-pojo", put);
@@ -533,7 +533,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN - creating sample project id
 		Document newProjectBody = new Document();
 		Resource data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 		ResourcePostController sut = new ResourcePostController();
@@ -554,7 +554,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document pojoBody = new Document();
 		Resource pojoData = new Resource();
-		pojoBody.setData(Nullable.of((Object) pojoData));
+		pojoBody.setData(Nullable.of(pojoData));
 		pojoData.setType("pojo");
 		JsonNode put = objectMapper.createObjectNode().put("value", "hello");
 		pojoData.setAttribute("other-pojo", objectMapper.readTree("null"));

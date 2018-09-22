@@ -146,7 +146,7 @@ public class ResourceFilterTest {
 		String method = HttpMethod.POST.toString();
 		Map<String, Set<String>> parameters = Collections.emptyMap();
 		Document requestBody = new Document();
-		requestBody.setData(Nullable.of((Object) task));
+		requestBody.setData(Nullable.of(task));
 
 		// try save while forbidden
 		QueryContext queryContext = container.getQueryContext();

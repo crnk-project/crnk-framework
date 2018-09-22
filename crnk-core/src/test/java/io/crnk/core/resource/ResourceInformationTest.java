@@ -54,7 +54,7 @@ public class ResourceInformationTest {
 	}
 
 	@Test
-	public void onRelationshipFieldSearchShouldReturnExistingField() throws NoSuchFieldException {
+	public void onRelationshipFieldSearchShouldReturnExistingField() {
 		ResourceField result = sut.findRelationshipFieldByName("value");
 		assertThat(result.getUnderlyingName()).isEqualTo("value");
 	}

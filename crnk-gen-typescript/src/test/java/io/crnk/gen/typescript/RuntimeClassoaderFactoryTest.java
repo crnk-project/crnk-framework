@@ -58,7 +58,7 @@ public class RuntimeClassoaderFactoryTest {
 	}
 
 	@Test
-	public void checkSharedClassAccessible() throws IOException, ClassNotFoundException {
+	public void checkSharedClassAccessible() throws ClassNotFoundException {
 		sharedClassLoader.putSharedClass("test", String.class);
 
 		Assert.assertSame(String.class, classLoader.loadClass("test"));
@@ -66,26 +66,26 @@ public class RuntimeClassoaderFactoryTest {
 	}
 
 	@Test
-	public void checkBootstrapClassesAccessible() throws IOException, ClassNotFoundException {
+	public void checkBootstrapClassesAccessible() throws ClassNotFoundException {
 		Assert.assertSame(String.class, classLoader.loadClass(String.class.getName()));
 		Assert.assertSame(Object.class, classLoader.loadClass(Object.class.getName()));
 	}
 
 
 	@Test
-	public void checkTypescriptModelExposed() throws IOException, ClassNotFoundException {
+	public void checkTypescriptModelExposed() throws ClassNotFoundException {
 		Assert.assertSame(TSMember.class, classLoader.loadClass(TSMember.class.getName()));
 		Assert.assertSame(TSClassType.class, classLoader.loadClass(TSClassType.class.getName()));
 		Assert.assertSame(TSImport.class, classLoader.loadClass(TSImport.class.getName()));
 	}
 
 	@Test
-	public void defaultLogbackTestProvidedFromParentClassloader() throws IOException, ClassNotFoundException {
+	public void defaultLogbackTestProvidedFromParentClassloader() {
 		Assert.assertNotNull(classLoader.getResource("logback-test.xml"));
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void defaultLogbackTestNotProvidedWithInvalidParentClassLoader() throws IOException, ClassNotFoundException {
+	public void defaultLogbackTestNotProvidedWithInvalidParentClassLoader() {
 		ClassLoader bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent();
 		classLoader = factory.createClassLoader(bootstrapClassLoader, true);
 		Assert.assertNull(bootstrapClassLoader.getResource("logback-test.xml"));
@@ -93,12 +93,12 @@ public class RuntimeClassoaderFactoryTest {
 	}
 
 	@Test
-	public void classLoaderExposesTestConfiguration() throws IOException, ClassNotFoundException {
+	public void classLoaderExposesTestConfiguration() {
 		Assert.assertNotEquals(0, classLoader.getURLs().length);
 	}
 
 	@Test(expected = ClassNotFoundException.class)
-	public void classLoaderIsolatesCallerEnvironment() throws IOException, ClassNotFoundException {
+	public void classLoaderIsolatesCallerEnvironment() throws ClassNotFoundException {
 		// methods from context classpath should not be accessible
 		classLoader.loadClass(Resource.class.getName());
 	}

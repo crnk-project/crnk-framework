@@ -113,7 +113,7 @@ public class RestTemplateClientTest {
 	}
 
 	@Test
-	public void testFindEmpty() throws InterruptedException {
+	public void testFindEmpty() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "doesNotExist"));
 		List<Task> tasks = taskRepo.findAll(querySpec);

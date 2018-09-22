@@ -74,7 +74,7 @@ public class HomeModuleTest {
 		// execute
 		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.anyObject());
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class HomeModuleTest {
 
 		HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
 		requestDispatcher.process(requestContextBase);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), (byte[]) Mockito.anyObject());
+		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.anyObject());
 	}
 
 

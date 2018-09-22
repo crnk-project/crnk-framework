@@ -59,7 +59,7 @@ public class TestDataLoader {
 
 		transactionRunner.doInTransaction(new Callable<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				for (int i = 0; i < 10; i++) {
 					ScheduleEntity scheduleEntity = new ScheduleEntity();
 					scheduleEntity.setId((long) i);

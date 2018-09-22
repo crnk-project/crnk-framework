@@ -21,7 +21,7 @@ public class ReflectionFieldAccessorTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void onNullBeanGetShouldThrowException() throws Exception {
+	public void onNullBeanGetShouldThrowException() {
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "privatePropertyWithMutator", String.class);
 
 		// THEN
@@ -32,7 +32,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onNullBeanSetShouldThrowException() throws Exception {
+	public void onNullBeanSetShouldThrowException() {
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "privatePropertyWithMutator", String.class);
 
 		// THEN
@@ -43,7 +43,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onNullFieldNameShouldThrowException() throws Exception {
+	public void onNullFieldNameShouldThrowException() {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);
 
@@ -52,7 +52,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onNullFieldTypeShouldThrowException() throws Exception {
+	public void onNullFieldTypeShouldThrowException() {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);
 
@@ -61,7 +61,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onNullResourceClassShouldThrowException() throws Exception {
+	public void onNullResourceClassShouldThrowException() {
 		// THEN
 		expectedException.expect(IllegalArgumentException.class);
 
@@ -70,7 +70,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onBooleanPrimitiveWithMutatorsShouldReturnValue() throws Exception {
+	public void onBooleanPrimitiveWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.setBooleanPrimitivePropertyWithMutators(true);
@@ -84,7 +84,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void methodPropertyShouldReturnValue() throws Exception {
+	public void methodPropertyShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "methodProperty", String.class);
@@ -97,7 +97,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onBooleanWithMutatorsShouldReturnValue() throws Exception {
+	public void onBooleanWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.setBooleanPropertyWithMutators(true);
@@ -111,7 +111,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onStringPublicWithMutatorsShouldReturnValue() throws Exception {
+	public void onStringPublicWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		bean.publicProperty = "value";
@@ -125,7 +125,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onInheritedStringPrivateWithMutatorsShouldReturnValue() throws Exception {
+	public void onInheritedStringPrivateWithMutatorsShouldReturnValue() {
 		// GIVEN
 		Bean bean = new ChildBean();
 		bean.setPrivatePropertyWithMutators("value");
@@ -139,7 +139,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onMethodAccessorOnlyShouldReturnValue() throws Exception {
+	public void onMethodAccessorOnlyShouldReturnValue() {
 		// GIVEN
 		GetterTest bean = new GetterTest();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(GetterTest.class, "property", String.class);
@@ -152,7 +152,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onListValueForSetPropertyShouldGetConverted() throws Exception {
+	public void onListValueForSetPropertyShouldGetConverted() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "setProperty", Set.class);
@@ -166,7 +166,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onBooleanPrimitiveWithMutatorsShouldSetValue() throws Exception {
+	public void onBooleanPrimitiveWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "booleanPrimitivePropertyWithMutators", boolean.class);
@@ -179,7 +179,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onBooleanWithMutatorsShouldSetValue() throws Exception {
+	public void onBooleanWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "booleanPropertyWithMutators", Boolean.class);
@@ -192,7 +192,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onStringPublicWithMutatorsShouldSetValue() throws Exception {
+	public void onStringPublicWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "publicProperty", String.class);
@@ -205,7 +205,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onInheritedStringPrivateWithMutatorsShouldSetValue() throws Exception {
+	public void onInheritedStringPrivateWithMutatorsShouldSetValue() {
 		// GIVEN
 		Bean bean = new ChildBean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(ChildBean.class, "privatePropertyWithMutators", String.class);
@@ -218,7 +218,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onDifferentFieldAndMutatorNamesShouldSetValue() throws Exception {
+	public void onDifferentFieldAndMutatorNamesShouldSetValue() {
 		// GIVEN
 		SetterTest bean = new SetterTest();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(SetterTest.class, "property", String.class);
@@ -231,7 +231,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onNonExistingPropertyShouldThrowException() throws Exception {
+	public void onNonExistingPropertyShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "nonExistingProperty", String.class);
@@ -244,7 +244,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldListShouldSetValue() throws Exception {
+	public void onFieldListShouldSetValue() {
 		// GIVEN
 		FieldListTest bean = new FieldListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -258,7 +258,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldSetShouldSetValue() throws Exception {
+	public void onFieldSetShouldSetValue() {
 		// GIVEN
 		FieldSetTest bean = new FieldSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -272,7 +272,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onSetterListShouldSetValue() throws Exception {
+	public void onSetterListShouldSetValue() {
 		// GIVEN
 		SetterListTest bean = new SetterListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -286,7 +286,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onSetterSetShouldSetValue() throws Exception {
+	public void onSetterSetShouldSetValue() {
 		// GIVEN
 		SetterSetTest bean = new SetterSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -300,7 +300,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithSetterListShouldSetValue() throws Exception {
+	public void onFieldWithSetterListShouldSetValue() {
 		// GIVEN
 		FieldWithSetterListTest bean = new FieldWithSetterListTest();
 		List<String> value = Collections.singletonList("asd");
@@ -314,7 +314,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithSetterSetShouldSetValue() throws Exception {
+	public void onFieldWithSetterSetShouldSetValue() {
 		// GIVEN
 		FieldWithSetterSetTest bean = new FieldWithSetterSetTest();
 		Set<String> value = Collections.singleton("asd");
@@ -328,7 +328,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingUncheckedExceptionGetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingUncheckedExceptionGetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "uncheckedExceptionalField", String.class);
@@ -341,7 +341,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingUncheckedExceptionSetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingUncheckedExceptionSetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "uncheckedExceptionalField", String.class);
@@ -354,7 +354,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingCheckedExceptionGetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingCheckedExceptionGetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "checkedExceptionalField", String.class);
@@ -367,7 +367,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void onFieldWithThrowingCheckedExceptionSetterShouldThrowException() throws Exception {
+	public void onFieldWithThrowingCheckedExceptionSetterShouldThrowException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "checkedExceptionalField", String.class);
@@ -380,7 +380,7 @@ public class ReflectionFieldAccessorTest {
 	}
 
 	@Test
-	public void unknownPropertyThrowingException() throws Exception {
+	public void unknownPropertyThrowingException() {
 		// GIVEN
 		Bean bean = new Bean();
 		ReflectionFieldAccessor accessor = new ReflectionFieldAccessor(Bean.class, "attrThatDoesNotExist", String.class);

@@ -37,7 +37,7 @@ public class PerTypeIncludeBehaviorTest extends AbstractIncludeBehaviorTest {
 	}
 
 	@Test
-	public void includeParent() throws Exception {
+	public void includeParent() {
 		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
 		querySpec.includeRelation(Arrays.asList("parent"));
 
@@ -57,7 +57,7 @@ public class PerTypeIncludeBehaviorTest extends AbstractIncludeBehaviorTest {
 	}
 
 	@Test
-	public void includeParentChildren() throws Exception {
+	public void includeParentChildren() {
 		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
 		querySpec.includeRelation(Arrays.asList("parent", "children"));
 
@@ -76,7 +76,7 @@ public class PerTypeIncludeBehaviorTest extends AbstractIncludeBehaviorTest {
 	}
 
 	@Test
-	public void includeCyclicParent() throws Exception {
+	public void includeCyclicParent() {
 		h.setParent(h1);
 
 		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);

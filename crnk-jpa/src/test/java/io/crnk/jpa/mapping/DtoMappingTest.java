@@ -112,7 +112,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void testReadAndUpdateFromEntity() throws InstantiationException, IllegalAccessException {
+	public void testReadAndUpdateFromEntity() {
 		// create as regular entity
 		TestEntity test = new TestEntity();
 		test.setId(2L);

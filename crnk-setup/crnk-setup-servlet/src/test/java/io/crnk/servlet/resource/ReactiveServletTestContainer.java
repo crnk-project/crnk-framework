@@ -44,10 +44,10 @@ public class ReactiveServletTestContainer implements TestContainer {
 	@Override
 	public <T> T getTestData(Class<T> clazz, Object id) {
 		if (clazz == Schedule.class) {
-			return (T) testModule.getScheduleRepository().getMap().get((Long) id);
+			return (T) testModule.getScheduleRepository().getMap().get(id);
 		}
 		if (clazz == RelationIdTestResource.class) {
-			return (T) testModule.getRelationIdTestRepository().getMap().get((Long) id);
+			return (T) testModule.getRelationIdTestRepository().getMap().get(id);
 		}
 		throw new UnsupportedOperationException();
 	}

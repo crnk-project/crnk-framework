@@ -91,11 +91,11 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceWithIdShouldSetIt() throws Exception {
+	public void onGivenRequestResourceWithIdShouldSetIt() {
 		// GIVEN
 		Document Document = new Document();
 		Resource data = new Resource();
-		Document.setData(Nullable.of((Object) data));
+		Document.setData(Nullable.of(data));
 		long taskId = Long.MAX_VALUE - 1L;
 		data.setType("tasks");
 		data.setId(Long.toString(taskId));
@@ -114,11 +114,11 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceShouldLoadAutoIncludeFields() throws Exception {
+	public void onGivenRequestResourceShouldLoadAutoIncludeFields() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
 		resourcePost.init(controllerContext);
@@ -136,7 +136,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newProjectBody = new Document();
 		data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
@@ -155,7 +155,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
 		data = new Resource();
-		newTaskToProjectBody.setData(Nullable.of((Object) Collections.singletonList(data)));
+		newTaskToProjectBody.setData(Nullable.of(Collections.singletonList(data)));
 		data.setType("projects");
 		data.setId(projectId.toString());
 
@@ -194,11 +194,11 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceShouldNotLoadAutoIncludeFields() throws Exception {
+	public void onGivenRequestResourceShouldNotLoadAutoIncludeFields() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 		data.setType("tasks");
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
@@ -218,7 +218,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newProjectBody = new Document();
 		data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 
@@ -238,7 +238,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
 		data = new Resource();
-		newTaskToProjectBody.setData(Nullable.of((Object) Collections.singletonList(data)));
+		newTaskToProjectBody.setData(Nullable.of(Collections.singletonList(data)));
 		data.setType("projects");
 		data.setId(projectId.toString());
 

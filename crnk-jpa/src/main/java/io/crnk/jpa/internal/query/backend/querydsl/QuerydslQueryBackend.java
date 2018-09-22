@@ -303,7 +303,7 @@ public class QuerydslQueryBackend<T>
 			// only two elements for each operation supported, needs querydsl fix?
 			Predicate result = predicates.get(0);
 			for (int i = 1; i < predicates.size(); i++) {
-				result = new BooleanPredicateOperation(Ops.AND, (ImmutableList) ImmutableList.of(result, predicates.get(i)));
+				result = new BooleanPredicateOperation(Ops.AND, ImmutableList.of(result, predicates.get(i)));
 			}
 			return result;
 		}
@@ -322,7 +322,7 @@ public class QuerydslQueryBackend<T>
 			// only two elements for each operation supported, needs querydsl fix?
 			Predicate result = predicates.get(0);
 			for (int i = 1; i < predicates.size(); i++) {
-				result = new BooleanPredicateOperation(Ops.OR, (ImmutableList) ImmutableList.of(result, predicates.get(i)));
+				result = new BooleanPredicateOperation(Ops.OR, ImmutableList.of(result, predicates.get(i)));
 			}
 			return result;
 		}

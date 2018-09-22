@@ -36,7 +36,7 @@ public class RegistryEntryTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void onInvalidRelationshipClassShouldThrowException() throws Exception {
+	public void onInvalidRelationshipClassShouldThrowException() {
 		// GIVEN
 		ResourceRepositoryInformation repositoryInformation = newRepositoryInformation(Task.class, "tasks");
 		ResourceField relationshipField = repositoryInformation.getResourceInformation().get().findFieldByUnderlyingName
@@ -66,7 +66,7 @@ public class RegistryEntryTest {
 	}
 
 	@Test
-	public void onValidParentShouldReturnTrue() throws Exception {
+	public void onValidParentShouldReturnTrue() {
 		// GIVEN
 		RegistryEntry thing = new LegacyRegistryEntry(newResourceEntry(Thing.class, "things"));
 		RegistryEntry document = new LegacyRegistryEntry(newResourceEntry(Document.class, "documents"));
@@ -82,7 +82,7 @@ public class RegistryEntryTest {
 	}
 
 	@Test
-	public void onInvalidParentShouldReturnFalse() throws Exception {
+	public void onInvalidParentShouldReturnFalse() {
 		// GIVEN
 		RegistryEntry document = new LegacyRegistryEntry(newResourceEntry(Document.class, "documents"));
 		RegistryEntry task = new LegacyRegistryEntry(newResourceEntry(Task.class, "tasks"));

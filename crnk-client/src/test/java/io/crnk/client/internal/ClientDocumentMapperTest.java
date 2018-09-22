@@ -32,21 +32,21 @@ public class ClientDocumentMapperTest {
 
 
 	@Test
-	public void testNullData() throws IOException {
+	public void testNullData() {
 		Document doc = new Document();
 		doc.setData(Nullable.nullValue());
 		Assert.assertNull(documentMapper.fromDocument(doc, false));
 	}
 
 	@Test
-	public void testNoData() throws IOException {
+	public void testNoData() {
 		Document doc = new Document();
 		doc.setData(Nullable.empty());
 		Assert.assertNull(documentMapper.fromDocument(doc, false));
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testCannotHaveErrors() throws IOException {
+	public void testCannotHaveErrors() {
 		Document doc = new Document();
 		doc.setErrors(Arrays.asList(new ErrorDataBuilder().build()));
 		doc.setData(Nullable.nullValue());

@@ -40,7 +40,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void rawTypeFromParameterizedType() throws Exception {
+	public void rawTypeFromParameterizedType() {
 		// WHEN
 		Class<?> result = ClassUtils.getRawType(ProjectRepository.class.getGenericInterfaces()[0]);
 
@@ -49,7 +49,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void rawTypeFromRawType() throws Exception {
+	public void rawTypeFromRawType() {
 		// WHEN
 		Class<?> result = ClassUtils.getRawType(String.class);
 
@@ -58,12 +58,12 @@ public class ClassUtilsTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void exceptionForUnknownRawType() throws Exception {
+	public void exceptionForUnknownRawType() {
 		ClassUtils.getRawType(null);
 	}
 
 	@Test
-	public void onClassInheritanceShouldReturnInheritedClasses() throws Exception {
+	public void onClassInheritanceShouldReturnInheritedClasses() {
 		// WHEN
 		List<Field> result = ClassUtils.getClassFields(ChildClass.class);
 
@@ -72,7 +72,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onClassInheritanceShouldReturnInheritedField() throws Exception {
+	public void onClassInheritanceShouldReturnInheritedField() {
 		// WHEN
 		Field result = ClassUtils.findClassField(ChildClass.class, "parentField");
 
@@ -128,7 +128,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onClassInheritanceShouldReturnInheritedGetters() throws Exception {
+	public void onClassInheritanceShouldReturnInheritedGetters() {
 		// WHEN
 		List<Method> result = ClassUtils.getClassGetters(ChildClass.class);
 
@@ -137,7 +137,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onFindGetterShouldReturnBooleanPropertyWithGet() throws Exception {
+	public void onFindGetterShouldReturnBooleanPropertyWithGet() {
 		Method method = ClassUtils.findGetter(ParentClass.class, "booleanPropertyWithGet");
 		assertThat(method.getName()).isEqualTo("getBooleanPropertyWithGet");
 	}
@@ -152,7 +152,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onClassInheritanceShouldReturnInheritedSetters() throws Exception {
+	public void onClassInheritanceShouldReturnInheritedSetters() {
 		// WHEN
 		List<Method> result = ClassUtils.getClassSetters(ChildClass.class);
 
@@ -188,7 +188,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void onValidClassShouldCreateNewInstance() throws Exception {
+	public void onValidClassShouldCreateNewInstance() {
 		// WHEN
 		ResourceClass result = ClassUtils.newInstance(ResourceClass.class);
 
@@ -197,7 +197,7 @@ public class ClassUtilsTest {
 	}
 
 	@Test
-	public void ignoreSyntheticMethods() throws Exception {
+	public void ignoreSyntheticMethods() {
 		// WHEN
 		List<Method> getterMethods = ClassUtils.getClassGetters(IntegerClass.class);
 		List<Method> setterMethods = ClassUtils.getClassSetters(IntegerClass.class);
@@ -210,43 +210,43 @@ public class ClassUtilsTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void onClassWithCrushingConstructorShouldThrowException() throws Exception {
+	public void onClassWithCrushingConstructorShouldThrowException() {
 		// WHEN
 		ClassUtils.newInstance(ClassWithCrashingConstructor.class);
 	}
 
 	@Test(expected = ResourceException.class)
-	public void onClassWithoutDefaultConstructorShouldThrowException() throws Exception {
+	public void onClassWithoutDefaultConstructorShouldThrowException() {
 		// WHEN
 		ClassUtils.newInstance(ClassWithoutDefaultConstructor.class);
 	}
 
 	@Test
-	public void onFindGetterShouldReturnIntegerMethod() throws Exception {
+	public void onFindGetterShouldReturnIntegerMethod() {
 		Method method = ClassUtils.findGetter(IntegerClass.class, "id");
 		assertThat(method.getName()).isEqualTo("getId");
 	}
 
 	@Test
-	public void onFindSetterShouldReturnIntegerMethod() throws Exception {
+	public void onFindSetterShouldReturnIntegerMethod() {
 		Method method = ClassUtils.findSetter(IntegerClass.class, "id", Integer.class);
 		assertThat(method.getName()).isEqualTo("setId");
 	}
 
 	@Test
-	public void onFindGetterShouldReturnPrimitiveBooleanMethod() throws Exception {
+	public void onFindGetterShouldReturnPrimitiveBooleanMethod() {
 		Method method = ClassUtils.findGetter(ParentClass.class, "primitiveBooleanProperty");
 		assertThat(method.getName()).isEqualTo("isPrimitiveBooleanProperty");
 	}
 
 	@Test
-	public void onFindGetterShouldReturnBooleanMethod() throws Exception {
+	public void onFindGetterShouldReturnBooleanMethod() {
 		Method method = ClassUtils.findGetter(ParentClass.class, "booleanProperty");
 		assertThat(method.getName()).isEqualTo("isBooleanProperty");
 	}
 
 	@Test
-	public void onFindGetterShouldNotReturnNonBooleanIsMethods() throws Exception {
+	public void onFindGetterShouldNotReturnNonBooleanIsMethods() {
 		Method method = ClassUtils.findGetter(InvalidBooleanClass.class, "notABooleanReturnType");
 		assertThat(method).isNull();
 	}

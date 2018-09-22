@@ -41,7 +41,7 @@ public class CharsetTest extends AbstractClientTest {
 
 	private String responseContentType;
 
-	public void testUTF8isDefault(boolean okHttp) throws InstantiationException, IllegalAccessException {
+	public void testUTF8isDefault(boolean okHttp) {
 		requestContentType = null;
 		responseContentType = null;
 		if (okHttp) {
@@ -68,15 +68,14 @@ public class CharsetTest extends AbstractClientTest {
 				public void onBuild(HttpClientBuilder builder) {
 					builder.addInterceptorFirst(new HttpRequestInterceptor() {
 						@Override
-						public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+						public void process(HttpRequest httpRequest, HttpContext httpContext) {
 							Header header = httpRequest.getFirstHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 							requestContentType = header != null ? header.getValue() : null;
 						}
 					});
 					builder.addInterceptorFirst(new HttpResponseInterceptor() {
 						@Override
-						public void process(HttpResponse httpResponse, HttpContext httpContext)
-								throws HttpException, IOException {
+						public void process(HttpResponse httpResponse, HttpContext httpContext) {
 							Header header = httpResponse.getFirstHeader(HttpHeaders.HTTP_CONTENT_TYPE);
 							responseContentType = header != null ? header.getValue() : null;
 						}

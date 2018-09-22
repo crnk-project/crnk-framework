@@ -13,7 +13,7 @@ public class MetaKeyImplTest {
 
 	@Test
 	public void test() {
-		JpaMetaProvider metaProvider = new JpaMetaProvider((Set) Collections.emptySet());
+		JpaMetaProvider metaProvider = new JpaMetaProvider(Collections.emptySet());
 		MetaLookup lookup = new MetaLookup();
 		lookup.addProvider(metaProvider);
 		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);

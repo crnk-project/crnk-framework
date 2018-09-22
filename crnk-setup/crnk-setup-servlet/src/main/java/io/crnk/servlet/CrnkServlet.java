@@ -50,7 +50,7 @@ public class CrnkServlet extends HttpServlet {
 	private String defaultCharacterEncoding = HttpHeaders.DEFAULT_CHARSET;
 
 	@Override
-	public void init() throws ServletException {
+	public void init() {
 		boot.setPropertiesProvider(new ServletPropertiesProvider(getServletConfig()));
 		acceptPlainJson = !Boolean.parseBoolean(boot.getPropertiesProvider().getProperty(CrnkProperties.REJECT_PLAIN_JSON));
 
@@ -73,7 +73,7 @@ public class CrnkServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ServletContext servletContext = getServletContext();
 
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, boot.getWebPathPrefix(), defaultCharacterEncoding);

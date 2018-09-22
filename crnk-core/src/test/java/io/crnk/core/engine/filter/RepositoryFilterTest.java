@@ -106,7 +106,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void findAllWithResourceListResult() throws Exception {
+	public void findAllWithResourceListResult() {
 
 		RegistryEntry scheduleRegistry = container.getEntry(Schedule.class);
 		ResourceRepositoryAdapter scheduleResourceAdapter = scheduleRegistry.getResourceRepository();
@@ -144,7 +144,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void findAllWithResourceList() throws Exception {
+	public void findAllWithResourceList() {
 		resourceAdapter.findAll(queryAdapter);
 
 		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
@@ -174,7 +174,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void findOne() throws Exception {
+	public void findOne() {
 
 		resourceAdapter.findOne(1L, queryAdapter);
 
@@ -205,7 +205,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void findAllById() throws Exception {
+	public void findAllById() {
 		resourceAdapter.findAll(Arrays.asList(2L), queryAdapter);
 
 		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
@@ -236,7 +236,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void create() throws Exception {
+	public void create() {
 		User user = new User();
 		user.setId(3L);
 		resourceAdapter.create(user, queryAdapter);
@@ -269,7 +269,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	public void save() throws Exception {
+	public void save() {
 		User user = new User();
 		user.setId(3L);
 		resourceAdapter.update(user, queryAdapter);
@@ -302,7 +302,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void delete() throws Exception {
+	public void delete() {
 		resourceAdapter.delete(2L, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -330,7 +330,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findOneTarget() throws Exception {
+	public void findOneTarget() {
 		projectRelationAdapter.findOneTarget(1L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -358,7 +358,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findManyTarget() throws Exception {
+	public void findManyTarget() {
 		projectRelationAdapter.findManyTargets(1L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -387,7 +387,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void setRelation() throws Exception {
+	public void setRelation() {
 		projectRelationAdapter.setRelation(user1, 13L, assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -417,7 +417,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void setRelations() throws Exception {
+	public void setRelations() {
 		projectRelationAdapter.setRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -446,7 +446,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void addRelations() throws Exception {
+	public void addRelations() {
 		projectRelationAdapter.addRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -474,7 +474,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void removeRelations() throws Exception {
+	public void removeRelations() {
 		projectRelationAdapter.removeRelations(user1, Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -503,7 +503,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findBulkOneTargetsNoBulkImpl() throws Exception {
+	public void findBulkOneTargetsNoBulkImpl() {
 		projectRelationAdapter.findBulkOneTargets(Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -537,7 +537,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findBulkManyTargetsNoBulkImpl() throws Exception {
+	public void findBulkManyTargetsNoBulkImpl() {
 		projectRelationAdapter.findBulkManyTargets(Arrays.asList(13L, 14L), assignedProjectsField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -571,7 +571,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findBulkOneTargetsBulkImpl() throws Exception {
+	public void findBulkOneTargetsBulkImpl() {
 		taskRelationAdapter.findBulkManyTargets(Arrays.asList(1L), assignedTasksField, queryAdapter);
 
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
@@ -602,7 +602,7 @@ public class RepositoryFilterTest {
 
 	@SuppressWarnings({"unchecked"})
 	@Test
-	public void findBulkManyTargetsBulkImpl() throws Exception {
+	public void findBulkManyTargetsBulkImpl() {
 		List<Long> ids = Arrays.asList(1L, 2L);
 		taskRelationAdapter.findBulkManyTargets(ids, assignedTasksField, queryAdapter);
 

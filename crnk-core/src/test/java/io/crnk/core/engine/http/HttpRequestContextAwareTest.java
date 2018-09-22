@@ -17,7 +17,7 @@ public class HttpRequestContextAwareTest {
 	}
 
 	@Test
-	public void check() throws IOException {
+	public void check() {
 		HttTestModule testModule = Mockito.mock(HttTestModule.class);
 
 		CrnkBoot boot = new CrnkBoot();

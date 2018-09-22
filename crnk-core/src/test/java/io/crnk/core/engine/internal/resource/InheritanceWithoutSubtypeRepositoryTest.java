@@ -88,7 +88,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 
 
 	@Test
-	public void checkCrudWithController() throws Exception {
+	public void checkCrudWithController() {
 		// CREATE resource
 		Relationship relationship = new Relationship();
 		relationship.setData(Nullable.of(new ResourceIdentifier("related0", "related")));

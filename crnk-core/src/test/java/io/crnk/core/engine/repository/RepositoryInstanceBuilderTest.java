@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RepositoryInstanceBuilderTest {
 
 	@Test
-	public void onExistingInstanceShouldReturnValue() throws Exception {
+	public void onExistingInstanceShouldReturnValue() {
 		// GIVEN
 		RepositoryInstanceBuilder<TaskRepository> sut =
 				new RepositoryInstanceBuilder<>(new SampleJsonServiceLocator(), TaskRepository.class);
@@ -26,7 +26,7 @@ public class RepositoryInstanceBuilderTest {
 	}
 
 	@Test(expected = RepositoryInstanceNotFoundException.class)
-	public void onNullInstanceShouldThrowException() throws Exception {
+	public void onNullInstanceShouldThrowException() {
 		// GIVEN
 		RepositoryInstanceBuilder<TaskRepository> sut =
 				new RepositoryInstanceBuilder<>(new JsonServiceLocator() {

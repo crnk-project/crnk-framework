@@ -41,7 +41,7 @@ public class ResourceDeleteControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void onGivenRequestResourceGetShouldHandleIt() throws Exception {
+	public void onGivenRequestResourceGetShouldHandleIt() {
 		// GIVEN
 
 		JsonPath jsonPath = pathBuilder.build("/tasks/1");

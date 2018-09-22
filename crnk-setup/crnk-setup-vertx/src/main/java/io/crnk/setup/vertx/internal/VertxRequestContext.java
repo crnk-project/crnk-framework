@@ -101,7 +101,7 @@ public class VertxRequestContext implements HttpRequestContextBase {
 
 	@Override
 	@Deprecated
-	public void setResponse(int code, byte[] body) throws IOException {
+	public void setResponse(int code, byte[] body) {
 		throw new UnsupportedOperationException();
 	}
 

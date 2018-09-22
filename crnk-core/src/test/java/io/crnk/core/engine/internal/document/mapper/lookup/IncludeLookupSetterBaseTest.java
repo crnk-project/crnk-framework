@@ -178,7 +178,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 
 
 	@Test
-	public void includeOneRelationLookup() throws Exception {
+	public void includeOneRelationLookup() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("includedProject"));
 
@@ -197,7 +197,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includeManyRelationLookup() throws Exception {
+	public void includeManyRelationLookup() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("includedProjects"));
 
@@ -213,7 +213,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includeOneDeepNestedRelationLookup() throws Exception {
+	public void includeOneDeepNestedRelationLookup() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("includedProject", "includedTask", "includedProject"));
 
@@ -236,7 +236,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includeManyDeepNestedRelationLookup() throws Exception {
+	public void includeManyDeepNestedRelationLookup() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("includedProjects", "includedTask", "includedProject"));
 
@@ -260,7 +260,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includePropertiesProviderAllTrueRelationshipLookup() throws Exception {
+	public void includePropertiesProviderAllTrueRelationshipLookup() {
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
 
 			@Override
@@ -288,7 +288,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includePropertiesProviderNonOverwriteRelationshipLookup() throws Exception {
+	public void includePropertiesProviderNonOverwriteRelationshipLookup() {
 		PropertiesProvider propertiesProvider = new PropertiesProvider() {
 
 			@Override
@@ -321,7 +321,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
 	}
 
 	@Test
-	public void includeByDefaultSerializeNLevels() throws Exception {
+	public void includeByDefaultSerializeNLevels() {
 		Project project = new Project();
 		project.setId(1L);
 

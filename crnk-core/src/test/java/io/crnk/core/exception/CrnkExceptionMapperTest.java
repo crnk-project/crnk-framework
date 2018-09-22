@@ -16,7 +16,7 @@ public class CrnkExceptionMapperTest {
 	private static final String DETAIL1 = "detail1";
 
 	@Test
-	public void shouldMapToErrorResponse() throws Exception {
+	public void shouldMapToErrorResponse() {
 		CrnkExceptionMapper mapper = new CrnkExceptionMapper();
 		ErrorResponse response = mapper.toErrorResponse(new SampleCrnkException());
 

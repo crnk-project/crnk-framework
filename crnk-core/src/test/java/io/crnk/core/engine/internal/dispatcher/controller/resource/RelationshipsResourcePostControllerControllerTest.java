@@ -42,7 +42,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	private UserToProjectRepository localUserToProjectRepository;
 
 	@Before
-	public void beforeTest() throws Exception {
+	public void beforeTest() {
 		localUserToProjectRepository = new UserToProjectRepository();
 		localUserToProjectRepository.removeRelations("project");
 		localUserToProjectRepository.removeRelations("assignedProjects");
@@ -77,7 +77,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	}
 
 	@Test(expected = RequestBodyNotFoundException.class)
-	public void onMissingBodyThrowException() throws Exception {
+	public void onMissingBodyThrowException() {
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/1/relationships/project");
 		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
 		sut.init(controllerContext);
@@ -89,10 +89,10 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	}
 
 	@Test
-	public void onExistingResourcesShouldAddToOneRelationship() throws Exception {
+	public void onExistingResourcesShouldAddToOneRelationship() {
 		// GIVEN
 		Document newTaskBody = new Document();
-		newTaskBody.setData(Nullable.of((Object) createTask()));
+		newTaskBody.setData(Nullable.of(createTask()));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -110,7 +110,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 
 		// GIVEN
 		Document newProjectBody = new Document();
-		newProjectBody.setData(Nullable.of((Object) createProject()));
+		newProjectBody.setData(Nullable.of(createProject()));
 
 		JsonPath projectPath = pathBuilder.build("/projects");
 
@@ -130,7 +130,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
-		newTaskToProjectBody.setData(Nullable.of((Object) createProject(Long.toString(projectId))));
+		newTaskToProjectBody.setData(Nullable.of(createProject(Long.toString(projectId))));
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
 		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
@@ -153,11 +153,11 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	}
 
 	@Test
-	public void onExistingResourcesShouldAddToManyRelationship() throws Exception {
+	public void onExistingResourcesShouldAddToManyRelationship() {
 		// GIVEN
 		Document newUserBody = new Document();
 		Resource data = createUser();
-		newUserBody.setData(Nullable.of((Object) data));
+		newUserBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/users");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -176,7 +176,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 		// GIVEN
 		Document newProjectBody = new Document();
 		data = createProject();
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		data.setType("projects");
 
 		JsonPath projectPath = pathBuilder.build("/projects");
@@ -197,7 +197,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 		// GIVEN
 		Document newTaskToProjectBody = new Document();
 		data = new Resource();
-		newTaskToProjectBody.setData(Nullable.of((Object) Collections.singletonList(data)));
+		newTaskToProjectBody.setData(Nullable.of(Collections.singletonList(data)));
 		data.setType("projects");
 		data.setId(projectId.toString());
 
@@ -217,11 +217,11 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 	}
 
 	@Test
-	public void onDeletingToOneRelationshipShouldSetTheValue() throws Exception {
+	public void onDeletingToOneRelationshipShouldSetTheValue() {
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 		ResourcePostController resourcePost = new ResourcePostController();
@@ -262,7 +262,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 		// GIVEN
 		Document newTaskBody = new Document();
 		Resource data = createTask();
-		newTaskBody.setData(Nullable.of((Object) data));
+		newTaskBody.setData(Nullable.of(data));
 
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
@@ -288,7 +288,7 @@ public class RelationshipsResourcePostControllerControllerTest extends BaseContr
 		data.getRelationships().put("tasks", new Relationship(Arrays.asList(new ResourceIdentifier(taskIdTwo.toString(),
 						"tasks"),
 				new ResourceIdentifier(taskIdThree.toString(), "tasks"))));
-		newProjectBody.setData(Nullable.of((Object) data));
+		newProjectBody.setData(Nullable.of(data));
 		JsonPath projectPolymorphicTypePath = pathBuilder.build("/" + type);
 
 		// WHEN

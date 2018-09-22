@@ -34,39 +34,39 @@ public class ExceptionMapperRegistryTest {
 	}
 
 	@Test
-	public void shouldReturn0DistanceBetweenSameClassFromException() throws Exception {
+	public void shouldReturn0DistanceBetweenSameClassFromException() {
 		int distance = exceptionMapperRegistry.getDistanceBetweenExceptions(Exception.class, Exception.class);
 		assertThat(distance).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldReturn1AsADistanceBetweenSameClassFromException() throws Exception {
+	public void shouldReturn1AsADistanceBetweenSameClassFromException() {
 		int distance = exceptionMapperRegistry.getDistanceBetweenExceptions(SomeException.class, Exception.class);
 		assertThat(distance).isEqualTo(1);
 	}
 
 	@Test
-	public void shouldNotFindMapperIfSuperClassIsNotMappedFromException() throws Exception {
+	public void shouldNotFindMapperIfSuperClassIsNotMappedFromException() {
 		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(RuntimeException.class);
 		assertThat(mapper.isPresent()).isFalse();
 	}
 
 	@Test
-	public void shouldFindDirectExceptionMapperFromException() throws Exception {
+	public void shouldFindDirectExceptionMapperFromException() {
 		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(IllegalStateException.class);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 	}
 
 	@Test
-	public void shouldFindDescendantExceptionMapperFromException() throws Exception {
+	public void shouldFindDescendantExceptionMapperFromException() {
 		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(ClosedFileSystemException.class);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 	}
 
 	@Test
-	public void shouldFindDirectExceptionMapperFromError() throws Exception {
+	public void shouldFindDirectExceptionMapperFromError() {
 		ErrorResponse response = ErrorResponse.builder().setStatus(HttpStatus.BAD_REQUEST_400).build();
 		Optional<ExceptionMapper<?>> mapper = (Optional) exceptionMapperRegistry.findMapperFor(response);
 		assertThat(mapper.isPresent()).isTrue();
@@ -76,7 +76,7 @@ public class ExceptionMapperRegistryTest {
 	}
 
 	@Test
-	public void shouldFindDescendantExceptionMapperFromError() throws Exception {
+	public void shouldFindDescendantExceptionMapperFromError() {
 		// two exception mapper will match (IllegalStateException and SomeIllegalStateException)
 		// subtype should be choosen.
 		ErrorData errorData = ErrorData.builder().setId("someId").build();
@@ -89,7 +89,7 @@ public class ExceptionMapperRegistryTest {
 	}
 
 	@Test
-	public void shouldNotFindDescendantExceptionMapperFromError() throws Exception {
+	public void shouldNotFindDescendantExceptionMapperFromError() {
 		ErrorData errorData = ErrorData.builder().setId("someOtherId").build();
 		ErrorResponse response = ErrorResponse.builder().setStatus(HttpStatus.BAD_REQUEST_400).setSingleErrorData(errorData).build();
 		Optional<ExceptionMapper<?>> mapper = (Optional) exceptionMapperRegistry.findMapperFor(response);

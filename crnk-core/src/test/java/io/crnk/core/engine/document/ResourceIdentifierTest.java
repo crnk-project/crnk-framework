@@ -7,7 +7,7 @@ import org.junit.Test;
 public class ResourceIdentifierTest {
 
 	@Test
-	public void testResourceIdentifierEqualsContract() throws NoSuchFieldException {
+	public void testResourceIdentifierEqualsContract() {
 		EqualsVerifier.forClass(ResourceIdentifier.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 }

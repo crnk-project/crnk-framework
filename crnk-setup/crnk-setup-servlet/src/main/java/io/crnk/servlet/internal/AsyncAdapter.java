@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class AsyncAdapter implements AsyncListener {
 	@Override
-	public void onComplete(AsyncEvent event) throws IOException {
+	public void onComplete(AsyncEvent event) {
 
 	}
 
@@ -16,12 +16,12 @@ public class AsyncAdapter implements AsyncListener {
 	}
 
 	@Override
-	public void onError(AsyncEvent event) throws IOException {
+	public void onError(AsyncEvent event) {
 
 	}
 
 	@Override
-	public void onStartAsync(AsyncEvent event) throws IOException {
+	public void onStartAsync(AsyncEvent event) {
 
 	}
 }

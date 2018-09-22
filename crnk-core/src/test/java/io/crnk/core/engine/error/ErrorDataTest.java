@@ -23,7 +23,7 @@ public class ErrorDataTest {
 	}
 
 	@Test
-	public void shouldFulfillEqualsHashCodeContract() throws Exception {
+	public void shouldFulfillEqualsHashCodeContract() {
 		EqualsVerifier.forClass(ErrorData.class).allFieldsShouldBeUsed().verify();
 	}
 

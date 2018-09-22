@@ -13,7 +13,7 @@ public class ResponseTest {
 	public void testHashCodeEquals() {
 		Document r1 = new Document();
 		Document r2 = new Document();
-		r2.setData(Nullable.of((Object) new Resource()));
+		r2.setData(Nullable.of(new Resource()));
 		Response c1 = new Response(r1, 201);
 		Response c1copy = new Response(r1, 201);
 		Response c2 = new Response(r2, 202);

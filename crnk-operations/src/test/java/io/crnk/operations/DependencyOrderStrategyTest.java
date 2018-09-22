@@ -195,7 +195,7 @@ public class DependencyOrderStrategyTest {
 		Relationship relationship = resource1.getRelationships().get(relationshipName);
 		if (relationship == null) {
 			relationship = new Relationship();
-			relationship.setData((Nullable) Nullable.of(new ArrayList<ResourceIdentifier>()));
+			relationship.setData(Nullable.of(new ArrayList<ResourceIdentifier>()));
 			resource1.getRelationships().put(relationshipName, relationship);
 		}
 
@@ -214,7 +214,7 @@ public class DependencyOrderStrategyTest {
 		}
 
 		ResourceIdentifier resourceId = new ResourceIdentifier(resource2.getId(), resource2.getType());
-		relationship.setData(Nullable.of((Object) resourceId));
+		relationship.setData(Nullable.of(resourceId));
 	}
 
 	private void addUnitializedDependency(Operation op, String relationshipName) {

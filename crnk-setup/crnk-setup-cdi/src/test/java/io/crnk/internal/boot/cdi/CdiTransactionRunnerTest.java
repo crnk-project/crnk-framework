@@ -43,7 +43,7 @@ public class CdiTransactionRunnerTest {
 
 
 	@Test
-	public void testHasPublicNoArgConstructor() throws Exception {
+	public void testHasPublicNoArgConstructor() {
 		Assert.assertNotNull(new CdiTransactionRunner());
 	}
 

@@ -30,7 +30,7 @@ public class HttpRequestContextBaseAdapterTest {
 	}
 
 	@Test
-	public void testAccepts() throws IOException {
+	public void testAccepts() {
 		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("text/html,application/json");
 		Assert.assertTrue(adapter.accepts("text/html"));
 		Assert.assertFalse(adapter.accepts("application/xy"));
@@ -38,7 +38,7 @@ public class HttpRequestContextBaseAdapterTest {
 	}
 
 	@Test
-	public void testAcceptsAny() throws IOException {
+	public void testAcceptsAny() {
 		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("text/html,application/json");
 		Assert.assertFalse(adapter.acceptsAny());
 		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn("application/json,*");
@@ -48,7 +48,7 @@ public class HttpRequestContextBaseAdapterTest {
 	}
 
 	@Test
-	public void testAcceptsAllIfNoHeader() throws IOException {
+	public void testAcceptsAllIfNoHeader() {
 		Mockito.when(base.getRequestHeader(Mockito.eq(HttpHeaders.HTTP_HEADER_ACCEPT))).thenReturn(null);
 		Assert.assertFalse(adapter.accepts("text/html"));
 		Assert.assertFalse(adapter.accepts("application/json"));
@@ -56,62 +56,62 @@ public class HttpRequestContextBaseAdapterTest {
 	}
 
 	@Test
-	public void setContentType() throws IOException {
+	public void setContentType() {
 		adapter.setContentType("test");
 		Mockito.verify(base, Mockito.times(1)).setResponseHeader(Mockito.eq(HttpHeaders.HTTP_CONTENT_TYPE), Mockito.eq("test"));
 	}
 
 	@Test
-	public void getRequestHeader() throws IOException {
+	public void getRequestHeader() {
 		adapter.getRequestHeader("a");
 		Mockito.verify(base, Mockito.times(1)).getRequestHeader(Mockito.eq("a"));
 	}
 
 	@Test
-	public void getRequestParameters() throws IOException {
+	public void getRequestParameters() {
 		adapter.getRequestParameters();
 		Mockito.verify(base, Mockito.times(1)).getRequestParameters();
 	}
 
 	@Test
-	public void getPath() throws IOException {
+	public void getPath() {
 		adapter.getPath();
 		Mockito.verify(base, Mockito.times(1)).getPath();
 	}
 
 	@Test
-	public void getBaseUrl() throws IOException {
+	public void getBaseUrl() {
 		adapter.getBaseUrl();
 		Mockito.verify(base, Mockito.times(2)).getBaseUrl();
 	}
 
 	@Test
-	public void getRequestBody() throws IOException {
+	public void getRequestBody() {
 		adapter.getRequestBody();
 		Mockito.verify(base, Mockito.times(1)).getRequestBody();
 	}
 
 	@Test
-	public void getMethod() throws IOException {
+	public void getMethod() {
 		adapter.getMethod();
 		Mockito.verify(base, Mockito.times(1)).getMethod();
 	}
 
 	@Test
-	public void getResponseHeader() throws IOException {
+	public void getResponseHeader() {
 		adapter.getResponseHeader("a");
 		Mockito.verify(base, Mockito.times(1)).getResponseHeader(Mockito.eq("a"));
 	}
 
 
 	@Test
-	public void setResponseHeader() throws IOException {
+	public void setResponseHeader() {
 		adapter.setResponseHeader("a", "b");
 		Mockito.verify(base, Mockito.times(1)).setResponseHeader(Mockito.eq("a"), Mockito.eq("b"));
 	}
 
 	@Test
-	public void unwrap() throws IOException {
+	public void unwrap() {
 		Assert.assertSame(adapter, adapter.unwrap(HttpRequestContextBaseAdapter.class));
 		Assert.assertSame(base, adapter.unwrap(base.getClass()));
 		Assert.assertNull(adapter.unwrap(String.class));

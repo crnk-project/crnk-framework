@@ -19,17 +19,17 @@ public class DocumentDataDeserializer extends JsonDeserializer<Nullable<Object>>
 		JsonToken currentToken = jp.getCurrentToken();
 		if (currentToken == JsonToken.START_ARRAY) {
 			Resource[] resources = jp.readValueAs(Resource[].class);
-			return Nullable.of((Object) Arrays.asList(resources));
+			return Nullable.of(Arrays.asList(resources));
 		} else if (currentToken == JsonToken.VALUE_NULL) {
 			return Nullable.nullValue();
 		} else {
 			PreconditionUtil.verifyEquals(currentToken, JsonToken.START_OBJECT, "parsing failed");
-			return Nullable.of((Object) jp.readValueAs(Resource.class));
+			return Nullable.of(jp.readValueAs(Resource.class));
 		}
 	}
 
 	@Override
-	public Nullable<Object> getNullValue(DeserializationContext ctxt) throws JsonMappingException {
+	public Nullable<Object> getNullValue(DeserializationContext ctxt) {
 		return Nullable.nullValue();
 	}
 }

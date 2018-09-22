@@ -49,7 +49,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 		transactionRunner.doInTransaction(new Callable<Object>() {
 
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 				EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
 				AbstractJpaTest.clear(em);
 
@@ -166,7 +166,7 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 	}
 
 	@Test
-	public void test() throws InstantiationException, IllegalAccessException {
+	public void test() {
 		String url = getBaseUri() + "country/ch";
 		io.restassured.response.Response getResponse = RestAssured.get(url);
 		Assert.assertEquals(200, getResponse.getStatusCode());

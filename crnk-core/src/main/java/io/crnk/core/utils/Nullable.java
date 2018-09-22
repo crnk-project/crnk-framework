@@ -35,7 +35,7 @@ public class Nullable<T> {
 	}
 
 	public static <T> Nullable<T> ofNullable(T value) {
-		return value == null ? Nullable.<T>empty() : of(value);
+		return value == null ? Nullable.empty() : of(value);
 	}
 
 	public static <T> Nullable<T> nullValue() {
