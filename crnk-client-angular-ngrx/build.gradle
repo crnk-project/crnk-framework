@@ -167,7 +167,7 @@ task npmCacheVerify(type: NpmTask) {
 tasks.assemble.dependsOn 'npmRunBuild'
 
 clean.doFirst {
-	delete "${projectDir}/node_modules/"
+	// too inefficient: delete "${projectDir}/node_modules/"
 }
 
 task publishNpmPackage(type: NpmTask, dependsOn: [npmRunBuild]) {
