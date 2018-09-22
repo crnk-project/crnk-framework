@@ -24,8 +24,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @ConditionalOnProperty(prefix = "crnk.validation", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(ValidationModule.class)
 @ConditionalOnMissingBean(ValidationModule.class)
-@EnableConfigurationProperties({ CrnkValidationProperties.class })
-@Import({ CrnkCoreAutoConfiguration.class })
+@EnableConfigurationProperties({CrnkValidationProperties.class})
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkValidationAutoConfiguration {
 
 	@Autowired

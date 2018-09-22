@@ -1,6 +1,5 @@
 package io.crnk.core.engine.http;
 
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;
 
 public interface HttpRequestContext extends HttpRequestContextBase {

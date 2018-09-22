@@ -102,7 +102,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(TestResourceB.class));
 		Controller postController = boot.getControllerRegistry().getController(path, HttpMethod.POST.toString());
-		Response response = postController.handleAsync(path, queryAdapter,  document).get();
+		Response response = postController.handleAsync(path, queryAdapter, document).get();
 		Assert.assertEquals(HttpStatus.CREATED_201, response.getHttpStatus().intValue());
 
 		Resource createdResource = response.getDocument().getSingleData().get();
@@ -113,7 +113,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 		path = pathBuilder.build("/testA/b");
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
-		response = patchController.handleAsync(path, queryAdapter,  document).get();
+		response = patchController.handleAsync(path, queryAdapter, document).get();
 		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
 
 		// GET resource
@@ -128,7 +128,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 		QuerySpec includedQuerySpec = new QuerySpec(TestResourceB.class);
 		includedQuerySpec.includeRelation(Arrays.asList("related"));
 		QuerySpecAdapter includedQueryAdapter = container.toQueryAdapter(includedQuerySpec);
-		response = getController.handleAsync(path, includedQueryAdapter,  null).get();
+		response = getController.handleAsync(path, includedQueryAdapter, null).get();
 		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
 		getResource = response.getDocument().getSingleData().get();
 		Assert.assertEquals("http://127.0.0.1/testA/b", getResource.getLinks().get("self").asText());
@@ -141,7 +141,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 		includedQuerySpec = new QuerySpec(TestResourceB.class);
 		includedQuerySpec.includeRelation(Arrays.asList("relatedWithRepository"));
 		includedQueryAdapter = container.toQueryAdapter(includedQuerySpec);
-		response = getController.handleAsync(path, includedQueryAdapter,  null).get();
+		response = getController.handleAsync(path, includedQueryAdapter, null).get();
 		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
 		getResource = response.getDocument().getSingleData().get();
 		Assert.assertEquals("http://127.0.0.1/testA/b", getResource.getLinks().get("self").asText());
@@ -154,7 +154,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 		Assert.assertNotNull(repository.findOne("b", new QuerySpec(TestResourceA.class)));
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller deleteController = boot.getControllerRegistry().getController(path, HttpMethod.DELETE.toString());
-		response = deleteController.handleAsync(path, queryAdapter,  null).get();
+		response = deleteController.handleAsync(path, queryAdapter, null).get();
 		Assert.assertEquals(HttpStatus.NO_CONTENT_204, response.getHttpStatus().intValue());
 		try {
 			repository.findOne("b", new QuerySpec(TestResourceA.class));

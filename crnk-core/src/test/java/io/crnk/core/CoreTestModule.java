@@ -2,7 +2,13 @@ package io.crnk.core;
 
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.module.Module;
-import io.crnk.core.queryspec.repository.*;
+import io.crnk.core.queryspec.repository.ProjectQuerySpecRepository;
+import io.crnk.core.queryspec.repository.ProjectToTaskRelationshipRepository;
+import io.crnk.core.queryspec.repository.ScheduleQuerySpecRepository;
+import io.crnk.core.queryspec.repository.TaskQuerySpecRepository;
+import io.crnk.core.queryspec.repository.TaskSubtypeRepository;
+import io.crnk.core.queryspec.repository.TaskToProjectRelationshipRepository;
+import io.crnk.core.queryspec.repository.TaskWithLookupQuerySpecRepository;
 
 public class CoreTestModule implements Module {
 

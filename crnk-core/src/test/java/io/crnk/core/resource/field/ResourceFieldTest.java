@@ -1,24 +1,15 @@
 package io.crnk.core.resource.field;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.information.resource.DefaultResourceInformationProvider;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
-import io.crnk.core.mock.models.Task;
 import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

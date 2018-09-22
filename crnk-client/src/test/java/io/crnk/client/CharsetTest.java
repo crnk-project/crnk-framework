@@ -1,7 +1,5 @@
 package io.crnk.client;
 
-import java.io.IOException;
-
 import io.crnk.client.http.apache.HttpClientAdapter;
 import io.crnk.client.http.apache.HttpClientAdapterListener;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -23,6 +21,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class CharsetTest extends AbstractClientTest {
 
@@ -61,8 +61,7 @@ public class CharsetTest extends AbstractClientTest {
 				}
 			});
 			client.setHttpAdapter(adapter);
-		}
-		else {
+		} else {
 			HttpClientAdapter adapter = HttpClientAdapter.newInstance();
 			adapter.addListener(new HttpClientAdapterListener() {
 				@Override

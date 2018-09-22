@@ -1,16 +1,16 @@
 package io.crnk.ui.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.internal.utils.IOUtils;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.ui.UIModuleConfig;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UIHttpRequestProcessor implements HttpRequestProcessor {
 

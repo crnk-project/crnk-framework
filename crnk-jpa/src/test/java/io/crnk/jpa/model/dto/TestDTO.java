@@ -1,6 +1,10 @@
 package io.crnk.jpa.model.dto;
 
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
 
 import java.util.List;
 

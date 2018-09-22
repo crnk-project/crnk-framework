@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -24,6 +20,10 @@ import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * checks usage of @JsonApiRelationId
@@ -98,7 +98,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		ResourcePostController sut = new ResourcePostController();
 		sut.init(controllerContext);
 
-		Response taskResponse = sut.handle(postPath, emptyTaskQuery,  newDocument);
+		Response taskResponse = sut.handle(postPath, emptyTaskQuery, newDocument);
 
 		// THEN POST
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -131,7 +131,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		ResourcePatchController sut = new ResourcePatchController();
 		sut.init(controllerContext);
 
-		Response taskResponse = sut.handle(path, emptyTaskQuery,  newDocument);
+		Response taskResponse = sut.handle(path, emptyTaskQuery, newDocument);
 
 		// THEN PATCH
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.OK_200);
@@ -162,7 +162,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
 		sut.init(controllerContext);
 
-		Response taskResponse = sut.handle(path, emptyTaskQuery,  newDocument);
+		Response taskResponse = sut.handle(path, emptyTaskQuery, newDocument);
 
 		// THEN PATCH
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);

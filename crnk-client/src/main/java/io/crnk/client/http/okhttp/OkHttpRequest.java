@@ -1,7 +1,5 @@
 package io.crnk.client.http.okhttp;
 
-import java.io.IOException;
-
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.http.HttpHeaders;
@@ -12,6 +10,8 @@ import okhttp3.Request;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import java.io.IOException;
 
 public class OkHttpRequest implements HttpAdapterRequest {
 

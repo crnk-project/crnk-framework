@@ -1,7 +1,5 @@
 package io.crnk.operations;
 
-import java.util.UUID;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -13,6 +11,8 @@ import io.crnk.operations.model.VoteEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.UUID;
 
 public class OperationsSingleEntityTest extends AbstractOperationsTest {
 

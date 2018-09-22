@@ -1,10 +1,5 @@
 package io.crnk.rs;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -16,6 +11,11 @@ import io.crnk.core.utils.Optional;
 import io.crnk.rs.type.JsonApiMediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Allows to return JAXRS exceptions in the JSON API format.

@@ -1,8 +1,5 @@
 package io.crnk.example.springboot.simple;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import io.crnk.client.CrnkClient;
@@ -17,6 +14,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 public class MicroServiceApplicationTest {
 

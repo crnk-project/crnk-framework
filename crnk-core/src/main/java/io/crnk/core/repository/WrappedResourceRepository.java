@@ -1,9 +1,9 @@
 package io.crnk.core.repository;
 
-import java.io.Serializable;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.io.Serializable;
 
 /**
  * Wraps another resource repository. In contrast to decorators, a wrapped repository is still a repository and treated as such.

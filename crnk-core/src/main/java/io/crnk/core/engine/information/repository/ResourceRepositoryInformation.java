@@ -1,9 +1,9 @@
 package io.crnk.core.engine.information.repository;
 
-import java.util.Map;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.utils.Optional;
+
+import java.util.Map;
 
 /**
  * Holds information about the type of a resource repository.

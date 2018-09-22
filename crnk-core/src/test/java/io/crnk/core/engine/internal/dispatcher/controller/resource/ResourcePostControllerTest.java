@@ -87,7 +87,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		expectedException.expect(RuntimeException.class);
 
 		// WHEN
-		sut.handle(projectPath, emptyTaskQuery,  newProjectBody);
+		sut.handle(projectPath, emptyTaskQuery, newProjectBody);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		expectedException.expect(RequestBodyException.class);
 
 		// WHEN
-		sut.handle(projectPath, emptyTaskQuery,  newProjectBody);
+		sut.handle(projectPath, emptyTaskQuery, newProjectBody);
 	}
 
 
@@ -120,7 +120,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		// WHEN
 		JsonPath path = pathBuilder.build("tasks");
-		sut.handle(path, emptyTaskQuery,  null);
+		sut.handle(path, emptyTaskQuery, null);
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyProjectQuery,  newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -160,7 +160,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		JsonPath taskPath = pathBuilder.build("/tasks");
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, emptyTaskQuery,  newTasksBody);
+		Response taskResponse = sut.handle(taskPath, emptyTaskQuery, newTasksBody);
 
 		// THEN
 		assertThat(taskResponse.getHttpStatus()).isEqualTo(HttpStatus.CREATED_201);
@@ -189,10 +189,9 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		try {
 			// WHEN
-			sut.handle(projectPath, emptyProjectQuery,  newProjectBody);
+			sut.handle(projectPath, emptyProjectQuery, newProjectBody);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			// THEN
 			Assert.assertEquals(e.getMessage(),
 					"upon POST repository for type=projects must return created resource, not allowed to return null");
@@ -218,10 +217,9 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		// WHEN
 		try {
-			sut.handle(path, emptyTaskQuery,  requestDocument);
+			sut.handle(path, emptyTaskQuery, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		}
-		catch (ForbiddenException e) {
+		} catch (ForbiddenException e) {
 			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
 		}
 	}
@@ -249,7 +247,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(path, emptyTaskQuery,  requestDocument);
+		Response response = sut.handle(path, emptyTaskQuery, requestDocument);
 		String persistedValue = response.getDocument().getSingleData().get().getAttributes().get("readOnlyValue").asText();
 		Assert.assertEquals("someReadOnlyValue", persistedValue);
 	}
@@ -267,7 +265,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyProjectQuery,  newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -294,7 +292,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		JsonPath taskPath = pathBuilder.build("/users");
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, emptyUserQuery,  newUserBody);
+		Response taskResponse = sut.handle(taskPath, emptyUserQuery, newUserBody);
 
 		// THEN
 		Resource task = taskResponse.getDocument().getSingleData().get();
@@ -324,7 +322,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyProjectQuery,  newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -354,10 +352,9 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		// WHEN
 		try {
-			sut.handle(taskPath, emptyUserQuery,  newUserBody);
+			sut.handle(taskPath, emptyUserQuery, newUserBody);
 			Assert.fail("should not be allowed to create a relationship with an invalid resource");
-		}
-		catch (BadRequestException e) {
+		} catch (BadRequestException e) {
 			Assert.assertEquals("Invalid resource type: notAResource", e.getMessage());
 		}
 	}
@@ -375,7 +372,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response taskResponse = sut.handle(taskPath, emptyTaskQuery,  newTaskBody);
+		Response taskResponse = sut.handle(taskPath, emptyTaskQuery, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -398,7 +395,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
 		// WHEN
-		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery,  newProjectBody);
+		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -431,7 +428,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		JsonPath projectsPath = pathBuilder.build("/projects");
 
 		// WHEN
-		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery,  newProjectBody);
+		Response projectsResponse = sut.handle(projectsPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectsResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -459,7 +456,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response memorandumResponse = sut.handle(projectPath, emptyMemorandumQuery,  newMemorandumBody);
+		Response memorandumResponse = sut.handle(projectPath, emptyMemorandumQuery, newMemorandumBody);
 
 		// THEN
 		assertThat(memorandumResponse.getDocument().getSingleData().get().getType()).isEqualTo("memoranda");
@@ -511,7 +508,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		// WHEN
 		QuerySpec querySpec = new QuerySpec(Pojo.class);
 		querySpec.includeRelation(PathSpec.of("projects"));
-		Response pojoResponse = sut.handle(pojoPath, container.toQueryAdapter(querySpec),  pojoBody);
+		Response pojoResponse = sut.handle(pojoPath, container.toQueryAdapter(querySpec), pojoBody);
 
 		// THEN
 		assertThat(pojoResponse.getDocument().getSingleData().get().getType()).isEqualTo("pojo");
@@ -543,7 +540,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response projectResponse = sut.handle(projectPath, emptyTaskQuery,  newProjectBody);
+		Response projectResponse = sut.handle(projectPath, emptyTaskQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -572,6 +569,6 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		expectedException.expectMessage(String.format("Invalid relationship name: %s", invalidRelationshipName));
 
 		// WHEN
-		sut.handle(pojoPath, container.toQueryAdapter(new QuerySpec(Pojo.class)),  pojoBody);
+		sut.handle(pojoPath, container.toQueryAdapter(new QuerySpec(Pojo.class)), pojoBody);
 	}
 }

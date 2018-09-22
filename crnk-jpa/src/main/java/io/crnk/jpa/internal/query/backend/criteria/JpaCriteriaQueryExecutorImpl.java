@@ -1,9 +1,11 @@
 package io.crnk.jpa.internal.query.backend.criteria;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import io.crnk.jpa.internal.query.AbstractQueryExecutorImpl;
+import io.crnk.jpa.internal.query.QueryUtil;
+import io.crnk.jpa.internal.query.backend.querydsl.ObjectArrayTupleImpl;
+import io.crnk.jpa.query.criteria.JpaCriteriaQueryExecutor;
+import io.crnk.meta.model.MetaDataObject;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
@@ -13,12 +15,10 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
-
-import io.crnk.jpa.internal.query.AbstractQueryExecutorImpl;
-import io.crnk.jpa.internal.query.QueryUtil;
-import io.crnk.jpa.internal.query.backend.querydsl.ObjectArrayTupleImpl;
-import io.crnk.jpa.query.criteria.JpaCriteriaQueryExecutor;
-import io.crnk.meta.model.MetaDataObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class JpaCriteriaQueryExecutorImpl<T> extends AbstractQueryExecutorImpl<T> implements JpaCriteriaQueryExecutor<T> {
 

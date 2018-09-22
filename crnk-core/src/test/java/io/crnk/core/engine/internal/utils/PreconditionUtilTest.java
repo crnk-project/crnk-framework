@@ -1,11 +1,11 @@
 package io.crnk.core.engine.internal.utils;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 public class PreconditionUtilTest {
 

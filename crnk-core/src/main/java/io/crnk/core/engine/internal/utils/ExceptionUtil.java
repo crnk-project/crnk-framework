@@ -16,11 +16,9 @@ public class ExceptionUtil {
 	public static <T> T wrapCatchedExceptions(Callable<T> callable) {
 		try {
 			return callable.call();
-		}
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -34,8 +32,7 @@ public class ExceptionUtil {
 	public static <T> T wrapCatchedExceptions(Callable<T> callable, String messageFormat, Object... params) {
 		try {
 			return callable.call();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			String formattedMessage = String.format(messageFormat, params);
 			throw new IllegalStateException(formattedMessage, e);
 		}

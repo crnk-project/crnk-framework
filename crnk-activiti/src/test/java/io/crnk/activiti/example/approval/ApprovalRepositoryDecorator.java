@@ -1,8 +1,5 @@
 package io.crnk.activiti.example.approval;
 
-import java.io.Serializable;
-import java.util.UUID;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -11,6 +8,9 @@ import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
 import io.crnk.test.mock.models.Schedule;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorBase<T, UUID> {
 
@@ -42,8 +42,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 	public <S extends T> S save(S entity) {
 		if (approvalManager.needsApproval(entity, HttpMethod.PATCH)) {
 			return approvalManager.requestApproval(entity, HttpMethod.PATCH);
-		}
-		else {
+		} else {
 			return super.save(entity);
 		}
 	}
@@ -53,8 +52,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 	public <S extends T> S create(S entity) {
 		if (approvalManager.needsApproval(entity, HttpMethod.POST)) {
 			return approvalManager.requestApproval(entity, HttpMethod.POST);
-		}
-		else {
+		} else {
 			return super.create(entity);
 		}
 	}
@@ -64,8 +62,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 		T entity = super.findOne(id, new QuerySpec(getResourceClass()));
 		if (approvalManager.needsApproval(entity, HttpMethod.DELETE)) {
 			approvalManager.requestApproval(entity, HttpMethod.DELETE);
-		}
-		else {
+		} else {
 			super.delete(id);
 		}
 	}

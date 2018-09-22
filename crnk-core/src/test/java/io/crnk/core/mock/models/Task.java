@@ -3,7 +3,15 @@ package io.crnk.core.mock.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
@@ -90,7 +98,9 @@ public class Task {
 		return readOnlyValue;
 	}
 
-	public String getWriteOnlyValue() { return writeOnlyValue; }
+	public String getWriteOnlyValue() {
+		return writeOnlyValue;
+	}
 
 	public List<Task> getOtherTasks() {
 		return otherTasks;

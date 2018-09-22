@@ -5,8 +5,6 @@ import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.TaskSubType;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TaskSubtypeRepository extends ResourceRepositoryBase<TaskSubType, Long> {

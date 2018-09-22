@@ -170,7 +170,7 @@ public class NestedResourceTest extends BaseControllerTest {
 
 		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
 		Controller postController = boot.getControllerRegistry().getController(path, HttpMethod.POST.toString());
-		Response response = postController.handleAsync(path, queryAdapter,  document).get();
+		Response response = postController.handleAsync(path, queryAdapter, document).get();
 		Assert.assertEquals(HttpStatus.CREATED_201, response.getHttpStatus().intValue());
 
 		Resource createdResource = response.getDocument().getSingleData().get();
@@ -182,13 +182,13 @@ public class NestedResourceTest extends BaseControllerTest {
 		Assert.assertNotNull(path);
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
-		response = patchController.handleAsync(path, queryAdapter,  document).get();
+		response = patchController.handleAsync(path, queryAdapter, document).get();
 		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
 
 		// GET resource
 		createdResource.setAttribute("value", toJson("valueB"));
 		Controller getController = boot.getControllerRegistry().getController(path, HttpMethod.GET.toString());
-		response = getController.handleAsync(path, queryAdapter,  null).get();
+		response = getController.handleAsync(path, queryAdapter, null).get();
 		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
 		Resource getResource = response.getDocument().getSingleData().get();
 		Assert.assertEquals("http://127.0.0.1/test/b/manyNested/a", getResource.getLinks().get("self").asText());

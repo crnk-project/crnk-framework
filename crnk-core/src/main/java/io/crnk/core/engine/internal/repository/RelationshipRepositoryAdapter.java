@@ -1,12 +1,12 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.util.Collection;
-import java.util.Map;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * A repository adapter for relationship repository.

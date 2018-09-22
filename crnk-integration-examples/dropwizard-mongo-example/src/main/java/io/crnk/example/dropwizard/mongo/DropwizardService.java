@@ -13,8 +13,6 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-import java.io.File;
-
 
 public class DropwizardService extends Application<DropwizardConfiguration> {
 

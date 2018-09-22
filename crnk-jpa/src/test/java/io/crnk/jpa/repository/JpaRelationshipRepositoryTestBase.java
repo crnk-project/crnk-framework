@@ -1,11 +1,6 @@
 package io.crnk.jpa.repository;
 
 import io.crnk.core.engine.information.resource.ResourceField;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -21,6 +16,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 @Transactional
 public abstract class JpaRelationshipRepositoryTestBase extends AbstractJpaTest {

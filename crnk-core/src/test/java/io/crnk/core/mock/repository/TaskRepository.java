@@ -1,9 +1,5 @@
 package io.crnk.core.mock.repository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Task;
@@ -13,7 +9,10 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.queryParams.QueryParams;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TaskRepository implements ResourceRepositoryV2<Task, Long>, MetaRepositoryV2<Task> {
 

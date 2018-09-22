@@ -1,7 +1,5 @@
 package io.crnk.gen.runtime.cdi;
 
-import java.io.IOException;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
@@ -10,6 +8,8 @@ import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import org.jboss.weld.environment.se.Weld;
+
+import java.io.IOException;
 
 public class CdiRunner {
 
@@ -35,8 +35,7 @@ public class CdiRunner {
 			MetaModule metaModule = optionalModule.get();
 			MetaLookup lookup = metaModule.getLookup();
 			context.generate(lookup);
-		}
-		finally {
+		} finally {
 			weld.shutdown();
 		}
 

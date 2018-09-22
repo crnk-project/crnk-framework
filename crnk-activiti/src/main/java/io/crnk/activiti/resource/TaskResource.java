@@ -1,9 +1,9 @@
 package io.crnk.activiti.resource;
 
+import io.crnk.core.resource.annotations.JsonApiId;
+
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-
-import io.crnk.core.resource.annotations.JsonApiId;
 
 public class TaskResource {
 

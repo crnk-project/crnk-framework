@@ -7,7 +7,12 @@ import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
-import io.crnk.test.mock.repository.*;
+import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
+import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.ScheduleToTaskRepository;
+import io.crnk.test.mock.repository.TaskSubtypeRepository;
+import io.crnk.test.mock.repository.TaskToProjectRepository;
+import io.crnk.test.mock.repository.TaskToScheduleRepo;
 
 public class ReactiveTestModule implements Module {
 

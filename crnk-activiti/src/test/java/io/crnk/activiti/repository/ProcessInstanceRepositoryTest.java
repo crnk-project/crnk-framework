@@ -1,9 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Map;
-
 import io.crnk.activiti.example.ApprovalTestApplication;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalValues;
@@ -19,6 +15,10 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Map;
 
 public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 
@@ -168,8 +168,7 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		try {
 			processRepository.findOne(processInstance.getId(), new QuerySpec(ScheduleApprovalProcessInstance.class));
 			Assert.fail();
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}

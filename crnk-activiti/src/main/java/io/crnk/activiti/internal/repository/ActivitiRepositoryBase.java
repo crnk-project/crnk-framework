@@ -1,9 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.activiti.mapper.ActivitiQuerySpecMapper;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
@@ -16,6 +13,9 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import org.activiti.engine.query.Query;
 
+import java.util.Arrays;
+import java.util.List;
+
 public abstract class ActivitiRepositoryBase<T> extends ResourceRepositoryBase<T, String> {
 
 	protected final ActivitiResourceMapper resourceMapper;
@@ -24,7 +24,7 @@ public abstract class ActivitiRepositoryBase<T> extends ResourceRepositoryBase<T
 
 
 	public ActivitiRepositoryBase(ActivitiResourceMapper resourceMapper, Class<T> resourceClass,
-			List<FilterSpec> baseFilters) {
+								  List<FilterSpec> baseFilters) {
 		super(resourceClass);
 		this.baseFilters = baseFilters;
 		this.resourceMapper = resourceMapper;

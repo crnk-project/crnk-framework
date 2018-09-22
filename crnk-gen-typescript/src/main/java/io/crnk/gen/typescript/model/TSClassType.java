@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript.model;
 
-import java.util.ArrayList;
-
 public class TSClassType extends TSObjectType {
 
 	private TSType superType;

@@ -33,7 +33,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ResourceFieldContributorTest {
 
@@ -84,7 +89,7 @@ public class ResourceFieldContributorTest {
 
 		Map<String, Set<String>> parameters = new HashMap<>();
 		parameters.put("include", Sets.newHashSet("contributedProject"));
-		Response response = requestDispatcher.dispatchRequest("tasks", "GET", parameters,  null);
+		Response response = requestDispatcher.dispatchRequest("tasks", "GET", parameters, null);
 
 		Document document = response.getDocument();
 		Resource resource = document.getCollectionData().get().get(0);

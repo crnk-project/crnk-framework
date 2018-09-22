@@ -6,6 +6,7 @@ import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.module.InitializingModule;
+
 import java.util.List;
 
 // tag::docs[]

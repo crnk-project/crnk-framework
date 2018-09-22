@@ -1,10 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.mapper.DefaultDateTimeMapper;
 import io.crnk.activiti.resource.FormResource;
@@ -23,6 +18,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ActivitiResourceMapperTest {
 

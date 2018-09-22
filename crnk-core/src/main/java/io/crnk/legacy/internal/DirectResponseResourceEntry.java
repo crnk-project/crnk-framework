@@ -12,7 +12,7 @@ public class DirectResponseResourceEntry implements ResourceEntry {
 	private ResourceRepositoryInformation information;
 
 	public DirectResponseResourceEntry(RepositoryInstanceBuilder<ResourceRepository> repositoryInstanceBuilder,
-			ResourceRepositoryInformation information) {
+									   ResourceRepositoryInformation information) {
 		this.repositoryInstanceBuilder = repositoryInstanceBuilder;
 		this.information = information;
 	}

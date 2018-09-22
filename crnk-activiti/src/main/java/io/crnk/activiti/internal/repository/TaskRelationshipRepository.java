@@ -1,10 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.io.Serializable;
-import java.util.Arrays;
-
-import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -14,8 +10,12 @@ import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 public class TaskRelationshipRepository<P extends ProcessInstanceResource, T extends TaskResource> extends
 		ReadOnlyRelationshipRepositoryBase<P,

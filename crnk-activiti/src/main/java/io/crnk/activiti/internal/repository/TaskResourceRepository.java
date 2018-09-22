@@ -1,8 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.util.List;
-
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterSpec;
@@ -11,12 +9,14 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 
+import java.util.List;
+
 public class TaskResourceRepository<T extends TaskResource> extends ActivitiRepositoryBase<T> {
 
 	private final TaskService taskService;
 
 	public TaskResourceRepository(TaskService taskService, ActivitiResourceMapper resourceMapper, Class<T> resourceClass,
-			List<FilterSpec> baseFilters) {
+								  List<FilterSpec> baseFilters) {
 		super(resourceMapper, resourceClass, baseFilters);
 		this.taskService = taskService;
 	}

@@ -1,7 +1,5 @@
 package io.crnk.jpa.meta;
 
-import java.io.Serializable;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.AbstractJpaJerseyTest;
@@ -18,6 +16,8 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 

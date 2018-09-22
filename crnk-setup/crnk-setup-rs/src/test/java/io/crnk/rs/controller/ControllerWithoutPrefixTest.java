@@ -1,13 +1,5 @@
 package io.crnk.rs.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.mock.TestModule;
@@ -15,6 +7,14 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
 import org.junit.Test;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ControllerWithoutPrefixTest extends ControllerTest {
 

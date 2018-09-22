@@ -1,11 +1,5 @@
 package io.crnk.gen.typescript.processor;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.gen.typescript.model.TSContainerElement;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSField;
@@ -19,6 +13,11 @@ import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSVisitorBase;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

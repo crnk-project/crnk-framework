@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -11,6 +8,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.utils.Nullable;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class RelationshipDataDeserializer extends JsonDeserializer<Nullable<Object>> {
 

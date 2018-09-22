@@ -7,7 +7,11 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.operations.Operation;
 import io.crnk.operations.internal.GraphUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DependencyOrderStrategy implements OperationOrderStrategy {
 

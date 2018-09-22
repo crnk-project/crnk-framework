@@ -1,12 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +27,13 @@ import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 import io.crnk.legacy.queryParams.params.TypedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DocumentMapperUtil {
 

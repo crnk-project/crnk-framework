@@ -1,18 +1,18 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.information.bean.BeanInformation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class JpaMetaUtils {
 
@@ -25,8 +25,7 @@ public class JpaMetaUtils {
 	public static Class<?> getElementType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
-		}
-		else if (type instanceof ParameterizedType) {
+		} else if (type instanceof ParameterizedType) {
 			ParameterizedType paramType = (ParameterizedType) type;
 			if (paramType.getRawType() instanceof Class && Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 				return getElementType(paramType.getActualTypeArguments()[1]);

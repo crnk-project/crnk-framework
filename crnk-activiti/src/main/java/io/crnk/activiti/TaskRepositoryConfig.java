@@ -1,14 +1,14 @@
 package io.crnk.activiti;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.activiti.resource.FormResource;
 import io.crnk.activiti.resource.HistoricTaskResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TaskRepositoryConfig {
 

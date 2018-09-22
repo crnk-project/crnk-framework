@@ -1,8 +1,5 @@
 package io.crnk.example.springboot.domain.repository;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.reflect.TypeToken;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
@@ -13,6 +10,9 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.example.springboot.domain.model.History;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 // tag::docs[]
 @Component

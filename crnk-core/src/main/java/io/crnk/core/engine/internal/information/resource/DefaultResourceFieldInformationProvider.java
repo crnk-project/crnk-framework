@@ -5,7 +5,20 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiField;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiLinksInformation;
+import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
@@ -92,8 +105,7 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 		if (jsonApiLookupIncludeAutomatically.isPresent()) {
 			if (jsonApiLookupIncludeAutomatically.get().overwrite()) {
 				return Optional.of(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
-			}
-			else {
+			} else {
 				return Optional.of(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
 			}
 		}
@@ -196,7 +208,7 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 		if (attributeDesc.getAnnotation(JsonApiToOne.class).isPresent()
 				|| attributeDesc.getAnnotation(JsonApiToMany.class).isPresent()
 				|| attributeDesc.getAnnotation(JsonApiRelation.class).isPresent()
-				) {
+		) {
 			return Optional.of(ResourceFieldType.RELATIONSHIP);
 		}
 

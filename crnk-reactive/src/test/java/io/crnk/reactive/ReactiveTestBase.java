@@ -7,12 +7,11 @@ import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.reactive.internal.MonoResultFactory;
+import io.crnk.reactive.model.InMemoryReactiveResourceRepository;
 import io.crnk.reactive.model.ReactiveProject;
 import io.crnk.reactive.model.ReactiveProjectToTasksRepository;
 import io.crnk.reactive.model.ReactiveTask;
 import io.crnk.reactive.model.ReactiveTaskToProjectRepository;
-import io.crnk.reactive.model.InMemoryReactiveResourceRepository;
 import org.junit.Before;
 import org.mockito.Mockito;
 

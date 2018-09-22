@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -9,6 +7,8 @@ import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.resource.links.LinksInformation;
+
+import java.io.IOException;
 
 /**
  * Serializes {@link LinksInformation} objects as JSON objects instead of simple JSON attributes.
@@ -30,8 +30,7 @@ public class LinksInformationSerializer extends JsonSerializer<LinksInformation>
 				gen.writeObjectFieldStart(attrName);
 				if (linkValue instanceof String) {
 					gen.writeStringField(SerializerUtil.HREF, linkValue.toString());
-				}
-				else {
+				} else {
 					gen.writeObject(linkValue);
 				}
 				gen.writeEndObject();

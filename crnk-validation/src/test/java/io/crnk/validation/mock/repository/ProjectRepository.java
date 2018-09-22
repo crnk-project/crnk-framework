@@ -5,7 +5,12 @@ import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.repository.ResourceRepository;
 import io.crnk.validation.mock.models.Project;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;

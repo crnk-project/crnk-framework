@@ -1,10 +1,5 @@
 package io.crnk.spring.setup.boot.jpa;
 
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
@@ -24,6 +19,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import java.util.List;
+
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' JPA module.
  * <p>
@@ -39,10 +39,10 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = "crnk.jpa", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(JpaModule.class)
 @ConditionalOnMissingBean(JpaModule.class)
-@EnableConfigurationProperties({ CrnkJpaProperties.class, CrnkCoreProperties.class })
+@EnableConfigurationProperties({CrnkJpaProperties.class, CrnkCoreProperties.class})
 @AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
 @AutoConfigureBefore
-@Import({ CrnkCoreAutoConfiguration.class })
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkJpaAutoConfiguration {
 
 	@PersistenceContext

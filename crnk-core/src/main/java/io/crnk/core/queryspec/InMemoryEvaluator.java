@@ -1,12 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -22,6 +15,13 @@ import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Applies the given QuerySpec to the provided list in memory. Result available
@@ -53,14 +53,11 @@ public class InMemoryEvaluator {
 		List<FilterSpec> expressions = filterSpec.getExpression();
 		if (expressions == null) {
 			return matchesPrimitiveOperator(object, filterSpec);
-		}
-		else if (filterSpec.getOperator() == FilterOperator.OR) {
+		} else if (filterSpec.getOperator() == FilterOperator.OR) {
 			return matchesOr(object, expressions);
-		}
-		else if (filterSpec.getOperator() == FilterOperator.AND) {
+		} else if (filterSpec.getOperator() == FilterOperator.AND) {
 			return matchesAnd(object, expressions);
-		}
-		else if (filterSpec.getOperator() == FilterOperator.NOT) {
+		} else if (filterSpec.getOperator() == FilterOperator.NOT) {
 			return !matchesFilter(object, FilterSpec.and(expressions));
 		}
 		throw new UnsupportedOperationException("not implemented " + filterSpec);
@@ -75,8 +72,7 @@ public class InMemoryEvaluator {
 		Object filterValue = filterSpec.getValue();
 		if (value instanceof Collection) {
 			return matchesAny((Collection<?>) value, operator, filterValue);
-		}
-		else {
+		} else {
 			return operator.matches(value, filterValue);
 		}
 	}
@@ -101,8 +97,7 @@ public class InMemoryEvaluator {
 			idAttributePath.add(pathElements.get(pathLength - 2) + "Id");
 			try {
 				return PropertyUtils.getProperty(object, idAttributePath);
-			}
-			catch (PropertyException e) {
+			} catch (PropertyException e) {
 				return null; // property does not exist
 			}
 		}

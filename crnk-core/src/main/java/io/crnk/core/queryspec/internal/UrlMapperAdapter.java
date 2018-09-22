@@ -1,8 +1,5 @@
 package io.crnk.core.queryspec.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
@@ -12,6 +9,9 @@ import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
+
+import java.util.Map;
+import java.util.Set;
 
 @Deprecated
 public class UrlMapperAdapter implements QuerySpecUrlMapper, UnkonwnMappingAware {

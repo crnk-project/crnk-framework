@@ -14,7 +14,7 @@ public class TSMetaTransformationOptions {
 
 	/**
 	 * @param parent where to place the generated object in the Typescript model.
-	*  A new source file is typically generated if no parent is specified.
+	 *               A new source file is typically generated if no parent is specified.
 	 */
 	public void setParent(TSContainerElement parent) {
 		this.parent = parent;

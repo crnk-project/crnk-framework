@@ -1,18 +1,18 @@
 package io.crnk.meta.internal.typed;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.meta.internal.MetaUtils;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> implements TypedMetaElementFactory {
 
@@ -49,8 +49,7 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 					}
 
 					initAttribute(attribute);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new IllegalStateException(
 							"failed to create attribute " + implClass.getName() + "." + name + " with metaName=" + metaName, e);
 				}

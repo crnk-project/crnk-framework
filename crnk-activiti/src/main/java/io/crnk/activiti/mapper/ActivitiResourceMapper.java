@@ -1,18 +1,5 @@
 package io.crnk.activiti.mapper;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import io.crnk.activiti.resource.ExecutionResource;
 import io.crnk.activiti.resource.FormResource;
 import io.crnk.activiti.resource.HistoricProcessInstanceResource;
@@ -31,6 +18,19 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskInfo;
 import org.apache.commons.lang3.ClassUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ActivitiResourceMapper {
 
@@ -59,7 +59,7 @@ public class ActivitiResourceMapper {
 	}
 
 	public <T extends HistoricProcessInstanceResource> T mapToResource(Class<T> resourceClass,
-			HistoricProcessInstance processInstance) {
+																	   HistoricProcessInstance processInstance) {
 		T resource = io.crnk.core.engine.internal.utils.ClassUtils.newInstance(resourceClass);
 		Map<String, Object> processVariables = processInstance.getProcessVariables();
 		copyInternal(resource, null, processVariables, true, Optional.of(processInstance));
@@ -105,7 +105,7 @@ public class ActivitiResourceMapper {
 
 
 	private void copyInternal(Object resource, String prefix, Map<String, Object> variables, boolean toResource,
-			Optional<Object> variableHolder) {
+							  Optional<Object> variableHolder) {
 		BeanInformation beanInformation = BeanInformation.get(resource.getClass());
 		for (String attributeName : beanInformation.getAttributeNames()) {
 			BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
@@ -116,8 +116,7 @@ public class ActivitiResourceMapper {
 
 			if (isStaticField(attribute)) {
 				copyStaticField(resource, attributeName, variableHolder, toResource);
-			}
-			else {
+			} else {
 				copyDynamicField(resource, attribute, variableHolder, variables, prefix, toResource);
 			}
 		}
@@ -143,8 +142,7 @@ public class ActivitiResourceMapper {
 			if (toResource) {
 				Object value = PropertyUtils.getProperty(activitiBean.get(), unmapName(attributeName));
 				PropertyUtils.setProperty(resource, attributeName, mapValue(value));
-			}
-			else {
+			} else {
 				BeanAttributeInformation attribute = activitiBeanInformation.getAttribute(attributeName);
 				if (attribute != null && attribute.getSetter() != null) {
 					Object value = PropertyUtils.getProperty(resource, unmapName(attributeName));
@@ -169,7 +167,7 @@ public class ActivitiResourceMapper {
 	}
 
 	private void copyDynamicField(Object resource, BeanAttributeInformation attribute, Optional<Object> variableHolder,
-			Map<String, Object> variables, String prefix, boolean toResource) {
+								  Map<String, Object> variables, String prefix, boolean toResource) {
 		String attributeName = attribute.getName();
 		Method getter = attribute.getGetter();
 		try {
@@ -182,13 +180,11 @@ public class ActivitiResourceMapper {
 						Object mappedValue = mapValue(value, attribute.getImplementationClass());
 						PropertyUtils.setProperty(resource, attributeName, mappedValue);
 					}
-				}
-				else {
+				} else {
 					Object value = getter.invoke(resource);
 					variables.put(key, value);
 				}
-			}
-			else {
+			} else {
 				Object childResource = getter.invoke(resource);
 				if (childResource == null) {
 					childResource =
@@ -201,8 +197,7 @@ public class ActivitiResourceMapper {
 					copyInternal(childResource, key, variables, toResource, childVariableHolder);
 				}
 			}
-		}
-		catch (IllegalAccessException | InvocationTargetException e) {
+		} catch (IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}

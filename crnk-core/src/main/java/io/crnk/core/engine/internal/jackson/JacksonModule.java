@@ -3,7 +3,6 @@ package io.crnk.core.engine.internal.jackson;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.module.Module;
 
@@ -45,8 +44,7 @@ public class JacksonModule implements Module {
 	 * Adds the {@link LinksInformationSerializer} if <code>serializeLinksAsObjects</code> is set to <code>true</code>.
 	 *
 	 * @param serializeLinksAsObjects flag which decides whether the {@link LinksInformationSerializer} should be added as
-	 * additional serializer or not.
-	 *
+	 *                                additional serializer or not.
 	 * @return {@link com.fasterxml.jackson.databind.Module} with custom serializers
 	 */
 	public static SimpleModule createJacksonModule(boolean serializeLinksAsObjects) {

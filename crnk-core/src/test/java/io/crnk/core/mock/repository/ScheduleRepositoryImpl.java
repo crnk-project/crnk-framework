@@ -43,7 +43,7 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 		schedules.remove(id);
 	}
 
-	public int getNumFindAll(){
+	public int getNumFindAll() {
 		return numFindAll;
 	}
 }

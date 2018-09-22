@@ -1,16 +1,15 @@
 package io.crnk.core.engine.internal.dispatcher;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Stores a list of controllers which are used to process the incoming requests.
@@ -41,8 +40,8 @@ public class ControllerRegistry {
 	/**
 	 * Iterate over all registered controllers to get the first suitable one.
 	 *
-	 * @param jsonPath    built JsonPath object mad from request path
-	 * @param method type of a HTTP request
+	 * @param jsonPath built JsonPath object mad from request path
+	 * @param method   type of a HTTP request
 	 * @return suitable controller
 	 */
 	public Controller getController(JsonPath jsonPath, String method) {

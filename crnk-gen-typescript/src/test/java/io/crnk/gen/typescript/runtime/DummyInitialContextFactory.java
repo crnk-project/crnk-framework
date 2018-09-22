@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript.runtime;
 
-import java.util.Hashtable;
-
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.Name;
@@ -10,6 +8,7 @@ import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
+import java.util.Hashtable;
 
 public class DummyInitialContextFactory implements InitialContextFactory {
 

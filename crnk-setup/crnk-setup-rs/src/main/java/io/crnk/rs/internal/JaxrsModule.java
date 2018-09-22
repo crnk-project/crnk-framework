@@ -1,9 +1,10 @@
 package io.crnk.rs.internal;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import io.crnk.core.engine.information.repository.RepositoryAction;
+import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
+import io.crnk.core.module.Module;
+import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationProvider;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,11 +13,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.SecurityContext;
-
-import io.crnk.core.engine.information.repository.RepositoryAction;
-import io.crnk.core.engine.information.repository.RepositoryAction.RepositoryActionType;
-import io.crnk.core.module.Module;
-import io.crnk.legacy.repository.information.DefaultResourceRepositoryInformationProvider;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JaxrsModule implements Module {
 
@@ -78,8 +78,7 @@ public class JaxrsModule implements Module {
 				String name = pathElements[pathElements.length - 1];
 				RepositoryAction action = new JaxrsRepositoryAction(name, actionType);
 				actions.put(name, action);
-			}
-			else if (isJaxRs) {
+			} else if (isJaxRs) {
 				throw new IllegalStateException("JAXRS actions must be annotated with @Path: " + method);
 			}
 		}
@@ -87,7 +86,7 @@ public class JaxrsModule implements Module {
 		/**
 		 * There are some strict roles to follow to be a valid action
 		 *
-		 * @param method holding the @Path annotation
+		 * @param method       holding the @Path annotation
 		 * @param pathElements of this method
 		 */
 		private void checkPathElements(Method method, String[] pathElements) {

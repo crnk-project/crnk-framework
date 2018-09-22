@@ -1,14 +1,14 @@
 package io.crnk.spring.mvc;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 
 /**
  * Module to register the Spring exception mappers with Crnk.

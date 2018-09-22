@@ -1,7 +1,5 @@
 package io.crnk.core.module;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -29,6 +27,8 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+
+import java.util.List;
 
 /**
  * Interface for extensions that can be registered to Crnk to provide a

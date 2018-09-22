@@ -18,8 +18,7 @@ public class ApprovalMapper {
 	public void unmapValues(ApprovalValues attributes, Object object) {
 		if (object instanceof Schedule) {
 			unmapValues((ScheduleApprovalValues) attributes, (Schedule) object);
-		}
-		else {
+		} else {
 			throw new IllegalStateException();
 		}
 	}

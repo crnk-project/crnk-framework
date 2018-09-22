@@ -1,7 +1,6 @@
 package io.crnk.core.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -21,7 +20,6 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -85,8 +83,7 @@ public class JsonApiRelationIdInformationProviderTest {
 		try {
 			resourceInformationProvider.build(UnmatchedIdFieldResource.class);
 			Assert.fail("pro");
-		}
-		catch (InvalidResourceException e) {
+		} catch (InvalidResourceException e) {
 			Assert.assertTrue(e.getMessage().contains("@JsonApiRelationId"));
 			Assert.assertTrue(e.getMessage().contains("[projectFk]"));
 		}

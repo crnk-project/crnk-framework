@@ -1,11 +1,11 @@
 package io.crnk.jpa.model;
 
-import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import java.time.OffsetDateTime;
 
 @Entity
 public class BasicAttributesTestEntity {

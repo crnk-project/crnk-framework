@@ -1,17 +1,17 @@
 package io.crnk.jpa;
 
-import javax.persistence.criteria.CriteriaQuery;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.model.TestEntity;
-import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilterBase;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
+import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilterBase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import javax.persistence.criteria.CriteriaQuery;
 
 public class JpaFilterTest extends AbstractJpaJerseyTest {
 

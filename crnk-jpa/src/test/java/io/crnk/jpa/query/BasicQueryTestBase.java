@@ -1,17 +1,5 @@
 package io.crnk.jpa.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-import javax.persistence.criteria.JoinType;
-
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -24,6 +12,18 @@ import org.hibernate.Hibernate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.criteria.JoinType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @Transactional
 public abstract class BasicQueryTestBase extends AbstractJpaTest {
@@ -382,8 +382,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 			if (i == 4) {
 				assertTrue(entity.getEmbValue().getNestedValue().getEmbBoolValue());
 				assertEquals(0, entity.getId().intValue());
-			}
-			else {
+			} else {
 				assertFalse(entity.getEmbValue().getNestedValue().getEmbBoolValue());
 				assertEquals(1 + i, entity.getId().intValue());
 			}
@@ -595,7 +594,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 		Assert.assertEquals("testId", testEntity.getId());
 
 		JpaQuery<Object> relatedQuery =
-					queryFactory.query(TestSubclassWithSuperclassPk.class, "superRelatedValue", "id", Arrays.asList("testId"));
+				queryFactory.query(TestSubclassWithSuperclassPk.class, "superRelatedValue", "id", Arrays.asList("testId"));
 		relatedQuery.addParentIdSelection();
 		JpaQueryExecutor<Object> relatedExecutor = relatedQuery.buildExecutor();
 		List<Tuple> resultTuples = relatedExecutor.getResultTuples();

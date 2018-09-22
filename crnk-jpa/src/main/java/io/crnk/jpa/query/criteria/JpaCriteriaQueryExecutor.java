@@ -1,10 +1,10 @@
 package io.crnk.jpa.query.criteria;
 
-import java.util.List;
+import io.crnk.jpa.query.JpaQueryExecutor;
+
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaQuery;
-
-import io.crnk.jpa.query.JpaQueryExecutor;
+import java.util.List;
 
 public interface JpaCriteriaQueryExecutor<T> extends JpaQueryExecutor<T> {
 

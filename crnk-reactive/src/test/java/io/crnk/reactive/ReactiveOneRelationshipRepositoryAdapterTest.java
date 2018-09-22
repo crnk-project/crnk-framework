@@ -1,8 +1,5 @@
 package io.crnk.reactive;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
@@ -14,6 +11,9 @@ import io.crnk.reactive.model.ReactiveTask;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class ReactiveOneRelationshipRepositoryAdapterTest extends ReactiveTestBase {
 

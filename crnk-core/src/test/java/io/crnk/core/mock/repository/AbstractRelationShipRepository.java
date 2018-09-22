@@ -1,11 +1,11 @@
 package io.crnk.core.mock.repository;
 
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+import io.crnk.core.mock.repository.util.Relation;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentMap;
-
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.mock.repository.util.Relation;
 
 
 public abstract class AbstractRelationShipRepository<T> {

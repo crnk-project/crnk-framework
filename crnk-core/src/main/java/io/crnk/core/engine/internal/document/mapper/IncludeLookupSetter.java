@@ -15,7 +15,6 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;

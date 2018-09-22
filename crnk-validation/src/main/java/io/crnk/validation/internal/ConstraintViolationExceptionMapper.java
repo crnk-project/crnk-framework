@@ -1,20 +1,5 @@
 package io.crnk.validation.internal;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ElementKind;
-import javax.validation.Path.Node;
-
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
 import io.crnk.core.engine.error.ErrorResponse;
@@ -33,6 +18,21 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module.ModuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ElementKind;
+import javax.validation.Path.Node;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
@@ -78,8 +78,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				Object parentNode = parentMethod.invoke(propertyNode);
 				if (parentNode != null) {
 					return valueMethod.invoke(parentNode);
-				}
-				else {
+				} else {
 					return valueMethod.invoke(propertyNode);
 				}
 			}
@@ -168,7 +167,7 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public ConstraintViolationException fromErrorResponse(ErrorResponse errorResponse) {
 		Set violations = new HashSet();
 
@@ -185,11 +184,9 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 			}
 			if (violation.getMessage() != null) {
 				message.append(violation.getMessage());
-			}
-			else if (error.getDetail() != null) {
+			} else if (error.getDetail() != null) {
 				message.append(error.getDetail());
-			}
-			else {
+			} else {
 				message.append(error.getCode());
 			}
 			String sourcePointer = error.getSourcePointer();
@@ -318,19 +315,15 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 					ResourceFieldAccessor accessor = resourceInformation.getAccessor(name);
 					if (accessor != null) {
 						next = accessor.getValue(nodeObject);
-					}
-					else {
+					} else {
 						next = PropertyUtils.getProperty(nodeObject, name);
 					}
-				}
-				else {
+				} else {
 					next = PropertyUtils.getProperty(nodeObject, name);
 				}
-			}
-			else if (node.getKind() == ElementKind.BEAN) {
+			} else if (node.getKind() == ElementKind.BEAN) {
 				next = nodeObject;
-			}
-			else {
+			} else {
 				throw new UnsupportedOperationException("unknown node: " + node);
 			}
 
@@ -348,12 +341,10 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				if (resourceField == null || resourceField.getResourceFieldType() == ResourceFieldType.ID) {
 					// continue along attributes path or primary key on root
 					appendSourcePointer(mappedName);
-				}
-				else if (resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
+				} else if (resourceField != null && resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
 					appendSourcePointer("/data/relationships/");
 					appendSourcePointer(mappedName);
-				}
-				else {
+				} else {
 
 					appendSourcePointer("/data/attributes/");
 					appendSourcePointer(mappedName);
@@ -369,13 +360,11 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				appendSeparator();
 				appendSourcePointer(index);
 				return ((List<?>) element).get(index);
-			}
-			else if (key != null) {
+			} else if (key != null) {
 				appendSeparator();
 				appendSourcePointer(key);
 				return ((Map<?, ?>) element).get(key);
-			}
-			else if (element instanceof Set && getValue(node) != null) {
+			} else if (element instanceof Set && getValue(node) != null) {
 				Object elementEntry = getValue(node);
 
 				// since sets get translated to arrays, we do the same here

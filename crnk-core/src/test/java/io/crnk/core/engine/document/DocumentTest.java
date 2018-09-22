@@ -1,8 +1,5 @@
 package io.crnk.core.engine.document;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -13,6 +10,9 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class DocumentTest {
 

@@ -1,12 +1,12 @@
 package io.crnk.client.http;
 
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.concurrent.TimeUnit;
 
 public class OkHttpAdapterTest {
 

@@ -1,13 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
@@ -15,14 +7,22 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.RelationshipRepository;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A repository adapter for relationship repository.

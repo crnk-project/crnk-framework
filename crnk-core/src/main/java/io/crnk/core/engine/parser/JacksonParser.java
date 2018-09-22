@@ -1,10 +1,10 @@
 package io.crnk.core.engine.parser;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.TextNode;
+
+import java.io.IOException;
 
 public class JacksonParser<T> implements StringParser<T> {
 
@@ -19,8 +19,7 @@ public class JacksonParser<T> implements StringParser<T> {
 		JsonNode node = new TextNode(input);
 		try {
 			return reader.readValue(node);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new ParserException("Cannot parse " + input, e);
 		}
 	}

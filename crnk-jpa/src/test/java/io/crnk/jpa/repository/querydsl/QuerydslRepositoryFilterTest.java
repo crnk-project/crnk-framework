@@ -1,8 +1,5 @@
 package io.crnk.jpa.repository.querydsl;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.jpa.JpaEntityRepository;
 import io.crnk.jpa.JpaModule;
@@ -15,6 +12,9 @@ import io.crnk.jpa.query.querydsl.QuerydslRepositoryFilterBase;
 import io.crnk.jpa.query.querydsl.QuerydslTranslationContext;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
 @Transactional
 public class QuerydslRepositoryFilterTest extends AbstractJpaTest {

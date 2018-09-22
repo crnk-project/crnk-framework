@@ -1,10 +1,10 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.engine.internal.utils.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class PathSpec {
 

@@ -16,20 +16,6 @@
  */
 package io.crnk.servlet;
 
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.http.HttpHeaders;
 import org.junit.After;
@@ -44,6 +30,20 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class CrnkFilterTest {
 

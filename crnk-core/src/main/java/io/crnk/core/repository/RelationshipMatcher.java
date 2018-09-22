@@ -1,9 +1,9 @@
 package io.crnk.core.repository;
 
+import io.crnk.core.engine.information.resource.ResourceField;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import io.crnk.core.engine.information.resource.ResourceField;
 
 /**
  * specifies to which relationships a relationship repository should be applied to.

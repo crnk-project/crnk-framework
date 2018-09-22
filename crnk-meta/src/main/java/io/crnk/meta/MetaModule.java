@@ -1,7 +1,6 @@
 package io.crnk.meta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;

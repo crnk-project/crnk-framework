@@ -1,12 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import javax.naming.Context;
-
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -19,6 +12,13 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.naming.Context;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class GenerateTypescriptTaskTest {
 

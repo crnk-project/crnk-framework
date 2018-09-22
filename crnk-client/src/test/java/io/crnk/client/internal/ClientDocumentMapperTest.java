@@ -1,8 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorDataBuilder;
@@ -12,6 +9,9 @@ import io.crnk.test.mock.TestModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class ClientDocumentMapperTest {
 

@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.registry;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -25,6 +21,10 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
 import io.crnk.legacy.internal.DirectResponseResourceEntry;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It

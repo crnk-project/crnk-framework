@@ -18,6 +18,10 @@
  */
 package io.crnk.gen.typescript.testmodel.deltaspike;
 
+import org.apache.deltaspike.core.spi.config.ConfigSource;
+import org.apache.deltaspike.core.spi.config.ConfigSourceProvider;
+import org.apache.deltaspike.core.util.PropertyFileUtils;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,50 +30,38 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.deltaspike.core.spi.config.ConfigSource;
-import org.apache.deltaspike.core.spi.config.ConfigSourceProvider;
-import org.apache.deltaspike.core.util.PropertyFileUtils;
-
 /**
  * Register all property files with the given propertyFileName
  * as {@link ConfigSource}.
  */
-class EnvironmentPropertyConfigSourceProvider implements ConfigSourceProvider
-{
-    private static final Logger LOG = Logger.getLogger(EnvironmentPropertyConfigSourceProvider.class.getName());
+class EnvironmentPropertyConfigSourceProvider implements ConfigSourceProvider {
+	private static final Logger LOG = Logger.getLogger(EnvironmentPropertyConfigSourceProvider.class.getName());
 
-    private List<ConfigSource> configSources = new ArrayList<ConfigSource>();
+	private List<ConfigSource> configSources = new ArrayList<ConfigSource>();
 
-    EnvironmentPropertyConfigSourceProvider(String propertyFileName, boolean optional)
-    {
-        try
-        {
-            Enumeration<URL> propertyFileUrls = PropertyFileUtils.resolvePropertyFiles(propertyFileName);
+	EnvironmentPropertyConfigSourceProvider(String propertyFileName, boolean optional) {
+		try {
+			Enumeration<URL> propertyFileUrls = PropertyFileUtils.resolvePropertyFiles(propertyFileName);
 
-            if (!optional && !propertyFileUrls.hasMoreElements())
-            {
-                throw new IllegalStateException(propertyFileName + " wasn't found.");
-            }
+			if (!optional && !propertyFileUrls.hasMoreElements()) {
+				throw new IllegalStateException(propertyFileName + " wasn't found.");
+			}
 
-            while (propertyFileUrls.hasMoreElements())
-            {
-                URL propertyFileUrl = propertyFileUrls.nextElement();
-                LOG.log(Level.INFO,
-                        "Custom config found by DeltaSpike. Name: ''{0}'', URL: ''{1}''",
-                        new Object[] {propertyFileName, propertyFileUrl});
-                configSources.add(new PropertyFileConfigSource(propertyFileUrl));
-            }
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalStateException("problem while loading DeltaSpike property files", ioe);
-        }
+			while (propertyFileUrls.hasMoreElements()) {
+				URL propertyFileUrl = propertyFileUrls.nextElement();
+				LOG.log(Level.INFO,
+						"Custom config found by DeltaSpike. Name: ''{0}'', URL: ''{1}''",
+						new Object[]{propertyFileName, propertyFileUrl});
+				configSources.add(new PropertyFileConfigSource(propertyFileUrl));
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException("problem while loading DeltaSpike property files", ioe);
+		}
 
-    }
+	}
 
-    @Override
-    public List<ConfigSource> getConfigSources()
-    {
-        return configSources;
-    }
+	@Override
+	public List<ConfigSource> getConfigSources() {
+		return configSources;
+	}
 }

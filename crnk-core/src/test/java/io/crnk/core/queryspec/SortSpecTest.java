@@ -1,11 +1,11 @@
 package io.crnk.core.queryspec;
 
-import java.util.Arrays;
-
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class SortSpecTest {
 

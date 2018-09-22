@@ -1,14 +1,5 @@
 package io.crnk.core.repository.foward.strategy;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -23,6 +14,15 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.list.DefaultResourceList;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Looks up related resources by querying the related/opposite resource repository. A filter based on the opposite relationship
@@ -39,7 +39,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 
 	@SuppressWarnings("unchecked")
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec,
-			QueryContext queryContext) {
+											QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 
@@ -86,14 +86,13 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 
 		if (Collection.class.isAssignableFrom(oppositeField.getType())) {
 			handleCollectionTarget(bulkResult, result, sourceIdSet, oppositeField, sourceInformation);
-		}
-		else {
+		} else {
 			handleSingleTarget(bulkResult, result, sourceIdSet, oppositeField, sourceInformation);
 		}
 	}
 
 	private void handleSingleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, ResourceField oppositeField,
-			ResourceInformation sourceInformation) {
+									ResourceInformation sourceInformation) {
 		I sourceId;
 		if (oppositeField.hasIdField()) {
 			ResourceFieldAccessor idAccessor = oppositeField.getIdAccessor();
@@ -106,8 +105,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 						+ "return the relationship or its identifier based "
 						+ "on @JsonApiRelationId ");
 			}
-		}
-		else {
+		} else {
 			Object source = oppositeField.getAccessor().getValue(result);
 			if (source == null) {
 				throw new IllegalStateException("field " + oppositeField.getUnderlyingName() + "Id is null for " + result
@@ -131,8 +129,8 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 	}
 
 	private void handleCollectionTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet,
-			ResourceField oppositeField,
-			ResourceInformation sourceInformation) {
+										ResourceField oppositeField,
+										ResourceInformation sourceInformation) {
 		Collection<I> sourceIds;
 		if (oppositeField.hasIdField()) {
 			ResourceFieldAccessor idAccessor = oppositeField.getIdAccessor();
@@ -145,8 +143,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
 						+ "return the relationship or its identifier based "
 						+ "on @JsonApiRelationId ");
 			}
-		}
-		else {
+		} else {
 			sourceIds = new ArrayList<>();
 			Collection property = (Collection) oppositeField.getAccessor().getValue(result);
 			if (property == null) {

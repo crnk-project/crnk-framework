@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec.pagingspec;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
@@ -13,6 +7,12 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagingSpec> {
 
@@ -55,8 +55,7 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 		for (Map.Entry<String, Set<String>> param : parameters.entrySet()) {
 			if (NUMBER_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				result.setNumber(getValue(param.getKey(), param.getValue()).intValue());
-			}
-			else if (SIZE_PARAMETER.equalsIgnoreCase(param.getKey())) {
+			} else if (SIZE_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				Long size = getValue(param.getKey(), param.getValue());
 				if (maxPageLimit != null && size != null && size > maxPageLimit) {
 					throw new BadRequestException(
@@ -65,8 +64,7 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 					);
 				}
 				result.setSize(size.intValue());
-			}
-			else {
+			} else {
 				throw new ParametersDeserializationException(param.getKey());
 			}
 		}
@@ -86,9 +84,9 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 
 	@Override
 	public void build(final PagedLinksInformation linksInformation,
-			final ResourceList<?> resources,
-			final QueryAdapter queryAdapter,
-			final PagingSpecUrlBuilder urlBuilder) {
+					  final ResourceList<?> resources,
+					  final QueryAdapter queryAdapter,
+					  final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
 		Boolean isNextPageAvailable = isNextPageAvailable(resources);
 		if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(linksInformation)) {
@@ -105,9 +103,9 @@ public class NumberSizePagingBehavior extends PagingBehaviorBase<NumberSizePagin
 	}
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation linksInformation, Long total,
-			Boolean isNextPageAvailable, QueryAdapter queryAdapter,
-			boolean hasResults,
-			PagingSpecUrlBuilder urlBuilder) {
+											  Boolean isNextPageAvailable, QueryAdapter queryAdapter,
+											  boolean hasResults,
+											  PagingSpecUrlBuilder urlBuilder) {
 		NumberSizePagingSpec pagingSpec = (NumberSizePagingSpec) queryAdapter.getPagingSpec();
 		int size = pagingSpec.getSize();
 		int number = pagingSpec.getNumber();

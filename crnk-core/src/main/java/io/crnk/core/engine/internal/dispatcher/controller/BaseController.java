@@ -36,9 +36,9 @@ public abstract class BaseController implements Controller {
 	/**
 	 * Passes the request to controller method.
 	 *
-	 * @param jsonPath          Requested resource path
-	 * @param queryAdapter      QueryAdapter
-	 * @param requestDocument   Top-level JSON object from method's body of the request passed as {@link Document}
+	 * @param jsonPath        Requested resource path
+	 * @param queryAdapter    QueryAdapter
+	 * @param requestDocument Top-level JSON object from method's body of the request passed as {@link Document}
 	 * @return BaseResponseContext object
 	 * @deprecated in favor of {@link #handleAsync(JsonPath, QueryAdapter, Document)}
 	 */

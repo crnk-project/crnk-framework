@@ -1,8 +1,8 @@
 package io.crnk.monitor.brave;
 
 import brave.Tracing;
-import io.crnk.monitor.brave.internal.BraveRepositoryFilter;
 import io.crnk.core.module.Module;
+import io.crnk.monitor.brave.internal.BraveRepositoryFilter;
 
 
 /**

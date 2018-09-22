@@ -1,13 +1,9 @@
 package io.crnk.core.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -43,7 +39,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,6 +50,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
 
 public class DefaultResourceInformationProviderTest {
 
@@ -412,22 +410,22 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void buildResourceInformationWithoutResourcePath(){
+	public void buildResourceInformationWithoutResourcePath() {
 		ResourceInformation resourceInformation = testResourceInformationProvider.buildWithoutResourcePath(ResourcePathResource.class);
 	}
 
 	@Test
-	public void checkGetSetResourcePathFromInformationProvider(){
+	public void checkGetSetResourcePathFromInformationProvider() {
 		assertThat(resourceInformationProvider.getResourcePath(ResourcePathResource.class)).isEqualTo("/resourcePathGetterResources");
 	}
 
 	@Test
-	public void checkGetNotSetResourcePathFromInformationProvider(){
+	public void checkGetNotSetResourcePathFromInformationProvider() {
 		assertThat(resourceInformationProvider.getResourcePath(IdFieldWithAccessorGetterResource.class)).isEqualTo("idFieldWithAccessorGetterResource");
 	}
 
 	@Test
-	public void checkGetNotSetResourcePathFromNonResourceFromInformationProvider(){
+	public void checkGetNotSetResourcePathFromNonResourceFromInformationProvider() {
 		assertThat(resourceInformationProvider.getResourcePath(String.class)).isNull();
 	}
 
@@ -529,7 +527,7 @@ public class DefaultResourceInformationProviderTest {
 		}
 	}
 
-	@JsonApiResource(type="resourcePathGetterResource", resourcePath = "/resourcePathGetterResources")
+	@JsonApiResource(type = "resourcePathGetterResource", resourcePath = "/resourcePathGetterResources")
 	private static class ResourcePathResource {
 
 		@JsonApiId
@@ -596,7 +594,7 @@ public class DefaultResourceInformationProviderTest {
 		}
 	}
 
-	@JsonPropertyOrder({ "b", "a", "c" })
+	@JsonPropertyOrder({"b", "a", "c"})
 	@JsonApiResource(type = "orderedResource")
 	private static class OrderedResource {
 

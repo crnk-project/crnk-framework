@@ -1,22 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static junit.framework.TestCase.assertTrue;
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.ReadContext;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.mock.models.ProjectPolymorphic;
 import io.crnk.core.mock.models.Task;
@@ -26,6 +15,16 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import static junit.framework.TestCase.assertTrue;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 
@@ -90,7 +89,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -105,7 +104,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		new TaskToProjectRepository().setRelation(new Task().setId(1L), 42L, "project");
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null);
 
 		// THEN
 		Assert.assertNotNull(response);

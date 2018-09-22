@@ -1,12 +1,12 @@
 package io.crnk.activiti;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.activiti.mapper.DateTimeMapper;
 import io.crnk.activiti.mapper.DefaultDateTimeMapper;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActivitiModuleConfig {
 

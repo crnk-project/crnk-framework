@@ -1,16 +1,16 @@
 package io.crnk.activiti;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.activiti.resource.HistoricProcessInstanceResource;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ProcessInstanceConfig {
 

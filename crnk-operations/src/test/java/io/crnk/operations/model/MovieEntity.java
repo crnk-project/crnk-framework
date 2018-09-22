@@ -1,10 +1,10 @@
 package io.crnk.operations.model;
 
-import java.util.Set;
-import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import java.util.Set;
+import java.util.UUID;
 
 
 @Entity

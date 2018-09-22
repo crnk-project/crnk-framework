@@ -1,13 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -16,7 +8,6 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -25,9 +16,13 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FieldResourceGetControllerControllerTest extends BaseControllerTest {
 

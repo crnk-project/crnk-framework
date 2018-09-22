@@ -1,11 +1,5 @@
 package io.crnk.spring.boot;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import javax.security.auth.message.config.AuthConfigFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
@@ -50,6 +44,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+import javax.security.auth.message.config.AuthConfigFactory;
+import java.io.IOException;
+
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBoot2Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -198,8 +198,7 @@ public class BasicSpringBoot2Test {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/tasks", String.class);
 			Assert.fail();
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
 	}
@@ -220,8 +219,7 @@ public class BasicSpringBoot2Test {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/doesNotExist", String.class);
 			Assert.fail();
-		}
-		catch (HttpClientErrorException e) {
+		} catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 
 			String body = e.getResponseBodyAsString();

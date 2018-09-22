@@ -1,14 +1,19 @@
 package io.crnk.gen.typescript.processor;
 
-import io.crnk.gen.typescript.model.*;
+import io.crnk.gen.typescript.model.TSArrayType;
+import io.crnk.gen.typescript.model.TSClassType;
+import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSImport;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSParameterizedType;
+import io.crnk.gen.typescript.model.TSSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class TSImportProcessorTest {
 

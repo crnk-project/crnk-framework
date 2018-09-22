@@ -1,8 +1,5 @@
 package io.crnk.core.repository.forward;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -23,6 +20,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class OppositeFowardingRelationshipRepositoryTest {
 
@@ -203,8 +203,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null"));
 		}
 	}
@@ -233,8 +232,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage(), e.getMessage().contains("To make use of opposite forwarding behavior for resource lookup"));
 		}
 	}
@@ -265,8 +263,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 		try {
 			relRepository.findOneTarget(13L, "project", querySpec);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("id is null for"));
 		}
 	}

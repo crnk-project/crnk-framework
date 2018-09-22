@@ -1,12 +1,5 @@
 package io.crnk.core.module.discovery;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.Repository;
@@ -20,6 +13,13 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Choose a proper DI implementation if desired (Guava, Spring, CDI, etc.)

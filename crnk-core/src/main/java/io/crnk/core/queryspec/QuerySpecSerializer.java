@@ -1,9 +1,9 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+
 import java.util.Map;
 import java.util.Set;
-
-import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 
 /**
  * Converts {@link QuerySpec} into URL parameters.

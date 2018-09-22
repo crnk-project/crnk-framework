@@ -1,12 +1,12 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.registry.ResourceRegistry;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Cache resource/field pairs already populated to avoid loops

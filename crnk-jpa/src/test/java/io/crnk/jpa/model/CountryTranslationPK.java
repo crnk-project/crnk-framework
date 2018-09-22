@@ -1,11 +1,11 @@
 package io.crnk.jpa.model;
 
-import java.io.Serializable;
+import com.google.common.base.Objects;
+
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import com.google.common.base.Objects;
+import java.io.Serializable;
 
 @Embeddable
 public class CountryTranslationPK implements Serializable {

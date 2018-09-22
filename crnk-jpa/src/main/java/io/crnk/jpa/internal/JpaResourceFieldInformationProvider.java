@@ -1,5 +1,12 @@
 package io.crnk.jpa.internal;
 
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProviderBase;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.resource.annotations.SerializeType;
+import io.crnk.core.utils.Optional;
+
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.EmbeddedId;
@@ -12,13 +19,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
-
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.information.resource.ResourceFieldInformationProviderBase;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Optional;
 
 public class JpaResourceFieldInformationProvider extends ResourceFieldInformationProviderBase {
 

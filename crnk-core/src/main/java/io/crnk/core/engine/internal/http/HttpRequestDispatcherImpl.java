@@ -1,29 +1,33 @@
 package io.crnk.core.engine.internal.http;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
-import io.crnk.core.engine.http.*;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
+import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * A class that can be used to integrate Crnk with external frameworks like Jersey, Spring etc. See crnk-rs

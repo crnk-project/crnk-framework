@@ -1,6 +1,10 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiToOne;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -18,6 +13,11 @@ import io.crnk.core.engine.internal.utils.CoreClassTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JacksonResourceFieldInformationProviderNamingTest {
 

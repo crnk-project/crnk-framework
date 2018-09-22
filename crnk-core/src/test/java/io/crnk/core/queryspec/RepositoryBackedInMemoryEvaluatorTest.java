@@ -1,8 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -11,6 +8,9 @@ import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.module.SimpleModule;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class RepositoryBackedInMemoryEvaluatorTest extends InMemoryEvaluatorTestBase {
 

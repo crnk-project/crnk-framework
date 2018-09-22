@@ -1,9 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLClassLoader;
-
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
@@ -12,6 +8,10 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URLClassLoader;
 
 public class GenerateTypescriptTask extends DefaultTask {
 
@@ -44,8 +44,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 		try {
 			thread.setContextClassLoader(classloader);
 			runGeneration(classloader);
-		}
-		finally {
+		} finally {
 			// make sure to restore the classloader when leaving this task
 			thread.setContextClassLoader(contextClassLoader);
 
@@ -86,8 +85,7 @@ public class GenerateTypescriptTask extends DefaultTask {
 		try {
 			Class<?> clazz = classLoader.loadClass(name);
 			return clazz.newInstance();
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException("failed to load class", e);
 		}
 	}

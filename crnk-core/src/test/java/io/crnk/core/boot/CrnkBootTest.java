@@ -1,11 +1,5 @@
 package io.crnk.core.boot;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-
-import java.util.Arrays;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -48,6 +42,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Properties;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 

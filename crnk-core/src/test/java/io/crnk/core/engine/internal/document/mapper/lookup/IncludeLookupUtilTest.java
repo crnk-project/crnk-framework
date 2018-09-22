@@ -1,10 +1,10 @@
 package io.crnk.core.engine.internal.document.mapper.lookup;
 
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

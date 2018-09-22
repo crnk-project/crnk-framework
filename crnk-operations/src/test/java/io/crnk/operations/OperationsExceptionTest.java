@@ -1,8 +1,5 @@
 package io.crnk.operations;
 
-import java.util.List;
-import java.util.UUID;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.exception.InternalServerErrorException;
@@ -18,6 +15,9 @@ import io.crnk.operations.server.OperationFilterContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
 
 public class OperationsExceptionTest extends AbstractOperationsTest {
 
@@ -71,8 +71,7 @@ public class OperationsExceptionTest extends AbstractOperationsTest {
 		try {
 			insertCall.execute();
 			Assert.fail();
-		}
-		catch (InternalServerErrorException e) {
+		} catch (InternalServerErrorException e) {
 			// ok
 		}
 	}

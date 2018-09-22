@@ -12,8 +12,8 @@ import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceRepository;
 
 /**
  * Transforms MetaResourceRepository elements to (One/Many)QueryResult interfaces to gain type-safe access
@@ -89,8 +89,7 @@ public class TSMetaResourceRepositoryTransformation implements TSMetaTransformat
 		field.setNullable(true);
 		if (isArray) {
 			field.setType(new TSArrayType(resourceType));
-		}
-		else {
+		} else {
 			field.setType(resourceType);
 		}
 		return field;

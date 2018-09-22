@@ -1,12 +1,12 @@
 package io.crnk.rs;
 
-import java.io.IOException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import java.io.IOException;
 
 public class CrnkFilterTest {
 
@@ -21,8 +21,7 @@ public class CrnkFilterTest {
 		try {
 			filter.filter(requestContext);
 			Assert.fail();
-		}
-		catch (WebApplicationException e) {
+		} catch (WebApplicationException e) {
 			Assert.assertEquals("test", e.getCause().getMessage());
 		}
 	}
@@ -37,8 +36,7 @@ public class CrnkFilterTest {
 		try {
 			filter.filter(requestContext);
 			Assert.fail();
-		}
-		catch (WebApplicationException e) {
+		} catch (WebApplicationException e) {
 			Assert.assertEquals("test", e.getMessage());
 			Assert.assertNull(e.getCause());
 		}

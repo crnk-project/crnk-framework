@@ -1,7 +1,6 @@
 package io.crnk.core.queryspec.repository;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiId;

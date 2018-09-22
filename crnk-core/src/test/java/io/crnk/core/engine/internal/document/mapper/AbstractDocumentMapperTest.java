@@ -2,7 +2,6 @@ package io.crnk.core.engine.internal.document.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
@@ -17,8 +16,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.queryParams.QueryParams;
-
 import org.junit.After;
 import org.junit.Before;
 

@@ -1,10 +1,5 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -31,6 +26,11 @@ import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.Tuple;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Exposes a JPA entity as ResourceRepository.
@@ -165,8 +165,7 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 		ResourceField idField = getIdField();
 		if (idField.getUnderlyingName().equals(primaryKeyAttribute.getName())) {
 			pk = id;
-		}
-		else {
+		} else {
 			T resource = findOne(id, new QuerySpec(getResourceClass()));
 			pk = PropertyUtils.getProperty(resource, primaryKeyAttribute.getName());
 			if (pk == null) {

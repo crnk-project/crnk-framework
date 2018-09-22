@@ -1,11 +1,11 @@
 package io.crnk.jpa.mapping;
 
-import javax.persistence.EntityManager;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.jpa.model.TestEntity;
 import io.crnk.jpa.model.dto.TestDTO;
 import io.crnk.jpa.query.Tuple;
+
+import javax.persistence.EntityManager;
 
 /**
  * you may consider the use of MapStructor or similar tooling to

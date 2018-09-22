@@ -1,13 +1,13 @@
 package io.crnk.jpa.meta;
 
-import java.util.Collections;
-
 import io.crnk.jpa.model.TestMappedSuperclass;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
 
 public class MetaMappedSuperTypeTest {
 

@@ -1,7 +1,11 @@
 package io.crnk.example.springboot.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.resource.annotations.*;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 
 import java.util.List;
 

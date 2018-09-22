@@ -2,7 +2,6 @@ package io.crnk.security;
 
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Task;
-
 import org.junit.Assert;
 import org.junit.Test;
 

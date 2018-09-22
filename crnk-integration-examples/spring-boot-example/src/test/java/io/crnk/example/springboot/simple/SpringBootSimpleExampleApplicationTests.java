@@ -1,13 +1,5 @@
 package io.crnk.example.springboot.simple;
 
-import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
-
-import java.io.Serializable;
-import java.util.Map;
-import javax.security.auth.message.config.AuthConfigFactory;
-
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
@@ -29,6 +21,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
+
+import javax.security.auth.message.config.AuthConfigFactory;
+import java.io.Serializable;
+import java.util.Map;
+
+import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Shows two kinds of test cases: RestAssured and CrnkClient.

@@ -1,7 +1,5 @@
 package io.crnk.spring.setup.boot.meta;
 
-import java.util.List;
-
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -15,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' Meta module.
  * <p>
@@ -27,8 +27,8 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = "crnk.meta", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(MetaModule.class)
 @ConditionalOnMissingBean(MetaModule.class)
-@EnableConfigurationProperties({ CrnkMetaProperties.class })
-@Import({ CrnkCoreAutoConfiguration.class })
+@EnableConfigurationProperties({CrnkMetaProperties.class})
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkMetaAutoConfiguration {
 
 	@Autowired

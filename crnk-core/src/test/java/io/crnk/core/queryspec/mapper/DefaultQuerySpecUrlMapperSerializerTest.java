@@ -1,9 +1,5 @@
 package io.crnk.core.queryspec.mapper;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -23,6 +19,10 @@ import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class DefaultQuerySpecUrlMapperSerializerTest {
 

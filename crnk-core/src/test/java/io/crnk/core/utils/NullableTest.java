@@ -1,9 +1,9 @@
 package io.crnk.core.utils;
 
-import java.util.NoSuchElementException;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.NoSuchElementException;
 
 public class NullableTest {
 

@@ -1,8 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.queryspec.QuerySpec;
@@ -16,6 +13,9 @@ import io.crnk.jpa.model.TestEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
 

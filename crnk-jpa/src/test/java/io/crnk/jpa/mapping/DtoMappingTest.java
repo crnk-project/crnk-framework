@@ -1,10 +1,5 @@
 package io.crnk.jpa.mapping;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import javax.persistence.EntityManager;
-
 import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -34,6 +29,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.persistence.EntityManager;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Example of how to do DTO mapping and computed attributes.

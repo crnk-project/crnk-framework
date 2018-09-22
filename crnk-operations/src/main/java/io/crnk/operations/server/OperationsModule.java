@@ -1,13 +1,5 @@
 package io.crnk.operations.server;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -28,6 +20,14 @@ import io.crnk.operations.internal.OperationParameterUtils;
 import io.crnk.operations.server.order.DependencyOrderStrategy;
 import io.crnk.operations.server.order.OperationOrderStrategy;
 import io.crnk.operations.server.order.OrderedOperation;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OperationsModule implements Module {
 

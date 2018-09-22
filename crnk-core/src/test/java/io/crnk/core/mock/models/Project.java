@@ -1,10 +1,5 @@
 package io.crnk.core.mock.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
@@ -12,7 +7,10 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
-import io.crnk.core.resource.annotations.PatchStrategy;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @JsonApiResource(type = "projects")
 public class Project {

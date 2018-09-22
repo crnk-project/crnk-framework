@@ -5,13 +5,11 @@ import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.MatchedRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.UntypedRelationshipRepository;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.RelationshipRepository;
 import net.jodah.typetools.TypeResolver;
 
@@ -41,12 +39,11 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	}
 
 	private RepositoryInformation buildInformation(Object repository, Class<? extends Object> repositoryClass,
-			RepositoryInformationProviderContext context) {
+												   RepositoryInformationProviderContext context) {
 		RelationshipMatcher matcher;
 		if (repository instanceof MatchedRelationshipRepository) {
 			matcher = ((MatchedRelationshipRepository) repository).getMatcher();
-		}
-		else {
+		} else {
 			Class<?> sourceResourceClass = getSourceResourceClass(repository, repositoryClass);
 			Class<?> targetResourceClass = getTargetResourceClass(repository, repositoryClass);
 
@@ -72,12 +69,10 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[0];
-		}
-		else if (repository != null) {
+		} else if (repository != null) {
 			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
 			return querySpecRepo.getSourceResourceClass();
-		}
-		else {
+		} else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}
@@ -87,12 +82,10 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[2];
-		}
-		else if (repository != null) {
+		} else if (repository != null) {
 			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
 			return querySpecRepo.getTargetResourceClass();
-		}
-		else {
+		} else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepositoryV2.class, repositoryClass);
 			return typeArgs[2];
 		}

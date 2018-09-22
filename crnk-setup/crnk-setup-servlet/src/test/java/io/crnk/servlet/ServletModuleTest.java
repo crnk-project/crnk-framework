@@ -1,7 +1,5 @@
 package io.crnk.servlet;
 
-import javax.servlet.ServletContext;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -15,6 +13,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import javax.servlet.ServletContext;
 
 public class ServletModuleTest {
 

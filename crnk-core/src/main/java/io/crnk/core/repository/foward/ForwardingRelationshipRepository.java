@@ -1,7 +1,5 @@
 package io.crnk.core.repository.foward;
 
-import java.io.Serializable;
-
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -20,6 +18,8 @@ import io.crnk.core.repository.foward.strategy.GetFromOwnerStrategy;
 import io.crnk.core.repository.foward.strategy.SetOppositeStrategy;
 import io.crnk.core.repository.foward.strategy.SetOwnerStrategy;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
+
+import java.io.Serializable;
 
 /**
  * Implements a RelationshipRepository for relationships making use of one or both adjacent resource repositories.

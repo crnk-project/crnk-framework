@@ -1,7 +1,5 @@
 package io.crnk.spring.setup.boot.mvc;
 
-import javax.servlet.Servlet;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -20,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import javax.servlet.Servlet;
 import java.util.List;
 
 

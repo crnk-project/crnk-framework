@@ -1,10 +1,5 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
@@ -21,6 +16,11 @@ import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It

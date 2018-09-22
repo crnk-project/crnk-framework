@@ -1,5 +1,17 @@
 package io.crnk.gen.typescript.transform;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.gen.typescript.model.TSAny;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSPrimitiveType;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -8,19 +20,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.UUID;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.crnk.gen.typescript.model.TSAny;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSObjectType;
-import io.crnk.gen.typescript.model.TSPrimitiveType;
-import io.crnk.gen.typescript.model.TSType;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TSMetaPrimitiveTypeTransformation implements TSMetaTransformation {
 

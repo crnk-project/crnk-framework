@@ -10,7 +10,11 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.bson.types.ObjectId;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TaskToProjectRepository implements RelationshipRepositoryV2<Task, ObjectId, Project, ObjectId> {
 

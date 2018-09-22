@@ -1,13 +1,13 @@
 package io.crnk.rs;
 
-import java.util.Iterator;
-import javax.ws.rs.WebApplicationException;
-
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.rs.internal.WebApplicationExceptionMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.ws.rs.WebApplicationException;
+import java.util.Iterator;
 
 public class WebApplicationExceptionMapperTest {
 

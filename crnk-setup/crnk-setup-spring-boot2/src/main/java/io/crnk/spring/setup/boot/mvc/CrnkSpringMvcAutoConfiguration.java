@@ -24,8 +24,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @ConditionalOnProperty(prefix = "crnk.spring.mvc", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(RequestMappingHandlerMapping.class)
 @ConditionalOnMissingBean(SpringMvcModule.class)
-@EnableConfigurationProperties({ CrnkSpringMvcProperties.class })
-@Import({ CrnkCoreAutoConfiguration.class })
+@EnableConfigurationProperties({CrnkSpringMvcProperties.class})
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkSpringMvcAutoConfiguration {
 
 	@Bean

@@ -23,7 +23,10 @@ import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class FilterTest {
 
@@ -73,7 +76,7 @@ public class FilterTest {
 
 		Map<String, Set<String>> queryParams = new HashMap<>();
 		Document requestBody = new Document();
-		dispatcher.dispatchRequest(path, requestType, queryParams,  requestBody);
+		dispatcher.dispatchRequest(path, requestType, queryParams, requestBody);
 
 		// THEN
 		verify(filter).filter(captor.capture(), any(DocumentFilterChain.class));

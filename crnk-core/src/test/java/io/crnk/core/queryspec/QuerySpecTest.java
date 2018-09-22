@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec;
 
-import static org.junit.Assert.assertNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
@@ -17,6 +11,12 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import static org.junit.Assert.assertNull;
 
 public class QuerySpecTest {
 

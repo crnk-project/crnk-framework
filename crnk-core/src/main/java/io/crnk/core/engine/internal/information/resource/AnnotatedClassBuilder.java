@@ -1,15 +1,15 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 
 /**
  * Since Jackson 2.7 there is a change in internal method {@link AnnotatedClass#construct} definition. Since Jackson

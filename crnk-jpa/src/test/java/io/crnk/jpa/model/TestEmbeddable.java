@@ -23,9 +23,9 @@ public class TestEmbeddable extends TestEmbeddableBase {
 	private String embStringValue;
 
 	@Column
-	@AttributeOverrides({ @AttributeOverride(name = "stringValue", column = @Column(name = "anyStringValue")),
+	@AttributeOverrides({@AttributeOverride(name = "stringValue", column = @Column(name = "anyStringValue")),
 			@AttributeOverride(name = "intValue", column = @Column(name = "anyIntValue")),
-			@AttributeOverride(name = "type", column = @Column(name = "anyTypeValue")) })
+			@AttributeOverride(name = "type", column = @Column(name = "anyTypeValue"))})
 	private TestAnyType anyValue;
 
 	// @ManyToOne(fetch = FetchType.EAGER)

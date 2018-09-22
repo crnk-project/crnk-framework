@@ -3,9 +3,10 @@ package io.crnk.reactive.repository;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
+import reactor.core.publisher.Mono;
+
 import java.util.Collection;
 import java.util.Map;
-import reactor.core.publisher.Mono;
 
 
 public interface ReactiveManyRelationshipRepository<T, I, D, J>

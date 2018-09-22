@@ -10,14 +10,17 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.*;
+import io.crnk.core.mock.repository.MockRepositoryUtil;
+import io.crnk.core.mock.repository.ProjectRepository;
+import io.crnk.core.mock.repository.RelationIdTestRepository;
+import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
-import org.assertj.core.util.Sets;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -160,7 +163,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 	@Test
 	public void checkSetRelationIds() {
-		relRepository.setRelations(resource,Arrays.asList(3L, 4L), "testMultipleValues");
+		relRepository.setRelations(resource, Arrays.asList(3L, 4L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(3L, 4L), resource.getTestMultipleValueIds());
 
 		List<Schedule> targets =
@@ -234,7 +237,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 	}
 
 	@Test
-	public void checkFilterRelations(){
+	public void checkFilterRelations() {
 		FilterSpec filterTasks = new FilterSpec(Arrays.asList("id"), FilterOperator.GT, 13L);
 		QuerySpec querySpecTask = new QuerySpec(Task.class);
 

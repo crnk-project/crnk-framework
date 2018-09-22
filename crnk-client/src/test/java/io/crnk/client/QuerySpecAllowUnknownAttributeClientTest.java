@@ -1,12 +1,5 @@
 package io.crnk.client;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -21,6 +14,13 @@ import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class QuerySpecAllowUnknownAttributeClientTest extends AbstractClientTest {
 

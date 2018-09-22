@@ -1,13 +1,5 @@
 package io.crnk.home;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,6 +24,14 @@ import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Displays a list of available resources in the root directory.
@@ -136,19 +136,16 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				response = writeJsonHome(requestContext, pathList);
 				if (acceptsHome) {
 					response.setContentType(JSON_HOME_CONTENT_TYPE);
-				}
-				else {
+				} else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
-			}
-			else {
+			} else {
 				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 				LOGGER.debug("using JSON API format");
 				response = getResponse(requestContext, pathList);
 				if (jsonapi) {
 					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				}
-				else {
+				} else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
 			}
@@ -241,8 +238,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -266,8 +262,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		}
-		catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 

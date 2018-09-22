@@ -1,9 +1,9 @@
 package io.crnk.core.repository.decorate;
 
-import java.io.Serializable;
-
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
+
+import java.io.Serializable;
 
 /**
  * Base class for {@links RepositoryDecorator} implementations doing nothing.

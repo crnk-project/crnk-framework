@@ -1,7 +1,5 @@
 package io.crnk.client;
 
-import java.util.Arrays;
-
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -16,6 +14,8 @@ import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientTest {
 
@@ -54,8 +54,7 @@ public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientT
 		querySpec.addFilter(new FilterSpec(Arrays.asList("unknownAttr"), FilterOperator.EQ, "test"));
 		try {
 			taskRepo.findAll(querySpec);
-		}
-		catch (BadRequestException e) {
+		} catch (BadRequestException e) {
 			Assert.assertEquals("Failed to resolve path to field 'unknownAttr'", e.getMessage());
 		}
 	}

@@ -4,7 +4,13 @@ import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.jpa.query.AnyTypeObject;
-import io.crnk.meta.model.*;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaAttributeFinder;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaKey;
+import io.crnk.meta.model.MetaMapType;
+import io.crnk.meta.model.MetaType;
 
 import java.util.ArrayList;
 import java.util.List;

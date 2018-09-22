@@ -1,13 +1,5 @@
 package io.crnk.jpa.internal.query;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.JoinType;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -21,8 +13,15 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.provider.MetaPartition;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.JoinType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?, ?>> implements JpaQuery<T> {
 

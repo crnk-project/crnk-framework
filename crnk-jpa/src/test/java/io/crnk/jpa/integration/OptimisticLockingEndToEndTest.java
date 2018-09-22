@@ -1,8 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-import javax.persistence.OptimisticLockException;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.AbstractJpaJerseyTest;
@@ -11,6 +8,9 @@ import io.crnk.jpa.model.VersionedEntity;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.persistence.OptimisticLockException;
+import java.io.Serializable;
 
 public class OptimisticLockingEndToEndTest extends AbstractJpaJerseyTest {
 
@@ -45,8 +45,7 @@ public class OptimisticLockingEndToEndTest extends AbstractJpaJerseyTest {
 		try {
 			saved = repo.save(saved);
 			Assert.fail();
-		}
-		catch (OptimisticLockException e) {
+		} catch (OptimisticLockException e) {
 			// ok
 		}
 

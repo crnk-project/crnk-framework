@@ -1,9 +1,9 @@
 package io.crnk.legacy.repository;
 
-import java.io.Serializable;
-
 import io.crnk.core.repository.Repository;
 import io.crnk.legacy.queryParams.QueryParams;
+
+import java.io.Serializable;
 
 /**
  * <p>

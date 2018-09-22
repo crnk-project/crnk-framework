@@ -1,8 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
 import com.google.common.collect.Sets;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -16,6 +13,9 @@ import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 public class SaveRelationshipWithResourceEndToEndTest extends AbstractJpaJerseyTest {
 

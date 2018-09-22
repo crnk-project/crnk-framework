@@ -1,16 +1,16 @@
 package io.crnk.core.engine.error;
 
+import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.document.ErrorDataBuilder;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.document.ErrorDataBuilder;
-
 public class ExceptionMapperHelper {
 
-	private ExceptionMapperHelper(){
+	private ExceptionMapperHelper() {
 	}
 
 	private static final String META_TYPE_KEY = "type";

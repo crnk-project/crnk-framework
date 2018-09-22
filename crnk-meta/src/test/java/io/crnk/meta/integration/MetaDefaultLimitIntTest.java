@@ -12,7 +12,6 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.rs.CrnkFeature;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

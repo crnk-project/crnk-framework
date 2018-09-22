@@ -1,13 +1,5 @@
 package io.crnk.core.repository.foward.strategy;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -18,6 +10,14 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serializable> extends ForwardingStrategyBase
 		implements ForwardingGetStrategy<T, I, D, J> {
@@ -97,7 +97,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 			Object sourceId = field.getParentResourceInformation().getId(source);
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
-				((Collection) targetId).retainAll((Collection)targetMap.keySet());
+				((Collection) targetId).retainAll((Collection) targetMap.keySet());
 				for (Object targetElementId : (Collection) targetId) {
 					addResult(bulkResult, field, sourceId, targetElementId, targetMap);
 				}

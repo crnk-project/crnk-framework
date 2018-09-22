@@ -8,8 +8,7 @@ import org.junit.Test;
  * No real benefit in testing that all methods of {@link VoidPagingBehavior}
  * throw an {@link UnsupportedOperationException}.
  */
-public class VoidPagingBehaviorTest
-{
+public class VoidPagingBehaviorTest {
 
 	private VoidPagingBehavior voidPagingBehavior;
 
@@ -19,7 +18,7 @@ public class VoidPagingBehaviorTest
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void testBuild()	{
+	public void testBuild() {
 		voidPagingBehavior.build(null, null, null, null);
 	}
 
@@ -29,17 +28,17 @@ public class VoidPagingBehaviorTest
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void testCreateEmptyPagingSpec()	{
+	public void testCreateEmptyPagingSpec() {
 		voidPagingBehavior.createEmptyPagingSpec();
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void testDeserialize()	{
+	public void testDeserialize() {
 		voidPagingBehavior.deserialize(null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void testSerialize()	{
+	public void testSerialize() {
 		voidPagingBehavior.serialize(null, null);
 	}
 }

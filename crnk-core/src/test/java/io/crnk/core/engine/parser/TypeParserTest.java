@@ -1,15 +1,5 @@
 package io.crnk.core.engine.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,6 +9,16 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeParserTest {
 

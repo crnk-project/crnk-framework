@@ -1,14 +1,14 @@
 package io.crnk.spring.setup.boot.mvc;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleExtension;
 import io.crnk.spring.setup.boot.core.CrnkCoreProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * Module to register the Spring exception mappers with Crnk.
@@ -42,8 +42,7 @@ public class SpringMvcModule implements Module {
 
 				ModuleExtension homeExtension = (ModuleExtension) method.invoke(clazz, pathPrefix, handlerMappings);
 				context.addExtension(homeExtension);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
 		}

@@ -1,7 +1,5 @@
 package io.crnk.home;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
@@ -18,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class JsonApiFormatTest {
 

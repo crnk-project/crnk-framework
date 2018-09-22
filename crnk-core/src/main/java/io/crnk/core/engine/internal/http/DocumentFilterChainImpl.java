@@ -1,13 +1,13 @@
 package io.crnk.core.engine.internal.http;
 
-import java.util.List;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.module.Module;
+
+import java.util.List;
 
 class DocumentFilterChainImpl implements DocumentFilterChain {
 

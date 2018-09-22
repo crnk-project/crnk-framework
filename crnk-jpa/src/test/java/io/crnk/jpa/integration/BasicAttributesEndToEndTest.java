@@ -1,10 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -16,6 +11,11 @@ import io.crnk.jpa.model.JpaTransientTestEntity;
 import io.crnk.jpa.model.TestEnum;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 public class BasicAttributesEndToEndTest extends AbstractJpaJerseyTest {
 

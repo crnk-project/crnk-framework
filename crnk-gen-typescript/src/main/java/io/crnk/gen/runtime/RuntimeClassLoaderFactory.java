@@ -1,18 +1,5 @@
 package io.crnk.gen.runtime;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-
 import io.crnk.gen.runtime.spring.SpringRuntimeConfig;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
 import io.crnk.gen.typescript.TSGeneratorConfig;
@@ -29,6 +16,19 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Code generation runs within the application classpath, not in the gradle classpath.
@@ -58,8 +58,7 @@ public class RuntimeClassLoaderFactory {
 			ClassLoader bootstrapClassLaoder = ClassLoader.getSystemClassLoader().getParent();
 
 			sharedClassLoader = new SharedClassLoader(bootstrapClassLaoder, parentClassLoader);
-		}
-		else {
+		} else {
 			sharedClassLoader = parentClassLoader;
 		}
 
@@ -169,8 +168,7 @@ public class RuntimeClassLoaderFactory {
 		for (File file : projectClassFiles) {
 			try {
 				urls.add(file.toURI().toURL());
-			}
-			catch (MalformedURLException e) {
+			} catch (MalformedURLException e) {
 				throw new IllegalStateException();
 			}
 		}

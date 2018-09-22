@@ -1,8 +1,12 @@
 package io.crnk.core.resource.annotations;
 
-import java.lang.annotation.*;
-
 import io.crnk.core.boot.CrnkProperties;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import static io.crnk.core.resource.annotations.LookupIncludeBehavior.DEFAULT;
 import static io.crnk.core.resource.annotations.SerializeType.LAZY;
@@ -15,7 +19,7 @@ import static io.crnk.core.resource.annotations.SerializeType.LAZY;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.FIELD, ElementType.METHOD})
 public @interface JsonApiRelation {
 
 

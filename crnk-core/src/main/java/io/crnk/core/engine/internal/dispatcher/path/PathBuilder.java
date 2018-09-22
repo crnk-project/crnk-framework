@@ -13,7 +13,6 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.ResourceFieldNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

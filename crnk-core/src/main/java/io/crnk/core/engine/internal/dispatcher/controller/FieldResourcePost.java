@@ -78,7 +78,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		setMeta(resourceBody, entity, relationshipResourceInformation);
 		setLinks(resourceBody, entity, relationshipResourceInformation);
 
-		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter,  false)
+		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, false)
 				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
@@ -89,7 +89,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		} else {
 			Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository().findOne(id, queryAdapter);
 			return createdDocument.zipWith(parentResource,
-					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created,  queryAdapter))
+					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, queryAdapter))
 					.merge(it -> it)
 					.map(this::toResponse);
 		}

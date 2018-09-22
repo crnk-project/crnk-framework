@@ -1,9 +1,5 @@
 package io.crnk.core.engine.internal.jackson;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
@@ -11,6 +7,10 @@ import io.crnk.core.resource.links.SelfLinksInformation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class LinksInformationSerializerTest {
 

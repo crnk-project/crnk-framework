@@ -3,7 +3,6 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ProjectPatchStrategy;
-import io.crnk.core.mock.models.ProjectPolymorphic;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.repository.ResourceRepository;
 

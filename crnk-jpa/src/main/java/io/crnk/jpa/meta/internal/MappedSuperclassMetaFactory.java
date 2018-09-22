@@ -1,11 +1,11 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.Type;
-import javax.persistence.Embeddable;
-import javax.persistence.MappedSuperclass;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaMappedSuperclass;
+
+import javax.persistence.Embeddable;
+import javax.persistence.MappedSuperclass;
+import java.lang.reflect.Type;
 
 public class MappedSuperclassMetaFactory extends AbstractEntityMetaFactory<MetaMappedSuperclass> {
 

@@ -1,13 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceDeleteController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceDeleteControllerTest extends BaseControllerTest {
 
@@ -50,7 +49,7 @@ public class ResourceDeleteControllerTest extends BaseControllerTest {
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyTaskQuery,  null);
+		Response response = sut.handle(jsonPath, emptyTaskQuery, null);
 
 		// THEN
 		assertThat(response.getDocument()).isNull();

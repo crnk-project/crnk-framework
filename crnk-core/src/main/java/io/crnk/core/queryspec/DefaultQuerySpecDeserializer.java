@@ -1,14 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PropertyException;
@@ -24,6 +15,15 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Maps url parameters to QuerySpec.
@@ -186,13 +186,11 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 				TypeParser typeParser = context.getTypeParser();
 				Object value = typeParser.parse(stringValue, (Class) attributeType);
 				typedValues.add(value);
-			}
-			catch (ParserException e) {
+			} catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				}
-				else {
+				} else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -213,12 +211,10 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 				current = getAttributeType(current, propertyName);
 			}
 			return current;
-		}
-		catch (PropertyException e) {
+		} catch (PropertyException e) {
 			if (allowUnknownAttributes) {
 				return String.class;
-			}
-			else {
+			} else {
 				throw e;
 			}
 		}
@@ -273,8 +269,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 		RestrictedQueryParamsMembers paramType;
 		try {
 			paramType = RestrictedQueryParamsMembers.valueOf(strParamType.toLowerCase());
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			paramType = RestrictedQueryParamsMembers.unknown;
 		}
 
@@ -288,22 +283,17 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 
 		if (paramType == RestrictedQueryParamsMembers.filter && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		}
-		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
+		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.pageParameter = elements.get(0);
-		}
-		else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
+		} else if (paramType == RestrictedQueryParamsMembers.page && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
 			param.pageParameter = elements.get(1);
-		}
-		else if (paramType == RestrictedQueryParamsMembers.unknown) {
+		} else if (paramType == RestrictedQueryParamsMembers.unknown) {
 			param.resourceInformation = null;
-		}
-		else if (elements.size() == 1) {
+		} else if (elements.size() == 1) {
 			param.resourceInformation = getResourceInformation(elements.get(0), parameterName);
-		}
-		else {
+		} else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		if (param.operator == null) {
@@ -340,26 +330,23 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			param.attributePath = Arrays.asList(elements.get(1).split("\\."));
-		}
-		else if (enforceDotPathSeparator && elements.size() == 1) {
+		} else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.resourceInformation = rootResourceInformation;
 			param.attributePath = Arrays.asList(elements.get(0).split("\\."));
-		}
-		else {
+		} else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
 	private void legacyParseFilterParameterName(Parameter param, List<String> elements,
-			ResourceInformation rootResourceInformation) {
+												ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
 			param.resourceInformation = getResourceInformation(elements.get(0), param.name);
 			elements.remove(0);
-		}
-		else {
+		} else {
 			param.resourceInformation = rootResourceInformation;
 		}
 		param.attributePath = new ArrayList<>();
@@ -373,8 +360,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 		param.operator = findOperator(lastElement);
 		if (param.operator != null) {
 			elements.remove(elements.size() - 1);
-		}
-		else {
+		} else {
 			param.operator = defaultOperator;
 		}
 	}
@@ -453,8 +439,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 			}
 			try {
 				return Long.parseLong(values.iterator().next());
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new ParametersDeserializationException("expected a Long for " + toString());
 			}
 		}

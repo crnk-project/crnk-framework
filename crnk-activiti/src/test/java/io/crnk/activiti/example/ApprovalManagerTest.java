@@ -1,8 +1,5 @@
 package io.crnk.activiti.example;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.activiti.example.approval.ApprovalManager;
 import io.crnk.activiti.example.approval.ApprovalMapper;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
@@ -24,6 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ApprovalManagerTest {
 

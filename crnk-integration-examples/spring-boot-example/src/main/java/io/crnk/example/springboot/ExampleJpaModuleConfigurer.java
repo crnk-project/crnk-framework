@@ -1,13 +1,6 @@
 package io.crnk.example.springboot;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-
 import io.crnk.example.springboot.domain.model.ScheduleDto;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
 import io.crnk.jpa.JpaModuleConfig;
@@ -18,6 +11,13 @@ import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
 
 @Component
 public class ExampleJpaModuleConfigurer implements JpaModuleConfigurer {
@@ -47,7 +47,7 @@ public class ExampleJpaModuleConfigurer implements JpaModuleConfigurer {
 		queryFactory.registerComputedAttribute(ScheduleEntity.class, "upperName", String.class,
 				new JpaCriteriaExpressionFactory<From<?, ScheduleEntity>>() {
 
-					@SuppressWarnings({ "rawtypes", "unchecked" })
+					@SuppressWarnings({"rawtypes", "unchecked"})
 					@Override
 					public Expression<String> getExpression(From<?, ScheduleEntity> entity, CriteriaQuery<?> query) {
 						CriteriaBuilder builder = em.getCriteriaBuilder();

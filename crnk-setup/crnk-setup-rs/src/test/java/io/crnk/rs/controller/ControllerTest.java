@@ -1,12 +1,5 @@
 package io.crnk.rs.controller;
 
-import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import javax.ws.rs.core.Response;
-
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.TestExceptionMapper;
@@ -16,6 +9,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import static io.crnk.rs.type.JsonApiMediaType.APPLICATION_JSON_API_TYPE;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class ControllerTest extends JerseyTestBase {
 

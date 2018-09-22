@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript.model;
 
-import io.crnk.meta.model.MetaElement;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +33,6 @@ public abstract class TSElementBase implements TSElement {
 	public void setPrivateData(String key, Object value) {
 		privateData.put(key, value);
 	}
-
 
 
 }

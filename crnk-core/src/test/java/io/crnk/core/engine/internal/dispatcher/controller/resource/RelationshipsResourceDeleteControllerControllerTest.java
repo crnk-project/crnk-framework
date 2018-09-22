@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -13,7 +11,6 @@ import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceD
 import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
-import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
@@ -22,6 +19,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RelationshipsResourceDeleteControllerControllerTest extends BaseControllerTest {
 
@@ -73,7 +72,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a task
-		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery,  newTaskBody);
+		Response taskResponse = resourcePost.handle(taskPath, emptyTaskQuery, newTaskBody);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
@@ -90,7 +89,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectBody);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectBody);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -113,7 +112,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery,  newTaskToProjectBody);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery, newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -128,7 +127,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
-		Response result = sut.handle(projectRelationPath, emptyProjectQuery,  newTaskToProjectBody);
+		Response result = sut.handle(projectRelationPath, emptyProjectQuery, newTaskToProjectBody);
 		assertThat(result).isNotNull();
 		taskToProjectRepository.removeRelations("project");
 
@@ -149,7 +148,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		resourcePost.init(controllerContext);
 
 		// WHEN -- adding a user
-		Response taskResponse = resourcePost.handle(taskPath, container.toQueryAdapter(new QuerySpec(User.class)),  newUserDocument);
+		Response taskResponse = resourcePost.handle(taskPath, container.toQueryAdapter(new QuerySpec(User.class)), newUserDocument);
 
 		// THEN
 		assertThat(taskResponse.getDocument().getSingleData().get().getType()).isEqualTo("users");
@@ -165,7 +164,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		JsonPath projectPath = pathBuilder.build("/projects");
 
 		// WHEN -- adding a project
-		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery,  newProjectDocument);
+		Response projectResponse = resourcePost.handle(projectPath, emptyProjectQuery, newProjectDocument);
 
 		// THEN
 		assertThat(projectResponse.getDocument().getSingleData().get().getType()).isEqualTo("projects");
@@ -185,7 +184,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		relationshipsResourcePostController.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery,  newProjectDocument2);
+		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery, newProjectDocument2);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -200,7 +199,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
-		Response result = sut.handle(savedTaskPath, emptyProjectQuery,  newProjectDocument2);
+		Response result = sut.handle(savedTaskPath, emptyProjectQuery, newProjectDocument2);
 		assertThat(result).isNotNull();
 
 		// THEN

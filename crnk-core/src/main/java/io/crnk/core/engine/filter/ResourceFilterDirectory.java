@@ -1,7 +1,6 @@
 package io.crnk.core.engine.filter;
 
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryContext;

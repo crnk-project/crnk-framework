@@ -1,9 +1,5 @@
 package io.crnk.validation.mock.models;
 
-import java.util.Collections;
-import java.util.List;
-import javax.validation.constraints.NotNull;
-
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -15,6 +11,10 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.validation.mock.ComplexValid;
+
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.List;
 
 @JsonApiResource(type = "tasks")
 @ComplexValid

@@ -1,15 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -24,6 +14,16 @@ import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class IncludeRequest {
 
@@ -53,8 +53,8 @@ public class IncludeRequest {
 	private Map<ResourceIdentifier, Resource> resourceMap;
 
 	public IncludeRequest(Object entity, Document document, ResourceRegistry resourceRegistry,
-			DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
-			IncludeLookupUtil util, ResourceMapper resourceMapper) {
+						  DocumentMappingConfig mappingConfig, QueryAdapter queryAdapter,
+						  IncludeLookupUtil util, ResourceMapper resourceMapper) {
 		this.resourceMapper = resourceMapper;
 		this.resourceRegistry = resourceRegistry;
 		this.mappingConfig = mappingConfig;
@@ -80,7 +80,7 @@ public class IncludeRequest {
 	}
 
 	public synchronized boolean isInclusionRequest(List<ResourceField> fieldPath,
-			ResourceField resourceField) {
+												   ResourceField resourceField) {
 		return util.isInclusionRequested(queryAdapter, fieldPath)
 				|| resourceField.getSerializeType() == SerializeType.EAGER;
 	}
@@ -129,8 +129,7 @@ public class IncludeRequest {
 		ResourceIdentifier targetId = targetResource.toIdentifier();
 		if (!resourceMap.containsKey(targetId)) {
 			resourceMap.put(targetId, targetResource);
-		}
-		else {
+		} else {
 			// TODO consider merging
 			targetResource = resourceMap.get(targetId);
 		}
@@ -157,15 +156,14 @@ public class IncludeRequest {
 				targetIds.add(util.idToResourceId(targetResourceInformation, targetElementId));
 			}
 			relationship.setData(Nullable.of(targetIds));
-		}
-		else {
+		} else {
 			ResourceIdentifier targetResourceId = util.idToResourceId(targetResourceInformation, targetEntityId);
 			relationship.setData(Nullable.of(targetResourceId));
 		}
 	}
 
 	public synchronized List<Resource> setupRelation(Resource sourceResource, ResourceField relationshipField,
-			Object targetEntity) {
+													 Object targetEntity) {
 		// set the relation
 		String relationshipName = relationshipField.getJsonName();
 		Map<String, Relationship> relationships = sourceResource.getRelationships();
@@ -178,8 +176,7 @@ public class IncludeRequest {
 			}
 			relationship.setData(Nullable.of(util.toIds(targets)));
 			return targets;
-		}
-		else {
+		} else {
 			Resource targetResource = merge(targetEntity);
 			relationship.setData(Nullable.of(targetResource.toIdentifier()));
 			return Collections.singletonList(targetResource);

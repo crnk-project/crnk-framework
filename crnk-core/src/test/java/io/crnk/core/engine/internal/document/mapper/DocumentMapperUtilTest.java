@@ -1,14 +1,14 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class DocumentMapperUtilTest extends AbstractDocumentMapperTest {
 

@@ -1,7 +1,5 @@
 package io.crnk.jpa.repository;
 
-import javax.persistence.EntityManager;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.JpaEntityRepository;
@@ -19,6 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
 
 @Transactional
 public class JpaRepositoryFilterTest extends AbstractJpaTest {

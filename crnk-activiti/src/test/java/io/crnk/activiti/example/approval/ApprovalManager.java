@@ -1,8 +1,5 @@
 package io.crnk.activiti.example.approval;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.core.engine.http.HttpMethod;
@@ -19,6 +16,9 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.Map;
 
 public class ApprovalManager {
 
@@ -41,8 +41,8 @@ public class ApprovalManager {
 
 
 	public void init(RuntimeService runtimeService, TaskService taskService, ActivitiResourceMapper resourceMapper,
-			ApprovalMapper mapper,
-			ModuleRegistry moduleRegistry) {
+					 ApprovalMapper mapper,
+					 ModuleRegistry moduleRegistry) {
 		this.runtimeService = runtimeService;
 		this.taskService = taskService;
 		this.resourceMapper = resourceMapper;
@@ -116,8 +116,7 @@ public class ApprovalManager {
 			save(registryEntry, resource);
 
 			LOGGER.debug("approval accepted: " + execution.getProcessInstanceId());
-		}
-		finally {
+		} finally {
 			approverThread.remove();
 		}
 	}

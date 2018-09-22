@@ -1,10 +1,10 @@
 package io.crnk.core.engine.error;
 
+import io.crnk.core.engine.document.ErrorData;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import io.crnk.core.engine.document.ErrorData;
 
 public class ErrorResponseBuilder {
 	private Collection<ErrorData> data;

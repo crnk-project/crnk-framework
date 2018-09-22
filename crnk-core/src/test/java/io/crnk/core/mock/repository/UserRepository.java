@@ -1,13 +1,13 @@
 package io.crnk.core.mock.repository;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserRepository implements ResourceRepositoryV2<User, Long> {
 

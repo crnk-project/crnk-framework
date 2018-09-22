@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = "crnk.ui", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(UIModule.class)
 @ConditionalOnMissingBean(UIModule.class)
-@EnableConfigurationProperties({ CrnkUiProperties.class })
-@Import({ CrnkCoreAutoConfiguration.class })
+@EnableConfigurationProperties({CrnkUiProperties.class})
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkUIAutoConfiguration {
 
 	@Bean

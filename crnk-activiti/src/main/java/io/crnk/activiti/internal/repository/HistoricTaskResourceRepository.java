@@ -1,8 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.util.List;
-
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.TaskResource;
 import io.crnk.core.queryspec.FilterSpec;
@@ -10,12 +8,14 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.task.TaskInfo;
 
+import java.util.List;
+
 public class HistoricTaskResourceRepository<T extends TaskResource> extends ActivitiRepositoryBase<T> {
 
 	private final HistoryService historyService;
 
 	public HistoricTaskResourceRepository(HistoryService historyService, ActivitiResourceMapper resourceMapper,
-			Class<T> resourceClass, List<FilterSpec> baseFilters) {
+										  Class<T> resourceClass, List<FilterSpec> baseFilters) {
 		super(resourceMapper, resourceClass, baseFilters);
 		this.historyService = historyService;
 	}

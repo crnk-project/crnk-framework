@@ -2,10 +2,8 @@ package io.crnk.servlet.resource;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.reactive.ReactiveModule;
-import io.crnk.reactive.internal.MonoResultFactory;
 import io.crnk.servlet.AsyncCrnkServlet;
 import io.crnk.servlet.reactive.model.SlowResourceRepository;
 import io.crnk.test.mock.ClientTestModule;

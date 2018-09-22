@@ -6,7 +6,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.Task;
-
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

@@ -19,7 +19,7 @@ public class FilterSpecTest {
 	}
 
 	@Test
-	public void fromPathSpec(){
+	public void fromPathSpec() {
 		FilterSpec filter = PathSpec.of("a", "b").filter(FilterOperator.EQ, "12");
 		Assert.assertEquals("12", filter.getValue());
 		Assert.assertEquals(FilterOperator.EQ, filter.getOperator());

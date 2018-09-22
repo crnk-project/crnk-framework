@@ -1,9 +1,9 @@
 package io.crnk.jpa.model;
 
-import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
 public class CustomTypeTestEntity {

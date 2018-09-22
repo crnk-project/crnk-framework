@@ -1,8 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.util.Collection;
-
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
@@ -13,6 +10,9 @@ import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Collection;
 
 public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTest {
 

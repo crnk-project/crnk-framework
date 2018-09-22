@@ -1,9 +1,5 @@
 package io.crnk.operations;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
-
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -15,6 +11,10 @@ import io.crnk.operations.model.PersonEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class OperationsPostTest extends io.crnk.operations.AbstractOperationsTest {
 

@@ -1,9 +1,9 @@
 package io.crnk.client;
 
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.test.mock.ClientTestModule;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class creates a CrnkClient to serialize links as JSON objects.<br />

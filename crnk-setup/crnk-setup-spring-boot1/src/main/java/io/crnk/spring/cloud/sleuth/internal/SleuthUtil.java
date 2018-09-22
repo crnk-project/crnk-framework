@@ -1,8 +1,5 @@
 package io.crnk.spring.cloud.sleuth.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -11,6 +8,9 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+
+import java.util.Map;
+import java.util.Set;
 
 // TODO replicated from BraveUtil
 public class SleuthUtil {
@@ -52,8 +52,7 @@ public class SleuthUtil {
 
 		if (relationshipField == null) {
 			pathBuilder.append(request.getQueryAdapter().getResourceInformation().getResourceType());
-		}
-		else {
+		} else {
 			pathBuilder.append(relationshipField.getParentResourceInformation().getResourceType());
 		}
 

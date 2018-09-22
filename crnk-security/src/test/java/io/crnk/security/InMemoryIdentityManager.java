@@ -35,7 +35,7 @@ public class InMemoryIdentityManager {
 		Constraint constraint = new Constraint();
 		constraint.setName(Constraint.__BASIC_AUTH);
 		//		constraint.setRoles(new String[] { "getRole", "postRole", "allRole" });
-		constraint.setRoles(new String[] { Constraint.ANY_AUTH, "getRole", "postRole", "allRole" });
+		constraint.setRoles(new String[]{Constraint.ANY_AUTH, "getRole", "postRole", "allRole"});
 		constraint.setAuthenticate(true);
 
 		ConstraintMapping cm = new ConstraintMapping();

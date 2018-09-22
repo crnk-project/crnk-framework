@@ -1,15 +1,5 @@
 package io.crnk.test.mock.repository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -17,6 +7,16 @@ import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Long> implements ScheduleRepository {
 
@@ -105,14 +105,12 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 			copy.setTasksList(schedule.getTasksList());
 			if (schedule.getProject() != null) {
 				copy.setProject(schedule.getProject());
-			}
-			else {
+			} else {
 				copy.setProjectId(schedule.getProjectId());
 			}
 			if (schedule.getProjects() != null) {
 				copy.setProjects(schedule.getProjects());
-			}
-			else {
+			} else {
 				copy.setProjectIds(schedule.getProjectIds());
 			}
 			copy.setTask(schedule.getTask());

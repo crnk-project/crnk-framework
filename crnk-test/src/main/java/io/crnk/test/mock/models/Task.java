@@ -1,10 +1,5 @@
 package io.crnk.test.mock.models;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
@@ -17,6 +12,11 @@ import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
 public class Task {

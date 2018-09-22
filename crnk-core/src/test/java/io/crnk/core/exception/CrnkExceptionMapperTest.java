@@ -1,13 +1,13 @@
 package io.crnk.core.exception;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.internal.exception.CrnkExceptionMapper;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class CrnkExceptionMapperTest {
 

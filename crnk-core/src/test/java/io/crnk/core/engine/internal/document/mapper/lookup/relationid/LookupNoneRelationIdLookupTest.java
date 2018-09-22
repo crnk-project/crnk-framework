@@ -1,19 +1,19 @@
 package io.crnk.core.engine.internal.document.mapper.lookup.relationid;
 
-import java.util.Arrays;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class LookupNoneRelationIdLookupTest extends AbstractDocumentMapperTest {
 
@@ -22,7 +22,7 @@ public class LookupNoneRelationIdLookupTest extends AbstractDocumentMapperTest {
 
 	private Schedule schedule;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
 	public void setup() {
 		super.setup();
@@ -40,8 +40,7 @@ public class LookupNoneRelationIdLookupTest extends AbstractDocumentMapperTest {
 		try {
 			check(false, true);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("inconsistent relationship"));
 		}
 	}
@@ -83,11 +82,9 @@ public class LookupNoneRelationIdLookupTest extends AbstractDocumentMapperTest {
 			Assert.assertNotNull(data.get());
 			Assert.assertEquals(1, document.getIncluded().size());
 			Assert.assertEquals("3", document.getIncluded().get(0).getId());
-		}
-		else if (setRelatedId) {
+		} else if (setRelatedId) {
 			Assert.fail("without lookup related entity should be set if related id is set");
-		}
-		else {
+		} else {
 			Assert.assertNull(data.get());
 		}
 	}

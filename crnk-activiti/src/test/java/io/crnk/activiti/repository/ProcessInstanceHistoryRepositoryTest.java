@@ -1,9 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.example.ApprovalTestApplication;
 import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
@@ -24,6 +20,10 @@ import org.activiti.engine.task.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 

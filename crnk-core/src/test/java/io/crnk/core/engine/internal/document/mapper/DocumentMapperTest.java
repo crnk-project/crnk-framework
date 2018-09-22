@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -22,6 +19,9 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class DocumentMapperTest extends AbstractDocumentMapperTest {
 

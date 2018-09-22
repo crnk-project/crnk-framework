@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript.transform;
 
-import java.util.List;
-
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSContainerElement;
@@ -27,6 +25,8 @@ import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 

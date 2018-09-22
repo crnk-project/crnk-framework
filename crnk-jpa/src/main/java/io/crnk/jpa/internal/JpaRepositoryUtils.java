@@ -1,8 +1,5 @@
 package io.crnk.jpa.internal;
 
-import java.util.Arrays;
-import java.util.Set;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeSpec;
@@ -15,6 +12,9 @@ import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
+
+import java.util.Arrays;
+import java.util.Set;
 
 public class JpaRepositoryUtils {
 

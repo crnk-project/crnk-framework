@@ -1,13 +1,5 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -32,6 +24,14 @@ import io.crnk.jpa.query.Tuple;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaType;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 public class JpaRelationshipRepository<S, I extends Serializable, T, J extends Serializable> extends JpaRepositoryBase<T>
 		implements RelationshipRepositoryV2<S, I, T, J>, BulkRelationshipRepositoryV2<S, I, T, J> {
 
@@ -50,8 +50,8 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	/**
 	 * JPA relationship directly exposed as repository
 	 *
-	 * @param module that manages this repository
-	 * @param resourceField from this relation
+	 * @param module           that manages this repository
+	 * @param resourceField    from this relation
 	 * @param repositoryConfig from this relation
 	 */
 	public JpaRelationshipRepository(JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T>
@@ -88,8 +88,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		if (target != null && oppositeAttrMeta != null) {
 			if (oppositeAttrMeta.getType().isCollection()) {
 				oppositeAttrMeta.addValue(target, sourceEntity);
-			}
-			else {
+			} else {
 				oppositeAttrMeta.setValue(target, sourceEntity);
 			}
 			em.persist(target);
@@ -120,8 +119,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 				iterator.remove();
 				if (oppositeAttrMeta.getType().isCollection()) {
 					oppositeAttrMeta.removeValue(prevTarget, sourceEntity);
-				}
-				else {
+				} else {
 					oppositeAttrMeta.setValue(prevTarget, null);
 				}
 			}
@@ -132,8 +130,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			if (oppositeAttrMeta != null) {
 				if (oppositeAttrMeta.getType().isCollection()) {
 					oppositeAttrMeta.addValue(target, sourceEntity);
-				}
-				else {
+				} else {
 					oppositeAttrMeta.setValue(target, sourceEntity);
 				}
 				em.persist(target);
@@ -146,8 +143,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		MetaType type = attrMeta.getType();
 		if (type.isCollection()) {
 			return type.asCollection().getElementType().getImplementationClass();
-		}
-		else {
+		} else {
 			return type.getImplementationClass();
 		}
 	}
@@ -167,8 +163,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			if (oppositeAttrMeta != null) {
 				if (oppositeAttrMeta.getType().isCollection()) {
 					oppositeAttrMeta.addValue(target, sourceEntity);
-				}
-				else {
+				} else {
 					oppositeAttrMeta.setValue(target, sourceEntity);
 				}
 				em.persist(target);
@@ -192,8 +187,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			if (target != null && oppositeAttrMeta != null) {
 				if (oppositeAttrMeta.getType().isCollection()) {
 					oppositeAttrMeta.removeValue(target, sourceEntity);
-				}
-				else {
+				} else {
 					oppositeAttrMeta.setValue(target, null);
 				}
 			}
@@ -258,8 +252,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			ResourceList<T> iterable;
 			if (map.containsKey(sourceId)) {
 				iterable = (ResourceList<T>) map.getList(sourceId);
-			}
-			else {
+			} else {
 				iterable = repositoryConfig.newResultList();
 				map.set(sourceId, iterable);
 			}

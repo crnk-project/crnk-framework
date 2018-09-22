@@ -4,9 +4,10 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
-import java.io.Serializable;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class RelationshipRepositoryV2Test {
 

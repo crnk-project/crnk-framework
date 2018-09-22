@@ -1,18 +1,5 @@
 package io.crnk.rs;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.rs.type.JsonApiMediaType;
 import io.crnk.test.JerseyTestBase;
@@ -27,6 +14,19 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public abstract class JsonApiResponseFilterTestBase extends JerseyTestBase {

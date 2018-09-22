@@ -42,8 +42,7 @@ public class PagingSpecConversionTest {
 		OffsetLimitPagingSpec offsetSpec = new OffsetLimitPagingSpec(5L, 10L);
 		try {
 			offsetSpec.convert(NumberSizePagingSpec.class);
-		}
-		catch (BadRequestException e) {
+		} catch (BadRequestException e) {
 			Assert.assertEquals("offset=5 must be multiple of limit=10 to support page number/size conversion", e.getMessage());
 		}
 	}

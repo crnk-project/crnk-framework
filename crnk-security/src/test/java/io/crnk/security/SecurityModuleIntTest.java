@@ -1,12 +1,5 @@
 package io.crnk.security;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
@@ -42,6 +35,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 public class SecurityModuleIntTest extends JerseyTestBase {
 
@@ -104,8 +104,7 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 						securityHandler.setHandler(handler);
 					}
 					server.setHandler(securityHandler);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
 				return container;

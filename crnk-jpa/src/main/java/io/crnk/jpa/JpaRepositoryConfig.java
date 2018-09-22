@@ -1,13 +1,5 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
@@ -24,6 +16,14 @@ import io.crnk.jpa.mapping.IdentityMapper;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.JpaQueryFactory;
 import net.jodah.typetools.TypeResolver;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @param <T> document type (entity or mapped dto)
@@ -69,14 +69,14 @@ public class JpaRepositoryConfig<T> {
 	}
 
 	public void setQueryFactory(JpaQueryFactory queryFactory) {
-		if(this.queryFactory != null){
+		if (this.queryFactory != null) {
 			throw new IllegalStateException("queryFactory already set");
 		}
 		this.queryFactory = () -> queryFactory;
 	}
 
 	public void setQueryFactory(Supplier<JpaQueryFactory> queryFactorySupplier) {
-		if(this.queryFactory != null){
+		if (this.queryFactory != null) {
 			throw new IllegalStateException("queryFactory already set");
 		}
 		this.queryFactory = queryFactorySupplier;
@@ -134,7 +134,7 @@ public class JpaRepositoryConfig<T> {
 	/**
 	 * Prepares a builder to configure a jpa document for the given entity.
 	 *
-	 * @param <E> entity type
+	 * @param <E>         entity type
 	 * @param entityClass to directly expose
 	 * @return builder
 	 */
@@ -149,15 +149,15 @@ public class JpaRepositoryConfig<T> {
 	 * Prepares a builder to configure a jpa document for the given entity class which is
 	 * mapped to a DTO with the provided mapper.
 	 *
-	 * @param <E> entity type
-	 * @param <D> dto type
+	 * @param <E>         entity type
+	 * @param <D>         dto type
 	 * @param entityClass to use
-	 * @param dtoClass to expose
-	 * @param mapper to convert entity to dto and back
+	 * @param dtoClass    to expose
+	 * @param mapper      to convert entity to dto and back
 	 * @return builder
 	 */
 	public static <E, D> JpaRepositoryConfig.Builder<D> builder(Class<E> entityClass, Class<D> dtoClass,
-			JpaMapper<E, D> mapper) {
+																JpaMapper<E, D> mapper) {
 		JpaRepositoryConfig.Builder<D> builder = new JpaRepositoryConfig.Builder<>();
 		builder.entityClass = entityClass;
 		builder.resourceClass = dtoClass;
@@ -201,8 +201,7 @@ public class JpaRepositoryConfig<T> {
 	private MetaInformation newMetaInformation() {
 		if (listMetaClass != null) {
 			return ClassUtils.newInstance(listMetaClass);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -210,8 +209,7 @@ public class JpaRepositoryConfig<T> {
 	private LinksInformation newLinksInformation() {
 		if (listLinksClass != null) {
 			return ClassUtils.newInstance(listLinksClass);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -239,7 +237,7 @@ public class JpaRepositoryConfig<T> {
 
 		private JpaMapper<?, T> mapper = IdentityMapper.newInstance();
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private Class<? extends DefaultResourceList<T>> listClass = (Class) DefaultResourceList.class;
 
 		private Class<? extends MetaInformation> listMetaClass = DefaultPagedMetaInformation.class;
@@ -285,8 +283,7 @@ public class JpaRepositoryConfig<T> {
 				setListMetaClass((Class<? extends MetaInformation>) typeArgs[1]);
 				setListLinksClass((Class<? extends LinksInformation>) typeArgs[2]);
 				return this;
-			}
-			catch (NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				throw new IllegalStateException("findAll method not overriden by " + interfaceClass.getName(), e);
 			}
 		}
@@ -335,7 +332,7 @@ public class JpaRepositoryConfig<T> {
 		 * @return this builder
 		 */
 		public <D> Builder<T> putRepositoryDecorator(Class<D> targetClass,
-				RelationshipRepositoryDecorator<T, ?, D, ?> decoratorRelationshipRepository) {
+													 RelationshipRepositoryDecorator<T, ?, D, ?> decoratorRelationshipRepository) {
 			this.relationshipRepositoryDecorators.put(targetClass, decoratorRelationshipRepository);
 			return this;
 		}

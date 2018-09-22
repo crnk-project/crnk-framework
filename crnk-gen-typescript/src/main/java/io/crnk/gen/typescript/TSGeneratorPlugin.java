@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-
 import com.moowork.gradle.node.npm.NpmInstallTask;
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import org.gradle.api.Action;
@@ -15,6 +13,8 @@ import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.TaskContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class TSGeneratorPlugin implements Plugin<Project> {
 
@@ -136,8 +136,7 @@ public class TSGeneratorPlugin implements Plugin<Project> {
 			npmInstall.getInputs().files(new File(buildDir, "package.json"));
 			npmInstall.getOutputs().dir(new File(buildDir, "node_modules"));
 			compileTypescriptTask.dependsOn(npmInstall);
-		}
-		catch (UnknownTaskException e) {
+		} catch (UnknownTaskException e) {
 			LOGGER.warn("task not found, ok in testing", e);
 		}
 
