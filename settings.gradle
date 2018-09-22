@@ -8,16 +8,9 @@ include ':crnk-meta'
 include ':crnk-jpa'
 include ':crnk-validation'
 
-
 include ':crnk-monitor-brave4'
 include ':crnk-security'
 include ':crnk-activiti'
-
-include ':crnk-legacy:crnk-spring'
-include ':crnk-legacy:crnk-brave'
-include ':crnk-legacy:crnk-servlet'
-include ':crnk-legacy:crnk-rs'
-include ':crnk-legacy:crnk-cdi'
 
 include ':crnk-setup:crnk-setup-spring'
 include ':crnk-setup:crnk-setup-spring-boot1'
