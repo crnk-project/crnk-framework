@@ -52,7 +52,7 @@ public class RepositoryAccessClientTest extends BasicRepositoryAccessTestBase {
 	@Test
 	public void testInterfaceAccess() {
 		// tag::interfaceAccess[]
-		ScheduleRepository scheduleRepository = ((ClientTestContainer) testContainer).getClient().getResourceRepository(ScheduleRepository.class);
+		ScheduleRepository scheduleRepository = ((ClientTestContainer) testContainer).getClient().getRepositoryForInterface(ScheduleRepository.class);
 
 		Schedule schedule = new Schedule();
 		schedule.setId(13L);
@@ -83,7 +83,7 @@ public class RepositoryAccessClientTest extends BasicRepositoryAccessTestBase {
 
 	@Test
 	public void testCreate() {
-		ScheduleRepository scheduleRepository = ((ClientTestContainer) testContainer).getClient().getResourceRepository(ScheduleRepository.class);
+		ScheduleRepository scheduleRepository = ((ClientTestContainer) testContainer).getClient().getRepositoryForInterface(ScheduleRepository.class);
 
 		Schedule schedule = new Schedule();
 		schedule.setName("mySchedule");

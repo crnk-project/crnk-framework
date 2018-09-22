@@ -41,7 +41,7 @@ public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientT
 
 	@Override
 	protected TestApplication configure() {
-		TestApplication app = new TestApplication(true);
+		TestApplication app = new TestApplication();
 		urlMapper = (DefaultQuerySpecUrlMapper) app.getFeature().getUrlMapper();
 		urlMapper.setAllowUnknownAttributes(true);
 		return app;

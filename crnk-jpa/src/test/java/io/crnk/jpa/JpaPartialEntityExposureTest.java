@@ -1,26 +1,27 @@
 package io.crnk.jpa;
 
-import java.util.List;
-import javax.persistence.EntityManager;
-
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
+import java.io.Serializable;
+import java.util.List;
+
 @Ignore
 public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 
-	protected ResourceRepositoryStub<TestEntity, Long> testRepo;
+	protected ResourceRepositoryV2<TestEntity, Serializable> testRepo;
 
 	private JpaModule module;
 
@@ -28,7 +29,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 	@Before
 	public void setup() {
 		super.setup();
-		testRepo = client.getQueryParamsRepository(TestEntity.class);
+		testRepo = client.getRepositoryForType(TestEntity.class);
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 		test.setStringValue("test");
 		testRepo.save(test);
 
-		List<TestEntity> tests = testRepo.findAll(new QueryParams());
+		List<TestEntity> tests = testRepo.findAll(new QuerySpec(TestEntity.class));
 		Assert.assertEquals(1, tests.size());
 		test = tests.get(0);
 		Assert.assertEquals(2L, test.getId().longValue());
@@ -60,7 +61,7 @@ public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 		Assert.assertTrue(test.getManyRelatedValues().isEmpty());
 
 		testRepo.delete(test.getId());
-		tests = testRepo.findAll(new QueryParams());
+		tests = testRepo.findAll(new QuerySpec(TestEntity.class));
 		Assert.assertEquals(0, tests.size());
 	}
 

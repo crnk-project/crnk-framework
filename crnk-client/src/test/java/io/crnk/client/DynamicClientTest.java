@@ -25,7 +25,7 @@ public class DynamicClientTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true);
+		return new TestApplication();
 	}
 
 	protected void setupFeature(CrnkTestFeature feature) {

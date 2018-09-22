@@ -40,7 +40,7 @@ public class MethodAnnotatedEntityTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testMethodAnnotatedFields() {
 		// tests whether JPA annotations on methods are supported as well
-		ResourceRepositoryV2<MethodAnnotatedEntity, Long> methodRepo = client.getQuerySpecRepository(MethodAnnotatedEntity.class);
+		ResourceRepositoryV2<MethodAnnotatedEntity, Long> methodRepo = client.getRepositoryForType(MethodAnnotatedEntity.class);
 
 		MethodAnnotatedEntity task = new MethodAnnotatedEntity();
 		task.setId(1L);

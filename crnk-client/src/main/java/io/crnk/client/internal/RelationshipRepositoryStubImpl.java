@@ -2,7 +2,6 @@ package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.legacy.RelationshipRepositoryStub;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -15,14 +14,13 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
-		implements RelationshipRepositoryStub<T, I, D, J>, RelationshipRepositoryV2<T, I, D, J> {
+		implements RelationshipRepositoryV2<T, I, D, J> {
 
 	private Class<T> sourceClass;
 
@@ -72,19 +70,6 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		}
 		ResourceField idField = sourceResourceInformation.getIdField();
 		return (Serializable) idField.getAccessor().getValue(source);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public D findOneTarget(I sourceId, String fieldName, QueryParams queryParams) {
-		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, queryParams, fieldName);
-		return (D) executeGet(url, ResponseType.RESOURCE);
-	}
-
-	@Override
-	public DefaultResourceList<D> findManyTargets(I sourceId, String fieldName, QueryParams queryParams) {
-		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, queryParams, fieldName);
-		return (DefaultResourceList<D>) executeGet(url, ResponseType.RESOURCES);
 	}
 
 	@SuppressWarnings("unchecked")

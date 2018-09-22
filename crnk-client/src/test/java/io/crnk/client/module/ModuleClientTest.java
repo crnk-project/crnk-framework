@@ -40,7 +40,7 @@ public class ModuleClientTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true);
+		return new TestApplication();
 	}
 
 	@Test

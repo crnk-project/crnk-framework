@@ -108,7 +108,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
 	@Test
 	public void testDtoMapping() {
-		ResourceRepositoryV2<ScheduleDto, Serializable> entityRepo = client.getQuerySpecRepository(ScheduleDto.class);
+		ResourceRepositoryV2<ScheduleDto, Serializable> entityRepo = client.getRepositoryForType(ScheduleDto.class);
 
 		QuerySpec querySpec = new QuerySpec(ScheduleDto.class);
 		ResourceList<ScheduleDto> list = entityRepo.findAll(querySpec);

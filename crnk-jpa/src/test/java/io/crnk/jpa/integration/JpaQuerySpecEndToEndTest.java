@@ -37,7 +37,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	@Before
 	public void setup() {
 		super.setup();
-		testRepo = client.getQuerySpecRepository(TestEntity.class);
+		testRepo = client.getRepositoryForType(TestEntity.class);
 	}
 
 	@Test
@@ -152,8 +152,8 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testMappedSuperTypeWithPkOnSuperType() {
 		ResourceRepositoryV2<TestSubclassWithSuperclassPk, Serializable> repo =
-				client.getQuerySpecRepository(TestSubclassWithSuperclassPk.class);
-		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+				client.getRepositoryForType(TestSubclassWithSuperclassPk.class);
+		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 
 		RelatedEntity related = new RelatedEntity();
 		related.setId(23423L);
@@ -202,7 +202,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testMappedSuperTypeWithPkOnSubclass() {
-		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 
 		RelatedEntity related = new RelatedEntity();
 		related.setId(23423L);
@@ -289,7 +289,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	private void testAddManyRelation(boolean onSave) {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related1 = new RelatedEntity();
 		related1.setId(1L);
 		related1.setStringValue("related1");
@@ -517,7 +517,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testEmbeddableIds() {
 		ResourceRepositoryV2<TestEmbeddedIdEntity, Serializable> rep = client
-				.getQuerySpecRepository(TestEmbeddedIdEntity.class);
+				.getRepositoryForType(TestEmbeddedIdEntity.class);
 
 		// add
 		TestEmbeddedIdEntity entity = new TestEmbeddedIdEntity();
@@ -548,7 +548,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	}
 
 	private TestEntity addTestWithOneRelation() {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related = new RelatedEntity();
 		related.setId(1L);
 		related.setStringValue("project");
@@ -573,7 +573,7 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 	private TestEntity addTestWithManyRelations() {
 		ResourceRepositoryV2<OtherRelatedEntity, Long> otherRepo = client
 				.getRepositoryForType(OtherRelatedEntity.class);
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 		RelationshipRepositoryV2<RelatedEntity, Long, OtherRelatedEntity, Long> otherRelRepo = client

@@ -1,15 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -21,14 +11,11 @@ import io.crnk.client.http.okhttp.OkHttpAdapterProvider;
 import io.crnk.client.internal.ClientDocumentMapper;
 import io.crnk.client.internal.ClientStubBase;
 import io.crnk.client.internal.ClientStubInvocationHandler;
-import io.crnk.client.internal.LegacyResourceRepositoryStubImpl;
 import io.crnk.client.internal.RelationshipRepositoryStubImpl;
 import io.crnk.client.internal.ResourceRepositoryStubImpl;
 import io.crnk.client.internal.proxy.BasicProxyFactory;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.client.internal.proxy.ClientProxyFactoryContext;
-import io.crnk.client.legacy.RelationshipRepositoryStub;
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.client.module.ClientModule;
 import io.crnk.client.module.ClientModuleFactory;
 import io.crnk.client.module.HttpAdapterAware;
@@ -92,6 +79,16 @@ import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+
 /**
  * Client implementation giving access to JSON API repositories using stubs.
  */
@@ -132,8 +129,6 @@ public class CrnkClient {
 	private Long maxPageLimit = null;
 
 	private QueryContext queryContext = new QueryContext();
-
-	private boolean queryParamsSupport = false;
 
 	private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
@@ -353,7 +348,7 @@ public class CrnkClient {
 	private void initResources() {
 		ResourceLookup resourceLookup = moduleRegistry.getResourceLookup();
 		for (Class<?> resourceClass : resourceLookup.getResourceClasses()) {
-			getQuerySpecRepository(resourceClass);
+			getRepositoryForType(resourceClass);
 		}
 	}
 
@@ -371,13 +366,7 @@ public class CrnkClient {
 		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
-		final ClientStubBase repositoryStub;
-		if (queryParamsSupport) {
-			repositoryStub = new LegacyResourceRepositoryStubImpl<>(this, resourceClass, resourceInformation, urlBuilder);
-		}
-		else {
-			repositoryStub = new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder);
-		}
+		final ClientStubBase repositoryStub = new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder);
 
 		// create interface for it!
 		RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
@@ -444,10 +433,10 @@ public class CrnkClient {
 					new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(),
 							urlBuilder);
 			RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder =
-					new RepositoryInstanceBuilder<RelationshipRepository>(null, null) {
+					new RepositoryInstanceBuilder(null, null) {
 
 						@Override
-						public RelationshipRepository buildRepository() {
+						public Object buildRepository() {
 							return relationshipRepositoryStub;
 						}
 					};
@@ -466,14 +455,6 @@ public class CrnkClient {
 		return new RelationshipRepositoryAdapterImpl(null, moduleRegistry, repoInstance);
 	}
 
-	/**
-	 * @deprecated Make use of getRepositoryForInterface.
-	 */
-	@Deprecated
-	public <R extends ResourceRepositoryV2<?, ?>> R getResourceRepository(Class<R> repositoryInterfaceClass) {
-		return getRepositoryForInterface(repositoryInterfaceClass);
-	}
-
 	@SuppressWarnings("unchecked")
 	public <R extends ResourceRepositoryV2<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
 		init();
@@ -485,32 +466,13 @@ public class CrnkClient {
 		Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
 
 		Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
-		ResourceRepositoryV2<?, Serializable> repositoryStub = getQuerySpecRepository(resourceClass);
+		ResourceRepositoryV2<?, Serializable> repositoryStub = getRepositoryForType(resourceClass);
 
 		ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
 		InvocationHandler invocationHandler =
 				new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
 		return (R) Proxy.newProxyInstance(classLoader, new Class[] { repositoryInterfaceClass, ResourceRepositoryV2.class },
 				invocationHandler);
-	}
-
-	/**
-	 * @param resourceClass resource class
-	 * @return stub for the given resourceClass
-	 * @deprecated make use of QuerySpec
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Deprecated
-	public <T, I extends Serializable> ResourceRepositoryStub<T, I> getQueryParamsRepository(Class<T> resourceClass) {
-		queryParamsSupport = true;
-
-		init();
-
-		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
-
-		// TODO fix this in crnk, should be able to get original document
-		ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
-		return (ResourceRepositoryStub<T, I>) repositoryAdapter.getResourceRepository();
 	}
 
 	/**
@@ -558,33 +520,6 @@ public class CrnkClient {
 		return new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder);
 	}
 
-
-	/**
-	 * @deprecated make use of getRepositoryForType()
-	 */
-	@Deprecated
-	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getQuerySpecRepository(Class<T> resourceClass) {
-		return getRepositoryForType(resourceClass);
-	}
-
-	/**
-	 * @param sourceClass source class
-	 * @param targetClass target class
-	 * @return stub for the relationship between the given source and target
-	 * class
-	 * @deprecated make use of QuerySpec
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryStub<T, I, D, J>
-	getQueryParamsRepository(
-			Class<T> sourceClass, Class<D> targetClass) {
-		queryParamsSupport = true;
-		init();
-
-		RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-		return (RelationshipRepositoryStub<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
-	}
-
 	/**
 	 * @param sourceClass source class
 	 * @param targetClass target class
@@ -598,15 +533,6 @@ public class CrnkClient {
 
 		RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
 		return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
-	}
-
-	/**
-	 * @deprecated make use of getRepositoryForType()
-	 */
-	@Deprecated
-	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getQuerySpecRepository(
-			Class<T> sourceClass, Class<D> targetClass) {
-		return getRepositoryForType(sourceClass, targetClass);
 	}
 
 	/**

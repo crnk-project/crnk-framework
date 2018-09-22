@@ -34,17 +34,17 @@ public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTes
 
 		client.setPushAlways(false);
 
-		scheduleRepo = client.getQuerySpecRepository(Schedule.class);
+		scheduleRepo = client.getRepositoryForType(Schedule.class);
 		taskRepo = client.getRepositoryForType(Task.class);
 		projectRepo = client.getRepositoryForType(Project.class);
 		relRepo = client.getRepositoryForType(Task.class, Project.class);
-		scheduleTaskRepo = client.getQuerySpecRepository(Schedule.class, Task.class);
+		scheduleTaskRepo = client.getRepositoryForType(Schedule.class, Task.class);
 		taskScheduleRepo = client.getRepositoryForType(Task.class, Schedule.class);
 	}
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(false);
+		return new TestApplication();
 	}
 
 	@Test

@@ -23,7 +23,7 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 	@Before
 	public void setup() {
 		super.setup();
-		testRepo = client.getQuerySpecRepository(TestEntity.class);
+		testRepo = client.getRepositoryForType(TestEntity.class);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 	}
 
 	private TestEntity addTestWithOneRelation() {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getQuerySpecRepository(RelatedEntity.class);
+		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related = new RelatedEntity();
 		related.setId(1L);
 		related.setStringValue("project");
@@ -66,7 +66,7 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 		testRepo.create(test);
 
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
-				.getQuerySpecRepository(TestEntity.class, RelatedEntity.class);
+				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 		relRepo.setRelation(test, related.getId(), TestEntity.ATTR_oneRelatedValue);
 
 		return test;

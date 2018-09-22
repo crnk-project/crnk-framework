@@ -23,7 +23,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		repository = client.getQuerySpecRepository(MetaElement.class);
+		repository = client.getRepositoryForType(MetaElement.class);
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 	public void testAttributesHaveParent() {
 		QuerySpec querySpec = new QuerySpec(MetaAttribute.class);
 		querySpec.includeRelation(Arrays.asList("parent"));
-		ResourceList<MetaAttribute> list = client.getQuerySpecRepository(MetaAttribute.class).findAll(querySpec);
+		ResourceList<MetaAttribute> list = client.getRepositoryForType(MetaAttribute.class).findAll(querySpec);
 		Assert.assertFalse(list.isEmpty());
 		for (MetaAttribute elem : list) {
 			Assert.assertNotNull(elem.getParent());
@@ -61,7 +61,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 	public void testAttributesHaveType() {
 		QuerySpec querySpec = new QuerySpec(MetaAttribute.class);
 		querySpec.includeRelation(Arrays.asList("type", "elementType"));
-		ResourceList<MetaAttribute> list = client.getQuerySpecRepository(MetaAttribute.class).findAll(querySpec);
+		ResourceList<MetaAttribute> list = client.getRepositoryForType(MetaAttribute.class).findAll(querySpec);
 		Assert.assertFalse(list.isEmpty());
 		for (MetaAttribute elem : list) {
 			Assert.assertNotNull(elem.getType());
@@ -159,7 +159,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		querySpec.includeRelation(Arrays.asList("primaryKey", "elements"));
 		querySpec.includeRelation(Arrays.asList("superType"));
 		String id = "resources.schedule";
-		MetaResource resource = (MetaResource) client.getQuerySpecRepository(elementClass).findOne(id, querySpec);
+		MetaResource resource = (MetaResource) client.getRepositoryForType(elementClass).findOne(id, querySpec);
 		Assert.assertNotNull(resource);
 		Assert.assertNotNull(resource.getAttributes());
 		Assert.assertNotNull(resource.getDeclaredAttributes());

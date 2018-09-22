@@ -30,7 +30,7 @@ public class ClientTestContainer implements TestContainer {
 
 			@Override
 			protected TestApplication configure() {
-				return new TestApplication(true);
+				return new TestApplication();
 			}
 
 			@Override
