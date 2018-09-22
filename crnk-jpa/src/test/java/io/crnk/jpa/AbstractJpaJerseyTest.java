@@ -52,8 +52,6 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
 	protected MetaModule metaModule;
 
-	private boolean useQuerySpec = true;
-
 	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
 		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
 		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
@@ -127,14 +125,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
 			SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
 
-			CrnkFeature feature;
-			if (useQuerySpec) {
-				feature = new CrnkFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
-						new SampleJsonServiceLocator());
-			}
-			else {
-				feature = new CrnkFeature();
-			}
+			CrnkFeature feature = new CrnkFeature();
 
 			feature.addModule(new TestModule());
 

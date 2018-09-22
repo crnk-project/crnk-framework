@@ -4,8 +4,6 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 
 class DocumentFilterContextImpl implements DocumentFilterContext {
 
@@ -27,11 +25,6 @@ class DocumentFilterContextImpl implements DocumentFilterContext {
 	@Override
 	public Document getRequestBody() {
 		return requestBody;
-	}
-
-	@Override
-	public QueryParams getQueryParams() {
-		return ((QueryParamsAdapter) queryAdapter).getQueryParams();
 	}
 
 	@Override

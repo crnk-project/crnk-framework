@@ -43,8 +43,6 @@ import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.internal.QueryParamsAdapterBuilder;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -162,36 +160,6 @@ public class CrnkBootTest {
 
 		QueryAdapterBuilder queryAdapterBuilder = boot.getQueryAdapterBuilder();
 		Assert.assertTrue(queryAdapterBuilder instanceof QuerySpecAdapterBuilder);
-	}
-
-	@Test
-	public void setQueryParamsBuilder() {
-		CrnkBoot boot = new CrnkBoot();
-		boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-		boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
-
-		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
-		boot.setQueryParamsBuilds(deserializer);
-		boot.boot();
-
-		QueryAdapterBuilder queryAdapterBuilder = boot.getQueryAdapterBuilder();
-		Assert.assertTrue(queryAdapterBuilder instanceof QueryParamsAdapterBuilder);
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void setQueryParamsBuilderErrorsWhenSettingMaxPage() {
-		CrnkBoot boot = new CrnkBoot();
-		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
-		boot.setQueryParamsBuilds(deserializer);
-		boot.setMaxPageLimit(10L);
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void setQueryParamsBuilderErrorsWhenSettingDefaultPage() {
-		CrnkBoot boot = new CrnkBoot();
-		QueryParamsBuilder deserializer = mock(QueryParamsBuilder.class);
-		boot.setQueryParamsBuilds(deserializer);
-		boot.setDefaultPageLimit(10L);
 	}
 
 	@Test
@@ -358,8 +326,7 @@ public class CrnkBootTest {
 		RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
 		ResourceRepositoryAdapter repositoryAdapter = taskEntry.getResourceRepository();
 		Assert.assertNotNull(repositoryAdapter.getResourceRepository());
-		JsonApiResponse response = repositoryAdapter.findAll(new QueryParamsAdapter(taskEntry.getResourceInformation(),
-				new QueryParams(), boot.getModuleRegistry(), queryContext)).get();
+		JsonApiResponse response = repositoryAdapter.findAll(new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry, queryContext)).get();
 		Assert.assertNotNull(response);
 
 		Assert.assertNotNull(requestDispatcher);

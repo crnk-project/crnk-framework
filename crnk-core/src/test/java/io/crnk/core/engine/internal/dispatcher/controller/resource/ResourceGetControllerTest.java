@@ -1,15 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -24,15 +14,21 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceGetControllerTest extends BaseControllerTest {
 
@@ -135,11 +131,15 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
 		Map<String, Set<String>> queryParams = new HashMap<>();
-		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[task-with-lookup]", new HashSet<>(Arrays.asList("project", "projectNull", "projectOverridden", "projectOverriddenNull")));
-		QueryParams queryParamsObject = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
+		QuerySpec querySpec = new QuerySpec(TaskWithLookup.class);
+		querySpec.includeRelation(PathSpec.of("project"));
+		querySpec.includeRelation(PathSpec.of("projectNull"));
+		querySpec.includeRelation(PathSpec.of("projectOverridden"));
+		querySpec.includeRelation(PathSpec.of("projectOverriddenNull"));
+
 
 		// WHEN
-		QueryParamsAdapter queryParamsAdapter = container.toQueryAdapter(TaskWithLookup.class, queryParamsObject);
+		QuerySpecAdapter queryParamsAdapter = container.toQueryAdapter(querySpec);
 		Response response = responseGetResp.handle(jsonPath, queryParamsAdapter,  null);
 
 		// THEN
@@ -215,12 +215,11 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + TASK_ID);
 		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
-		Map<String, Set<String>> queryParams = new HashMap<>();
-		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("[\"project\"]"));
-		QueryParams requestParams = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
+		QuerySpec requestParams = new QuerySpec(Task.class);
+		requestParams.includeRelation(PathSpec.of("project"));
 
 		// WHEN
-		Response response = responseGetResp.handle(jsonPath, container.toQueryAdapter(Task.class, requestParams),  null);
+		Response response = responseGetResp.handle(jsonPath, container.toQueryAdapter(requestParams),  null);
 
 		// THEN
 		Assert.assertNotNull(response);

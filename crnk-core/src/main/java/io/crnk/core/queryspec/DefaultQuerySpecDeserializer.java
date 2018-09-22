@@ -22,7 +22,6 @@ import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.mapper.UnkonwnMappingAware;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class DefaultQuerySpecDeserializer implements QuerySpecDeserializer, Unko
 		supportedOperators.add(FilterOperator.LT);
 		supportedOperators.add(FilterOperator.LE);
 
-		LoggerFactory.getLogger(QueryParamsAdapter.class)
+		LoggerFactory.getLogger(DefaultQuerySpecDeserializer.class)
 				.warn("deprecated DefaultQuerySpecDeserializer still in use, switch to DefaultQuerySpecUrlMapper");
 	}
 

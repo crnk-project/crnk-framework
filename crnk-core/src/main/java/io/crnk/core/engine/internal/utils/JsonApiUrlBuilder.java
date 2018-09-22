@@ -1,16 +1,8 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
@@ -19,10 +11,15 @@ import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.internal.UrlMapperAdapter;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.DefaultQueryParamsSerializer;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.queryParams.QueryParamsSerializer;
+
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class JsonApiUrlBuilder {
 
@@ -30,9 +27,7 @@ public class JsonApiUrlBuilder {
 
 	private final ModuleRegistry moduleRegistry;
 
-
 	private QueryParamsSerializer queryParamsSerializer = new DefaultQueryParamsSerializer();
-
 
 	public JsonApiUrlBuilder(ModuleRegistry moduleRegistry, QueryContext queryContext) {
 		this.queryContext = queryContext;
@@ -49,11 +44,7 @@ public class JsonApiUrlBuilder {
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter,
 						   String relationshipName) {
-		if (queryAdapter instanceof QuerySpecAdapter) {
-			return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
-		} else {
-			return buildUrl(resourceInformation, id, ((QueryParamsAdapter) queryAdapter).getQueryParams(), relationshipName);
-		}
+		return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
 	}
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {

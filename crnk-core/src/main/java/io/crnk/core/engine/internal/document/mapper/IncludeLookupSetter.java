@@ -18,7 +18,6 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.utils.Nullable;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +63,7 @@ public class IncludeLookupSetter {
 			mappingConfig) {
 
 		QueryAdapter inclusionQueryAdapter = queryAdapter;
-		if (!allowPagination && !(queryAdapter instanceof QueryParamsAdapter) && !queryAdapter.isEmpty()) {
+		if (!allowPagination && !queryAdapter.isEmpty()) {
 			// offset/limit cannot properly work for nested inclusions if becomes cyclic
 			inclusionQueryAdapter = queryAdapter.duplicate();
 

@@ -22,6 +22,8 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.utils.Nullable;
@@ -180,13 +182,12 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
 		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
-		Map<String, Set<String>> queryParams = new HashMap<>();
-		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("includedProjects"));
-		QueryParams queryParams1 = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
+		QuerySpec queryParams1 = new QuerySpec(Task.class);
+		queryParams1.includeRelation(PathSpec.of("includedProjects"));
 
 		// WHEN
 		Response response = responseGetResp.handle(jsonPath,
-				container.toQueryAdapter(Task.class, queryParams1),  null);
+				container.toQueryAdapter(queryParams1),  null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -265,13 +266,12 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		JsonPath jsonPath = pathBuilder.build("/tasks/" + taskId);
 		ResourceGetController responseGetResp = new ResourceGetController();
 		responseGetResp.init(controllerContext);
-		Map<String, Set<String>> queryParams = new HashMap<>();
-		queryParams.put(RestrictedQueryParamsMembers.include.name() + "[tasks]", Collections.singleton("[\"projects\"]"));
-		QueryParams requestParams = new QueryParamsBuilder(new DefaultQueryParamsParser()).buildQueryParams(queryParams);
+		QuerySpec requestParams = new QuerySpec(Task.class);
+		requestParams.includeRelation(PathSpec.of("projects"));
 
 		// WHEN
 		Response response = responseGetResp.handle(jsonPath,
-				container.toQueryAdapter(Task.class, requestParams), null);
+				container.toQueryAdapter(requestParams), null);
 
 		// THEN
 		Assert.assertNotNull(response);

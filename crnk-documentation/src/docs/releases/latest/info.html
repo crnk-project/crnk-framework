@@ -1,5 +1,21 @@
 
 
+<h4>Removal of deprecated Repository annotations</h4>
+
+The annotation-based repositories have been deprecated since Crnk 0.x and have now been removed. A switch to the Interface-based repositories like
+ResourceRepositoryV2 is quickly implemented if somewhere still necessary.
+
+<h4>Downsizing of QueryParams code base</h4>
+
+QueryParams has been deprecated since Crnk 0.x. So far both QuerySpec and QueryParams have been first-class citizens within Crnk. With this release, support
+for QueryParams has been downsized. This means that any parsing and processing of QueryParams has been removed, but the conversion of QuerySpec
+to QueryParams is still in place. The use of this conversion has been recommended for a long time to facilitate moving to QuerySpec, which also means nothing
+should change or project just have to catch up with this conversion setup. With this setup, QueryParams continues to be supported in the near future,
+but with a much lighter code base.	It is desired to remove QueryParams entirely from crnk-core in subsequent releases. Either by setting up a new
+crnk-core-queryparams or dropping support for it entirely. Contributions in this area are welcomed if it desired to keep support alive.
+Otherwise it will be dropped in early 2019.
+
+
 <h4>Simplified QuerySpec with new PathSpec</h4>
 
 All the QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path

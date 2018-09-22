@@ -33,6 +33,7 @@ import io.crnk.core.mock.models.Pojo;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.utils.Nullable;
@@ -513,11 +514,9 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 		JsonPath pojoPath = pathBuilder.build("/pojo");
 
 		// WHEN
-		QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
-		QueryParams queryParams =
-				queryParamsBuilder.buildQueryParams(Collections.singletonMap("include[pojo]", Collections.singleton
-						("projects")));
-		Response pojoResponse = sut.handle(pojoPath, container.toQueryAdapter(Pojo.class, queryParams),  pojoBody);
+		QuerySpec querySpec = new QuerySpec(Pojo.class);
+		querySpec.includeRelation(PathSpec.of("projects"));
+		Response pojoResponse = sut.handle(pojoPath, container.toQueryAdapter(querySpec),  pojoBody);
 
 		// THEN
 		assertThat(pojoResponse.getDocument().getSingleData().get().getType()).isEqualTo("pojo");

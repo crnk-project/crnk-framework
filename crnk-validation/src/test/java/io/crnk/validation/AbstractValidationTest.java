@@ -56,9 +56,8 @@ public abstract class AbstractValidationTest extends JerseyTestBase {
 			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, getClass().getPackage().getName());
 			property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://test.local");
 
-			CrnkFeature feature = new CrnkFeature(new ObjectMapper(),
-					new QueryParamsBuilder(new DefaultQueryParamsParser()), new SampleJsonServiceLocator());
-			feature.addModule(ValidationModule.newInstance());
+			CrnkFeature feature = new CrnkFeature();
+			feature.addModule(ValidationModule.create());
 			register(feature);
 
 		}
