@@ -11,15 +11,19 @@ import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.*;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.ForwardingDirection;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
+import org.assertj.core.util.Sets;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -156,7 +160,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
 
 	@Test
 	public void checkSetRelationIds() {
-		relRepository.setRelations(resource, Arrays.asList(3L, 4L), "testMultipleValues");
+		relRepository.setRelations(resource,Arrays.asList(3L, 4L), "testMultipleValues");
 		Assert.assertEquals(Arrays.asList(3L, 4L), resource.getTestMultipleValueIds());
 
 		List<Schedule> targets =
@@ -227,6 +231,36 @@ public class OwnerFowardingRelationshipRepositoryTest {
 		Assert.assertEquals(2, project.getTasks().size());
 		Assert.assertEquals(14L, project.getTasks().get(0).getId().longValue());
 		Assert.assertEquals(15L, project.getTasks().get(1).getId().longValue());
+	}
+
+	@Test
+	public void checkFilterRelations(){
+		FilterSpec filterTasks = new FilterSpec(Arrays.asList("id"), FilterOperator.GT, 13L);
+		QuerySpec querySpecTask = new QuerySpec(Task.class);
+
+		FilterSpec filterSchedules = new FilterSpec(Arrays.asList("id"), FilterOperator.GT, 3L);
+		QuerySpec querySpecSchedules = new QuerySpec(Schedule.class);
+
+		projectTaskRepository.setRelations(project, Arrays.asList(13L, 14L, 15L), "tasks");
+		relRepository.setRelations(resource, new ArrayList<Long>(Arrays.asList(3L, 4L)), "testMultipleValues");
+
+		MultivaluedMap targetsTasks =
+				projectTaskRepository.findTargets(Arrays.asList(project.getId()), "tasks", querySpecTask);
+		MultivaluedMap targetsMap =
+				relRepository.findTargets(Arrays.asList(resource.getId()), "testMultipleValues", querySpecSchedules);
+		Assert.assertEquals(3, targetsTasks.getList(project.getId()).size());
+		Assert.assertEquals(2, targetsMap.getList(resource.getId()).size());
+
+		querySpecTask.addFilter(filterTasks);
+		querySpecSchedules.addFilter(filterSchedules);
+
+		targetsTasks =
+				projectTaskRepository.findTargets(Arrays.asList(project.getId()), "tasks", querySpecTask);
+		targetsMap =
+				relRepository.findTargets(Arrays.asList(resource.getId()), "testMultipleValues", querySpecSchedules);
+
+		Assert.assertEquals(2, targetsTasks.getList(project.getId()).size());
+		Assert.assertEquals(1, targetsMap.getList(resource.getId()).size());
 	}
 
 	@After
