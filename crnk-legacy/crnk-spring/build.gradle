@@ -1,6 +1,0 @@
-apply plugin: 'java'
-
-dependencies {
-	compile project(':crnk-setup:crnk-setup-spring')
-	compile project(':crnk-setup:crnk-setup-spring-boot1')
-}
