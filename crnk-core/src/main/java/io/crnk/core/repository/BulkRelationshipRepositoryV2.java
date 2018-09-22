@@ -1,12 +1,12 @@
 package io.crnk.core.repository;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * {@code RelationshipRepositoryV2} implementation that provides additional support to bulk-request relations. This

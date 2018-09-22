@@ -1,9 +1,9 @@
 package io.crnk.core.engine.internal.utils;
 
+import org.junit.Assert;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-
-import org.junit.Assert;
 
 public class CoreClassTestUtils {
 
@@ -16,8 +16,7 @@ public class CoreClassTestUtils {
 		try {
 			constructors[0].setAccessible(true);
 			Assert.assertNotNull(constructors[0].newInstance());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -28,8 +27,7 @@ public class CoreClassTestUtils {
 			Assert.assertTrue(Modifier.isProtected(constructor.getModifiers()));
 			constructor.setAccessible(true);
 			Assert.assertNotNull(constructor.newInstance());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}

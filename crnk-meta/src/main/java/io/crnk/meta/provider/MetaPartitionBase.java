@@ -1,14 +1,5 @@
 package io.crnk.meta.provider;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaArrayType;
@@ -20,6 +11,15 @@ import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaPrimitiveType;
 import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.MetaType;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 public abstract class MetaPartitionBase implements MetaPartition {
 
@@ -56,8 +56,7 @@ public abstract class MetaPartitionBase implements MetaPartition {
 			if (typeMapping.containsKey(type)) {
 				nonUniqueTypes.add(type);
 				typeMapping.remove(type);
-			}
-			else {
+			} else {
 				typeMapping.put(type, element);
 			}
 		}
@@ -193,8 +192,7 @@ public abstract class MetaPartitionBase implements MetaPartition {
 				if (primitiveKey || !primitiveValue) {
 					mapMeta.setName(valueType.getName() + "$mappedBy$" + keyType.getName());
 					mapMeta.setId(valueType.getId() + "$mappedBy$" + keyType.getName());
-				}
-				else {
+				} else {
 					mapMeta.setName(keyType.getName() + "$map$" + valueType.getName());
 					mapMeta.setId(keyType.getId() + "$map$" + valueType.getName());
 				}

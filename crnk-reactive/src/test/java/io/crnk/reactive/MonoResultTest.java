@@ -1,8 +1,5 @@
 package io.crnk.reactive;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.crnk.core.engine.result.Result;
 import io.crnk.reactive.internal.MonoResult;
 import org.junit.Assert;
@@ -10,6 +7,9 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MonoResultTest {
 

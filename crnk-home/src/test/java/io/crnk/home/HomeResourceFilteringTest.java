@@ -1,7 +1,5 @@
 package io.crnk.home;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
@@ -19,6 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class HomeResourceFilteringTest {
 
@@ -79,8 +79,7 @@ public class HomeResourceFilteringTest {
 		JsonNode tasksNode = resourcesNode.get("tasks");
 		if (filtered) {
 			Assert.assertNull(tasksNode);
-		}
-		else {
+		} else {
 			Assert.assertEquals("http://localhost/tasks", tasksNode.asText());
 		}
 	}

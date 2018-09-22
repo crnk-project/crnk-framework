@@ -18,13 +18,13 @@
  */
 package io.crnk.gen.typescript.testmodel.deltaspike;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.deltaspike.core.api.config.PropertyFileConfig;
 import org.apache.deltaspike.core.spi.config.ConfigSource;
 import org.apache.deltaspike.core.spi.config.ConfigSourceProvider;
 import org.apache.deltaspike.core.util.ServiceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO JNDI causes trouble in DEfaultConfigurationSource from Deltaspike
 public class GeneratorConfigSourceProvider implements ConfigSourceProvider {
@@ -34,19 +34,18 @@ public class GeneratorConfigSourceProvider implements ConfigSourceProvider {
 	private List<ConfigSource> configSources = new ArrayList<ConfigSource>();
 
 	/**
-     * Default constructor which adds the {@link ConfigSource} implementations which are supported by default
-     */
-    public GeneratorConfigSourceProvider()
-    {
-        configSources.add(new SystemPropertyConfigSource());
-        configSources.add(new EnvironmentPropertyConfigSource());
+	 * Default constructor which adds the {@link ConfigSource} implementations which are supported by default
+	 */
+	public GeneratorConfigSourceProvider() {
+		configSources.add(new SystemPropertyConfigSource());
+		configSources.add(new EnvironmentPropertyConfigSource());
 
-        EnvironmentPropertyConfigSourceProvider epcsp =
-            new EnvironmentPropertyConfigSourceProvider(PROPERTY_FILE_NAME, true);
-        configSources.addAll(epcsp.getConfigSources());
+		EnvironmentPropertyConfigSourceProvider epcsp =
+				new EnvironmentPropertyConfigSourceProvider(PROPERTY_FILE_NAME, true);
+		configSources.addAll(epcsp.getConfigSources());
 
-        registerPropertyFileConfigs();
-    }
+		registerPropertyFileConfigs();
+	}
 
 	/**
 	 * Load all {@link PropertyFileConfig}s which are registered via

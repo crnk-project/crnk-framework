@@ -38,7 +38,7 @@ public class ClientResourceUpsertTest {
 	}
 
 	@Test
-	public void testUIDComputation(){
+	public void testUIDComputation() {
 		Serializable id = "test";
 		RegistryEntry entry = Mockito.mock(RegistryEntry.class);
 		ResourceInformation resourceInformation = Mockito.mock(ResourceInformation.class);
@@ -56,7 +56,7 @@ public class ClientResourceUpsertTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void handleNotSupported() {
-		upsert.handle(null,  null, null);
+		upsert.handle(null, null, null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

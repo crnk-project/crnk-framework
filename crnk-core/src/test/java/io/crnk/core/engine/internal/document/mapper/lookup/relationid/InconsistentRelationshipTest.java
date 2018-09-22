@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper.lookup.relationid;
 
-import java.util.Arrays;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
@@ -15,6 +13,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 public class InconsistentRelationshipTest extends AbstractDocumentMapperTest {
 
 
@@ -22,7 +22,7 @@ public class InconsistentRelationshipTest extends AbstractDocumentMapperTest {
 
 	private Schedule schedule;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
 	public void setup() {
 		super.setup();
@@ -78,8 +78,7 @@ public class InconsistentRelationshipTest extends AbstractDocumentMapperTest {
 			Assert.assertEquals(1, document.getIncluded().size());
 			Assert.assertEquals("3", document.getIncluded().get(0).getId());
 			Assert.assertEquals(setRelatedEntity ? 0 : 1, scheduleRepository.getNumFindAll());
-		}
-		else {
+		} else {
 			Assert.assertNull(data.get());
 			Assert.assertEquals(0, scheduleRepository.getNumFindAll());
 		}

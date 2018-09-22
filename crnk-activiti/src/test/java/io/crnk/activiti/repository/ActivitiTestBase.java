@@ -1,8 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.util.Date;
-import java.util.List;
-
 import io.crnk.activiti.example.model.ApproveTask;
 import io.crnk.activiti.internal.repository.TaskResourceRepository;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
@@ -19,6 +16,9 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.After;
 import org.junit.Before;
+
+import java.util.Date;
+import java.util.List;
 
 public abstract class ActivitiTestBase {
 

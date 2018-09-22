@@ -1,6 +1,11 @@
 package io.crnk.legacy.queryParams;
 
-import io.crnk.legacy.queryParams.params.*;
+import io.crnk.legacy.queryParams.params.FilterParams;
+import io.crnk.legacy.queryParams.params.GroupingParams;
+import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
+import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
+import io.crnk.legacy.queryParams.params.SortingParams;
+import io.crnk.legacy.queryParams.params.TypedParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

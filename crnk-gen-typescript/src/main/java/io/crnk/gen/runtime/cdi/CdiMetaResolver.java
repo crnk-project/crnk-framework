@@ -1,9 +1,9 @@
 package io.crnk.gen.runtime.cdi;
 
-import java.lang.reflect.Method;
-
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
+
+import java.lang.reflect.Method;
 
 /**
  * It is quite difficult to setup a JEE application locally, so going the Deltaspike way seems the simplest approach.
@@ -18,8 +18,7 @@ public class CdiMetaResolver implements RuntimeMetaResolver {
 			Object runner = runnerClass.newInstance();
 			Method method = runnerClass.getMethod("run", GeneratorTrigger.class);
 			method.invoke(runner, context);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}

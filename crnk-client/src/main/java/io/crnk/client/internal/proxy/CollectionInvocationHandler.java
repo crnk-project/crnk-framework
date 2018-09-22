@@ -40,8 +40,7 @@ public class CollectionInvocationHandler implements InvocationHandler, ObjectPro
 		}
 		try {
 			return method.invoke(collection, args);
-		}
-		catch (InvocationTargetException e) { // NO SONAR ok this way
+		} catch (InvocationTargetException e) { // NO SONAR ok this way
 			throw e.getCause();
 		}
 	}

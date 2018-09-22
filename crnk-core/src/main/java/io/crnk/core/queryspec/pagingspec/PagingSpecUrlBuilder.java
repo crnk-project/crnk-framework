@@ -29,8 +29,7 @@ public class PagingSpecUrlBuilder {
 		ResourceInformation rootInfo;
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();
-		}
-		else {
+		} else {
 			rootInfo = relationshipField.getParentResourceInformation();
 		}
 		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,

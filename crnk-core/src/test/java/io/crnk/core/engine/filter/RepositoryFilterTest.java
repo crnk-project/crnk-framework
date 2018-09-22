@@ -1,40 +1,32 @@
 package io.crnk.core.engine.filter;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import io.crnk.core.CoreTestContainer;
-import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.engine.url.ConstantServiceUrlProvider;
-import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.UserRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.mock.repository.UserToTaskRepository;
-import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-import io.crnk.core.resource.registry.ResourceRegistryTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class RepositoryFilterTest {
 

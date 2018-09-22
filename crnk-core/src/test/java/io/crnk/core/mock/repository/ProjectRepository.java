@@ -1,13 +1,13 @@
 package io.crnk.core.mock.repository;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.repository.ResourceRepository;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectRepository implements ResourceRepository<Project, Long> {
 
@@ -31,7 +31,7 @@ public class ProjectRepository implements ResourceRepository<Project, Long> {
 		}
 		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
-		if(entity.getId() == RETURN_NULL_ON_CREATE_ID){
+		if (entity.getId() == RETURN_NULL_ON_CREATE_ID) {
 			return null;
 		}
 		return entity;

@@ -1,19 +1,19 @@
 package io.crnk.core.engine.internal.document.mapper.lookup.relationid;
 
-import java.util.Arrays;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class LookupAlwaysRelationIdLookupTest extends AbstractDocumentMapperTest {
 
@@ -22,7 +22,7 @@ public class LookupAlwaysRelationIdLookupTest extends AbstractDocumentMapperTest
 
 	private Schedule schedule;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
 	public void setup() {
 		super.setup();
@@ -78,8 +78,7 @@ public class LookupAlwaysRelationIdLookupTest extends AbstractDocumentMapperTest
 			Assert.assertEquals(1, document.getIncluded().size());
 			Assert.assertEquals("3", document.getIncluded().get(0).getId());
 			Assert.assertEquals(1, scheduleRepository.getNumFindAll());
-		}
-		else {
+		} else {
 			Assert.assertNull(data.get());
 			Assert.assertEquals(0, scheduleRepository.getNumFindAll());
 		}

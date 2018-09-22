@@ -1,7 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
@@ -9,6 +7,8 @@ import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.NamingTestEntity;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class AttributeNamingEndToEndTest extends AbstractJpaJerseyTest {
 

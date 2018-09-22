@@ -1,13 +1,13 @@
 package io.crnk.jpa.query.querydsl;
 
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import javax.persistence.EntityManager;
-
 import io.crnk.jpa.internal.JpaQueryFactoryBase;
 import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
 import io.crnk.jpa.query.JpaQueryFactory;
+
+import javax.persistence.EntityManager;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class QuerydslQueryFactory extends JpaQueryFactoryBase implements JpaQueryFactory {
 

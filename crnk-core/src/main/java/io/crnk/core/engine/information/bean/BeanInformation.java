@@ -1,5 +1,7 @@
 package io.crnk.core.engine.information.bean;
 
+import io.crnk.core.engine.internal.utils.ClassUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -9,8 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.crnk.core.engine.internal.utils.ClassUtils;
 
 public class BeanInformation {
 

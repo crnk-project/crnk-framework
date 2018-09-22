@@ -1,8 +1,8 @@
 package io.crnk.core.repository;
 
-import java.util.Objects;
-
 import io.crnk.core.engine.information.resource.ResourceField;
+
+import java.util.Objects;
 
 /**
  * see {@link RelationshipMatcher}

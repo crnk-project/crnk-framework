@@ -1,10 +1,10 @@
 package io.crnk.spring.app;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.SpanReporter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestSpanReporter implements SpanReporter {
 

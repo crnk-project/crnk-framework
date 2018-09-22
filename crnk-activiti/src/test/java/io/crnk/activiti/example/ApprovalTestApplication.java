@@ -1,10 +1,5 @@
 package io.crnk.activiti.example;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.inject.Singleton;
-import javax.ws.rs.ApplicationPath;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -37,6 +32,11 @@ import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import javax.inject.Singleton;
+import javax.ws.rs.ApplicationPath;
+import java.util.Arrays;
+import java.util.List;
 
 @ApplicationPath("/")
 @Singleton

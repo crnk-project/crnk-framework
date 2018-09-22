@@ -1,9 +1,9 @@
 package io.crnk.core.engine.parser;
 
+import io.crnk.core.engine.internal.utils.ExceptionUtil;
+
 import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
-
-import io.crnk.core.engine.internal.utils.ExceptionUtil;
 
 public class ConstructorBasedParser<T> implements StringParser<T> {
 

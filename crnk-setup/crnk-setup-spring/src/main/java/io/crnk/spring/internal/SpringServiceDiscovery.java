@@ -1,12 +1,12 @@
 package io.crnk.spring.internal;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Spring-based discovery of services.

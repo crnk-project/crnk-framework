@@ -31,7 +31,7 @@ public class SecurityConfig {
 		}
 
 		public Builder permitAll(ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
 			}
 
@@ -39,7 +39,7 @@ public class SecurityConfig {
 		}
 
 		public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
 			}
 
@@ -47,7 +47,7 @@ public class SecurityConfig {
 		}
 
 		public Builder permitAll(String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
 			}
 
@@ -55,7 +55,7 @@ public class SecurityConfig {
 		}
 
 		public Builder permitRole(String role, ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				rules.add(new SecurityRule(role, permission));
 			}
 
@@ -63,7 +63,7 @@ public class SecurityConfig {
 		}
 
 		public <T> Builder permitRole(String role, Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				rules.add(new SecurityRule(resourceClass, role, permission));
 			}
 
@@ -71,7 +71,7 @@ public class SecurityConfig {
 		}
 
 		public Builder permitRole(String role, String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission: permissions) {
+			for (ResourcePermission permission : permissions) {
 				rules.add(new SecurityRule(resourceType, role, permission));
 			}
 

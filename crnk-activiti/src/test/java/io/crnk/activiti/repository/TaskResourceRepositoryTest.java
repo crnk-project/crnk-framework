@@ -1,8 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-
 import com.google.common.collect.Sets;
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.ActivitiModuleConfig;
@@ -24,6 +21,9 @@ import org.activiti.engine.task.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 
 public class TaskResourceRepositoryTest extends ActivitiTestBase {
 
@@ -149,8 +149,7 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
 		try {
 			taskRepository.findOne(task.getId(), querySpec);
 			Assert.fail();
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}
@@ -164,8 +163,7 @@ public class TaskResourceRepositoryTest extends ActivitiTestBase {
 		try {
 			taskRepository.findOne(task.getId(), querySpec);
 			Assert.fail();
-		}
-		catch (ResourceNotFoundException e) {
+		} catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}

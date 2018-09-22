@@ -1,10 +1,6 @@
 package io.crnk.spring.boot;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.junit.Assert.assertEquals;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -14,7 +10,6 @@ import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBootApplication;
-
 import io.crnk.spring.mvc.SpringMvcModule;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
@@ -41,9 +36,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.security.auth.message.config.AuthConfigFactory;
 import java.io.IOException;
 
-import javax.security.auth.message.config.AuthConfigFactory;
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

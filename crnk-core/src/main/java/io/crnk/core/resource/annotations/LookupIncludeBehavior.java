@@ -10,7 +10,7 @@ public enum LookupIncludeBehavior {
 	/**
 	 * Defines that the relationship will be traversed by
 	 * consulting the global setting first and, if not
-	 * set, this value will fall back to {@link LookupIncludeBehavior#NONE} by default. 
+	 * set, this value will fall back to {@link LookupIncludeBehavior#NONE} by default.
 	 */
 	DEFAULT,
 	/**

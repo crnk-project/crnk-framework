@@ -1,16 +1,16 @@
 package io.crnk.core.queryspec.pagingspec;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPagingSpec> {
 
@@ -46,8 +46,7 @@ public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPag
 		for (Map.Entry<String, Set<String>> param : parameters.entrySet()) {
 			if (OFFSET_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				result.setOffset(getValue(param.getKey(), param.getValue()));
-			}
-			else if (LIMIT_PARAMETER.equalsIgnoreCase(param.getKey())) {
+			} else if (LIMIT_PARAMETER.equalsIgnoreCase(param.getKey())) {
 				Long limit = getValue(param.getKey(), param.getValue());
 				if (maxPageLimit != null && limit != null && limit > maxPageLimit) {
 					throw new BadRequestException(
@@ -56,8 +55,7 @@ public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPag
 					);
 				}
 				result.setLimit(limit);
-			}
-			else {
+			} else {
 				throw new ParametersDeserializationException(param.getKey());
 			}
 		}
@@ -77,9 +75,9 @@ public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPag
 
 	@Override
 	public void build(final PagedLinksInformation linksInformation,
-			final ResourceList<?> resources,
-			final QueryAdapter queryAdapter,
-			final PagingSpecUrlBuilder urlBuilder) {
+					  final ResourceList<?> resources,
+					  final QueryAdapter queryAdapter,
+					  final PagingSpecUrlBuilder urlBuilder) {
 		Long totalCount = getTotalCount(resources);
 		Boolean isNextPageAvailable = isNextPageAvailable(resources);
 		if ((totalCount != null || isNextPageAvailable != null) && !hasPageLinks(linksInformation)) {
@@ -96,9 +94,9 @@ public class OffsetLimitPagingBehavior extends PagingBehaviorBase<OffsetLimitPag
 	}
 
 	private void doEnrichPageLinksInformation(PagedLinksInformation linksInformation, Long total,
-			Boolean isNextPageAvailable, QueryAdapter queryAdapter,
-			boolean hasResults,
-			PagingSpecUrlBuilder urlBuilder) {
+											  Boolean isNextPageAvailable, QueryAdapter queryAdapter,
+											  boolean hasResults,
+											  PagingSpecUrlBuilder urlBuilder) {
 		OffsetLimitPagingSpec offsetLimitPagingSpec = (OffsetLimitPagingSpec) queryAdapter.getPagingSpec();
 		long pageSize = offsetLimitPagingSpec.getLimit();
 		long offset = offsetLimitPagingSpec.getOffset();

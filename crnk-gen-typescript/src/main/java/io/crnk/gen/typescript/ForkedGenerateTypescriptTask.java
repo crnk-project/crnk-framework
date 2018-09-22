@@ -1,13 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.gen.runtime.RuntimeClassLoaderFactory;
 import org.gradle.api.Project;
@@ -15,6 +7,14 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ForkedGenerateTypescriptTask extends JavaExec {
 
@@ -42,8 +42,7 @@ public class ForkedGenerateTypescriptTask extends JavaExec {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			mapper.writerFor(TSGeneratorConfig.class).writeValue(configFile, config);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 		setArgs(Arrays.asList(configFile.getAbsolutePath()));
@@ -57,8 +56,7 @@ public class ForkedGenerateTypescriptTask extends JavaExec {
 		classpath.addAll(classLoaderFactory.getProjectLibraries());
 		try {
 			classpath.add(Paths.get(classLoaderFactory.getPluginUrl().toURI()).toFile());
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		}
 

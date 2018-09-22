@@ -1,6 +1,12 @@
 package io.crnk.spring;
 
-import java.io.IOException;
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.dispatcher.RequestDispatcher;
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.servlet.internal.ServletRequestContext;
+import io.crnk.spring.boot.CrnkSpringBootProperties;
+
 import javax.annotation.Priority;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -11,13 +17,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.dispatcher.RequestDispatcher;
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.servlet.internal.ServletRequestContext;
-import io.crnk.spring.boot.CrnkSpringBootProperties;
+import java.io.IOException;
 
 /**
  * @deprecated use CrnkFilter

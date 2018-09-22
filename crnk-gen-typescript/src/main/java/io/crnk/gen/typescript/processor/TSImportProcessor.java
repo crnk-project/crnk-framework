@@ -1,10 +1,5 @@
 package io.crnk.gen.typescript.processor;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.gen.typescript.model.TSAny;
 import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSElement;
@@ -16,6 +11,10 @@ import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Computes Typescript import statements for the given source model.

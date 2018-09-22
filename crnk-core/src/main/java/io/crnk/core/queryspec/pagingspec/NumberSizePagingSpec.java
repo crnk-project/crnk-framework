@@ -3,7 +3,7 @@ package io.crnk.core.queryspec.pagingspec;
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
-public class NumberSizePagingSpec implements PagingSpec{
+public class NumberSizePagingSpec implements PagingSpec {
 
 	private Integer size = null;
 
@@ -32,14 +32,11 @@ public class NumberSizePagingSpec implements PagingSpec{
 		if (pagingSpecType.equals(OffsetLimitPagingSpec.class)) {
 			if (number == 1 && size == null) {
 				return (T) new OffsetLimitPagingSpec(0L, null);
-			}
-			else if (number == 1) {
+			} else if (number == 1) {
 				return (T) new OffsetLimitPagingSpec(0L, size.longValue());
-			}
-			else if (number != 1 && size == null) {
+			} else if (number != 1 && size == null) {
 				throw new UnsupportedOperationException("cannot use page number without page size");
-			}
-			else {
+			} else {
 				return (T) new OffsetLimitPagingSpec(size.longValue() * (number - 1), size.longValue());
 			}
 		}

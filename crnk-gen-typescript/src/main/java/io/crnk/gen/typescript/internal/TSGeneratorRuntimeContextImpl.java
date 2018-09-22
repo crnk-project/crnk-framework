@@ -1,11 +1,11 @@
 package io.crnk.gen.typescript.internal;
 
-import java.io.File;
-import java.io.IOException;
-
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.meta.MetaLookup;
+
+import java.io.File;
+import java.io.IOException;
 
 
 public class TSGeneratorRuntimeContextImpl implements GeneratorTrigger, TSGeneratorRuntimeContext {

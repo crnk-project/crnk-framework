@@ -1,9 +1,9 @@
 package io.crnk.activiti.resource;
 
-import java.time.OffsetDateTime;
-
 import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
+
+import java.time.OffsetDateTime;
 
 public class HistoricProcessInstanceResource {
 

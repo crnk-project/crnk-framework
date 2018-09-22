@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @SpringBootApplication
-@Import({ TestDataLoader.class })
+@Import({TestDataLoader.class})
 public class MinimalSpringBootApplication {
 
 	public static void main(String[] args) {

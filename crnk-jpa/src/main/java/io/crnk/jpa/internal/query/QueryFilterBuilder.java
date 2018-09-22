@@ -1,11 +1,5 @@
 package io.crnk.jpa.internal.query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.criteria.JoinType;
-
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
@@ -16,6 +10,12 @@ import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaType;
+
+import javax.persistence.criteria.JoinType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public final class QueryFilterBuilder<P, F> {
 

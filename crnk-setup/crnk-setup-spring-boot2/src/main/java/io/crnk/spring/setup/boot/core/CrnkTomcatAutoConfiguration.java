@@ -20,7 +20,7 @@ import org.springframework.core.Ordered;
  * Relaxes tomcat connector for [ and ] till browser vendor properly implement spec (if they ever do so).
  */
 @Configuration
-@ConditionalOnClass({ Connector.class, AbstractHttp11Protocol.class })
+@ConditionalOnClass({Connector.class, AbstractHttp11Protocol.class})
 public class CrnkTomcatAutoConfiguration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkTomcatAutoConfiguration.class);
@@ -46,8 +46,7 @@ public class CrnkTomcatAutoConfiguration {
 					}
 					relaxedQueryChars += "[]";
 					PropertyUtils.setProperty(protocol11, PROPERTY_NAME, relaxedQueryChars);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					LOGGER.debug("failed to set relaxed query charts, Tomcat might be outdated");
 				}
 			}

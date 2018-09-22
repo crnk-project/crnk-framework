@@ -1,11 +1,5 @@
 package io.crnk.jpa.internal.query.backend.querydsl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.QTuple;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -13,6 +7,12 @@ import io.crnk.jpa.internal.query.AbstractQueryExecutorImpl;
 import io.crnk.jpa.query.querydsl.QuerydslExecutor;
 import io.crnk.jpa.query.querydsl.QuerydslTuple;
 import io.crnk.meta.model.MetaDataObject;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class QuerydslExecutorImpl<T> extends AbstractQueryExecutorImpl<T> implements QuerydslExecutor<T> {
 

@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec.mapper;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -39,6 +33,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -248,7 +248,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals(expectedSpec, actualSpec);
 
 		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-		Assert.assertEquals( new HashSet(Arrays.asList("data.data")), serialized.get("sort[projects]"));
+		Assert.assertEquals(new HashSet(Arrays.asList("data.data")), serialized.get("sort[projects]"));
 	}
 
 	@Test
@@ -331,7 +331,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals(expectedSpec, actualSpec);
 
 		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-		Assert.assertEquals( new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.name][EQ]"));
+		Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.name][EQ]"));
 	}
 
 	@Test
@@ -376,7 +376,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals(expectedSpec, actualSpec);
 
 		Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-		Assert.assertEquals( new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.task.name][EQ]"));
+		Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.task.name][EQ]"));
 	}
 
 	@Test

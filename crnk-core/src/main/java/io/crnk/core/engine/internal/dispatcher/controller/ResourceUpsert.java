@@ -1,18 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +35,19 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class ResourceUpsert extends ResourceIncludeField {
 
@@ -318,7 +318,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 					ResourceIdentifier resourceId = relationshipIds.get(i);
 					Serializable typedRelationshipId = (Serializable) relationshipTypedIds.get(i);
 					RegistryEntry entry = resourceRegistry.getEntry(resourceId.getType());
-					relatedResults.add(fetchRelated(entry, typedRelationshipId,  queryAdapter));
+					relatedResults.add(fetchRelated(entry, typedRelationshipId, queryAdapter));
 				}
 
 				if (relatedResults.isEmpty()) {

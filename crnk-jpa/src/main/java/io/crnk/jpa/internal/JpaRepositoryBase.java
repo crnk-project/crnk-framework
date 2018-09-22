@@ -1,9 +1,5 @@
 package io.crnk.jpa.internal;
 
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaQuery;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
@@ -19,6 +15,10 @@ import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.Tuple;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryExecutor;
 import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilter;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaQuery;
+import java.util.List;
 
 public abstract class JpaRepositoryBase<T> {
 
@@ -62,11 +62,9 @@ public abstract class JpaRepositoryBase<T> {
 		if (list.isEmpty()) {
 			throw new ResourceNotFoundException(
 					"resource not found: type=" + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
-		}
-		else if (list.size() == 1) {
+		} else if (list.size() == 1) {
 			return list.get(0);
-		}
-		else {
+		} else {
 			throw new IllegalStateException(
 					"unique result expected: " + repositoryConfig.getResourceClass().getSimpleName() + " id=" + id);
 		}

@@ -1,12 +1,12 @@
 package io.crnk.core.queryspec.pagingspec;
 
-import java.util.Set;
-
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
+
+import java.util.Set;
 
 abstract class PagingBehaviorBase<T extends PagingSpec> implements LimitBoundedPagingBehavior<T> {
 

@@ -1,14 +1,14 @@
 package io.crnk.rs.controller;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.mock.TestModule;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.jetty.JettyTestContainerFactory;
 import org.glassfish.jersey.test.spi.TestContainerFactory;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 public class ControllerWithPrefixTest extends ControllerTest {
 

@@ -1,7 +1,5 @@
 package io.crnk.core.engine.information;
 
-import java.lang.reflect.Type;
-
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -17,6 +15,8 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 

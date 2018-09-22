@@ -1,12 +1,12 @@
 package io.crnk.core.engine.http;
 
-import java.io.IOException;
-
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class HttpRequestContextBaseAdapterTest {
 

@@ -29,7 +29,7 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	private ResourceInformation sourceResourceInformation;
 
 	public RelationshipRepositoryStubImpl(CrnkClient client, Class<T> sourceClass, Class<D> targetClass,
-			ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
+										  ResourceInformation sourceResourceInformation, JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder, targetClass);
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;

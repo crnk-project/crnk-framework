@@ -1,13 +1,13 @@
 package io.crnk.core.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.module.TestResource;
 import io.crnk.core.queryspec.PathSpec;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MultivaluedMapTest {
 

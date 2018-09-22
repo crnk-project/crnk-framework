@@ -1,7 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.queryspec.QuerySpec;
@@ -15,6 +13,8 @@ import io.crnk.rs.CrnkFeature;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class JpaPageNumberEndToEndTest extends AbstractJpaJerseyTest {
 

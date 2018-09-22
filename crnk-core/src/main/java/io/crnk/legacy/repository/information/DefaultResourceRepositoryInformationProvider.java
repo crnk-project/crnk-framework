@@ -1,9 +1,5 @@
 package io.crnk.legacy.repository.information;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
@@ -12,14 +8,16 @@ import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.UntypedResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import net.jodah.typetools.TypeResolver;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class DefaultResourceRepositoryInformationProvider implements RepositoryInformationProvider {
 
@@ -49,7 +47,7 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 	}
 
 	private RepositoryInformation build(Object repository, Class<? extends Object> repositoryClass,
-			RepositoryInformationProviderContext context) {
+										RepositoryInformationProviderContext context) {
 		Class<?> resourceClass = getResourceClass(repository, repositoryClass);
 
 		ResourceInformationProvider resourceInformationProvider = context.getResourceInformationBuilder();
@@ -88,14 +86,12 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 		if (repository instanceof ResourceRepository) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
 			return typeArgs[0];
-		}
-		else if (repository != null) {
+		} else if (repository != null) {
 			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		}
-		else {
+		} else {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}

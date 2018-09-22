@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -18,6 +16,8 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
+
+import java.util.Set;
 
 public class ResourcePostController extends ResourceUpsert {
 

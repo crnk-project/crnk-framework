@@ -1,9 +1,9 @@
 package io.crnk.jpa.model;
 
-import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import java.util.Set;
 
 @Entity
 public class ManyToManyTestEntity {

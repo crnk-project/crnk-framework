@@ -1,9 +1,17 @@
 package io.crnk.jpa.internal.query.backend.criteria;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.jpa.internal.query.JoinRegistry;
+import io.crnk.jpa.internal.query.MetaComputedAttribute;
+import io.crnk.jpa.internal.query.QueryUtil;
+import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
+import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
+import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -16,19 +24,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
-
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.queryspec.Direction;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.jpa.internal.query.JoinRegistry;
-import io.crnk.jpa.internal.query.MetaComputedAttribute;
-import io.crnk.jpa.internal.query.QueryUtil;
-import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
-import io.crnk.jpa.query.criteria.JpaCriteriaExpressionFactory;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaAttributePath;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class JpaCriteriaQueryBackend<T> implements JpaQueryBackend<From<?, ?>, Order, Predicate, Expression<?>> {
 

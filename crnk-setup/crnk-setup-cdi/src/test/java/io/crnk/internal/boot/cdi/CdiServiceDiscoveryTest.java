@@ -1,9 +1,5 @@
 package io.crnk.internal.boot.cdi;
 
-import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.BeanManager;
-
 import io.crnk.cdi.internal.CdiServiceDiscovery;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -20,6 +16,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.BeanManager;
+import java.util.List;
 
 @RunWith(CdiTestRunner.class)
 @ApplicationScoped

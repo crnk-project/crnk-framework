@@ -22,8 +22,8 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = "crnk.home", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(HomeModule.class)
 @ConditionalOnMissingBean(HomeModule.class)
-@EnableConfigurationProperties({ CrnkHomeProperties.class })
-@Import({ CrnkCoreAutoConfiguration.class })
+@EnableConfigurationProperties({CrnkHomeProperties.class})
+@Import({CrnkCoreAutoConfiguration.class})
 public class CrnkHomeAutoConfiguration {
 
 	@Bean

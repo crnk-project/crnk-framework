@@ -1,8 +1,5 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.Type;
-import javax.persistence.Embeddable;
-
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEmbeddable;
@@ -11,6 +8,9 @@ import io.crnk.jpa.query.AnyTypeObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
+
+import javax.persistence.Embeddable;
+import java.lang.reflect.Type;
 
 public class EmbeddableMetaFactory extends AbstractJpaDataObjectFactory<MetaEmbeddable> {
 

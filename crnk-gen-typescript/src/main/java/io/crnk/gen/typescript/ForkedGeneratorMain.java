@@ -1,11 +1,11 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContextImpl;
+
+import java.io.File;
 
 public class ForkedGeneratorMain {
 
@@ -29,8 +29,7 @@ public class ForkedGeneratorMain {
 			RuntimeMetaResolver runtime = (RuntimeMetaResolver) Class.forName(config.computeMetaResolverClassName()).newInstance();
 			runtime.run(context, classLoader);
 			System.exit(0);
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			throw new IllegalStateException(e);
 		}
 	}

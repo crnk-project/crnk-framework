@@ -1,8 +1,5 @@
 package io.crnk.core.module;
 
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -12,6 +9,9 @@ import io.crnk.core.engine.internal.information.resource.DefaultResourceInstance
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class TestResourceInformationProvider implements ResourceInformationProvider {
 

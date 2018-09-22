@@ -1,8 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
 import io.crnk.core.engine.information.repository.RepositoryMethodAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
@@ -22,6 +19,9 @@ import io.crnk.legacy.queryParams.params.TypedParams;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 public class QuerySpecAdapterTest {
 
 	@Test
@@ -33,7 +33,7 @@ public class QuerySpecAdapterTest {
 						OffsetLimitPagingSpec.class);
 		resourceRegistry.addEntry(
 				new LegacyRegistryEntry(new DirectResponseResourceEntry(null, new ResourceRepositoryInformationImpl("tasks",
-						 resourceInformation, new HashMap(),RepositoryMethodAccess.ALL, true))));
+						resourceInformation, new HashMap(), RepositoryMethodAccess.ALL, true))));
 
 		QueryContext queryContext = new QueryContext();
 

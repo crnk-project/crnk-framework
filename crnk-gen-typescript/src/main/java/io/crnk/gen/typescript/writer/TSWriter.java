@@ -1,7 +1,5 @@
 package io.crnk.gen.typescript.writer;
 
-import java.util.*;
-
 import io.crnk.gen.typescript.model.TSAny;
 import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSClassType;
@@ -24,6 +22,12 @@ import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.model.TSVisitor;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 public class TSWriter implements TSVisitor {
 

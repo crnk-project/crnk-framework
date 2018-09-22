@@ -8,11 +8,10 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.Set;
 
 public class ValidationRepositoryFilter extends RepositoryFilterBase {
 

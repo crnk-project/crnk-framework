@@ -1,16 +1,14 @@
 package io.crnk.core.resource.annotations;
 
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
-
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 
 /**

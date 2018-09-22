@@ -25,8 +25,8 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnBean(Tracer.class)
 @ConditionalOnMissingBean(SpringCloudSleuthModule.class)
 
-@EnableConfigurationProperties({ CrnkSpringCloudSleuthProperties.class })
-@Import({ CrnkConfigV3.class })
+@EnableConfigurationProperties({CrnkSpringCloudSleuthProperties.class})
+@Import({CrnkConfigV3.class})
 public class CrnkSpringCloudSleuthAutoConfiguration {
 
 	@Bean

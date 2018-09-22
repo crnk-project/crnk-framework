@@ -2,7 +2,6 @@ package io.crnk.home;
 
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
@@ -10,13 +9,12 @@ import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.test.mock.ClassTestUtils;
 import io.crnk.test.mock.TestModule;
-
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
 
 public class HomeModuleTest {
 

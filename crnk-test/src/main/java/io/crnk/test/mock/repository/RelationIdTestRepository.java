@@ -1,13 +1,13 @@
 package io.crnk.test.mock.repository;
 
-import io.crnk.test.mock.models.RelationIdTestResource;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.test.mock.models.RelationIdTestResource;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RelationIdTestRepository extends ResourceRepositoryBase<RelationIdTestResource, Long> {
 

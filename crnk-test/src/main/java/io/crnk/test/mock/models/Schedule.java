@@ -1,11 +1,5 @@
 package io.crnk.test.mock.models;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -15,6 +9,12 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @JsonApiResource(type = "schedule", resourcePath = "schedules")
 public class Schedule {
@@ -149,8 +149,7 @@ public class Schedule {
 				ids.add(project.getId());
 			}
 			this.projectIds = ids;
-		}
-		else {
+		} else {
 			projectIds = null;
 		}
 	}

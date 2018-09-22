@@ -1,9 +1,9 @@
 package io.crnk.test.mock.models.types;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.OffsetDateTime;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProjectData {
 

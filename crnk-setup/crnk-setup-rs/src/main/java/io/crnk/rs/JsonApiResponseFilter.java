@@ -1,15 +1,5 @@
 package io.crnk.rs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -23,6 +13,16 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.utils.Nullable;
 import io.crnk.rs.type.JsonApiMediaType;
+
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 
 /**
  * Uses the Crnk {@link DocumentMapper} to create a JSON API response for
@@ -75,12 +75,10 @@ public class JsonApiResponseFilter implements ContainerResponseFilter {
 				responseContext.setEntity(documentMapper.toDocument(jsonApiResponse, queryAdapter, mappingConfig).get());
 				responseContext.getHeaders().put("Content-Type",
 						Collections.singletonList((Object) JsonApiMediaType.APPLICATION_JSON_API));
-			}
-			finally {
+			} finally {
 				httpRequestContextProvider.onRequestFinished();
 			}
-		}
-		else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
+		} else if (isJsonApiResponse(responseContext) && !doNotWrap(response)) {
 			Document document = new Document();
 			document.setData(Nullable.of(response));
 			responseContext.setEntity(document);

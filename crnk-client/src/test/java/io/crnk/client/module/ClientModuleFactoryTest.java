@@ -1,15 +1,14 @@
 package io.crnk.client.module;
 
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.module.Module;
 import io.crnk.test.mock.ClientTestModule;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.List;
 
 public class ClientModuleFactoryTest {
 

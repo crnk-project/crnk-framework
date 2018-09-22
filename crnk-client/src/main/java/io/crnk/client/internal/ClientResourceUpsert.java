@@ -1,13 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.client.ResponseBodyException;
@@ -28,6 +20,14 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 class ClientResourceUpsert extends ResourceUpsert {
 
@@ -134,7 +134,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 	@Override
 	protected Optional<Result> setRelationsFieldAsync(Object newResource, RegistryEntry registryEntry,
-			Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
+													  Map.Entry<String, Relationship> property, QueryAdapter queryAdapter) {
 
 		Relationship relationship = property.getValue();
 
@@ -156,8 +156,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 						if (hrefNode != null) {
 							url = hrefNode.asText().trim();
 						}
-					}
-					else {
+					} else {
 						url = relatedNode.asText().trim();
 					}
 					Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
@@ -165,8 +164,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 				}
 			}
 			return Optional.empty();
-		}
-		else {
+		} else {
 			// set elements
 			return super.setRelationsFieldAsync(newResource, registryEntry, property, queryAdapter);
 		}
@@ -174,7 +172,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 
 	@Override
 	protected boolean canModifyField(ResourceInformation resourceInformation, String fieldName, ResourceField field,
-			QueryContext queryContext) {
+									 QueryContext queryContext) {
 		// nothing to validate during deserialization on client-side
 		// there is only a need to check field access when receiving resources
 		// on the server-side client needs all the data he gets from the server

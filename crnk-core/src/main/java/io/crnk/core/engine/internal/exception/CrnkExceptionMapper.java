@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.exception;
 
-import java.util.Iterator;
-
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -16,6 +14,8 @@ import io.crnk.core.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
+
 /**
  * Exception mapper for a generic exception which can be thrown in request processing.
  */
@@ -28,8 +28,7 @@ public final class CrnkExceptionMapper implements ExceptionMapper<CrnkMappableEx
 		// log 5xx status as error and anything else as warn
 		if (exception.getHttpStatus() >= 500 && exception.getHttpStatus() < 600) {
 			LOGGER.error("failed to process request", exception);
-		}
-		else {
+		} else {
 			LOGGER.warn("failed to process request", exception);
 		}
 

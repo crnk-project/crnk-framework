@@ -1,20 +1,20 @@
 package io.crnk.core.engine.internal.document.mapper.lookup.relationid;
 
-import java.util.Arrays;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class NestedRelationIdLookupTest extends AbstractDocumentMapperTest {
 
@@ -27,7 +27,7 @@ public class NestedRelationIdLookupTest extends AbstractDocumentMapperTest {
 
 	private RelationIdTestResource child;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
 	public void setup() {
 		super.setup();
@@ -88,8 +88,7 @@ public class NestedRelationIdLookupTest extends AbstractDocumentMapperTest {
 		if (setRelatedId) {
 			Assert.assertNotNull(data.get());
 			Assert.assertEquals(2, document.getIncluded().size());
-		}
-		else {
+		} else {
 			Assert.assertNull(data.get());
 		}
 	}

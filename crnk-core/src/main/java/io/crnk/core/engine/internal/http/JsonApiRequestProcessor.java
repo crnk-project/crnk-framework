@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.http;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -33,20 +30,23 @@ import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.Set;
+
 public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase implements HttpRequestProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JsonApiRequestProcessor.class);
 
 
 	public JsonApiRequestProcessor(Module.ModuleContext moduleContext, ControllerRegistry controllerRegistry,
-			QueryAdapterBuilder queryAdapterBuilder) {
+								   QueryAdapterBuilder queryAdapterBuilder) {
 		super(moduleContext, queryAdapterBuilder, controllerRegistry);
 	}
 
 	/**
 	 * Determines whether the supplied HTTP request is considered a JSON-API request.
 	 *
-	 * @param requestContext The HTTP request
+	 * @param requestContext  The HTTP request
 	 * @param acceptPlainJson Whether a plain JSON request should also be considered a JSON-API request
 	 * @return <code>true</code> if it is a JSON-API request; <code>false</code> otherwise
 	 * @since 2.4
@@ -109,13 +109,11 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 			RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
 			requestDispatcher.dispatchAction(path, method, parameters);
 			return null;
-		}
-		else if (jsonPath != null) {
+		} else if (jsonPath != null) {
 			Document requestDocument;
 			try {
 				requestDocument = getRequestDocument(requestContext);
-			}
-			catch (JsonProcessingException e) {
+			} catch (JsonProcessingException e) {
 				return resultFactory.just(getErrorResponse(e));
 			}
 			QueryContext queryContext = requestContext.getQueryContext();
@@ -141,7 +139,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
 
 	public Result<Response> processAsync(JsonPath jsonPath, String method, Map<String, Set<String>> parameters,
-			Document requestDocument, QueryContext queryContext) {
+										 Document requestDocument, QueryContext queryContext) {
 		try {
 			ResultFactory resultFactory = moduleContext.getResultFactory();
 			ResourceInformation resourceInformation = getRequestedResource(jsonPath);
@@ -156,21 +154,18 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 					DocumentFilterChain filterChain = getFilterChain(jsonPath, method);
 					Response response = filterChain.doFilter(filterContext);
 					return resultFactory.just(response);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					Response response = toErrorResponse(e);
 					return resultFactory.just(response);
 				}
-			}
-			else {
+			} else {
 				LOGGER.debug("processing asynchronously");
 				Controller controller = controllerRegistry.getController(jsonPath, method);
 				Result<Response> responseResult =
 						controller.handleAsync(jsonPath, queryAdapter, requestDocument);
 				return responseResult.onErrorResume(this::toErrorResponse);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			ResultFactory resultFactory = moduleContext.getResultFactory();
 			return resultFactory.just(toErrorResponse(e));
 		}
@@ -185,8 +180,7 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 			exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 			PreconditionUtil
 					.assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
-		}
-		else {
+		} else {
 			LOGGER.debug("dispatching exception to mapper", e);
 		}
 		return exceptionMapper.get().toErrorResponse(e).toResponse();

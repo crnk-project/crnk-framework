@@ -1,10 +1,5 @@
 package io.crnk.core.module;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -47,6 +42,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SimpleModuleTest {
 
@@ -126,7 +126,8 @@ public class SimpleModuleTest {
 		try {
 			module.addPagingBehavior(Mockito.mock(OffsetLimitPagingBehavior.class));
 			Assert.fail("IllegalArgumentException expected, paging was added already");
-		} catch (IllegalArgumentException e) {}
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
 	@Test

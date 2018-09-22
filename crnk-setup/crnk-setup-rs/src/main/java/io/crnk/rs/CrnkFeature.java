@@ -90,7 +90,7 @@ public class CrnkFeature implements Feature {
 	 * All repositories with JAX-RS action need to be registered with JAX-RS as singletons.
 	 *
 	 * @param context of jaxrs
-	 * @param boot of crnk
+	 * @param boot    of crnk
 	 */
 	private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
 		ResourceRegistry resourceRegistry = boot.getResourceRegistry();

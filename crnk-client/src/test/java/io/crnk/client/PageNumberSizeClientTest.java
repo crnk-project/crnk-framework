@@ -1,7 +1,5 @@
 package io.crnk.client;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.core.queryspec.QuerySpec;
@@ -17,6 +15,8 @@ import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 public class PageNumberSizeClientTest extends AbstractClientTest {
 

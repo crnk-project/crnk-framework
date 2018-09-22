@@ -1,12 +1,12 @@
 package io.crnk.spring.client;
 
-import java.io.IOException;
-import java.util.List;
-
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+import java.util.List;
 
 public class RestTemplateResponse implements HttpAdapterResponse {
 

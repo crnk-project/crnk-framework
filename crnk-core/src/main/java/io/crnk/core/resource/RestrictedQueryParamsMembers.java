@@ -22,7 +22,8 @@ public enum RestrictedQueryParamsMembers {
 	 * List of specified fields to include in models
 	 */
 	fields,// NOSONAR ok in this case
-	unknown, /**
+	unknown,
+	/**
 	 * Additional resources that should be attached to response
 	 */
 	include// NOSONAR ok in this case

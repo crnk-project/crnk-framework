@@ -1,10 +1,5 @@
 package io.crnk.spring.mvc;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
@@ -19,16 +14,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 public class CrnkErrorController extends BasicErrorController {
 
 	public CrnkErrorController(ErrorAttributes errorAttributes,
-			ErrorProperties errorProperties) {
+							   ErrorProperties errorProperties) {
 		super(errorAttributes, errorProperties);
 	}
 
 	public CrnkErrorController(ErrorAttributes errorAttributes,
-			ErrorProperties errorProperties,
-			List<ErrorViewResolver> errorViewResolvers) {
+							   ErrorProperties errorProperties,
+							   List<ErrorViewResolver> errorViewResolvers) {
 		super(errorAttributes, errorProperties, errorViewResolvers);
 	}
 
@@ -44,14 +44,11 @@ public class CrnkErrorController extends BasicErrorController {
 		for (Map.Entry<String, Object> attribute : body.entrySet()) {
 			if (attribute.getKey().equals("status")) {
 				errorDataBuilder.setStatus(attribute.getValue().toString());
-			}
-			else if (attribute.getKey().equals("error")) {
+			} else if (attribute.getKey().equals("error")) {
 				errorDataBuilder.setTitle(attribute.getValue().toString());
-			}
-			else if (attribute.getKey().equals("message")) {
+			} else if (attribute.getKey().equals("message")) {
 				errorDataBuilder.setDetail(attribute.getValue().toString());
-			}
-			else {
+			} else {
 				errorDataBuilder.addMetaField(attribute.getKey(), attribute.getValue());
 			}
 		}

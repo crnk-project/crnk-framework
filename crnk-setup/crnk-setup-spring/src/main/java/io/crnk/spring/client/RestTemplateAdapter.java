@@ -1,8 +1,5 @@
 package io.crnk.spring.client;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
@@ -11,6 +8,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class RestTemplateAdapter implements HttpAdapter {
 
@@ -65,18 +65,15 @@ public class RestTemplateAdapter implements HttpAdapter {
 					SimpleClientHttpRequestFactory simpleRequestFactory =
 							(SimpleClientHttpRequestFactory) impl.getRequestFactory();
 					simpleRequestFactory.setReadTimeout(networkTimeout.intValue());
-				}
-				else if (requestFactory instanceof HttpComponentsClientHttpRequestFactory) {
+				} else if (requestFactory instanceof HttpComponentsClientHttpRequestFactory) {
 					HttpComponentsClientHttpRequestFactory apacheRequestFactory =
 							(HttpComponentsClientHttpRequestFactory) impl.getRequestFactory();
 					apacheRequestFactory.setReadTimeout(networkTimeout.intValue());
-				}
-				else if (requestFactory instanceof OkHttp3ClientHttpRequestFactory) {
+				} else if (requestFactory instanceof OkHttp3ClientHttpRequestFactory) {
 					OkHttp3ClientHttpRequestFactory okhttpRequestFactory =
 							(OkHttp3ClientHttpRequestFactory) impl.getRequestFactory();
 					okhttpRequestFactory.setReadTimeout(networkTimeout.intValue());
-				}
-				else {
+				} else {
 					throw new IllegalStateException("unknown type " + requestFactory);
 				}
 

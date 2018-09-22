@@ -1,9 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.FormResource;
 import io.crnk.core.queryspec.QuerySpec;
@@ -13,6 +10,9 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.TaskFormData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -30,12 +30,12 @@ public class FormResourceRepository<F extends FormResource> extends ResourceRepo
 
 	@Deprecated
 	public FormResourceRepository(FormService formService, ActivitiResourceMapper resourceMapper,
-			Class<F> formClass) {
+								  Class<F> formClass) {
 		this(formService, null, resourceMapper, formClass);
 	}
 
 	public FormResourceRepository(FormService formService, TaskService taskService, ActivitiResourceMapper resourceMapper,
-			Class<F> formClass) {
+								  Class<F> formClass) {
 		super(formClass);
 		this.formService = formService;
 		this.resourceMapper = resourceMapper;
@@ -49,8 +49,7 @@ public class FormResourceRepository<F extends FormResource> extends ResourceRepo
 
 			FormResource formResource = resourceMapper.mapToResource(getResourceClass(), taskFormData);
 			return (F) formResource;
-		}
-		catch (ActivitiObjectNotFoundException e) {
+		} catch (ActivitiObjectNotFoundException e) {
 			// happens after completion when task is returned one last time.
 			// FIXME better solution since still log out
 			return null;

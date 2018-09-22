@@ -1,13 +1,13 @@
 package io.crnk.jpa;
 
-import javax.persistence.EntityManager;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.jpa.model.TestEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.persistence.EntityManager;
 
 public class JpaModuleTest {
 
@@ -32,8 +32,7 @@ public class JpaModuleTest {
 		boot.addModule(JpaModule.createServerModule(config, em, transactionManager));
 		try {
 			boot.boot();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			// ok
 			Assert.assertEquals(e.getMessage(),
 					"failed to gather entity informations from class java.lang.String, make sure it is probably annotated with "

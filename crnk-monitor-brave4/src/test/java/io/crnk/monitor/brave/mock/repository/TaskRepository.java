@@ -1,9 +1,9 @@
 package io.crnk.monitor.brave.mock.repository;
 
-import io.crnk.monitor.brave.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.monitor.brave.mock.models.Task;
 
 import java.util.HashMap;
 import java.util.Map;

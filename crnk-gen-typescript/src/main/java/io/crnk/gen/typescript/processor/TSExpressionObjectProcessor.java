@@ -1,11 +1,5 @@
 package io.crnk.gen.typescript.processor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.gen.typescript.internal.TypescriptUtils;
 import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSClassType;
@@ -29,6 +23,12 @@ import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.gen.typescript.transform.TSMetaDataObjectTransformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Computes Type-safe query classes similar to QueryDSL for resource types.
@@ -131,7 +131,7 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 			if (fieldType instanceof TSArrayType) {
 				TSArrayType arrayType = (TSArrayType) fieldType;
 				TSType valueType = arrayType.getElementType();
-				if(valueType instanceof TSPrimitiveType) {
+				if (valueType instanceof TSPrimitiveType) {
 					TSField elementField = getField(setupField(queryType, fieldName, arrayType.getElementType()));
 					TSType elementType = elementField.getType();
 					TSPrimitiveType primitiveValueType = (TSPrimitiveType) valueType;
@@ -141,11 +141,12 @@ public class TSExpressionObjectProcessor implements TSSourceProcessor {
 					qField.setType(new TSParameterizedType(CrnkLibrary.ARRAY_PATH, elementType, primitiveValueType));
 					qField.setInitializer("new ArrayPath(this, '" + fieldName + "', " + elementType.getName() + ")");
 					return Arrays.asList(qField);
-				}return null;
+				}
+				return null;
 			} else if (fieldType instanceof TSIndexSignatureType) {
 				TSIndexSignatureType mapType = (TSIndexSignatureType) fieldType;
 				TSType valueType = mapType.getValueType();
-				if(valueType instanceof TSPrimitiveType) {
+				if (valueType instanceof TSPrimitiveType) {
 					TSField elementField = getField(setupField(queryType, fieldName, mapType.getValueType()));
 					TSType elementType = elementField.getType();
 					TSPrimitiveType primitiveValueType = (TSPrimitiveType) valueType;

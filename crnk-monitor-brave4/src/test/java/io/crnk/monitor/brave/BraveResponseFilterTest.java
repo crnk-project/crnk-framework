@@ -1,13 +1,8 @@
 package io.crnk.monitor.brave;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import io.crnk.core.engine.query.QueryContext;
-import io.crnk.monitor.brave.internal.BraveRepositoryFilter;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.document.ErrorData;
@@ -17,18 +12,23 @@ import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
+import io.crnk.monitor.brave.internal.BraveRepositoryFilter;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @Ignore // TODO deal with the new finals in Brave code base
 public class BraveResponseFilterTest {

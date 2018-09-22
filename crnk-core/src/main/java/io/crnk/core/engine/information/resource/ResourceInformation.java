@@ -1,17 +1,5 @@
 package io.crnk.core.engine.information.resource;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
@@ -34,6 +22,18 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Holds information about the type of the resource.
@@ -131,25 +131,25 @@ public class ResourceInformation {
 	private ResourceInformation resourceInformation;
 
 	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
-			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, implementationType, resourceType, null, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String resourcePath,
-			String superResourceType,
-			List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   String superResourceType,
+							   List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, implementationType, resourceType, resourcePath, superResourceType, null, fields, pagingSpecType);
 	}
 
 	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this(parser, implementationType, resourceType, null, superResourceType, instanceBuilder, fields, pagingSpecType);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public ResourceInformation(TypeParser parser, Type implementationType, String resourceType, String resourcePath,
-			String superResourceType,
-			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
+							   String superResourceType,
+							   ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields, Class<? extends PagingSpec> pagingSpecType) {
 		this.parser = parser;
 		this.implementationClass = ClassUtils.getRawType(implementationType);
 		this.implementationType = implementationType;
@@ -183,8 +183,7 @@ public class ResourceInformation {
 						"nested identifiers can only have a single @JsonApiRelationId annotated field, got multiple for %s",
 						beanInformation.getImplementationClass());
 				parentAttribute = attribute;
-			}
-			else if (attribute.getAnnotation(JsonApiId.class).isPresent()) {
+			} else if (attribute.getAnnotation(JsonApiId.class).isPresent()) {
 				PreconditionUtil.verify(idAttribute == null,
 						"nested identifiers can only one attribute being annotated with @JsonApiId, got multiple for %s",
 						beanInformation.getImplementationClass());
@@ -295,8 +294,7 @@ public class ResourceInformation {
 				public Object getValue(Object resource, String name) {
 					try {
 						return jsonAnyGetter.invoke(resource, name);
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
 					}
@@ -306,8 +304,7 @@ public class ResourceInformation {
 				public void setValue(Object resource, String name, Object fieldValue) {
 					try {
 						jsonAnySetter.invoke(resource, name, fieldValue);
-					}
-					catch (IllegalAccessException | InvocationTargetException e) {
+					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new ResourceException(
 								String.format("Exception while writting %s.%s=%s due to %s", resource, name, fieldValue,
 										e.getMessage()), e);
@@ -353,13 +350,12 @@ public class ResourceInformation {
 					fieldAccessors.put(resourceField.getIdName(), resourceField.getIdAccessor());
 
 					// a non-JsonApiRelationId field can also be referenced => has its own ResourceField instance
-					if(!fieldByUnderlyingName.containsKey(resourceField.getIdName())) {
+					if (!fieldByUnderlyingName.containsKey(resourceField.getIdName())) {
 						fieldByUnderlyingName.put(resourceField.getIdName(), resourceField);
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			this.relationshipFields = Collections.emptyList();
 			this.attributeFields = Collections.emptyList();
 			this.fieldAccessors = null;
@@ -393,8 +389,7 @@ public class ResourceInformation {
 
 		if (metaFields.isEmpty()) {
 			return null;
-		}
-		else if (metaFields.size() > 1) {
+		} else if (metaFields.size() > 1) {
 			throw new MultipleJsonApiMetaInformationException(resourceClass.getCanonicalName());
 		}
 		return metaFields.get(0);
@@ -410,8 +405,7 @@ public class ResourceInformation {
 
 		if (linksFields.isEmpty()) {
 			return null;
-		}
-		else if (linksFields.size() > 1) {
+		} else if (linksFields.size() > 1) {
 			throw new MultipleJsonApiLinksInformationException(resourceClass.getCanonicalName());
 		}
 		return linksFields.get(0);
@@ -543,8 +537,7 @@ public class ResourceInformation {
 		String strId;
 		if (resourceOrId instanceof String) {
 			strId = (String) resourceOrId;
-		}
-		else {
+		} else {
 			strId = toIdString(resourceOrId);
 		}
 		return new ResourceIdentifier(strId, getResourceType());
@@ -557,7 +550,7 @@ public class ResourceInformation {
 	 * @param id stringified id
 	 * @return id
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Serializable parseIdString(String id) {
 		return (Serializable) idStringMapper.parse(id);
 	}

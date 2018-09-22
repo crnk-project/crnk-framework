@@ -16,16 +16,6 @@
  */
 package io.crnk.servlet;
 
-import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.servlet.resource.repository.NodeRepository;
@@ -38,6 +28,16 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonPartEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CrnkServletRejectJsonTest {
 	private static final String SOME_TASK_ATTRIBUTES = "{\"name\":\"Some task\"}";
@@ -84,7 +84,9 @@ public class CrnkServletRejectJsonTest {
 		nodeRepository.clearRepo();
 	}
 
-	/** Option to reject plain JSON GET requests is enabled explicitly. */
+	/**
+	 * Option to reject plain JSON GET requests is enabled explicitly.
+	 */
 	@Test
 	public void testRejectPlainJson() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);

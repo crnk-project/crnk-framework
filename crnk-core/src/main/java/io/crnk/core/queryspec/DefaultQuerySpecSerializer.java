@@ -1,5 +1,12 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.engine.internal.utils.StringUtils;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.resource.RestrictedQueryParamsMembers;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,13 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import io.crnk.core.engine.internal.utils.StringUtils;
-import io.crnk.core.engine.registry.RegistryEntry;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.RepositoryNotFoundException;
-import io.crnk.core.resource.RestrictedQueryParamsMembers;
-import org.slf4j.LoggerFactory;
 
 /**
  * @deprecated use {@link io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper}
@@ -92,8 +92,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 					values.add(serializeValue(elem));
 				}
 				map.put(key, values);
-			}
-			else {
+			} else {
 				String value = serializeValue(filterSpec.getValue());
 				put(map, key, value);
 			}

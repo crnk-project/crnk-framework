@@ -1,13 +1,13 @@
 package io.crnk.jpa.model;
 
+import io.crnk.core.resource.annotations.JsonApiField;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-
-import io.crnk.core.resource.annotations.JsonApiField;
 
 @Entity
 public class AnnotationTestEntity {

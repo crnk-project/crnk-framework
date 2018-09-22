@@ -1,22 +1,6 @@
 package io.crnk.validation;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.validation.internal.ConstraintViolationImpl;
 import io.crnk.validation.mock.ComplexValidator;
 import io.crnk.validation.mock.models.Project;
@@ -25,6 +9,16 @@ import io.crnk.validation.mock.models.Schedule;
 import io.crnk.validation.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 // TODO remo: root/leaf bean not yet available, Crnk extensions required
 public class ValidationEndToEndTest extends AbstractValidationTest {

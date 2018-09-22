@@ -1,8 +1,5 @@
 package io.crnk.spring.boot.autoconfigure;
 
-import java.util.List;
-import javax.servlet.Servlet;
-
 import io.crnk.spring.boot.CrnkSpringMvcProperties;
 import io.crnk.spring.mvc.CrnkErrorController;
 import org.springframework.beans.factory.ObjectProvider;
@@ -23,14 +20,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import javax.servlet.Servlet;
+import java.util.List;
+
 
 @Configuration
 @ConditionalOnProperty(prefix = "crnk.spring.mvc", name = "errorController", havingValue = "true", matchIfMissing = true)
 @ConditionalOnWebApplication
-@ConditionalOnClass({ Servlet.class, DispatcherServlet.class, ErrorMvcAutoConfiguration.class })
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class, ErrorMvcAutoConfiguration.class})
 // Load before the main ErrorMvcAutoConfiguration so that we override it
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableConfigurationProperties({ CrnkSpringMvcProperties.class })
+@EnableConfigurationProperties({CrnkSpringMvcProperties.class})
 public class CrnkErrorControllerAutoConfiguration {
 
 	private final ServerProperties serverProperties;
@@ -38,7 +38,7 @@ public class CrnkErrorControllerAutoConfiguration {
 	private final List<ErrorViewResolver> errorViewResolvers;
 
 	public CrnkErrorControllerAutoConfiguration(ServerProperties serverProperties,
-			ObjectProvider<List<ErrorViewResolver>> errorViewResolversProvider) {
+												ObjectProvider<List<ErrorViewResolver>> errorViewResolversProvider) {
 		this.serverProperties = serverProperties;
 		this.errorViewResolvers = errorViewResolversProvider.getIfAvailable();
 	}

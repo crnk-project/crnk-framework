@@ -1,17 +1,6 @@
 package io.crnk.core.module;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import io.crnk.core.repository.InMemoryResourceRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -64,6 +53,7 @@ import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -73,6 +63,14 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -109,7 +107,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void checkAddingPagingBehavior(){
+	public void checkAddingPagingBehavior() {
 		Assert.assertEquals(1, moduleRegistry.getPagingBehaviors().size());
 	}
 
@@ -158,7 +156,7 @@ public class ModuleRegistryTest {
 	}
 
 	@Test
-	public void checkNullResourcePath(){
+	public void checkNullResourcePath() {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		SimpleModule module = new SimpleModule("test");
 		moduleRegistry.addModule(module);
@@ -361,8 +359,7 @@ public class ModuleRegistryTest {
 		try {
 			informationProvider.build(Object.class);
 			Assert.fail();
-		}
-		catch (UnsupportedOperationException e) {
+		} catch (UnsupportedOperationException e) {
 			// ok
 		}
 

@@ -19,7 +19,7 @@ public class TaskToProjectRepository implements RelationshipRepositoryV2<Task, L
 		THREAD_LOCAL_REPOSITORY.clear();
 	}
 
-	public TaskToProjectRepository(){
+	public TaskToProjectRepository() {
 
 	}
 

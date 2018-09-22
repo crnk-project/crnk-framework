@@ -1,10 +1,10 @@
 package io.crnk.core.queryspec;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.queryspec.mapper.QueryParameter;
+
+import java.lang.reflect.Type;
+import java.util.Collection;
 
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
@@ -54,11 +54,9 @@ public abstract class FilterOperator {
 				if (escapedCharacters.contains(Character.toString(c))) {
 					pattern.append('\\');
 					pattern.append(c);
-				}
-				else if (c == '%') {
+				} else if (c == '%') {
 					pattern.append(".*");
-				}
-				else {
+				} else {
 					pattern.append(Character.toLowerCase(c));
 				}
 			}

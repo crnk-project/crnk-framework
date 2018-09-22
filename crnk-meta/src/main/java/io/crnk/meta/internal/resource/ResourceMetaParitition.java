@@ -1,12 +1,5 @@
 package io.crnk.meta.internal.resource;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -37,6 +30,13 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.model.resource.MetaResourceRepository;
 import io.crnk.meta.provider.MetaPartitionContext;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
@@ -211,9 +211,9 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	protected String getId(String resourceType) {
 		ResourceRegistry resourceRegistry = this.context.getModuleContext().getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntry(resourceType);
-		if(idPrefix != null) {
+		if (idPrefix != null) {
 			return idPrefix + resourceType.replace('/', '.');
-		}else{
+		} else {
 			Class<?> resourceClass = entry.getResourceInformation().getResourceClass();
 			return resourceClass.getName();
 		}

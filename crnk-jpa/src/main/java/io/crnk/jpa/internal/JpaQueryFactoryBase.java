@@ -1,8 +1,5 @@
 package io.crnk.jpa.internal;
 
-import java.util.Collections;
-import javax.persistence.EntityManager;
-
 import io.crnk.jpa.internal.query.ComputedAttributeRegistryImpl;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.query.ComputedAttributeRegistry;
@@ -10,6 +7,9 @@ import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.provider.MetaPartition;
+
+import javax.persistence.EntityManager;
+import java.util.Collections;
 
 public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 

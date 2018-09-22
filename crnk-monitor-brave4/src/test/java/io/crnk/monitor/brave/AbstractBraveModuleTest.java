@@ -1,18 +1,6 @@
 package io.crnk.monitor.brave;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import brave.Tracing;
-import io.crnk.monitor.brave.mock.models.Project;
-import io.crnk.monitor.brave.mock.models.Task;
-import io.crnk.monitor.brave.mock.repository.ProjectRepository;
-import io.crnk.monitor.brave.mock.repository.TaskRepository;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -22,6 +10,10 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.monitor.brave.mock.models.Project;
+import io.crnk.monitor.brave.mock.models.Task;
+import io.crnk.monitor.brave.mock.repository.ProjectRepository;
+import io.crnk.monitor.brave.mock.repository.TaskRepository;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -33,6 +25,14 @@ import org.mockito.Mockito;
 import zipkin2.Endpoint;
 import zipkin2.Span;
 import zipkin2.reporter.Reporter;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 
@@ -108,8 +108,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		task.setId(13L);
 		try {
 			taskRepo.create(task);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ok
 		}
 

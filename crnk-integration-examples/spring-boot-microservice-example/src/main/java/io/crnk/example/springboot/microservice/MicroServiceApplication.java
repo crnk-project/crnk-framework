@@ -1,12 +1,12 @@
 package io.crnk.example.springboot.microservice;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.example.springboot.microservice.project.ProjectApplication;
 import io.crnk.example.springboot.microservice.task.TaskApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Launches both micro services within the same JVM for demonstration purposes.

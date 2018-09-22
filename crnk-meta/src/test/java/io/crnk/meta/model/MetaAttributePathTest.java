@@ -1,12 +1,12 @@
 package io.crnk.meta.model;
 
-import java.util.Arrays;
-import java.util.Iterator;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class MetaAttributePathTest {
 

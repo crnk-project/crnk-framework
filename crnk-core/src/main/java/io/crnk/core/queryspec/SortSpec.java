@@ -1,9 +1,9 @@
 package io.crnk.core.queryspec;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+
 import java.io.Serializable;
 import java.util.List;
-
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
 public class SortSpec extends AbstractPathSpec implements Serializable {
 

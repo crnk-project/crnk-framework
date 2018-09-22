@@ -1,12 +1,12 @@
 package io.crnk.core.queryspec.pagingspec;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceList;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Acts as the default value for {@link JsonApiResource#pagingBehavior()}.
@@ -41,7 +41,7 @@ public class VoidPagingBehavior implements PagingBehavior<PagingSpec> {
 
 	@Override
 	public void build(PagedLinksInformation linksInformation, ResourceList<?> resources,
-			QueryAdapter queryAdapter, PagingSpecUrlBuilder urlBuilder) {
+					  QueryAdapter queryAdapter, PagingSpecUrlBuilder urlBuilder) {
 		throw new UnsupportedOperationException();
 	}
 

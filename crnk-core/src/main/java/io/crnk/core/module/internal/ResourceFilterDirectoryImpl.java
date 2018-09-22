@@ -1,9 +1,5 @@
 package io.crnk.core.module.internal;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
@@ -18,6 +14,10 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceFilterDirectoryImpl.class);
@@ -29,7 +29,7 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 	private final ResourceRegistry resourceRegistry;
 
 	public ResourceFilterDirectoryImpl(List<ResourceFilter> filters, HttpRequestContextProvider requestContextProvider,
-			ResourceRegistry resourceRegistry) {
+									   ResourceRegistry resourceRegistry) {
 		this.filters = filters;
 		this.requestContextProvider = requestContextProvider;
 		this.resourceRegistry = resourceRegistry;
@@ -96,8 +96,7 @@ public class ResourceFilterDirectoryImpl implements ResourceFilterDirectory {
 
 				// consider checking more than GET? intersection/union of multiple?
 				behavior = behavior.merge(get(oppositeResourceInformation, HttpMethod.GET, queryContext));
-			}
-			else {
+			} else {
 				LOGGER.warn("opposite side {} not found", oppositeResourceType);
 			}
 		}

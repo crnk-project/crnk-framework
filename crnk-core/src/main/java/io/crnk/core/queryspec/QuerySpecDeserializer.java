@@ -1,10 +1,10 @@
 package io.crnk.core.queryspec;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @deprecated use {@link QuerySpecUrlMapper}

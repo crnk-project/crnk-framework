@@ -74,14 +74,11 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 		if (pagingSpecType.equals(NumberSizePagingSpec.class)) {
 			if (offset == 0 && limit == null) {
 				return (T) new NumberSizePagingSpec(1, null);
-			}
-			else if (offset == 0) {
+			} else if (offset == 0) {
 				return (T) new NumberSizePagingSpec(1, limit.intValue());
-			}
-			else if (offset != 0 && limit == null) {
+			} else if (offset != 0 && limit == null) {
 				throw new UnsupportedOperationException("cannot use page offset without page limit");
-			}
-			else {
+			} else {
 				int number = (int) (offset / limit);
 				if (number * limit != offset) {
 					throw new BadRequestException(

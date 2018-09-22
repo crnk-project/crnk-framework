@@ -1,14 +1,14 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-
 import io.crnk.core.engine.information.resource.ResourceField;
+
+import java.io.Serializable;
 
 public class DefaultJpaRepositoryFactory implements JpaRepositoryFactory {
 
 	@Override
 	public <T, I extends Serializable> JpaEntityRepository<T, I> createEntityRepository(JpaModule module,
-			JpaRepositoryConfig<T> config) {
+																						JpaRepositoryConfig<T> config) {
 
 		return new JpaEntityRepository<>(config);
 	}

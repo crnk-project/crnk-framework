@@ -1,13 +1,13 @@
 package io.crnk.core.engine.registry;
 
 
-import java.util.Collection;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.module.TestResource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Collection;
 
 public class HierarchicalResourceRegistryPartTest {
 

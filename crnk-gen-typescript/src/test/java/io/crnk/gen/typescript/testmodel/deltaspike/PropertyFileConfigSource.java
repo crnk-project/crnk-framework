@@ -18,32 +18,29 @@
  */
 package io.crnk.gen.typescript.testmodel.deltaspike;
 
-import java.net.URL;
-
 import org.apache.deltaspike.core.impl.config.PropertiesConfigSource;
 import org.apache.deltaspike.core.util.PropertyFileUtils;
+
+import java.net.URL;
 
 /**
  * {@link org.apache.deltaspike.core.spi.config.ConfigSource} which uses
  * <i>META-INF/apache-deltaspike.properties</i> for the lookup
  */
-class PropertyFileConfigSource extends PropertiesConfigSource
-{
-    private String fileName;
+class PropertyFileConfigSource extends PropertiesConfigSource {
+	private String fileName;
 
-    PropertyFileConfigSource(URL propertyFileUrl)
-    {
-        super(PropertyFileUtils.loadProperties(propertyFileUrl));
-        fileName = propertyFileUrl.toExternalForm();
-        initOrdinal(100);
-    }
+	PropertyFileConfigSource(URL propertyFileUrl) {
+		super(PropertyFileUtils.loadProperties(propertyFileUrl));
+		fileName = propertyFileUrl.toExternalForm();
+		initOrdinal(100);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getConfigName()
-    {
-        return fileName;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getConfigName() {
+		return fileName;
+	}
 }

@@ -1,11 +1,20 @@
 package io.crnk.test.mock;
 
 import io.crnk.core.module.Module;
-import io.crnk.test.mock.repository.*;
+import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.RelationIdTestRepository;
+import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.test.mock.repository.ScheduleToTaskRepository;
+import io.crnk.test.mock.repository.TaskRepository;
+import io.crnk.test.mock.repository.TaskSubtypeRepository;
+import io.crnk.test.mock.repository.TaskToProjectRepository;
+import io.crnk.test.mock.repository.TaskToScheduleRepo;
 import io.crnk.test.mock.repository.nested.ManyNestedRepository;
-import io.crnk.test.mock.repository.nested.RelatedRepository;
 import io.crnk.test.mock.repository.nested.NestedRelationshipRepository;
 import io.crnk.test.mock.repository.nested.ParentRepository;
+import io.crnk.test.mock.repository.nested.RelatedRepository;
 
 public class TestModule implements Module {
 

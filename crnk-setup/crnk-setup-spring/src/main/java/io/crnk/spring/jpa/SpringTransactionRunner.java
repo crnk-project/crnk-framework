@@ -1,7 +1,5 @@
 package io.crnk.spring.jpa;
 
-import java.util.concurrent.Callable;
-
 import io.crnk.core.engine.transaction.TransactionRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -10,6 +8,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.concurrent.Callable;
 
 public class SpringTransactionRunner implements TransactionRunner {
 
@@ -34,17 +34,14 @@ public class SpringTransactionRunner implements TransactionRunner {
 							throw new RollbackOnlyException(result);
 						}
 						return result;
-					}
-					catch (RuntimeException e) {
+					} catch (RuntimeException e) {
 						throw e;
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						throw new IllegalStateException(e);
 					}
 				}
 			});
-		}
-		catch (RollbackOnlyException e) {
+		} catch (RollbackOnlyException e) {
 			return (T) e.getResult();
 		}
 	}

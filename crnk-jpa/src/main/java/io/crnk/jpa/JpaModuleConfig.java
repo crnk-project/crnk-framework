@@ -1,5 +1,11 @@
 package io.crnk.jpa;
 
+import io.crnk.jpa.internal.QueryFactoryDiscovery;
+import io.crnk.jpa.query.JpaQueryFactory;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,12 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.persistence.Entity;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-
-import io.crnk.jpa.internal.QueryFactoryDiscovery;
-import io.crnk.jpa.query.JpaQueryFactory;
 
 public class JpaModuleConfig {
 

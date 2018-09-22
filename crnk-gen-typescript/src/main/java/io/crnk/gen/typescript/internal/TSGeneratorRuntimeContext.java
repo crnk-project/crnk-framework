@@ -1,8 +1,8 @@
 package io.crnk.gen.typescript.internal;
 
-import java.io.File;
-
 import io.crnk.gen.typescript.TSGeneratorConfig;
+
+import java.io.File;
 
 
 public interface TSGeneratorRuntimeContext {

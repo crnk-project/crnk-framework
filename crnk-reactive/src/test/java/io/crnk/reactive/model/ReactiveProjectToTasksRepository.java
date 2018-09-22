@@ -1,11 +1,5 @@
 package io.crnk.reactive.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.exception.ResourceNotFoundException;
@@ -15,6 +9,12 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.reactive.repository.ReactiveManyRelationshipRepository;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ReactiveProjectToTasksRepository
 		implements ReactiveManyRelationshipRepository<ReactiveProject, Long, ReactiveTask, Long> {
@@ -68,7 +68,7 @@ public class ReactiveProjectToTasksRepository
 
 	@Override
 	public Mono<Map<Long, ResourceList<ReactiveTask>>> findManyTargets(Collection<Long> sourceIds, ResourceField field,
-			QuerySpec querySpec) {
+																	   QuerySpec querySpec) {
 		Map<Long, ResourceList<ReactiveTask>> result = new HashMap<>();
 		for (Long sourceId : sourceIds) {
 			List<Long> taskIds = relationMap.getList(sourceId);

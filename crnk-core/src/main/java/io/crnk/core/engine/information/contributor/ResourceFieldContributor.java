@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.contributor;
 
 import io.crnk.core.engine.information.resource.ResourceField;
+
 import java.util.List;
 
 /**

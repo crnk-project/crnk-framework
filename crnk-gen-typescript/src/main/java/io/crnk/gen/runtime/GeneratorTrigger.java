@@ -1,8 +1,8 @@
 package io.crnk.gen.runtime;
 
-import java.io.IOException;
-
 import io.crnk.gen.typescript.TSGeneratorConfig;
+
+import java.io.IOException;
 
 public interface GeneratorTrigger {
 

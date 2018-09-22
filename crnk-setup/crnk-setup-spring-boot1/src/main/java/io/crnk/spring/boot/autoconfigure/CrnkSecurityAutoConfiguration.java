@@ -1,7 +1,5 @@
 package io.crnk.spring.boot.autoconfigure;
 
-import java.util.List;
-
 import io.crnk.operations.server.OperationsModule;
 import io.crnk.security.SecurityConfig;
 import io.crnk.security.SecurityModule;
@@ -18,6 +16,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' security module.
  * <p>
@@ -30,8 +30,8 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = "crnk.security", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnClass(SecurityModule.class)
 @ConditionalOnMissingBean(SecurityModule.class)
-@EnableConfigurationProperties({ CrnkSecurityProperties.class })
-@Import({ CrnkConfigV3.class })
+@EnableConfigurationProperties({CrnkSecurityProperties.class})
+@Import({CrnkConfigV3.class})
 public class CrnkSecurityAutoConfiguration {
 
 	@Autowired

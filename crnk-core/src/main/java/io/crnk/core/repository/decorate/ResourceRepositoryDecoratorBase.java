@@ -1,11 +1,11 @@
 package io.crnk.core.repository.decorate;
 
-import java.io.Serializable;
-
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.WrappedResourceRepository;
+
+import java.io.Serializable;
 
 /**
  * Note that ResourceRepositoryDecorator are ignored by the Crnk engine and not treated as repositories themselves.

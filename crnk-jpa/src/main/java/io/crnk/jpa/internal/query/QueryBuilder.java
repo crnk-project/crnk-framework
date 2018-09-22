@@ -1,10 +1,5 @@
 package io.crnk.jpa.internal.query;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
@@ -13,6 +8,11 @@ import io.crnk.meta.model.MetaAttributeFinder;
 import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class QueryBuilder<T, F, O, P, E> {
 

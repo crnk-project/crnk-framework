@@ -58,7 +58,7 @@ public class IncludeRelationshipLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	public Result<Set<Resource>> lookupRelatedResource(IncludeRequest request, Collection<Resource> sourceResources,
-			ResourceField relationshipField) {
+													   ResourceField relationshipField) {
 		if (sourceResources.isEmpty()) {
 			return resultFactory.just(Collections.emptySet());
 		}
@@ -71,8 +71,7 @@ public class IncludeRelationshipLoader {
 			boolean present = sourceResource.getRelationships().get(relationshipField.getJsonName()).getData().isPresent();
 			if (present) {
 				sourceResourcesWithData.add(sourceResource);
-			}
-			else {
+			} else {
 				sourceResourcesWithoutData.add(sourceResource);
 			}
 
@@ -103,7 +102,7 @@ public class IncludeRelationshipLoader {
 	}
 
 	public Result<Set<Resource>> lookupRelatedResourcesWithId(IncludeRequest request, Collection<Resource> sourceResources,
-			ResourceField relationshipField) {
+															  ResourceField relationshipField) {
 
 		String oppositeResourceType = relationshipField.getOppositeResourceType();
 		RegistryEntry oppositeEntry = resourceRegistry.getEntry(oppositeResourceType);
@@ -122,15 +121,14 @@ public class IncludeRelationshipLoader {
 		Set<Object> relatedIdsToLoad = new HashSet<>();
 		for (Resource sourceResource : sourceResources) {
 			Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());
-			PreconditionUtil.verify(relationship.getData().isPresent(),"expected relationship data to be loaded for @JsonApiResourceId annotated field, sourceType=%d sourceId=%d, relationshipName=%s", sourceResource.getType(), sourceResource.getId(), relationshipField.getJsonName());
+			PreconditionUtil.verify(relationship.getData().isPresent(), "expected relationship data to be loaded for @JsonApiResourceId annotated field, sourceType=%d sourceId=%d, relationshipName=%s", sourceResource.getType(), sourceResource.getId(), relationshipField.getJsonName());
 
 			if (relationship.getData().get() != null) {
 				for (ResourceIdentifier id : relationship.getCollectionData().get()) {
 					if (request.containsResource(id)) {
 						// load from cache
 						related.add(request.getResource(id));
-					}
-					else {
+					} else {
 						relatedIdsToLoad.add(oppositeResourceInformation.parseIdString(id.getId()));
 					}
 				}
@@ -179,8 +177,7 @@ public class IncludeRelationshipLoader {
 		Result<Map<Object, JsonApiResponse>> responseMapResult;
 		if (isMany) {
 			responseMapResult = relationshipRepository.findBulkManyTargets(resourceIds, relationshipField, queryAdapter);
-		}
-		else {
+		} else {
 			responseMapResult = relationshipRepository.findBulkOneTargets(resourceIds, relationshipField, queryAdapter);
 		}
 		return responseMapResult.map(responseMap -> {
@@ -193,8 +190,7 @@ public class IncludeRelationshipLoader {
 
 					List<Resource> targets = request.setupRelation(sourceResource, relationshipField, targetEntity);
 					loadedTargets.addAll(targets);
-				}
-				else {
+				} else {
 					Nullable<Object> emptyData = Nullable.of(
 							Iterable.class.isAssignableFrom(relationshipField.getType()) ? Collections.emptyList() : null);
 					Relationship relationship = sourceResource.getRelationships().get(relationshipField.getJsonName());

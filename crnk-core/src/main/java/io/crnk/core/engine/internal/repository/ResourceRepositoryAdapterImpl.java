@@ -1,7 +1,5 @@
 package io.crnk.core.engine.internal.repository;
 
-import java.io.Serializable;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.RepositoryFilterContext;
@@ -9,14 +7,16 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.ResourceRepository;
+
+import java.io.Serializable;
 
 /**
  * A repository adapter for resource repository

@@ -1,8 +1,5 @@
 package io.crnk.core.mock.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -11,6 +8,9 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonApiResource(type = "relationIdTest")
 public class RelationIdTestResource {
@@ -134,8 +134,7 @@ public class RelationIdTestResource {
 				ids.add(schedule.getId());
 			}
 			this.testMultipleValueIds = ids;
-		}
-		else {
+		} else {
 			this.testMultipleValueIds = null;
 		}
 	}

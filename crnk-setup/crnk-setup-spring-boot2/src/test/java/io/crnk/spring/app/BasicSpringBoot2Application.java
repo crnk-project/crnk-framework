@@ -1,7 +1,7 @@
 package io.crnk.spring.app;
 
-import io.crnk.spring.setup.boot.jpa.CrnkJpaAutoConfiguration;
 import io.crnk.spring.setup.boot.core.CrnkCoreAutoConfiguration;
+import io.crnk.spring.setup.boot.jpa.CrnkJpaAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,8 @@
 package io.crnk.core.module;
 
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.internal.CoreModule;
+import io.crnk.core.engine.internal.jackson.JacksonModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,10 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.crnk.core.engine.internal.CoreModule;
-import io.crnk.core.engine.internal.jackson.JacksonModule;
+import java.util.List;
 
 public class ModuleExtensionTest {
 

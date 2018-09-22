@@ -1,7 +1,5 @@
 package io.crnk.monitor.brave.internal;
 
-import java.util.Collection;
-
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
@@ -13,6 +11,8 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.repository.response.JsonApiResponse;
 import zipkin.Constants;
+
+import java.util.Collection;
 
 /**
  * Performs a local trace for each repository call. Keep in mind that a single HTTP request
@@ -60,12 +60,10 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 		try (Tracer.SpanInScope ws = tracer.withSpanInScope(span)) {
 			result = chain.doFilter(context);
 			return result;
-		}
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			exception = e;
 			throw e;
-		}
-		finally {
+		} finally {
 			boolean resultError = result != null && result.getErrors() != null && result.getErrors().iterator().hasNext();
 			boolean failed = exception != null || resultError;
 			String status = failed ? STRING_EXCEPTION : STRING_OK;

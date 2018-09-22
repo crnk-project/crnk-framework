@@ -1,9 +1,5 @@
 package io.crnk.jpa.repository;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -25,6 +21,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 @Transactional
 public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {

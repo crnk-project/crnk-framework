@@ -54,8 +54,7 @@ public class AbstractPathSpec {
 			if (other.path != null) {
 				return false;
 			}
-		}
-		else if (!path.equals(other.path)) {
+		} else if (!path.equals(other.path)) {
 			return false;
 		}
 		return true;

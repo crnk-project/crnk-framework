@@ -1,9 +1,5 @@
 package io.crnk.activiti.example;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.activiti.example.model.ApproveForm;
 import io.crnk.activiti.example.model.ApproveTask;
@@ -22,6 +18,10 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class ApprovalIntTest extends JerseyTest {
 

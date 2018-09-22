@@ -1,12 +1,5 @@
 package io.crnk.meta.model;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -15,6 +8,13 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 @JsonApiResource(type = "meta/attribute")
 public class MetaAttribute extends MetaElement {
@@ -172,13 +172,13 @@ public class MetaAttribute extends MetaElement {
 		this.version = version;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void addValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.add(value);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	public void removeValue(Object dataObject, Object value) {
 		Collection col = (Collection) getValue(dataObject);
 		col.remove(value);

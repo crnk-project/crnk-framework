@@ -1,7 +1,5 @@
 package io.crnk.client.http.apache;
 
-import java.io.IOException;
-
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.core.engine.http.HttpHeaders;
@@ -14,6 +12,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import java.io.IOException;
 
 public class HttpClientRequest implements HttpAdapterRequest {
 

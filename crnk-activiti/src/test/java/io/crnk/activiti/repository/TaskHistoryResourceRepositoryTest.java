@@ -1,7 +1,5 @@
 package io.crnk.activiti.repository;
 
-import java.util.Arrays;
-
 import io.crnk.activiti.ActivitiModule;
 import io.crnk.activiti.ActivitiModuleConfig;
 import io.crnk.activiti.ProcessInstanceConfig;
@@ -20,6 +18,8 @@ import org.activiti.engine.task.Task;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class TaskHistoryResourceRepositoryTest extends ActivitiTestBase {
 

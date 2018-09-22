@@ -1,5 +1,8 @@
 package io.crnk.core.engine.information.bean;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.crnk.core.utils.Optional;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -7,9 +10,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.utils.Optional;
 
 public class BeanAttributeInformation {
 
@@ -124,15 +124,12 @@ public class BeanAttributeInformation {
 		try {
 			if (getter != null) {
 				return getter.invoke(bean);
-			}
-			else {
+			} else {
 				return field.get(bean);
 			}
-		}
-		catch (IllegalAccessException e) {
+		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -141,15 +138,12 @@ public class BeanAttributeInformation {
 		try {
 			if (setter != null) {
 				setter.invoke(bean, value);
-			}
-			else {
+			} else {
 				field.set(bean, value);
 			}
-		}
-		catch (IllegalAccessException e) {
+		} catch (IllegalAccessException e) {
 			throw new IllegalStateException(e);
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -159,8 +153,7 @@ public class BeanAttributeInformation {
 			Optional<JsonProperty> annotation = getAnnotation(JsonProperty.class);
 			if (annotation.isPresent()) {
 				jsonName = annotation.get().value();
-			}
-			else {
+			} else {
 				jsonName = name;
 			}
 		}

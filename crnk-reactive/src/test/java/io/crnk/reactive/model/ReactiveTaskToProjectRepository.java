@@ -1,15 +1,15 @@
 package io.crnk.reactive.model;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.reactive.repository.ReactiveOneRelationshipRepository;
 import reactor.core.publisher.Mono;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReactiveTaskToProjectRepository implements ReactiveOneRelationshipRepository<ReactiveTask, Long, ReactiveProject, Long> {
 
@@ -28,7 +28,7 @@ public class ReactiveTaskToProjectRepository implements ReactiveOneRelationshipR
 			Long projectId = relationMap.get(sourceId);
 			if (projectId != null) {
 				ReactiveProject project = projectMap.get(projectId);
-				if(project == null){
+				if (project == null) {
 					throw new ResourceNotFoundException(projectId.toString());
 				}
 				result.put(sourceId, project);

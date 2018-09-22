@@ -1,6 +1,18 @@
 package io.crnk.gen.typescript.writer;
 
-import io.crnk.gen.typescript.model.*;
+import io.crnk.gen.typescript.model.TSArrayType;
+import io.crnk.gen.typescript.model.TSClassType;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSField;
+import io.crnk.gen.typescript.model.TSIndexSignatureType;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSMember;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSObjectType;
+import io.crnk.gen.typescript.model.TSParameterizedType;
+import io.crnk.gen.typescript.model.TSSource;
+import io.crnk.gen.typescript.model.TSType;
+import io.crnk.gen.typescript.model.TSVisitorBase;
 
 import java.util.HashSet;
 import java.util.Set;

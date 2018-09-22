@@ -1,9 +1,9 @@
 package io.crnk.test.mock;
 
+import org.junit.Assert;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-
-import org.junit.Assert;
 
 public class ClassTestUtils {
 
@@ -16,8 +16,7 @@ public class ClassTestUtils {
 		try {
 			constructors[0].setAccessible(true);
 			Assert.assertNotNull(constructors[0].newInstance());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -31,8 +30,7 @@ public class ClassTestUtils {
 			Assert.assertTrue(Modifier.isProtected(constructor.getModifiers()));
 			constructor.setAccessible(true);
 			Assert.assertNotNull(constructor.newInstance());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}

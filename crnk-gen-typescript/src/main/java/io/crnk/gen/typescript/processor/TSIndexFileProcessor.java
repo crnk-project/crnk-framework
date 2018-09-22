@@ -3,7 +3,12 @@ package io.crnk.gen.typescript.processor;
 import io.crnk.gen.typescript.model.TSExport;
 import io.crnk.gen.typescript.model.TSSource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Computes Index files for the given source files.

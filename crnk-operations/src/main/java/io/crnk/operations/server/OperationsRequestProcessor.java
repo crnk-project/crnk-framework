@@ -1,9 +1,5 @@
 package io.crnk.operations.server;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
@@ -12,6 +8,10 @@ import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class OperationsRequestProcessor implements HttpRequestProcessor {
 
@@ -36,13 +36,12 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 
 				List<Operation> operations = Arrays.asList(mapper.readValue(context.getRequestBody(), Operation[].class));
 
-				List<OperationResponse> responses = 	operationsModule.apply(operations);
+				List<OperationResponse> responses = operationsModule.apply(operations);
 
 				String responseJson = mapper.writeValueAsString(responses);
 				context.setContentType(JSONPATCH_CONTENT_TYPE);
 				context.setResponse(200, responseJson);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.error("failed to execute operations", e);
 				context.setResponse(500, (byte[]) null);
 			}

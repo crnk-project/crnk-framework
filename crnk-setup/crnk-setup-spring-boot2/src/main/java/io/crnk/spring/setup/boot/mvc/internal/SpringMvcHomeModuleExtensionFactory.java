@@ -1,13 +1,13 @@
 package io.crnk.spring.setup.boot.mvc.internal;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.home.HomeModuleExtension;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public class SpringMvcHomeModuleExtensionFactory {
 
@@ -25,8 +25,7 @@ public class SpringMvcHomeModuleExtensionFactory {
 
 					if (pathPrefix == null) {
 						ext.addPath(pattern);
-					}
-					else if (pattern.startsWith(pathPrefix)) {
+					} else if (pattern.startsWith(pathPrefix)) {
 						ext.addPath(pattern.substring(pathPrefix.length()));
 					}
 				}

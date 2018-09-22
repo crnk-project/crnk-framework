@@ -7,7 +7,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.RelationIdTestRepository;
-import io.crnk.test.mock.repository.ScheduleRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.test.suite.TestContainer;
 

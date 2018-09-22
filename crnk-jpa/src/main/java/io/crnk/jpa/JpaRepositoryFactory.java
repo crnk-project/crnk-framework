@@ -1,6 +1,7 @@
 package io.crnk.jpa;
 
 import io.crnk.core.engine.information.resource.ResourceField;
+
 import java.io.Serializable;
 
 /**
@@ -26,13 +27,13 @@ public interface JpaRepositoryFactory {
 	 * Creates a relationship document that maps an entity relationship to a JSON API endpoint. The provided document classes do not necessarily have to be
 	 * an entity class. The JpaModule is checked whether there is a mapping available.
 	 *
-	 * @param <S>                 source document type
-	 * @param <I>                 source identifier type
-	 * @param <T>                 target document type
-	 * @param <J>                 target identifier type
-	 * @param module              managing the document
-	 * @param resourceField       representing the source field of the relation (entity or mapped dto)
-	 * @param config              for this document
+	 * @param <S>           source document type
+	 * @param <I>           source identifier type
+	 * @param <T>           target document type
+	 * @param <J>           target identifier type
+	 * @param module        managing the document
+	 * @param resourceField representing the source field of the relation (entity or mapped dto)
+	 * @param config        for this document
 	 * @return created document
 	 */
 	<S, I extends Serializable, T, J extends Serializable> JpaRelationshipRepository<S, I, T, J> createRelationshipRepository(

@@ -1,9 +1,5 @@
 package io.crnk.meta.internal.resource;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Set;
-
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -33,6 +29,10 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaProviderContext;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Set;
+
 public class ResourceMetaFilter implements MetaFilter {
 
 	private final MetaProviderContext context;
@@ -52,8 +52,7 @@ public class ResourceMetaFilter implements MetaFilter {
 		if (element instanceof MetaResource) {
 			MetaResource metaResource = (MetaResource) element;
 			return adjustResourceForRequest(metaResource, queryContext);
-		}
-		else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
+		} else if (element instanceof MetaResourceField && element.getParent() instanceof MetaResource) {
 			// TODO also cover MetaResourceBase by expending InformationModel accordingly
 			MetaResourceField field = (MetaResourceField) element;
 			return adjustFieldForRequest(field, queryContext);
@@ -193,8 +192,7 @@ public class ResourceMetaFilter implements MetaFilter {
 					MetaCollectionType metaCollection;
 					if (optMetaCollection.isPresent()) {
 						metaCollection = (MetaCollectionType) optMetaCollection.get();
-					}
-					else {
+					} else {
 						metaCollection = isSet ? new MetaSetType() : new MetaListType();
 						metaCollection.setId(oppositeMeta.getId() + suffix);
 						metaCollection.setName(oppositeMeta.getName() + suffix);
@@ -204,18 +202,15 @@ public class ResourceMetaFilter implements MetaFilter {
 					}
 					attr.setType(metaCollection);
 
-				}
-				else {
+				} else {
 					attr.setType(oppositeMeta);
 				}
-			}
-			else {
+			} else {
 				Type implementationType = field.getGenericType();
 				MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 				attr.setType(metaType.asType());
 			}
-		}
-		else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
+		} else if (element instanceof MetaAttribute && element.getParent() instanceof MetaJsonObject) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
 

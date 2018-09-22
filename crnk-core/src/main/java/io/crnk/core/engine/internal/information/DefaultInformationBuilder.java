@@ -1,11 +1,5 @@
 package io.crnk.core.engine.internal.information;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.repository.RelationshipRepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -31,6 +25,12 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultInformationBuilder implements InformationBuilder {
 
@@ -122,7 +122,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 
 		@Override
-		public void setExposed(boolean exposed){
+		public void setExposed(boolean exposed) {
 			this.exposed = exposed;
 		}
 

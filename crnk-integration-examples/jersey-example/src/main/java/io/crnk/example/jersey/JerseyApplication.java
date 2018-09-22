@@ -1,13 +1,13 @@
 package io.crnk.example.jersey;
 
-import javax.ws.rs.ApplicationPath;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.example.jersey.domain.repository.ProjectRepositoryImpl;
 import io.crnk.home.HomeModule;
 import io.crnk.rs.CrnkFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import javax.ws.rs.ApplicationPath;
 
 @ApplicationPath("/")
 public class JerseyApplication extends ResourceConfig {

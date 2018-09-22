@@ -23,44 +23,38 @@ import org.apache.deltaspike.core.impl.config.MapConfigSource;
 /**
  * {@link org.apache.deltaspike.core.spi.config.ConfigSource}
  * which uses {@link System#getenv()}
- *
+ * <p>
  * We also allow to write underlines _ instead of dots _ in the
  * environment via export (unix) or SET (windows)
  */
-class EnvironmentPropertyConfigSource extends MapConfigSource
-{
+class EnvironmentPropertyConfigSource extends MapConfigSource {
 
-    public EnvironmentPropertyConfigSource()
-    {
-        super(System.getenv());
-        initOrdinal(300);
-    }
+	public EnvironmentPropertyConfigSource() {
+		super(System.getenv());
+		initOrdinal(300);
+	}
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getConfigName()
-    {
-        return "environment-properties";
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getConfigName() {
+		return "environment-properties";
+	}
 
-    @Override
-    public String getPropertyValue(String key)
-    {
-        String val = super.getPropertyValue(key);
-        if (val == null || val.isEmpty())
-        {
-            val = super.getPropertyValue(key.replace('.', '_'));
-        }
+	@Override
+	public String getPropertyValue(String key) {
+		String val = super.getPropertyValue(key);
+		if (val == null || val.isEmpty()) {
+			val = super.getPropertyValue(key.replace('.', '_'));
+		}
 
-        return val;
-    }
+		return val;
+	}
 
-    @Override
-    public boolean isScannable()
-    {
-        return false;
-    }
+	@Override
+	public boolean isScannable() {
+		return false;
+	}
 }

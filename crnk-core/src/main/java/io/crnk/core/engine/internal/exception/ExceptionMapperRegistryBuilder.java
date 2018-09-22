@@ -63,7 +63,7 @@ public final class ExceptionMapperRegistryBuilder {
 
 			//Won't get in here
 			throw new IllegalStateException("unable to discover exception class for " + mapper.getName());
-		}catch(MalformedParameterizedTypeException e){
+		} catch (MalformedParameterizedTypeException e) {
 			throw new IllegalStateException(mapper.getName(), e);
 		}
 	}

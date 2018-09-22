@@ -1,13 +1,13 @@
 package io.crnk.meta.internal.resource;
 
-import java.lang.reflect.Type;
-
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.meta.internal.typed.MetaDataObjectProvider;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaJsonObject;
+
+import java.lang.reflect.Type;
 
 public class JsonObjectMetaFactory extends MetaDataObjectProvider {
 

@@ -1,9 +1,5 @@
 package io.crnk.jpa.integration;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
@@ -28,6 +24,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 

@@ -5,7 +5,11 @@ import io.crnk.jpa.query.ComputedAttributeTestBase;
 import io.crnk.jpa.query.JpaQueryFactory;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 
 public class ComputedAttributeCriteriaTest extends ComputedAttributeTestBase {
 

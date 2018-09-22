@@ -1,5 +1,16 @@
 package io.crnk.servlet.internal;
 
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.utils.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,17 +20,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.utils.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServletRequestContext implements HttpRequestContextBase {
 
@@ -46,12 +46,12 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	private HttpResponse response = new HttpResponse();
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-			final HttpServletResponse response, String pathPrefix) {
+								 final HttpServletResponse response, String pathPrefix) {
 		this(servletContext, request, response, pathPrefix, HttpHeaders.DEFAULT_CHARSET);
 	}
 
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
-			final HttpServletResponse response, String pathPrefix, String defaultCharacterEncoding) {
+								 final HttpServletResponse response, String pathPrefix, String defaultCharacterEncoding) {
 		this.servletContext = servletContext;
 		this.servletRequest = request;
 		this.servletResponse = response;
@@ -70,8 +70,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				throw new IllegalStateException("invalid base url: " + baseUrl + " for request " + requestUrl);
 			}
 			path = requestUrl.substring(baseUrl.length());
-		}
-		else if (pathPrefix != null && path.startsWith(pathPrefix)) {
+		} else if (pathPrefix != null && path.startsWith(pathPrefix)) {
 			path = path.substring(pathPrefix.length());
 		}
 
@@ -94,11 +93,9 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 		if (pathPrefix != null && pathPrefix.startsWith(contextPath)) {
 			basePath = pathPrefix;
-		}
-		else if (pathPrefix != null) {
+		} else if (pathPrefix != null) {
 			basePath += pathPrefix;
-		}
-		else if (servletPath != null) {
+		} else if (servletPath != null) {
 			basePath = servletPath;
 		}
 		basePath = UrlUtils.removeTrailingSlash(basePath);
@@ -114,8 +111,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI().toString());
 			if (requestUri.isEmpty()) {
 				url = requestUrl;
-			}
-			else {
+			} else {
 				int sep = requestUrl.indexOf(requestUri, serverNameEndIndex);
 				if (sep == -1) {
 					throw new IllegalStateException(
@@ -125,8 +121,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				}
 				url = requestUrl.substring(0, sep);
 			}
-		}
-		else {
+		} else {
 			int sep = requestUrl.indexOf(basePath, serverNameEndIndex);
 			if (sep == -1) {
 				throw new IllegalStateException(
@@ -174,8 +169,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				characterEncoding = defaultCharacterEncoding;
 				request.setCharacterEncoding(characterEncoding);
 			}
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -223,12 +217,10 @@ public class ServletRequestContext implements HttpRequestContextBase {
 				InputStream is = servletRequest.getInputStream();
 				if (is != null) {
 					requestBody = Nullable.of(io.crnk.core.engine.internal.utils.IOUtils.readFully(is));
-				}
-				else {
+				} else {
 					requestBody = Nullable.nullValue();
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException(e); // FIXME
 			}
 		}

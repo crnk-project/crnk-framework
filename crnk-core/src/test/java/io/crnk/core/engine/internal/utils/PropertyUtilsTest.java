@@ -1,7 +1,9 @@
 package io.crnk.core.engine.internal.utils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
@@ -10,10 +12,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class PropertyUtilsTest {
 
@@ -150,8 +150,7 @@ public class PropertyUtilsTest {
 		try {
 			PropertyUtils.getPropertyClass(Bean.class, "doesNotExist");
 			Assert.fail();
-		}
-		catch (PropertyException e) {
+		} catch (PropertyException e) {
 			Assert.assertEquals("doesNotExist", e.getField());
 			Assert.assertEquals(Bean.class, e.getResourceClass());
 		}
@@ -162,8 +161,7 @@ public class PropertyUtilsTest {
 		try {
 			PropertyUtils.getPropertyType(Bean.class, "doesNotExist");
 			Assert.fail();
-		}
-		catch (PropertyException e) {
+		} catch (PropertyException e) {
 			Assert.assertEquals("doesNotExist", e.getField());
 			Assert.assertEquals(Bean.class, e.getResourceClass());
 		}

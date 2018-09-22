@@ -18,8 +18,8 @@ import io.crnk.core.resource.list.ResourceList;
 public class RepositoryAdapterUtils {
 
 	public static LinksInformation enrichLinksInformation(ModuleRegistry moduleRegistry,
-			LinksInformation linksInformation, Object resource,
-			RepositoryRequestSpec requestSpec) {
+														  LinksInformation linksInformation, Object resource,
+														  RepositoryRequestSpec requestSpec) {
 		if (requestSpec.getQueryAdapter() instanceof QuerySpecAdapter && resource instanceof ResourceList) {
 			ResourceList<?> resources = (ResourceList<?>) resource;
 			linksInformation = enrichPageLinksInformation(moduleRegistry, linksInformation, resources, requestSpec);
@@ -29,7 +29,7 @@ public class RepositoryAdapterUtils {
 	}
 
 	private static LinksInformation enrichSelfLinksInformation(LinksInformation linksInformation,
-			RepositoryRequestSpec requestSpec) {
+															   RepositoryRequestSpec requestSpec) {
 		ResourceInformation resourceInformation = requestSpec.getQueryAdapter().getResourceInformation();
 		ResourceRegistry resourceRegistry = requestSpec.getQueryAdapter().getResourceRegistry();
 		if (resourceRegistry != null && resourceInformation != null && linksInformation instanceof SelfLinksInformation) {
@@ -39,9 +39,9 @@ public class RepositoryAdapterUtils {
 	}
 
 	private static LinksInformation enrichPageLinksInformation(ModuleRegistry moduleRegistry,
-			LinksInformation linksInformation,
-			ResourceList<?> resources,
-			RepositoryRequestSpec requestSpec) {
+															   LinksInformation linksInformation,
+															   ResourceList<?> resources,
+															   RepositoryRequestSpec requestSpec) {
 		ResourceInformation responseResourceInformation = requestSpec.getResponseResourceInformation();
 
 		RegistryEntry entry = moduleRegistry.getResourceRegistry().getEntry(responseResourceInformation.getResourceType());

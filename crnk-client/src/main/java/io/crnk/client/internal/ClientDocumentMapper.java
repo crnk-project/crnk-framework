@@ -1,9 +1,5 @@
 package io.crnk.client.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.client.internal.proxy.ObjectProxy;
@@ -29,6 +25,10 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ClientDocumentMapper extends DocumentMapper {
 

@@ -1,17 +1,17 @@
 package io.crnk.gen.typescript.internal;
 
+import io.crnk.gen.typescript.model.TSContainerElement;
+import io.crnk.gen.typescript.model.TSElement;
+import io.crnk.gen.typescript.model.TSInterfaceType;
+import io.crnk.gen.typescript.model.TSModule;
+import io.crnk.gen.typescript.model.TSType;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import io.crnk.gen.typescript.model.TSContainerElement;
-import io.crnk.gen.typescript.model.TSElement;
-import io.crnk.gen.typescript.model.TSInterfaceType;
-import io.crnk.gen.typescript.model.TSModule;
-import io.crnk.gen.typescript.model.TSType;
 
 public class TypescriptUtils {
 
@@ -24,8 +24,7 @@ public class TypescriptUtils {
 			FileOutputStream out = new FileOutputStream(targetFile);
 			out.write(bytes);
 			out.close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
@@ -64,8 +63,7 @@ public class TypescriptUtils {
 		TSModule module = getNestedTypeContainer(type, create);
 		if (module == null && !create) {
 			return null;
-		}
-		else if (module == null) {
+		} else if (module == null) {
 			throw new IllegalStateException("cannot setup interface as no parent container is available");
 		}
 
@@ -81,8 +79,7 @@ public class TypescriptUtils {
 			interfaceType.setParent(module);
 			module.getElements().add(interfaceType);
 			return interfaceType;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -114,8 +111,7 @@ public class TypescriptUtils {
 			// module needs to come before type definition
 			parent.getElements().add(insertionIndex, module);
 			return module;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

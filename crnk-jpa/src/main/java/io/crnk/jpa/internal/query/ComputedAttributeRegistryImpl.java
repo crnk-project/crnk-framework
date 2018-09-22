@@ -1,18 +1,16 @@
 package io.crnk.jpa.internal.query;
 
+import io.crnk.jpa.query.ComputedAttributeRegistry;
+import io.crnk.jpa.query.JpaQueryFactoryContext;
+import io.crnk.meta.model.MetaDataObject;
+import io.crnk.meta.model.MetaType;
+import io.crnk.meta.provider.MetaPartition;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import io.crnk.jpa.meta.MetaJpaDataObject;
-import io.crnk.jpa.query.ComputedAttributeRegistry;
-import io.crnk.jpa.query.JpaQueryFactoryContext;
-import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.MetaDataObject;
-import io.crnk.meta.model.MetaType;
-import io.crnk.meta.provider.MetaPartition;
 
 public class ComputedAttributeRegistryImpl implements ComputedAttributeRegistry {
 

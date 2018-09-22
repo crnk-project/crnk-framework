@@ -1,10 +1,10 @@
 package io.crnk.jpa.meta.internal;
 
-import java.lang.reflect.Type;
-import javax.persistence.Entity;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.jpa.meta.MetaEntity;
+
+import javax.persistence.Entity;
+import java.lang.reflect.Type;
 
 public class EntityMetaProvider extends AbstractEntityMetaFactory<MetaEntity> {
 

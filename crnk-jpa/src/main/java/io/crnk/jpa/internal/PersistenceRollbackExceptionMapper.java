@@ -1,8 +1,8 @@
 package io.crnk.jpa.internal;
 
-import javax.persistence.RollbackException;
-
 import io.crnk.core.module.Module;
+
+import javax.persistence.RollbackException;
 
 /**
  * RollbackException can hide the more interesting causes.

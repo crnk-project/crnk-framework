@@ -1,12 +1,12 @@
 package io.crnk.spring.mvc.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.home.HomeModuleExtension;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.util.Map;
+import java.util.Set;
 
 public class SpringMvcHomeModuleExtensionFactory {
 
@@ -17,7 +17,7 @@ public class SpringMvcHomeModuleExtensionFactory {
 		for (RequestMappingInfo info : handlerMethods.keySet()) {
 			Set<String> patterns = info.getPatternsCondition().getPatterns();
 			for (String pattern : patterns) {
-				if(pattern.equals("/error"))
+				if (pattern.equals("/error"))
 					continue;
 				ext.addPath(pattern);
 			}

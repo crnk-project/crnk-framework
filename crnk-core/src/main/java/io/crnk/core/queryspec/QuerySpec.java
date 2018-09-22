@@ -1,14 +1,5 @@
 package io.crnk.core.queryspec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.CompareUtils;
@@ -19,6 +10,15 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class QuerySpec {
 
@@ -90,8 +90,7 @@ public class QuerySpec {
 			if (visitor.visitFilterStart(spec)) {
 				if (spec.hasExpressions()) {
 					visitFilters(visitor, spec.getExpression());
-				}
-				else {
+				} else {
 					visitor.visitPath(spec.getPath());
 				}
 				visitor.visitFilterEnd(spec);
@@ -114,7 +113,7 @@ public class QuerySpec {
 	 * TODO currently ignores relations and inclusions, has room for
 	 * improvements
 	 *
-	 * @param <T> the type of resources in this Iterable
+	 * @param <T>       the type of resources in this Iterable
 	 * @param resources resources
 	 * @return sorted, filtered list.
 	 */
@@ -133,8 +132,8 @@ public class QuerySpec {
 	 * <p>
 	 * TODO currently ignores relations and inclusions
 	 *
-	 * @param <T> resource type
-	 * @param resources to apply the querySpec to
+	 * @param <T>        resource type
+	 * @param resources  to apply the querySpec to
 	 * @param resultList used to return the result (including paging meta information)
 	 */
 	public <T> void apply(Iterable<T> resources, ResourceList<T> resultList) {
@@ -294,8 +293,7 @@ public class QuerySpec {
 		for (QuerySpec spec : specs) {
 			if (spec.getResourceClass() != null) {
 				relatedSpecs.put(spec.getResourceClass(), spec);
-			}
-			else {
+			} else {
 				relatedSpecs.put(spec.getResourceType(), spec);
 			}
 		}

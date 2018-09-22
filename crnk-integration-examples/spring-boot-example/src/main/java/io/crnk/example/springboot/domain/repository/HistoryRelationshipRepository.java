@@ -1,8 +1,5 @@
 package io.crnk.example.springboot.domain.repository;
 
-import java.io.Serializable;
-import java.util.UUID;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 import io.crnk.core.repository.RelationshipMatcher;
@@ -10,6 +7,9 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.History;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Generic repository that introduces a history relationship for project and task resource without touching

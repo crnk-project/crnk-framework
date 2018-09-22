@@ -1,9 +1,6 @@
 package io.crnk.activiti.internal.repository;
 
 
-import java.util.List;
-import java.util.Map;
-
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.core.engine.internal.utils.CompareUtils;
@@ -14,6 +11,9 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.query.Query;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
+
+import java.util.List;
+import java.util.Map;
 
 public class ProcessInstanceResourceRepository<T extends ProcessInstanceResource> extends ActivitiRepositoryBase<T> {
 

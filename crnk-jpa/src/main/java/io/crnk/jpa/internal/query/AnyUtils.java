@@ -15,7 +15,7 @@ public class AnyUtils {
 	/**
 	 * Sets the value of the given anytype.
 	 *
-	 * @param partition to use to retrieve information
+	 * @param partition  to use to retrieve information
 	 * @param dataObject the anytype for which the value is set.
 	 * @param value      the new value
 	 */

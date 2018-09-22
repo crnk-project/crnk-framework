@@ -1,6 +1,5 @@
 package io.crnk.spring.app;
 
-import io.crnk.core.boot.CrnkBoot;
 import io.crnk.spring.setup.boot.core.CrnkBootConfigurer;
 import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import io.crnk.spring.setup.boot.meta.MetaModuleConfigurer;

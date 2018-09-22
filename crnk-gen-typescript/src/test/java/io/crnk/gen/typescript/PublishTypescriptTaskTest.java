@@ -1,9 +1,5 @@
 package io.crnk.gen.typescript;
 
-import java.io.File;
-import java.io.IOException;
-import javax.naming.Context;
-
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
@@ -12,6 +8,10 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import javax.naming.Context;
+import java.io.File;
+import java.io.IOException;
 
 public class PublishTypescriptTaskTest {
 

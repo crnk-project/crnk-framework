@@ -1,10 +1,10 @@
 package io.crnk.core.engine.internal.utils;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.concurrent.Callable;
 
 
 public class ExceptionUtilsTest {
@@ -62,8 +62,7 @@ public class ExceptionUtilsTest {
 				}
 			}, "test %s", 13);
 			Assert.fail();
-		}
-		catch (IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			Assert.assertEquals("test 13", e.getMessage());
 			Assert.assertTrue(e.getCause() instanceof IllegalArgumentException);
 		}

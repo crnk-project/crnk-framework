@@ -1,15 +1,5 @@
 package io.crnk.core.queryspec.mapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -34,6 +24,16 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DefaultQuerySpecUrlMapper
 		implements QuerySpecUrlMapper, QuerySpecDeserializer, QuerySpecSerializer, UnkonwnMappingAware {
@@ -238,7 +238,7 @@ public class DefaultQuerySpecUrlMapper
 
 	protected void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
 		ResourceRegistry resourceRegistry = context.getResourceRegistry();
-		if(querySpec != null) {
+		if (querySpec != null) {
 			String resourceType = querySpec.getResourceType();
 			ResourceInformation resourceInformation;
 			if (resourceType == null) {
@@ -295,12 +295,10 @@ public class DefaultQuerySpecUrlMapper
 					HashSet singletonSet = new HashSet();
 					singletonSet.add(strValue);
 					map.put(key, singletonSet);
-				}
-				else {
+				} else {
 					map.put(key, values);
 				}
-			}
-			else {
+			} else {
 				String value = serializeValue(filterSpec.getValue());
 				put(map, key, value);
 			}
@@ -326,7 +324,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected void serializeIncludedFields(QuerySpec querySpec, ResourceInformation resourceInformation,
-			Map<String, Set<String>> map) {
+										   Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedFields().isEmpty()) {
 			String key = addResourceType(QueryParameterType.FIELDS, null, resourceInformation);
 
@@ -342,7 +340,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected void serializeIncludedRelations(QuerySpec querySpec, ResourceInformation resourceInformation,
-			Map<String, Set<String>> map) {
+											  Map<String, Set<String>> map) {
 		if (!querySpec.getIncludedRelations().isEmpty()) {
 			String key = addResourceType(QueryParameterType.INCLUDE, null, resourceInformation);
 
@@ -402,22 +400,18 @@ public class DefaultQuerySpecUrlMapper
 			try {
 				if (NULL_VALUE_STRING.equals(stringValue)) {
 					typedValues.add(null);
-				}
-				else if (filterType != Object.class) {
+				} else if (filterType != Object.class) {
 					TypeParser typeParser = context.getTypeParser();
 					Object value = typeParser.parse(stringValue, filterType);
 					typedValues.add(value);
-				}
-				else {
+				} else {
 					typedValues.add(stringValue);
 				}
-			}
-			catch (ParserException e) {
+			} catch (ParserException e) {
 				if (ignoreParseExceptions) {
 					typedValues.add(stringValue);
 					LOGGER.debug("failed to parse {}", parameter);
-				}
-				else {
+				} else {
 					throw new ParametersDeserializationException(parameter.toString(), e);
 				}
 			}
@@ -454,7 +448,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected List<QueryParameter> parseParameters(Map<String, Set<String>> params,
-			ResourceInformation rootResourceInformation) {
+												   ResourceInformation rootResourceInformation) {
 		List<QueryParameter> list = new ArrayList<>();
 		Set<Map.Entry<String, Set<String>>> entrySet = params.entrySet();
 		for (Map.Entry<String, Set<String>> entry : entrySet) {
@@ -464,15 +458,14 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected QueryParameter parseParameter(String parameterName, Set<String> values,
-			ResourceInformation rootResourceInformation) {
+											ResourceInformation rootResourceInformation) {
 		int typeSep = parameterName.indexOf('[');
 		String strParamType = typeSep != -1 ? parameterName.substring(0, typeSep) : parameterName;
 
 		QueryParameterType paramType;
 		try {
 			paramType = QueryParameterType.valueOf(strParamType.toUpperCase());
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			paramType = QueryParameterType.UNKNOWN;
 		}
 
@@ -492,22 +485,17 @@ public class DefaultQuerySpecUrlMapper
 
 		if (paramType == QueryParameterType.FILTER && elements.size() >= 1) {
 			parseFilterParameterName(param, elements, rootResourceInformation);
-		}
-		else if (paramType == QueryParameterType.PAGE && elements.size() == 1) {
+		} else if (paramType == QueryParameterType.PAGE && elements.size() == 1) {
 			param.setResourceInformation(rootResourceInformation);
 			param.setPagingType(elements.get(0));
-		}
-		else if (paramType == QueryParameterType.PAGE && elements.size() == 2) {
+		} else if (paramType == QueryParameterType.PAGE && elements.size() == 2) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), parameterName));
 			param.setPagingType(elements.get(1));
-		}
-		else if (paramType == QueryParameterType.UNKNOWN) {
+		} else if (paramType == QueryParameterType.UNKNOWN) {
 			param.setResourceInformation(null);
-		}
-		else if (elements.size() == 1) {
+		} else if (elements.size() == 1) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), parameterName));
-		}
-		else {
+		} else {
 			param.setResourceInformation(rootResourceInformation);
 		}
 		if (param.getOperator() == null) {
@@ -530,7 +518,7 @@ public class DefaultQuerySpecUrlMapper
 	}
 
 	protected void parseFilterParameterName(QueryParameter param, List<String> elements,
-			ResourceInformation rootResourceInformation) {
+											ResourceInformation rootResourceInformation) {
 		// check whether last element is an operator
 		parseFilterOperator(param, elements);
 
@@ -545,26 +533,23 @@ public class DefaultQuerySpecUrlMapper
 		if (enforceDotPathSeparator && elements.size() == 2) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
 			param.setAttributePath(Arrays.asList(elements.get(1).split("\\.")));
-		}
-		else if (enforceDotPathSeparator && elements.size() == 1) {
+		} else if (enforceDotPathSeparator && elements.size() == 1) {
 			param.setResourceInformation(rootResourceInformation);
 			param.setAttributePath(Arrays.asList(elements.get(0).split("\\.")));
-		}
-		else {
+		} else {
 			legacyParseFilterParameterName(param, elements, rootResourceInformation);
 		}
 	}
 
 	protected void legacyParseFilterParameterName(QueryParameter param, List<String> elements,
-			ResourceInformation rootResourceInformation) {
+												  ResourceInformation rootResourceInformation) {
 		// check whether first element is a type or attribute, this
 		// can cause problems if names clash, so use
 		// enforceDotPathSeparator!
 		if (isResourceType(elements.get(0))) {
 			param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
 			elements.remove(0);
-		}
-		else {
+		} else {
 			param.setResourceInformation(rootResourceInformation);
 		}
 		ArrayList<String> attributePath = new ArrayList<>();
@@ -579,8 +564,7 @@ public class DefaultQuerySpecUrlMapper
 		FilterOperator operator = findOperator(lastElement);
 		if (operator != null) {
 			elements.remove(elements.size() - 1);
-		}
-		else {
+		} else {
 			operator = defaultOperator;
 		}
 		param.setOperator(operator);

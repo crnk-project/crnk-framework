@@ -1,8 +1,5 @@
 package io.crnk.client.internal;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.document.Document;
@@ -19,6 +16,9 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
+
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
 		implements ResourceRepositoryV2<T, I> {

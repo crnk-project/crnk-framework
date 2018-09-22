@@ -1,9 +1,5 @@
 package io.crnk.validation.internal;
 
-import java.util.Iterator;
-import javax.validation.ElementKind;
-import javax.validation.Path;
-
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.ErrorDataBuilder;
@@ -15,6 +11,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.validation.ElementKind;
+import javax.validation.Path;
+import java.util.Iterator;
 
 public class ConstraintViolationImplTest {
 
@@ -44,7 +44,7 @@ public class ConstraintViolationImplTest {
 	}
 
 	@Test
-	public void testDetailMappedToMessage(){
+	public void testDetailMappedToMessage() {
 		Assert.assertEquals(errorData.getDetail(), violation.getMessage());
 		Assert.assertNotNull(errorData.getDetail());
 	}
@@ -69,15 +69,13 @@ public class ConstraintViolationImplTest {
 		try {
 			node.isInIterable();
 			Assert.fail();
-		}
-		catch (UnsupportedOperationException e) {
+		} catch (UnsupportedOperationException e) {
 			//
 		}
 		try {
 			node.as((Class) String.class);
 			Assert.fail();
-		}
-		catch (UnsupportedOperationException e) {
+		} catch (UnsupportedOperationException e) {
 			//
 		}
 		Assert.assertFalse(iterator.hasNext());

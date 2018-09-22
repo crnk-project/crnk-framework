@@ -1,12 +1,12 @@
 package io.crnk.core.queryspec.mapper;
 
-import java.util.List;
-import java.util.Set;
-
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.exception.ParametersDeserializationException;
 import io.crnk.core.queryspec.FilterOperator;
+
+import java.util.List;
+import java.util.Set;
 
 public class QueryParameter {
 
@@ -38,8 +38,7 @@ public class QueryParameter {
 		try {
 			String strValue = values.iterator().next();
 			return typeParser.parse(strValue, type);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new ParametersDeserializationException("expected a Long for " + toString());
 		}
 	}

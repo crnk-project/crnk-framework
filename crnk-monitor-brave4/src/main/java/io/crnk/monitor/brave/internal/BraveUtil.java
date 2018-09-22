@@ -1,8 +1,5 @@
 package io.crnk.monitor.brave.internal;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.StringUtils;
@@ -11,6 +8,9 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+
+import java.util.Map;
+import java.util.Set;
 
 public class BraveUtil {
 
@@ -51,8 +51,7 @@ public class BraveUtil {
 
 		if (relationshipField == null) {
 			pathBuilder.append(request.getQueryAdapter().getResourceInformation().getResourceType());
-		}
-		else {
+		} else {
 			pathBuilder.append(relationshipField.getParentResourceInformation().getResourceType());
 		}
 		pathBuilder.append("/");

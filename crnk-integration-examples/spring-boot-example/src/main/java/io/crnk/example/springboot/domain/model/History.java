@@ -1,10 +1,10 @@
 package io.crnk.example.springboot.domain.model;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
+
+import java.util.UUID;
 
 @JsonApiResource(type = "history")
 public class History {

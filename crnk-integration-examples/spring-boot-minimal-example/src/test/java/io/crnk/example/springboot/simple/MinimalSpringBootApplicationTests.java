@@ -1,7 +1,5 @@
 package io.crnk.example.springboot.simple;
 
-import java.io.Serializable;
-
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import io.crnk.core.queryspec.QuerySpec;
@@ -10,6 +8,8 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.microservice.Project;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 /**
  * Shows two kinds of test cases: RestAssured and CrnkClient.

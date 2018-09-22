@@ -1,8 +1,5 @@
 package io.crnk.gen.typescript.testmodel;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-
 import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.meta.MetaModule;
@@ -16,6 +13,9 @@ import io.crnk.test.mock.repository.TaskRepository;
 import io.crnk.test.mock.repository.TaskSubtypeRepository;
 import io.crnk.test.mock.repository.TaskToProjectRepository;
 import io.crnk.test.mock.repository.TaskToScheduleRepo;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 
 @ApplicationScoped
 public class MetaModuleProducer {

@@ -1,8 +1,5 @@
 package io.crnk.monitor.brave;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import brave.Tracing;
 import brave.http.HttpTracing;
 import io.crnk.client.http.HttpAdapter;
@@ -12,6 +9,9 @@ import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import io.crnk.client.module.HttpAdapterAware;
 import io.crnk.core.module.Module;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -60,8 +60,7 @@ public class BraveClientModule implements Module, HttpAdapterAware {
 				Constructor constructor = integrationClass.getConstructor(HttpTracing.class);
 				OkHttpAdapterListener listener = (OkHttpAdapterListener) constructor.newInstance(tracing);
 				okHttpAdapter.addListener(listener);
-			}
-			else if (adapter instanceof HttpClientAdapter) {
+			} else if (adapter instanceof HttpClientAdapter) {
 				HttpClientAdapter httpClientAdapter = (HttpClientAdapter) adapter;
 
 				Class integrationClass = getClass().getClassLoader().loadClass(
@@ -70,12 +69,10 @@ public class BraveClientModule implements Module, HttpAdapterAware {
 				Constructor constructor = integrationClass.getConstructor(HttpTracing.class);
 				HttpClientAdapterListener listener = (HttpClientAdapterListener) constructor.newInstance(tracing);
 				httpClientAdapter.addListener(listener);
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException(adapter.getClass() + " not supported yet");
 			}
-		}
-		catch (InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+		} catch (InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException |
 				ClassNotFoundException e) {
 			throw new IllegalStateException("failed to setup brave integration", e);
 		}

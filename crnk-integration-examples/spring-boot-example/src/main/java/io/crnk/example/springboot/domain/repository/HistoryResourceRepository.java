@@ -1,13 +1,13 @@
 package io.crnk.example.springboot.domain.repository;
 
-import java.util.UUID;
-
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.History;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 /**
  * See HistoryRelationshipRepository for more information/actual use case

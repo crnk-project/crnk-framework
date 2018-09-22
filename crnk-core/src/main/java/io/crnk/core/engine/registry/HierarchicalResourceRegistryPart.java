@@ -98,8 +98,7 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 		String prefix;
 		if (sep == -1) {
 			prefix = "";
-		}
-		else {
+		} else {
 			prefix = resourceType.substring(0, sep);
 		}
 		return partMap.get(prefix);

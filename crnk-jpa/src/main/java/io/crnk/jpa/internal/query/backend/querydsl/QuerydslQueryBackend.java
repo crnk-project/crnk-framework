@@ -1,11 +1,5 @@
 package io.crnk.jpa.internal.query.backend.querydsl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import javax.annotation.Nullable;
-import javax.persistence.criteria.JoinType;
-
 import com.google.common.collect.ImmutableList;
 import com.querydsl.core.support.FetchableSubQueryBase;
 import com.querydsl.core.types.CollectionExpression;
@@ -47,7 +41,13 @@ import io.crnk.meta.model.MetaAttributePath;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+import javax.annotation.Nullable;
+import javax.persistence.criteria.JoinType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class QuerydslQueryBackend<T>
 		implements QuerydslTranslationContext<T>, JpaQueryBackend<Expression<?>, OrderSpecifier<?>, Predicate, Expression<?>> {
 
@@ -64,7 +64,7 @@ public class QuerydslQueryBackend<T>
 	private List<OrderSpecifier<?>> orderList = new ArrayList<>();
 
 	public QuerydslQueryBackend(QuerydslQueryImpl<T> queryImpl, Class<T> clazz, MetaDataObject parentMeta,
-			MetaAttribute parentAttr, boolean addParentSelection) {
+								MetaAttribute parentAttr, boolean addParentSelection) {
 		this.queryImpl = queryImpl;
 
 		JPAQueryFactory queryFactory = queryImpl.getQueryFactory();
@@ -81,20 +81,17 @@ public class QuerydslQueryBackend<T>
 			if (addParentSelection) {
 				Expression<Object> parentIdExpr = getParentIdExpression(parentMeta, parentAttr);
 				querydslQuery = queryFactory.select(parentIdExpr, root);
-			}
-			else {
+			} else {
 				querydslQuery = queryFactory.select(root);
 			}
 
 			querydslQuery = querydslQuery.from(parentFrom);
 			if (joinPath instanceof CollectionExpression) {
 				querydslQuery = querydslQuery.join((CollectionExpression) joinPath, root);
-			}
-			else {
+			} else {
 				querydslQuery = querydslQuery.join((EntityPath) joinPath, root);
 			}
-		}
-		else {
+		} else {
 			root = QuerydslUtils.getEntityPath(clazz);
 			joinHelper = new JoinRegistry<>(this, queryImpl);
 			joinHelper.putJoin(new MetaAttributePath(), root);
@@ -150,8 +147,7 @@ public class QuerydslQueryBackend<T>
 	public OrderSpecifier<?> newSort(Expression<?> expr, Direction dir) {
 		if (dir == Direction.ASC) {
 			return new OrderSpecifier(Order.ASC, expr);
-		}
-		else {
+		} else {
 			return new OrderSpecifier(Order.DESC, expr);
 		}
 	}
@@ -181,8 +177,7 @@ public class QuerydslQueryBackend<T>
 		if (selection != null) {
 			if (selection instanceof QTuple) {
 				newSelection.addAll(((QTuple) selection).getArgs());
-			}
-			else {
+			} else {
 				newSelection.add(selection);
 			}
 		}
@@ -233,52 +228,39 @@ public class QuerydslQueryBackend<T>
 
 		if (operator == FilterOperator.LIKE) {
 			return ((StringExpression) expression).lower().like(value.toString().toLowerCase());
-		}
-		else if (operator == FilterOperator.GT) {
+		} else if (operator == FilterOperator.GT) {
 			if (expression instanceof FetchableSubQueryBase) {
 				return ((FetchableSubQueryBase) expression).gt(value);
-			}
-			else if (expression instanceof NumberExpression) {
+			} else if (expression instanceof NumberExpression) {
 				return ((NumberExpression) expression).gt((Number) value);
-			}
-			else {
+			} else {
 				return ((ComparableExpression) expression).gt((Comparable) value);
 			}
-		}
-		else if (operator == FilterOperator.LT) {
+		} else if (operator == FilterOperator.LT) {
 			if (expression instanceof FetchableSubQueryBase) {
 				return ((FetchableSubQueryBase) expression).lt(value);
-			}
-			else if (expression instanceof NumberExpression) {
+			} else if (expression instanceof NumberExpression) {
 				return ((NumberExpression) expression).lt((Number) value);
-			}
-			else {
+			} else {
 				return ((ComparableExpression) expression).lt((Comparable) value);
 			}
-		}
-		else if (operator == FilterOperator.GE) {
+		} else if (operator == FilterOperator.GE) {
 			if (expression instanceof FetchableSubQueryBase) {
 				return ((FetchableSubQueryBase) expression).goe(value);
-			}
-			else if (expression instanceof NumberExpression) {
+			} else if (expression instanceof NumberExpression) {
 				return ((NumberExpression) expression).goe((Number) value);
-			}
-			else {
+			} else {
 				return ((ComparableExpression) expression).goe((Comparable) value);
 			}
-		}
-		else if (operator == FilterOperator.LE) {
+		} else if (operator == FilterOperator.LE) {
 			if (expression instanceof FetchableSubQueryBase) {
 				return ((FetchableSubQueryBase) expression).loe(value);
-			}
-			else if (expression instanceof NumberExpression) {
+			} else if (expression instanceof NumberExpression) {
 				return ((NumberExpression) expression).loe((Number) value);
-			}
-			else {
+			} else {
 				return ((ComparableExpression) expression).loe((Comparable) value);
 			}
-		}
-		else {
+		} else {
 			throw new IllegalStateException("unexpected operator " + operator);
 		}
 
@@ -294,13 +276,11 @@ public class QuerydslQueryBackend<T>
 		if (value instanceof List) {
 			Predicate p = ((SimpleExpression) expression).in((List) value);
 			return negateIfNeeded(p, operator);
-		}
-		else if (expression instanceof MapExpressionBase) {
+		} else if (expression instanceof MapExpressionBase) {
 			MapExpressionBase mapExpression = (MapExpressionBase) expression;
 			Predicate p = mapExpression.containsValue(value);
 			return negateIfNeeded(p, operator);
-		}
-		else if (value == null) {
+		} else if (value == null) {
 			return negateIfNeeded(((SimpleExpression) expression).isNull(), operator);
 		}
 		return negateIfNeeded(((SimpleExpression) expression).eq(value), operator);
@@ -310,8 +290,7 @@ public class QuerydslQueryBackend<T>
 		// convert to String for LIKE operators
 		if (expression.getType() != String.class && (operator == FilterOperator.LIKE)) {
 			return Expressions.stringOperation(Ops.STRING_CAST, expression);
-		}
-		else {
+		} else {
 			return expression;
 		}
 	}
@@ -320,8 +299,7 @@ public class QuerydslQueryBackend<T>
 	public Predicate and(List<Predicate> predicates) {
 		if (predicates.size() == 1) {
 			return predicates.get(0);
-		}
-		else {
+		} else {
 			// only two elements for each operation supported, needs querydsl fix?
 			Predicate result = predicates.get(0);
 			for (int i = 1; i < predicates.size(); i++) {
@@ -340,8 +318,7 @@ public class QuerydslQueryBackend<T>
 	public Predicate or(List<Predicate> predicates) {
 		if (predicates.size() == 1) {
 			return predicates.get(0);
-		}
-		else {
+		} else {
 			// only two elements for each operation supported, needs querydsl fix?
 			Predicate result = predicates.get(0);
 			for (int i = 1; i < predicates.size(); i++) {
@@ -379,8 +356,7 @@ public class QuerydslQueryBackend<T>
 			QuerydslExpressionFactory expressionFactory = (QuerydslExpressionFactory) virtualAttrs
 					.get((MetaComputedAttribute) pathElement);
 			return expressionFactory.getExpression(expression, getQuery());
-		}
-		else {
+		} else {
 			return QuerydslUtils.get(expression, pathElement.getName());
 		}
 	}
@@ -401,8 +377,7 @@ public class QuerydslQueryBackend<T>
 					.get(computedAttr);
 
 			return expressionFactory.getExpression(parent, getQuery());
-		}
-		else {
+		} else {
 			Expression<Object> expression = QuerydslUtils.get(parent, targetAttr.getName());
 			querydslQuery.getMetadata().addJoin(QuerydslUtils.convertJoinType(joinType), expression);
 			return expression;
