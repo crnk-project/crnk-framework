@@ -23,6 +23,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Test;
@@ -97,7 +99,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 		sut.init(controllerContext);
 
 		// WHEN
-		Response response = sut.handle(jsonPath, emptyProjectQuery,  null);
+		Response response = sut.handle(jsonPath, emptyProjectQuery, null);
 
 		// THEN
 		Assert.assertNotNull(response);
@@ -136,10 +138,10 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 				.setRelations(user, Collections.singletonList(project.getId()), assignedProjectsField, emptyProjectQuery);
 		relRepositoryProjectToTask.setRelation(project, task.getId(), includedTaskField, emptyTaskQuery);
 
-		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
-		addParams(params, "include[projects]", "includedTask");
-		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
-		QueryAdapter queryAdapter = container.toQueryAdapter(Project.class, queryParams);
+		QuerySpec queryParams = new QuerySpec(Project.class);
+		queryParams.includeRelation(PathSpec.of("includedTask"));
+
+		QueryAdapter queryAdapter = container.toQueryAdapter(queryParams);
 		JsonPath jsonPath = pathBuilder.build("/users/1/assignedProjects");
 		FieldResourceGetController sut = new FieldResourceGetController();
 		sut.init(controllerContext);

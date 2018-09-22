@@ -2,28 +2,21 @@ package io.crnk.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.http.HttpRequestContextBaseAdapter;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
-import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.mockito.Mockito;
 
 public class CoreTestContainer {
@@ -87,12 +80,6 @@ public class CoreTestContainer {
 
 	public ModuleRegistry getModuleRegistry() {
 		return boot.getModuleRegistry();
-	}
-
-	public QueryParamsAdapter toQueryAdapter(Class resourceClass, QueryParams queryParams) {
-		ResourceInformation resourceInformation = getEntry(resourceClass).getResourceInformation();
-		return new QueryParamsAdapter(resourceInformation, queryParams, boot.getModuleRegistry(), getQueryContext());
-
 	}
 
 	public ResourceRegistry getResourceRegistry() {

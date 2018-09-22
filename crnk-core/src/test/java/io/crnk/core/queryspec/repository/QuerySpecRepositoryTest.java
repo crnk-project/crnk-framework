@@ -1,11 +1,5 @@
 package io.crnk.core.queryspec.repository;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -19,12 +13,14 @@ import io.crnk.core.mock.repository.ScheduleRepository;
 import io.crnk.core.queryspec.AbstractQuerySpecTest;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.QueryParamsAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 
@@ -57,18 +53,6 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		taskAdapter = taskEntry.getResourceRepository();
 		projectRelAdapter = taskEntry.getRelationshipRepository("projects");
 		tasksRelAdapter = projectEntry.getRelationshipRepository("tasks");
-	}
-
-	@Test
-	public void testCrudWithQueryParamsInput() {
-		Map<String, Set<String>> params = new HashMap<String, Set<String>>();
-		addParams(params, "sort[tasks][name]", "asc");
-		QueryParams queryParams = queryParamsBuilder.buildQueryParams(params);
-
-		QueryParamsAdapter queryAdapter =
-				new QueryParamsAdapter(resourceRegistry.getEntry(Task.class).getResourceInformation(), queryParams,
-						moduleRegistry, container.getQueryContext());
-		checkCrud(queryAdapter);
 	}
 
 	@Test

@@ -50,20 +50,6 @@ public class CrnkFeature implements Feature {
 		// nothing to do
 	}
 
-	public CrnkFeature(ObjectMapper objectMapper, QueryParamsBuilder queryParamsBuilder,
-			JsonServiceLocator jsonServiceLocator) {
-		boot.setObjectMapper(objectMapper);
-		boot.setQueryParamsBuilds(queryParamsBuilder);
-		boot.setServiceLocator(jsonServiceLocator);
-	}
-
-	public CrnkFeature(ObjectMapper objectMapper, QuerySpecDeserializer querySpecDeserializer,
-			JsonServiceLocator jsonServiceLocator) {
-		boot.setObjectMapper(objectMapper);
-		boot.setQuerySpecDeserializer(querySpecDeserializer);
-		boot.setServiceLocator(jsonServiceLocator);
-	}
-
 	/**
 	 * Sets a custom ServiceUrlProvider.
 	 */

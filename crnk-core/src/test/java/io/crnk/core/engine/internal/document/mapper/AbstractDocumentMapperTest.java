@@ -14,9 +14,9 @@ import io.crnk.core.mock.MockConstants;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
 
 import org.junit.After;
@@ -66,8 +66,7 @@ public abstract class AbstractDocumentMapperTest {
 		ResourceRegistry resourceRegistry = container.getBoot().getResourceRegistry();
 		ModuleRegistry moduleRegistry = container.getModuleRegistry();
 		QueryContext queryContext = container.getQueryContext();
-		return new QueryParamsAdapter(resourceRegistry.getEntry(resourceClass).getResourceInformation(), new QueryParams(),
-				moduleRegistry, queryContext);
+		return new QuerySpecAdapter(new QuerySpec(resourceClass), resourceRegistry, queryContext);
 	}
 
 	protected QueryAdapter toAdapter(QuerySpec querySpec) {

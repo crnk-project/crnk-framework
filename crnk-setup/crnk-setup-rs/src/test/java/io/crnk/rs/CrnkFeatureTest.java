@@ -1,33 +1,17 @@
 package io.crnk.rs;
 
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.SecurityContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.SecurityContext;
+
 public class CrnkFeatureTest {
-
-	@Test
-	public void testQuerySpecConstructor() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		QuerySpecDeserializer querySpecDeserializer = new DefaultQuerySpecDeserializer();
-		SampleJsonServiceLocator serviceLocator = new SampleJsonServiceLocator();
-		CrnkFeature feature = new CrnkFeature(objectMapper, querySpecDeserializer,
-				serviceLocator);
-
-		Assert.assertSame(objectMapper, feature.getObjectMapper());
-		Assert.assertSame(querySpecDeserializer, feature.getBoot().getQuerySpecDeserializer());
-	}
 
 	@Test
 	public void testServiceServiceUrlProvider() {
@@ -36,12 +20,6 @@ public class CrnkFeatureTest {
 		ServiceUrlProvider serviceUrlProvider = Mockito.mock(ServiceUrlProvider.class);
 		feature.setServiceUrlProvider(serviceUrlProvider);
 		Assert.assertSame(serviceUrlProvider, feature.getBoot().getServiceUrlProvider());
-	}
-
-	@Test
-	public void getQuerySpecDeserializer() {
-		CrnkFeature feature = new CrnkFeature();
-		Assert.assertNotNull(feature.getQuerySpecDeserializer());
 	}
 
 	@Test

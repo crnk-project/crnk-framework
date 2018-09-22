@@ -13,7 +13,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.resource.RestrictedQueryParamsMembers;
-import io.crnk.legacy.internal.QueryParamsAdapter;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -27,7 +26,7 @@ public class DefaultQuerySpecSerializer implements QuerySpecSerializer {
 	public DefaultQuerySpecSerializer(ResourceRegistry resourceRegistry) {
 		this.resourceRegistry = resourceRegistry;
 
-		LoggerFactory.getLogger(QueryParamsAdapter.class)
+		LoggerFactory.getLogger(DefaultQuerySpecSerializer.class)
 				.warn("deprecated DefaultQuerySpecSerializer still in use, switch to DefaultQuerySpecUrlMapper");
 	}
 

@@ -3,7 +3,6 @@ package io.crnk.core.engine.filter;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.legacy.queryParams.QueryParams;
 
 /**
  * Provides request information to {@link DocumentFilter}.
@@ -11,8 +10,6 @@ import io.crnk.legacy.queryParams.QueryParams;
 public interface DocumentFilterContext {
 
 	Document getRequestBody();
-
-	QueryParams getQueryParams();
 
 	JsonPath getJsonPath();
 
