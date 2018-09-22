@@ -1,6 +1,8 @@
 package io.crnk.legacy.queryParams;
 
 import io.crnk.legacy.queryParams.params.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -23,6 +25,17 @@ public class QueryParams {
 	private TypedParams<IncludedRelationsParams> includedRelations;
 
 	private Map<RestrictedPaginationKeys, Integer> pagination;
+
+	private static boolean warningShown = false;
+
+	public QueryParams() {
+		if (!warningShown) {
+			warningShown = true;
+			Logger logger = LoggerFactory.getLogger(QueryParams.class);
+			logger.warn("QueryParams is deprecated an will be removed in the future.");
+		}
+
+	}
 
 	public TypedParams<FilterParams> getFilters() {
 		return filters;

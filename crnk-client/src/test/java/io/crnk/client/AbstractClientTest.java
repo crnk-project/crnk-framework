@@ -1,26 +1,26 @@
 package io.crnk.client;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.MultivaluedMap;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.core.boot.CrnkProperties;
-import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.rs.JsonApiResponseFilter;
 import io.crnk.rs.JsonapiExceptionMapperBridge;
 import io.crnk.test.JerseyTestBase;
 import io.crnk.test.mock.ClientTestModule;
-import io.crnk.test.mock.repository.*;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.test.mock.repository.TaskRepository;
+import io.crnk.test.mock.repository.TaskToProjectRepository;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Assert;
 import org.junit.Before;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractClientTest extends JerseyTestBase {
 
@@ -63,7 +63,7 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 	@Override
 	protected TestApplication configure() {
 		if (testApplication == null) {
-			testApplication = new TestApplication(false);
+			testApplication = new TestApplication();
 		}
 
 		return testApplication;
@@ -112,19 +112,14 @@ public abstract class AbstractClientTest extends JerseyTestBase {
 
 		private CrnkTestFeature feature;
 
-		public TestApplication(boolean querySpec) {
-			this(querySpec, false, false);
+		public TestApplication() {
+			this(false, false);
 		}
 
-		public TestApplication(boolean querySpec, boolean jsonApiFilter, boolean serializeLinksAsObjects) {
+		public TestApplication(boolean jsonApiFilter, boolean serializeLinksAsObjects) {
 			property(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS, Boolean.toString(serializeLinksAsObjects));
-			if (!querySpec) {
-				feature = new CrnkTestFeature(new ObjectMapper(), new QueryParamsBuilder(new DefaultQueryParamsParser()),
-						new SampleJsonServiceLocator());
-			}
-			else {
-				feature = new CrnkTestFeature();
-			}
+
+			feature = new CrnkTestFeature();
 
 			feature.addModule(new io.crnk.test.mock.TestModule());
 			feature.addModule(new ClientTestModule());

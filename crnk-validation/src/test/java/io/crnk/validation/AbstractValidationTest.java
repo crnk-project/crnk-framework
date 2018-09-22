@@ -1,14 +1,10 @@
 package io.crnk.validation;
 
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
-import io.crnk.client.legacy.RelationshipRepositoryStub;
-import io.crnk.client.legacy.ResourceRepositoryStub;
 import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.queryParams.DefaultQueryParamsParser;
 import io.crnk.legacy.queryParams.QueryParamsBuilder;
@@ -20,15 +16,19 @@ import io.crnk.validation.mock.repository.TaskRepository;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.concurrent.TimeUnit;
+
 public abstract class AbstractValidationTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryStub<Task, Long> taskRepo;
+	protected ResourceRepositoryV2<Task, Long> taskRepo;
 
-	protected ResourceRepositoryStub<Project, Long> projectRepo;
+	protected ResourceRepositoryV2<Project, Long> projectRepo;
 
-	protected RelationshipRepositoryStub<Task, Long, Project, Long> relRepo;
+	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
 
 	protected QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder(new DefaultQueryParamsParser());
 
@@ -36,9 +36,9 @@ public abstract class AbstractValidationTest extends JerseyTestBase {
 	public void setup() {
 		client = new CrnkClient(getBaseUri().toString());
 		client.addModule(ValidationModule.newInstance());
-		taskRepo = client.getQueryParamsRepository(Task.class);
-		projectRepo = client.getQueryParamsRepository(Project.class);
-		relRepo = client.getQueryParamsRepository(Task.class, Project.class);
+		taskRepo = client.getRepositoryForType(Task.class);
+		projectRepo = client.getRepositoryForType(Project.class);
+		relRepo = client.getRepositoryForType(Task.class, Project.class);
 		TaskRepository.map.clear();
 
 		client.getHttpAdapter().setReceiveTimeout(1000000, TimeUnit.MILLISECONDS);

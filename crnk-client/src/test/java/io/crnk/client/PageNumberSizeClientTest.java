@@ -31,7 +31,7 @@ public class PageNumberSizeClientTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		TestApplication app = new TestApplication(true);
+		TestApplication app = new TestApplication();
 		app.getFeature().addModule(NumberSizePagingBehavior.createModule());
 		return app;
 	}

@@ -1,11 +1,8 @@
 package io.crnk.client;
 
-import javax.ws.rs.core.FeatureContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.legacy.locator.JsonServiceLocator;
-import io.crnk.legacy.queryParams.QueryParamsBuilder;
 import io.crnk.rs.CrnkFeature;
+
+import javax.ws.rs.core.FeatureContext;
 
 /**
  * Test-specific subclass of the {@link CrnkFeature} used to
@@ -16,14 +13,6 @@ import io.crnk.rs.CrnkFeature;
 public class CrnkTestFeature extends CrnkFeature {
 
 	private TestRequestFilter testRequestFilter;
-
-	public CrnkTestFeature(
-			ObjectMapper objectMapper,
-			QueryParamsBuilder queryParamsBuilder,
-			JsonServiceLocator jsonServiceLocator) {
-		super(objectMapper, queryParamsBuilder, jsonServiceLocator);
-		testRequestFilter = new TestRequestFilter();
-	}
 
 	public CrnkTestFeature() {
 		testRequestFilter = new TestRequestFilter();

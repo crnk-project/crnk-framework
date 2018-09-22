@@ -42,7 +42,7 @@ public class InheritanceWithoutSubtypeRepositoryClientTest extends AbstractClien
 
 	@Override
 	protected TestApplication configure() {
-		TestApplication app = new TestApplication(true);
+		TestApplication app = new TestApplication();
 		SimpleModule module = new SimpleModule("inheritance");
 		module.addRepository(repository);
 		module.addRepository(relatedRepository);

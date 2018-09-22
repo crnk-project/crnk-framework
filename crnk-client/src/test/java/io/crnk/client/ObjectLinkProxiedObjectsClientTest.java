@@ -23,6 +23,6 @@ public class ObjectLinkProxiedObjectsClientTest extends AbstractProxiedObjectsCl
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(false, false, true);
+		return new TestApplication(false, true);
 	}
 }

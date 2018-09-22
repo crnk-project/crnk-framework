@@ -126,7 +126,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 		Mockito.verify(dtoMapper, Mockito.times(0)).unmapQuerySpec(Mockito.any(QuerySpec.class));
 
 		// query the mapped DTO
-		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getQuerySpecRepository(TestDTO.class);
+		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getRepositoryForType(TestDTO.class);
 		List<TestDTO> dtos = dtoRepo.findAll(new QuerySpec(TestDTO.class));
 		Assert.assertEquals(1, dtos.size());
 		TestDTO dto = dtos.get(0);
@@ -149,8 +149,8 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testMappedOneRelation() {
-		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getQuerySpecRepository(TestDTO.class);
-		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedDTO.class);
+		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getRepositoryForType(TestDTO.class);
+		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getRepositoryForType(RelatedDTO.class);
 		RelationshipRepositoryV2<TestDTO, Serializable, RelatedDTO, Serializable> relRepo = client
 				.getRepositoryForType(TestDTO.class, RelatedDTO.class);
 
@@ -185,8 +185,8 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testMappedManyRelation() {
-		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getQuerySpecRepository(TestDTO.class);
-		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getQuerySpecRepository(RelatedDTO.class);
+		ResourceRepositoryV2<TestDTO, Serializable> testRepo = client.getRepositoryForType(TestDTO.class);
+		ResourceRepositoryV2<RelatedDTO, Serializable> relatedRepo = client.getRepositoryForType(RelatedDTO.class);
 		RelationshipRepositoryV2<TestDTO, Long, RelatedDTO, Long> relRepo = client
 				.getRepositoryForType(TestDTO.class, RelatedDTO.class);
 
@@ -237,7 +237,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testInsertDeleteDto() {
-		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getQuerySpecRepository(TestDTO.class);
+		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getRepositoryForType(TestDTO.class);
 
 		// create a entity with a DTO and check properly saved
 		TestDTO dto = new TestDTO();
@@ -262,7 +262,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testSubQueryComputation() {
-		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getQuerySpecRepository(TestDTO.class);
+		ResourceRepositoryV2<TestDTO, Serializable> dtoRepo = client.getRepositoryForType(TestDTO.class);
 
 		int n = 5;
 		for (long i = 0; i < n; i++) {

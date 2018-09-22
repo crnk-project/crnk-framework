@@ -34,15 +34,17 @@ public class JsonApiActionResponseTest extends AbstractClientTest {
 		scheduleRepository = client.getRepositoryForInterface(ScheduleRepository.class);
 	}
 
+	class TestFilter implements DocumentFilter {
+
+		@Override
+		public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
+			return chain.doFilter(filterRequestContext);
+		}
+	}
+
 	@Override
 	protected void setupFeature(CrnkTestFeature feature) {
-		filter = Mockito.spy(new DocumentFilter() {
-
-			@Override
-			public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
-				return chain.doFilter(filterRequestContext);
-			}
-		});
+		filter = Mockito.spy(new TestFilter());
 		SimpleModule testModule = new SimpleModule("testFilter");
 		testModule.addFilter(filter);
 		feature.addModule(testModule);
@@ -50,7 +52,7 @@ public class JsonApiActionResponseTest extends AbstractClientTest {
 
 	@Override
 	protected TestApplication configure() {
-		return new TestApplication(true, true, false);
+		return new TestApplication(true, false);
 	}
 
 	@Test
