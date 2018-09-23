@@ -19,58 +19,59 @@ public final class DefaultStringParsers {
 	private DefaultStringParsers() {
 	}
 
-	public static Map<Class, StringParser> get() {
-		Map<Class, StringParser> parsers = new HashMap();
+	public static Map<Class, StringMapper> get() {
+		Map<Class, StringMapper> parsers = new HashMap();
 
-		addType(parsers, asList(Byte.class, byte.class), new StringParser<Byte>() {
+		addType(parsers, asList(Byte.class, byte.class), new ToStringStringMapper<Byte>() {
+
 			@Override
 			public Byte parse(String input) {
 				return Byte.valueOf(input);
 			}
 		});
-		addType(parsers, asList(Short.class, short.class), new StringParser<Short>() {
+		addType(parsers, asList(Short.class, short.class), new ToStringStringMapper<Short>() {
 			@Override
 			public Short parse(String input) {
 				return Short.valueOf(input);
 			}
 		});
-		addType(parsers, asList(Integer.class, int.class), new StringParser<Integer>() {
+		addType(parsers, asList(Integer.class, int.class), new ToStringStringMapper<Integer>() {
 			@Override
 			public Integer parse(String input) {
 				return Integer.valueOf(input);
 			}
 		});
-		addType(parsers, asList(Long.class, long.class), new StringParser<Long>() {
+		addType(parsers, asList(Long.class, long.class), new ToStringStringMapper<Long>() {
 			@Override
 			public Long parse(String input) {
 				return Long.valueOf(input);
 			}
 		});
-		addType(parsers, asList(Float.class, float.class), new StringParser<Float>() {
+		addType(parsers, asList(Float.class, float.class), new ToStringStringMapper<Float>() {
 			@Override
 			public Float parse(String input) {
 				return Float.valueOf(input);
 			}
 		});
-		addType(parsers, asList(Double.class, double.class), new StringParser<Double>() {
+		addType(parsers, asList(Double.class, double.class), new ToStringStringMapper<Double>() {
 			@Override
 			public Double parse(String input) {
 				return Double.valueOf(input);
 			}
 		});
-		addType(parsers, singletonList(BigInteger.class), new StringParser<BigInteger>() {
+		addType(parsers, singletonList(BigInteger.class), new ToStringStringMapper<BigInteger>() {
 			@Override
 			public BigInteger parse(String input) {
 				return new BigInteger(input);
 			}
 		});
-		addType(parsers, singletonList(BigDecimal.class), new StringParser<BigDecimal>() {
+		addType(parsers, singletonList(BigDecimal.class), new ToStringStringMapper<BigDecimal>() {
 			@Override
 			public BigDecimal parse(String input) {
 				return new BigDecimal(input);
 			}
 		});
-		addType(parsers, asList(Character.class, char.class), new StringParser<Character>() {
+		addType(parsers, asList(Character.class, char.class), new ToStringStringMapper<Character>() {
 			@Override
 			public Character parse(String input) {
 				if (input.length() != 1) {
@@ -79,7 +80,7 @@ public final class DefaultStringParsers {
 				return input.charAt(0);
 			}
 		});
-		addType(parsers, asList(Boolean.class, boolean.class), new StringParser<Boolean>() {
+		addType(parsers, asList(Boolean.class, boolean.class), new ToStringStringMapper<Boolean>() {
 			@Override
 			public Boolean parse(String input) {
 				String inputNormalized = input.toLowerCase();
@@ -91,7 +92,7 @@ public final class DefaultStringParsers {
 				throw newException(Boolean.class, input);
 			}
 		});
-		addType(parsers, Collections.singletonList(UUID.class), new StringParser<UUID>() {
+		addType(parsers, Collections.singletonList(UUID.class), new ToStringStringMapper<UUID>() {
 			@Override
 			public UUID parse(String input) {
 				try {
@@ -105,7 +106,9 @@ public final class DefaultStringParsers {
 		return parsers;
 	}
 
-	private static <T> void addType(Map<Class, StringParser> parsers, List<Class<T>> classes, StringParser<T> standardTypeParser) {
+
+
+	private static <T> void addType(Map<Class, StringMapper> parsers, List<Class<T>> classes, StringMapper<T> standardTypeParser) {
 		for (Class<T> clazz : classes) {
 			parsers.put(clazz, standardTypeParser);
 		}

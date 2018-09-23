@@ -1,10 +1,10 @@
 package io.crnk.core.engine.parser;
 
-public class EnumParser<T> implements StringParser<T> {
+public class EnumStringMapper<T> extends ToStringStringMapper<T> {
 
 	private final Class<T> clazz;
 
-	public EnumParser(Class<T> clazz) {
+	public EnumStringMapper(Class<T> clazz) {
 		this.clazz = clazz;
 	}
 

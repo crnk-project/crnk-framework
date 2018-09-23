@@ -1,7 +1,6 @@
 package io.crnk.core.engine.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import io.crnk.core.engine.internal.utils.MethodCache;
 import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
@@ -44,6 +43,8 @@ public class TypeParser {
 
 	public final Map<Class, StringParser> parsers;
 
+	public final Map<Class, StringMapper> mappers;
+
 	private MethodCache methodCache = new MethodCache();
 
 	private boolean useJackson = true;
@@ -52,7 +53,11 @@ public class TypeParser {
 
 	public TypeParser() {
 		parsers = new ConcurrentHashMap<>();
-		parsers.putAll(DefaultStringParsers.get());
+		mappers = new ConcurrentHashMap<>();
+
+
+		mappers.putAll(DefaultStringParsers.get());
+		parsers.putAll(mappers);
 	}
 
 	public boolean isUseJackson() {
@@ -72,6 +77,14 @@ public class TypeParser {
 	 */
 	public <T> void addParser(Class<T> clazz, StringParser<T> parser) {
 		parsers.put(clazz, parser);
+	}
+
+	/**
+	 * Adds a custom mapper for the given type.
+	 */
+	public <T> void addMapper(Class<T> clazz, StringMapper<T> mapper) {
+		addParser(clazz, mapper);
+		mappers.put(clazz, mapper);
 	}
 
 	/**
@@ -102,26 +115,57 @@ public class TypeParser {
 	 */
 	public <T> T parse(String input, Class<T> clazz) {
 		try {
-			return parseInput(input, clazz);
-		} catch (ParserException e) {
-			throw e;
+			if (String.class.equals(clazz)) {
+				return (T) input;
+			}
+
+			StringParser<T> parser = getParser(clazz, input);
+			if (parser == null) {
+				throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
+			}
+
+			return parser.parse(input);
 		} catch (NumberFormatException e) {
 			throw new ParserException(e.getMessage());
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T> T parseInput(final String input, final Class<T> clazz) {
+
+	/**
+	 * Translates the given object to a String.
+	 *
+	 * @param input value to map to String
+	 * @return instance of parsed value
+	 */
+	public String toString(Object input) {
+		if (input == null) {
+			return null;
+		}
+		Class<?> clazz = input.getClass();
 		if (String.class.equals(clazz)) {
-			return (T) input;
+			return (String) input;
 		}
 
-		StringParser<T> parser = getParser(clazz, input);
-		if (parser == null) {
-			throw new ParserException(String.format("Cannot parse to %s : %s", clazz.getName(), input));
+		StringMapper mapper = getMapper(clazz);
+		if (mapper == null) {
+			throw new ParserException(String.format("Cannot map to %s : %s", clazz.getName(), input));
 		}
 
-		return parser.parse(input);
+		return mapper.toString(input);
+	}
+
+	public <T> StringMapper<T> getMapper(Class<T> clazz) {
+		if (mappers.containsKey(clazz)) {
+			return mappers.get(clazz);
+
+		}
+		StringMapper mapper = setupMapper(clazz);
+		if (mapper != null) {
+			LOGGER.debug("using mapper {} for type {}", mapper, clazz);
+			mappers.put(clazz, mapper);
+			return mapper;
+		}
+		return null;
 	}
 
 	private <T> StringParser<T> getParser(Class<T> clazz, String input) {
@@ -142,20 +186,40 @@ public class TypeParser {
 		return getParser(clazz, null) != null;
 	}
 
+	private <T> StringMapper<T> setupMapper(Class<T> clazz) {
+		if (mappers.containsKey(clazz)) {
+			return mappers.get(clazz);
+		}
+
+		if (isEnum(clazz)) {
+			return new EnumStringMapper<>(clazz);
+		}
+
+		if (useJackson) {
+			return new JacksonStringMapper(objectMapper, clazz);
+		}
+
+		return new ToStringStringMapper<T>() {
+			@Override
+			public T parse(String input) {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+
 	private <T> StringParser<T> setupParser(Class<T> clazz, String input) {
 		if (parsers.containsKey(clazz)) {
 			return parsers.get(clazz);
 		}
 
 		if (isEnum(clazz)) {
-			return new EnumParser<>(clazz);
+			return new EnumStringMapper<>(clazz);
 		}
 
 		// TODO cleanup this input dependency
 		if (useJackson && input != null) {
-			ObjectReader reader = objectMapper.readerFor(clazz);
 			try {
-				JacksonParser parser = new JacksonParser(reader);
+				JacksonStringMapper parser = new JacksonStringMapper(objectMapper, clazz);
 				parser.parse(input);
 				return parser;
 			} catch (RuntimeException e) {
@@ -178,7 +242,7 @@ public class TypeParser {
 			method = methodCache.find(clazz, "parse", CharSequence.class);
 		}
 		if (method.isPresent()) {
-			return new MethodBasedParser(method.get(), clazz);
+			return new MethodBasedMapper(method.get(), clazz);
 		}
 
 		return null;

@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,14 +34,27 @@ public class TypeParserTest {
 	public void setup() {
 		sut = new TypeParser();
 		mapper = new ObjectMapper();
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.registerModule(new JavaTimeModule());
 		sut.setObjectMapper(mapper);
 	}
+
+	@Test
+	public void checkOffsetDateTime() {
+		String text = "2018-09-23T16:12:43.154Z";
+		OffsetDateTime value = sut.parse(text, OffsetDateTime.class);
+		assertThat(sut.toString(value)).isEqualTo(text);
+		assertThat(sut.getMapper(OffsetDateTime.class)).isInstanceOf(JacksonStringMapper.class);
+	}
+
 
 	@Test
 	public void onStringShouldReturnString() {
 		String result = sut.parse("String", String.class);
 		assertThat(result).isExactlyInstanceOf(String.class);
 		assertThat(result).isEqualTo("String");
+
+		assertThat(sut.toString(result)).isEqualTo(result);
 	}
 
 	@Test(expected = ParserException.class)
@@ -56,6 +70,17 @@ public class TypeParserTest {
 	@Test
 	public void onBooleanFReturnFalse() {
 		Assert.assertFalse(sut.parse("f", Boolean.class));
+	}
+
+	@Test
+	public void checkBooleanToString() {
+		assertThat(sut.toString(Boolean.FALSE)).isEqualTo("false");
+		assertThat(sut.toString(Boolean.TRUE)).isEqualTo("true");
+	}
+
+	@Test
+	public void checkNullToString() {
+		assertThat(sut.toString(null)).isNull();
 	}
 
 	@Test
@@ -148,6 +173,7 @@ public class TypeParserTest {
 		Byte result = sut.parse("1", byte.class);
 		assertThat(result).isExactlyInstanceOf(Byte.class);
 		assertThat(result).isEqualTo((byte) 1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -155,6 +181,7 @@ public class TypeParserTest {
 		Short result = sut.parse("1", Short.class);
 		assertThat(result).isExactlyInstanceOf(Short.class);
 		assertThat(result).isEqualTo((short) 1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -162,6 +189,7 @@ public class TypeParserTest {
 		Short result = sut.parse("1", short.class);
 		assertThat(result).isExactlyInstanceOf(Short.class);
 		assertThat(result).isEqualTo((short) 1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -169,6 +197,7 @@ public class TypeParserTest {
 		Integer result = sut.parse("1", Integer.class);
 		assertThat(result).isExactlyInstanceOf(Integer.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -176,6 +205,7 @@ public class TypeParserTest {
 		Integer result = sut.parse("1", int.class);
 		assertThat(result).isExactlyInstanceOf(Integer.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -183,6 +213,7 @@ public class TypeParserTest {
 		Long result = sut.parse("1", Long.class);
 		assertThat(result).isExactlyInstanceOf(Long.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -190,6 +221,7 @@ public class TypeParserTest {
 		Long result = sut.parse("1", long.class);
 		assertThat(result).isExactlyInstanceOf(Long.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -197,6 +229,7 @@ public class TypeParserTest {
 		Float result = sut.parse("1", Float.class);
 		assertThat(result).isExactlyInstanceOf(Float.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1.0");
 	}
 
 	@Test
@@ -204,6 +237,7 @@ public class TypeParserTest {
 		Float result = sut.parse("1", float.class);
 		assertThat(result).isExactlyInstanceOf(Float.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1.0");
 	}
 
 	@Test
@@ -211,6 +245,7 @@ public class TypeParserTest {
 		Double result = sut.parse("1", Double.class);
 		assertThat(result).isExactlyInstanceOf(Double.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1.0");
 	}
 
 	@Test
@@ -218,6 +253,7 @@ public class TypeParserTest {
 		Double result = sut.parse("1", double.class);
 		assertThat(result).isExactlyInstanceOf(Double.class);
 		assertThat(result).isEqualTo(1);
+		assertThat(sut.toString(result)).isEqualTo("1.0");
 	}
 
 	@Test
@@ -225,6 +261,7 @@ public class TypeParserTest {
 		BigInteger result = sut.parse("1", BigInteger.class);
 		assertThat(result).isExactlyInstanceOf(BigInteger.class);
 		assertThat(result).isEqualTo(new BigInteger("1"));
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -232,6 +269,7 @@ public class TypeParserTest {
 		BigDecimal result = sut.parse("1", BigDecimal.class);
 		assertThat(result).isExactlyInstanceOf(BigDecimal.class);
 		assertThat(result).isEqualTo(new BigDecimal("1"));
+		assertThat(sut.toString(result)).isEqualTo("1");
 	}
 
 	@Test
@@ -239,6 +277,7 @@ public class TypeParserTest {
 		SampleEnum result = sut.parse("SAMPLE_VALUE", SampleEnum.class);
 		assertThat(result).isExactlyInstanceOf(SampleEnum.class);
 		assertThat(result).isEqualTo(SampleEnum.SAMPLE_VALUE);
+		assertThat(sut.toString(result)).isEqualTo("SAMPLE_VALUE");
 	}
 
 	@Test
@@ -311,7 +350,7 @@ public class TypeParserTest {
 		Assert.assertEquals(dateValue, parsedValue);
 
 		StringParser<LocalDateTime> parser = sut.getParser(LocalDateTime.class);
-		Assert.assertTrue(parser instanceof JacksonParser);
+		Assert.assertTrue(parser instanceof JacksonStringMapper);
 	}
 
 	private enum SampleEnum {
