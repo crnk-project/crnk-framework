@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderModule;
@@ -373,6 +375,14 @@ public class CrnkBoot {
 		List<RepositoryDecoratorFactory> decoratorFactories = getInstancesByType(RepositoryDecoratorFactory.class);
 		for (RepositoryDecoratorFactory decoratorFactory : decoratorFactories) {
 			module.addRepositoryDecoratorFactory(decoratorFactory);
+		}
+		List<ResourceModificationFilter> modificationFilters = getInstancesByType(ResourceModificationFilter.class);
+		for (ResourceModificationFilter modificationFilter : modificationFilters) {
+			module.addResourceModificationFilter(modificationFilter);
+		}
+		List<ResourceFilter> accessFilters = getInstancesByType(ResourceFilter.class);
+		for (ResourceFilter accessFilter : accessFilters) {
+			module.addResourceFilter(accessFilter);
 		}
 
 		moduleRegistry.addModule(module);
