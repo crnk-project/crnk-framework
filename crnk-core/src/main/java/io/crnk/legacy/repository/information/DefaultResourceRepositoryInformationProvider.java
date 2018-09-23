@@ -91,9 +91,13 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
-		} else {
+		} else if (ResourceRepository.class.isAssignableFrom(repositoryClass)) {
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repositoryClass);
+			return typeArgs[0];
+		} else if (ResourceRepositoryV2.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
 			return typeArgs[0];
 		}
+		throw new IllegalStateException("failed to get resource class from " + repositoryClass + ", does it implement ResourceRepositoryV2?");
 	}
 }
