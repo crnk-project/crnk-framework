@@ -1,12 +1,5 @@
 package io.crnk.meta.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.SerializeType;
-
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "meta/dataObject")
 public abstract class MetaDataObject extends MetaType {
@@ -164,7 +164,7 @@ public abstract class MetaDataObject extends MetaType {
 			return null;
 		} else {
 			if (!(pathElementType instanceof MetaDataObject)) {
-				throw new IllegalArgumentException("failed to resolve path " + pathElements);
+				throw new IllegalArgumentException("failed to resolve path " + pathElements + ", expected a simple object, but got " + pathElementType.getImplementationClass());
 			}
 			return pathElementType.asDataObject();
 		}
