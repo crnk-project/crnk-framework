@@ -69,30 +69,25 @@ to Crnk. For example in the case of JAX-RS:
 	feature.addModule(jpaModule);
 ----
 
-
-The JPA modules by default looks up the entityManagerFactory and obtains a list
-of registered JPA entities. For each entity a instance of `JpaEntityRepository`
-is registered to Crnk using the module API. Accordingly, every relation
-is registered as `JpaRelationshipRepository`.
+Note that in Spring Boot the setup is simplified by an AutoConfiguration. The
+application just has to implement `JpaModuleConfigurer` to configure `JpaModuleConfig`.
 
 - `JpaModuleConfig.setRepositoryFactory` allows to provide a factory to change or customized the used repositories.
 - `exposeAllEntities` takes an `EntityManagerFactory` and exposes all registered entities as
   JSON API repository.
 - To manually select the entities exposed to Crnk use `JpaModuleConfig.addRepository(...)`.
  `JpaRepositoryConfig` provides a number of customization options for the exposed entity.
-  `setListClass`, `setListMetaClass` and `setListLinksClass` allow to set the type information and will
-  then return resources having lists, links and meta data of the given type.  `setInterfaceClass`
-  is a shortcut that allows to extract those three types from a repository interface definition
+  `setListClass`, `setListMetaClass` and `setListLinksClass` allow to set the type information of links and meta data.
+  `setInterfaceClass` is a shortcut that allows to extract those three types from a repository interface definition
   (see `TaskRepository` below for an example).
-- `JpaRepositoryConfig.Builder.setRepositoryDecorator` allows to setup a repository decorator that allows to intercept
-  the request and responses and perform changes, like setting up additional links and meta information.
+- `JpaRepositoryConfig.Builder.setRepositoryDecorator` allows to setup a repository decorator that can intercept and change any request,
+  like setting up additional links and meta information.
 - `JpaRepositoryConfig` allows to specify DTO mapping, have a look at the later section to this topic.
-- Internally the JpaModule will create instances of `JpaResourceRepository` and  `JpaRelationshipRepository`
-  to register them
+- Internally the JpaModule will setup a `JpaResourceRepository` and  `JpaRelationshipRepository` for each exposed entity.
 - The transactionRunner needs to be implemented by the application to hook into the transaction processing of the used
-  environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and adding a
-  `@Transactional` annotation. The JPA module makes sure that every call to a repository happens within such a transaction
-  boundary. Crnk comes with two default implementations: `SpringTransactionRunner` and
+  environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and carring a
+  `@Transactional` annotation. The JPA module then ensures that every requests happens within such a transaction. Crnk
+   comes with two default implementations: `SpringTransactionRunner` and
   `CdiTransactionRunner` that come are included in `crnk-setup-spring` and `crnk-cdi`.
 
 
@@ -101,12 +96,13 @@ is registered as `JpaRelationshipRepository`.
 Most features of JPA are supported and get mapped to JSON API:
 
 - Entities are mapped to resources.
+- Crnk understands all JPA-related annotations and in many cases, not Crnk-specific annotations are necessary.
 - Embeddables are mapped to nested json structures.
 - Embeddables used as primary keys are mapped to/from a simple string to remain addressable as resource id. The order of attributes thereby determines the position
   of the values in the string.
 - Not yet supported are relationships within embeddables.
 
-It is possible to add additional JSON API related fields to entities by making use of the `@Transient` annotation of `javax.persistence` (or the other way around by marking
+It is possible to add additional JSON API related fields to entities by annotating them with `@javax.persistence.Transient` (or the other way around by marking
 it with `@JsonIgnore`):
 
 [source]
@@ -115,13 +111,23 @@ it with `@JsonIgnore`):
 include::../../../../crnk-jpa/src/test/java/io/crnk/jpa/model/JpaTransientTestEntity.java[tags=docs]
 ----
 
-However, for more complex scenarios application may rather make use of <<dto_mapping,DTO mapping>>.
+`@JsonApiRelationId` is also supported for JPA entities:
 
+[source]
+----
+	@Column(name="project_id")
+	@JsonApiRelationId
+	private Long projectId;
 
-### JPA Setup with Spring
+    @JsonApiRelation(serialize=SerializeType.ID_ONLY)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "project_id", insertable = false, updatable = false)
+	private Project project;
+----
 
-Have a look at <<jpa_spring,JPA Module Auto Configuration>>. For Spring Boot an auto configuration is
-available that already takes care of some defaults.
+Notice that both fields are mapped to the same column. The `project` field must be made read-only with `insertable` and `updateable` to let JPA know that
+`projectId` is supposed to be used for write operations. In the example, `SerializeType.ID_ONLY` will trigger for `projectId` to always be written to the
+response in the relationship data section without having to fully load the related `project`.
 
 
 ### Pagination
@@ -140,6 +146,14 @@ and QueryDSL. `JpaModule.setQueryFactory` allows
 to choose between those two implementation. There is the `JpaCriteriaQueryFactory`
 and the `QuerydslQueryFactory`. By default the Criteria API is used.
 QueryDSL sits on top of JPQL and has to advantage of being easier to use.
+
+
+### Lazy and Eager Loading
+
+JPA relationships can either be `EAGER` or `LAZY`. The former is mapped to Crnk serialization type `ID_ONLY` and the later to `LAZY`.
+If a relationship is supposed to be truly eager, `@JsonApiRelation(serializeType=SerializeType.EAGER)` can be used next to the JPA annotations.
+
+Be careful with JPA since its default is `EAGER` loading. It is a typical source of performance issues.
 
 
 ### Access with Crnk client

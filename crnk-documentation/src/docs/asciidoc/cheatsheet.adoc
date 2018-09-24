@@ -184,9 +184,10 @@ ResourceList<Task> list = taskRepo.findAll(querySpec);
 
 More information available http://www.crnk.io/releases/stable/documentation/#_jsonapirelation[here]
 
-A relationship backed by a primitive relationship identifier `projectId` and matching relationship `project`
-where the identifier is always written in the response with `SerializeType.ONLY_ID` and the relationship
-is looked up in the project repository when necessary with `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`:
+The subsequent example establishes a relationship to `Project` with the `project` field. It is backed by a primitive
+relationship identifier `projectId`. `projectId` is always written to the response (`SerializeType.ONLY_ID`). The `project` relationship
+is looked up in the project repository with `projectId` if an inclusion has been requested and the task repository did not initialize `project`
+(`LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`):
 
 [source,java]
 ----
@@ -194,7 +195,7 @@ is looked up in the project repository when necessary with `LookupIncludeBehavio
 private Long projectId;
 
 @JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
-private Task project;
+private Project project;
 ----
 
 An eager project relationship where the project is always returned together with the task as inclusion:
@@ -202,7 +203,7 @@ An eager project relationship where the project is always returned together with
 [source,java]
 ----
 @JsonApiRelation(serialize = SerializeType.EAGER)
-private Task project;
+private Project project;
 ----
 
 To setup a relationship that is served by querying the opposite side (to get all tasks of a project, all tasks are searched for this project):
@@ -218,7 +219,7 @@ public class Project{
 ----
 
 If neither a `RelationshipRepositoryBehavior` nor `@JsonApiRelationId` is applicable, `RelationshipRepositoryV2` or rather  `BulkRelationshipRepositoryV2`
-can be implemented with custom logic to lookup relationships.
+can implement arbitrary custom logic to lookup relationships.
 
 # Information
 
@@ -329,6 +330,22 @@ Implementations can be available to service discovery or be registered with a `M
 
 # Security
 
+- Setup authentication by providing a `SecurityProvider`. JAX-RS, Spring and Servlet integration already come with an implementation out-of-the-box.
+- Setup access control by using the `SecurityModule` from `crnk-security` or implement custom logic with a `ResourceFilter`. Spring Boot sets up the module automatically
+  if found on the classpath and `SecurityConfigurer` allows its customization.
+
 See http://www.crnk.io/releases/latest/documentation/#_security[here], a longer topic, no shortcuts here...
+
+
+
+# Data Access
+
+There are a number of ready-to-use repository implementation that can greatly speed up development.
+
+- Use crnk-jpa to access JPA entities.
+- Use crnk-activity to access Activiti workflow and tasks.
+- Use crnk-meta to get information about resources and repositories themselves.
+
+For more information see http://www.crnk.io/releases/latest/documentation/#_data_access[here].
 
 :leveloffset: 0
