@@ -1,5 +1,14 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
@@ -17,15 +26,6 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Vanilla {@link Module} implementation that allows registration of extensions.
@@ -133,6 +133,9 @@ public class SimpleModule implements Module {
 		}
 		for (PagingBehavior pagingBehavior : pagingBehaviors) {
 			context.addPagingBehavior(pagingBehavior);
+		}
+		for (SecurityProvider securityProvider : securityProviders) {
+			context.addSecurityProvider(securityProvider);
 		}
 	}
 
@@ -287,7 +290,8 @@ public class SimpleModule implements Module {
 
 		if (!behaviorTypeAdded) {
 			pagingBehaviors.add(pagingBehavior);
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException(
 					"PagingBehavior of same type already added. Type:"
 							+ pagingBehavior.getClass().getSimpleName());

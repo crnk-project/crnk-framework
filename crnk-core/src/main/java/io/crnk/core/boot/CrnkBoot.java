@@ -1,5 +1,13 @@
 package io.crnk.core.boot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
@@ -41,6 +49,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
@@ -65,14 +74,6 @@ import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Facilitates the startup of Crnk in various environments (Spring, CDI,
@@ -383,6 +384,11 @@ public class CrnkBoot {
 		List<ResourceFilter> accessFilters = getInstancesByType(ResourceFilter.class);
 		for (ResourceFilter accessFilter : accessFilters) {
 			module.addResourceFilter(accessFilter);
+		}
+
+		List<SecurityProvider> securityProviders = getInstancesByType(SecurityProvider.class);
+		for (SecurityProvider securityProvider : securityProviders) {
+			module.addSecurityProvider(securityProvider);
 		}
 
 		moduleRegistry.addModule(module);

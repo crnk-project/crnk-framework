@@ -1,5 +1,11 @@
 package io.crnk.core.boot;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+
+import java.util.Arrays;
+import java.util.Properties;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -18,6 +24,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
+import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.mock.MockConstants;
@@ -42,12 +49,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.Properties;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 
@@ -170,6 +171,7 @@ public class CrnkBootTest {
 		RepositoryDecoratorFactory decoratorFactory = mock(RepositoryDecoratorFactory.class);
 		ResourceFieldContributor resourceFieldContributor = mock(ResourceFieldContributor.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
+		SecurityProvider securityProvider = mock(SecurityProvider.class);
 		JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(RepositoryDecoratorFactory.class)))
@@ -177,6 +179,7 @@ public class CrnkBootTest {
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(ResourceFieldContributor.class)))
 				.thenReturn(Arrays.asList(resourceFieldContributor));
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(Module.class))).thenReturn(Arrays.asList(module));
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(SecurityProvider.class))).thenReturn(Arrays.asList(securityProvider));
 		Mockito.when(serviceDiscovery.getInstancesByType(eq(JsonApiExceptionMapper.class)))
 				.thenReturn(Arrays.asList(exceptionMapper));
 		boot.boot();
@@ -187,6 +190,7 @@ public class CrnkBootTest {
 		Assert.assertTrue(moduleRegistry.getResourceFieldContributors().contains(resourceFieldContributor));
 		Assert.assertTrue(moduleRegistry.getRepositoryDecoratorFactories().contains(decoratorFactory));
 		Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
+		Assert.assertTrue(moduleRegistry.getSecurityProviders().contains(securityProvider));
 	}
 
 	class TestExceptionMapper implements ExceptionMapper<IllegalStateException> {
