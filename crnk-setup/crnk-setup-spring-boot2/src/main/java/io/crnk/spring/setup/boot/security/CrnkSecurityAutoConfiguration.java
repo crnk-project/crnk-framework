@@ -1,9 +1,10 @@
 package io.crnk.spring.setup.boot.security;
 
+import java.util.List;
+
 import io.crnk.operations.server.OperationsModule;
 import io.crnk.security.SecurityConfig;
 import io.crnk.security.SecurityModule;
-import io.crnk.spring.security.SpringSecurityModule;
 import io.crnk.spring.setup.boot.core.CrnkCoreAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -13,8 +14,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import java.util.List;
 
 /**
  * @link EnableAutoConfiguration Auto-configuration} for Crnk' security module.
@@ -44,11 +43,5 @@ public class CrnkSecurityAutoConfiguration {
 			}
 		}
 		return SecurityModule.newServerModule(config.build());
-	}
-
-	@Bean
-	@ConditionalOnClass(org.springframework.security.access.AccessDeniedException.class)
-	public SpringSecurityModule springSecurityModule() {
-		return SpringSecurityModule.create();
 	}
 }

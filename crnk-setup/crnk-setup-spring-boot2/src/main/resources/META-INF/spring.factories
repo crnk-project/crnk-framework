@@ -8,6 +8,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   io.crnk.spring.setup.boot.operations.CrnkOperationsAutoConfiguration,\
   io.crnk.spring.setup.boot.ui.CrnkUIAutoConfiguration,\
   io.crnk.spring.setup.boot.security.CrnkSecurityAutoConfiguration,\
+  io.crnk.spring.setup.boot.security.CrnkSpringSecurityAutoConfiguration,\
   io.crnk.spring.setup.boot.mvc.CrnkSpringMvcAutoConfiguration,\
   io.crnk.spring.setup.boot.mvc.CrnkErrorControllerAutoConfiguration,\
   io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration
