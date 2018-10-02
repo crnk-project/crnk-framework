@@ -88,6 +88,32 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 
 
 	@Test
+	public void checkNestedSubTypeRegistered() {
+		RegistryEntry entryA = resourceRegistry.getEntry(TestResourceA.class);
+		RegistryEntry entryB = resourceRegistry.getEntry(TestResourceB.class);
+		RegistryEntry entryC1 = resourceRegistry.getEntry(NestedTestResourceC1.class);
+		RegistryEntry entryC2 = resourceRegistry.getEntry(NestedTestResourceC2.class);
+
+		Assert.assertNotNull(entryC1);
+		Assert.assertNotNull(entryC2);
+		Assert.assertNotEquals(entryA, entryC1);
+		Assert.assertNotEquals(entryB, entryC1);
+		Assert.assertNotEquals(entryA, entryC2);
+		Assert.assertNotEquals(entryB, entryC2);
+		Assert.assertNotEquals(entryC2, entryC1);
+
+		Assert.assertNull(entryC1.getRepositoryInformation());
+		Assert.assertNull(entryC2.getRepositoryInformation());
+		Assert.assertFalse(entryC1.hasResourceRepository());
+		Assert.assertFalse(entryC2.hasResourceRepository());
+
+		ResourceInformation resourceInformationC1 = entryC1.getResourceInformation();
+		Assert.assertEquals("testC1", resourceInformationC1.getResourceType());
+		Assert.assertEquals("testA", resourceInformationC1.getResourcePath());
+	}
+
+
+	@Test
 	public void checkCrudWithController() {
 		// CREATE resource
 		Relationship relationship = new Relationship();
@@ -180,7 +206,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 		}
 	}
 
-	@JsonApiResource(type = "testB", resourcePath = "testA")
+	@JsonApiResource(type = "testB", resourcePath = "testA", subTypes = {NestedTestResourceC1.class, NestedTestResourceC2.class})
 	public static class TestResourceB extends TestResourceA {
 
 		private String value;
@@ -224,6 +250,35 @@ public class InheritanceWithoutSubtypeRepositoryTest extends BaseControllerTest 
 
 		public void setRelatedWithRepository(RelatedResource relatedWithRepository) {
 			this.relatedWithRepository = relatedWithRepository;
+		}
+	}
+
+	@JsonApiResource(type = "testC1", resourcePath = "testA")
+	public static class NestedTestResourceC1 extends TestResourceB {
+
+		private String valueC1;
+
+
+		public String getValueC1() {
+			return valueC1;
+		}
+
+		public void setValueC1(String valueC1) {
+			this.valueC1 = valueC1;
+		}
+	}
+
+	@JsonApiResource(type = "testC2", resourcePath = "testA")
+	public static class NestedTestResourceC2 extends TestResourceB {
+
+		private String valueC2;
+
+		public String getValueC2() {
+			return valueC2;
+		}
+
+		public void setValueC2(String valueC2) {
+			this.valueC2 = valueC2;
 		}
 	}
 

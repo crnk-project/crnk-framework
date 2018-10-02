@@ -451,9 +451,10 @@ public class ModuleRegistry {
 
 	private void applyResourceRegistrations() {
 		Set<Class> resourceClasses = findResourceClasses();
+		Map<Class, RegistryEntry> addtionalEntryMap = new HashMap<>();
 		for (Class<?> resourceClass : resourceClasses) {
 			if (resourceRegistry.getEntry(resourceClass) == null) {
-				applyResourceRegistration(resourceClass);
+				applyResourceRegistration(resourceClass, addtionalEntryMap);
 			}
 		}
 	}
@@ -471,15 +472,21 @@ public class ModuleRegistry {
 		}
 	}
 
-	private void applyResourceRegistration(Class<?> resourceClass) {
-		if (resourceRegistry.getEntry(resourceClass) == null) {
+	private RegistryEntry applyResourceRegistration(Class<?> resourceClass, Map<Class, RegistryEntry> additionalEntryMap) {
+		if(additionalEntryMap.containsKey(resourceClass)){
+			return additionalEntryMap.get(resourceClass);
+		}
+		RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
+		if (entry == null) {
 			Class<?> superclass = resourceClass.getSuperclass();
+			RegistryEntry parentEntry;
 			if (resourceInformationProvider.accept(superclass)) {
-				applyResourceRegistration(superclass);
+				parentEntry = applyResourceRegistration(superclass, additionalEntryMap);
+			} else {
+				throw new IllegalStateException("super type " + superclass + " of " + resourceClass + " is not a resource. Is it annotated with @JsonApiResource?");
 			}
 
 			LOGGER.debug("adding resource {}", resourceClass);
-			RegistryEntry parentEntry = resourceRegistry.findEntry(resourceClass);
 			PreconditionUtil.verify(parentEntry != null, "unable to find repository for resource type %s, make sure a repository is backing this type or one of its super types", resourceClass);
 			PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass), "make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
 			ResourceInformation information = resourceInformationProvider.build(resourceClass);
@@ -487,12 +494,14 @@ public class ModuleRegistry {
 
 			RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
 			entryBuilder.resource().from(information);
-			RegistryEntry entry = entryBuilder.build();
+			entry = entryBuilder.build();
 			entry.setParentRegistryEntry(parentEntry);
 			getContext().addRegistryEntry(entry);
 			Class<?> parentClass = parentEntry.getResourceInformation().getResourceClass();
 			PreconditionUtil.verify(resourceClass.getSuperclass().equals(parentClass), "%s must be a subType of %s", resourceClass, parentClass);
 		}
+		additionalEntryMap.put(resourceClass, entry);
+		return entry;
 	}
 
 	private List<Object> filterDecorators(List<Object> repositories) {
