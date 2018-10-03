@@ -73,6 +73,14 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 
 			SimpleModule reflectionsModule = new SimpleModule("reflections");
 			for (Class resourceClass : resourceClasses) {
+				JsonApiResource resourceAnnotation = (JsonApiResource) resourceClass.getAnnotation(JsonApiResource.class);
+				JsonApiResource superAnnotation = (JsonApiResource) resourceClass.getSuperclass().getAnnotation(JsonApiResource.class);
+				String superPath = superAnnotation != null ? superAnnotation.resourcePath().isEmpty() ? superAnnotation.type() : superAnnotation.resourcePath() : null;
+				if (superPath != null && resourceAnnotation.resourcePath().equals(superPath)) {
+					// repository shared path with super type, meaning that it does not have a repository on its own
+					continue;
+				}
+
 				Class repositoryInterface = resourceRepositoryMap.get(resourceClass);
 				if (repositoryInterface != null) {
 					// repository class provides further ResourceList meta data

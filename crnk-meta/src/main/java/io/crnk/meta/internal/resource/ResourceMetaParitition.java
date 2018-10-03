@@ -141,7 +141,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 			ResourceRepositoryInformation repositoryInformation = entry.getRepositoryInformation();
 			ResourceRepositoryAdapter resourceRepository = entry.getResourceRepository();
-			if (resourceRepository != null) {
+			if (repositoryInformation != null) {
 				MetaResourceRepository repository = discoverRepository(repositoryInformation, metaResource,
 						resourceRepository);
 				context.addElement(repository);

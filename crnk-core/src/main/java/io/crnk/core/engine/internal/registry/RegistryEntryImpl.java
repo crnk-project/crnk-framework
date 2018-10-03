@@ -60,7 +60,7 @@ public class RegistryEntryImpl implements RegistryEntry {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[type=" + resourceInformation.getResourceType() + "]";
+		return getClass().getSimpleName() + "[type=" + resourceInformation.getResourceType() + ", path=" + resourceInformation.getResourcePath() + "]";
 	}
 
 	@Override
