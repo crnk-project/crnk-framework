@@ -1,12 +1,14 @@
 package io.crnk.core.engine.internal.http;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
-import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
@@ -26,9 +28,6 @@ import io.crnk.core.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 public class JsonApiRequestProcessorBase {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -42,7 +41,7 @@ public class JsonApiRequestProcessorBase {
 	protected ControllerRegistry controllerRegistry;
 
 	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext, QueryAdapterBuilder queryAdapterBuilder,
-									   ControllerRegistry controllerRegistry) {
+			ControllerRegistry controllerRegistry) {
 		this.moduleContext = moduleContext;
 		this.queryAdapterBuilder = queryAdapterBuilder;
 		this.controllerRegistry = controllerRegistry;
@@ -73,20 +72,7 @@ public class JsonApiRequestProcessorBase {
 
 	protected HttpResponse toHttpResponse(Response response) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
-
-		HttpResponse httpResponse = new HttpResponse();
-		httpResponse.setStatusCode(response.getHttpStatus());
-
-		if (response.getHttpStatus() != HttpStatus.NO_CONTENT_204) {
-			String responseBody;
-			try {
-				responseBody = objectMapper.writeValueAsString(response.getDocument());
-			} catch (JsonProcessingException e) {
-				throw new IllegalStateException(e);
-			}
-			httpResponse.setBody(responseBody);
-			httpResponse.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
-		}
+		HttpResponse httpResponse = response.toHttpResponse(objectMapper);
 		logger.debug("setup http resposne {}", httpResponse);
 		return httpResponse;
 	}
@@ -97,9 +83,11 @@ public class JsonApiRequestProcessorBase {
 			ObjectMapper objectMapper = moduleContext.getObjectMapper();
 			try {
 				return objectMapper.readerFor(Document.class).readValue(requestBody);
-			} catch (JsonProcessingException e) {
+			}
+			catch (JsonProcessingException e) {
 				throw e;
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
@@ -129,11 +117,13 @@ public class JsonApiRequestProcessorBase {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 		RegistryEntry registryEntry = jsonPath.getRootEntry();
 
-		ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship() : jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
+		ResourceField field = (jsonPath instanceof RelationshipsPath) ? ((RelationshipsPath) jsonPath).getRelationship()
+				: jsonPath instanceof FieldPath ? ((FieldPath) jsonPath).getField() : null;
 		if (field != null) {
 			String oppositeResourceType = field.getOppositeResourceType();
 			return resourceRegistry.getEntry(oppositeResourceType).getResourceInformation();
-		} else {
+		}
+		else {
 			return registryEntry.getResourceInformation();
 		}
 	}

@@ -1,5 +1,16 @@
 package io.crnk.operations;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
@@ -29,17 +40,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.metamodel.ManagedType;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractOperationsTest extends JerseyTestBase {
 
@@ -193,8 +193,13 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 			feature.addModule(jpaModule);
 			feature.addModule(operationsModule);
 			feature.addModule(ValidationModule.create());
+			setupServer(feature);
 			register(feature);
 		}
+	}
+
+	protected void setupServer(CrnkFeature feature) {
+		// noting to do, override if necessary
 	}
 
 }

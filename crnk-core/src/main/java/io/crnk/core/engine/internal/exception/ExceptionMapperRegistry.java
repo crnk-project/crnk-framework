@@ -1,13 +1,20 @@
 package io.crnk.core.engine.internal.exception;
 
+import java.util.Set;
+
+import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.utils.Optional;
-
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExceptionMapperRegistry {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionMapperRegistry.class);
 
 	private final Set<ExceptionMapperType> exceptionMappers;
 
@@ -35,7 +42,7 @@ public class ExceptionMapperRegistry {
 		return Optional.ofNullable(closestExceptionMapper);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <E extends Throwable> Optional<ExceptionMapper<E>> findMapperFor(ErrorResponse errorResponse) {
 		int currentDepth = -1;
 		ExceptionMapper closestExceptionMapper = null;
@@ -81,5 +88,21 @@ public class ExceptionMapperRegistry {
 			count++;
 		}
 		return count;
+	}
+
+	public Response toResponse(Throwable e) {
+		Optional<JsonApiExceptionMapper> exceptionMapper = findMapperFor(e.getClass());
+		if (!exceptionMapper.isPresent()) {
+			LOGGER.error("failed to process operations request, unknown exception thrown", e);
+			e = new InternalServerErrorException(e.getMessage());
+			exceptionMapper = findMapperFor(e.getClass());
+			PreconditionUtil
+					.assertTrue("no exception mapper for InternalServerErrorException found", exceptionMapper.isPresent());
+		}
+		else {
+			LOGGER.debug("dispatching exception to mapper", e);
+		}
+		ErrorResponse errorResponse = exceptionMapper.get().toErrorResponse(e);
+		return errorResponse.toResponse();
 	}
 }
