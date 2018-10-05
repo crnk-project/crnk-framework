@@ -1,30 +1,55 @@
 
+This release brings many incremental improvements and some long overdue architecture cleanups.
+Make sure to familiarize yourself with the updated UrlMapper behavior and QueryParams implementation.
+Any application following the convention recommended the past year should not have any issues with this.
 
-<h4>Removal of deprecated Repository annotations</h4>
 
-The annotation-based repositories have been deprecated since Crnk 0.x and have now been removed. A switch to the Interface-based repositories like
-ResourceRepositoryV2 is quickly implemented if somewhere still necessary.
+<h4>Documentation updates</h4>
 
-<h4>Downsizing of QueryParams code base</h4>
+The outline of the documentation has been revised. Some of the chapters have been restructured.
+And there is now a cheatsheet giving an overview
+of the most important features and APIs.
+<p>
+The crnk-examples have been renamed to crnk-integration-examples to clearly distinguish from the main
+crnk-example application. The name change reflects the fact that those examples are only meant to showcase
+the integration of Crnk into various frameworks, not its entire feature set.
 
-QueryParams has been deprecated since Crnk 0.x. So far both QuerySpec and QueryParams have been first-class citizens within Crnk. With this release, support
-for QueryParams has been downsized. This means that any parsing and processing of QueryParams has been removed, but the conversion of QuerySpec
-to QueryParams is still in place. The use of this conversion has been recommended for a long time to facilitate moving to QuerySpec, which also means nothing
-should change or project just have to catch up with this conversion setup. With this setup, QueryParams continues to be supported in the near future,
-but with a much lighter code base.	It is desired to remove QueryParams entirely from crnk-core in subsequent releases. Either by setting up a new
-crnk-core-queryparams or dropping support for it entirely. Contributions in this area are welcomed if it is desired to keep support alive.
-Otherwise it will be dropped in early 2019.
+
+
+<h4>New UrlMapper default configuration</h4>
+
+The DefaultQuerySpecUrlMapper implementation offers a enforceDotPathSeparator property that
+has historically been disabled to maintain backward compatibility. It allows to write filter parameter as either:
+
+<pre class="prettyprint">
+filter[person][address][city]=Zurich
+filter[address][city]=Zurich
+</pre>
+
+or
+
+<pre class="prettyprint">
+filter[person][address.city]=Zurich
+filter[address.city]=Zurich
+</pre>
+
+Hereby <i>person</i> is the resource type and <i>address.city</i> a nested attribute. With the first notation,
+issues can arise if resources and relationships carry the same name. This ambiguity prevents Crnk from
+properly resolving paths and may lead to hard to understand errors. For this reason Crnk has recommended
+the second flavor for some time while at the same time offering backward compatibility with the first one.
+
+Setting enforceDotPathSeparator to true removes support for the first notation, meaning Crnk will only support
+the second notation and will always be able to properly resolve paths. If this causes issue for your applicaiton,
+the flag can easily be disabled again, for example, in SpringBoot the flag is accessible
+with the <i>crnk.enforceDotPathSeparator</i> property.
 
 
 <h4>Simplified QuerySpec with new PathSpec</h4>
 
-All the QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path
+All QuerySpec-related objects like FilterSpec and SortSpec now hold the attribute path
 as PathSpec. PathSpec facilitate working with paths compared to the previous List&lt;String&gt; solution.
-All the previous API remains unchanged and supported (no deprecations).
-
-<p>PathSpec offers various of(...) methods to quickly create an instance. It further offers
-	filter(...) and sort(...) methods to construct FilterSpec and SortSpecs out of the current path.
-
+It offers various methods create new instances and can be used to quickly construct filter and sort
+specifications.
 
 
 <h4>QuerySpecVisitor</h4>
@@ -34,21 +59,44 @@ a QuerySpec by calling QuerySpec.accept(QuerySpecVisitor). Visitors can be used,
 to easily modify attribute paths within a QuerySpc.
 
 
+<h4>Removal of deprecated Repository annotations</h4>
+
+The annotation-based repositories have been deprecated since Crnk 0.x and have now been removed. A switch to the Interface-based repositories like
+ResourceRepositoryV2 is quickly implemented if somewhere still necessary.
+
+<h4>Optimized QueryParams code base</h4>
+
+QueryParams has been deprecated since Crnk 0.x. So far both QuerySpec and QueryParams have been first-class citizens within Crnk. With this release, support
+for QueryParams has been refactored and remains support through the QuerySpec-to-QueryParams conversion process. That has been the recommended and
+only meaningful setup for a long time. The big benefit is a much lighter and more robust code base in the area.
+<p>
+	Future release either drop QueryParams support or move it out into a dedicated module. Contributes in the area would be welcomed. If it is no longer deemed useful
+	by anybody, it will be removed sometime in Q1/Q2 2019.
+
+
 <h4>Classpath scanning for Typescript generator</h4>
 
 The Typescript generator used to need a running application to extract information about the set
-of resources and repositories. This remains the best and only way to reliably extract all informations
-out of a Crnk-based application. However, due to this architecture, generation is also prone to fail
-due to misconfiguration of the application. For this reason, this release introduces an new, alternative
-mechanism where
-the classpath can be scanned for @JsonApiResource-annotated classes and repository interface
+of resources and repositories. This remains the best and only way to reliably extract all information
+out of a Crnk-based application. However, due to this architecture, generation is also prone to quickly fail
+in case of misconfiguration of the application. For this reason, this release introduces an new, alternative
+mechanism where the classpath can be scanned for @JsonApiResource-annotated classes and repository interface
 definitions extending ResourceRepositoryV2. The benefit is a simpler setup at the cost of potentially
 missing out on non-standard repositories that are not backed by a @JsonApiResource annotation.
 In Gradle this then looks like:
 
 <pre class="prettyprint">
+
+dependencies {
+	typescriptGenRuntime project(':management:management-api')
+	...
+}
+
 typescriptGen{
   resourcePackages = ['îo.crnk.example']
+  runtime {
+    configuration = 'typescriptGenRuntime'
+  }
   ...
 }
 </pre>
@@ -84,7 +132,6 @@ There is a new interface JpaCriteriaRepositoryFilter and base class JpaCriteriaR
 easy customization of CriteriaQuery objects. The interfaces are a specialization of JpaRepositoryFilter
 and can be used in the same manner by registering it to the JpaModuleConfig.
 
-
 <h4>InMemoryEvaluator</h4>
 
 InMemoryEvaluator gained a new constructor that takes a ResourceRegistry. This allows the use of resource information
@@ -111,3 +158,8 @@ on default methods.
 <h4>simplified crnk-jpa setup in Spring Boot</h4>
 
 The exposeAll behavior automatically backs-off if a repository is registered manually. Setting the properly to false is no longer necessary.
+
+<h4>Early security checks for bulk operations</h4>
+
+The operations module now checks any bulk operations against configured configured role-based authorization rules (SecurityModule) and other ResourceFilter.
+It allows to catch security violations early before accessing any repositories.
