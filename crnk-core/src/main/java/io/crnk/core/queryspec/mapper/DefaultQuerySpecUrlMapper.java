@@ -46,7 +46,7 @@ public class DefaultQuerySpecUrlMapper
 
 	private Set<FilterOperator> supportedOperators = new HashSet<>();
 
-	private boolean enforceDotPathSeparator = false;
+	private boolean enforceDotPathSeparator = true;
 
 	private boolean ignoreParseExceptions;
 
