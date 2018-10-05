@@ -245,8 +245,7 @@ public abstract class ResponseRepositoryAdapter {
 			QueryContext queryContext = queryAdapter.getQueryContext();
 			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod(), queryContext);
 			if (filterBehavior != FilterBehavior.NONE) {
-				String msg = "not allowed to access " + request.getMethod() + " " + resourceInformation.getResourceType();
-				throw new ForbiddenException(msg);
+				throw new ForbiddenException(resourceInformation, request.getMethod());
 			}
 		}
 

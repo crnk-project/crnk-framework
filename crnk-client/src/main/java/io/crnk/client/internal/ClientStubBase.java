@@ -1,5 +1,8 @@
 package io.crnk.client.internal;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
 import io.crnk.client.CrnkClient;
@@ -23,9 +26,6 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 public class ClientStubBase {
 
@@ -85,7 +85,8 @@ public class ClientStubBase {
 				if (Resource.class.equals(resourceClass)) {
 					Document document = objectMapper.readValue(body, Document.class);
 					return toResourceResponse(document, objectMapper);
-				} else {
+				}
+				else {
 					Document document = objectMapper.readValue(body, Document.class);
 
 					ClientDocumentMapper documentMapper = client.getDocumentMapper();
@@ -93,7 +94,8 @@ public class ClientStubBase {
 				}
 			}
 			return null;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new TransportException(e);
 		}
 	}
@@ -110,12 +112,17 @@ public class ClientStubBase {
 				list.setLinks(new JsonLinksInformation(document.getMeta(), objectMapper));
 			}
 			return list;
-		} else {
+		}
+		else {
 			return data;
 		}
 	}
 
 	protected RuntimeException handleError(HttpAdapterResponse response) throws IOException {
+		return handleError(client, response);
+	}
+
+	public static RuntimeException handleError(CrnkClient client, HttpAdapterResponse response) throws IOException {
 		ErrorResponse errorResponse = null;
 		String body = response.body();
 		String contentType = response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE);
@@ -137,10 +144,12 @@ public class ClientStubBase {
 			Throwable throwable = mapper.get().fromErrorResponse(errorResponse);
 			if (throwable instanceof RuntimeException) {
 				return (RuntimeException) throwable;
-			} else {
+			}
+			else {
 				return new ClientException(response.code(), response.message(), throwable);
 			}
-		} else {
+		}
+		else {
 			return new ClientException(response.code(), response.message());
 		}
 	}

@@ -1,11 +1,17 @@
 package io.crnk.operations.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.client.http.HttpAdapterResponse;
 import io.crnk.client.internal.ClientDocumentMapper;
+import io.crnk.client.internal.ClientStubBase;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpHeaders;
@@ -15,18 +21,12 @@ import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
 import io.crnk.operations.server.OperationsRequestProcessor;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class OperationsCall {
 
@@ -103,17 +103,17 @@ public class OperationsCall {
 			request.header(HttpHeaders.HTTP_HEADER_ACCEPT, OperationsRequestProcessor.JSONPATCH_CONTENT_TYPE);
 			HttpAdapterResponse response = request.execute();
 
-			int status = response.code();
-			if (status != 200) {
-				// general issue, status of individual operations is important.
-				throw new InternalServerErrorException("patch execution failed with status " + status);
+			if (!response.isSuccessful()) {
+				throw ClientStubBase.handleError(client.getCrnk(), response);
 			}
 			String json = response.body();
 			responses = Arrays.asList(mapper.readValue(json, OperationResponse[].class));
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 
 	public OperationResponse getResponse(int index) {
 		checkResponsesAvailable();

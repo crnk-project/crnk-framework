@@ -1,17 +1,21 @@
 package io.crnk.operations.server;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.module.Module;
 import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public class OperationsRequestProcessor implements HttpRequestProcessor {
 
@@ -31,21 +35,28 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
 	@Override
 	public void process(HttpRequestContext context) throws IOException {
 		if (context.accepts(JSONPATCH_CONTENT_TYPE)) {
+			ObjectMapper mapper = moduleContext.getObjectMapper();
 			try {
-				ObjectMapper mapper = moduleContext.getObjectMapper();
 
 				List<Operation> operations = Arrays.asList(mapper.readValue(context.getRequestBody(), Operation[].class));
 
-				List<OperationResponse> responses = operationsModule.apply(operations);
+				QueryContext queryContext = context.getQueryContext();
+				List<OperationResponse> responses = operationsModule.apply(operations, queryContext);
 
 				String responseJson = mapper.writeValueAsString(responses);
 				context.setContentType(JSONPATCH_CONTENT_TYPE);
 				context.setResponse(200, responseJson);
-			} catch (Exception e) {
-				LOGGER.error("failed to execute operations", e);
-				context.setResponse(500, (byte[]) null);
+			}
+			catch (Exception e) {
+				Response response = toErrorResponse(e);
+				HttpResponse httpResponse = response.toHttpResponse(mapper);
+				context.setResponse(httpResponse);
 			}
 		}
 	}
 
+	private Response toErrorResponse(Throwable e) {
+		ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
+		return exceptionMapperRegistry.toResponse(e);
+	}
 }

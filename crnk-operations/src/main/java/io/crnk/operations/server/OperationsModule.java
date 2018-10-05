@@ -1,16 +1,32 @@
 package io.crnk.operations.server;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.filter.FilterBehavior;
+import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.http.HttpRequestContext;
+import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.utils.Nullable;
@@ -20,14 +36,6 @@ import io.crnk.operations.internal.OperationParameterUtils;
 import io.crnk.operations.server.order.DependencyOrderStrategy;
 import io.crnk.operations.server.order.OperationOrderStrategy;
 import io.crnk.operations.server.order.OrderedOperation;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OperationsModule implements Module {
 
@@ -76,13 +84,59 @@ public class OperationsModule implements Module {
 		context.addHttpRequestProcessor(new io.crnk.operations.server.OperationsRequestProcessor(this, context));
 	}
 
+	/**
+	 * @deprecated use {@link #apply(List, QueryContext)}
+	 */
+	@Deprecated
 	public List<OperationResponse> apply(List<Operation> operations) {
+		HttpRequestContextProvider httpRequestContextProvider =
+				moduleContext.getModuleRegistry().getHttpRequestContextProvider();
+		HttpRequestContext requestContext = httpRequestContextProvider.getRequestContext();
+		QueryContext queryContext = requestContext.getQueryContext();
+		return apply(operations, queryContext);
+	}
+
+	/**
+	 * Applies the given set of operations.
+	 *
+	 * @return responses
+	 */
+	public List<OperationResponse> apply(List<Operation> operations, QueryContext queryContext) {
+		checkAccess(operations, queryContext);
 		enrichTypeIdInformation(operations);
 
 		List<OrderedOperation> orderedOperations = orderStrategy.order(operations);
 
 		DefaultOperationFilterChain chain = new DefaultOperationFilterChain();
 		return chain.doFilter(new DefaultOperationFilterContext(orderedOperations));
+	}
+
+	/**
+	 * This is not strictly necessary, but allows to catch security issues early before accessing the individual repositories
+	 */
+	private void checkAccess(List<Operation> operations, QueryContext queryContext) {
+		for (Operation operation : operations) {
+			checkAccess(operation, queryContext);
+		}
+	}
+
+	private void checkAccess(Operation operation, QueryContext queryContext) {
+		HttpMethod httpMethod = HttpMethod.valueOf(operation.getOp());
+
+		String path = OperationParameterUtils.parsePath(operation.getPath());
+		JsonPath jsonPath = (new PathBuilder(moduleContext.getResourceRegistry(), moduleContext.getTypeParser())).build(path);
+		if (jsonPath == null) {
+			throw new RepositoryNotFoundException(path);
+		}
+
+		RegistryEntry entry = jsonPath.getRootEntry();
+		ResourceInformation resourceInformation = entry.getResourceInformation();
+
+		ResourceFilterDirectory filterDirectory = moduleContext.getResourceFilterDirectory();
+		FilterBehavior filterBehavior = filterDirectory.get(resourceInformation, httpMethod, queryContext);
+		if (filterBehavior == FilterBehavior.FORBIDDEN) {
+			throw new ForbiddenException(resourceInformation, httpMethod);
+		}
 	}
 
 	private void enrichTypeIdInformation(List<Operation> operations) {
@@ -165,6 +219,7 @@ public class OperationsModule implements Module {
 	protected OperationResponse executeOperation(Operation operation) {
 		RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
 
+
 		String path = OperationParameterUtils.parsePath(operation.getPath());
 		Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
 		String method = operation.getOp();
@@ -226,7 +281,8 @@ public class OperationsModule implements Module {
 			List<OperationFilter> filters = getFilters();
 			if (filterIndex == filters.size()) {
 				return executeOperations(context.getOrderedOperations());
-			} else {
+			}
+			else {
 				OperationFilter filter = filters.get(filterIndex);
 				filterIndex++;
 				return filter.filter(context, this);
