@@ -126,11 +126,8 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 	}
 
 	private String findPropertyNameByJsonName(String jsonName) {
-		return resourceInformation.getAttributeFields().stream()
-				.filter(field -> jsonName.equals(field.getJsonName()))
-				.map(ResourceField::getUnderlyingName)
-				.findFirst()
-				.orElse(jsonName);
+		ResourceField field = resourceInformation.findAttributeFieldByName(jsonName);
+		return field != null ? field.getUnderlyingName() : jsonName;
 	}
 
 	private boolean isJsonApiStructure(String[] elements, int i) {
