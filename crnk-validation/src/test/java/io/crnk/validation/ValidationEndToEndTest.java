@@ -38,7 +38,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("name", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
 			Assert.assertTrue(violation.getMessage().contains("null"));
-			Assert.assertEquals("/data/attributes/name", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/renamed-name", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -86,7 +86,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			ConstraintViolationImpl violation = (ConstraintViolationImpl) violations.iterator().next();
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("data.value", violation.getPropertyPath().toString());
-			Assert.assertEquals("/data/attributes/data/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/renamed-data/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -109,7 +109,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataList[0].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("/data/attributes/dataList/0/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/data-list/0/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 
@@ -136,7 +136,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 			Assert.assertEquals("{javax.validation.constraints.NotNull.message}", violation.getMessageTemplate());
 			Assert.assertEquals("dataMap[someKey].value", violation.getPropertyPath().toString());
 			Assert.assertNotNull(violation.getMessage());
-			Assert.assertEquals("/data/attributes/dataMap/someKey/value", violation.getErrorData().getSourcePointer());
+			Assert.assertEquals("/data/attributes/data-map/someKey/value", violation.getErrorData().getSourcePointer());
 		}
 	}
 

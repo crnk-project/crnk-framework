@@ -33,6 +33,10 @@ public class MetaAttribute extends MetaElement {
 	@JsonIgnore
 	private Field field;
 
+	// if set, then the java field name is different than the json attribute name
+	@JsonIgnore
+	private String fieldName;
+
 	private boolean derived;
 
 	private boolean lazy;
@@ -64,7 +68,7 @@ public class MetaAttribute extends MetaElement {
 		if (field == null || readMethod == null) {
 			MetaDataObject parent = getParent();
 			Class<?> beanClass = parent.getImplementationClass();
-			String name = getName();
+			String name = getFieldName() == null ? getName() : getFieldName();
 
 			this.field = ClassUtils.findClassField(beanClass, name);
 			this.readMethod = ClassUtils.findGetter(beanClass, name);
@@ -275,5 +279,13 @@ public class MetaAttribute extends MetaElement {
 
 	public void setLob(boolean blob) {
 		this.lob = blob;
+	}
+
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
 	}
 }

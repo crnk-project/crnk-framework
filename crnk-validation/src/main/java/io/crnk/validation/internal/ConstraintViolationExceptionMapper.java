@@ -334,7 +334,8 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 				String mappedName = name;
 				if (resourceField != null) {
 					// in case of @JsonApiRelationId it will be mapped to original name
-					mappedName = resourceField.getUnderlyingName();
+					resourceField = resourceInformation.findFieldByUnderlyingName(resourceField.getUnderlyingName());
+					mappedName = resourceField.getJsonName();
 				}
 
 				appendSeparator();
