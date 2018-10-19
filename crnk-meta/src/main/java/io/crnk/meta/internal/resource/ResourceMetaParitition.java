@@ -287,6 +287,8 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 	private void addAttribute(MetaResourceBase resource, ResourceField field) {
 		MetaResourceField attr = new MetaResourceField();
 
+		attr.setUnderlyingName(field.getUnderlyingName());
+
 		attr.setParent(resource, true);
 		attr.setName(field.getJsonName());
 		attr.setAssociation(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP);

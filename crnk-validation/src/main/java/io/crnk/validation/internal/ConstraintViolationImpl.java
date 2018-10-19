@@ -1,6 +1,9 @@
 package io.crnk.validation.internal;
 
 import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
@@ -20,11 +23,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 // TODO remo: take care of UnsupportedOperationExceptions to adhere to spec
 public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 	private ErrorData errorData;
+
+	private ResourceInformation resourceInformation;
 
 	private Class<?> resourceClass;
 
@@ -42,9 +48,10 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 
 			if (resourceType != null) {
 				RegistryEntry entry = resourceRegistry.getEntry(resourceType);
-				resourceClass = entry.getResourceInformation().getResourceClass();
+				resourceInformation = entry.getResourceInformation();
+				resourceClass = resourceInformation.getResourceClass();
 				if (strResourceId != null) {
-					resourceId = entry.getResourceInformation().parseIdString(strResourceId);
+					resourceId = resourceInformation.parseIdString(strResourceId);
 				}
 			}
 		}
@@ -105,14 +112,22 @@ public class ConstraintViolationImpl implements ConstraintViolation<Object> {
 			} else if (isJsonApiStructure(elements, i)) {
 				i++; // skip next as well
 			} else {
-				nodes.add(new NodeImpl(element));
+				// we don't have any meta-information about nested objects (https://github.com/crnk-project/crnk-framework/issues/399) yet,
+				// therefore we're not attempting to find the property name, as soon as we're in a nested object.
+				String propertyName = type == resourceClass ? findPropertyNameByJsonName(element) : element;
+				nodes.add(new NodeImpl(propertyName));
 
 				// follow attribute
-				type = PropertyUtils.getPropertyType(rawType, element);
+				type = PropertyUtils.getPropertyType(rawType, propertyName);
 			}
 			i++;
 		}
 		return new PathImpl(nodes);
+	}
+
+	private String findPropertyNameByJsonName(String jsonName) {
+		ResourceField field = resourceInformation.findAttributeFieldByName(jsonName);
+		return field != null ? field.getUnderlyingName() : jsonName;
 	}
 
 	private boolean isJsonApiStructure(String[] elements, int i) {

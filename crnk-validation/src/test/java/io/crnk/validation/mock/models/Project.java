@@ -1,5 +1,7 @@
 package io.crnk.validation.mock.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.JsonApiToMany;
@@ -23,20 +25,24 @@ public class Project {
 	private Long id;
 
 	@NotNull
+	@JsonProperty("renamed-name")
 	private String name;
 
 	private String description;
 
 	@Valid
+	@JsonProperty("renamed-data")
 	private ProjectData data;
 
 	@Valid
+	@JsonProperty("data-list")
 	private List<ProjectData> dataList = new ArrayList<>();
 
 	@Valid
 	private Set<ProjectData> dataSet = new HashSet<>();
 
 	@Valid
+	@JsonProperty("data-map")
 	private Map<String, ProjectData> dataMap = new HashMap<>();
 
 	@Size(min = 0, max = 3)
