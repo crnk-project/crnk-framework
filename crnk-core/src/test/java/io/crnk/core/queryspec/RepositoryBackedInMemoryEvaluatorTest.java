@@ -27,7 +27,6 @@ public class RepositoryBackedInMemoryEvaluatorTest extends InMemoryEvaluatorTest
 	protected InMemoryEvaluator getEvaluator() {
 		SimpleModule module = new SimpleModule("test");
 		module.addRepository(new RelationIdTestRepository());
-		module.addRepository(new InMemoryResourceRepository(RenamedIdResource.class));
 
 		boot = new CrnkBoot();
 		boot.setPropertiesProvider(key -> {
@@ -59,40 +58,5 @@ public class RepositoryBackedInMemoryEvaluatorTest extends InMemoryEvaluatorTest
 
 		Assert.assertEquals(1, evaluator.eval(resources, matchQuerySpec).size());
 		Assert.assertEquals(0, evaluator.eval(resources, mismatchQuerySpec).size());
-	}
-
-	@Test
-	public void filterByRenamedIdWithIdEnforcement() {
-		RegistryEntry entry = boot.getResourceRegistry().getEntry(RenamedIdResource.class);
-		ResourceField idField = entry.getResourceInformation().getIdField();
-		Assert.assertEquals("id", idField.getJsonName());
-
-		RenamedIdResource resource = new RenamedIdResource();
-		resource.setNotId("doe");
-		List<RenamedIdResource> resources = Arrays.asList(resource);
-
-		QuerySpec matchQuerySpec = new QuerySpec(RenamedIdResource.class);
-		matchQuerySpec.addFilter(new FilterSpec(PathSpec.of("id"), FilterOperator.EQ, "doe"));
-
-		QuerySpec mismatchQuerySpec = new QuerySpec(RelationIdTestResource.class);
-		mismatchQuerySpec.addFilter(new FilterSpec(PathSpec.of("id"), FilterOperator.EQ, "other"));
-
-		Assert.assertEquals(1, evaluator.eval(resources, matchQuerySpec).size());
-		Assert.assertEquals(0, evaluator.eval(resources, mismatchQuerySpec).size());
-	}
-
-	@JsonApiResource(type = "renamedId")
-	public static class RenamedIdResource {
-
-		@JsonApiId
-		private String notId;
-
-		public String getNotId() {
-			return notId;
-		}
-
-		public void setNotId(String notId) {
-			this.notId = notId;
-		}
 	}
 }
