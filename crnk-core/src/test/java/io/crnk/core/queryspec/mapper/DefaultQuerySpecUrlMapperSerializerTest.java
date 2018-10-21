@@ -46,6 +46,11 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
+	public void dotSeparatorEnabledByDefault(){
+		Assert.assertTrue(urlMapper.getEnforceDotPathSeparator());
+	}
+
+	@Test
 	public void testHttpsSchema() {
 		CoreTestContainer container = new CoreTestContainer();
 		container.getBoot().setServiceUrlProvider(new ConstantServiceUrlProvider("https://127.0.0.1"));
