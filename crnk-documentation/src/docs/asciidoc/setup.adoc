@@ -594,6 +594,9 @@ provided by `CrnkProperties`:
    This *does not affect the payload `Content-Type`. `POST` and `PATCH` requests must still use
   `Content-Type: application/vnd.api+json` to describe their request body
 
+* If `crnk.enforceIdName` is set to `true` all `@JsonApiId` annotated fields will be named `id` on the rest layer (for sorting, filtering, etc.) regardless of its Java name.
+  By default this is not enabled for historic reasons. But enabling it more closely reflects the JSON API specification and is recommended to do so.
+  It likely will be enabled in Crnk 3 by default.
 
 
 anchor:home_module[]

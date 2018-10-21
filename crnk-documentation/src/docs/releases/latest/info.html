@@ -102,6 +102,11 @@ typescriptGen{
 </pre>
 
 
+<h4>new property: crnk.enforceIdName</h4>
+
+If set to true, it will name all `@JsonApiId` annotated fields as `id` on the rest layer (sorting, filtering, etc.) regardless of its Java name.
+By default this is not enabled for historic reasons. But enabling it more closely reflects the JSON API specification and is recommended to do so.
+It likely will be enabled in Crnk 3 by default.
 
 <h4>@JpaResource annotation deprecated</h4>
 

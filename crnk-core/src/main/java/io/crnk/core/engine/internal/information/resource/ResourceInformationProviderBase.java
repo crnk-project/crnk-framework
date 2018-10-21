@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
@@ -41,11 +42,14 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 
 	private LookupIncludeBehavior globalLookupIncludeBehavior;
 
+	private boolean enforceIdName;
+
 	public ResourceInformationProviderBase(
 			PropertiesProvider propertiesProvider,
 			List<ResourceFieldInformationProvider> resourceFieldInformationProviders) {
 		this.resourceFieldInformationProviders = resourceFieldInformationProviders;
 		this.globalLookupIncludeBehavior = IncludeLookupUtil.getGlobalLookupIncludeBehavior(propertiesProvider);
+		this.enforceIdName = Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties.ENFORCE_ID_NAME));
 	}
 
 	@Override
@@ -93,9 +97,9 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 	protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.Field
 			fieldBuilder) {
 		fieldBuilder.underlyingName(attributeDesc.getName());
-		fieldBuilder.jsonName(getJsonName(attributeDesc));
-
 		ResourceFieldType fieldType = getFieldType(attributeDesc);
+		fieldBuilder.jsonName(getJsonName(attributeDesc, fieldType));
+
 		fieldBuilder.fieldType(fieldType);
 		fieldBuilder.access(getAccess(attributeDesc, fieldType));
 		fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
@@ -323,7 +327,11 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
 		return ResourceFieldType.ATTRIBUTE;
 	}
 
-	private String getJsonName(BeanAttributeInformation attributeDesc) {
+	private String getJsonName(BeanAttributeInformation attributeDesc, ResourceFieldType fieldType) {
+		if (fieldType == ResourceFieldType.ID && enforceIdName) {
+			// referred to as id even if named differently in Java
+			return "id";
+		}
 		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
 			Optional<String> jsonName = fieldInformationProvider.getJsonName(attributeDesc);
 			if (jsonName.isPresent()) {

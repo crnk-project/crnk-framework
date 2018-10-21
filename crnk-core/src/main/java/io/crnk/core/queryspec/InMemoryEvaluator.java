@@ -112,7 +112,7 @@ public class InMemoryEvaluator {
 		int consumedElements = 1;
 		String firstPathElement = pathElements.get(0);
 		ResourceField resourceField = resourceInformation.findFieldByUnderlyingName(firstPathElement);
-		PreconditionUtil.verify(resourceField != null, "resource field {} in {} not found", firstPathElement, clazz);
+		PreconditionUtil.verify(resourceField != null, "resource field %s in %s not found", firstPathElement, clazz);
 
 		Object value = resourceField.getAccessor().getValue(object);
 		boolean isRelationship = resourceField.getResourceFieldType() == ResourceFieldType.RELATIONSHIP;

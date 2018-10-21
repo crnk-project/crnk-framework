@@ -7,8 +7,16 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 public class CrnkProperties {
 
+
 	private CrnkProperties() {
 	}
+
+	/**
+	 * If set to &quot;true&quot; it will name all @JsonApiId-annotated field "id" on the rest layer. Not
+	 * only for the resource data itself, but also for sort and filter parameters. Historically this has not been enabled,
+	 * but maybe worth to enable by default in Crnk 3.0 (TODO crnk3).
+	 */
+	public static final String ENFORCE_ID_NAME = "crnk.enforceIdName";
 
 
 	/**
