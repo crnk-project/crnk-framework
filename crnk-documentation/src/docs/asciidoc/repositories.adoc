@@ -610,7 +610,7 @@ It is recommended to make use of this implementation if a relationship is loaded
 fetch that relation. RelationshipRepositoryBase provides a default implementation where
 `findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
 
-Note that in contrast to `RelationshipRepositoryV2` and `RelationshipRepositoryV2` that are symmetric
+Note that in contrast to `ResourceRepositoryV2` and `RelationshipRepositoryV2` that are symmetric
 and applicable to Crnk servers and client, `BulkRelationshipRepositoryV2` is applicable on the server-side only.
 
 
