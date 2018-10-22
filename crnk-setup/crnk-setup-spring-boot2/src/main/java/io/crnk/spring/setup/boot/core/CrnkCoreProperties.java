@@ -55,6 +55,19 @@ public class CrnkCoreProperties {
 	 */
 	private Boolean enforceDotSeparator;
 
+	/**
+	 * Names sort and filter parameters "id" for all @JsonApiId annotated fields. Disabled by default for historic reasons.
+	 */
+	private boolean enforceIdName;
+
+	public boolean isEnforceIdName() {
+		return enforceIdName;
+	}
+
+	public void setEnforceIdName(boolean enforceIdName) {
+		this.enforceIdName = enforceIdName;
+	}
+
 	public String getResourcePackage() {
 		return resourcePackage;
 	}

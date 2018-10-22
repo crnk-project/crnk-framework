@@ -80,6 +80,9 @@ public class CrnkCoreAutoConfiguration implements ApplicationContextAware {
 				if (CrnkProperties.RESOURCE_DEFAULT_DOMAIN.equals(key)) {
 					return properties.getDomainName();
 				}
+				if (CrnkProperties.ENFORCE_ID_NAME.equals(key)) {
+					return String.valueOf(properties.isEnforceIdName());
+				}
 				if (CrnkProperties.WEB_PATH_PREFIX.equals(key)) {
 					return properties.getPathPrefix();
 				}

@@ -5,6 +5,7 @@ import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.RelationIdTestRepository;
+import io.crnk.test.mock.repository.RenamedIdRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.test.mock.repository.ScheduleToTaskRepository;
 import io.crnk.test.mock.repository.TaskRepository;
@@ -43,6 +44,7 @@ public class TestModule implements Module {
 		context.addRepository(new TaskToScheduleRepo());
 		context.addRepository(new PrimitiveAttributeRepository());
 		context.addRepository(new RelationIdTestRepository());
+		context.addRepository(new RenamedIdRepository());
 
 		context.addRepository(manyNestedRepository);
 		context.addRepository(relatedRepository);

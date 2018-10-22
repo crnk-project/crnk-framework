@@ -2,10 +2,16 @@ package io.crnk.core.queryspec;
 
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.core.repository.InMemoryResourceRepository;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,12 +21,20 @@ import java.util.List;
 public class RepositoryBackedInMemoryEvaluatorTest extends InMemoryEvaluatorTestBase {
 
 
+	private CrnkBoot boot;
+
 	@Override
 	protected InMemoryEvaluator getEvaluator() {
 		SimpleModule module = new SimpleModule("test");
 		module.addRepository(new RelationIdTestRepository());
 
-		CrnkBoot boot = new CrnkBoot();
+		boot = new CrnkBoot();
+		boot.setPropertiesProvider(key -> {
+			if (key.equals(CrnkProperties.ENFORCE_ID_NAME)) {
+				return "true";
+			}
+			return null;
+		});
 		boot.addModule(new CoreTestModule());
 		boot.addModule(module);
 		boot.boot();
