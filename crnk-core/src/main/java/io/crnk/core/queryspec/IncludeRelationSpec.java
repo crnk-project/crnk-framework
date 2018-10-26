@@ -13,4 +13,9 @@ public class IncludeRelationSpec extends IncludeSpec {
 	public IncludeRelationSpec(PathSpec path) {
 		super(path);
 	}
+
+	@Override
+	public IncludeRelationSpec clone() {
+		return new IncludeRelationSpec(path.clone());
+	}
 }

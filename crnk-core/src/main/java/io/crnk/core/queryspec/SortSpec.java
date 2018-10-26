@@ -69,6 +69,6 @@ public class SortSpec extends AbstractPathSpec implements Serializable {
 
 	@Override
 	public SortSpec clone() {
-		return new SortSpec(path, direction);
+		return new SortSpec(path.clone(), direction);
 	}
 }

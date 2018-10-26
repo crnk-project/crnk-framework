@@ -1,10 +1,11 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.StringUtils;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import io.crnk.core.engine.internal.utils.StringUtils;
 
 public class PathSpec {
 
@@ -24,6 +25,11 @@ public class PathSpec {
 		PathSpec pathSpec = new PathSpec();
 		pathSpec.elements = elements;
 		return pathSpec;
+	}
+
+	@Override
+	public PathSpec clone() {
+		return of(new ArrayList<>(elements));
 	}
 
 	public static PathSpec of(String path) {

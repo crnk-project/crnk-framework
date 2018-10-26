@@ -1,11 +1,11 @@
 package io.crnk.core.queryspec;
 
+import java.util.Arrays;
+
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class SortSpecTest {
 
@@ -81,7 +81,7 @@ public class SortSpecTest {
 		SortSpec sortSpec = new SortSpec(Arrays.asList("sortAttr"), Direction.ASC);
 		SortSpec duplicate = sortSpec.clone();
 		Assert.assertNotSame(sortSpec, duplicate);
-		Assert.assertSame(sortSpec.getAttributePath(), duplicate.getAttributePath());
+		Assert.assertNotSame(sortSpec.getAttributePath(), duplicate.getAttributePath());
 		Assert.assertSame(sortSpec.getDirection(), duplicate.getDirection());
 	}
 }

@@ -13,4 +13,8 @@ public class IncludeFieldSpec extends IncludeSpec {
 	public IncludeFieldSpec(PathSpec path) {
 		super(path);
 	}
+
+	public IncludeFieldSpec clone() {
+		return new IncludeFieldSpec(path.clone());
+	}
 }

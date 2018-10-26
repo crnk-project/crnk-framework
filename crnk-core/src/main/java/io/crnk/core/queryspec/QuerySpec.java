@@ -90,7 +90,8 @@ public class QuerySpec {
 			if (visitor.visitFilterStart(spec)) {
 				if (spec.hasExpressions()) {
 					visitFilters(visitor, spec.getExpression());
-				} else {
+				}
+				else {
 					visitor.visitPath(spec.getPath());
 				}
 				visitor.visitFilterEnd(spec);
@@ -113,7 +114,7 @@ public class QuerySpec {
 	 * TODO currently ignores relations and inclusions, has room for
 	 * improvements
 	 *
-	 * @param <T>       the type of resources in this Iterable
+	 * @param <T> the type of resources in this Iterable
 	 * @param resources resources
 	 * @return sorted, filtered list.
 	 */
@@ -132,8 +133,8 @@ public class QuerySpec {
 	 * <p>
 	 * TODO currently ignores relations and inclusions
 	 *
-	 * @param <T>        resource type
-	 * @param resources  to apply the querySpec to
+	 * @param <T> resource type
+	 * @param resources to apply the querySpec to
 	 * @param resultList used to return the result (including paging meta information)
 	 */
 	public <T> void apply(Iterable<T> resources, ResourceList<T> resultList) {
@@ -293,7 +294,8 @@ public class QuerySpec {
 		for (QuerySpec spec : specs) {
 			if (spec.getResourceClass() != null) {
 				relatedSpecs.put(spec.getResourceClass(), spec);
-			} else {
+			}
+			else {
 				relatedSpecs.put(spec.getResourceType(), spec);
 			}
 		}
@@ -420,8 +422,12 @@ public class QuerySpec {
 		if (pagingSpec != null) {
 			copy.pagingSpec = pagingSpec.clone();
 		}
-		copy.includedFields.addAll(includedFields);
-		copy.includedRelations.addAll(includedRelations);
+		for (IncludeFieldSpec includedField : includedFields) {
+			copy.includedFields.add(includedField.clone());
+		}
+		for (IncludeRelationSpec includeRelationSpec : includedRelations) {
+			copy.includedRelations.add(includeRelationSpec.clone());
+		}
 		for (SortSpec sortSpec : sort) {
 			copy.sort.add(sortSpec.clone());
 		}

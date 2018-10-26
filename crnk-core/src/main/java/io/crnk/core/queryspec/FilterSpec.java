@@ -1,12 +1,12 @@
 package io.crnk.core.queryspec;
 
-import io.crnk.core.engine.internal.utils.CompareUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import io.crnk.core.engine.internal.utils.CompareUtils;
 
 public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpec> {
 
@@ -18,7 +18,7 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
 	}
 
 	FilterSpec(FilterSpec spec) {
-		super(spec.getAttributePath());
+		super(spec.getPath() != null ? spec.getPath().clone() : null);
 		this.operator = spec.operator;
 		this.value = spec.value;
 		if (spec.expressions != null) {

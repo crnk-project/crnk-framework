@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec;
 
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
@@ -11,12 +17,6 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import static org.junit.Assert.assertNull;
 
 public class QuerySpecTest {
 
@@ -163,10 +163,13 @@ public class QuerySpecTest {
 		QuerySpec duplicate = spec.duplicate();
 		Assert.assertNotSame(spec, duplicate);
 		Assert.assertNotSame(spec.getFilters().get(0), duplicate.getFilters().get(0));
+		Assert.assertNotSame(spec.getFilters().get(0).getPath(), duplicate.getFilters().get(0).getPath());
 		Assert.assertNotSame(spec.getSort(), duplicate.getSort());
 		Assert.assertNotSame(spec.getSort().get(0), duplicate.getSort().get(0));
+		Assert.assertNotSame(spec.getSort().get(0).getPath(), duplicate.getSort().get(0).getPath());
 		Assert.assertNotSame(spec.getIncludedFields(), duplicate.getIncludedFields());
 		Assert.assertNotSame(spec.getIncludedRelations(), duplicate.getIncludedRelations());
+		Assert.assertNotSame(spec.getIncludedRelations().get(0), duplicate.getIncludedRelations().get(0));
 		Assert.assertNotSame(spec.getPagingSpec(), duplicate.getPagingSpec());
 		Assert.assertEquals(spec, duplicate);
 	}
