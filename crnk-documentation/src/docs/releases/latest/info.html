@@ -176,6 +176,13 @@ taskConfig.filterBy("description", ENFORCED_DESCRIPTION);
 return ActivitiModule.create(processEngine, config);
 </pre>
 
+<h4>Bidirectional Object to String mapping with TypeParser</h4>
+
+The TypeParser class of Crnk has been extended to not only parse Strings, but also map objects back to Strings.
+Most notably, the DefaultQuerySpecUrlMapper makes use of this functionality to represent filter values
+as Strings in urls. Thereby, the extensibility of the TypeParser allows to customize that mapping.
+
+
 
 <h4>Simplified customizations of Criteria-based crnk-jpa repositories</h4>
 

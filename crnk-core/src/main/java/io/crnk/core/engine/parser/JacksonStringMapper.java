@@ -3,8 +3,8 @@ package io.crnk.core.engine.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 
 import java.io.IOException;
 
@@ -34,8 +34,11 @@ public class JacksonStringMapper<T> implements StringMapper<T> {
 	public String toString(T input) {
 		JsonNode jsonNode = mapper.valueToTree(input);
 
-		if (jsonNode instanceof ValueNode) {
+		if (jsonNode instanceof TextNode) {
 			return jsonNode.textValue();
+		}
+		if (jsonNode instanceof NumericNode) {
+			return jsonNode.asText();
 		}
 
 		// fallback to String for complex type

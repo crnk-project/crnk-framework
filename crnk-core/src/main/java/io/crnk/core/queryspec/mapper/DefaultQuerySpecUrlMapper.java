@@ -2,6 +2,7 @@ package io.crnk.core.queryspec.mapper;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.parser.ParserException;
 import io.crnk.core.engine.parser.TypeParser;
@@ -223,11 +224,14 @@ public class DefaultQuerySpecUrlMapper
 		return type.toString().toLowerCase() + "[" + resourceType + "]" + (key != null ? key : "");
 	}
 
-	protected static String serializeValue(Object value) {
+	protected String serializeValue(Object value) {
 		if (value == null) {
 			return NULL_VALUE_STRING;
 		}
-		return value.toString();
+		TypeParser typeParser = context.getTypeParser();
+		String strValue = typeParser.toString(value);
+		PreconditionUtil.verify(strValue != null, "should not map to null: %s", value);
+		return strValue;
 	}
 
 	@Override
