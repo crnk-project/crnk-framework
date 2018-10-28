@@ -1,4 +1,3 @@
-
 This release brings many incremental improvements and some long overdue architecture cleanups.
 Make sure to familiarize yourself with the updated UrlMapper behavior and QueryParams implementation.
 Any application following the convention recommended the past year should not have any issues with this.
@@ -7,10 +6,11 @@ Any application following the convention recommended the past year should not ha
 <h4>Early support for faceted search</h4>
 
 Faceted search is used by many UIs to allow users to quickly navigate data sets. For example, virtually every online shop makes
-use of the feature to show product categories and the number of products in that category. Those categories, denoted as
-facets, have a label, a set of values, a count for each value. Facets may also depend on each other, whereas later facets are filtered by former ones.
+use of this feature to show product categories and the number of products in that category. Those categories, denoted as
+facets, have a label, a set of values and a count for each value. Facets may also depend on each other, whereas later facets are filtered by former ones.
 <p>
-With FacetModule Crnk provides an out-of-the-box solution to implemented faceted search. For more information have a look at the new chapter in the documentation.
+	With FacetModule Crnk provides an out-of-the-box solution to implemented faceted search. For more information have a
+	look at the new chapter in the documentation.
 
 <h4>Documentation updates</h4>
 
@@ -18,10 +18,9 @@ The outline of the documentation has been revised. Some of the chapters have bee
 And there is now a cheatsheet giving an overview
 of the most important features and APIs.
 <p>
-The crnk-examples have been renamed to crnk-integration-examples to clearly distinguish from the main
-crnk-example application. The name change reflects the fact that those examples are only meant to showcase
-the integration of Crnk into various frameworks, not its entire feature set.
-
+	The crnk-examples have been renamed to crnk-integration-examples to clearly distinguish from the main
+	crnk-example application. The name change reflects the fact that those examples are only meant to showcase
+	the integration of Crnk into various frameworks, not its entire feature set.
 
 
 <h4>New UrlMapper default configuration</h4>
@@ -60,6 +59,44 @@ It offers various methods create new instances and can be used to quickly constr
 specifications.
 
 
+<h4>Relationships loading handled according to JSON API specification</h4>
+
+The specification from <a href="http://jsonapi.org/format/#fetching-relationships">http://jsonapi.org/format/#fetching-relationships</a>
+mandates two relationship links:
+
+<ul>
+	<li>
+		<pre class="prettyprint">
+				"self": "http://example.com/articles/1/relationships/author"
+		</pre>
+	</li>
+	<li>
+		<pre class="prettyprint">
+				"related": "http://example.com/articles/1/author"
+		</pre>
+	</li>
+</ul>
+
+With this release, Crnk properly handles GET request of self links by no longer returning the entire resources, but only the type and id:
+
+<pre class="prettyprint">
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "links": {
+    "self": "/articles/1/relationships/author",
+    "related": "/articles/1/author"
+  },
+  "data": {
+    "type": "people",
+    "id": "12"
+  }
+</pre>
+
+Behind the scenes, the same relationship repository implementation is called. The QuerySpec will specify that only the identifier is required through
+the <i>includedFields</i> property.
+
 <h4>QuerySpecVisitor</h4>
 
 The new QuerySpecVisitor and QuerySpecVisitorBase classes allow to visit
@@ -78,7 +115,8 @@ QueryParams has been deprecated since Crnk 0.x. So far both QuerySpec and QueryP
 for QueryParams has been refactored and remains support through the QuerySpec-to-QueryParams conversion process. That has been the recommended and
 only meaningful setup for a long time. The big benefit is a much lighter and more robust code base in the area.
 <p>
-	Future release either drop QueryParams support or move it out into a dedicated module. Contributes in the area would be welcomed. If it is no longer deemed useful
+	Future release either drop QueryParams support or move it out into a dedicated module. Contributes in the area would
+	be welcomed. If it is no longer deemed useful
 	by anybody, it will be removed sometime in Q1/Q2 2019.
 
 

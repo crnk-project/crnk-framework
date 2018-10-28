@@ -45,15 +45,18 @@ public class JsonApiUrlBuilder {
 	}
 
 	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
-		return buildUrlInternal(resourceInformation, id, querySpec, relationshipName);
+		return buildUrlInternal(resourceInformation, id, querySpec, relationshipName, true);
 	}
 
-	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String
-			relationshipName) {
-		return buildUrlInternal(resourceInformation, id, queryParams, relationshipName);
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName, boolean selfLink) {
+		return buildUrlInternal(resourceInformation, id, querySpec, relationshipName, selfLink);
 	}
 
-	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName) {
+	public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
+		return buildUrlInternal(resourceInformation, id, queryParams, relationshipName, true);
+	}
+
+	private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName, boolean selfLink) {
 		String url;
 		ResourceRegistry resourceRegistry = moduleRegistry.getResourceRegistry();
 		if (id instanceof Collection) {
@@ -74,8 +77,10 @@ public class JsonApiUrlBuilder {
 		} else {
 			url = resourceRegistry.getResourceUrl(queryContext, resourceInformation);
 		}
-		if (relationshipName != null) {
+		if (relationshipName != null && selfLink) {
 			url += "/relationships/" + relationshipName;
+		}else if(relationshipName != null){
+			url += "/" + relationshipName;
 		}
 
 		UrlParameterBuilder urlBuilder = new UrlParameterBuilder(url);
