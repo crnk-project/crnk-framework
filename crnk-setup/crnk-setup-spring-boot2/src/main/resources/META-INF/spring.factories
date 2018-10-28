@@ -11,4 +11,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   io.crnk.spring.setup.boot.security.CrnkSpringSecurityAutoConfiguration,\
   io.crnk.spring.setup.boot.mvc.CrnkSpringMvcAutoConfiguration,\
   io.crnk.spring.setup.boot.mvc.CrnkErrorControllerAutoConfiguration,\
+  io.crnk.spring.setup.boot.data.facet.CrnkFacetAutoConfiguration,\
   io.crnk.spring.setup.boot.validation.CrnkValidationAutoConfiguration

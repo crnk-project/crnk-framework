@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
+import io.crnk.data.facet.FacetModule;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.model.CountryTranslationEntity;
 import io.crnk.jpa.query.AbstractJpaTest;
@@ -119,7 +120,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 			SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
 
 			CrnkFeature feature = new CrnkFeature();
-
+			feature.addModule(new FacetModule());
 			feature.addModule(new TestModule());
 
 			JpaModule module = JpaModule.newServerModule(em, transactionRunner);

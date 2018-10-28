@@ -55,6 +55,7 @@ public class JacksonModule implements Module {
 		if (serializeLinksAsObjects) {
 			simpleModule.addSerializer(new LinksInformationSerializer());
 		}
+
 		return simpleModule;
 	}
 }

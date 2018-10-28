@@ -81,7 +81,7 @@ public abstract class JpaRepositoryBase<T> {
 		return false;
 	}
 
-	protected QuerySpec filterQuerySpec(QuerySpec querySpec) {
+	public QuerySpec filterQuerySpec(QuerySpec querySpec) {
 		JpaMapper<Object, T> mapper = repositoryConfig.getMapper();
 		QuerySpec filteredQuerySpec = mapper.unmapQuerySpec(querySpec);
 		for (JpaRepositoryFilter filter : repositoryConfig.getFilters()) {
@@ -92,7 +92,7 @@ public abstract class JpaRepositoryBase<T> {
 		return filteredQuerySpec;
 	}
 
-	protected <E> JpaQuery<E> filterQuery(QuerySpec querySpec, JpaQuery<E> query) {
+	public <E> JpaQuery<E> filterQuery(QuerySpec querySpec, JpaQuery<E> query) {
 		JpaQuery<E> filteredQuery = query;
 		for (JpaRepositoryFilter filter : repositoryConfig.getFilters()) {
 			if (filter.accept(repositoryConfig.getResourceClass())) {

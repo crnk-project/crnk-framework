@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.queryspec.mapper.QueryParameter;
 
@@ -9,7 +11,8 @@ import java.util.Collection;
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
  */
-public abstract class FilterOperator {
+@JsonSerialize(using = ToStringSerializer.class)
+public class FilterOperator {
 
 	/**
 	 * Boolean and
@@ -22,6 +25,19 @@ public abstract class FilterOperator {
 		}
 
 	};
+
+	/**
+	 * Selection of facet for nested filtering
+	 */
+	public static final FilterOperator SELECT = new FilterOperator("SELECT") {
+
+		@Override
+		public boolean matches(Object value1, Object value2) {
+			throw new UnsupportedOperationException(); // handle differently
+		}
+
+	};
+
 
 	/**
 	 * Like operation. In case of in-memory filtering it makes use of "%" as
@@ -218,7 +234,9 @@ public abstract class FilterOperator {
 	 * @param value2 second value
 	 * @return true if matches
 	 */
-	public abstract boolean matches(Object value1, Object value2);
+	public  boolean matches(Object value1, Object value2){
+		throw new UnsupportedOperationException("not implemented");
+	}
 
 	/**
 	 * Typically the type of a filter parameter and the type of an attribute match. But some operators like LIKE have a type oder

@@ -12,6 +12,7 @@ import java.lang.reflect.Modifier;
 
 public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 
+	private final Field privateField;
 	private Method getter;
 
 	private Method setter;
@@ -40,10 +41,15 @@ public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 		this.getter = ClassUtils.findGetter(resourceType, fieldName);
 		this.setter = ClassUtils.findSetter(resourceType, fieldName, fieldType);
 		this.field = ClassUtils.findClassField(resourceType, fieldName);
+		this.privateField = field;
 		if (field != null && !Modifier.isPublic(field.getModifiers())) {
 			this.field = null;
 		}
 
+	}
+
+	public Field getField() {
+		return privateField;
 	}
 
 	@Override

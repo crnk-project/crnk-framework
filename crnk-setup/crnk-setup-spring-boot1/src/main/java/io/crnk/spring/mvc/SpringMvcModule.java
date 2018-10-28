@@ -30,7 +30,7 @@ public class SpringMvcModule implements Module {
 	}
 
 	private void setupHomeExtension(ModuleContext context) {
-		if (ClassUtils.existsClass("io.crnk.home.HomeModuleExtension")) {
+		if (ClassUtils.existsClass("io.crnk.home.JpaFacetExtension")) {
 			ExceptionUtil.wrapCatchedExceptions(new Callable<Object>() {
 				@Override
 				public Object call() throws Exception {

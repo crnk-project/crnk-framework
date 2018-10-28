@@ -6,6 +6,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
+import io.crnk.data.facet.annotation.Facet;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class Project {
 	private Long id;
 
 	@JsonProperty
+	@Facet
 	private String name;
 
 	@JsonApiRelation(opposite = "project", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,

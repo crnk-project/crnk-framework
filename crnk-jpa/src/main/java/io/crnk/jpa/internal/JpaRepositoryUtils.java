@@ -35,21 +35,15 @@ public class JpaRepositoryUtils {
 	}
 
 	public static void prepareQuery(JpaQuery<?> query, QuerySpec querySpec, Set<String> computedAttrs) {
-
 		for (String computedAttr : computedAttrs) {
 			query.addSelection(Arrays.asList(computedAttr));
 		}
-
 		for (FilterSpec filter : querySpec.getFilters()) {
 			query.addFilter(filter);
 		}
 		for (SortSpec sortSpec : querySpec.getSort()) {
 			query.addSortBy(sortSpec);
 		}
-		if (!querySpec.getIncludedFields().isEmpty()) {
-			throw new UnsupportedOperationException("includeFields not yet supported");
-		}
-
 	}
 
 	public static void prepareExecutor(JpaQueryExecutor<?> executor, QuerySpec querySpec, boolean includeRelations) {

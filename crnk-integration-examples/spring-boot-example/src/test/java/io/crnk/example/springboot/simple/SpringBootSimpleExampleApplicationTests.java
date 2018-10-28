@@ -83,8 +83,6 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 		response.then().assertThat().statusCode(200);
 		String body = response.getBody().print();
 		Assert.assertTrue(body, body.contains("/api/browse/"));
-		Assert.assertTrue(body, body.contains("/api/hello"));
-		Assert.assertTrue(body, !body.contains("/resourceInfo"));
 	}
 
 	@Test

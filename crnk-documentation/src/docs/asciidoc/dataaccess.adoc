@@ -727,3 +727,107 @@ starting the approval process, submitting a form and then verifying the changes 
 
 
 
+anchor:facet_module[]
+
+## Faceted Search
+
+WARNING: This feature is new and considered experimental. Also have a look at the roadmap.
+
+Faceted search is used by many UIs to allow users to quickly navigate data sets. For example, virtually
+every online shop makes use of the feature to show product categories and the number of products in that
+category. Those categories, denoted as facets, have a label, a set of values, a count for each value. Facets
+may also depend on each other, whereas later facets are filtered by former ones.
+
+With `FacetModule` Crnk provides an out-of-the-box solution to implemented faceted search.
+There is an inefficient in-memory implementation that works well with every repository as long as the
+data set is small. And later more efficient implementations tailored towards the various repository
+implementations.
+
+### Setup
+
+The `FacetModule` can
+be added to the application. For Spring there is a `CrnkFacetAutoConfiguration` in place.
+All that is needed is to annotate the desired attributes to be faceted:
+
+[source]
+.FacetedProject.java
+----
+include::../../../../crnk-data/crnk-data-facet/src/test/java/io/crnk/data/facet/setup/FacetedProject.java[tag=docs]
+----
+
+Behind the scenes are currently two implementations available that are automatically chosen for the repository at hand:
+
+- `InMemoryFacetProvider` that queries all resources and computes the facets in-memory. Only *suitable for small data sets*!
+- `JpaFacetProvider` that makes use of SQL `GROUP BY` queries to efficiently compute facets. Used for any JPA-backed repository.
+
+For very large data sets, the use of ElasticSearch is recommended (not yet implemented). Applications are also free to
+implement their own `FacetProvider` implementation and register it through `FacetModuleExtension`.
+
+### Examples
+
+All the facets are then available as regular, new JSON API resource that can filtered, paged, sorted, etc. like
+any other resource:
+
+[source]
+.http://127.0.0.1:8080/api/facet
+----
+{
+
+  "data" : [ {
+    "id" : "projects_name",
+    "type" : "facet",
+    "attributes" : {
+      "values" : {
+        "Some Project" : {
+          "label" : "Some Project",
+          "value" : "Some Project",
+          "filterSpec" : {
+            "path" : "name",
+            "operator" : "EQ",
+            "value" : "Some Project",
+          },
+          "count" : 1
+        },
+        ...
+      },
+      "name" : "name",
+      "type" : "projects",
+      "labels" : [ "Great Project", "Crnk Project", "Some Project", "JSON API Project" ]
+    },
+  }]
+}
+----
+
+Note that the values are ordered by their count in the `labels` attribute.
+
+
+### Nesting
+
+To select values of facets and update the counts of subsequent facets use:
+
+----
+http://127.0.0.1:8080/api/facet?filter[values.priority][SELECT]=1,2
+----
+
+A facet value is selected through its label and the special `SELECT` operator. In the given example, the priority
+is restricted to `1` and `2`. This in turn can limit the counts other facets, if those facets follow
+the `priority` facet. To choose and order facets use:
+
+----
+http://127.0.0.1:8080/api/facet?filter[name]=priority,name
+----
+
+Facets are then ordered as specified by `filter[name]`.
+
+For more examples, see `InMemoryFacetProviderTest`.
+
+
+### Roadmap
+
+- Limit number of facet values and introduce a "other" category.
+- Configurable null handling.
+- Data/time support.
+- Range-based facets.
+- Native Elastic Search implementation
+
+Feedback and PRs welcomed!

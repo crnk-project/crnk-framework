@@ -330,13 +330,6 @@ public abstract class JpaEntityRepositoryTestBase extends AbstractJpaTest {
 	}
 
 	@Test(expected = Exception.class)
-	public void testSparseFieldSetNotSupported() {
-		QuerySpec querySpec = new QuerySpec(TestEntity.class);
-		querySpec.includeField(Arrays.asList("test"));
-		repo.findAll(querySpec);
-	}
-
-	@Test(expected = Exception.class)
 	public void testSortUnknownAttr() {
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("test"), Direction.DESC));

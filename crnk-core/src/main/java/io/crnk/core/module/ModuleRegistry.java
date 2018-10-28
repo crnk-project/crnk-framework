@@ -129,7 +129,7 @@ public class ModuleRegistry {
 	}
 
 	public List<ResourceModificationFilter> getResourceModificationFilters() {
-		return prioritze(aggregatedModule.getResourceModificationFilters());
+		return Prioritizable.prioritze(aggregatedModule.getResourceModificationFilters());
 	}
 
 	public void setServerInfo(Map<String, String> serverInfo) {
@@ -234,7 +234,7 @@ public class ModuleRegistry {
 	public ResourceInformationProvider getResourceInformationBuilder() {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider =
-					new CombinedResourceInformationProvider(prioritze(aggregatedModule.getResourceInformationProviders()));
+					new CombinedResourceInformationProvider(Prioritizable.prioritze(aggregatedModule.getResourceInformationProviders()));
 			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
@@ -267,7 +267,7 @@ public class ModuleRegistry {
 
 	public List<HttpRequestProcessor> getHttpRequestProcessors() {
 		checkState(InitializedState.INITIALIZED, InitializedState.INITIALIZED);
-		return prioritze(aggregatedModule.getHttpRequestProcessors());
+		return Prioritizable.prioritze(aggregatedModule.getHttpRequestProcessors());
 	}
 
 	/**
@@ -527,7 +527,7 @@ public class ModuleRegistry {
 	 * @return {@link DocumentFilter} added by all modules
 	 */
 	public List<DocumentFilter> getFilters() {
-		return prioritze(aggregatedModule.getFilters());
+		return Prioritizable.prioritze(aggregatedModule.getFilters());
 	}
 
 
@@ -535,7 +535,7 @@ public class ModuleRegistry {
 	 * @return {@link RepositoryFilter} added by all modules
 	 */
 	public List<RepositoryFilter> getRepositoryFilters() {
-		return prioritze(aggregatedModule.getRepositoryFilters());
+		return Prioritizable.prioritze(aggregatedModule.getRepositoryFilters());
 	}
 
 	/**
@@ -985,35 +985,7 @@ public class ModuleRegistry {
 		}
 	}
 
-	private static <T> List<T> prioritze(List<T> list) {
-		Map<Object, Integer> indexMap = new HashMap<>();
-		int index = 0;
-		for (T item : list) {
-			indexMap.put(item, index--);
-		}
 
-		ArrayList<T> results = new ArrayList<>(list);
-		Collections.sort(results, new Comparator<T>() {
-			@Override
-			public int compare(T o1, T o2) {
-				int p1 = getPriority(o1);
-				int p2 = getPriority(o2);
-				if (p1 == p2) {
-					p1 = indexMap.get(o1);
-					p2 = indexMap.get(o2);
-				}
-				return p1 - p2;
-			}
-
-			private int getPriority(T o1) {
-				if (o1 instanceof Prioritizable) {
-					return ((Prioritizable) o1).getPriority();
-				}
-				return 0;
-			}
-		});
-		return results;
-	}
 
 	public QuerySpecUrlMapper getUrlMapper() {
 		return urlMapper;

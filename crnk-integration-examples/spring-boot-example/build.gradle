@@ -13,7 +13,7 @@ dependencies {
 	compile project(':crnk-ui')
 	compile project(':crnk-operations')
 	compile project(':crnk-security')
-
+	compile project(':crnk-data:crnk-data-facet')
 
 	compile 'org.springframework.boot:spring-boot-starter-data-jpa:2.0.1.RELEASE'
 	compile 'org.springframework.boot:spring-boot-starter-web:2.0.1.RELEASE'

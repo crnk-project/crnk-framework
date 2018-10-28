@@ -2,6 +2,7 @@ package io.crnk.jpa.internal.query;
 
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaAttributeFinder;
@@ -105,12 +106,12 @@ public class QueryBuilder<T, F, O, P, E> {
 		return numAutoSelections;
 	}
 
-	protected void applySortSpec() {
+	public void applySortSpec() {
 		QuerySortBuilder<T, E, O> orderBuilder = new QuerySortBuilder<>(query, backend, attributeFinder);
 		orderBuilder.applySortSpec();
 	}
 
-	protected void applyFilterSpec() {
+	public void applyFilterSpec() {
 		QueryFilterBuilder<P, F> predicateBuilder = new QueryFilterBuilder<>(backend, attributeFinder);
 
 		MetaDataObject meta = query.getMeta();
@@ -133,4 +134,9 @@ public class QueryBuilder<T, F, O, P, E> {
 		}
 	}
 
+	public E getExpression(PathSpec path) {
+		MetaDataObject meta = query.getMeta();
+		MetaAttributePath metaAttributePath = meta.resolvePath(path.getElements());
+		return backend.getAttribute(metaAttributePath);
+	}
 }

@@ -1,7 +1,10 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class FilterOperatorTest {
 
@@ -24,6 +27,16 @@ public class FilterOperatorTest {
 	@Test
 	public void testLEOperator() {
 		Assert.assertTrue(FilterOperator.LE.matches("a", "b"));
+	}
+
+	@Test
+	public void testSerialization() throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String json = objectMapper.writerFor(FilterOperator.class).writeValueAsString(FilterOperator.EQ);
+		Assert.assertEquals("\"EQ\"", json);
+
+		FilterOperator operator = objectMapper.readerFor(FilterOperator.class).readValue(json);
+		Assert.assertEquals(FilterOperator.EQ, operator);
 	}
 
 	@Test
