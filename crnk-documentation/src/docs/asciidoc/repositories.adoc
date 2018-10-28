@@ -551,11 +551,40 @@ new RelationshipMatcher().rule().target(Task.class).add().matches(field)
 new RelationshipMatcher().rule().target(Tasks.class).add().matches(field)
 new RelationshipMatcher().rule().field("tasks").add().matches(field)
 new RelationshipMatcher().rule().oppositeField("project").add().matches(field)
-[source]
 ----
 
 One can implement, for example, a history relationship repository that introduces a history relationship for every other resource
 as done in the example from the previous section.
+
+
+### Self and Related Links
+
+The JSON API specification from http://jsonapi.org/format/#fetching-relationships
+mandates two relationship links:
+
+- `"self": "http://example.com/articles/1/relationships/author"`
+- `"related": "http://example.com/articles/1/author"`
+
+While the `related` link returns full resources, the `self` link only returns the `type` and `id`:
+
+[source]
+----
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "links": {
+    "self": "/articles/1/relationships/author",
+    "related": "/articles/1/author"
+  },
+  "data": {
+    "type": "people",
+    "id": "12"
+  }
+----
+
+Behind the scenes, Crnk invokes the same relationship repository implementation , but the QuerySpec will specify whether only the identifier is required through
+the `includedFields` property.
 
 
 ### ForwardingRelationshipRepository

@@ -111,6 +111,7 @@ public class RelationshipsResourceGetControllerTest extends BaseControllerTest {
 		String resultJson = objectMapper.writeValueAsString(response.getDocument());
 		assertThatJson(resultJson).node("data.id").isStringEqualTo("42");
 		assertThatJson(resultJson).node("data.type").isEqualTo("projects");
+		assertThatJson(resultJson).node("data.attributes").isAbsent();
 	}
 
 	@Test

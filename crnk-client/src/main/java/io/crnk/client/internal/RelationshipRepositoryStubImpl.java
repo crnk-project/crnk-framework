@@ -75,13 +75,13 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	@SuppressWarnings("unchecked")
 	@Override
 	public D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
-		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName);
+		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName, false);
 		return (D) executeGet(url, ResponseType.RESOURCE);
 	}
 
 	@Override
 	public DefaultResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
-		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName);
+		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, querySpec, fieldName, false);
 		return (DefaultResourceList<D>) executeGet(url, ResponseType.RESOURCES);
 	}
 
@@ -104,12 +104,7 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 
 	private void doExecute(String requestUrl, HttpMethod method, final Document document) {
 		final ObjectMapper objectMapper = client.getObjectMapper();
-		String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return objectMapper.writeValueAsString(document);
-			}
-		});
+		String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(() -> objectMapper.writeValueAsString(document));
 		execute(requestUrl, ResponseType.NONE, method, requestBodyValue);
 	}
 
