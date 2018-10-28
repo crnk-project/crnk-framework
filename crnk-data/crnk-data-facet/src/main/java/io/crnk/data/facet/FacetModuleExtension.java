@@ -15,10 +15,6 @@ public class FacetModuleExtension implements ModuleExtension {
 		return providers;
 	}
 
-	public void setProviders(List<FacetProvider> providers) {
-		this.providers = providers;
-	}
-
 	@Override
 	public Class<? extends Module> getTargetModule() {
 		return FacetModule.class;

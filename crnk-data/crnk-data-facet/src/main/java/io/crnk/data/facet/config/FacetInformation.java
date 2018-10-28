@@ -1,5 +1,7 @@
 package io.crnk.data.facet.config;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+
 public class FacetInformation {
 
 	private String name;
@@ -19,9 +21,7 @@ public class FacetInformation {
 	}
 
 	protected void setResource(FacetResourceInformation resource) {
-		if (this.resource != null) {
-			throw new IllegalStateException("already registered to " + this.resource);
-		}
+		PreconditionUtil.verify(this.resource == null, "already registered to %s", this.resource);
 		this.resource = resource;
 	}
 }

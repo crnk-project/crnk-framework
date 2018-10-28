@@ -12,12 +12,15 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.data.facet.FacetModuleConfig;
 import io.crnk.data.facet.FacetRepository;
 import io.crnk.data.facet.FacetResource;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBoot2Application;
 import io.crnk.spring.setup.boot.core.CrnkCoreProperties;
+import io.crnk.spring.setup.boot.data.facet.CrnkFacetProperties;
+import io.crnk.spring.setup.boot.data.facet.FacetModuleConfigurer;
 import io.crnk.spring.setup.boot.home.CrnkHomeProperties;
 import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import io.crnk.spring.setup.boot.meta.CrnkMetaProperties;
@@ -102,6 +105,12 @@ public class BasicSpringBoot2Test {
 	@Autowired
 	private SpringMvcModule mvcModule;
 
+	@Autowired
+	private FacetModuleConfigurer facetModuleConfigurer;
+
+	@Autowired
+	private CrnkFacetProperties facetProperties;
+
 	@Before
 	public void setup() {
 		TestModule.clear();
@@ -127,9 +136,12 @@ public class BasicSpringBoot2Test {
 		Assert.assertTrue(validationProperties.isEnabled());
 		Assert.assertTrue(uiProperties.isEnabled());
 		Assert.assertTrue(metaProperties.isEnabled());
+		Assert.assertTrue(facetProperties.isEnabled());
+		facetProperties.setEnabled(true); // just call to have it covered
 
 		Mockito.verify(metaConfigurer, Mockito.times(1)).configure(Mockito.any(MetaModuleConfig.class));
 		Mockito.verify(jpaConfigurer, Mockito.times(1)).configure(Mockito.any(JpaModuleConfig.class));
+		Mockito.verify(facetModuleConfigurer, Mockito.times(1)).configure(Mockito.any(FacetModuleConfig.class));
 
 		Assert.assertEquals("spring.mvc", mvcModule.getModuleName());
 

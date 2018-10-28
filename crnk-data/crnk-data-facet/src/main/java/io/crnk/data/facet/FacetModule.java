@@ -4,6 +4,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.resource.ReflectionFieldAccessor;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.RepositoryNotFoundException;
@@ -68,50 +69,47 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	}
 
 	protected synchronized void setup() {
-		if (initialized) {
-			return;
-		}
-		initialized = true;
+		if (!initialized) {
+			initialized = true;
 
-		collectInformation();
+			collectInformation();
 
-		providers = collectProviders();
+			providers = collectProviders();
 
-		Set<FacetProvider> usedProviders = config.getResources().values().stream()
-				.map(it -> setupDefaultProvider(it))
-				.map(it -> it.getProvider())
-				.collect(Collectors.toSet());
+			Set<FacetProvider> usedProviders = config.getResources().values().stream()
+					.map(it -> setupDefaultProvider(it))
+					.map(it -> it.getProvider())
+					.collect(Collectors.toSet());
 
-		FacetProviderContext providerContext = new FacetProviderContext() {
-			@Override
-			public ResourceRepositoryV2 getRepository(String resourceType) {
-				RegistryEntry entry = getEntry(resourceType);
-				return entry.getResourceRepositoryFacade();
-			}
-
-			@Override
-			public ResourceInformation getResourceInformation(String resourceType) {
-				RegistryEntry entry = getEntry(resourceType);
-				return entry.getResourceInformation();
-			}
-
-			@Override
-			public TypeParser getTypeParser() {
-				return moduleContext.getTypeParser();
-			}
-
-			@Override
-			public RegistryEntry getEntry(String resourceType) {
-				RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(resourceType);
-				if (entry == null) {
-					throw new RepositoryNotFoundException(resourceType);
+			FacetProviderContext providerContext = new FacetProviderContext() {
+				@Override
+				public ResourceRepositoryV2 getRepository(String resourceType) {
+					RegistryEntry entry = getEntry(resourceType);
+					return entry.getResourceRepositoryFacade();
 				}
-				return entry;
-			}
-		};
 
-		for (FacetProvider provider : usedProviders) {
-			provider.init(providerContext);
+				@Override
+				public ResourceInformation getResourceInformation(String resourceType) {
+					RegistryEntry entry = getEntry(resourceType);
+					return entry.getResourceInformation();
+				}
+
+				@Override
+				public TypeParser getTypeParser() {
+					return moduleContext.getTypeParser();
+				}
+
+				@Override
+				public RegistryEntry getEntry(String resourceType) {
+					RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(resourceType);
+					PreconditionUtil.verify(entry != null, "resource not found: %s", resourceType);
+					return entry;
+				}
+			};
+
+			for (FacetProvider provider : usedProviders) {
+				provider.init(providerContext);
+			}
 		}
 	}
 
@@ -165,9 +163,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 				}
 			}
 		}
-		if (acceptedFacetProvider == null) {
-			throw new IllegalStateException("no facet provider for " + facetResourceInformation);
-		}
+		PreconditionUtil.verify(acceptedFacetProvider != null, "no facet provider for %s", facetResourceInformation);
 		facetResourceInformation.setProvider(acceptedFacetProvider);
 		return facetResourceInformation;
 	}

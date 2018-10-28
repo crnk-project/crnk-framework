@@ -7,6 +7,7 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.facet.FacetResource;
 import io.crnk.data.facet.FacetValue;
+import io.crnk.data.facet.config.FacetInformation;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.model.TestEntity;
@@ -14,12 +15,13 @@ import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
 
-public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
+public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
 	private ResourceRepositoryV2<TestEntity, Long> testRepo;
 
@@ -71,4 +73,13 @@ public class JpaQuerySpecEndToEndTest extends AbstractJpaJerseyTest {
 		Assert.assertEquals(PathSpec.of("longValue").filter(FilterOperator.EQ, 3), value3.getFilterSpec());
 		Assert.assertEquals(3, value3.getValue());
 	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void checkUnknownFacet() {
+		JpaFacetProvider facetProvider = new JpaFacetProvider();
+		QuerySpec querySpec = Mockito.mock(QuerySpec.class);
+		FacetInformation facetInformation = Mockito.mock(FacetInformation.class);
+		facetProvider.findValues(facetInformation, querySpec);
+	}
+
 }

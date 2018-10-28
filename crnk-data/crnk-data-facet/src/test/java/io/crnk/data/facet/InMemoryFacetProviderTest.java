@@ -126,6 +126,33 @@ public class InMemoryFacetProviderTest {
 	}
 
 	@Test
+	public void checkNestedFacetFilterAllSelected() {
+		QuerySpec querySpec = new QuerySpec(FacetResource.class);
+		querySpec.addFilter(PathSpec.of(FacetResource.ATTR_NAME).filter(FilterOperator.EQ, Arrays.asList("priority", "name")));
+		querySpec.addFilter(PathSpec.of(FacetResource.ATTR_VALUES, "priority").filter(FilterOperator.SELECT, Arrays.asList("0", "1")));
+		ResourceList<FacetResource> list = repository.findAll(querySpec);
+		Assert.assertEquals(2, list.size());
+
+		FacetResource priorityFacet = list.get(0);
+		Assert.assertEquals("projects", priorityFacet.getType());
+		Assert.assertEquals("priority", priorityFacet.getName());
+		Assert.assertEquals(2, priorityFacet.getValues().size());
+
+		// filtered by priority, counts reduced accordingly
+		FacetResource nameFacets = list.get(1);
+		Assert.assertEquals("projects", nameFacets.getType());
+		Assert.assertEquals("name", nameFacets.getName());
+
+		Map<String, FacetValue> values = nameFacets.getValues();
+		FacetValue value1 = values.get("project1");
+		Assert.assertEquals(3, value1.getCount());
+		FacetValue value2 = values.get("project2");
+		Assert.assertEquals(5, value2.getCount());
+		FacetValue value3 = values.get("project3");
+		Assert.assertEquals(7, value3.getCount());
+	}
+
+	@Test
 	public void matchFilterByType() {
 		QuerySpec querySpec = new QuerySpec(FacetResource.class);
 		querySpec.addFilter(PathSpec.of("type").filter(FilterOperator.EQ, "projects"));

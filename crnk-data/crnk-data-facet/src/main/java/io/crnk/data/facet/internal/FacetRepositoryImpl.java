@@ -60,8 +60,6 @@ public class FacetRepositoryImpl extends ReadOnlyResourceRepositoryBase<FacetRes
 
 		List<FacetResource> facets = new ArrayList<>();
 
-		FilterSpec quickFilter = getQuickFilter(querySpec);
-
 		for (FacetResourceInformation facetResourceInformation : config.getResources().values()) {
 			String resourceType = facetResourceInformation.getType();
 			if (!isFiltered(resourceType)) {
@@ -195,16 +193,5 @@ public class FacetRepositoryImpl extends ReadOnlyResourceRepositoryBase<FacetRes
 			LOGGER.debug("not authorized to access facet of {}", resourceType);
 		}
 		return filtered;
-	}
-
-	private FilterSpec getQuickFilter(QuerySpec querySpec) {
-		FilterSpec typeFilter = querySpec.getFilter(FacetResource.ATTR_TYPE);
-		FilterSpec nameFilter = querySpec.getFilter(FacetResource.ATTR_NAME);
-
-		if (typeFilter != null && nameFilter != null)
-			return FilterSpec.and(typeFilter, nameFilter);
-		if (nameFilter != null)
-			return nameFilter;
-		return typeFilter;
 	}
 }

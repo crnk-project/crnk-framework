@@ -49,12 +49,10 @@ public class JpaFacetProvider extends FacetProviderBase implements Prioritizable
 
 	@Override
 	public List<FacetValue> findValues(FacetInformation facetInformation, QuerySpec querySpec) {
-		String resourceType = facetInformation.getResource().getType();
-		ResourceRepositoryV2 repository = (ResourceRepositoryV2) context.getEntry(resourceType).getResourceRepository().getResourceRepository();
-
-		JpaEntityRepository entityRepository = (JpaEntityRepository) unwrap(repository);
-
 		if (facetInformation instanceof BasicFacetInformation) {
+			String resourceType = facetInformation.getResource().getType();
+			ResourceRepositoryV2 repository = (ResourceRepositoryV2) context.getEntry(resourceType).getResourceRepository().getResourceRepository();
+			JpaEntityRepository entityRepository = (JpaEntityRepository) unwrap(repository);
 			BasicFacetInformation basicFacetInformation = (BasicFacetInformation) facetInformation;
 
 			PathSpec path = basicFacetInformation.getPath();

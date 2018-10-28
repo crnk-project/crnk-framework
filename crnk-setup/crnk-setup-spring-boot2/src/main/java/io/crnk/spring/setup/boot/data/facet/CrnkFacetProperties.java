@@ -13,7 +13,7 @@ public class CrnkFacetProperties {
 	 */
 	private Boolean enabled = true;
 
-	public Boolean getEnabled() {
+	public Boolean isEnabled() {
 		return enabled;
 	}
 

@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.engine.internal.utils.CompareUtils;
 import io.crnk.core.queryspec.mapper.QueryParameter;
 
@@ -9,6 +11,7 @@ import java.util.Collection;
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
  */
+@JsonSerialize(using = ToStringSerializer.class)
 public class FilterOperator {
 
 	/**

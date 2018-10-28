@@ -322,14 +322,13 @@ public class JpaModule implements InitializingModule {
 
 	private void setupFacetExtension(ModuleContext context) {
 		if (ClassUtils.existsClass("io.crnk.data.facet.FacetModuleExtension")) {
-			try {
+			ExceptionUtil.wrapCatchedExceptions(() -> {
 				Class clazz = Class.forName("io.crnk.jpa.internal.facet.JpaFacetModuleExtensionFactory");
 				Method method = clazz.getMethod("create");
 				ModuleExtension homeExtension = (ModuleExtension) method.invoke(clazz);
 				context.addExtension(homeExtension);
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
+				return null;
+			});
 		}
 	}
 
