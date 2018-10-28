@@ -1,5 +1,10 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.crnk.core.engine.internal.utils.CompareUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,8 +15,12 @@ import io.crnk.core.engine.internal.utils.CompareUtils;
 
 public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpec> {
 
+	@JsonSerialize(using = ToStringSerializer.class)
 	private FilterOperator operator;
+
 	private Object value;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private List<FilterSpec> expressions;
 
 	protected FilterSpec() {

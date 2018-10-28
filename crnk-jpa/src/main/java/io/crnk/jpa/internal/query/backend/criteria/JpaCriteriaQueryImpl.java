@@ -33,7 +33,7 @@ public class JpaCriteriaQueryImpl<T> extends AbstractJpaQueryImpl<T, JpaCriteria
 	}
 
 	@Override
-	protected JpaCriteriaQueryBackend<T> newBackend() {
+	public JpaCriteriaQueryBackend<T> newBackend() {
 		return new JpaCriteriaQueryBackend<>(this, em, clazz, parentMeta, parentAttr, parentKey, parentIdSelection);
 	}
 

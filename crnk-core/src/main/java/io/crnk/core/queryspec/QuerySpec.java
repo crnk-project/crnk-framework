@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 public class QuerySpec {
 
@@ -234,6 +235,19 @@ public class QuerySpec {
 		this.filters = filters;
 	}
 
+	public Optional<FilterSpec> findFilter(final PathSpec pathSpec) {
+		for (FilterSpec filterSpec : filters) {
+			if (filterSpec.getPath().equals(pathSpec)) {
+				return Optional.of(filterSpec);
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * @deprecated use {@link #findFilter(PathSpec)}
+	 */
+	@Deprecated
 	public FilterSpec getFilter(final String name) {
 		for (FilterSpec filterSpec : filters) {
 			if (filterSpec.getAttributePath().contains(name)) {
@@ -244,6 +258,10 @@ public class QuerySpec {
 		return null;
 	}
 
+	/**
+	 * @deprecated use {@link #findFilter(PathSpec)}
+	 */
+	@Deprecated
 	public FilterSpec getFilterOrThrow(final String name) {
 		FilterSpec filter = getFilter(name);
 		if (filter == null) {
@@ -377,7 +395,7 @@ public class QuerySpec {
 		if (querySpec == null && targetResourceType != null) {
 			querySpec = getQuerySpec(targetResourceType);
 		}
-		if (targetResourceClass != null) {
+		if (querySpec == null && targetResourceClass != null) {
 			querySpec = getQuerySpec(targetResourceClass);
 		}
 		if (querySpec == null) {

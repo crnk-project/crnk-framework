@@ -21,6 +21,8 @@ include ':crnk-setup:crnk-setup-cdi'
 include ':crnk-setup:crnk-setup-guice'
 include ':crnk-setup:crnk-setup-rs'
 
+include ':crnk-data:crnk-data-facet'
+
 include ':crnk-operations'
 include ':crnk-gen-typescript'
 

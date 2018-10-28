@@ -66,6 +66,7 @@ public class DefaultQuerySpecUrlMapper
 		supportedOperators.add(FilterOperator.GE);
 		supportedOperators.add(FilterOperator.LT);
 		supportedOperators.add(FilterOperator.LE);
+		supportedOperators.add(FilterOperator.SELECT);
 	}
 
 	@Override

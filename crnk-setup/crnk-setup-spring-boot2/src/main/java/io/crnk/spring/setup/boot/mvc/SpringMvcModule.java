@@ -32,7 +32,7 @@ public class SpringMvcModule implements Module {
 	}
 
 	private void setupHomeExtension(ModuleContext context) {
-		if (ClassUtils.existsClass("io.crnk.home.HomeModuleExtension")) {
+		if (ClassUtils.existsClass("io.crnk.home.JpaFacetExtension")) {
 			try {
 				Class clazz = Class.forName("io.crnk.spring.setup.boot.mvc.internal.SpringMvcHomeModuleExtensionFactory");
 				Method method = clazz.getMethod("create", String.class,

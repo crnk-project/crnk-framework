@@ -15,6 +15,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
+import io.crnk.core.module.ModuleExtension;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
@@ -53,6 +54,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -313,6 +315,21 @@ public class JpaModule implements InitializingModule {
 			context.addExtension(metaModuleExtension);
 
 			setupTransactionMgmt();
+
+			setupFacetExtension(context);
+		}
+	}
+
+	private void setupFacetExtension(ModuleContext context) {
+		if (ClassUtils.existsClass("io.crnk.data.facet.FacetModuleExtension")) {
+			try {
+				Class clazz = Class.forName("io.crnk.jpa.internal.facet.JpaFacetModuleExtensionFactory");
+				Method method = clazz.getMethod("create");
+				ModuleExtension homeExtension = (ModuleExtension) method.invoke(clazz);
+				context.addExtension(homeExtension);
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 

@@ -27,4 +27,8 @@ public abstract class ResourceRepositoryDecoratorBase<T, I extends Serializable>
 		this.decoratedObject = wrappedRepository;
 		super.setWrappedRepository(wrappedRepository);
 	}
+
+	public ResourceRepositoryV2<T, I> getDecoratedObject() {
+		return decoratedObject;
+	}
 }

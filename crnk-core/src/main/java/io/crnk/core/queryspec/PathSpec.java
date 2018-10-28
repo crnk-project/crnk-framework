@@ -1,17 +1,27 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.crnk.core.engine.internal.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import io.crnk.core.engine.internal.utils.StringUtils;
-
+@JsonSerialize(using = ToStringSerializer.class)
 public class PathSpec {
 
 	private List<String> elements;
 
 	private PathSpec() {
+	}
+
+	/**
+	 * used back Jackson ToStringSerializer
+	 */
+	protected PathSpec(String path){
+		elements = of(path).elements;
 	}
 
 	public static PathSpec of(String... elements) {

@@ -1,5 +1,7 @@
 package io.crnk.core.queryspec;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 public class AbstractPathSpec {
@@ -26,6 +28,7 @@ public class AbstractPathSpec {
 		this.path = path;
 	}
 
+	@JsonIgnore
 	public List<String> getAttributePath() {
 		return path != null ? path.getElements() : null;
 	}

@@ -312,4 +312,8 @@ public class JpaCriteriaQueryBackend<T> implements JpaQueryBackend<From<?, ?>, O
 			return parent.join(targetAttr.getName(), joinType);
 		}
 	}
+
+	public CriteriaBuilder getCriteriaBuilder() {
+		return cb;
+	}
 }

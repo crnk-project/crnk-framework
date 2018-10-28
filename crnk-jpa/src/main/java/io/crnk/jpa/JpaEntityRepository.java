@@ -56,6 +56,9 @@ public class JpaEntityRepository<T, I extends Serializable> extends JpaRepositor
 		primaryKeyAttribute = JpaMetaUtils.getUniquePrimaryKey(config.getEntityClass());
 	}
 
+	public JpaQueryFactory getQueryFactory() {
+		return repositoryConfig.getQueryFactory();
+	}
 
 	@Override
 	public final T findOne(I id, QuerySpec querySpec) {

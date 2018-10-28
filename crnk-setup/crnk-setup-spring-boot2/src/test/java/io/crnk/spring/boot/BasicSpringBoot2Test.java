@@ -1,12 +1,19 @@
 package io.crnk.spring.boot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.PathSpec;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.resource.list.ResourceList;
+import io.crnk.data.facet.FacetRepository;
+import io.crnk.data.facet.FacetResource;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBoot2Application;
@@ -170,6 +177,17 @@ public class BasicSpringBoot2Test {
 				.getForEntity("http://localhost:" + this.port + "/api/schedules", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
+	}
+
+
+	@Test
+	public void testFacets() {
+		CrnkClient client = new CrnkClient("http://localhost:" + this.port + "/api");
+		FacetRepository repository = client.getRepositoryForInterface(FacetRepository.class);
+		QuerySpec querySpec = new QuerySpec(FacetResource.class);
+		querySpec.addFilter(PathSpec.of(FacetResource.ATTR_VALUES, "name").filter(FilterOperator.SELECT, "doe"));
+		ResourceList<FacetResource> facets = repository.findAll(querySpec);
+		Assert.assertEquals(2, facets.size());
 	}
 
 	@Test

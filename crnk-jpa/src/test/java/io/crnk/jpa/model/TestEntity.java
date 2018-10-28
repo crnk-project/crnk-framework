@@ -1,5 +1,7 @@
 package io.crnk.jpa.model;
 
+import io.crnk.data.facet.annotation.Facet;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -50,6 +52,7 @@ public class TestEntity extends TestMappedSuperclass {
 	private Long id;
 
 	@Column
+	@Facet
 	private long longValue;
 
 	@Column
