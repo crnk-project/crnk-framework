@@ -1,9 +1,9 @@
 package io.crnk.activiti.resource;
 
+import java.time.OffsetDateTime;
+
 import io.crnk.core.resource.annotations.JsonApiField;
 import io.crnk.core.resource.annotations.JsonApiId;
-
-import java.time.OffsetDateTime;
 
 public class HistoricProcessInstanceResource {
 
@@ -37,7 +37,7 @@ public class HistoricProcessInstanceResource {
 
 	private OffsetDateTime endTime;
 
-	private long duration;
+	private Long duration;
 
 	private String startUserId;
 
@@ -59,11 +59,11 @@ public class HistoricProcessInstanceResource {
 		this.endTime = endTime;
 	}
 
-	public long getDuration() {
+	public Long getDuration() {
 		return duration;
 	}
 
-	public void setDuration(long duration) {
+	public void setDuration(Long duration) {
 		this.duration = duration;
 	}
 
