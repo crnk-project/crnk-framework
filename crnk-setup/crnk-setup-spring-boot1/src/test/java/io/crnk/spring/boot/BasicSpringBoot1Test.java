@@ -1,11 +1,16 @@
 package io.crnk.spring.boot;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import javax.security.auth.message.config.AuthConfigFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
@@ -36,12 +41,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.security.auth.message.config.AuthConfigFactory;
-import java.io.IOException;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBootApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
@@ -49,9 +48,6 @@ public class BasicSpringBoot1Test {
 
 	@Value("${local.server.port}")
 	private int port;
-
-	@Autowired
-	private QuerySpecDeserializer deserializer;
 
 	@Autowired
 	private CrnkBoot boot;
@@ -146,7 +142,7 @@ public class BasicSpringBoot1Test {
 
 		RestTemplate testRestTemplate = new RestTemplate();
 		ResponseEntity<String> response = testRestTemplate
-				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule%2Cproject", String.class);
+				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule,project", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 
 		JsonFluentAssert included = assertThatJson(response.getBody()).node("included");
@@ -161,11 +157,6 @@ public class BasicSpringBoot1Test {
 				.getForEntity("http://localhost:" + this.port + "/api/building", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertThatJson(response.getBody()).node("data").isPresent();
-	}
-
-	@Test
-	public void testDeserializerInjected() {
-		Assert.assertSame(boot.getQuerySpecDeserializer(), deserializer);
 	}
 
 	@Test

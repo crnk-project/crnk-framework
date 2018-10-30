@@ -8,8 +8,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
@@ -94,12 +92,6 @@ public class CrnkConfigV3 implements ApplicationContextAware {
 		boot.addModule(new ServletModule(boot.getModuleRegistry().getHttpRequestContextProvider()));
 		boot.boot();
 		return boot;
-	}
-
-	@Bean
-	@ConditionalOnMissingBean(QuerySpecDeserializer.class)
-	public QuerySpecDeserializer querySpecDeserializer() {
-		return new DefaultQuerySpecDeserializer();
 	}
 
 	@Bean
