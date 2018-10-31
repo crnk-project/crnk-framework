@@ -1,5 +1,19 @@
 package io.crnk.core.engine.http;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
@@ -40,20 +54,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class HttpRequestDispatcherImplTest {
 
@@ -253,7 +253,7 @@ public class HttpRequestDispatcherImplTest {
 		ControllerRegistry controllerRegistry = mock(ControllerRegistry.class);
 		// noinspection unchecked
 		when(controllerRegistry.getController(any(JsonPath.class), anyString())).thenThrow(new BadRequestException("test"));
-		requestProcessor.setControllerRegistry(controllerRegistry);
+		container.getModuleRegistry().setControllerRegistry(controllerRegistry);
 
 		RequestDispatcher requestDispatcher = new HttpRequestDispatcherImpl(container.getModuleRegistry(),
 				ExceptionMapperRegistryTest.exceptionMapperRegistry);
@@ -269,7 +269,7 @@ public class HttpRequestDispatcherImplTest {
 		ControllerRegistry controllerRegistry = mock(ControllerRegistry.class);
 		// noinspection unchecked
 		when(controllerRegistry.getController(any(JsonPath.class), anyString())).thenThrow(ArithmeticException.class);
-		requestProcessor.setControllerRegistry(controllerRegistry);
+		container.getModuleRegistry().setControllerRegistry(controllerRegistry);
 
 		RequestDispatcher requestDispatcher =
 				new HttpRequestDispatcherImpl(container.getModuleRegistry(), ExceptionMapperRegistryTest.exceptionMapperRegistry);

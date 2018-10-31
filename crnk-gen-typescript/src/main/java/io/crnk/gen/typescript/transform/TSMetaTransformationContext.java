@@ -1,5 +1,6 @@
 package io.crnk.gen.typescript.transform;
 
+import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.meta.model.MetaElement;
@@ -19,4 +20,6 @@ public interface TSMetaTransformationContext {
 	MetaElement getMeta(Class<?> implClass);
 
 	MetaElement getMeta(String metaId);
+
+	TSResourceFormat getResourceFormat();
 }

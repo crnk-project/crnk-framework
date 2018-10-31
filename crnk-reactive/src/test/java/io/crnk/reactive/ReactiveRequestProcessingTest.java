@@ -1,5 +1,8 @@
 package io.crnk.reactive;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
@@ -23,9 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import reactor.core.publisher.Hooks;
 
-import java.io.IOException;
-import java.util.List;
-
 public class ReactiveRequestProcessingTest extends ReactiveTestBase {
 
 	private JsonApiRequestProcessor processor;
@@ -44,7 +44,7 @@ public class ReactiveRequestProcessingTest extends ReactiveTestBase {
 		task.setLinksInformation(new ReactiveTask.TaskLinks());
 		taskRepository.getMap().put(task.getId(), task);
 
-		processor = new JsonApiRequestProcessor(boot.getModuleRegistry().getContext(), boot.getControllerRegistry(), boot.getQueryAdapterBuilder());
+		processor = new JsonApiRequestProcessor(boot.getModuleRegistry().getContext());
 		requestContextBase = Mockito.mock(HttpRequestContextBase.class);
 		Mockito.when(requestContextBase.getPath()).thenReturn("/reactive/task/");
 		requestContext = new HttpRequestContextBaseAdapter(requestContextBase);

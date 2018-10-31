@@ -22,6 +22,7 @@ include ':crnk-setup:crnk-setup-guice'
 include ':crnk-setup:crnk-setup-rs'
 
 include ':crnk-data:crnk-data-facet'
+include ':crnk-format:crnk-format-plain-json'
 
 include ':crnk-operations'
 include ':crnk-gen-typescript'

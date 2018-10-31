@@ -1,5 +1,8 @@
 package io.crnk.core.engine.http;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.document.Document;
@@ -21,9 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.List;
 
 public class JsonApiRequestProcessorTest {
 
@@ -65,8 +65,7 @@ public class JsonApiRequestProcessorTest {
 		TaskRepository tasks = new TaskRepository();
 		tasks.save(task);
 
-		processor = new JsonApiRequestProcessor(moduleContext, container.getBoot().getControllerRegistry(),
-				container.getBoot().getQueryAdapterBuilder());
+		processor = new JsonApiRequestProcessor(moduleContext);
 
 		requestContextBase = container.getRequestContextBase();
 		requestContext = container.getRequestContext();

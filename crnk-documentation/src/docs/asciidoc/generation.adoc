@@ -80,6 +80,9 @@ typescriptGen{
     //    }
 	// }
 
+	// format to generate
+	format = 'JSONAPI' // or 'PLAINJSON'
+
 	npm {
 		// map given Java package to a subdirectory of genDir
 		directoryMapping['io.myapp.types'] = '/types'

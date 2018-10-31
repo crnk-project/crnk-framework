@@ -14,13 +14,11 @@ import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
 import io.crnk.core.engine.internal.dispatcher.path.RelationshipsPath;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.MethodNotAllowedException;
@@ -36,15 +34,8 @@ public class JsonApiRequestProcessorBase {
 
 	private Boolean acceptingPlainJson;
 
-	protected QueryAdapterBuilder queryAdapterBuilder;
-
-	protected ControllerRegistry controllerRegistry;
-
-	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext, QueryAdapterBuilder queryAdapterBuilder,
-			ControllerRegistry controllerRegistry) {
+	public JsonApiRequestProcessorBase(Module.ModuleContext moduleContext) {
 		this.moduleContext = moduleContext;
-		this.queryAdapterBuilder = queryAdapterBuilder;
-		this.controllerRegistry = controllerRegistry;
 	}
 
 	protected boolean isAcceptingPlainJson() {
@@ -126,9 +117,5 @@ public class JsonApiRequestProcessorBase {
 		else {
 			return registryEntry.getResourceInformation();
 		}
-	}
-
-	public void setControllerRegistry(ControllerRegistry controllerRegistry) {
-		this.controllerRegistry = controllerRegistry;
 	}
 }

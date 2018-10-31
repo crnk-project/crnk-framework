@@ -1,5 +1,11 @@
 package io.crnk.spring.boot;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import javax.security.auth.message.config.AuthConfigFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
@@ -21,6 +27,7 @@ import io.crnk.spring.app.BasicSpringBoot2Application;
 import io.crnk.spring.setup.boot.core.CrnkCoreProperties;
 import io.crnk.spring.setup.boot.data.facet.CrnkFacetProperties;
 import io.crnk.spring.setup.boot.data.facet.FacetModuleConfigurer;
+import io.crnk.spring.setup.boot.format.PlainJsonFormatProperties;
 import io.crnk.spring.setup.boot.home.CrnkHomeProperties;
 import io.crnk.spring.setup.boot.jpa.JpaModuleConfigurer;
 import io.crnk.spring.setup.boot.meta.CrnkMetaProperties;
@@ -47,6 +54,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -54,12 +64,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
-import javax.security.auth.message.config.AuthConfigFactory;
-import java.io.IOException;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBoot2Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -111,6 +115,9 @@ public class BasicSpringBoot2Test {
 	@Autowired
 	private CrnkFacetProperties facetProperties;
 
+	@Autowired
+	private PlainJsonFormatProperties plainJsonFormatProperties;
+
 	@Before
 	public void setup() {
 		TestModule.clear();
@@ -137,7 +144,9 @@ public class BasicSpringBoot2Test {
 		Assert.assertTrue(uiProperties.isEnabled());
 		Assert.assertTrue(metaProperties.isEnabled());
 		Assert.assertTrue(facetProperties.isEnabled());
+		Assert.assertTrue(plainJsonFormatProperties.isEnabled());
 		facetProperties.setEnabled(true); // just call to have it covered
+		plainJsonFormatProperties.setEnabled(true); // just call to have it covered
 
 		Mockito.verify(metaConfigurer, Mockito.times(1)).configure(Mockito.any(MetaModuleConfig.class));
 		Mockito.verify(jpaConfigurer, Mockito.times(1)).configure(Mockito.any(JpaModuleConfig.class));
@@ -173,8 +182,14 @@ public class BasicSpringBoot2Test {
 		taskRepository.save(task);
 
 		RestTemplate testRestTemplate = new RestTemplate();
-		ResponseEntity<String> response = testRestTemplate
-				.getForEntity("http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule,project", String.class);
+
+		String url = "http://localhost:" + this.port + "/api/tasks?include[tasks]=schedule,project";
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(io.crnk.core.engine.http.HttpHeaders.HTTP_HEADER_ACCEPT,
+				io.crnk.core.engine.http.HttpHeaders.JSONAPI_CONTENT_TYPE);
+
+		HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+		ResponseEntity<String> response = testRestTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 
 		JsonFluentAssert included = assertThatJson(response.getBody()).node("included");
@@ -228,7 +243,8 @@ public class BasicSpringBoot2Test {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/tasks", String.class);
 			Assert.fail();
-		} catch (HttpStatusCodeException e) {
+		}
+		catch (HttpStatusCodeException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
 	}
@@ -249,7 +265,8 @@ public class BasicSpringBoot2Test {
 			testRestTemplate
 					.getForEntity("http://localhost:" + this.port + "/doesNotExist", String.class);
 			Assert.fail();
-		} catch (HttpClientErrorException e) {
+		}
+		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 
 			String body = e.getResponseBodyAsString();
