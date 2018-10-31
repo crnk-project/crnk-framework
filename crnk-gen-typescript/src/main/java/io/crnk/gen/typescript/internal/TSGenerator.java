@@ -1,15 +1,31 @@
 package io.crnk.gen.typescript.internal;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
+import io.crnk.core.engine.internal.utils.IOUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.TSNpmConfiguration;
+import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.model.TSElement;
 import io.crnk.gen.typescript.model.TSSource;
+import io.crnk.gen.typescript.model.libraries.NgrxJsonApiLibrary;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
 import io.crnk.gen.typescript.transform.TSMetaTransformation;
 import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
@@ -21,17 +37,6 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 public class TSGenerator {
 
@@ -73,6 +78,13 @@ public class TSGenerator {
 	}
 
 	public void run() throws IOException {
+		if (config.getFormat() == TSResourceFormat.PLAINJSON) {
+			// TODO eventually something better necesary (non-static)
+			NgrxJsonApiLibrary.initPlainJson(config.getNpm().getPackageName());
+		}
+		else {
+			NgrxJsonApiLibrary.initJsonApi();
+		}
 		if (config.getNpm().isPackagingEnabled()) {
 			writePackaging();
 			writeTypescriptConfig();
@@ -166,6 +178,21 @@ public class TSGenerator {
 			String source = writer.toString();
 			write(file, source);
 		}
+
+		if (config.getFormat() == TSResourceFormat.PLAINJSON) {
+			try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("crnk.ts")) {
+				File srcOutputDir = outputDir;
+				if (config.getNpm().isPackagingEnabled() && config.getSourceDirectoryName() != null) {
+					srcOutputDir = new File(outputDir, config.getSourceDirectoryName());
+				}
+				File crnkFile = new File(srcOutputDir, "crnk.ts");
+				crnkFile.getParentFile().mkdirs();
+				byte[] data = IOUtils.readFully(inputStream);
+				try (FileOutputStream out = new FileOutputStream(crnkFile)) {
+					out.write(data);
+				}
+			}
+		}
 	}
 
 	protected static void write(File file, String source) throws IOException {
@@ -195,7 +222,8 @@ public class TSGenerator {
 			if (isRoot && isGenerated) {
 				LOGGER.debug("transforming {}", element.getId());
 				transform(element, TSMetaTransformationOptions.EMPTY);
-			} else {
+			}
+			else {
 				LOGGER.debug("ignoring {}, root={}, generated={}", element.getId(), isRoot, isGenerated);
 			}
 		}
@@ -207,7 +235,8 @@ public class TSGenerator {
 					transformation.postTransform(transformedElement, createMetaTransformationContext());
 				}
 			}
-		} finally {
+		}
+		finally {
 			postProcessing = false;
 		}
 	}
@@ -245,7 +274,8 @@ public class TSGenerator {
 		}
 		for (TSMetaTransformation transformation : transformations) {
 			if (transformation.accepts(element)) {
-				LOGGER.debug("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(), transformation);
+				LOGGER.debug("transforming type {} of type {} with {}", element.getId(), element.getClass().getSimpleName(),
+						transformation);
 				TSElement tsElement = transformation.transform(element, createMetaTransformationContext(), options);
 				transformedElements.add(tsElement);
 				return tsElement;
@@ -360,6 +390,11 @@ public class TSGenerator {
 		@Override
 		public MetaElement getMeta(String metaId) {
 			return lookup.getMetaById().get(metaId);
+		}
+
+		@Override
+		public TSResourceFormat getResourceFormat() {
+			return config.getFormat();
 		}
 	}
 

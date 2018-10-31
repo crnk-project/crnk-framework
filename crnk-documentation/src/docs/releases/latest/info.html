@@ -1,0 +1,41 @@
+<h4>More flexible document formats</h4>
+
+So far Crnk followed the JSON API specification to the letter to establish a REST endpoint. The motivation of this was
+to have a clearly defined standard. In particular the relationship handling and inclusions allow to built powerful applications
+(such as when working with the redux pattern on the client side).
+However, at the same time this feature can make more simpler applications harder to write since
+they are forced to resolve those relationships. With <b>crnk-format-plain-json</b> a new module <b>PlainJsonFormatModule</b>
+is introduced that allows to setup alternative, custom document format next to JSON API. The ACCEPT and CONTENT-TYPE header will determine
+whether the JSON API or that custom format is used. An example can look like:
+
+<pre class="prettyprint">
+{
+  "data" : {
+    "id" : "12",
+    "type" : "tasks",
+    "name" : "someTask",
+    "schedule" : {
+      "data" : null,
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/schedule",
+        "related" : "http://localhost:8080/tasks/12/schedule"
+      }
+    },
+    "project" : {
+      "data" : {
+        "id" : "1",
+        "type" : "projects",
+        "name" : "someProject"
+      },
+      "links" : {
+        "self" : "http://localhost:8080/tasks/12/relationships/project",
+        "related" : "http://localhost:8080/tasks/12/project"
+      }
+    }
+  }
+}
+</pre>
+
+Most notably the project relationship is directly inlined with the task. And a resource is written in a more flat manner without the
+<i>attributes</i> and
+<i>relationships</i> containers. Contributions to add more flexibility to the module are always welcome.

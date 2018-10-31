@@ -1,5 +1,9 @@
 package io.crnk.gen.typescript.processor;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import io.crnk.gen.typescript.model.TSAny;
 import io.crnk.gen.typescript.model.TSArrayType;
 import io.crnk.gen.typescript.model.TSElement;
@@ -11,10 +15,6 @@ import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
 import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Computes Typescript import statements for the given source model.
@@ -57,7 +57,6 @@ public class TSImportProcessor implements TSSourceProcessor {
 
 		// no need for inclusions of primitive types and within same file
 		if (!(type instanceof TSPrimitiveType || source == refSource)) {
-
 			TSNamedElement importedType = type;
 			if (type.getParent() instanceof TSModule) {
 				importedType = (TSNamedElement) type.getParent();
@@ -91,7 +90,7 @@ public class TSImportProcessor implements TSSourceProcessor {
 
 	private static String computeImportPath(TSSource refSource, TSSource source) {
 		if (refSource == null) {
-			throw new NullPointerException();
+			throw new NullPointerException(source.getName());
 		}
 		StringBuilder pathBuilder = new StringBuilder();
 		if (refSource.getNpmPackage() == null) {

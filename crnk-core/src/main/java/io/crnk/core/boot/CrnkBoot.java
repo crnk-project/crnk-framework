@@ -267,7 +267,8 @@ public class CrnkBoot {
 		ResourceRegistryPart rootPart;
 		if (registryParts.isEmpty()) {
 			rootPart = new DefaultResourceRegistryPart();
-		} else {
+		}
+		else {
 			HierarchicalResourceRegistryPart hierarchialPart = new HierarchicalResourceRegistryPart();
 			for (Map.Entry<String, ResourceRegistryPart> entry : registryParts.entrySet()) {
 				hierarchialPart.putPart(entry.getKey(), entry.getValue());
@@ -331,8 +332,9 @@ public class CrnkBoot {
 		for (Controller controller : controllers) {
 			controller.init(context);
 		}
-
-		return new ControllerRegistry(controllers);
+		ControllerRegistry controllerRegistry = new ControllerRegistry(controllers);
+		moduleRegistry.setControllerRegistry(controllerRegistry);
+		return controllerRegistry;
 	}
 
 	public DocumentMapper getDocumentMapper() {
@@ -353,8 +355,9 @@ public class CrnkBoot {
 			public void setupModule(ModuleContext context) {
 				controllerRegistry = createControllerRegistry();
 				queryAdapterBuilder = createQueryAdapterBuilder();
+				moduleRegistry.setQueryAdapterBuilder(queryAdapterBuilder);
 
-				this.addHttpRequestProcessor(new JsonApiRequestProcessor(context, controllerRegistry, queryAdapterBuilder));
+				this.addHttpRequestProcessor(new JsonApiRequestProcessor(context));
 				super.setupModule(context);
 			}
 		};
@@ -494,7 +497,8 @@ public class CrnkBoot {
 		String pathPrefix = null;
 		if (webPathPrefix != null) {
 			pathPrefix = webPathPrefix;
-		} else {
+		}
+		else {
 			pathPrefix = propertiesProvider.getProperty(CrnkProperties.WEB_PATH_PREFIX);
 		}
 		if (pathPrefix != null && !pathPrefix.startsWith("/")) {
@@ -581,10 +585,12 @@ public class CrnkBoot {
 				List<QuerySpecDeserializer> deserializers = serviceDiscovery.getInstancesByType(QuerySpecDeserializer.class);
 				if (deserializers.isEmpty()) {
 					moduleRegistry.setUrlMapper(new DefaultQuerySpecUrlMapper());
-				} else {
+				}
+				else {
 					setQuerySpecDeserializerUnchecked(deserializers.get(0));
 				}
-			} else {
+			}
+			else {
 				moduleRegistry.setUrlMapper(list.get(0));
 			}
 		}
@@ -626,7 +632,8 @@ public class CrnkBoot {
 			if (pagingBehavior instanceof LimitBoundedPagingBehavior) {
 				if (defaultPageLimit != null) {
 					((LimitBoundedPagingBehavior) pagingBehavior).setDefaultLimit(defaultPageLimit);
-				} else {
+				}
+				else {
 					LOGGER.warn(
 							"no defaultLimit for paging specified, may lead to denial of service for in proper requests with "
 									+ "large data sets"

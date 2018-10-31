@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import javax.naming.Context;
+
 import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.Project;
@@ -13,13 +20,6 @@ import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 public class GenerateTypescriptTaskTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
@@ -29,18 +29,23 @@ public class GenerateTypescriptTaskTest {
 
 	private File outputDir;
 
-
 	@Test
 	public void testWithExpressions() throws IOException {
-		test(true);
+		test(true, TSResourceFormat.JSONAPI);
 	}
 
 	@Test
 	public void testWithoutExpressions() throws IOException {
-		test(false);
+		test(false, TSResourceFormat.JSONAPI);
 	}
 
-	private void test(boolean expressions) throws IOException {
+	@Test
+	public void testPlainJson() throws IOException {
+		test(false, TSResourceFormat.PLAINJSON);
+	}
+
+
+	private void test(boolean expressions, TSResourceFormat resourceFormat) throws IOException {
 		// Deltaspike sometimes really wants to have a retarded JNDI context
 		System.setProperty(Context.INITIAL_CONTEXT_FACTORY, DummyInitialContextFactory.class.getName());
 
@@ -73,6 +78,7 @@ public class GenerateTypescriptTaskTest {
 		config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
 		config.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
 		config.getNpm().setPackageVersion("0.0.1");
+		config.setFormat(resourceFormat);
 
 		TSGeneratorPlugin plugin = project.getPlugins().getPlugin(TSGeneratorPlugin.class);
 		plugin.init(project);
@@ -89,6 +95,9 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/generated/source/typescript/src/types/project.data.ts");
 		assertExists("build/generated/source/typescript/src/schedule.ts");
 		assertExists("build/generated/source/typescript/src/tasks.ts");
+		if (resourceFormat == TSResourceFormat.PLAINJSON) {
+			assertExists("build/generated/source/typescript/src/crnk.ts");
+		}
 		assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
 		assertNotExists("build/generated/source/typescript/src/tasks.meta.ts");
 
@@ -97,7 +106,7 @@ public class GenerateTypescriptTaskTest {
 		assertExists("build/npm_compile/package.json");
 		assertExists("build/npm_compile/src/index.ts");
 
-		checkSchedule(expressions);
+		checkSchedule(expressions, resourceFormat);
 		checkProject();
 		if (expressions) {
 			checkProjectData();
@@ -121,9 +130,18 @@ public class GenerateTypescriptTaskTest {
 		Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
 	}
 
-	private void checkSchedule(boolean expressions) throws IOException {
-		String expectedSourceFileName = expressions ? "expected_schedule_with_expressions.ts" :
-				"expected_schedule_without_expressions.ts";
+	private void checkSchedule(boolean expressions, TSResourceFormat format) throws IOException {
+		String expectedSourceFileName;
+		if (format == TSResourceFormat.PLAINJSON) {
+			expectedSourceFileName = "expected_schedule_plain_json.ts";
+		}
+		else if (expressions) {
+			expectedSourceFileName = "expected_schedule_with_expressions.ts";
+		}
+		else {
+			expectedSourceFileName = "expected_schedule_without_expressions.ts";
+		}
+
 		String actualSourcePath = "build/generated/source/typescript/src/schedule.ts";
 		compare(expectedSourceFileName, actualSourcePath);
 	}

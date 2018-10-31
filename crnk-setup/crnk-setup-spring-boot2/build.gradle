@@ -20,6 +20,7 @@ dependencies {
 	compileOnly project(':crnk-ui')
 	compileOnly project(':crnk-client')
 	compileOnly project(':crnk-data:crnk-data-facet')
+	compileOnly project(':crnk-format:crnk-format-plain-json')
 
 	compileOnly 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'
@@ -40,6 +41,7 @@ dependencies {
 	testCompile project(':crnk-client')
 	testCompile project(':crnk-test')
 	testCompile project(':crnk-data:crnk-data-facet')
+	testCompile project(':crnk-format:crnk-format-plain-json')
 
 	testCompile 'org.springframework.boot:spring-boot-starter-data-jpa'
 	testCompile 'org.springframework.boot:spring-boot-starter-web'

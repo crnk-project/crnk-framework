@@ -1,5 +1,14 @@
 package io.crnk.core.module;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
@@ -20,6 +29,7 @@ import io.crnk.core.engine.information.repository.RepositoryInformationProviderC
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
+import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
@@ -31,6 +41,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.query.QueryAdapterBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -56,17 +67,6 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Container for setting up and holding {@link Module} instances;
@@ -116,12 +116,36 @@ public class ModuleRegistry {
 
 	private ResourceFilterDirectory filterBehaviorProvider;
 
+	private ControllerRegistry controllerRegistry;
+
+	private QueryAdapterBuilder queryAdapterBuilder;
+
 	public ModuleRegistry() {
 		this(true);
 	}
 
 	public ModuleRegistry(boolean isServer) {
 		this.isServer = isServer;
+	}
+
+	@Deprecated
+	public QueryAdapterBuilder getQueryAdapterBuilder() {
+		return queryAdapterBuilder;
+	}
+
+	@Deprecated
+	public void setQueryAdapterBuilder(QueryAdapterBuilder queryAdapterBuilder) {
+		this.queryAdapterBuilder = queryAdapterBuilder;
+	}
+
+	@Deprecated // consider to move to a module with json api processor
+	public ControllerRegistry getControllerRegistry() {
+		return controllerRegistry;
+	}
+
+	@Deprecated
+	public void setControllerRegistry(ControllerRegistry controllerRegistry) {
+		this.controllerRegistry = controllerRegistry;
 	}
 
 	public DefaultInformationBuilder getInformationBuilder() {
@@ -234,7 +258,8 @@ public class ModuleRegistry {
 	public ResourceInformationProvider getResourceInformationBuilder() {
 		if (resourceInformationProvider == null) {
 			resourceInformationProvider =
-					new CombinedResourceInformationProvider(Prioritizable.prioritze(aggregatedModule.getResourceInformationProviders()));
+					new CombinedResourceInformationProvider(
+							Prioritizable.prioritze(aggregatedModule.getResourceInformationProviders()));
 			InformationBuilder informationBuilder = new DefaultInformationBuilder(typeParser);
 			DefaultResourceInformationProviderContext context =
 					new DefaultResourceInformationProviderContext(resourceInformationProvider, informationBuilder, typeParser,
@@ -385,7 +410,8 @@ public class ModuleRegistry {
 			Optional<? extends Module> optModule = getModule(extension.getTargetModule());
 			if (optModule.isPresent()) {
 				reverseExtensionMap.add(optModule.get(), extension);
-			} else if (!extension.isOptional()) {
+			}
+			else if (!extension.isOptional()) {
 				throw new IllegalStateException(extension.getTargetModule() + " not installed but required by " + extension);
 			}
 		}
@@ -429,7 +455,7 @@ public class ModuleRegistry {
 		return httpRequestContextProvider;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void applyRepositoryRegistrations() {
 		Collection<Object> repositories = filterDecorators(aggregatedModule.getRepositories());
 		for (Object repository : repositories) {
@@ -441,7 +467,9 @@ public class ModuleRegistry {
 		Set<Class> resourceClasses = new HashSet<>();
 		resourceClasses.addAll(getResourceLookup().getResourceClasses());
 		if (resourceRegistry != null) {
-			resourceClasses.addAll(resourceRegistry.getResources().stream().map(it -> it.getResourceInformation().getResourceClass()).collect(Collectors.toList()));
+			resourceClasses
+					.addAll(resourceRegistry.getResources().stream().map(it -> it.getResourceInformation().getResourceClass())
+							.collect(Collectors.toList()));
 		}
 		for (Class resourceClass : new ArrayList<>(resourceClasses)) {
 			findChildResources(resourceClasses, resourceClass);
@@ -473,7 +501,7 @@ public class ModuleRegistry {
 	}
 
 	private RegistryEntry applyResourceRegistration(Class<?> resourceClass, Map<Class, RegistryEntry> additionalEntryMap) {
-		if(additionalEntryMap.containsKey(resourceClass)){
+		if (additionalEntryMap.containsKey(resourceClass)) {
 			return additionalEntryMap.get(resourceClass);
 		}
 		RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
@@ -482,15 +510,24 @@ public class ModuleRegistry {
 			RegistryEntry parentEntry;
 			if (resourceInformationProvider.accept(superclass)) {
 				parentEntry = applyResourceRegistration(superclass, additionalEntryMap);
-			} else {
-				throw new IllegalStateException("super type " + superclass + " of " + resourceClass + " is not a resource. Is it annotated with @JsonApiResource?");
+			}
+			else {
+				throw new IllegalStateException("super type " + superclass + " of " + resourceClass
+						+ " is not a resource. Is it annotated with @JsonApiResource?");
 			}
 
 			LOGGER.debug("adding resource {}", resourceClass);
-			PreconditionUtil.verify(parentEntry != null, "unable to find repository for resource type %s, make sure a repository is backing this type or one of its super types", resourceClass);
-			PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass), "make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
+			PreconditionUtil.verify(parentEntry != null,
+					"unable to find repository for resource type %s, make sure a repository is backing this type or one of its "
+							+ "super types",
+					resourceClass);
+			PreconditionUtil.verify(resourceInformationProvider.accept(resourceClass),
+					"make sure resource type %s is a valid resource, e.g. annotated with @JsonApiResource", resourceClass);
 			ResourceInformation information = resourceInformationProvider.build(resourceClass);
-			PreconditionUtil.verify(parentEntry.getResourceInformation().getResourcePath().equals(information.getResourcePath()), "resource type %s without repository implementation must specify a @JsonApiResource.resourcePath matching one of its parent repositories", resourceClass);
+			PreconditionUtil.verify(parentEntry.getResourceInformation().getResourcePath().equals(information.getResourcePath()),
+					"resource type %s without repository implementation must specify a @JsonApiResource.resourcePath matching "
+							+ "one of its parent repositories",
+					resourceClass);
 
 			RegistryEntryBuilder entryBuilder = getContext().newRegistryEntryBuilder();
 			entryBuilder.resource().from(information);
@@ -498,7 +535,9 @@ public class ModuleRegistry {
 			entry.setParentRegistryEntry(parentEntry);
 			getContext().addRegistryEntry(entry);
 			Class<?> parentClass = parentEntry.getResourceInformation().getResourceClass();
-			PreconditionUtil.verify(resourceClass.getSuperclass().equals(parentClass), "%s must be a subType of %s", resourceClass, parentClass);
+			PreconditionUtil
+					.verify(resourceClass.getSuperclass().equals(parentClass), "%s must be a subType of %s", resourceClass,
+							parentClass);
 		}
 		additionalEntryMap.put(resourceClass, entry);
 		return entry;
@@ -984,7 +1023,6 @@ public class ModuleRegistry {
 			return propertiesProvider;
 		}
 	}
-
 
 
 	public QuerySpecUrlMapper getUrlMapper() {
