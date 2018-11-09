@@ -141,11 +141,17 @@ public class ResourceMetaFilter implements MetaFilter {
 			for (ResourceField field : information.getRelationshipFields()) {
 				if (field.getOppositeName() != null) {
 					String oppositeType = field.getOppositeResourceType();
+
 					String oppositeTypeId = partition.getId(oppositeType);
 					MetaResource oppositeMeta = (MetaResource) context.getMetaElement(oppositeTypeId).get();
-					MetaAttribute attr = metaResource.getAttribute(field.getUnderlyingName());
+					ResourceInformation oppositeInformation = getResourceInformation(oppositeMeta, false);
+					ResourceField oppositeField = oppositeInformation.findFieldByUnderlyingName(field.getOppositeName());
+					PreconditionUtil.verify(oppositeField != null, "opposite field %s.%s not found",
+							field.getParentResourceInformation().getResourceType(), field.getOppositeName());
+
+					MetaAttribute attr = metaResource.getAttribute(field.getJsonName());
 					try {
-						MetaAttribute oppositeAttr = oppositeMeta.getAttribute(field.getOppositeName());
+						MetaAttribute oppositeAttr = oppositeMeta.getAttribute(oppositeField.getJsonName());
 						PreconditionUtil.assertNotNull(attr.getId() + " opposite not found", oppositeAttr);
 						attr.setOppositeAttribute(oppositeAttr);
 					}
@@ -158,7 +164,7 @@ public class ResourceMetaFilter implements MetaFilter {
 
 			ResourceField idField = information.getIdField();
 			if (idField != null) {
-				MetaAttribute idAttr = metaResource.getAttribute(idField.getUnderlyingName());
+				MetaAttribute idAttr = metaResource.getAttribute(idField.getJsonName());
 				idAttr.setPrimaryKeyAttribute(true);
 
 				if (metaResource.getSuperType() == null || metaResource.getSuperType().getPrimaryKey() == null) {

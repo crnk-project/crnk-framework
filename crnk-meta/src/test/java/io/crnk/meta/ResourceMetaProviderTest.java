@@ -1,5 +1,12 @@
 package io.crnk.meta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.resource.annotations.JsonApiId;
@@ -31,13 +38,6 @@ import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
@@ -175,7 +175,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("description", attributes.get(2).getName());
 		Assert.assertEquals("task", attributes.get(3).getName());
 		Assert.assertEquals("lazyTask", attributes.get(4).getName());
-		Assert.assertEquals("tasks", attributes.get(5).getName());
+		Assert.assertEquals("taskSet", attributes.get(5).getName());
 		Assert.assertEquals("tasksList", attributes.get(6).getName());
 		Assert.assertEquals("project", attributes.get(7).getName());
 		Assert.assertEquals("projects", attributes.get(8).getName());
@@ -246,6 +246,17 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals(Schedule.class, meta.getImplementationType());
 		Assert.assertNull(meta.getParent());
 		Assert.assertTrue(meta.getSubTypes().isEmpty());
+	}
+
+	@Test
+	public void testRenamedOppositeRelationship() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		MetaAttribute taskSetAttr = meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", taskSetAttr.getName());
+		MetaAttribute oppositeAttribute = taskSetAttr.getOppositeAttribute();
+		Assert.assertNotNull(oppositeAttribute);
+		Assert.assertEquals("schedule", oppositeAttribute.getName());
+		Assert.assertSame(taskSetAttr, oppositeAttribute.getOppositeAttribute());
 	}
 
 	@Test
@@ -407,15 +418,15 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 	public void testMultiValuedSetRelation() {
 		MetaResource meta = resourceProvider.getMeta(Schedule.class);
 
-		MetaResourceField attr = (MetaResourceField) meta.getAttribute("tasks");
-		Assert.assertEquals("tasks", attr.getName());
-		Assert.assertEquals("resources.schedule.tasks", attr.getId());
+		MetaResourceField attr = (MetaResourceField) meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", attr.getName());
+		Assert.assertEquals("resources.schedule.taskSet", attr.getId());
 		Assert.assertTrue(attr.isLazy());
 		Assert.assertFalse(attr.isMeta());
 		Assert.assertFalse(attr.isLinks());
 		Assert.assertTrue(attr.isAssociation());
 		Assert.assertNotNull(attr.getOppositeAttribute());
-		Assert.assertNotNull("tasks", attr.getOppositeAttribute().getName());
+		Assert.assertNotNull("taskSet", attr.getOppositeAttribute().getName());
 		Assert.assertEquals(Set.class, attr.getType().getImplementationClass());
 		Assert.assertEquals(Task.class, attr.getType().getElementType().getImplementationClass());
 		Assert.assertTrue(attr.getType().getClass().getName(), attr.getType() instanceof MetaSetType);

@@ -16,7 +16,7 @@ export module Schedule {
 		[key: string]: ResourceRelationship;
 		task?: TypedOneResourceRelationship<Tasks>;
 		lazyTask?: TypedOneResourceRelationship<Tasks>;
-		tasks?: TypedManyResourceRelationship<Tasks>;
+		taskSet?: TypedManyResourceRelationship<Tasks>;
 		tasksList?: TypedManyResourceRelationship<Tasks>;
 		project?: TypedOneResourceRelationship<Projects>;
 		projects?: TypedManyResourceRelationship<Projects>;
@@ -55,7 +55,7 @@ export let createEmptySchedule = function(id: string): Schedule {
 		relationships: {
 			task: {data: null},
 			lazyTask: {data: null},
-			tasks: {data: []},
+			taskSet: {data: []},
 			tasksList: {data: []},
 			project: {data: null},
 			projects: {data: []},

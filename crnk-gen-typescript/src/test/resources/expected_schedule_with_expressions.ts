@@ -30,7 +30,7 @@ export module Schedule {
 		[key: string]: ResourceRelationship;
 		task?: TypedOneResourceRelationship<Tasks>;
 		lazyTask?: TypedOneResourceRelationship<Tasks>;
-		tasks?: TypedManyResourceRelationship<Tasks>;
+		taskSet?: TypedManyResourceRelationship<Tasks>;
 		tasksList?: TypedManyResourceRelationship<Tasks>;
 		project?: TypedOneResourceRelationship<Projects>;
 		projects?: TypedManyResourceRelationship<Projects>;
@@ -85,13 +85,13 @@ export module QSchedule {
 			}
 			return this._lazyTask;
 		};
-		private _tasks: QTypedManyResourceRelationship<QTasks, Tasks>;
-		get tasks(): QTypedManyResourceRelationship<QTasks, Tasks> {
-			if (!this._tasks) {
-				this._tasks =
-					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasks', QTasks);
+		private _taskSet: QTypedManyResourceRelationship<QTasks, Tasks>;
+		get taskSet(): QTypedManyResourceRelationship<QTasks, Tasks> {
+			if (!this._taskSet) {
+				this._taskSet =
+					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'taskSet', QTasks);
 			}
-			return this._tasks;
+			return this._taskSet;
 		};
 		private _tasksList: QTypedManyResourceRelationship<QTasks, Tasks>;
 		get tasksList(): QTypedManyResourceRelationship<QTasks, Tasks> {
@@ -134,7 +134,7 @@ export let createEmptySchedule = function(id: string): Schedule {
 		relationships: {
 			task: {data: null},
 			lazyTask: {data: null},
-			tasks: {data: []},
+			taskSet: {data: []},
 			tasksList: {data: []},
 			project: {data: null},
 			projects: {data: []},

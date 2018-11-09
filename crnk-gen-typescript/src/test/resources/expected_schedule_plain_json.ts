@@ -15,7 +15,7 @@ export interface Schedule extends Resource {
 	description?: string;
 	task?: OneResourceRelationship<Tasks>;
 	lazyTask?: OneResourceRelationship<Tasks>;
-	tasks?: ManyResourceRelationship<Tasks>;
+	taskSet?: ManyResourceRelationship<Tasks>;
 	tasksList?: ManyResourceRelationship<Tasks>;
 	project?: OneResourceRelationship<Projects>;
 	projects?: ManyResourceRelationship<Projects>;
