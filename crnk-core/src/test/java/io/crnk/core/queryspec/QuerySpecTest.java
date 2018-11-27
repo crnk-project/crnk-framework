@@ -10,6 +10,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
+import io.crnk.core.queryspec.pagingspec.NumberSizePagingSpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -30,14 +31,21 @@ public class QuerySpecTest {
 		QuerySpec querySpec = new QuerySpec(Task.class, "tasks");
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec(Task.class));
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec("tasks"));
+		Assert.assertEquals(OffsetLimitPagingSpec.class, querySpec.getPaging().getClass());
 
 		querySpec = new QuerySpec(Task.class, null);
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec(Task.class));
 		Assert.assertNotSame(querySpec, querySpec.getOrCreateQuerySpec(Project.class));
+		Assert.assertEquals(OffsetLimitPagingSpec.class, querySpec.getPaging().getClass());
 
 		querySpec = new QuerySpec(null, "tasks");
 		Assert.assertSame(querySpec, querySpec.getOrCreateQuerySpec("tasks"));
 		Assert.assertNotSame(querySpec, querySpec.getOrCreateQuerySpec("other"));
+		Assert.assertEquals(OffsetLimitPagingSpec.class, querySpec.getPaging().getClass());
+
+		querySpec = new QuerySpec(null, "tasks");
+		querySpec.setPaging(new NumberSizePagingSpec());
+		Assert.assertEquals(NumberSizePagingSpec.class, querySpec.getPaging().getClass());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
