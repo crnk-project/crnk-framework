@@ -9,6 +9,8 @@ import io.crnk.meta.model.MetaDataObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +33,8 @@ public abstract class MetaDataObjectProviderBase<T extends MetaDataObject> imple
 		for (String name : beanInformation.getAttributeNames()) {
 			BeanAttributeInformation attrInformation = beanInformation.getAttribute(name);
 			if (attrInformation.getGetter() != null && !isIgnored(attrInformation)) {
-				if (attrInformation.getGetter().getDeclaringClass() != implClass) {
-					continue; // contained in super type
+				if (!attrInformation.isDeclaredHere() && !attrInformation.isConcretion()) {
+					continue; // same information is contained in super type
 				}
 
 				String metaName = getMetaName(attrInformation);

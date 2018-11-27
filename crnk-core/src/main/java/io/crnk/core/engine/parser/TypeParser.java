@@ -57,7 +57,6 @@ public class TypeParser {
 		parsers = new ConcurrentHashMap<>();
 		mappers = new ConcurrentHashMap<>();
 
-
 		mappers.putAll(DefaultStringParsers.get());
 		parsers.putAll(mappers);
 	}

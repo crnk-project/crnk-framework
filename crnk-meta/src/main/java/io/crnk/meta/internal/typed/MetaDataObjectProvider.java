@@ -1,5 +1,6 @@
 package io.crnk.meta.internal.typed;
 
+import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.query.QueryContext;
@@ -39,7 +40,8 @@ public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<
 		if (element instanceof MetaAttribute && element.getParent().getClass() == getMetaClass()) {
 			MetaAttribute attr = (MetaAttribute) element;
 			MetaDataObject parent = attr.getParent();
-			Type implementationType = PropertyUtils.getPropertyType(parent.getImplementationClass(), attr.getName());
+			BeanInformation beanInformation = BeanInformation.get(parent.getImplementationClass());
+			Type implementationType = beanInformation.getAttribute(attr.getName()).getType();
 			MetaElement metaType = context.allocate(implementationType);
 			attr.setType(metaType.asType());
 		}

@@ -239,7 +239,7 @@ public class ResourceMetaFilter implements MetaFilter {
 						"attribute not found " + parent.getImplementationClass().getName() + "." + attr.getName());
 			}
 
-			Type implementationType = attrInformation.getImplementationType();
+			Type implementationType = attrInformation.getType();
 			MetaElement metaType = partition.allocateMetaElement(implementationType).get();
 			attr.setType(metaType.asType());
 		}

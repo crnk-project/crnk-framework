@@ -1,3 +1,6 @@
+# Hints for attaching to a local JVM
+**/.attach_pid*
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
 *.class

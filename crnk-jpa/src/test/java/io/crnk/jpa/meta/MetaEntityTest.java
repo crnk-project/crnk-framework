@@ -2,8 +2,10 @@ package io.crnk.jpa.meta;
 
 import io.crnk.jpa.model.SequenceEntity;
 import io.crnk.jpa.model.TestMappedSuperclassWithPk;
+import io.crnk.jpa.model.TestSubclassWithSuperclassGenerics;
 import io.crnk.jpa.model.TestSubclassWithSuperclassPk;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaPrimaryKey;
 import org.junit.Assert;
@@ -11,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.List;
 
 public class MetaEntityTest {
 
@@ -54,5 +57,27 @@ public class MetaEntityTest {
 		Assert.assertEquals(1, primaryKey.getElements().size());
 		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
 		Assert.assertTrue(primaryKey.isGenerated());
+	}
+
+	@Test
+	public void testGenericsOnParentMappedSuperClass() {
+		MetaEntity meta = metaProvider.discoverMeta(TestSubclassWithSuperclassGenerics.class);
+		MetaPrimaryKey primaryKey = meta.getPrimaryKey();
+		Assert.assertNotNull(primaryKey);
+		Assert.assertEquals(1, primaryKey.getElements().size());
+		Assert.assertEquals("id", primaryKey.getElements().get(0).getName());
+		Assert.assertTrue(primaryKey.getElements().get(0).isPrimaryKeyAttribute());
+		Assert.assertFalse(primaryKey.isGenerated());
+		MetaAttribute genericAttr = meta.getAttribute("generic");
+		Assert.assertNotNull(genericAttr);
+		Assert.assertEquals(Integer.class, genericAttr.getType().getImplementationClass());
+
+		MetaAttribute genericListAttr = meta.getAttribute("genericList");
+		Assert.assertNotNull(genericListAttr);
+		Assert.assertEquals(List.class, genericListAttr.getType().getImplementationClass());
+
+		MetaAttribute genericListList= meta.getAttribute("genericListSuper");
+		Assert.assertNotNull(genericListList);
+		Assert.assertEquals(List.class, genericListList.getType().getImplementationClass());
 	}
 }
