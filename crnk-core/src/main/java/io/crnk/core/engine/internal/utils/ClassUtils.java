@@ -3,10 +3,16 @@ package io.crnk.core.engine.internal.utils;
 import io.crnk.core.exception.ResourceException;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,36 +30,8 @@ public class ClassUtils {
 
 	public static final String PREFIX_GETTER_GET = "get";
 
-
-	private static final Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap();
-
-	private static final Map<Class<?>, Class<?>> wrapperPrimitiveMap;
-
-	static {
-		primitiveWrapperMap.put(Boolean.TYPE, Boolean.class);
-		primitiveWrapperMap.put(Byte.TYPE, Byte.class);
-		primitiveWrapperMap.put(Character.TYPE, Character.class);
-		primitiveWrapperMap.put(Short.TYPE, Short.class);
-		primitiveWrapperMap.put(Integer.TYPE, Integer.class);
-		primitiveWrapperMap.put(Long.TYPE, Long.class);
-		primitiveWrapperMap.put(Double.TYPE, Double.class);
-		primitiveWrapperMap.put(Float.TYPE, Float.class);
-		primitiveWrapperMap.put(Void.TYPE, Void.TYPE);
-		wrapperPrimitiveMap = new HashMap();
-		Iterator i$ = primitiveWrapperMap.keySet().iterator();
-
-		while (i$.hasNext()) {
-			Class primitiveClass = (Class) i$.next();
-			Class wrapperClass = primitiveWrapperMap.get(primitiveClass);
-			if (!primitiveClass.equals(wrapperClass)) {
-				wrapperPrimitiveMap.put(wrapperClass, primitiveClass);
-			}
-		}
-	}
-
 	private ClassUtils() {
 	}
-
 
 	public static boolean existsClass(String className) {
 		try {
@@ -205,7 +183,6 @@ public class ClassUtils {
 		return boolean.class.equals(returnType) || Boolean.class.equals(returnType);
 	}
 
-
 	public static Method findSetter(Class<?> beanClass, String fieldName, Class<?> fieldType) {
 		String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
@@ -213,6 +190,7 @@ public class ClassUtils {
 		try {
 			return beanClass.getMethod(methodName, fieldType);
 		} catch (NoSuchMethodException e1) {
+			// This is okay, there's just no trivial setter. Carry on searching below.
 		}
 
 		Method[] methods = beanClass.getMethods();
@@ -282,10 +260,7 @@ public class ClassUtils {
 		while (currentClass != null && currentClass != Object.class) {
 			for (Method method : currentClass.getDeclaredMethods()) {
 				if (!method.isSynthetic() && isSetter(method)) {
-					Method v = result.get(method.getName());
-					if (v == null) {
-						result.put(method.getName(), method);
-					}
+					result.putIfAbsent(method.getName(), method);
 				}
 			}
 			currentClass = currentClass.getSuperclass();
@@ -343,7 +318,6 @@ public class ClassUtils {
 	}
 
 	private static boolean isNonBooleanGetter(Method method) {
-
 		if (!method.getName().startsWith("get")) {
 			return false;
 		}
@@ -358,7 +332,6 @@ public class ClassUtils {
 	}
 
 	private static boolean isSetter(Method method) {
-
 		if (!method.getName().startsWith("set")) {
 			return false;
 		}
@@ -369,14 +342,26 @@ public class ClassUtils {
 		return method.getParameterTypes().length == 1;
 	}
 
+	/**
+	 * Given a type, this method resolves the corresponding raw type.
+	 *
+	 * This method works if {@code type} is of type {@link Class}, or {@link ParameterizedType}.
+	 * Its shortcoming is that it cannot resolve {@link TypeVariable} and will always return {@code Object.class},
+	 * not attempting to resolve the concrete type that the variable is to be substituted with.
+	 *
+	 * Please use tools like {@link io.crnk.core.engine.information.bean.BeanInformation} and
+	 * {@link io.crnk.core.engine.information.bean.BeanAttributeInformation} instead.
+	 */
+	@Deprecated
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
 		} else if (type instanceof ParameterizedType) {
 			return getRawType(((ParameterizedType) type).getRawType());
-		} else {
-			throw new IllegalStateException("unknown type: " + type);
+		} else if (type instanceof TypeVariable<?>) {
+			return getRawType(((TypeVariable<?>) type).getBounds()[0]);
 		}
+		throw new IllegalStateException("unknown type: " + type);
 	}
 
 	public static boolean isPrimitiveType(Class<?> type) {

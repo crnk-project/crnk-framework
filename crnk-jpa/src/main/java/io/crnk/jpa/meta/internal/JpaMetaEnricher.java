@@ -12,7 +12,6 @@ import io.crnk.meta.provider.MetaProviderBase;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 public class JpaMetaEnricher extends MetaFilterBase {
 
@@ -34,30 +33,35 @@ public class JpaMetaEnricher extends MetaFilterBase {
 
 	@Override
 	public void onInitialized(MetaElement element) {
-		if (element instanceof MetaJsonObject) {
-			MetaJsonObject jsonDataObject = (MetaJsonObject) element;
-			Class<?> implementationClass = jsonDataObject.getImplementationClass();
+		if (!(element instanceof MetaJsonObject)) {
+			return;
+		}
 
-			if (metaProvider.hasMeta(implementationClass)) {
-				MetaJpaDataObject jpaDataObject = metaProvider.getMeta(implementationClass);
+		final MetaJsonObject jsonDataObject = (MetaJsonObject) element;
+		final Class<?> implementationClass = jsonDataObject.getImplementationClass();
 
-				if (jpaDataObject.getPrimaryKey() != null && jsonDataObject.getPrimaryKey() != null) {
-					jsonDataObject.getPrimaryKey().setGenerated(jpaDataObject.getPrimaryKey().isGenerated());
-				}
+		if (implementationClass == Object.class || !metaProvider.hasMeta(implementationClass)) {
+			return;
+		}
 
-				List<? extends MetaAttribute> declaredAttributes = jsonDataObject.getDeclaredAttributes();
-				for (MetaAttribute declaredAttribute : declaredAttributes) {
-					String name = declaredAttribute.getName();
-					if (jpaDataObject.hasAttribute(name)) {
-						MetaAttribute jpaAttribute = jpaDataObject.getAttribute(name);
+		final MetaElement metaElement = metaProvider.getMeta(implementationClass);
+		final MetaJpaDataObject jpaDataObject = (MetaJpaDataObject) metaElement;
 
-						declaredAttribute.setLob(jpaAttribute.isLob());
-						declaredAttribute.setVersion(jpaAttribute.isVersion());
-						declaredAttribute.setNullable(jpaAttribute.isNullable());
-						declaredAttribute.setCascaded(jpaAttribute.isCascaded());
-					}
-				}
+		if (jpaDataObject.getPrimaryKey() != null && jsonDataObject.getPrimaryKey() != null) {
+			jsonDataObject.getPrimaryKey().setGenerated(jpaDataObject.getPrimaryKey().isGenerated());
+		}
+
+		for (MetaAttribute declaredAttribute : jsonDataObject.getDeclaredAttributes()) {
+			final String name = declaredAttribute.getName();
+			if (!jpaDataObject.hasAttribute(name)) {
+				continue;
 			}
+
+			final MetaAttribute jpaAttribute = jpaDataObject.getAttribute(name);
+			declaredAttribute.setLob(jpaAttribute.isLob());
+			declaredAttribute.setVersion(jpaAttribute.isVersion());
+			declaredAttribute.setNullable(jpaAttribute.isNullable());
+			declaredAttribute.setCascaded(jpaAttribute.isCascaded());
 		}
 	}
 

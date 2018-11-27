@@ -175,7 +175,6 @@ public abstract class MetaPartitionBase implements MetaPartition {
 		return Optional.empty();
 	}
 
-
 	private Optional<MetaElement> allocateMap(ParameterizedType paramType) {
 		if (paramType.getRawType() instanceof Class && Map.class.isAssignableFrom((Class<?>) paramType.getRawType())) {
 			PreconditionUtil.assertEquals("expected 2 type arguments", 2, paramType.getActualTypeArguments().length);

@@ -76,7 +76,6 @@ public class JacksonResourceFieldInformationProviderNamingTest {
 	@Test
 	public void onWrappedBooleanFieldShouldReturnFieldNameBasedOnGetter() {
 		BeanAttributeInformation attr = beanDesc.getAttribute("accessorField");
-
 		assertThat(sut.getJsonName(attr).isPresent()).isFalse();
 	}
 
