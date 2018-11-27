@@ -50,7 +50,9 @@ public class ForwardingStrategyContext {
 	private QuerySpec createSourceQuerySpec() {
 		RegistryEntry sourceEntry = getSourceEntry();
 		ResourceInformation resourceInformation = sourceEntry.getResourceInformation();
-		return new QuerySpec(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
+		QuerySpec querySpec = new QuerySpec(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
+		querySpec.setPaging(sourceEntry.getPagingBehavior().createEmptyPagingSpec());
+		return querySpec;
 	}
 
 	public <Q> Iterable<Q> findAll(RegistryEntry entry, Iterable<?> targetIds, QueryContext queryContext) {
