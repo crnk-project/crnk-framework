@@ -1,11 +1,5 @@
 package io.crnk.core.engine.parser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.internal.utils.MethodCache;
-import io.crnk.core.utils.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -16,6 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.engine.internal.utils.MethodCache;
+import io.crnk.core.utils.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses {@link String} into an instance of provided {@link Class}. It support
@@ -49,6 +49,8 @@ public class TypeParser {
 
 	private boolean useJackson = true;
 
+	private boolean enforceJackson = true;
+
 	private ObjectMapper objectMapper;
 
 	public TypeParser() {
@@ -58,6 +60,14 @@ public class TypeParser {
 
 		mappers.putAll(DefaultStringParsers.get());
 		parsers.putAll(mappers);
+	}
+
+	public boolean isEnforceJackson() {
+		return enforceJackson;
+	}
+
+	public void setEnforceJackson(boolean enforceJackson) {
+		this.enforceJackson = enforceJackson;
 	}
 
 	public boolean isUseJackson() {
@@ -92,8 +102,8 @@ public class TypeParser {
 	 * parsed values.
 	 *
 	 * @param inputs list of Strings
-	 * @param clazz  type to be parsed to
-	 * @param <T>    type of class
+	 * @param clazz type to be parsed to
+	 * @param <T> type of class
 	 * @return {@link Iterable} of parsed values
 	 */
 	public <T extends Serializable> Iterable<T> parse(Iterable<String> inputs, Class<T> clazz) {
@@ -110,7 +120,7 @@ public class TypeParser {
 	 *
 	 * @param input String value
 	 * @param clazz type to be parsed to
-	 * @param <T>   type of class
+	 * @param <T> type of class
 	 * @return instance of parsed value
 	 */
 	public <T> T parse(String input, Class<T> clazz) {
@@ -125,7 +135,8 @@ public class TypeParser {
 			}
 
 			return parser.parse(input);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			throw new ParserException(e.getMessage());
 		}
 	}
@@ -216,13 +227,20 @@ public class TypeParser {
 			return new EnumStringMapper<>(clazz);
 		}
 
-		// TODO cleanup this input dependency
+		if (enforceJackson) {
+			return new JacksonStringMapper(objectMapper, clazz);
+		}
+
 		if (useJackson && input != null) {
 			try {
 				JacksonStringMapper parser = new JacksonStringMapper(objectMapper, clazz);
 				parser.parse(input);
 				return parser;
-			} catch (RuntimeException e) {
+			}
+			catch (RuntimeException e) {
+				if (enforceJackson) {
+					throw new ParserException(String.format("Cannot parse '%s' tp type=%s"));
+				}
 				LOGGER.debug("Jackson not applicable to {} based on input {}", clazz, input);
 				LOGGER.trace("Jackson error", e);
 			}
@@ -233,7 +251,8 @@ public class TypeParser {
 				Constructor<T> constructor = clazz.getDeclaredConstructor(String.class);
 				return new ConstructorBasedParser(constructor);
 			}
-		} catch (NoSuchMethodException e) {
+		}
+		catch (NoSuchMethodException e) {
 			throw new IllegalStateException(e);
 		}
 

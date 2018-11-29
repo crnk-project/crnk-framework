@@ -1,5 +1,13 @@
 package io.crnk.core.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -27,6 +35,7 @@ import io.crnk.core.mock.models.ProjectPatchStrategy;
 import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
+import io.crnk.core.mock.models.User;
 import io.crnk.core.module.TestResourceInformationProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiId;
@@ -45,14 +54,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
 
 public class DefaultResourceInformationProviderTest {
 
@@ -113,6 +114,14 @@ public class DefaultResourceInformationProviderTest {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		assertThat(containsFieldWithName(resourceInformation, "deleted")).isTrue();
 		assertThat(containsFieldWithName(resourceInformation, "tDeleted")).isFalse();
+	}
+
+	@Test
+	public void checkIdAlwaysNamedId() {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(User.class);
+		ResourceField idField = resourceInformation.getIdField();
+		assertThat(idField.getJsonName()).isEqualTo("id");
+		assertThat(idField.getUnderlyingName()).isEqualTo("loginId");
 	}
 
 	@Test

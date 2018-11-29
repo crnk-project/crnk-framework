@@ -1,5 +1,8 @@
 package io.crnk.core.mock.models;
 
+import java.util.Collections;
+import java.util.List;
+
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
@@ -9,14 +12,11 @@ import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
-import java.util.Collections;
-import java.util.List;
-
 @JsonApiResource(type = "users")
 public class User {
 
 	@JsonApiId
-	private Long id;
+	private Long loginId;
 
 	private String name;
 
@@ -34,12 +34,12 @@ public class User {
 	@JsonApiLinksInformation
 	private LinksInformation linksInformation;
 
-	public Long getId() {
-		return id;
+	public Long getLoginId() {
+		return loginId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setLoginId(Long loginId) {
+		this.loginId = loginId;
 	}
 
 	public String getName() {

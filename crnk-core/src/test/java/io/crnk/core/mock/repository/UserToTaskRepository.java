@@ -81,7 +81,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	@Override
 	public Task findOneTarget(Long sourceId, String fieldName, QuerySpec querySpec) {
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
+			if (relation.getSource().getLoginId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Task project = new Task();
 				project.setId((Long) relation.getTargetId());
 				return project;
@@ -94,7 +94,7 @@ public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, 
 	public ResourceList<Task> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
 		ResourceList<Task> projects = new DefaultResourceList<>();
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
+			if (relation.getSource().getLoginId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Task project = new Task();
 				project.setId((Long) relation.getTargetId());
 				projects.add(project);

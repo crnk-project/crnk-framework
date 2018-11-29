@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.resource;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -35,10 +41,6 @@ import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 public class NestedResourceTest extends BaseControllerTest {
 
@@ -107,7 +109,8 @@ public class NestedResourceTest extends BaseControllerTest {
 
 
 		Assert.assertEquals("http://127.0.0.1/test/a/manyNested/b", resourceRegistry.getResourceUrl(nested));
-		//Assert.assertEquals("http://127.0.0.1/test/b/manyNested/b", resourceRegistry.getResourceUrl(ManyNestedResource.class, "a-b"));
+		//Assert.assertEquals("http://127.0.0.1/test/b/manyNested/b", resourceRegistry.getResourceUrl(ManyNestedResource.class,
+		// "a-b"));
 	}
 
 	@Test
@@ -216,7 +219,8 @@ public class NestedResourceTest extends BaseControllerTest {
 		try {
 			manyNestedRepository.findOne(id, new QuerySpec(ManyNestedResource.class));
 			Assert.fail();
-		} catch (ResourceNotFoundException e) {
+		}
+		catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}
@@ -227,7 +231,8 @@ public class NestedResourceTest extends BaseControllerTest {
 		@JsonApiId
 		private String id;
 
-		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "parent", repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
+		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "parent",
+				repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
 		private List<ManyNestedResource> manyNested;
 
 		public String getId() {
@@ -247,6 +252,7 @@ public class NestedResourceTest extends BaseControllerTest {
 		}
 	}
 
+	@JsonSerialize(using = ToStringSerializer.class)
 	public static class ManyNestedId implements Serializable {
 
 		@JsonApiId
@@ -257,6 +263,12 @@ public class NestedResourceTest extends BaseControllerTest {
 
 		public ManyNestedId() {
 
+		}
+
+		public ManyNestedId(String idString) {
+			String[] elements = idString.split("\\-");
+			parentId = elements[0];
+			id = elements[1];
 		}
 
 		public ManyNestedId(String parentId, String id) {
@@ -278,14 +290,6 @@ public class NestedResourceTest extends BaseControllerTest {
 
 		public void setParentId(String parentId) {
 			this.parentId = parentId;
-		}
-
-		public static ManyNestedId parse(String idString) {
-			String[] elements = idString.split("\\-");
-			ManyNestedId id = new ManyNestedId();
-			id.parentId = elements[0];
-			id.id = elements[1];
-			return id;
 		}
 
 		public int hashCode() {

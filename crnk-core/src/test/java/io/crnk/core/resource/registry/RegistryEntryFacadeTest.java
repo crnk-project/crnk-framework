@@ -1,5 +1,7 @@
 package io.crnk.core.resource.registry;
 
+import java.util.Arrays;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.User;
@@ -14,8 +16,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.Arrays;
 
 @SuppressWarnings("unchecked")
 public class RegistryEntryFacadeTest {
@@ -42,12 +42,12 @@ public class RegistryEntryFacadeTest {
 
 		user1 = new User();
 		user1.setName("test1");
-		user1.setId(13L);
+		user1.setLoginId(13L);
 		repository.save(user1);
 
 		user2 = new User();
 		user2.setName("test2");
-		user2.setId(14L);
+		user2.setLoginId(14L);
 		repository.save(user2);
 
 		entry = container.getEntry(User.class);
@@ -56,24 +56,24 @@ public class RegistryEntryFacadeTest {
 
 	@Test
 	public void checkFindOne() {
-		User facadeUser = facade.findOne(user1.getId(), new QuerySpec(User.class));
+		User facadeUser = facade.findOne(user1.getLoginId(), new QuerySpec(User.class));
 		Assert.assertSame(user1, facadeUser);
 	}
 
 	@Test
 	public void checkSave() {
 		User updatedUser = new User();
-		updatedUser.setId(user1.getId());
+		updatedUser.setLoginId(user1.getLoginId());
 		updatedUser.setName("updated");
 		facade.save(updatedUser);
 
-		User facadeUser = facade.findOne(user1.getId(), new QuerySpec(User.class));
+		User facadeUser = facade.findOne(user1.getLoginId(), new QuerySpec(User.class));
 		Assert.assertSame(updatedUser, facadeUser);
 	}
 
 	@Test
 	public void checkDelete() {
-		facade.delete(user2.getId());
+		facade.delete(user2.getLoginId());
 
 		ResourceList<User> list = facade.findAll(new QuerySpec(User.class));
 		Assert.assertEquals(1, list.size());
@@ -91,7 +91,7 @@ public class RegistryEntryFacadeTest {
 
 	@Test
 	public void checkFindAllWithIds() {
-		ResourceList<User> list = facade.findAll(Arrays.asList(user1.getId()), new QuerySpec(User.class));
+		ResourceList<User> list = facade.findAll(Arrays.asList(user1.getLoginId()), new QuerySpec(User.class));
 		Assert.assertEquals(1, list.size());
 		Assert.assertSame(user1, list.get(0));
 	}
@@ -105,7 +105,7 @@ public class RegistryEntryFacadeTest {
 	@Test
 	public void checkFindAllWithFilter() {
 		QuerySpec querySpec = new QuerySpec(User.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, user2.getId()));
+		querySpec.addFilter(new FilterSpec(Arrays.asList("loginId"), FilterOperator.EQ, user2.getLoginId()));
 		ResourceList<User> list = facade.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
 		Assert.assertSame(user2, list.get(0));

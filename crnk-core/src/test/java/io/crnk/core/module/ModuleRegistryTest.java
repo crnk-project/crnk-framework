@@ -1,5 +1,9 @@
 package io.crnk.core.module;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
@@ -67,10 +71,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ModuleRegistryTest {
 
@@ -364,7 +364,7 @@ public class ModuleRegistryTest {
 		}
 
 		ResourceInformation userInfo = informationProvider.build(User.class);
-		Assert.assertEquals("id", userInfo.getIdField().getUnderlyingName());
+		Assert.assertEquals("loginId", userInfo.getIdField().getUnderlyingName());
 
 		ResourceInformation testInfo = informationProvider.build(TestResource.class);
 		Assert.assertEquals("id", testInfo.getIdField().getUnderlyingName());

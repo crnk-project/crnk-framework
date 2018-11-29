@@ -81,7 +81,7 @@ public class UserToProjectRepository implements RelationshipRepositoryV2<User, L
 	@Override
 	public Project findOneTarget(Long sourceId, String fieldName, QuerySpec querySpec) {
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) &&
+			if (relation.getSource().getLoginId().equals(sourceId) &&
 					relation.getFieldName().equals(fieldName)) {
 				Project project = new Project();
 				project.setId((Long) relation.getTargetId());
@@ -95,7 +95,7 @@ public class UserToProjectRepository implements RelationshipRepositoryV2<User, L
 	public ResourceList<Project> findManyTargets(Long sourceId, String fieldName, QuerySpec querySpec) {
 		ResourceList<Project> projects = new DefaultResourceList<>();
 		for (Relation<User> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
-			if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
+			if (relation.getSource().getLoginId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
 				Project project = new Project();
 				project.setId((Long) relation.getTargetId());
 				projects.add(project);

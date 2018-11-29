@@ -86,10 +86,10 @@ public class RepositoryFilterTest {
 
 		UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
 		user1 = new User();
-		user1.setId(1L);
+		user1.setLoginId(1L);
 		resourceRepository.save(user1);
 		user2 = new User();
-		user2.setId(2L);
+		user2.setLoginId(2L);
 		resourceRepository.save(user2);
 
 		UserToProjectRepository userProjectRepository =
@@ -238,7 +238,7 @@ public class RepositoryFilterTest {
 	@Test
 	public void create() {
 		User user = new User();
-		user.setId(3L);
+		user.setLoginId(3L);
 		resourceAdapter.create(user, queryAdapter);
 
 		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
@@ -271,7 +271,7 @@ public class RepositoryFilterTest {
 	@Test
 	public void save() {
 		User user = new User();
-		user.setId(3L);
+		user.setLoginId(3L);
 		resourceAdapter.update(user, queryAdapter);
 
 		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);

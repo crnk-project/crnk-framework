@@ -19,10 +19,10 @@ public class UserRepository implements ResourceRepositoryV2<User, Long> {
 
 	@Override
 	public <S extends User> S save(S entity) {
-		if (entity.getId() == null) {
-			entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+		if (entity.getLoginId() == null) {
+			entity.setLoginId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
 		}
-		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
+		THREAD_LOCAL_REPOSITORY.put(entity.getLoginId(), entity);
 
 		return entity;
 	}
@@ -55,7 +55,7 @@ public class UserRepository implements ResourceRepositoryV2<User, Long> {
 
 	private boolean contains(User value, Iterable<Long> ids) {
 		for (Long id : ids) {
-			if (value.getId().equals(id)) {
+			if (value.getLoginId().equals(id)) {
 				return true;
 			}
 		}

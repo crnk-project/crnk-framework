@@ -1,10 +1,13 @@
 package io.crnk.test.mock.models.nested;
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 
-import java.io.Serializable;
-
+@JsonSerialize(using = ToStringSerializer.class)
 public class NestedId implements Serializable {
 
 	@JsonApiId
@@ -14,7 +17,12 @@ public class NestedId implements Serializable {
 	private String parentId;
 
 	public NestedId() {
+	}
 
+	public NestedId(String idString) {
+		String[] elements = idString.split("\\-");
+		parentId = elements[0];
+		id = elements[1];
 	}
 
 	public NestedId(String parentId, String id) {
@@ -36,14 +44,6 @@ public class NestedId implements Serializable {
 
 	public void setParentId(String parentId) {
 		this.parentId = parentId;
-	}
-
-	public static NestedId parse(String idString) {
-		String[] elements = idString.split("\\-");
-		NestedId id = new NestedId();
-		id.parentId = elements[0];
-		id.id = elements[1];
-		return id;
 	}
 
 	public int hashCode() {

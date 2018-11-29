@@ -279,9 +279,9 @@ and `TypeParser` with `CrnkBoot.getModuleRegistry().getTypeParser()` (or `Module
 For example:
 
 - `TypeParser` allows to register and override the parsing of Strings to other classes.
-  By default it has has built-in parsers for various JRE classes, it looks on the type
-  itself for a String constructor or static `parse(String)` parse method and otherwise
-  fallbacks to Jackson. Further `StringParser` can add support for arbitrary types.
+  By default it has has built-in parsers for various JRE classes. Custom `StringMapper`
+   can be registered. As fallback it will make use of the `ObjectMapper` of Jackson
+   (which in most cases will be also the default).
 - `DefaultQuerySpecUrlMapper.setIgnoreParseExceptions(...)` allows to ignore if parsing
   of a filter value fails. In this case the filter value is left as String and it is
   assumed the repository itself will take care of the parsing.

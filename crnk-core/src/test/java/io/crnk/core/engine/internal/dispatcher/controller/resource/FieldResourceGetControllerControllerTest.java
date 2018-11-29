@@ -121,7 +121,7 @@ public class FieldResourceGetControllerControllerTest extends BaseControllerTest
 
 		// setup test data
 		User user = new User();
-		user.setId(1L);
+		user.setLoginId(1L);
 		userRepo.create(user, emptyUserQuery);
 		Project project = new Project();
 		project.setId(2L);

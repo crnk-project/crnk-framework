@@ -1,5 +1,13 @@
 package io.crnk.jpa.internal;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.persistence.EmbeddedId;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -36,15 +44,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OptimisticLockException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -145,8 +144,11 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 			boolean jsonApiId1 = attr1.getAnnotation(JsonApiId.class).isPresent();
 			if (jsonApiId0 && !jsonApiId1) {
 				((ResourceFieldImpl) field1).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
+				((ResourceFieldImpl) field1).setJsonName(getJsonName(attr1, ResourceFieldType.ATTRIBUTE)); // undo enforce "id" name
+
 			} else if (!jsonApiId0 && jsonApiId1) {
 				((ResourceFieldImpl) field0).setResourceFieldType(ResourceFieldType.ATTRIBUTE);
+				((ResourceFieldImpl) field0).setJsonName(getJsonName(attr0, ResourceFieldType.ATTRIBUTE)); // undo enforce "id" name
 			}
 		}
 	}
