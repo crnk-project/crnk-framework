@@ -7,13 +7,13 @@ anchor:jpa_module[]
 
 ## JPA
 
-The JPA module allows to automatically expose JPA entities as JSON API repositories. No implementation
+The JPA module allows to automatically expose JPA entities as JSON:API repositories. No implementation
 or Crnk-specific annotations are necessary.
 
 The feature set includes:
 
-- expose JPA entities to JSON API repositories
-- expose JPA relations as JSON API repositories
+- expose JPA entities to JSON:API repositories
+- expose JPA relations as JSON:API repositories
 - decide which entities to expose as endpoints
 - sorting, filtering, paging, inclusion of related resources.
 - all default operators of crnk are supported: `EQ`, `NEQ`, `LIKE`, `LT`, `LE`, `GT`, `GE`.
@@ -22,17 +22,17 @@ The feature set includes:
    `filter[project.name][NEQ]=someValue` or `include=project.tasks`.
 - support for entity inheritance by allowing sorting, filtering and inclusions
   to refer to attributes on subtypes.
-- support for Jackson annotations to customize entity attributes on the JSON API layer, see <<jackson_annotations,here>>.
+- support for Jackson annotations to customize entity attributes on the JSON:API layer, see <<jackson_annotations,here>>.
 - DTO mapping support to map entities to DTOs before sending them to clients.
 - JPA Criteria API and QueryDSL support to issue queries.
 - filter API to intercept and modify issued queries.
 - support for computed attributes behaving like regular, persisted attributes.
 - automatic transaction handling spanning requests and doing a rollback in case of an exception.
-- `OptimisticLockExceptionMapper` mapped to JSON API errors with
+- `OptimisticLockExceptionMapper` mapped to JSON:API errors with
   `409` status code.
 - `PersistenceException` and `RollbackException` are unwrapped
    to the usually more interesting exceptions like
-   `ValidationException` and then translated to JSON API errors.
+   `ValidationException` and then translated to JSON:API errors.
 
 Have a look at the Spring Boot example application which makes use of the JPA module, DTO mapping
 and computed attributes.
@@ -74,7 +74,7 @@ application just has to implement `JpaModuleConfigurer` to configure `JpaModuleC
 
 - `JpaModuleConfig.setRepositoryFactory` allows to provide a factory to change or customized the used repositories.
 - `exposeAllEntities` takes an `EntityManagerFactory` and exposes all registered entities as
-  JSON API repository.
+  JSON:API repository.
 - To manually select the entities exposed to Crnk use `JpaModuleConfig.addRepository(...)`.
  `JpaRepositoryConfig` provides a number of customization options for the exposed entity.
   `setListClass`, `setListMetaClass` and `setListLinksClass` allow to set the type information of links and meta data.
@@ -93,7 +93,7 @@ application just has to implement `JpaModuleConfigurer` to configure `JpaModuleC
 
 ### JPA Entity Setup
 
-Most features of JPA are supported and get mapped to JSON API:
+Most features of JPA are supported and get mapped to JSON:API:
 
 - Entities are mapped to resources.
 - Crnk understands all JPA-related annotations and in many cases, not Crnk-specific annotations are necessary.
@@ -102,7 +102,7 @@ Most features of JPA are supported and get mapped to JSON API:
   of the values in the string.
 - Not yet supported are relationships within embeddables.
 
-It is possible to add additional JSON API related fields to entities by annotating them with `@javax.persistence.Transient` (or the other way around by marking
+It is possible to add additional JSON:API related fields to entities by annotating them with `@javax.persistence.Transient` (or the other way around by marking
 it with `@JsonIgnore`):
 
 [source]
@@ -360,8 +360,8 @@ anchor:validation_module[]
 
 A `ValidationModule` provided by `io.crnk:crnk-validation` implements
 resource validation and provides exception mappers for `javax.validation.ValidationException` and `javax.validation.ConstraintViolationException`.
-Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON API errors.
-A JSON API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
+Among others, it properly translates 'javax.validation.ConstraintViolation' instances to JSON:API errors.
+A JSON:API error can, among others, contain a source pointer. This source pointer allows a clients/UI to
 display the validation errors next to the corresponding input fields.
 
 A translated exception can look like:
@@ -410,16 +410,16 @@ anchor:meta_module[]
 
 ## Meta Module
 
-This is a module that exposes the internal workings of Crnk as JSON API repositories.
+This is a module that exposes the internal workings of Crnk as JSON:API repositories.
 It lets you browse the set of available resources, their types, their attributes, etc. For example,
 Crnk UI make use of the meta module to implement auto-completing of input fields.
 
-NOTE: There is currently no JSON API standard for meta data. There are more
+NOTE: There is currently no JSON:API standard for meta data. There are more
 general formats like Swagger and ALPS. At some point those might be supported as
 well (probably rather the later than the former). One
 can view them to be complementary to the `MetaModule` as the later
-is exactly tailored towards JSON API, such as the accessability as regular
-JSON API (meta) repository and data structures matching the standard. Most likely,
+is exactly tailored towards JSON:API, such as the accessability as regular
+JSON:API (meta) repository and data structures matching the standard. Most likely,
 any future standard implementation will built up on the information from the
 `MetaModule`.
 
@@ -433,7 +433,7 @@ A setup can look as follows:
 		metaModule.addMetaProvider(new ResourceMetaProvider());
 ----
 
-`ResourceMetaProvider` exposes all JSON API resources and repositories as meta data. You may add further provides to
+`ResourceMetaProvider` exposes all JSON:API resources and repositories as meta data. You may add further provides to
 expose more meta data, such as the `JpaMetaProvider`.
 
 
@@ -454,10 +454,10 @@ most important classes are:
 | `/meta/setType`			| `MetaSetType` 			| Represents an set type.
 | `/meta/mapType`			| `MetaMapType` 			| Represents an map type.
 | `/meta/dataObject`		| `MetaDataObject`   		| Base type for any object holding data, like
-																			 JPA entities or JSON API resources.
+																			 JPA entities or JSON:API resources.
 | `/meta/attribute`			| `MetaAttribute` 			| Represents an attribute of a `MetaDataObject`.
-| `/meta/resource`		 	| `MetaResource`   			| JSON API resource representation extending `MetaDataObject`.
-| `/meta/resourceRepository`| `MetaResourceRepository` 	| JSON API repository representation holding resources.
+| `/meta/resource`		 	| `MetaResource`   			| JSON:API resource representation extending `MetaDataObject`.
+| `/meta/resourceRepository`| `MetaResourceRepository` 	| JSON:API repository representation holding resources.
 |===
 
 A `MetaResource` looks like:
@@ -578,7 +578,7 @@ implementation. This allows to:
 
 - add `MetaFilter` implementations to intercept and modify meta elements upon initialization and request.
 - add `MetaPartition` implementations to introduce new, isolated areas in the meta model, like a JPA
-  meta model next to the JSON API one (like for documentation purposes).
+  meta model next to the JSON:API one (like for documentation purposes).
 
 For more detailed information have a look at the current `ResourceMetaProvider`.
 
@@ -592,8 +592,8 @@ NOTE: This module is in new and in incubation. Feedback and improvements welcome
 There is an `ActivitiModule` for the https://www.activiti.org[Activiti] workflow engine that offers an alternative REST API.
 The motivation of `ActivitiModule` is to:
 
-- have a JSON API compliant REST API to benefit from the resource-oriented architecture, linking, sorting, filtering, paging,
-  and client-side tooling of JSON API.
+- have a JSON:API compliant REST API to benefit from the resource-oriented architecture, linking, sorting, filtering, paging,
+  and client-side tooling of JSON:API.
 - have a type-safe, non-generic REST API that is tailored towards the use cases at hand. This means that for each process
   and task definition, there is a dedicated repository and resource type for it. The resource is comprised of
   both the static fields provided by Activiti (like `name`, `startTime` and `priority`) and the dynamic fields
@@ -617,7 +617,7 @@ The `ActivitiModule` implements four resource base classes that match the equiva
 - `ProcessInstanceResource`
 - `TaskResource`
 
-To setup a JSON API repository for a process or task, the corresponding resource class can be subclassed and extended with
+To setup a JSON:API repository for a process or task, the corresponding resource class can be subclassed and extended with
 the application specific fields. For example:
 
 [source]
@@ -762,7 +762,7 @@ implement their own `FacetProvider` implementation and register it through `Face
 
 ### Examples
 
-All the facets are then available as regular, new JSON API resource that can filtered, paged, sorted, etc. like
+All the facets are then available as regular, new JSON:API resource that can filtered, paged, sorted, etc. like
 any other resource:
 
 [source]
@@ -789,7 +789,7 @@ any other resource:
       },
       "name" : "name",
       "type" : "projects",
-      "labels" : [ "Great Project", "Crnk Project", "Some Project", "JSON API Project" ]
+      "labels" : [ "Great Project", "Crnk Project", "Some Project", "JSON:API Project" ]
     },
   }]
 }

@@ -9,7 +9,7 @@ one of those two repository interfaces:
   * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for relationships.
 
 The repositories are used to serve `POST`, `GET`, `PATCH` and `DELETE` requests as specified by
-JSON API specification. The repository contract closely resembles the JSON API specification. Subsequent
+JSON:API specification. The repository contract closely resembles the JSON:API specification. Subsequent
 sections and chapters outline various possibilities to speed-up and potentially reuse existing
 repository implementations.
 
@@ -24,7 +24,7 @@ anchor:resource_repository[]
 `ResourceRepositoryV2` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
 The interface takes two generic arguments:
 
-1. The type of a resource. Typically this is a plain Java Bean making use of the JSON API annotations. But may also be something
+1. The type of a resource. Typically this is a plain Java Bean making use of the JSON:API annotations. But may also be something
   entirely different (see <<architectures> and <<modules>>). One other example is the
   `io.crnk.core.engine.document.Resource` class used to setup dynamically types repositories.
 2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
@@ -140,11 +140,11 @@ insertable, updateable, deltable for such repositories as false.
 
 ## Query parameters with QuerySpec
 
-Crnk passes JSON API query parameters to repositories trough a QuerySpec parameter. It holds
-request parameters like sorting and filtering specified by JSON API. The subsequent
+Crnk passes JSON:API query parameters to repositories trough a QuerySpec parameter. It holds
+request parameters like sorting and filtering specified by JSON:API. The subsequent
 sections will provide a number of example.
 
-NOTE: Not everything is specified by JSON API. For some request parameters only recommendations
+NOTE: Not everything is specified by JSON:API. For some request parameters only recommendations
 are provided as different applications are likely to be in need of different semantics and
 implementations. For this reason the engine part in `crnk-core` makes use of `QueryAdapter` and allows implementations other than
 QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
@@ -203,7 +203,7 @@ anchor:filtering[]
 
 ### Filtering
 
-NOTE: The JSON API specification does not a mandate a specific filtering semantic. Instead
+NOTE: The JSON:API specification does not a mandate a specific filtering semantic. Instead
 it provides a recommendation that comes by default with Crnk. Depending on the data store
 in use, application may choose to extend or replace that default implementation by extending or
 replacing `DefaultQuerySpecUrlMapper`.
@@ -349,7 +349,7 @@ The conversion takes place automatically when invoking `QuerySpec.getPaging(desi
 
 #### Pagination Links
 
-JSON API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
+JSON:API specifies `first`, `previous`, `next` and `last` links (see http://jsonapi.org/format/#fetching-pagination).
 The `PagedLinksInformation` interface provides a Java representation of those links that can be implemented and returned
 by repositories along with the result data. There is a default implementation named `DefaultPagedLinksInformation`.
 
@@ -435,7 +435,7 @@ anchor:urlmapper[]
 ### URL Mapping
 
 The mapping of request parameters to QuerySpec and back is implemented by `QuerySpecUrlMapper`.
-With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON API
+With `DefaultQuerySpecUrlMapper` there is a default implementation that follows the JSON:API
 specification and recommendations and introduces some further defaults as documented
 in the previous sections (like the filter operators) where the recommendations
 do not go far enough. The used `QuerySpecUrlMapper` can be obtained
@@ -559,7 +559,7 @@ as done in the example from the previous section.
 
 ### Self and Related Links
 
-The JSON API specification from http://jsonapi.org/format/#fetching-relationships
+The JSON:API specification from http://jsonapi.org/format/#fetching-relationships
 mandates two relationship links:
 
 - `"self": "http://example.com/articles/1/relationships/author"`
@@ -704,7 +704,7 @@ and used by both servers and clients:
 ## Error Handling
 
 Processing errors in Crnk can be handled by throwing an exception and providing
-a corresponding exception mapper which defines mapping to a proper JSON API error response.
+a corresponding exception mapper which defines mapping to a proper JSON:API error response.
 
 
 ### Throwing an exception...
@@ -742,7 +742,7 @@ Sample exception is nothing more than a simple runtime exception:
   }
 ----
 
-### ...and mapping it to JSON API response
+### ...and mapping it to JSON:API response
 
 Class responsible for mapping the exception should:
 
@@ -758,7 +758,7 @@ include::../../../../crnk-test/src/main/java/io/crnk/test/mock/TestExceptionMapp
 ----
 
 On the server-side an exception should be mapped to an `ErrorResponse` object
-with `toErrorResponse`. It consists of an HTTP status and `ErrorData` (which is consistent with JSON API error structure).
+with `toErrorResponse`. It consists of an HTTP status and `ErrorData` (which is consistent with JSON:API error structure).
 On the client-side an `ExceptionMapper` returning `true` upon `accept(...)` is used to map an
 `ErrorResponse` back to an exception with `fromErrorResponse`.
 
@@ -908,7 +908,7 @@ anchor:JsonApiExposed[]
 ## @JsonApiExposed
 
 A repository may be annotated with `@JsonApiExposed(false)`. In this case the repository is only available internally to other repositories, not
-externally on the JSON API endpoint. There are different use cases for this:
+externally on the JSON:API endpoint. There are different use cases for this:
 
 - Have a look at the https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-microservice-example[micro-service example application] to see how remote repositories can be linked to local ones.
 - <<nested_resources,nested resources>> can be made accessible only through their parent, such as `http://example.com/posts/1/comments/2` and no longer `http://example.com/comments`

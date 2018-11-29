@@ -28,7 +28,7 @@ NOTE that:
 
 - A potential future V3 version of the traditional interfaces will align the first two differences.
 - `Mono` rather than `Flux` is used for list return types since meta and links information must be returned as well, not just a sequence of resources.
-  For large number of resources, the JSON API pagination mechanisms can be applied.
+  For large number of resources, the JSON:API pagination mechanisms can be applied.
 - Internally the traditional and reactive repositories are served by the same Crnk engine and share virtually all of the code base.
   The difference lies in the used `ResultFactory` implementation. `ImmediateResultFactory` is used by the traditional API. `MonoResultFactory` by
   reactive setups.

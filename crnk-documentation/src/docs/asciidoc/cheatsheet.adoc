@@ -8,8 +8,8 @@
 This documents gives a quick overview of the most important Crnk features. The
 document is work in progress. Please provide feedback what is desired to see.
 
-Make sure to have read the http://jsonapi.org/format/[JSON API specification] to understand the concepts
-of resource-oriented APIs and the standards established by JSON API. Also have a look at its
+Make sure to have read the http://jsonapi.org/format/[JSON:API specification] to understand the concepts
+of resource-oriented APIs and the standards established by JSON:API. Also have a look at its
 additional http://jsonapi.org/recommendations/[recommendations].
 
 
@@ -165,7 +165,7 @@ public class TaskRepository extends ResourceRepositoryBase<Task, Long> {
 
 # Client
 
-To query a remote JSON API repository:
+To query a remote JSON:API repository:
 
 [source,java]
 ----
