@@ -186,7 +186,7 @@ There are different possibilities to implement a repository at runtime:
 
 - Create a matching resource class at runtime with a library like http://bytebuddy.net/#/ to follow the same
   pattern as for any compile-time repository.
-- Make use of the `Resource` class. It is the generic JSON API resource presentation within the Crnk engine.
+- Make use of the `Resource` class. It is the generic JSON:API resource presentation within the Crnk engine.
 - Make use of an arbitrary dynamic object like a `java.util.Map` and provide a `ResourceFieldAccessor` for
   each `ResourceField` to specify how to read and write attributes (see below for `ResourceField` examples).
 

@@ -10,7 +10,7 @@ resource starts holding complex object graphs again.
 
 For all the before mentioned reason support for http://jsonpatch.com/[jsonpatch.com] is provided. It allows to send multiple
 insertions, updates and deletions with a single request and provides the results for each such executed operation.
-Note that numerous attempts and discussions have taken place and are still ongoing to establish a common JSON API standard,
+Note that numerous attempts and discussions have taken place and are still ongoing to establish a common JSON:API standard,
 but that does not seem to make much progress. With  http://jsonpatch.com/[jsonpatch.com] there is already an estabilished
 standard that fits well for many use cases.
 
@@ -32,7 +32,7 @@ transaction spanning all requests. This looks as follows:
 include::../../../../crnk-operations/src/test/java/io/crnk/operations/AbstractOperationsTest.java[tags=transaction]
 ----
 
-There is further an operations client implementation that works along the regular JSON API client implementation:
+There is further an operations client implementation that works along the regular JSON:API client implementation:
 
 [source]
 .OperationsPostTest.java

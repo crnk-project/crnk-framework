@@ -5,7 +5,7 @@ anchor:security_module[]
 # Security
 
 The resource-oriented nature of Crnk makes a number of quite powerful security schemes possible
-to authorize access to resources. The semantics of JSON API with resources, relationships, fields
+to authorize access to resources. The semantics of JSON:API with resources, relationships, fields
 and parameters provide much more information about an application compared to, for example, a
 more classical JAX-RS oder Spring MVC application. This in turn allows to automate and simplify
 many security-related topics, which in turn allows for a more robust authorization.
@@ -112,7 +112,7 @@ It can be obtained with `ModuleContext.getResourceFilterDirectory(...)` from the
 
 ## Dataroom Access Control
 
-Filtering of resources is one of the main building blocks of JSON API. As such it is typically
+Filtering of resources is one of the main building blocks of JSON:API. As such it is typically
 not too hard to implement DAC. The roles of a user can be checked and if necessary
 for filters specific to that user can be added. There are two possibilities
 to add such filters:

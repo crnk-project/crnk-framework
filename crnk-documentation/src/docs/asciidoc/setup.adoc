@@ -99,7 +99,7 @@ TIP: Set `io.crnk` to `DEBUG` if you encounter any issues during setup or later 
 
 Crnk allows integration with JAX-RS environments through the usage of JAX-RS specification. JAX-RS 2.0 is
 required for this integration. Under the hood there is a @PreMatching filter which checks each request for
-JSON API processing. The setup can look as simple as:
+JSON:API processing. The setup can look as simple as:
 
 ### CrnkFeature
 
@@ -133,7 +133,7 @@ A more advanced setup may look like:
 
 		@Override
 		public boolean configure(FeatureContext featureContext) {
-			// also map entities to JSON API resources (see further below)
+			// also map entities to JSON:API resources (see further below)
 			JpaModule jpaModule = new JpaModule(emFactory, em, transactionRunner);
 			jpaModule.setRepositoryFactory(new ValidatedJpaRepositoryFactory());
 
@@ -161,23 +161,23 @@ up automatically and do not manual registration.
 
 In many cases Crnk repositories are used along regular JAX-RS services. In such scenarios it can be worthwhile
 if Crnk repositories and JAX-RS services make use of the same exception handling and response format. To make
-use of the JSON API resp. Crnk exception handling in JAX-RS services, one can add the
+use of the JSON:API resp. Crnk exception handling in JAX-RS services, one can add the
 *JsonapiExceptionMapperBridge* to the JAX-RS application. The constructor of `JsonapiExceptionMapperBridge`
 takes `CrnkFeature` as parameter.
 
 For an example have a look at the next section which make use of it together with `JsonApiResponseFilter`.
 
 
-### Use JSON API format with JAX-RS services
+### Use JSON:API format with JAX-RS services
 
 Similar to `JsonapiExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
-resources in JSON API format with *JsonApiResponseFilter*. `JsonApiResponseFilter` wraps primitive
+resources in JSON:API format with *JsonApiResponseFilter*. `JsonApiResponseFilter` wraps primitive
 responses with a `data` object; resource objects with `data` and `included` objects.
 The constructor of `JsonApiResponseFilter` takes `CrnkFeature` as parameter.
 
 
 To determine which JAX-RS services should be wrapped, `JsonApiResponseFilter` checks whether the
-`@Produce` annotation delivers JSON API. The produce
+`@Produce` annotation delivers JSON:API. The produce
 annotation can be added, for example, to the class:
 
 [source]
@@ -197,7 +197,7 @@ include::../../../../crnk-setup/crnk-setup-rs/src/test/java/io/crnk/rs/JsonApiRe
 Note that:
 
 - `CrnkProperties.NULL_DATA_RESPONSE_ENABLED` determines whether null responses should be wrapped
-   as JSON API responses.
+   as JSON:API responses.
 - Make use of proper service discovery instead of `CrnkProperties.RESOURCE_SEARCH_PACKAGE` in real applications.
 
 
@@ -345,7 +345,7 @@ include::../../../../crnk-integration-examples/spring-boot-example/src/main/java
 
 Next to all the auto configurations there are also a number of further Spring-specific modules:
 
-- `SpringSecurityModule` provides a mapping of Spring Security exception types to JSON API errors that complements
+- `SpringSecurityModule` provides a mapping of Spring Security exception types to JSON:API errors that complements
   the Spring-independent `SecurityModule`. Auto configuration is provided by `CrnkSecurityAutoConfiguration`. It sets up `SecurityModule` and
   `SpringSecurityModule`. By default access to all repositories is blocked. A bean of type `SecurityModuleConfigurer`
   can be added to grant access to repositories.
@@ -353,11 +353,11 @@ Next to all the auto configurations there are also a number of further Spring-sp
 - `SpringTransactionRunner` lets all requests run in a transaction. If the request completes, the transaction is committed.
   In case of an error, the transaction is rolled back.
 
-- Spring MVC Module makes Spring MVC services available in the Crnk Home Module next to the json api repositories to have a list of all offered
+- Spring MVC Module makes Spring MVC services available in the Crnk Home Module next to the JSON:API repositories to have a list of all offered
   services. Auto configuration is provided by `CrnkSpringMvcAutoConfiguration`.
 
 - With `CrnkErrorController` configured by `CrnkErrorControllerAutoConfiguration` additionally a new error controller is
-  provided that returns errors in JSON API format. `crnk.spring.mvc.errorController=false` allows to disable the controller.
+  provided that returns errors in JSON:API format. `crnk.spring.mvc.errorController=false` allows to disable the controller.
 
 
 
@@ -393,10 +393,10 @@ anchor:tomcatSetup[]
 ## Tomcat Setup
 
 There is a bit of a controversy about which characters to encode or not encode in URLs based on
-RFC 7230 and RFC 3986. JSON API is affected in that regard due to the use of [ and ].
+RFC 7230 and RFC 3986. JSON:API is affected in that regard due to the use of [ and ].
 Browser vendors have yet to endorse those RFCs. But unfortunately, Tomcat already started
 to enforce the RFCs from their side. As such it is useful to
-relax the [ and ] characters to simplify development with JSON API, like entering
+relax the [ and ] characters to simplify development with JSON:API, like entering
 URLs manually in the browser. For this purpose `relaxedPathChars` can be set to `[]`, for more information
 see:
 
@@ -510,7 +510,7 @@ auto configurations and properties. Some possibilities:
 - `setServiceDiscovery` sets a custom service discovery mechanism.
 - `setPropertiesProvider` allows to set how properties are resolved.
 - `getQuerySpecDeserializer` and `setQuerySpecDeserializer` allows to reconfigure how parameters are parsed.
-   Note that in some areas JSON API only provides reocmmendations and Crnk follows those recommendations
+   Note that in some areas JSON:API only provides reocmmendations and Crnk follows those recommendations
    by default. So depending on your use cases, you may want to configure or implement some aspects differently.
 - `setMaxPageLimit` allows to set the maximum number of allowed resources that can be fetched with a request
    by limiting pagination.
@@ -518,11 +518,11 @@ auto configurations and properties. Some possibilities:
    recommended* to be used as people frequently browse repositories on there own with a web browser and
    fail to provide pagination. As a result, your entire database may get downloaded and may bring down
    your servers depending on the datasize.
-- `setWebPathPrefix` like `/api` to specify the path from where the JSON API endpoint is available.
+- `setWebPathPrefix` like `/api` to specify the path from where the JSON:API endpoint is available.
 - `setUrlMapper` to provide a new url mapping implementation to customize how Crnk generates links.
-- `getResourceRegistry` to access the available JSON API resources and repositories.
+- `getResourceRegistry` to access the available JSON:API resources and repositories.
 - `setAllowUnknownAttributes` to ignore unknown filter and sort attributes.
-- `setAllowUnknownParameters` to ignore query parameters not specified by JSON API (`filter`, `sort`, etc.).
+- `setAllowUnknownParameters` to ignore query parameters not specified by JSON:API (`filter`, `sort`, etc.).
 
 
 IMPORTANT: Appropriate page limits are vital to protect against denial-of-service attacks when working
@@ -571,7 +571,7 @@ provided by `CrnkProperties`:
 
 * `crnk.config.resource.response.return_404` with values true and false (default).
   Enforces a 404 response should a repository return a null value. This is common practice, but
-  not strictly mandated by the JSON API specification. In general it is recommended for
+  not strictly mandated by the JSON:API specification. In general it is recommended for
   repository to throw `ResourceNotFoundException`.
 
 * `crnk.config.serialize.object.links` to serialize links as objects. See
@@ -595,7 +595,7 @@ provided by `CrnkProperties`:
   `Content-Type: application/vnd.api+json` to describe their request body
 
 * If `crnk.enforceIdName` is set to `true` all `@JsonApiId` annotated fields will be named `id` on the rest layer (for sorting, filtering, etc.) regardless of its Java name.
-  By default this is not enabled for historic reasons. But enabling it more closely reflects the JSON API specification and is recommended to do so.
+  By default this is not enabled for historic reasons. But enabling it more closely reflects the JSON:API specification and is recommended to do so.
   It likely will be enabled in Crnk 3 by default.
 
 
@@ -607,7 +607,7 @@ The `HomeModule` provides a listing of available resources in each directory (su
 directory paths always end with a '/' and the `HomeModule` will process the request if there is no resource or
 relationship repository serving that particular path.
 
-The `HomeModule` supports two kinds of formats that can be choosen upon creation. A JSON API-style format where a
+The `HomeModule` supports two kinds of formats that can be choosen upon creation. A JSON:API-style format where a
 links node holds all links to child directories and repositories. And a JSON HOME format as specified by
 https://tools.ietf.org/html/draft-nottingham-json-home-06[JSON Home].
 

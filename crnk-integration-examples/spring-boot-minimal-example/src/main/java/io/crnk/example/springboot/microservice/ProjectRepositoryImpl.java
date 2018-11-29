@@ -38,5 +38,4 @@ public class ProjectRepositoryImpl extends ResourceRepositoryBase<Project, Long>
 	public synchronized ResourceList<Project> findAll(QuerySpec querySpec) {
 		return querySpec.apply(projects.values());
 	}
-
 }

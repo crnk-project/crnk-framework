@@ -9,14 +9,14 @@ https://github.com/abdulhaq-e/`ngrx-json-api`[`ngrx-json-api`]. ngrx brings the 
 development from React to Angular. Its motivation is to separate the presentation layer from
 application state for a clean, mockable, debug-friendly, performant and scalable design.
 
-We believe that JSON API and redux can complement each other well. The resource-based nature
-of JSON API and its normalized response document format (trough relationships and inclusions)
+We believe that JSON:API and redux can complement each other well. The resource-based nature
+of JSON:API and its normalized response document format (trough relationships and inclusions)
 are well suited to be put into an ngrx-based store. `ngrx-json-api` is a project that does exactly that.
 The missing piece is how to integrate Angular components like forms and tables with `ngrx-json-api`.
-Tables need to display JSON API resources and do sorting, filtering, paging.
-Forms need to display JSON API resources and trigger `POST`, `PATCH` and `DELETE` requests.
+Tables need to display JSON:API resources and do sorting, filtering, paging.
+Forms need to display JSON:API resources and trigger `POST`, `PATCH` and `DELETE` requests.
 Errors should be displayed to the user in a dialog, header section or next to
-input component causing the issue (based on JSON API source pointers).
+input component causing the issue (based on JSON:API source pointers).
 
 Crnk provides two tools: `crnk-gen-typescript` and `@crnk/angular-ngrx`. `crnk-gen-typescript`
 generates type-safe Typescript stubs from any Crnk backend. `@crnk/angular-ngrx` takes care
@@ -44,10 +44,10 @@ at the <<generation>> chapter.
 | A simple QueryDSL-like expression model for Typescript.
 
 | `@crnk/angular-ngrx/expression/forms`
-| Binding of the expression model to Angular form components (a JSON API specific flavor of `ngModel`).
+| Binding of the expression model to Angular form components (a JSON:API specific flavor of `ngModel`).
 
 | `@crnk/angular-ngrx/binding`
-| Helper classes that take care of binding tables or forms to JSON API. Makes use of `@crnk/angular-ngrx/expression`.
+| Helper classes that take care of binding tables or forms to JSON:API. Makes use of `@crnk/angular-ngrx/expression`.
 
 | `@crnk/angular-ngrx/meta`
 | Typescript API for <<meta_module,Meta Module>> generated with `crnk-gen-typescript`.
@@ -79,19 +79,19 @@ anchor:expressions[]
 
 `@crnk/angular-ngrx/expression` provides a QueryDSL-like expression model for Typescript. It is used  to
  address boiler-plate when working with the Angular `FormModule` resp. `ngModel` directly. For example,
- when an input field needs to be bound to a JSON API resource field, a number of things must happen:
+ when an input field needs to be bound to a JSON:API resource field, a number of things must happen:
 
  - The input field should display the current store value.
  - The input field must have a unique form name.
  - The input field must sent changes back to the store.
- - The `FormControl` backing the input field must be properly validated. JSON API errors may
+ - The `FormControl` backing the input field must be properly validated. JSON:API errors may
     may contain a source pointer. If the source pointer points to a field that is bound to a `FormControl`, it
     must be accounted for in its valid state.
  - The input field is usually accompanied by a message field displaying validation errors.
  - Errors that cannot be mapped to a `FormControl` must be displayed in a editor header or error dialog.
 
 `ngModel` is limited to holding a simple value. In contrast, the use cases here require an understanding of the
-entire resource. It is necessary to have full JSON API resource and the path to the
+entire resource. It is necessary to have full JSON:API resource and the path to the
 field to determine the field value and errors. This is achieved with `@crnk/angular-ngrx/expression`:
 
 - `Expression` interface represents any kind of value that can be obtained in some fashion.
@@ -122,7 +122,7 @@ Note that:
 - `toFormName` computes a default (unique) form name for that path. The name is composed of the
   resource type, resource id and path to allow editing of multiple resources on the same screen.
 - `toQueryPath` constructs a path used for sorting and filtering. Such a path does not include any
-  `attributes`, `relationships` or `data` elements necessary to navigate through JSON API structures.
+  `attributes`, `relationships` or `data` elements necessary to navigate through JSON:API structures.
 - QMetaAttribute can also be constructed without a bean binding. In this case it can still
   be used to construct type-safe paths and call `toString`. This can be used, for example, to specify
   a field for a table column where only later multiple records will then be loaded and shown.
@@ -152,13 +152,13 @@ in the next sections.
 
 ## Form Binding
 
-Working with forms and JSON API is the same for many use cases:
+Working with forms and JSON:API is the same for many use cases:
 
 - components are bound to store values
 - components have to update store values by dispatching appropriate actions
 - components may perform basic local validation. For example with the Angular `required` directive.
-- components may get server-side validation errors using the JSON API error format.
-- components may perform complex client-side validation using `@ngrx/effects`. JSON API is
+- components may get server-side validation errors using the JSON:API error format.
+- components may perform complex client-side validation using `@ngrx/effects`. JSON:API is
   well suited for this purpose. For example,  a (validation) effect can listen to value changes
   in the store and trigger `ModifyStoreResourceErrorsAction` of `ngrx-json-api` when necessary.
   That validation effect is free to perform any kind of validation logic cleanly decoupled
@@ -194,7 +194,7 @@ query is located.
 ### Updating Data
 
 `FormBinding` listens to value changes of the bound form and updates accordingly updates the store through `ngrx-json-api`
-actions. To have a mapping between JSON API resource fields and form controls, the later must follow a naming pattern.
+actions. To have a mapping between JSON:API resource fields and form controls, the later must follow a naming pattern.
 There are two possibilities for form control names:
 
 - `//<type>//<id>//path` to reference a field by the resource type, resource id and path within the resource, e.g.
@@ -216,28 +216,28 @@ do not pass. Two fields give access to that status information:
 
 ### Validation and Error handling
 
-`FormBinding` takes care of error handling. It maps back any JSON API errors back to the form controls of the
-configured form. Internally it matches the source pointers of JSON API errors against the form names (see previous section)
-to match errors with form control. The `FormBinding` has an `unmappedErrors` property that lists any JSON API error that could not be assigned to a specific form
-control instance, either because the matching instance does not exists or the JSON API error is not specific to given attribute
+`FormBinding` takes care of error handling. It maps back any JSON:API errors back to the form controls of the
+configured form. Internally it matches the source pointers of JSON:API errors against the form names (see previous section)
+to match errors with form control. The `FormBinding` has an `unmappedErrors` property that lists any JSON:API error that could not be assigned to a specific form
+control instance, either because the matching instance does not exists or the JSON:API error is not specific to given attribute
 but concerns the entire resource (like a conflict).
 
 There are two possibilities how to display errors:
 
 - Make use of the default Angular API and display the errors of the `FormControl` instances.
-- Access the JSON API errors from the store directly.
+- Access the JSON:API errors from the store directly.
 
 There are two components for this purpose that work together with the expression model from the previous section. Both
 components take an expression as parameter:
 
 - `crnk-control-errors` retrieves the errors from the `FormControl` having been bound to the same expression. As a consequence,
-  it displays both local and JSON API errors.
-- `crnk-resource-errors` retrieves the JSON API error directory from the store. As such, it works independently of the forms
-  but can display JSON API errors only.
+  it displays both local and JSON:API errors.
+- `crnk-resource-errors` retrieves the JSON:API error directory from the store. As such, it works independently of the forms
+  but can display JSON:API errors only.
 
 In both case a template must be specified how the error is rendered. In case of multiple errors, the template is rendered
-multiple times. `errorCode` and `errorData`  are available as variable. `errorData` contains the full JSON API error
-in case of a JSON API error.
+multiple times. `errorCode` and `errorData`  are available as variable. `errorData` contains the full JSON:API error
+in case of a JSON:API error.
 
 
 
@@ -256,7 +256,7 @@ WARNING: Intellij IDEA seems to have some issues when it comes to using the asyn
 ## Table Binding
 
 Similar to `FormBinding` there is a `DataTableBinding` class. It can help
-taking care of interfacing a table component with JSON API.
+taking care of interfacing a table component with JSON:API.
 
 
 ### Setup
@@ -285,7 +285,7 @@ bound to the table. `zoneId` additionally can specify in which `ngrx-json-api` z
 
 `DataTableBinding`  makes use of a `DataTableImplementationAdapter` and offers a
 `onLazyLoad(...)` method to translate native event of the table implementation
-to JSON API query parameters and then updates the query in the store accordingly. The update of the store in turns
+to JSON:API query parameters and then updates the query in the store accordingly. The update of the store in turns
 triggers a refresh from the server and lets the table component get the new data through the `result$` variable
 of type `Observable<ManyQueryResult>`. `ManyQueryResult` holds, next to the resources, information about
 linking, meta data, loading state and errors.
