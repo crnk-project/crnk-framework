@@ -44,7 +44,7 @@ public class CrnkTomcatAutoConfiguration {
 					if (relaxedQueryChars == null) {
 						relaxedQueryChars = "";
 					}
-					relaxedQueryChars += "[]";
+					relaxedQueryChars += "[]{}";
 					PropertyUtils.setProperty(protocol11, PROPERTY_NAME, relaxedQueryChars);
 				} catch (Exception e) {
 					LOGGER.debug("failed to set relaxed query charts, Tomcat might be outdated");

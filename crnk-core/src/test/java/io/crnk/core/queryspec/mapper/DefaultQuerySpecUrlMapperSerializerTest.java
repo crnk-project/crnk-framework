@@ -1,5 +1,9 @@
 package io.crnk.core.queryspec.mapper;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -19,10 +23,6 @@ import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class DefaultQuerySpecUrlMapperSerializerTest {
 
@@ -93,16 +93,6 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.putRelatedSpec(Project.class, projectQuerySpec);
 		check("http://127.0.0.1/tasks?filter[projects][name][EQ]=test", null, querySpec);
-	}
-
-	@Test(expected = UnsupportedOperationException.class)
-	public void testNestedFilterSpecNotYetSupported() {
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		querySpec.addFilter(FilterSpec.or(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"),
-				new FilterSpec(Arrays.asList("name"), FilterOperator.GE, "test")));
-
-		RegistryEntry entry = resourceRegistry.getEntry(Task.class);
-		urlBuilder.buildUrl(entry.getResourceInformation(), null, querySpec);
 	}
 
 	@Test

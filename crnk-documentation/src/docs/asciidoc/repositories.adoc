@@ -201,7 +201,7 @@ the implementation of a repository as simple as possible.
 
 anchor:filtering[]
 
-### Filtering
+### Basic Filtering
 
 NOTE: The JSON:API specification does not a mandate a specific filtering semantic. Instead
 it provides a recommendation that comes by default with Crnk. Depending on the data store
@@ -295,6 +295,60 @@ For example:
   with `DefaultQuerySpecUrlMapper.addSupportedOperator(..)`. The default operator can be
   overridden by setting `DefaultQuerySpecUrlMapper.setDefaultOperator(...)`.
   For more information see  <<urlmapper,`QuerySpecUrlMapper`>>.
+
+anchor:nested_filtering[]
+
+### Nested Filtering
+
+WARNING: This feature is experimental. Please provide feedback.
+
+The url patterns from the previous section allow to `AND` multiple filter conditions. For scenarios where
+this is insufficient, it is also possible to specify more complex filter specifications through JSON.
+The subsequent example filters projects by either their `name` being equals `Great Project` or its `id`
+being smaller or equals 122.
+
+[source]
+----
+http://127.0.0.1:8080/projects?filter={"OR": {"name": "Great Project", "LE": {"id": 122}}}
+----
+
+The following rules apply:
+
+- JSON field names matching an operator can be used in two different ways: to setup arbitrary nesting
+  of `AND`, `OR`, `NOT` or to specify an operator for field, name pair like `{"id": 122}`.
+- JSON field names matching a resource field name can also be used in two different ways: to filter the
+  attribute by the specified value or to setup nested attributes.
+
+Some further examples:
+
+1. To require a single attribute to equal a value:
+
+  {"name": "test"}
+
+2. To require a single attribute to equal a value from within a set:
+
+  {"id": [12, 13, 14]}
+
+3. To filter by multiple attributes with the `OR` operator:
+
+  { "OR": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
+
+4. To filter by multiple attributes with the `AMD` operator:
+
+  { "AND": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
++
+or more simply:
+
+  {"id": [12, 13, 14], "completed": "true" }
+
+5. To nest `AND`, `OR`, `NOT` operators:
+
+  {"name": "Great Task", "OR": {"id": 122, "name": "Other Task"}}
+
+
+
+
+
 
 
 anchor:sorting[]
