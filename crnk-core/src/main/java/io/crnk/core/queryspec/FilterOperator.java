@@ -147,7 +147,7 @@ public class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) <= 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) <= 0;
 		}
 
 	};
@@ -162,7 +162,7 @@ public class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) > 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) > 0;
 		}
 	};
 
@@ -176,7 +176,7 @@ public class FilterOperator {
 		public boolean matches(Object value1, Object value2) {
 			Comparable<Object> c1 = (Comparable<Object>) value1;
 			Comparable<Object> c2 = (Comparable<Object>) value2;
-			return c1.compareTo(c2) >= 0;
+			return c1 != null && c1 != null && c1.compareTo(c2) >= 0;
 		}
 	};
 

@@ -1,5 +1,6 @@
 package io.crnk.core.queryspec.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -64,6 +65,11 @@ public abstract class DefaultQuerySpecDeserializerTestBase extends AbstractQuery
 			@Override
 			public TypeParser getTypeParser() {
 				return moduleRegistry.getTypeParser();
+			}
+
+			@Override
+			public ObjectMapper getObjectMapper() {
+				return container.getObjectMapper();
 			}
 		};
 
