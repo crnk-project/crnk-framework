@@ -109,11 +109,6 @@ public class GenerateTypescriptTaskTest {
         assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
         assertNotExists("build/generated/source/typescript/src/tasks.meta.ts");
 
-        // check whether source copied to compile directory for proper source bundling
-        assertExists("build/npm_compile/.npmrc");
-        assertExists("build/npm_compile/package.json");
-        assertExists("build/npm_compile/src/index.ts");
-
         checkSchedule(expressions, resourceFormat);
         checkProject();
         if (expressions) {
