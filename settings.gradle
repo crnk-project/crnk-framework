@@ -3,7 +3,6 @@ include ':crnk-reactive'
 include ':crnk-home'
 include ':crnk-test'
 include ':crnk-client'
-include ':crnk-client-angular-ngrx'
 include ':crnk-meta'
 include ':crnk-jpa'
 include ':crnk-validation'
@@ -11,6 +10,7 @@ include ':crnk-validation'
 include ':crnk-monitor-brave4'
 include ':crnk-security'
 include ':crnk-activiti'
+include ':crnk-ui'
 
 include ':crnk-setup:crnk-setup-spring'
 include ':crnk-setup:crnk-setup-spring-boot1'
@@ -25,7 +25,11 @@ include ':crnk-data:crnk-data-facet'
 include ':crnk-format:crnk-format-plain-json'
 
 include ':crnk-operations'
+
+include ':crnk-documentation'
+include ':crnk-bom'
 include ':crnk-gen-typescript'
+include ':crnk-client-angular-ngrx'
 
 include ':crnk-integration-examples:dropwizard-mongo-example'
 include ':crnk-integration-examples:jersey-example'
@@ -35,10 +39,6 @@ include ':crnk-integration-examples:spring-boot-example'
 include ':crnk-integration-examples:spring-boot-minimal-example'
 include ':crnk-integration-examples:spring-boot-microservice-example'
 include ':crnk-integration-examples:dagger-vertx-example'
-
-include ':crnk-ui'
-include ':crnk-documentation'
-include ':crnk-bom'
 
 gradle.beforeProject { Project project ->
 	project.with {

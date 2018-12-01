@@ -86,9 +86,6 @@ public class GenerateTypescriptTaskTest {
 		GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
 		task.runGeneration(Thread.currentThread().getContextClassLoader());
 
-		Copy processTask = (Copy) project.getTasks().getByName("processTypescript");
-		processTask.execute();
-
 		assertExists("build/generated/source/typescript/package.json");
 		assertExists("build/generated/source/typescript/src/index.ts");
 		assertExists("build/generated/source/typescript/src/projects.ts");

@@ -14,7 +14,8 @@
 		<class>io.crnk.jpa.model.RelatedEntity</class>
 		<class>io.crnk.jpa.model.TestEntity</class>
 		<class>io.crnk.jpa.model.OtherRelatedEntity</class>
-		<class>io.crnk.jpa.model.AnnotationTestEntity</class>
+		<class>io.crnk.jpa.model.JpaTransientTestEntity</class>
+		<class>io.crnk.jpa.model.AnnotationTestEntity</class>x
 		<class>io.crnk.jpa.model.BasicAttributesTestEntity</class>
 		<class>io.crnk.jpa.model.CollectionAttributesTestEntity</class>
 		<class>io.crnk.jpa.model.CountryEntity</class>

@@ -22,8 +22,6 @@ buildscript {
 	}
 }
 
-apply plugin: 'net.ltgt.apt'
-
 sourceSets {
 	main {
 		java {

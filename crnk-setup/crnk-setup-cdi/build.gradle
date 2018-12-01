@@ -14,10 +14,10 @@ dependencies {
 // e.g. CDI expects those directories to be equal
 sourceSets {
 	main {
-		output.resourcesDir = output.classesDir
+		output.resourcesDir = output.classesDirs.singleFile
 	}
 	test {
-		output.resourcesDir = output.classesDir
+		output.resourcesDir = output.classesDirs.singleFile
 	}
 }
 jar {
