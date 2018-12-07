@@ -14,7 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JpaDefaultPagingEndToEndTest extends AbstractJpaJerseyTest {
+public class JpaDefaultPagingIntTest extends AbstractJpaJerseyTest {
 
 	private ResourceRepositoryV2<TestEntity, Long> testRepo;
 

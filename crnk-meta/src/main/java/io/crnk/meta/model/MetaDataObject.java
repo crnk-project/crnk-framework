@@ -163,6 +163,9 @@ public abstract class MetaDataObject extends MetaType {
 		if (i == pathElements.size() - 1) {
 			return null;
 		} else {
+			if(pathElementType instanceof MetaCollectionType){
+				pathElementType = ((MetaCollectionType)pathElementType).getElementType();
+			}
 			if (!(pathElementType instanceof MetaDataObject)) {
 				throw new IllegalArgumentException("failed to resolve path " + pathElements + ", expected a simple object, but got " + pathElementType.getImplementationClass());
 			}

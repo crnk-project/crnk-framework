@@ -34,76 +34,38 @@ The feature set includes:
    to the usually more interesting exceptions like
    `ValidationException` and then translated to JSON:API errors.
 
-Have a look at the Spring Boot example application which makes use of the JPA module, DTO mapping
-and computed attributes.
-
 Not yet supported are sparse field sets queried by tuple queries.
 
 ### JPA Module Setup
 
-To use the module, add a dependency to `io.crnk:crnk-jpa` and register the `JpaModule`
-to Crnk. For example in the case of JAX-RS:
+To use the JPA module, two things are necessary:
+
+- a set of existing entities
+- matching JPA repositories that have to be setup
+
+For an  example have a look at
+https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/spring-boot-example[spring-boot-example].
+
+#### Entity
+
+Any JPA entity can be used to expose as JSON:API resource:
 
 [source]
+.ScheduleEntity.java
 ----
-	TransactionRunner transactionRunner = ...;
-
-	JpaModuleConfig config = new JpaModuleConfig();
-
-	// expose all entitities from provided EntityManagerFactory
-	config.exposeAllEntities(entityManagerFactory);
-
-	// expose single entity
-    config.addRepository(JpaRepositoryConfig.builder(TaskEntity.class).build());
-
-    // expose single entity with additional interface declaration. Interface is used to
-    // extract the list, meta and link information types.
-    config.addRepository(
-      JpaRepositoryConfig.builder(PersonEntity.class)
-           .setInterfaceClass(PersonRepository.class).build()
-    );
-
-	JpaModule jpaModule = JpaModule.createServerModule(config, em, transactionRunner());
-
-	CrnkFeature feature = new CrnkFeature(...);
-	feature.addModule(jpaModule);
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/model/ScheduleEntity.java[]
 ----
-
-Note that in Spring Boot the setup is simplified by an AutoConfiguration. The
-application just has to implement `JpaModuleConfigurer` to configure `JpaModuleConfig`.
-
-- `JpaModuleConfig.setRepositoryFactory` allows to provide a factory to change or customized the used repositories.
-- `exposeAllEntities` takes an `EntityManagerFactory` and exposes all registered entities as
-  JSON:API repository.
-- To manually select the entities exposed to Crnk use `JpaModuleConfig.addRepository(...)`.
- `JpaRepositoryConfig` provides a number of customization options for the exposed entity.
-  `setListClass`, `setListMetaClass` and `setListLinksClass` allow to set the type information of links and meta data.
-  `setInterfaceClass` is a shortcut that allows to extract those three types from a repository interface definition
-  (see `TaskRepository` below for an example).
-- `JpaRepositoryConfig.Builder.setRepositoryDecorator` allows to setup a repository decorator that can intercept and change any request,
-  like setting up additional links and meta information.
-- `JpaRepositoryConfig` allows to specify DTO mapping, have a look at the later section to this topic.
-- Internally the JpaModule will setup a `JpaResourceRepository` and  `JpaRelationshipRepository` for each exposed entity.
-- The transactionRunner needs to be implemented by the application to hook into the transaction processing of the used
-  environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and carring a
-  `@Transactional` annotation. The JPA module then ensures that every requests happens within such a transaction. Crnk
-   comes with two default implementations: `SpringTransactionRunner` and
-  `CdiTransactionRunner` that come are included in `crnk-setup-spring` and `crnk-cdi`.
-
-
-### JPA Entity Setup
-
-Most features of JPA are supported and get mapped to JSON:API:
 
 - Entities are mapped to resources.
 - Crnk understands all JPA-related annotations and in many cases, not Crnk-specific annotations are necessary.
 - Embeddables are mapped to nested json structures.
 - Embeddables used as primary keys are mapped to/from a simple string to remain addressable as resource id. The order of attributes thereby determines the position
   of the values in the string.
-- Not yet supported are relationships within embeddables.
+- Not supported are relationships within embeddables.
+
 
 It is possible to add additional JSON:API related fields to entities by annotating them with `@javax.persistence.Transient` (or the other way around by marking
-it with `@JsonIgnore`):
+it with `@JsonIgnore`).
 
 [source]
 .JpaTransientTestEntity.java
@@ -128,6 +90,54 @@ include::../../../../crnk-jpa/src/test/java/io/crnk/jpa/model/JpaTransientTestEn
 Notice that both fields are mapped to the same column. The `project` field must be made read-only with `insertable` and `updateable` to let JPA know that
 `projectId` is supposed to be used for write operations. In the example, `SerializeType.ID_ONLY` will trigger for `projectId` to always be written to the
 response in the relationship data section without having to fully load the related `project`.
+
+
+#### JPA Repository Setup
+
+To then expose
+an entity as resource, provide a repository implementation inheriting from
+`JpaEntityRepositoryBase`:
+
+[source]
+.ScheduleRepositoryImpl.java
+----
+include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/domain/repository/ScheduleRepositoryImpl.java[]
+----
+
+If no such repository is specified, Spring Boot will by default expose all entities if not configured otherwise.
+
+
+#### JPA module Setup
+
+Crnk provides a Spring Boot AutoConfiguration to setup the JPA Module.
+for more advanced use cases and other frameworks, the JPA module can also be setup
+manually:
+
+[source]
+----
+	TransactionRunner transactionRunner = ...;
+
+	JpaModuleConfig config = new JpaModuleConfig();
+
+	// expose all entitities from provided EntityManagerFactory
+	config.exposeAllEntities(entityManagerFactory);
+
+	JpaModule jpaModule = JpaModule.createServerModule(config, em, transactionRunner());
+
+	CrnkFeature feature = new CrnkFeature(...);
+	feature.addModule(jpaModule);
+----
+
+- `exposeAllEntities` takes an `EntityManagerFactory` and exposes all registered entities as
+  JSON:API repository.
+- `JpaRepositoryConfig.Builder.setRepositoryDecorator` allows to setup a repository decorator that can intercept and change any request,
+  like setting up additional links and meta information.
+- The transactionRunner needs to be implemented by the application to hook into the transaction processing of the used
+  environment (Spring, JEE, etc.). This might be as simple as a Spring bean implementing `TransactionRunner` and carring a
+  `@Transactional` annotation. The JPA module then ensures that every requests happens within such a transaction. Crnk
+   comes with two default implementations: `SpringTransactionRunner` and
+  `CdiTransactionRunner` that come are included in `crnk-setup-spring` and `crnk-cdi`.
+
 
 
 ### Pagination
@@ -212,146 +222,17 @@ On the server-side, the interface can be registered with:
            .setInterfaceClass(PersonRepository.class).build()
 ----
 
-### Intercepting and modifying requests to JPA repositories
-
-JPA repositories support the same set of <<repository_decoration,decoration>> and <<requestfilter,filtering>> mechanisms as any other repository.
-They allow to intercept and customize request before or after hitting the JPA repositories.
-
-Next to that, there are further JPA-specific filters that allow to apply changes to JPA repository requests:
-
-`JpaModuleConfig.addFilter(new MyRepositoryFilter())`
-
-A filter looks like:
-
-[source]
-----
-	public class MyRepositoryFilter extends JpaRepositoryFilterBase {
-
-		boolean accept(Class<?> resourceType){...}
-
-		<T, I extends Serializable> JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository){...}
-
-		QuerySpec filterQuerySpec(Object repository, QuerySpec querySpec){...}
-
-		...
-	}
-----
-
-The filter methods can perform any kind of customizations. With `JpaCriteriaRepositoryFilter` and `QuerydslRepositoryFilter` there are two specialization of
-`JpaRepositoryFilter` that allow further customizations specific to respective query mechanism.
-
 
 ### Customizing the exposed resources over the underlying entity model
 
-Not always it is desired to have a 1:1 mapping between resources and entities. There are various techniques to customize the resource model:
+Not always it is desired to have a 1:1 mapping between resources and entities. There are
+various techniques to customize the resource model:
 
 - Make use of the Crnk and Jackson annotations like `@JsonApiResource`, `JsonApiRelationId`, `JsonApiRelation` and `@JsonIgnore` to modify the entities on the resource layer.
 - Setup a DB view matching the desired resource and declare it as entity. This typically is the most efficient way to implement complex entity/resource mappings.
-- Setup a DTO mapping to map entities to resource objects (see the subsequent section for more information)
-
-#### DTP Mapping
-
-anchor:dto_mapping[]
-
-Mapping to DTO objects is supported with `JpaModule.registerMappedEntityClass(...)`.
-A mapper then can be provided that translates the Entity to a DTO class.
-Such a mapper might be implemented manually or generated (mostly) automatically
-with tools like MapStruct. If two mapped entities are registered, there
-respective mapped relationships will be automatically registered as well.
-
-The mapping is performed by `JpaMapper` interface providing methods to
-map and unmap entities to and from DTOs. There is an additional
-`unmapQuerySpec` method that does the same task for query parameters,
-such as renaming attributes or translating types.
-`JpaMapper` may introduce and fill-up new attributes not available on one side.
-Such attributes can either be set in the mapper itself, or
-be derived from a value computed in the database as shown in this example:
-
-[source]
-----
-    JpaModuleConfig config = new JpaModuleConfig();
-	config.setQueryFactory(QuerydslQueryFactory.newInstance());
-
-	// introduce new computed attribute
-	QuerydslExpressionFactory<QTestEntity> basicComputedValueFactory = new QuerydslExpressionFactory<QTestEntity>() {
-
-		@Override
-		public Expression<String> getExpression(QTestEntity parent, JPAQuery<?> jpaQuery) {
-			return parent.stringValue.upper();
-		}
-	};
-	QuerydslQueryFactory queryFactory = (QuerydslQueryFactory) config.getQueryFactory();
-	queryFactory.registerComputedAttribute(TestEntity.class, TestDTO.ATTR_COMPUTED_UPPER_STRING_VALUE,
-		 String.class, basicComputedValueFactory);
-
-	// register repository with DTO mapping
-	config.addRepository(
-	  JpaRepositoryConfig.builder(TestEntity.class, TestDTO.class, new TestDTOMapper(entityManager)).build()
-	);
-
-    JpaModule module = JpaModule.createServerModule(config, em, transactionRunner);
-----
-
-and
-
-[source]
-----
-	public class TestDTOMapper implements JpaMapper<TestEntity, TestDTO> {
-
-		private EntityManager em;
-
-		...
-
-		@Override
-		public TestDTO map(Tuple tuple) {
-			TestDTO dto = new TestDTO();
-			TestEntity entity = tuple.get(0, TestEntity.class);
-			dto.setId(entity.getId());
-			dto.setStringValue(entity.getStringValue());
-			dto.setComputedUpperStringValue(tuple.get("computedUpperStringValue", String.class));
-			...
-			return dto;
-		}
-
-		@Override
-        public TestEntity unmap(TestDto dto) {
-        	TestEntity entity = em.find(TestEntity.class, dto.getId());
-        	if(entity == null){
-        	  entity = new TestEntity();
-        	}
-        	entity.setStringValue(dto.getStringValue());
-
-        	...
-        }
-
-        @Override
-        public QuerySpec unmapQuerySpec(QuerySpec querySpec) {
-           	...
-        }
-	}
-----
-
-The example shows:
-- Some of the regular entity attributes are mapped to the DTO.
-- There is a `computedUpperStringValue` attribute that is computed with an SQL expression.
-  The expression can be written with the Criteria API or QueryDSL depending
-  on which query backend is in use.
-- `unmap` looks up the entity with the `EntityManager`. This is necessary to obtain a JPA-managed
-  instance. Otherwise a JPA implementation may treat existing entities as new entities and fail
-  upon insertion.
-
-Computed attributes are indistinguishable from regular, persisted entity attributes.
-They can be used for selection, sorting and filtering. Both `JpaCriteriaQueryFactory`
-and `QuerydslQueryFactory` provide a `registerComputedAttribute` method to
-register an expression factory to create such computed attributes. The registration requires
-the target entity and a name. To make the computed attribute available
-to consumers, the mapper class has access to it trough the provided
-tuple class. Have a look at https://github.com/crnk-project/crnk-framework/blob/master/crnk-jpa/src/test/java/io/crnk/jpa/mapping/DtoMappingTest.java to see everything in use.
-
-There is currently not yet any automated support for renaming of attribute. If attributes
-are renamed on DTOs, the incoming QuerySpec has to be modified accordingly to
-match again the entity attribute naming. The same holds for types like Enums or dates. The
-JPA implementation mostly likely will fail with an incorrect type is passed to it.
+- Perform any kind of modification in your repository by overriding `findAll`, `save`, `create`,
+  `delete`. Note that the repository itself must not necessarily return entity classes, but
+   rather can also return a DTO.
 
 
 anchor:validation_module[]

@@ -28,6 +28,7 @@
 		<class>io.crnk.jpa.model.ManyToManyTestEntity</class>
 		<class>io.crnk.jpa.model.NamingTestEntity</class>
 		<class>io.crnk.jpa.model.OtherRelatedEntity</class>
+		<class>io.crnk.jpa.model.OneToOneOppositeEntity</class>
 		<class>io.crnk.jpa.model.RenamedTestEntity</class>
 		<class>io.crnk.jpa.model.SequenceEntity</class>
 		<class>io.crnk.jpa.model.SingleTableBaseEntity</class>
@@ -50,12 +51,13 @@
 			<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem" />
 			<property name="javax.persistence.jdbc.user" value="sa" />
 
+			<property name="hibernate.generate_statistics" value="true" />
 			<property name="hibernate.id.new_generator_mappings" value="true" />
 			<property name="hibernate.dialect" value="H2" />
 			<property name="hibernate.format_sql" value="false" />
+			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.hbm2ddl.auto" value="drop-and-create" />
-			<property name="hibernate.validator.autoregister_listeners"
-					  value="true" />
+			<property name="hibernate.validator.autoregister_listeners" value="true" />
 		</properties>
 	</persistence-unit>
 </persistence>

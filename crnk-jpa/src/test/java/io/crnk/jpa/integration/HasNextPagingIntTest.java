@@ -17,7 +17,7 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class HasNextPagingEndToEndTest extends AbstractJpaJerseyTest {
+public class HasNextPagingIntTest extends AbstractJpaJerseyTest {
 
 	private ResourceRepositoryV2<TestEntity, Long> testRepo;
 

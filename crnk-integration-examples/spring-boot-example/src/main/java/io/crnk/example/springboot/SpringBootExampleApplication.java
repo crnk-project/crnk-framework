@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Configuration
 @RestController
 @SpringBootApplication
-@Import({ExampleJpaModuleConfigurer.class, CorsConfig.class, TestDataLoader.class})
+@Import({CorsConfig.class, TestDataLoader.class})
 public class SpringBootExampleApplication {
 
 	public static void main(String[] args) {

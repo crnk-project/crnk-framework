@@ -12,7 +12,7 @@ import org.junit.Test;
 import javax.persistence.OptimisticLockException;
 import java.io.Serializable;
 
-public class OptimisticLockingEndToEndTest extends AbstractJpaJerseyTest {
+public class OptimisticLockingIntTest extends AbstractJpaJerseyTest {
 
 
 	@Override

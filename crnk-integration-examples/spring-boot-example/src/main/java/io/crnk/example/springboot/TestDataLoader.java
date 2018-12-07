@@ -6,6 +6,7 @@ import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.example.springboot.domain.model.Project;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
 import io.crnk.example.springboot.domain.model.Task;
+import io.crnk.example.springboot.domain.model.UserEntity;
 import io.crnk.example.springboot.domain.repository.ProjectRepository;
 import io.crnk.example.springboot.domain.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -61,9 +64,21 @@ public class TestDataLoader {
 			@Override
 			public Object call() {
 				for (int i = 0; i < 10; i++) {
+					UserEntity john = new UserEntity();
+					john.setLoginId("john" + i);
+					john.setName("John Doe");
+					em.persist(john);
+
+					UserEntity jane = new UserEntity();
+					jane.setLoginId("jane" + i);
+					jane.setName("Jane Doe");
+					em.persist(jane);
+
 					ScheduleEntity scheduleEntity = new ScheduleEntity();
 					scheduleEntity.setId((long) i);
 					scheduleEntity.setName("schedule" + i);
+					scheduleEntity.setCreator(john);
+					scheduleEntity.setVerifiers(new HashSet<>(Arrays.asList(jane, john)));
 					em.persist(scheduleEntity);
 				}
 				em.flush();

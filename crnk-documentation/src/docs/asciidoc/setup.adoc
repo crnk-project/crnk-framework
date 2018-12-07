@@ -335,14 +335,6 @@ to gain programmatic access to module configurations. The following `Configurer`
 - `SecurityModuleConfigurer`
 - `MetaModuleConfigurer`
 
-For example:
-
-[source]
-.ExampleJpaModuleConfigurer.java
-----
-include::../../../../crnk-integration-examples/spring-boot-example/src/main/java/io/crnk/example/springboot/ExampleJpaModuleConfigurer.java[]
-----
-
 Next to all the auto configurations there are also a number of further Spring-specific modules:
 
 - `SpringSecurityModule` provides a mapping of Spring Security exception types to JSON:API errors that complements

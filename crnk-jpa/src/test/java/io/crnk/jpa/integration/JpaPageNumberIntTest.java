@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-public class JpaPageNumberEndToEndTest extends AbstractJpaJerseyTest {
+public class JpaPageNumberIntTest extends AbstractJpaJerseyTest {
 
 	private CrnkBoot boot;
 
