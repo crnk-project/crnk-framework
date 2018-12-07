@@ -1,5 +1,6 @@
 package io.crnk.spring.setup.boot.jpa;
 
+import io.crnk.jpa.JpaEntityRepositoryBase;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
@@ -45,57 +46,59 @@ import java.util.List;
 @Import({CrnkCoreAutoConfiguration.class})
 public class CrnkJpaAutoConfiguration {
 
-	@PersistenceContext
-	private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-	@Autowired
-	private EntityManagerFactory emf;
+    @Autowired
+    private EntityManagerFactory emf;
 
-	@Autowired
-	private CrnkJpaProperties jpaProperties;
+    @Autowired
+    private CrnkJpaProperties jpaProperties;
 
-	@Autowired(required = false)
-	private List<JpaModuleConfigurer> configurers;
+    @Autowired(required = false)
+    private List<JpaModuleConfigurer> configurers;
 
+    @Autowired(required = false)
+    private List<JpaEntityRepositoryBase> entityRepositories;
 
-	@Bean
-	@ConditionalOnMissingBean
-	public SpringTransactionRunner transactionRunner() {
-		return new SpringTransactionRunner();
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public SpringTransactionRunner transactionRunner() {
+        return new SpringTransactionRunner();
+    }
 
-	@Bean
-	@ConditionalOnMissingBean
-	public JpaModuleConfig jpaModuleConfig() {
-		return new JpaModuleConfig();
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public JpaModuleConfig jpaModuleConfig() {
+        return new JpaModuleConfig();
+    }
 
-	@Bean
-	@ConditionalOnMissingBean
-	public JpaModule jpaModule(JpaModuleConfig config) {
-		if (configurers != null) {
-			for (JpaModuleConfigurer configurer : configurers) {
-				configurer.configure(config);
-			}
-		}
+    @Bean
+    @ConditionalOnMissingBean
+    public JpaModule jpaModule(JpaModuleConfig config) {
+        if (configurers != null) {
+            for (JpaModuleConfigurer configurer : configurers) {
+                configurer.configure(config);
+            }
+        }
 
-		if (jpaProperties.getExposeAll() && config.getRepositories().isEmpty()) {
-			config.exposeAllEntities(emf);
-		}
+        if (jpaProperties.getExposeAll() && config.getRepositories().isEmpty() && (entityRepositories == null || entityRepositories.isEmpty())) {
+            config.exposeAllEntities(emf);
+        }
 
-		JpaModule module = JpaModule.createServerModule(config, em, transactionRunner());
-		if (jpaProperties.getQueryFactory() != null) {
-			switch (jpaProperties.getQueryFactory()) {
-				case CRITERIA:
-					module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
-					break;
-				case QUERYDSL:
-					module.setQueryFactory(QuerydslQueryFactory.newInstance());
-					break;
-				default:
-					throw new IllegalStateException("unknown query factory");
-			}
-		}
-		return module;
-	}
+        JpaModule module = JpaModule.createServerModule(config, em, transactionRunner());
+        if (jpaProperties.getQueryFactory() != null) {
+            switch (jpaProperties.getQueryFactory()) {
+                case CRITERIA:
+                    module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+                    break;
+                case QUERYDSL:
+                    module.setQueryFactory(QuerydslQueryFactory.newInstance());
+                    break;
+                default:
+                    throw new IllegalStateException("unknown query factory");
+            }
+        }
+        return module;
+    }
 }

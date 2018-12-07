@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-public class AttributeNamingEndToEndTest extends AbstractJpaJerseyTest {
+public class AttributeNamingIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testCanStoreBasicAttributeValues() {

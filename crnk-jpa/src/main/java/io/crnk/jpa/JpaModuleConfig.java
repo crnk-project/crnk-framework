@@ -24,7 +24,7 @@ public class JpaModuleConfig {
 
 	private JpaRepositoryFactory repositoryFactory = new DefaultJpaRepositoryFactory();
 
-	private boolean relationshipsEnabled = true;
+	private boolean relationshipsEnabled = false;
 
 	public JpaModuleConfig() {
 	}
@@ -179,10 +179,17 @@ public class JpaModuleConfig {
 		this.queryFactory = queryFactory;
 	}
 
+	@Deprecated
 	public boolean getRelationshipsEnabled() {
 		return relationshipsEnabled;
 	}
 
+	/**
+	 * @deprecated if true it will make use of the
+	 *      deprecated {@link JpaRelationshipRepository} instead of {@link io.crnk.core.repository.foward.ForwardingRelationshipRepository}.
+	 *      Both should perform equally well.
+	 */
+	@Deprecated
 	public void setRelationshipsEnabled(boolean relationshipsEnabled) {
 		this.relationshipsEnabled = relationshipsEnabled;
 	}

@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-public class BasicAttributesEndToEndTest extends AbstractJpaJerseyTest {
+public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testCanStoreBasicAttributeValues() {

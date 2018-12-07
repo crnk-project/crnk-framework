@@ -24,8 +24,10 @@ public class QuerydslRepositoryFilterTest extends AbstractJpaTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void translationInterceptor() {
-		JpaEntityRepository<TestEntity, Long> repo =
-				new JpaEntityRepository<>(module, JpaRepositoryConfig.create(TestEntity.class));
+		JpaRepositoryConfig<TestEntity> config = JpaRepositoryConfig.create(TestEntity.class);
+		config.setQueryFactory(module.getConfig().getQueryFactory());
+		JpaEntityRepository<TestEntity, Long> repo = new JpaEntityRepository<>(config);
+		repo.setResourceRegistry(resourceRegistry);
 
 
 		QuerySpec querySpec = new QuerySpec(TestEntity.class);

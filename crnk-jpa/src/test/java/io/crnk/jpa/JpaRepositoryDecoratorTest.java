@@ -2,7 +2,6 @@ package io.crnk.jpa;
 
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecoratorBase;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
 import io.crnk.jpa.JpaRepositoryConfig.Builder;
 import io.crnk.jpa.model.RelatedEntity;
@@ -16,8 +15,6 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 	private ResourceRepositoryV2<TestEntity, Long> testRepo;
 
 	private ResourceRepositoryDecoratorBase<TestEntity, Long> resourceDecorator;
-
-	private RelationshipRepositoryDecoratorBase<TestEntity, Long, RelatedEntity, Long> relationshipDecorator;
 
 	@Override
 	@Before
@@ -35,11 +32,8 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 
 			resourceDecorator = Mockito.spy(new ResourceRepositoryDecoratorBase<TestEntity, Long>() {
 			});
-			relationshipDecorator = Mockito.spy(new RelationshipRepositoryDecoratorBase<TestEntity, Long, RelatedEntity, Long>() {
-			});
 			Builder<TestEntity> configBuilder = JpaRepositoryConfig.builder(TestEntity.class);
 			configBuilder.setRepositoryDecorator(resourceDecorator);
-			configBuilder.putRepositoryDecorator(RelatedEntity.class, relationshipDecorator);
 			module.addRepository(configBuilder.build());
 		}
 	}
@@ -49,8 +43,6 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 		addTestWithOneRelation();
 
 		Mockito.verify(resourceDecorator, Mockito.timeout(1)).create(Mockito.any(TestEntity.class));
-		Mockito.verify(relationshipDecorator, Mockito.timeout(1)).setRelation(Mockito.any(TestEntity.class), Mockito.anyLong(),
-				Mockito.eq(TestEntity.ATTR_oneRelatedValue));
 	}
 
 	private TestEntity addTestWithOneRelation() {

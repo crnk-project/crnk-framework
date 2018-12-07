@@ -11,6 +11,7 @@ import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.RelationIdTestRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.TaskList;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
@@ -21,278 +22,338 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class OppositeFowardingRelationshipRepositoryTest {
 
 
-	private ForwardingRelationshipRepository relRepository;
+    private ForwardingRelationshipRepository relRepository;
 
-	private RelationIdTestRepository testRepository;
+    private RelationIdTestRepository testRepository;
 
-	private ResourceRegistry resourceRegistry;
+    private ResourceRegistry resourceRegistry;
 
-	private HttpRequestContextProvider requestContextProvider;
+    private HttpRequestContextProvider requestContextProvider;
 
-	@Before
-	public void setup() {
-		MockRepositoryUtil.clear();
+    @Before
+    public void setup() {
+        MockRepositoryUtil.clear();
 
-		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
-		container.boot();
-		resourceRegistry = container.getResourceRegistry();
-
-
-		testRepository = (RelationIdTestRepository) container.getEntry(RelationIdTestResource.class)
-				.getResourceRepository().getResourceRepository();
-		requestContextProvider = container.getModuleRegistry().getHttpRequestContextProvider();
-
-		RelationshipMatcher relMatcher =
-				new RelationshipMatcher().rule().source(RelationIdTestResource.class).target(RelationIdTestResource.class).add();
-		relRepository = new ForwardingRelationshipRepository(RelationIdTestResource.class, relMatcher,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(container.getResourceRegistry());
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
-	}
-
-	@Test
-	public void checkFindOneTarget() {
-		RelationIdTestResource parent = new RelationIdTestResource();
-		parent.setId(2L);
-		parent.setName("parent");
-
-		RelationIdTestResource child = new RelationIdTestResource();
-		child.setId(3L);
-		child.setName("child");
-
-		parent.setTestNested(child);
-		testRepository.create(parent);
-		testRepository.create(child);
-
-		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
-		Object target = relRepository.findOneTarget(3L, "testNestedOpposite", querySpec);
-
-		Assert.assertNotNull(target);
-	}
+        CoreTestContainer container = new CoreTestContainer();
+        container.setDefaultPackage();
+        container.boot();
+        resourceRegistry = container.getResourceRegistry();
 
 
-	@Test
-	public void checkFindOneTargetWithRelationId() {
-		RelationIdTestResource parent = new RelationIdTestResource();
-		parent.setId(2L);
-		parent.setName("parent");
+        testRepository = (RelationIdTestRepository) container.getEntry(RelationIdTestResource.class)
+                .getResourceRepository().getResourceRepository();
+        requestContextProvider = container.getModuleRegistry().getHttpRequestContextProvider();
 
-		RelationIdTestResource child = new RelationIdTestResource();
-		child.setId(3L);
-		child.setName("child");
+        RelationshipMatcher relMatcher =
+                new RelationshipMatcher().rule().source(RelationIdTestResource.class).target(RelationIdTestResource.class).add();
+        relRepository = new ForwardingRelationshipRepository(RelationIdTestResource.class, relMatcher,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(container.getResourceRegistry());
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+    }
 
-		parent.setTestNestedId(child.getId());
-		testRepository.create(parent);
-		testRepository.create(child);
+    @Test
+    public void checkFindOneTarget() {
+        RelationIdTestResource parent = new RelationIdTestResource();
+        parent.setId(2L);
+        parent.setName("parent");
 
-		QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
-		Object target = relRepository.findOneTarget(3L, "testNestedOpposite", querySpec);
+        RelationIdTestResource child = new RelationIdTestResource();
+        child.setId(3L);
+        child.setName("child");
 
-		Assert.assertNotNull(target);
-	}
+        parent.setTestNested(child);
+        testRepository.create(parent);
+        testRepository.create(child);
 
-	@Test
-	public void checkFindManyTargets() {
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		projectRepository.save(project);
+        QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
+        Object target = relRepository.findOneTarget(3L, "testNestedOpposite", querySpec);
 
-		TaskRepository taskRepository = new TaskRepository();
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		task.setProject(project);
-		taskRepository.save(task);
-
-		relRepository = new ForwardingRelationshipRepository(Project.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
-
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		List<Task> tasks = relRepository.findManyTargets(42L, "tasks", querySpec);
-		Assert.assertEquals(1, tasks.size());
-		Assert.assertEquals(13L, tasks.get(0).getId().longValue());
-	}
-
-	@Test
-	public void checkFindManyTargetsWithRelationId() {
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		projectRepository.save(project);
-
-		ScheduleRepositoryImpl scheduleRepository = new ScheduleRepositoryImpl();
-		Schedule schedule = new Schedule();
-		schedule.setId(13L);
-		schedule.setName("schedule");
-		schedule.setProjectId(project.getId());
-		scheduleRepository.save(schedule);
-
-		relRepository = new ForwardingRelationshipRepository(Project.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
-
-		QuerySpec querySpec = new QuerySpec(Schedule.class);
-		List<Schedule> schedules = relRepository.findManyTargets(42L, "schedules", querySpec);
-		Assert.assertEquals(1, schedules.size());
-		Assert.assertEquals(13L, schedules.get(0).getId().longValue());
-	}
+        Assert.assertNotNull(target);
+    }
 
 
-	@Test
-	public void checkFindOneTargetFromCollection() {
-		TaskRepository taskRepository = new TaskRepository();
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		taskRepository.save(task);
+    @Test
+    public void checkFindOneTargetWithRelationId() {
+        RelationIdTestResource parent = new RelationIdTestResource();
+        parent.setId(2L);
+        parent.setName("parent");
 
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		project.setTasks(Arrays.asList(task));
-		projectRepository.save(project);
+        RelationIdTestResource child = new RelationIdTestResource();
+        child.setId(3L);
+        child.setName("child");
 
-		relRepository = new ForwardingRelationshipRepository(Task.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
+        parent.setTestNestedId(child.getId());
+        testRepository.create(parent);
+        testRepository.create(child);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		Project foundProject = (Project) relRepository.findOneTarget(13L, "project", querySpec);
-		Assert.assertEquals(42L, foundProject.getId().longValue());
-	}
+        QuerySpec querySpec = new QuerySpec(RelationIdTestResource.class);
+        Object target = relRepository.findOneTarget(3L, "testNestedOpposite", querySpec);
 
-	@Test
-	public void checkFindTargetWithInvalidNullReturnId() {
-		TaskRepository taskRepository = new TaskRepository();
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		taskRepository.save(task);
+        Assert.assertNotNull(target);
+    }
 
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		project.setTasks(Arrays.asList(task));
-		projectRepository.save(project);
+    @Test
+    public void checkFindManyTargets() {
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        projectRepository.save(project);
 
-		// manipulate
-		task.setId(null);
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        task.setProject(project);
+        taskRepository.save(task);
 
-		relRepository = new ForwardingRelationshipRepository(Task.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
+        relRepository = new ForwardingRelationshipRepository(Project.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		try {
-			relRepository.findOneTarget(13L, "project", querySpec);
-			Assert.fail();
-		} catch (IllegalStateException e) {
-			Assert.assertTrue(e.getMessage().contains("id is null"));
-		}
-	}
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        List<Task> tasks = relRepository.findManyTargets(42L, "tasks", querySpec);
+        Assert.assertEquals(1, tasks.size());
+        Assert.assertEquals(13L, tasks.get(0).getId().longValue());
 
-	@Test
-	public void checkFindTargetWithNotLoadedRelationship() {
-		TaskRepository taskRepository = new TaskRepository();
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		taskRepository.save(task);
+        // must maintain meta/links information
+        Assert.assertTrue(tasks instanceof TaskList);
+    }
 
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		project.setTasks(null);
-		projectRepository.save(project);
+    @Test
+    public void checkFindManyTargetsWithRelationId() {
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        projectRepository.save(project);
 
-		relRepository = new ForwardingRelationshipRepository(Task.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
+        ScheduleRepositoryImpl scheduleRepository = new ScheduleRepositoryImpl();
+        Schedule schedule = new Schedule();
+        schedule.setId(13L);
+        schedule.setName("schedule");
+        schedule.setProjectId(project.getId());
+        scheduleRepository.save(schedule);
 
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		try {
-			relRepository.findOneTarget(13L, "project", querySpec);
-			Assert.fail();
-		} catch (IllegalStateException e) {
-			Assert.assertTrue(e.getMessage(), e.getMessage().contains("To make use of opposite forwarding behavior for resource lookup"));
-		}
-	}
+        relRepository = new ForwardingRelationshipRepository(Project.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
 
-	@Test
-	public void checkFindTargetWithNullRelationshipValue() {
-		TaskRepository taskRepository = new TaskRepository();
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("task");
-		taskRepository.save(task);
-
-		Task nullIdTask = new Task();
-
-		ProjectRepository projectRepository = new ProjectRepository();
-		Project project = new Project();
-		project.setId(42L);
-		project.setName("project");
-		project.setTasks(Arrays.asList(nullIdTask));
-		projectRepository.save(project);
-
-		relRepository = new ForwardingRelationshipRepository(Task.class, null,
-				ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-		relRepository.setResourceRegistry(resourceRegistry);
-		relRepository.setHttpRequestContextProvider(requestContextProvider);
-
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		try {
-			relRepository.findOneTarget(13L, "project", querySpec);
-			Assert.fail();
-		} catch (IllegalStateException e) {
-			Assert.assertTrue(e.getMessage().contains("id is null for"));
-		}
-	}
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        List<Schedule> schedules = relRepository.findManyTargets(42L, "schedules", querySpec);
+        Assert.assertEquals(1, schedules.size());
+        Assert.assertEquals(13L, schedules.get(0).getId().longValue());
+    }
 
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void checkSetRelationNotYetImplemented() {
-		relRepository.setRelation(null, null, null);
-	}
+    @Test
+    public void checkFindOneTargetFromCollection() {
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        taskRepository.save(task);
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void checkSetRelationsNotYetImplemented() {
-		relRepository.setRelations(null, null, null);
-	}
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        project.setTasks(Arrays.asList(task));
+        projectRepository.save(project);
 
+        relRepository = new ForwardingRelationshipRepository(Task.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void checkAddRelationsNotYetImplemented() {
-		relRepository.addRelations(null, null, null);
-	}
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        Project foundProject = (Project) relRepository.findOneTarget(13L, "project", querySpec);
+        Assert.assertEquals(42L, foundProject.getId().longValue());
+    }
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void checkRemoveRelationsNotYetImplemented() {
-		relRepository.addRelations(null, null, null);
-	}
+    @Test
+    public void checkFindTargetWithInvalidNullReturnId() {
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        taskRepository.save(task);
 
-	@After
-	public void teardown() {
-		MockRepositoryUtil.clear();
-	}
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        project.setTasks(Arrays.asList(task));
+        projectRepository.save(project);
+
+        // manipulate
+        task.setId(null);
+
+        relRepository = new ForwardingRelationshipRepository(Task.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        try {
+            relRepository.findOneTarget(13L, "project", querySpec);
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage().contains("id is null"));
+        }
+    }
+
+    @Test
+    public void checkFindTargetWithNotLoadedRelationship() {
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        taskRepository.save(task);
+
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        project.setTasks(null);
+        projectRepository.save(project);
+
+        relRepository = new ForwardingRelationshipRepository(Task.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        try {
+            relRepository.findOneTarget(13L, "project", querySpec);
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage(), e.getMessage().contains("To make use of opposite forwarding behavior for resource lookup"));
+        }
+    }
+
+    @Test
+    public void checkFindTargetWithNullRelationshipValue() {
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        taskRepository.save(task);
+
+        Task nullIdTask = new Task();
+
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        project.setTasks(Arrays.asList(nullIdTask));
+        projectRepository.save(project);
+
+        relRepository = new ForwardingRelationshipRepository(Task.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        try {
+            relRepository.findOneTarget(13L, "project", querySpec);
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage().contains("id is null for"));
+        }
+    }
+
+    @Test
+    public void checkAddRemoveRelations() {
+        TaskRepository taskRepository = new TaskRepository();
+        List<Task> tasks = new ArrayList<>();
+        for (long i = 0; i < 10; i++) {
+            Task task = new Task();
+            task.setId(i);
+            task.setName("task");
+            taskRepository.save(task);
+            tasks.add(task);
+        }
+
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        projectRepository.save(project);
+
+        relRepository = new ForwardingRelationshipRepository(Project.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+        Assert.assertNull(tasks.get(3).getProject());
+        Assert.assertNull(tasks.get(4).getProject());
+        relRepository.addRelations(project, Arrays.asList(3L, 4L), "tasks");
+        Assert.assertSame(project, tasks.get(3).getProject());
+        Assert.assertSame(project, tasks.get(4).getProject());
+
+        relRepository.addRelations(project, Arrays.asList(5L), "tasks");
+        Assert.assertSame(project, tasks.get(3).getProject());
+        Assert.assertSame(project, tasks.get(4).getProject());
+        Assert.assertSame(project, tasks.get(5).getProject());
+
+        relRepository.removeRelations(project, Arrays.asList(3L), "tasks");
+        Assert.assertNull(tasks.get(3).getProject());
+        Assert.assertSame(project, tasks.get(4).getProject());
+        Assert.assertSame(project, tasks.get(5).getProject());
+    }
+
+    @Test
+    public void checkSetRelations() {
+        TaskRepository taskRepository = new TaskRepository();
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("task");
+        taskRepository.save(task);
+
+        ProjectRepository projectRepository = new ProjectRepository();
+        Project project = new Project();
+        project.setId(42L);
+        project.setName("project");
+        projectRepository.save(project);
+
+        relRepository = new ForwardingRelationshipRepository(Task.class, null,
+                ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        relRepository.setResourceRegistry(resourceRegistry);
+        relRepository.setHttpRequestContextProvider(requestContextProvider);
+
+        relRepository.setRelation(task, project.getId(), "project");
+        Assert.assertTrue(project.getTasks().contains(task));
+
+        // setup bi-directionality to allow removal
+        task.setProject(project);
+        relRepository.setRelation(task, null, "project");
+        Assert.assertFalse(project.getTasks().contains(task));
+
+        // verify repeated removal has no impact
+        task.setProject(null);
+        relRepository.setRelation(task, null, "project");
+        Assert.assertFalse(project.getTasks().contains(task));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void checkSetRelationsNotYetImplemented() {
+        relRepository.setRelations(null, null, null);
+    }
+
+    @After
+    public void teardown() {
+        MockRepositoryUtil.clear();
+    }
 
 }

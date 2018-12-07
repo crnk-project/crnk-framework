@@ -7,10 +7,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 
 public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializable>
 		extends ForwardingStrategyBase implements ForwardingSetStrategy<T, I, D, J> {
@@ -89,14 +86,4 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 		sourceAdapter.update(source, context.createSaveQueryAdapter(fieldName, queryContext));
 	}
 
-	private Collection<D> getOrCreateCollection(Object source, ResourceField field) {
-		Object property = field.getAccessor().getValue(source);
-		if (property == null) {
-			Class<?> propertyClass = field.getType();
-			boolean isList = List.class.isAssignableFrom(propertyClass);
-			property = isList ? new ArrayList() : new HashSet();
-			field.getAccessor().setValue(source, property);
-		}
-		return (Collection<D>) property;
-	}
 }

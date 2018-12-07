@@ -7,6 +7,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.BulkRelationshipRepositoryV2;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.Repository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -24,6 +25,7 @@ import io.crnk.jpa.query.Tuple;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaType;
 
+import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +34,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @deprecated in favor of {@link io.crnk.core.repository.foward.ForwardingRelationshipRepository}
+ */
+@Deprecated
 public class JpaRelationshipRepository<S, I extends Serializable, T, J extends Serializable> extends JpaRepositoryBase<T>
 		implements RelationshipRepositoryV2<S, I, T, J>, BulkRelationshipRepositoryV2<S, I, T, J> {
 
@@ -56,7 +62,9 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 	 */
 	public JpaRelationshipRepository(JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T>
 			repositoryConfig) {
-		super(module, repositoryConfig);
+		super(repositoryConfig);
+
+		JpaRepositoryUtils.setDefaultConfig(module.getConfig(), repositoryConfig);
 
 		this.sourceResourceClass = (Class<S>) resourceField.getParentResourceInformation().getResourceClass();
 		this.resourceField = resourceField;
@@ -79,6 +87,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		MetaAttribute attrMeta = entityMeta.getAttribute(fieldName);
 		MetaAttribute oppositeAttrMeta = attrMeta.getOppositeAttribute();
 		Class<?> targetType = getElementType(attrMeta);
+		EntityManager em = getEntityManager();
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
@@ -100,6 +109,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		MetaAttribute attrMeta = entityMeta.getAttribute(fieldName);
 		MetaAttribute oppositeAttrMeta = attrMeta.getOppositeAttribute();
 		Class<?> targetType = getElementType(attrMeta);
+		EntityManager em = getEntityManager();
 
 		Object sourceEntity = sourceMapper.unmap(source);
 
@@ -155,6 +165,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		Class<?> targetType = getElementType(attrMeta);
 
 		Object sourceEntity = sourceMapper.unmap(source);
+		EntityManager em = getEntityManager();
 
 		for (J targetId : targetIds) {
 			Object target = em.find(targetType, targetId);
@@ -179,6 +190,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		Class<?> targetType = getElementType(attrMeta);
 
 		Object sourceEntity = sourceMapper.unmap(source);
+		EntityManager em = getEntityManager();
 
 		for (J targetId : targetIds) {
 			Object target = em.find(targetType, targetId);
@@ -207,17 +219,17 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		// support paging for non-bulk requests
 		boolean singleRequest = sourceIdLists.size() == 1;
 		boolean pagedSingleRequest = singleRequest && querySpec.getLimit() != null;
-		boolean fetchNext = pagedSingleRequest && isNextFetched(querySpec);
+		boolean fetchNext = pagedSingleRequest && repositoryConfig.isNextFetched(querySpec);
 
-		QuerySpec bulkQuerySpec = querySpec.duplicate();
+		QuerySpec bulkQuerySpec = querySpec.clone();
 
-		QuerySpec filteredQuerySpec = filterQuerySpec(bulkQuerySpec);
+		QuerySpec filteredQuerySpec = JpaRepositoryUtils.filterQuerySpec(repositoryConfig, this, bulkQuerySpec);
 
 		JpaQueryFactory queryFactory = repositoryConfig.getQueryFactory();
 		JpaQuery<?> query = queryFactory.query(sourceEntityClass, fieldName, sourceKeyName, sourceIdLists);
 		query.setPrivateData(new JpaRequestContext(this, querySpec));
 		query.addParentIdSelection();
-		query = filterQuery(filteredQuerySpec, query);
+		query = JpaRepositoryUtils.filterQuery(repositoryConfig, this, filteredQuerySpec, query);
 
 		Class<?> entityClass = repositoryConfig.getEntityClass();
 		ComputedAttributeRegistry computedAttributesRegistry = queryFactory.getComputedAttributes();
@@ -227,7 +239,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 		JpaQueryExecutor<?> executor = query.buildExecutor();
 		JpaRepositoryUtils.prepareExecutor(executor, filteredQuerySpec, fetchRelations(fieldName));
-		executor = filterExecutor(filteredQuerySpec, executor);
+		executor = JpaRepositoryUtils.filterExecutor(repositoryConfig, this, filteredQuerySpec, executor);
 		if (fetchNext) {
 			executor.setLimit(executor.getLimit() + 1);
 		}
@@ -242,7 +254,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 			}
 		}
 
-		tuples = filterTuples(bulkQuerySpec, tuples);
+		tuples = JpaRepositoryUtils.filterTuples(repositoryConfig, this, bulkQuerySpec, tuples);
 
 		MultivaluedMap<I, T> map = mapTuples(tuples);
 
@@ -259,7 +271,7 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 
 			if (pagedSingleRequest) {
 				MetaInformation metaInfo = iterable.getMeta();
-				boolean fetchTotal = isTotalFetched(filteredQuerySpec);
+				boolean fetchTotal = repositoryConfig.isTotalFetched(filteredQuerySpec);
 				if (fetchTotal) {
 					long totalRowCount = executor.getTotalRowCount();
 					((PagedMetaInformation) metaInfo).setTotalResourceCount(totalRowCount);
@@ -271,6 +283,17 @@ public class JpaRelationshipRepository<S, I extends Serializable, T, J extends S
 		}
 
 		return map;
+	}
+
+	/**
+	 * By default LookupIncludeBehavior.ALWAYS is in place and we let the relationship repositories load the relations. There
+	 * is no need to do join fetches, which can lead to problems with paging (evaluated in memory instead of the db).
+	 *
+	 * @param fieldName of the relation to fetch
+	 * @return relation will be eagerly fetched if true
+	 */
+	protected boolean fetchRelations(String fieldName) { // NOSONAR
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")

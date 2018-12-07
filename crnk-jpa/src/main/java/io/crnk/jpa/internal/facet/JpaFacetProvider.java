@@ -65,7 +65,7 @@ public class JpaFacetProvider extends FacetProviderBase implements Prioritizable
 			Class entityClass = entityRepository.getEntityClass();
 			JpaCriteriaQueryImpl query = (JpaCriteriaQueryImpl) queryFactory.query(entityClass);
 			query.setPrivateData(new JpaRequestContext(entityRepository, querySpec));
-			QuerySpec filteredQuerySpec = entityRepository.filterQuerySpec(querySpec);
+			QuerySpec filteredQuerySpec = JpaRepositoryUtils.filterQuerySpec(entityRepository.getRepositoryConfig(), entityRepository, querySpec);
 			JpaRepositoryUtils.prepareQuery(query, filteredQuerySpec, Collections.emptySet());
 
 
