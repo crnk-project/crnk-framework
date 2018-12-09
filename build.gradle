@@ -20,7 +20,7 @@ buildscript {
 }
 
 wrapper {
-	gradleVersion = '5.0'
+	gradleVersion = '4.10.1'
 }
 
 // note that a production build creates javadoc, sources jars and signatures undesired during development
