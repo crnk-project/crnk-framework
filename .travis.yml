@@ -8,11 +8,11 @@ sudo: required # gives also more memory (quite important)
 dist: trusty
 
 script:
-	- ./gradlew build -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 --build-cache
+  - ./gradlew build -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 --build-cache
 
 before_install:
- - chmod a+x gradlew
- - chmod a+x deploy.sh
+  - chmod a+x gradlew
+  - chmod a+x deploy.sh
 
 env:
   global:

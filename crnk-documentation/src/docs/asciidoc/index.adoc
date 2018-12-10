@@ -62,7 +62,6 @@ include::operations.adoc[]
 include::monitoring.adoc[]
 include::module_development.adoc[]
 include::generation.adoc[]
-include::angular.adoc[]
 include::faq.adoc[]
 
 :leveloffset: 0
