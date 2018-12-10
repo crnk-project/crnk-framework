@@ -77,6 +77,8 @@ gradle.beforeProject { Project project ->
 				}
 
 				test {
+					maxParallelForks = 1
+
 					testLogging {
 						exceptionFormat = 'full'
 					}

@@ -7,6 +7,9 @@ sudo: required # gives also more memory (quite important)
 
 dist: trusty
 
+script:
+	- ./gradlew build -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 --build-cache
+
 before_install:
  - chmod a+x gradlew
  - chmod a+x deploy.sh
@@ -19,3 +22,12 @@ env:
 after_success:
   - ./gradlew coveralls
   - ./deploy.sh
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
