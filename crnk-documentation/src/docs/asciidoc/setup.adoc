@@ -282,7 +282,7 @@ A code below shows a sample ``web.xml`` file with properly defined and configure
 
 `init-param` allow to pass configuration flags to Crnk. For a list of properties see <<properties,here>>.
 
-## Integration with Spring and String Boot
+## Integration with Spring and Spring Boot
 
 Crnk provides with:
 
