@@ -50,7 +50,9 @@ public class ForwardingStrategyContext {
         QuerySpec querySpec = new QuerySpec(resourceInformation.getResourceClass(), resourceInformation.getResourceType());
         querySpec.includeRelation(Arrays.asList(fieldName));
         querySpec.includeField(PathSpec.of(resourceInformation.getIdField().getUnderlyingName()));
-        querySpec.setPaging(sourceEntry.getPagingBehavior().createEmptyPagingSpec());
+        if (sourceEntry.getPagingBehavior() != null) {
+            querySpec.setPaging(sourceEntry.getPagingBehavior().createEmptyPagingSpec());
+        }
         return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
     }
 
