@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanAttributeInformation {
 
@@ -72,7 +72,7 @@ public class BeanAttributeInformation {
 		return getter.getReturnType();
 	}
 
-	private Map<Class, Optional<?>> annotations = new HashMap<>();
+	private Map<Class, Optional<?>> annotations = new ConcurrentHashMap<>();
 
 	public <A extends Annotation> Optional<A> getAnnotation(Class<A> annotationClass) {
 		if (annotations.containsKey(annotationClass)) {
