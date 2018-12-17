@@ -98,4 +98,25 @@ public class PerTypeIncludeBehaviorTest extends AbstractIncludeBehaviorTest {
 		assertTrue(rootParent.getSingleData().isPresent());
 		assertNotNull(h1.getId().toString(), rootParent.getSingleData().get().getId());
 	}
+
+	@Test
+	public void includeCustomNamedParent() {
+		h.setAnotherParent(h1);
+
+		QuerySpec querySpec = new QuerySpec(HierarchicalTask.class);
+		querySpec.includeRelation(Arrays.asList("anotherParent"));
+
+		Document document = mapper.toDocument(toResponse(h), toAdapter(querySpec), mappingConfig).get();
+		Resource taskResource = document.getSingleData().get();
+
+		Relationship parentRelationship = taskResource.getRelationships().get("another-parent");
+		assertNotNull(parentRelationship);
+		assertNotNull(parentRelationship.getSingleData());
+		ResourceIdentifier parentResource = parentRelationship.getSingleData().get();
+		assertNotNull(h.getId().toString(), parentResource.getId());
+
+		List<Resource> included = document.getIncluded();
+		assertEquals(1, included.size());
+		assertNotNull(h1.getId().toString(), included.get(0).getId());
+	}
 }

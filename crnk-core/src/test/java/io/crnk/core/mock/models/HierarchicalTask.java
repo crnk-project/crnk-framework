@@ -1,5 +1,6 @@
 package io.crnk.core.mock.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -19,6 +20,10 @@ public class HierarchicalTask {
 
 	@JsonApiRelation(opposite = "children")
 	private HierarchicalTask parent;
+
+	@JsonProperty("another-parent")
+	@JsonApiRelation
+	private HierarchicalTask anotherParent;
 
 	@JsonApiRelation(opposite = "parent", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private List<HierarchicalTask> children;
@@ -45,6 +50,14 @@ public class HierarchicalTask {
 
 	public void setParent(HierarchicalTask parent) {
 		this.parent = parent;
+	}
+
+	public HierarchicalTask getAnotherParent() {
+		return anotherParent;
+	}
+
+	public void setAnotherParent(HierarchicalTask parent) {
+		this.anotherParent = parent;
 	}
 
 	public List<HierarchicalTask> getChildren() {
