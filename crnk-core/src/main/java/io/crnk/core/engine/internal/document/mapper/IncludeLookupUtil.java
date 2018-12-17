@@ -232,7 +232,7 @@ public class IncludeLookupUtil {
 			if (builder.length() > 0) {
 				builder.append(".");
 			}
-			builder.append(field.getJsonName());
+			builder.append(field.getUnderlyingName());
 		}
 		return builder.toString();
 	}
@@ -242,7 +242,7 @@ public class IncludeLookupUtil {
 		List<String> result = builder;
 		for (int i = offset; i < fieldPath.size(); i++) {
 			ResourceField field = fieldPath.get(i);
-			result.add(field.getJsonName());
+			result.add(field.getUnderlyingName());
 		}
 		return result;
 	}
