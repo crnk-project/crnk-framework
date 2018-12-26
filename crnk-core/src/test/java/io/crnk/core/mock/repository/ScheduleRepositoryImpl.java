@@ -35,7 +35,7 @@ public class ScheduleRepositoryImpl extends ResourceRepositoryBase<Schedule, Lon
 	@Override
 	public <S extends Schedule> S save(S entity) {
 		schedules.put(entity.getId(), entity);
-		return null;
+		return entity;
 	}
 
 	@Override

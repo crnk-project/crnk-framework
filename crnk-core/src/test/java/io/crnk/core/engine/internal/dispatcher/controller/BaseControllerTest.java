@@ -17,6 +17,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.mock.models.ComplexPojo;
 import io.crnk.core.mock.models.Memorandum;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.MockRepositoryUtil;
@@ -58,6 +59,8 @@ public abstract class BaseControllerTest {
 	protected ModuleRegistry moduleRegistry;
 
 	protected QuerySpecAdapter emptyTaskQuery;
+
+	protected QuerySpecAdapter emptyScheduleQuery;
 
 	protected QuerySpecAdapter emptyProjectQuery;
 
@@ -109,6 +112,7 @@ public abstract class BaseControllerTest {
 		MockRepositoryUtil.clear();
 
 		emptyTaskQuery = container.toQueryAdapter(new QuerySpec(Task.class));
+		emptyScheduleQuery = container.toQueryAdapter(new QuerySpec(Schedule.class));
 		emptyProjectQuery = container.toQueryAdapter(new QuerySpec(Project.class));
 		emptyUserQuery = container.toQueryAdapter(new QuerySpec(User.class));
 		emptyComplexPojoQuery = container.toQueryAdapter(new QuerySpec(ComplexPojo.class));
