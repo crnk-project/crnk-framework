@@ -18,7 +18,6 @@ import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.internal.MetaIdProvider;
 import io.crnk.meta.internal.typed.TypedMetaPartitionBase;
 import io.crnk.meta.model.MetaDataObject;
@@ -36,6 +35,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class ResourceMetaParitition extends TypedMetaPartitionBase {

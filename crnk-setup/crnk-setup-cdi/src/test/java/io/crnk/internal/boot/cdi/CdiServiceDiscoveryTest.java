@@ -7,7 +7,6 @@ import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
-import io.crnk.core.utils.Optional;
 import io.crnk.internal.boot.cdi.model.CdiTestExceptionMapper;
 import io.crnk.internal.boot.cdi.model.ProjectRepository;
 import io.crnk.internal.boot.cdi.model.TaskRepository;
@@ -20,6 +19,7 @@ import org.mockito.Mockito;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.BeanManager;
 import java.util.List;
+import java.util.Optional;
 
 @RunWith(CdiTestRunner.class)
 @ApplicationScoped

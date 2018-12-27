@@ -25,7 +25,6 @@ import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
@@ -49,6 +48,7 @@ import javax.persistence.OptimisticLockException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**

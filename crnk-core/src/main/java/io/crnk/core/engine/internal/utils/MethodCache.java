@@ -1,10 +1,9 @@
 package io.crnk.core.engine.internal.utils;
 
-import io.crnk.core.utils.Optional;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MethodCache {

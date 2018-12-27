@@ -1,6 +1,5 @@
 package io.crnk.jpa.meta.internal;
 
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.internal.MetaIdProvider;
 import io.crnk.meta.internal.typed.TypedMetaPartitionBase;
 import io.crnk.meta.model.MetaElement;
@@ -8,6 +7,7 @@ import io.crnk.meta.model.MetaType;
 import io.crnk.meta.provider.MetaPartitionContext;
 
 import java.lang.reflect.Type;
+import java.util.Optional;
 import java.util.Set;
 
 public class JpaMetaPartition extends TypedMetaPartitionBase {
