@@ -88,11 +88,20 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void checkJsonApiAttributeAnnotation() {
+	public void checkJsonApiFieldOnAttributeAnnotation() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 		ResourceField field = resourceInformation.findAttributeFieldByName("status");
 		Assert.assertFalse(field.getAccess().isPatchable());
 		Assert.assertFalse(field.getAccess().isPostable());
+	}
+
+	@Test
+	public void checkJsonApiFieldOnRelationshipAnnotation() {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
+		ResourceField field = resourceInformation.findRelationshipFieldByName("statusThing");
+		Assert.assertFalse(field.getAccess().isPatchable());
+		Assert.assertFalse(field.getAccess().isPostable());
+		Assert.assertFalse(field.getAccess().isDeletable());
 	}
 
 	@Test
@@ -242,7 +251,7 @@ public class DefaultResourceInformationProviderTest {
 	public void shouldHaveProperRelationshipFieldInfoForValidResource() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(Task.class);
 
-		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(5).extracting(NAME_PROPERTY)
+		assertThat(resourceInformation.getRelationshipFields()).isNotNull().hasSize(6).extracting(NAME_PROPERTY)
 				.contains("project", "projects");
 	}
 
@@ -256,7 +265,6 @@ public class DefaultResourceInformationProviderTest {
 	@Test
 	public void shouldReturnIdFieldBasedOnFieldGetter() {
 		ResourceInformation resourceInformation = resourceInformationProvider.build(IdFieldWithAccessorGetterResource.class);
-
 		assertThat(resourceInformation.getIdField()).isNotNull();
 	}
 

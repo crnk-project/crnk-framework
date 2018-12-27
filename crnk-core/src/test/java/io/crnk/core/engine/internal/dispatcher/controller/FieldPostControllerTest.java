@@ -1,10 +1,10 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FieldResourcePostControllerTest extends BaseControllerTest {
+public class FieldPostControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = HttpMethod.POST.name();
 

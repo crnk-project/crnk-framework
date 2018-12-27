@@ -32,6 +32,11 @@ public interface ResourceFieldInformationProvider {
 	Optional<Boolean> isPostable(BeanAttributeInformation attributeDesc);
 
 	/**
+	 * Returns whether the relationship field can be modified upon a DELETE request.
+	 */
+	Optional<Boolean> isDeletable(BeanAttributeInformation attributeDesc);
+
+	/**
 	 * Returns whether the field can be modified upon a PATCH request.
 	 */
 	Optional<Boolean> isPatchable(BeanAttributeInformation attributeDesc);

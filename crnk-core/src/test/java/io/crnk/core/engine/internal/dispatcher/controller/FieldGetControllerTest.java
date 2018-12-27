@@ -1,11 +1,11 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
@@ -24,7 +24,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FieldResourceGetControllerControllerTest extends BaseControllerTest {
+public class FieldGetControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = "GET";
 

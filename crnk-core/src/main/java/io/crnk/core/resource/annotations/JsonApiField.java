@@ -42,6 +42,12 @@ public @interface JsonApiField {
 	boolean readable() default true;
 
 	/**
+	 * @return true if the attribute can be deleted with a DELETE request. Only applicable to
+	 *  multi-valued relationships.
+	 */
+	boolean deletable() default true;
+
+	/**
 	 * @return Patch strategy.
 	 */
 	PatchStrategy patchStrategy() default PatchStrategy.DEFAULT;

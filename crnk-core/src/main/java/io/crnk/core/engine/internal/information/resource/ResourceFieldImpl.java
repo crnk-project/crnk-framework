@@ -57,7 +57,7 @@ public class ResourceFieldImpl implements ResourceField {
 			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
 				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
-				new ResourceFieldAccess(true, true, true, true, true),
+				new ResourceFieldAccess(true, true, true, true, true, true),
 				null, null, null, RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
 	}
 

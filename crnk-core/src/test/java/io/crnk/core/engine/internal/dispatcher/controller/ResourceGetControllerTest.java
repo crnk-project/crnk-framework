@@ -1,11 +1,11 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPostController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -23,14 +23,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResourceGetControllerTest extends BaseControllerTest {
+public class ResourceGetControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = "GET";
 
@@ -199,7 +198,7 @@ public class ResourceGetControllerTest extends BaseControllerTest {
 		data.setId("2");
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + TASK_ID + "/relationships/project");
-		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
+		RelationshipsPostController sut = new RelationshipsPostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project

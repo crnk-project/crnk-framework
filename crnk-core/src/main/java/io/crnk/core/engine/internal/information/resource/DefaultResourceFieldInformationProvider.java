@@ -164,6 +164,15 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 	}
 
 	@Override
+	public Optional<Boolean> isDeletable(BeanAttributeInformation attributeDesc) {
+		Optional<JsonApiField> annotation = attributeDesc.getAnnotation(JsonApiField.class);
+		if (annotation.isPresent()) {
+			return Optional.of(annotation.get().deletable());
+		}
+		return Optional.empty();
+	}
+
+	@Override
 	public Optional<Boolean> isPatchable(BeanAttributeInformation attributeDesc) {
 		Optional<JsonApiField> annotation = attributeDesc.getAnnotation(JsonApiField.class);
 		if (annotation.isPresent()) {

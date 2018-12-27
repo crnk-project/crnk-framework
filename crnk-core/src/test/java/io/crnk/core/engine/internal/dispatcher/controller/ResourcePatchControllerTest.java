@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
@@ -8,7 +8,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
@@ -36,7 +36,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResourcePatchControllerTest extends BaseControllerTest {
+public class ResourcePatchControllerTest extends ControllerTestBase {
 
     private static final String REQUEST_TYPE = "PATCH";
 
@@ -188,7 +188,7 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
             sut.handle(patchPath, emptyTaskQuery, requestDocument);
             Assert.fail("should not be allowed to update read-only field");
         } catch (ForbiddenException e) {
-            Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
+            Assert.assertEquals("field 'tasks.readOnlyValue' cannot be accessed for PATCH", e.getMessage());
         }
     }
 
@@ -383,6 +383,39 @@ public class ResourcePatchControllerTest extends BaseControllerTest {
         assertThat(updatedResource.getType()).isEqualTo("schedules");
         assertThat(updatedResource.getAttributes().get("name").asText()).isEqualTo("schedule updated");
         assertThat(updatedResource.getRelationships().get("project").getData().get()).isNull();
+    }
+
+    @Test
+    public void ignoreNonPatchableRelationship() throws Exception {
+        Task task = new Task();
+        task.setName("test");
+        task.setStatusThingId(13L);
+        TaskRepository taskRepository = new TaskRepository();
+        taskRepository.save(task);
+
+        JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId());
+
+        // try set relationship
+        Document taskPatch = new Document();
+        Resource data = new Resource();
+        data.setType("tasks");
+        data.setId(task.getId().toString());
+        Relationship nulledRelationship = new Relationship();
+        nulledRelationship.setData(Nullable.nullValue());
+        data.setAttribute("name", objectMapper.readTree("\"task updated\""));
+        data.getRelationships().put("statusThing", nulledRelationship);
+        taskPatch.setData(Nullable.of(data));
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+        Response response = sut.handle(taskPath, emptyTaskQuery, taskPatch);
+
+        // not relationship not patched since not not patchable due to @JsonApiField(patchable=false)
+        Assert.assertNotNull(response);
+        Resource savedTask = response.getDocument().getSingleData().get();
+        assertThat(savedTask.getType()).isEqualTo("tasks");
+        assertThat(savedTask.getAttributes().get("name").asText()).isEqualTo("task updated");
+        Relationship savedRelationshipId = savedTask.getRelationships().get("statusThing");
+        assertThat(savedRelationshipId.getData().get()).isEqualTo(new ResourceIdentifier("13", "things"));
     }
 
     @Test

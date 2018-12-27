@@ -10,13 +10,13 @@ import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class AbstractWrappedExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
+abstract class AbstractJpaExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 
 	private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	protected ModuleContext context;
 
-	public AbstractWrappedExceptionMapper(ModuleContext context) {
+	public AbstractJpaExceptionMapper(ModuleContext context) {
 		this.context = context;
 	}
 

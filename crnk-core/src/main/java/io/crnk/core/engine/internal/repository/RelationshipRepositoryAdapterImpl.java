@@ -75,7 +75,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.setRelations(source, targetIds, field.getUnderlyingName());
@@ -101,7 +100,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.addRelations(source, targetIds, field.getUnderlyingName());
@@ -127,7 +125,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 				if (relationshipRepository instanceof RelationshipRepositoryV2) {
 					((RelationshipRepositoryV2) relationshipRepository)
 							.removeRelations(source, targetIds, field.getUnderlyingName());
@@ -152,7 +149,6 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				RepositoryRequestSpec request = context.getRequest();
 				Serializable sourceId = request.getId();
 				ResourceField field = request.getRelationshipField();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
 
 				Object resource;
 				if (relationshipRepository instanceof RelationshipRepositoryV2) {

@@ -1,18 +1,18 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
+import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDeleteController;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
+import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.mock.models.Project;
+import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
+import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
@@ -21,8 +21,9 @@ import io.crnk.legacy.queryParams.QueryParams;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class RelationshipsResourceDeleteControllerControllerTest extends BaseControllerTest {
+public class RelationshipsDeleteControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = HttpMethod.DELETE.name();
 
@@ -35,7 +36,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 	public void onValidRequestShouldAcceptIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks/1/relationships/project");
-		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
+		RelationsDeleteController sut = new RelationsDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -49,7 +50,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 	public void onNonRelationRequestShouldDenyIt() {
 		// GIVEN
 		JsonPath jsonPath = pathBuilder.build("tasks");
-		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
+		RelationsDeleteController sut = new RelationsDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN
@@ -108,11 +109,11 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		data.setId(projectId.toString());
 
 		JsonPath projectRelationPath = pathBuilder.build("/tasks/" + taskId + "/relationships/project");
-		RelationshipsResourcePostController relationshipsResourcePostController = new RelationshipsResourcePostController();
-		relationshipsResourcePostController.init(controllerContext);
+		RelationshipsPostController relationshipsPostController = new RelationshipsPostController();
+		relationshipsPostController.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(projectRelationPath, emptyProjectQuery, newTaskToProjectBody);
+		Response projectRelationshipResponse = relationshipsPostController.handle(projectRelationPath, emptyProjectQuery, newTaskToProjectBody);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -123,7 +124,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
+		RelationsDeleteController sut = new RelationsDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
@@ -180,11 +181,11 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		newProjectDocument2.setData(Nullable.of(createProject(projectId.toString())));
 
 		JsonPath savedTaskPath = pathBuilder.build("/users/" + userId + "/relationships/assignedProjects");
-		RelationshipsResourcePostController relationshipsResourcePostController = new RelationshipsResourcePostController();
-		relationshipsResourcePostController.init(controllerContext);
+		RelationshipsPostController relationshipsPostController = new RelationshipsPostController();
+		relationshipsPostController.init(controllerContext);
 
 		// WHEN -- adding a relation between user and project
-		Response projectRelationshipResponse = relationshipsResourcePostController.handle(savedTaskPath, emptyProjectQuery, newProjectDocument2);
+		Response projectRelationshipResponse = relationshipsPostController.handle(savedTaskPath, emptyProjectQuery, newProjectDocument2);
 		assertThat(projectRelationshipResponse).isNotNull();
 
 		// THEN
@@ -195,7 +196,7 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		/* ------- */
 
 		// GIVEN
-		RelationshipsResourceDeleteController sut = new RelationshipsResourceDeleteController();
+		RelationsDeleteController sut = new RelationsDeleteController();
 		sut.init(controllerContext);
 
 		// WHEN -- removing a relation between task and project
@@ -205,5 +206,27 @@ public class RelationshipsResourceDeleteControllerControllerTest extends BaseCon
 		// THEN
 		Project nullProject = userToProjectRepository.findOneTarget(userId, "assignedProjects", new QuerySpec(Project.class));
 		assertThat(nullProject).isNull();
+	}
+
+	@Test
+	public void onNonDeletableRelationshipShouldThrowException() {
+		Task task = new Task();
+		task.setName("some task");
+		TaskRepository taskRepository = new TaskRepository();
+		taskRepository.save(task);
+		Long taskId = task.getId();
+
+		// attempt to update non-postable relationship
+		Document body = new Document();
+		ResourceIdentifier id = new ResourceIdentifier("13", "things");
+		body.setData(Nullable.of(id));
+		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/statusThing");
+		RelationsDeleteController sut = new RelationsDeleteController();
+		sut.init(controllerContext);
+
+		// WHEN -- adding a relation between user and project
+		assertThatThrownBy(() -> sut.handle(savedTaskPath, emptyTaskQuery, body))
+				.isInstanceOf(ForbiddenException.class)
+				.hasMessage("field 'tasks.statusThing' cannot be accessed for DELETE");
 	}
 }

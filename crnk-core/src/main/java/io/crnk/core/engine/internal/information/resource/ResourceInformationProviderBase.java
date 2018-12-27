@@ -230,9 +230,10 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         boolean sortable = isSortable(attributeDesc);
         boolean filterable = isFilterable(attributeDesc);
         boolean postable = isPostable(attributeDesc);
+        boolean deletable = isDeletable(attributeDesc);
         boolean patchable = isPatchable(attributeDesc, resourceFieldType);
         boolean readable = isReadable(attributeDesc);
-        return new ResourceFieldAccess(readable, postable, patchable, sortable, filterable);
+        return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
     }
 
     private boolean isSortable(BeanAttributeInformation attributeDesc) {
@@ -280,6 +281,20 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
         return true;
     }
+
+    private boolean isDeletable(BeanAttributeInformation attributeDesc) {
+        if (isReadOnly(attributeDesc)) {
+            return false;
+        }
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<Boolean> deletable = fieldInformationProvider.isDeletable(attributeDesc);
+            if (deletable.isPresent()) {
+                return deletable.get();
+            }
+        }
+        return true;
+    }
+
 
     private boolean isReadable(BeanAttributeInformation attributeDesc) {
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {

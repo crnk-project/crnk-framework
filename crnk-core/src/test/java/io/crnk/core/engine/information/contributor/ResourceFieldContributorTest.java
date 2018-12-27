@@ -21,6 +21,7 @@ import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.ProjectToTaskRepository;
 import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.mock.repository.ThingRepository;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
@@ -54,6 +55,7 @@ public class ResourceFieldContributorTest {
 		testModule.addRepository(new TaskRepository());
 		testModule.addRepository(new ProjectRepository());
 		testModule.addRepository(new ProjectToTaskRepository());
+		testModule.addRepository(new ThingRepository());
 		testModule.addRepository(contributedRepository);
 
 		container = new CoreTestContainer();

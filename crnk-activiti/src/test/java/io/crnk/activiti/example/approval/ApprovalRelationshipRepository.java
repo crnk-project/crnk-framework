@@ -71,7 +71,7 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 		fieldBuilder.oppositeResourceType(oppositeResourceType);
 		fieldBuilder.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		fieldBuilder.fieldType(ResourceFieldType.RELATIONSHIP);
-		fieldBuilder.access(new ResourceFieldAccess(false, false, false, false, false));
+		fieldBuilder.access(new ResourceFieldAccess(true, false, false, false, false, false));
 		fieldBuilder.accessor(new ResourceFieldAccessor() {
 			@Override
 			public Object getValue(Object resource) {
