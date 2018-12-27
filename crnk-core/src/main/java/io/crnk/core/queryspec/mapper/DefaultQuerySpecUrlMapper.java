@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -544,8 +546,12 @@ public class DefaultQuerySpecUrlMapper
         if (allowCommaSeparatedValue && paramType == QueryParameterType.FILTER && values.size() == 1) {
             String value = values.iterator().next();
             if (!(jsonParser.isJson(value))) {
-                String[] valueArray = value.split("\\,");
-                values = new HashSet<>(Arrays.asList(valueArray));
+            	try {
+		            String[] valueArray = URLDecoder.decode(value, "UTF-8").split("\\,");
+		            values = new HashSet<>(Arrays.asList(valueArray));
+	            } catch (UnsupportedEncodingException e) {
+            		throw new ParametersDeserializationException("Could not decode: " + value, e);
+	            }
             }
         }
 

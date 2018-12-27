@@ -379,7 +379,23 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         Assert.assertEquals(expectedSpec.getFilters(), actualSpec.getFilters());
     }
 
-    @Test
+	@Test
+	public void testFilterWithEncodedCommaSeparation() {
+		Assert.assertTrue(urlMapper.getAllowCommaSeparatedValue());
+		HashSet<String> values = new HashSet<>();
+		values.add("john");
+		values.add("jane");
+		QuerySpec expectedSpec = new QuerySpec(Task.class);
+		expectedSpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, values));
+
+		Map<String, Set<String>> params = new HashMap<>();
+		add(params, "filter[name]", "john%2Cjane");
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
+		Assert.assertEquals(expectedSpec.getFilters(), actualSpec.getFilters());
+	}
+
+	@Test
     public void testFilterWithoutCommaSeparation() {
         urlMapper.setAllowCommaSeparatedValue(false);
         QuerySpec expectedSpec = new QuerySpec(Task.class);
