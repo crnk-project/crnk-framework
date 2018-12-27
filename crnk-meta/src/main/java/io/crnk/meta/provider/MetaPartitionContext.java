@@ -1,9 +1,9 @@
 package io.crnk.meta.provider;
 
 import io.crnk.core.module.Module;
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public interface MetaPartitionContext {

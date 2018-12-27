@@ -53,7 +53,6 @@ import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import org.slf4j.Logger;
@@ -65,6 +64,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 

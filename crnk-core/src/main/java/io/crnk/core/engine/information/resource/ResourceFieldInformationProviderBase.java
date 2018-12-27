@@ -5,7 +5,8 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Optional;
+
+import java.util.Optional;
 
 public class ResourceFieldInformationProviderBase implements ResourceFieldInformationProvider {
 

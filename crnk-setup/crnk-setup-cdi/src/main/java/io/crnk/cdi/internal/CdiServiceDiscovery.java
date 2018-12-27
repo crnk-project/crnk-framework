@@ -3,7 +3,6 @@ package io.crnk.cdi.internal;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.module.discovery.ServiceDiscovery;
-import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +15,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**

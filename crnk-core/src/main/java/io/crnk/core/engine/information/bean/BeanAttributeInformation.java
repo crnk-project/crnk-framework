@@ -1,7 +1,6 @@
 package io.crnk.core.engine.information.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -9,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanAttributeInformation {

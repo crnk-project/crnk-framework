@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.http;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,7 +30,6 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.module.Module;
-import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,6 +2,7 @@ package io.crnk.meta.internal.resource;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 
 import io.crnk.core.engine.filter.FilterBehavior;
@@ -18,7 +19,6 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaCollectionType;
 import io.crnk.meta.model.MetaDataObject;

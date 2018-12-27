@@ -6,9 +6,10 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 abstract class AbstractJpaExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 

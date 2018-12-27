@@ -14,13 +14,13 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.utils.Optional;
 import io.crnk.core.utils.Prioritizable;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A builder which creates ResourceInformation instances of a specific class. It

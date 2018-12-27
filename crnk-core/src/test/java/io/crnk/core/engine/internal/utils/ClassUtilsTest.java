@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.utils.Optional;
 import io.crnk.legacy.repository.ResourceRepository;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -15,6 +14,7 @@ import org.junit.rules.ExpectedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;

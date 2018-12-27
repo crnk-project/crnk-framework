@@ -7,7 +7,6 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
-import io.crnk.core.utils.Optional;
 import io.crnk.guice.GuiceServiceDiscovery;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.TestExceptionMapper;
@@ -18,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 public class GuiceServiceDiscoveryTest {
 
