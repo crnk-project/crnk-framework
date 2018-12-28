@@ -43,7 +43,7 @@ public class SleuthRepositoryFilter extends RepositoryFilterBase {
 	@Override
 	public JsonApiResponse filterRequest(RepositoryFilterContext context, RepositoryRequestFilterChain chain) {
 		RepositoryRequestSpec request = context.getRequest();
-		String query = SleuthUtil.getQuery(request, moduleContext.getResourceRegistry());
+		String query = SleuthUtil.getQuery(request, moduleContext.getModuleRegistry().getUrlMapper());
 
 		Span span = tracer.createSpan(SleuthUtil.getSpanName(request));
 

@@ -22,7 +22,6 @@ import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
@@ -53,13 +52,13 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
     private ResourceInformation taskWithPagingBehaviorInformation;
 
-    private QuerySpecDeserializerContext deserializerContext;
+    private QuerySpecUrlContext querySpecUrlContext;
 
     @Before
     public void setup() {
         super.setup();
 
-        deserializerContext = new QuerySpecDeserializerContext() {
+        querySpecUrlContext = new QuerySpecUrlContext() {
 
             @Override
             public ResourceRegistry getResourceRegistry() {
@@ -78,7 +77,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         };
 
         urlMapper = new DefaultQuerySpecUrlMapper();
-        urlMapper.init(deserializerContext);
+        urlMapper.init(querySpecUrlContext);
 
         RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
         taskInformation = taskEntry.getResourceInformation();
@@ -548,7 +547,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
                 deserialized[0] = true;
             }
         };
-        urlMapper.init(deserializerContext);
+        urlMapper.init(querySpecUrlContext);
         urlMapper.deserialize(taskInformation, params);
         Assert.assertTrue(deserialized[0]);
     }

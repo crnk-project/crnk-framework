@@ -4,10 +4,9 @@ import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.registry.ResourceRegistry;
-import io.crnk.core.queryspec.DefaultQuerySpecSerializer;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
+import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 
 import java.util.Map;
 import java.util.Set;
@@ -18,14 +17,13 @@ public class BraveUtil {
 	}
 
 
-	public static String getQuery(RepositoryRequestSpec request, ResourceRegistry resourceRegistry) {
+	public static String getQuery(RepositoryRequestSpec request, QuerySpecUrlMapper urlMapper) {
 		QueryAdapter queryAdapter = request.getQueryAdapter();
 		StringBuilder builder = new StringBuilder();
 		builder.append("?");
 		if (queryAdapter instanceof QuerySpecAdapter) {
 			QuerySpec querySpec = request.getQuerySpec(queryAdapter.getResourceInformation());
-			DefaultQuerySpecSerializer serializer = new DefaultQuerySpecSerializer(resourceRegistry);
-			Map<String, Set<String>> parameters = serializer.serialize(querySpec);
+			Map<String, Set<String>> parameters = urlMapper.serialize(querySpec);
 			for (Map.Entry<String, Set<String>> entry : parameters.entrySet()) {
 				if (builder.length() > 1) {
 					builder.append("&");

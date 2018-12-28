@@ -22,7 +22,6 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
-import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.resource.list.DefaultResourceList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,13 +156,4 @@ public class ClientStubBase {
 	public enum ResponseType {
 		NONE, RESOURCE, RESOURCES
 	}
-
-	public QuerySpecSerializer getQuerySpecSerializer() {
-		return this.urlBuilder.getQuerySpecSerializer();
-	}
-
-	public void setQuerySpecSerializer(QuerySpecSerializer querySpecSerializer) {
-		this.urlBuilder.setQuerySpecSerializer(querySpecSerializer);
-	}
-
 }

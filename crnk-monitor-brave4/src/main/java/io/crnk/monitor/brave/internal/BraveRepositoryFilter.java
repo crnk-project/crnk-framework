@@ -48,7 +48,7 @@ public class BraveRepositoryFilter extends RepositoryFilterBase {
 		Tracer tracer = tracing.tracer();
 
 		RepositoryRequestSpec request = context.getRequest();
-		String query = BraveUtil.getQuery(request, moduleContext.getResourceRegistry());
+		String query = BraveUtil.getQuery(request, moduleContext.getModuleRegistry().getUrlMapper());
 
 		Span span = tracer.nextSpan();
 		span.name(BraveUtil.getSpanName(request));

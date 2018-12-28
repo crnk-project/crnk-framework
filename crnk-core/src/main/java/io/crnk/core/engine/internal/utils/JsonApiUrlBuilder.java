@@ -5,11 +5,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.queryspec.DefaultQuerySpecDeserializer;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.queryspec.internal.UrlMapperAdapter;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.legacy.queryParams.QueryParams;
 
@@ -147,20 +144,5 @@ public class JsonApiUrlBuilder {
 				addQueryParameter(key, (String) value);
 			}
 		}
-	}
-
-	@Deprecated
-	public QuerySpecSerializer getQuerySpecSerializer() {
-		return (QuerySpecSerializer) this.moduleRegistry.getUrlMapper();
-	}
-
-	/**
-	 * @deprecated use setUrlMapper on CrnkBoot or CrnkClient
-	 */
-	@Deprecated
-	public void setQuerySpecSerializer(QuerySpecSerializer querySpecSerializer) {
-		UrlMapperAdapter adapter = new UrlMapperAdapter(new DefaultQuerySpecDeserializer());
-		adapter.setSerializer(querySpecSerializer);
-		moduleRegistry.setUrlMapper(adapter);
 	}
 }

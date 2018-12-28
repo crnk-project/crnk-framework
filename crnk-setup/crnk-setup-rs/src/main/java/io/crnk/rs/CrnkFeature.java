@@ -10,7 +10,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.rs.internal.JaxrsModule;
@@ -115,13 +114,6 @@ public class CrnkFeature implements Feature {
 
 	public void setDefaultPageLimit(Long defaultPageLimit) {
 		boot.setDefaultPageLimit(defaultPageLimit);
-	}
-
-	/**
-	 * @deprecated use {@link #getUrlMapper()}
-	 */
-	public QuerySpecDeserializer getQuerySpecDeserializer() {
-		return boot.getQuerySpecDeserializer();
 	}
 
 	public QuerySpecUrlMapper getUrlMapper() {
