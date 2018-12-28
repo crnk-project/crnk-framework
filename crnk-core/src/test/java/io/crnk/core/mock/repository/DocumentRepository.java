@@ -3,11 +3,11 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Document;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DocumentRepository implements ResourceRepository<Document, Long> {
+public class DocumentRepository implements LegacyResourceRepository<Document, Long> {
 
 	private static final ConcurrentHashMap<Long, Document> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

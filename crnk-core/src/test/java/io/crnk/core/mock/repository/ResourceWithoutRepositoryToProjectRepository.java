@@ -3,10 +3,10 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ResourceWithoutRepository;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
 public class ResourceWithoutRepositoryToProjectRepository
-		implements RelationshipRepository<ResourceWithoutRepository, String, Project, Long> {
+		implements LegacyRelationshipRepository<ResourceWithoutRepository, String, Project, Long> {
 	@Override
 	public void setRelation(ResourceWithoutRepository source, Long targetId, String fieldName) {
 

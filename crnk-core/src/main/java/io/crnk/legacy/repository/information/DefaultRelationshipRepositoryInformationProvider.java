@@ -10,7 +10,7 @@ import io.crnk.core.repository.MatchedRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.repository.UntypedRelationshipRepository;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import net.jodah.typetools.TypeResolver;
 
 public class DefaultRelationshipRepositoryInformationProvider implements RepositoryInformationProvider {
@@ -24,7 +24,7 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
 		return !UntypedRelationshipRepository.class.isAssignableFrom(repositoryClass) && (
-				RelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class
+				LegacyRelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class
 						.isAssignableFrom(repositoryClass));
 	}
 
@@ -66,8 +66,8 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	}
 
 	public Class<?> getSourceResourceClass(Object repository, Class<?> repositoryClass) {
-		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
+		if (LegacyRelationshipRepository.class.isAssignableFrom(repositoryClass)) {
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyRelationshipRepository.class, repositoryClass);
 			return typeArgs[0];
 		} else if (repository != null) {
 			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
@@ -79,8 +79,8 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	}
 
 	protected Class<?> getTargetResourceClass(Object repository, Class<?> repositoryClass) {
-		if (RelationshipRepository.class.isAssignableFrom(repositoryClass)) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
+		if (LegacyRelationshipRepository.class.isAssignableFrom(repositoryClass)) {
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyRelationshipRepository.class, repositoryClass);
 			return typeArgs[2];
 		} else if (repository != null) {
 			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;

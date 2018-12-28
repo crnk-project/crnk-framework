@@ -5,7 +5,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 
 /**
  * An optional interface that can be implemented along with
- * {@link ResourceRepository} or {@link RelationshipRepository} to get meta
+ * {@link LegacyResourceRepository} or {@link LegacyRelationshipRepository} to get meta
  * information about returned document(s).
  * <p>
  * <b>Consider the use of ResourceList instead.</b>
@@ -13,7 +13,7 @@ import io.crnk.legacy.queryParams.QueryParams;
  * @deprecated Make use of MetaRepositoryV2 or ResourceList
  */
 @Deprecated
-public interface MetaRepository<T> {
+public interface LegacyMetaRepository<T> {
 
 	/**
 	 * Return meta information about a document. Can be called after find

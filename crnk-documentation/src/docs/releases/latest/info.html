@@ -54,3 +54,13 @@ The old configuration mechanism is still in place and can continued to be used.
 Support for the readable, patchable, postable, deletable properties of @JsonApiField have been
 added to relationships to complement the current support of basic attributes.
 
+
+<h4>Renaming of Legacy QueryParams-based Repositories</h4>
+
+The legacy ResourceRepository and RelationshipRepository gained a &quot;Legacy&quot;
+such as LegancyResourceRepository. This to free those names for
+new, non-deprecated repositories and get rid of the V2 naming.
+<p>
+QueryParams-based repositories are still scheduled to be dropped
+sooner than later. Should you still need support for it, let us know.
+

@@ -1,10 +1,10 @@
 package io.crnk.servlet.resource.repository;
 
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.servlet.resource.model.Node;
 
-public class NodeToNodeRepository implements RelationshipRepository<Node, Long, Node, Long> {
+public class NodeToNodeRepository implements LegacyRelationshipRepository<Node, Long, Node, Long> {
 
 	private NodeRepository nodeRepository = new NodeRepository();
 

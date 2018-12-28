@@ -9,14 +9,14 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.MetaRepository;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
+import io.crnk.legacy.repository.LegacyMetaRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TaskRepository implements ResourceRepository<Task, Long>, MetaRepository<Task> {
+public class TaskRepository implements LegacyResourceRepository<Task, Long>, LegacyMetaRepository<Task> {
 
     private static final ConcurrentHashMap<Long, Task> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

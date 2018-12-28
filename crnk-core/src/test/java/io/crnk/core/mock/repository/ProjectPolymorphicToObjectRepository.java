@@ -4,14 +4,14 @@ import io.crnk.core.mock.models.ProjectPolymorphic;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ProjectPolymorphicToObjectRepository extends AbstractRelationShipRepository<ProjectPolymorphic> implements RelationshipRepository<ProjectPolymorphic, Long, Object, Long> {
+public class ProjectPolymorphicToObjectRepository extends AbstractRelationShipRepository<ProjectPolymorphic> implements LegacyRelationshipRepository<ProjectPolymorphic, Long, Object, Long> {
 
 	private final static ConcurrentMap<Relation<ProjectPolymorphic>, Integer> STATIC_REPOSITORY = new ConcurrentHashMap<>();
 

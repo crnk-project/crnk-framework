@@ -2,12 +2,12 @@ package io.crnk.core.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.links.LinksInformation;
-import io.crnk.legacy.repository.RelationshipRepository;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
 /**
- * An optional interface that can be implemented along with {@link ResourceRepository} or {@link
- * RelationshipRepository} to get links information about returned resource(s).
+ * An optional interface that can be implemented along with {@link LegacyResourceRepository} or {@link
+ * LegacyRelationshipRepository} to get links information about returned resource(s).
  * <p>
  * consisder the use ResourceList instead
  */

@@ -2,14 +2,14 @@ package io.crnk.legacy.repository.annotations;
 
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.io.Serializable;
 
 /**
  * Represents a non-existing resource. It is assigned to a resource class if Crnk couldn't find any resource.
  */
-public class NotFoundRepository<T, ID extends Serializable> implements ResourceRepository<T, ID> {
+public class NotFoundRepository<T, ID extends Serializable> implements LegacyResourceRepository<T, ID> {
 
 	private final Class<?> repositoryClass;
 
