@@ -112,6 +112,17 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertNull(projectResource.getRelationships().get("tasks"));
 	}
 
+	@Test
+	public void testCompactModeWithNullData() {
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(new QuerySpec(Task.class));
+
+		queryAdapter.setCompactMode(true);
+		Document compactDocument = mapper.toDocument(new JsonApiResponse(), queryAdapter, mappingConfig).get();
+		queryAdapter.setCompactMode(false);
+		Document standardDocument = mapper.toDocument(new JsonApiResponse(), queryAdapter, mappingConfig).get();
+
+		Assert.assertEquals(standardDocument, compactDocument);
+	}
 
 	@Test
 	public void testDocumentInformation() {
