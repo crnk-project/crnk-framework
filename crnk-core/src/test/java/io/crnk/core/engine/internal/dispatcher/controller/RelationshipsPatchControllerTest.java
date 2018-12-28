@@ -22,7 +22,7 @@ import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.UserToProjectRepository;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Nullable;
 import io.crnk.legacy.queryParams.QueryParams;
@@ -292,7 +292,7 @@ public class RelationshipsPatchControllerTest extends ControllerTestBase {
 		assertNotNull(projectPolymorphic.getRelationships().get("task").getSingleData().get());
 		assertNotNull(projectPolymorphic.getRelationships().get("tasks"));
 
-		ResourceRepositoryV2 resourceRepository =
+		ResourceRepository resourceRepository =
 				resourceRegistry.getEntry(ProjectPolymorphic.class).getResourceRepositoryFacade();
 		ProjectPolymorphic projectPolymorphicObj =
 				(ProjectPolymorphic) resourceRepository.findOne(projectId, new QuerySpec(ProjectPolymorphic.class));

@@ -3,7 +3,7 @@ package io.crnk.validation;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
 import io.crnk.validation.mock.models.Project;
@@ -20,9 +20,9 @@ public abstract class AbstractValidationTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
 	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
 

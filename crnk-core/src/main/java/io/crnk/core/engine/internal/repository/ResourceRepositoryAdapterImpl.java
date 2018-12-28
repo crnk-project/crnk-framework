@@ -12,11 +12,12 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * A repository adapter for resource repository
@@ -58,8 +59,8 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Serializable id = request.getId();
 				Object resource;
-				if (resourceRepository instanceof ResourceRepositoryV2) {
-					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec
+				if (resourceRepository instanceof ResourceRepository) {
+					resource = ((ResourceRepository) resourceRepository).findOne(id, request.getQuerySpec
 							(resourceInformation));
 				} else {
 					resource = ((LegacyResourceRepository) resourceRepository).findOne(id, request.getQueryParams());
@@ -86,9 +87,9 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				RepositoryRequestSpec request = context.getRequest();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
 				Object resources;
-				if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepository) {
 					QuerySpec querySpec = request.getQuerySpec(resourceInformation);
-					resources = ((ResourceRepositoryV2) resourceRepository).findAll(querySpec);
+					resources = ((ResourceRepository) resourceRepository).findAll(querySpec);
 				} else {
 					resources = ((LegacyResourceRepository) resourceRepository).findAll(request.getQueryParams());
 				}
@@ -109,12 +110,11 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			@Override
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
-				QueryAdapter queryAdapter = request.getQueryAdapter();
-				Iterable<?> ids = request.getIds();
+				Collection<?> ids = request.getIds();
 				Object resources;
-				if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepository) {
 					resources =
-							((ResourceRepositoryV2) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
+							((ResourceRepository) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
 				} else {
 					resources = ((LegacyResourceRepository) resourceRepository).findAll(ids, request.getQueryParams());
 				}
@@ -147,11 +147,11 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				Object entity = request.getEntity();
 
 				Object resource;
-				if (resourceRepository instanceof ResourceRepositoryV2) {
+				if (resourceRepository instanceof ResourceRepository) {
 					if (method == HttpMethod.POST) {
-						resource = ((ResourceRepositoryV2) resourceRepository).create(entity);
+						resource = ((ResourceRepository) resourceRepository).create(entity);
 					} else {
-						resource = ((ResourceRepositoryV2) resourceRepository).save(entity);
+						resource = ((ResourceRepository) resourceRepository).save(entity);
 					}
 				} else {
 					resource = ((LegacyResourceRepository) resourceRepository).save(entity);
@@ -174,8 +174,8 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Serializable id = request.getId();
-				if (resourceRepository instanceof ResourceRepositoryV2) {
-					((ResourceRepositoryV2) resourceRepository).delete(id);
+				if (resourceRepository instanceof ResourceRepository) {
+					((ResourceRepository) resourceRepository).delete(id);
 				} else {
 					((LegacyResourceRepository) resourceRepository).delete(id);
 				}

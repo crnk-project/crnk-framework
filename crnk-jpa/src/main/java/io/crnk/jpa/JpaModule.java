@@ -18,7 +18,7 @@ import io.crnk.core.module.InitializingModule;
 import io.crnk.core.module.ModuleExtension;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
@@ -460,7 +460,7 @@ public class JpaModule implements InitializingModule {
             JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this,
                     repositoryConfig);
 
-            ResourceRepositoryV2<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
+            ResourceRepository<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
 
             context.addRepository(repository);
 
@@ -476,7 +476,7 @@ public class JpaModule implements InitializingModule {
         }
     }
 
-    private ResourceRepositoryV2<?, ?> filterResourceCreation(Class<?> resourceClass, JpaEntityRepository<?, ?> repository) {
+    private ResourceRepository<?, ?> filterResourceCreation(Class<?> resourceClass, JpaEntityRepository<?, ?> repository) {
         JpaEntityRepository<?, ?> filteredRepository = repository;
         for (JpaRepositoryFilter filter : config.getFilters()) {
             if (filter.accept(resourceClass)) {
@@ -701,7 +701,7 @@ public class JpaModule implements InitializingModule {
 
         @Override
         public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
-                ResourceRepositoryV2<T, I> repository) {
+                ResourceRepository<T, I> repository) {
             JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
             if (config != null) {
                 return config.getRepositoryDecorator();

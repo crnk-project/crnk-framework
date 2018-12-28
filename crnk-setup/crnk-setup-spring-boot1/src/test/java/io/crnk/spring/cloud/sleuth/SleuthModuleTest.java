@@ -5,7 +5,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.spring.app.TestSpanReporter;
 import io.crnk.spring.client.RestTemplateAdapter;
 import io.crnk.test.JerseyTestBase;
@@ -36,12 +36,12 @@ public abstract class SleuthModuleTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	@Autowired
 	private TestSpanReporter reportedSpans;
 
-	private ResourceRepositoryV2<Project, Serializable> projectRepo;
+	private ResourceRepository<Project, Serializable> projectRepo;
 
 
 	@Before

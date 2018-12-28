@@ -3,7 +3,7 @@ package io.crnk.core.module.discovery;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.Repository;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.repository.LegacyResourceRepository;
@@ -53,7 +53,7 @@ public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 
 		builder = builder.addUrls(ClasspathHelper.forClass(Repository.class));
 		builder = builder.addUrls(ClasspathHelper.forClass(LegacyResourceRepository.class));
-		builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepositoryV2.class));
+		builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepository.class));
 
 		builder = builder.setScanners(new SubTypesScanner(false), new TypeAnnotationsScanner());
 		reflections = new Reflections(builder);

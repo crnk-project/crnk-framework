@@ -8,7 +8,7 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
@@ -33,11 +33,11 @@ public abstract class BasicRepositoryAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected ResourceRepositoryV2<Schedule, Long> scheduleRepo;
+	protected ResourceRepository<Schedule, Long> scheduleRepo;
 
 	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
 

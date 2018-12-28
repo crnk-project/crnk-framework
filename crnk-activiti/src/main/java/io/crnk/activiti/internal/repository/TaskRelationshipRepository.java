@@ -11,7 +11,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
@@ -57,8 +57,8 @@ public class TaskRelationshipRepository<P extends ProcessInstanceResource, T ext
 	public T findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
 		if (relationshipName.equals(fieldName)) {
 			RegistryEntry taskEntry = resourceRegistry.getEntry(taskClass);
-			ResourceRepositoryV2 taskRepository =
-					(ResourceRepositoryV2) taskEntry.getResourceRepository().getResourceRepository();
+			ResourceRepository taskRepository =
+					(ResourceRepository) taskEntry.getResourceRepository().getResourceRepository();
 
 			QuerySpec processQuerySpec = querySpec.duplicate();
 

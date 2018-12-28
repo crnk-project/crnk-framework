@@ -2,7 +2,7 @@ package io.crnk.test.suite;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.nested.ManyNestedResource;
 import io.crnk.test.mock.models.nested.NestedId;
@@ -17,11 +17,11 @@ public abstract class NestedRepositoryAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<ParentResource, String> parentRepo;
+	protected ResourceRepository<ParentResource, String> parentRepo;
 
-	protected ResourceRepositoryV2<ManyNestedResource, NestedId> nestedRepo;
+	protected ResourceRepository<ManyNestedResource, NestedId> nestedRepo;
 
-	protected ResourceRepositoryV2<NestedRelatedResource, String> relatedRepo;
+	protected ResourceRepository<NestedRelatedResource, String> relatedRepo;
 
 	@Before
 	public void setup() {

@@ -1,7 +1,7 @@
 package io.crnk.jpa.integration;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
 import io.crnk.jpa.model.VersionedEntity;
@@ -24,7 +24,7 @@ public class OptimisticLockingIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testOptimisticLocking() {
-		ResourceRepositoryV2<VersionedEntity, Serializable> repo = client
+		ResourceRepository<VersionedEntity, Serializable> repo = client
 				.getRepositoryForType(VersionedEntity.class);
 		VersionedEntity entity = new VersionedEntity();
 		entity.setId(1L);

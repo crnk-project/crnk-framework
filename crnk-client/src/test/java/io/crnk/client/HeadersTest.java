@@ -2,7 +2,7 @@ package io.crnk.client;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +14,7 @@ public class HeadersTest extends AbstractClientTest {
 
 	private static final String EXPECTED_CONTENT_TYPE = "application/vnd.api+json";
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	@Before
 	public void setup() {

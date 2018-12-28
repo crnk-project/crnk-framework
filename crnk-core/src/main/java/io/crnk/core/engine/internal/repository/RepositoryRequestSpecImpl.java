@@ -14,7 +14,9 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +31,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	private QueryAdapter queryAdapter;
 
-	private Iterable<?> ids;
+	private Collection ids;
 
 	private Object entity;
 
@@ -69,7 +71,10 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 												   QueryAdapter queryAdapter, Iterable<?> ids) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
-		spec.ids = ids;
+		spec.ids = new ArrayList();
+		for(Object id : ids){
+			spec.ids.add(id);
+		}
 		spec.owningResourceInformation = owningResourceInformation;
 		spec.method = HttpMethod.GET;
 		return spec;
@@ -112,7 +117,10 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.entity = entity;
 		spec.queryAdapter = queryAdapter;
-		spec.ids = ids;
+		spec.ids = new ArrayList();
+		for(Object id : ids){
+			spec.ids.add(id);
+		}
 		spec.relationshipField = relationshipField;
 		spec.owningResourceInformation = relationshipField.getParentResourceInformation();
 		spec.method = method;
@@ -182,12 +190,12 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Iterable<T> getIds() {
+	public <T> Collection<T> getIds() {
 		if (ids == null && entity != null) {
 			ResourceInformation resourceInformation = queryAdapter.getResourceInformation();
-			return (Iterable<T>) Collections.singleton(resourceInformation.getId(entity));
+			return (Collection<T>) Collections.singleton(resourceInformation.getId(entity));
 		}
-		return (Iterable<T>) ids;
+		return (Collection<T>) ids;
 	}
 
 	@Override

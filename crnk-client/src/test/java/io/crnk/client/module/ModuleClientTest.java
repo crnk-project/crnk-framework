@@ -8,7 +8,7 @@ import io.crnk.core.module.Module;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -45,7 +45,7 @@ public class ModuleClientTest extends AbstractClientTest {
 
 	@Test
 	public void test() {
-		ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
 		Task task = new Task();
 		task.setId(1L);
 		task.setName("task");

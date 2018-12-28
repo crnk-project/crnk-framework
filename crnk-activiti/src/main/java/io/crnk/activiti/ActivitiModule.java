@@ -17,7 +17,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
@@ -50,30 +50,30 @@ public class ActivitiModule implements Module {
 		this.config = config;
 	}
 
-	public <T extends TaskResource> ResourceRepositoryV2<T, String> getTaskRepository(Class<T> resourceClass) {
+	public <T extends TaskResource> ResourceRepository<T, String> getTaskRepository(Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
 
-	public <T extends HistoricTaskResource> ResourceRepositoryV2<T, String> getHistoricTaskRepository(Class<T> resourceClass) {
+	public <T extends HistoricTaskResource> ResourceRepository<T, String> getHistoricTaskRepository(Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
 
-	public <T extends FormResource> ResourceRepositoryV2<T, String> getFormRepository(Class<T> resourceClass) {
+	public <T extends FormResource> ResourceRepository<T, String> getFormRepository(Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
 
-	public <T extends ProcessInstanceResource> ResourceRepositoryV2<T, String> getProcessInstanceRepository(
+	public <T extends ProcessInstanceResource> ResourceRepository<T, String> getProcessInstanceRepository(
 			Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
 
-	public <T extends HistoricProcessInstanceResource> ResourceRepositoryV2<T, String> getHistoricProcessInstanceRepository(
+	public <T extends HistoricProcessInstanceResource> ResourceRepository<T, String> getHistoricProcessInstanceRepository(
 			Class<T> resourceClass) {
 		return getRepository(resourceClass);
 	}
 
 
-	private <T> ResourceRepositoryV2<T, String> getRepository(Class<T> resourceClass) {
+	private <T> ResourceRepository<T, String> getRepository(Class<T> resourceClass) {
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 		RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
 		if (entry == null) {

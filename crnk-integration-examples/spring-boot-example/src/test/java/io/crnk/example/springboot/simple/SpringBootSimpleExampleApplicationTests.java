@@ -7,7 +7,7 @@ import com.jayway.restassured.response.ValidatableResponse;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.Project;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
@@ -89,7 +89,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testJpaEntityAccess() {
-        ResourceRepositoryV2<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
+        ResourceRepository<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
 
         QuerySpec querySpec = new QuerySpec(ScheduleEntity.class);
         ResourceList<ScheduleEntity> list = entityRepo.findAll(querySpec);
@@ -108,7 +108,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testJpaEntity() {
-        ResourceRepositoryV2<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
+        ResourceRepository<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
 
         QuerySpec querySpec = new QuerySpec(ScheduleEntity.class);
         ResourceList<ScheduleEntity> list = entityRepo.findAll(querySpec);
@@ -130,7 +130,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testJpaInclusion() {
-        ResourceRepositoryV2<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
+        ResourceRepository<ScheduleEntity, Serializable> entityRepo = client.getRepositoryForType(ScheduleEntity.class);
 
         QuerySpec querySpec = new QuerySpec(ScheduleEntity.class);
         querySpec.includeRelation(PathSpec.of("creator"));
@@ -148,7 +148,7 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
 
     @Test
     public void testOppositeInclusion() {
-        ResourceRepositoryV2<UserEntity, Serializable> entityRepo = client.getRepositoryForType(UserEntity.class);
+        ResourceRepository<UserEntity, Serializable> entityRepo = client.getRepositoryForType(UserEntity.class);
 
         QuerySpec querySpec = new QuerySpec(UserEntity.class);
         querySpec.includeRelation(PathSpec.of("createdSchedules"));

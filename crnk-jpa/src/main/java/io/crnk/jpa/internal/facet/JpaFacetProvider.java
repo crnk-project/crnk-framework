@@ -6,7 +6,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.data.facet.FacetValue;
@@ -51,7 +51,7 @@ public class JpaFacetProvider extends FacetProviderBase implements Prioritizable
 	public List<FacetValue> findValues(FacetInformation facetInformation, QuerySpec querySpec) {
 		if (facetInformation instanceof BasicFacetInformation) {
 			String resourceType = facetInformation.getResource().getType();
-			ResourceRepositoryV2 repository = (ResourceRepositoryV2) context.getEntry(resourceType).getResourceRepository().getResourceRepository();
+			ResourceRepository repository = (ResourceRepository) context.getEntry(resourceType).getResourceRepository().getResourceRepository();
 			JpaEntityRepository entityRepository = (JpaEntityRepository) unwrap(repository);
 			BasicFacetInformation basicFacetInformation = (BasicFacetInformation) facetInformation;
 

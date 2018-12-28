@@ -9,7 +9,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.monitor.brave.mock.models.Project;
 import io.crnk.monitor.brave.mock.models.Task;
 import io.crnk.monitor.brave.mock.repository.ProjectRepository;
@@ -38,7 +38,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	private Reporter<Span> clientReporter;
 

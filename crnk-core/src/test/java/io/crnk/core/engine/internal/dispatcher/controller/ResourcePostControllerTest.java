@@ -26,7 +26,7 @@ import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.TaskRepository;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -522,7 +522,7 @@ public class ResourcePostControllerTest extends ControllerTestBase {
 		assertThat(persistedProjectsRelationship).isNotNull();
 
 		// check lazy loaded relation
-		ResourceRepositoryV2 repo = resourceRegistry.getEntry(Pojo.class).getResourceRepositoryFacade();
+		ResourceRepository repo = resourceRegistry.getEntry(Pojo.class).getResourceRepositoryFacade();
 		Pojo pojo = (Pojo) repo.findOne(null, null);
 		assertThat(pojo.getProjects()).hasSize(1);
 		assertThat(pojo.getProjects().get(0).getId()).isEqualTo(projectId);

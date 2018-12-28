@@ -12,7 +12,7 @@ import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.facet.FacetModuleConfig;
 import io.crnk.data.facet.FacetRepository;
@@ -273,7 +273,7 @@ public class BasicSpringBoot2Test {
         projectRepository.save(schedule3);
 
         CrnkClient client = new CrnkClient("http://localhost:" + this.port + "/api");
-        ResourceRepositoryV2<Schedule, Serializable> repository = client.getRepositoryForType(Schedule.class);
+        ResourceRepository<Schedule, Serializable> repository = client.getRepositoryForType(Schedule.class);
         QuerySpec querySpec = new QuerySpec(Schedule.class);
         querySpec.addFilter(new FilterSpec("{\"OR\": {\"name\": \"Great Schedule\", \"LE\": {\"id\": 122}}}"));
         ResourceList<Schedule> schedules = repository.findAll(querySpec);

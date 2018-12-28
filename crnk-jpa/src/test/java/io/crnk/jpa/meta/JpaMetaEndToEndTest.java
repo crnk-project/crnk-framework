@@ -1,7 +1,7 @@
 package io.crnk.jpa.meta;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.AnnotationMappedSubtypeEntity;
 import io.crnk.jpa.model.AnnotationTestEntity;
@@ -51,7 +51,7 @@ public class JpaMetaEndToEndTest extends AbstractJpaJerseyTest {
 		RenamedTestEntity test = new RenamedTestEntity();
 		test.setId(1L);
 
-		ResourceRepositoryV2<RenamedTestEntity, Serializable> repository = client.getRepositoryForType(RenamedTestEntity.class);
+		ResourceRepository<RenamedTestEntity, Serializable> repository = client.getRepositoryForType(RenamedTestEntity.class);
 		repository.create(test);
 		Assert.assertEquals(1, repository.findAll(new QuerySpec(RenamedTestEntity.class)).size());
 		repository.delete(1L);

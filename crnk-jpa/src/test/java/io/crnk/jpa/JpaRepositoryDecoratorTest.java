@@ -1,7 +1,7 @@
 package io.crnk.jpa;
 
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
 import io.crnk.jpa.JpaRepositoryConfig.Builder;
 import io.crnk.jpa.model.RelatedEntity;
@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 
 public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
 	private ResourceRepositoryDecoratorBase<TestEntity, Long> resourceDecorator;
 
@@ -46,7 +46,7 @@ public class JpaRepositoryDecoratorTest extends AbstractJpaJerseyTest {
 	}
 
 	private TestEntity addTestWithOneRelation() {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+		ResourceRepository<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related = new RelatedEntity();
 		related.setId(1L);
 		related.setStringValue("project");

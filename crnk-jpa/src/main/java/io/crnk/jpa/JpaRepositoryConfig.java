@@ -3,7 +3,7 @@ package io.crnk.jpa;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
@@ -281,7 +281,7 @@ public class JpaRepositoryConfig<T> {
          * @return this builder
          */
         @SuppressWarnings("unchecked")
-        public Builder<T> setInterfaceClass(Class<? extends ResourceRepositoryV2<T, ?>> interfaceClass) {
+        public Builder<T> setInterfaceClass(Class<? extends ResourceRepository<T, ?>> interfaceClass) {
 
             try {
                 Method findMethod = interfaceClass.getDeclaredMethod("findAll", QuerySpec.class);

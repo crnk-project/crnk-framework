@@ -2,7 +2,7 @@ package io.crnk.servlet.resource;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.utils.Supplier;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
@@ -32,7 +32,7 @@ public class ReactiveServletTestContainer implements TestContainer {
 	}
 
 	@Override
-	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
+	public <T, I> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
 		return client.get().getRepositoryForType(resourceClass);
 	}
 

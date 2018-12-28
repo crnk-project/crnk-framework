@@ -1,5 +1,6 @@
 package io.crnk.core.module;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.InMemoryResourceRepository;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.resource.annotations.JsonApiId;
@@ -572,7 +573,7 @@ public class ModuleRegistryTest {
 		}
 	}
 
-	class TestRepository2 implements ResourceRepositoryV2<TestResource2, Integer> {
+	class TestRepository2 implements ResourceRepository<TestResource2, Integer> {
 
 		@Override
 		public <S extends TestResource2> S save(S entity) {
@@ -599,7 +600,7 @@ public class ModuleRegistryTest {
 		}
 
 		@Override
-		public ResourceList<TestResource2> findAll(Iterable<Integer> ids, QuerySpec querySpec) {
+		public ResourceList<TestResource2> findAll(Collection<Integer> ids, QuerySpec querySpec) {
 			return null;
 		}
 

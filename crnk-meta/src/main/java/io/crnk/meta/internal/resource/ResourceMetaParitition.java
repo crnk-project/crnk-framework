@@ -13,7 +13,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
@@ -249,7 +249,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 		// TODO avoid use of ResourceRepositoryAdapter by enriching ResourceRepositoryInformation
 		Object repository = resourceRepository.getResourceRepository();
-		if (repository instanceof ResourceRepositoryV2) {
+		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}
 		return meta;

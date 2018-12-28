@@ -4,7 +4,7 @@ import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 public class HasNextPagingIntTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
 	@Override
 	@Before
@@ -74,7 +74,7 @@ public class HasNextPagingIntTest extends AbstractJpaJerseyTest {
 		test.setStringValue("test");
 		testRepo.create(test);
 
-		ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+		ResourceRepository<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 

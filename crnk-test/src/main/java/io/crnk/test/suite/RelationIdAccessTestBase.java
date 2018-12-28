@@ -3,7 +3,7 @@ package io.crnk.test.suite;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
@@ -24,9 +24,9 @@ public abstract class RelationIdAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected ResourceRepositoryV2<Schedule, Long> scheduleRepo;
+	protected ResourceRepository<Schedule, Long> scheduleRepo;
 
 	protected RelationshipRepositoryV2<Schedule, Long, Project, Long> relRepo;
 
@@ -68,7 +68,7 @@ public abstract class RelationIdAccessTestBase {
 		resource.setName("test");
 		resource.setTestResourceIdRefId(new ResourceIdentifier("13", "schedule"));
 
-		ResourceRepositoryV2<RelationIdTestResource, Serializable> repository =
+		ResourceRepository<RelationIdTestResource, Serializable> repository =
 				testContainer.getRepositoryForType(RelationIdTestResource.class);
 		RelationIdTestResource createdResource = repository.create(resource);
 		Assert.assertEquals(resource.getTestResourceIdRefId(), createdResource.getTestResourceIdRefId());

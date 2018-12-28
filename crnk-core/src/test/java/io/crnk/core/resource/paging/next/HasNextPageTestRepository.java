@@ -2,7 +2,7 @@ package io.crnk.core.resource.paging.next;
 
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class HasNextPageTestRepository implements ResourceRepositoryV2<Task, Long> {
+public class HasNextPageTestRepository implements ResourceRepository<Task, Long> {
 
 	private static List<Task> tasks = new ArrayList<>();
 

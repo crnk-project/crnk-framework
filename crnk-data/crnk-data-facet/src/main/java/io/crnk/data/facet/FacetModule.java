@@ -10,7 +10,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.queryspec.PathSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.data.facet.annotation.Facet;
 import io.crnk.data.facet.config.BasicFacetInformation;
@@ -83,7 +83,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 
 			FacetProviderContext providerContext = new FacetProviderContext() {
 				@Override
-				public ResourceRepositoryV2 getRepository(String resourceType) {
+				public ResourceRepository getRepository(String resourceType) {
 					RegistryEntry entry = getEntry(resourceType);
 					return entry.getResourceRepositoryFacade();
 				}
