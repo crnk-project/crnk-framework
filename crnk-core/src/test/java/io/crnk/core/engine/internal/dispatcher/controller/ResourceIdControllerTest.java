@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -6,8 +6,8 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPatchController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * checks usage of @JsonApiRelationId
  */
-public class ResourceIdControllerTest extends BaseControllerTest {
+public class ResourceIdControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = "POST";
 
@@ -159,7 +159,7 @@ public class ResourceIdControllerTest extends BaseControllerTest {
 		Document newDocument = createDocument(scheduleId);
 
 		// WHEN PATCH
-		RelationshipsResourcePatchController sut = new RelationshipsResourcePatchController();
+		RelationshipsPatchController sut = new RelationshipsPatchController();
 		sut.init(controllerContext);
 
 		Response taskResponse = sut.handle(path, emptyTaskQuery, newDocument);

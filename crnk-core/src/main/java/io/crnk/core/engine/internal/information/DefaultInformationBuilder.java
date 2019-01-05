@@ -274,7 +274,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private ResourceFieldAccessor idAccessor;
 
-		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true);
+		private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true,true, true, true);
 
 		private RelationshipRepositoryBehavior relationshipRepositoryBehavior = RelationshipRepositoryBehavior.DEFAULT;
 

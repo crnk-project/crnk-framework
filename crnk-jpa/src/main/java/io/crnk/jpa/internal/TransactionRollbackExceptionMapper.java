@@ -7,7 +7,7 @@ import javax.transaction.RollbackException;
 /**
  * RollbackException can hide the more interesting causes.
  */
-public class TransactionRollbackExceptionMapper extends AbstractWrappedExceptionMapper<RollbackException> {
+public class TransactionRollbackExceptionMapper extends AbstractJpaExceptionMapper<RollbackException> {
 
 
 	public TransactionRollbackExceptionMapper(Module.ModuleContext context) {

@@ -15,10 +15,10 @@ import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.utils.Optional;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {

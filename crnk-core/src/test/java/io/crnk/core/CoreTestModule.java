@@ -1,6 +1,7 @@
 package io.crnk.core;
 
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.core.mock.repository.ThingRepository;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.repository.ProjectQuerySpecRepository;
 import io.crnk.core.queryspec.repository.ProjectToTaskRelationshipRepository;
@@ -29,6 +30,7 @@ public class CoreTestModule implements Module {
 		context.addRepository(new ProjectQuerySpecRepository());
 		context.addRepository(new ProjectToTaskRelationshipRepository());
 		context.addRepository(new ScheduleQuerySpecRepository());
+		context.addRepository(new ThingRepository());
 		context.addRepository(new TaskQuerySpecRepository());
 		context.addRepository(new TaskToProjectRelationshipRepository());
 		context.addRepository(new TaskWithLookupQuerySpecRepository());

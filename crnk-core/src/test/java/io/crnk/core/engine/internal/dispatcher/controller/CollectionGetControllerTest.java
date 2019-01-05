@@ -1,13 +1,13 @@
-package io.crnk.core.engine.internal.dispatcher.controller.collection;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
 import io.crnk.core.engine.internal.dispatcher.controller.CollectionGetController;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPostController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
@@ -27,7 +27,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CollectionGetControllerTest extends BaseControllerTest {
+public class CollectionGetControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = "GET";
 
@@ -160,7 +160,7 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/includedProjects");
-		RelationshipsResourcePostController sut = new RelationshipsResourcePostController();
+		RelationshipsPostController sut = new RelationshipsPostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project
@@ -243,8 +243,8 @@ public class CollectionGetControllerTest extends BaseControllerTest {
 		data.setId(projectId.toString());
 
 		JsonPath savedTaskPath = pathBuilder.build("/tasks/" + taskId + "/relationships/projects");
-		RelationshipsResourcePostController sut =
-				new RelationshipsResourcePostController();
+		RelationshipsPostController sut =
+				new RelationshipsPostController();
 		sut.init(controllerContext);
 
 		// WHEN -- adding a relation between task and project

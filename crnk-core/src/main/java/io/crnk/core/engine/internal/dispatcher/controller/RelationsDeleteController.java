@@ -15,26 +15,24 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RelationshipsResourcePatchController extends RelationshipsResourceUpsert {
+public class RelationsDeleteController extends RelationshipsResourceUpsert {
 
 	@Override
 	public HttpMethod method() {
-		return HttpMethod.PATCH;
+		return HttpMethod.DELETE;
 	}
 
 	@Override
-	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation,
-											ResourceField relationshipField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
+	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
 											RelationshipRepositoryAdapter relationshipRepositoryForClass) {
 		return resourceResult.merge(resource -> {
 			List<ResourceIdentifier> resourceIds = new ArrayList<>();
 			for (ResourceIdentifier dataBody : dataBodies) {
 				resourceIds.add(dataBody);
 			}
-
 			List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
 			for (ResourceModificationFilter filter : modificationFilters) {
-				resourceIds = filter.modifyManyRelationship(resource, relationshipField, ResourceRelationshipModificationType.SET, resourceIds);
+				resourceIds = filter.modifyManyRelationship(resource, relationshipField, ResourceRelationshipModificationType.REMOVE, resourceIds);
 			}
 
 			List<Serializable> parsedIds = new LinkedList<>();
@@ -42,30 +40,26 @@ public class RelationshipsResourcePatchController extends RelationshipsResourceU
 				Serializable parsedId = targetResourceInformation.parseIdString(resourceId.getId());
 				parsedIds.add(parsedId);
 			}
-			//noinspection unchecked
-			return relationshipRepositoryForClass.setRelations(resource, parsedIds, relationshipField, queryAdapter);
+			// noinspection unchecked
+			return relationshipRepositoryForClass.removeRelations(resource, parsedIds, relationshipField, queryAdapter);
 		});
 	}
 
 	@Override
-	protected Result processToOneRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation,
-											  ResourceField relationshipField, ResourceIdentifier resourceId, QueryAdapter queryAdapter,
+	protected Result processToOneRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, ResourceIdentifier dataBody, QueryAdapter queryAdapter,
 											  RelationshipRepositoryAdapter relationshipRepositoryForClass) {
 		return resourceResult.merge(resource -> {
-
+			ResourceIdentifier resourceId = null;
 			List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
-			ResourceIdentifier filteredResourceId = resourceId;
 			for (ResourceModificationFilter filter : modificationFilters) {
-				filteredResourceId = filter.modifyOneRelationship(resource, relationshipField, filteredResourceId);
+				resourceId = filter.modifyOneRelationship(resource, relationshipField, resourceId);
 			}
 
-			Serializable parsedId = null;
-			if (filteredResourceId != null) {
-				parsedId = targetResourceInformation.parseIdString(filteredResourceId.getId());
-			}
+			Serializable parsedId = resourceId != null ? targetResourceInformation.parseIdString(resourceId.getId()) : null;
 
-			//noinspection unchecked
+			// noinspection unchecked
 			return relationshipRepositoryForClass.setRelation(resource, parsedId, relationshipField, queryAdapter);
 		});
 	}
+
 }

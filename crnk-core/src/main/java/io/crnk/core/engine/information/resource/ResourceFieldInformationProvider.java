@@ -5,7 +5,8 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Optional;
+
+import java.util.Optional;
 
 /**
  * Provides information necessary to properly serializer (or skip) resource attributes.
@@ -30,6 +31,11 @@ public interface ResourceFieldInformationProvider {
 	 * Returns whether the field can be modified upon a POST request.
 	 */
 	Optional<Boolean> isPostable(BeanAttributeInformation attributeDesc);
+
+	/**
+	 * Returns whether the relationship field can be modified upon a DELETE request.
+	 */
+	Optional<Boolean> isDeletable(BeanAttributeInformation attributeDesc);
 
 	/**
 	 * Returns whether the field can be modified upon a PATCH request.

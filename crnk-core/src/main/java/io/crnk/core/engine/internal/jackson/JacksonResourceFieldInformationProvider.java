@@ -15,11 +15,11 @@ import io.crnk.core.engine.internal.information.resource.AnnotatedClassBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotatedFieldBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotatedMethodBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * A Jackson-backed implementation of the {@link ResourceFieldInformationProvider} interface.

@@ -5,12 +5,12 @@ import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.utils.Optional;
 import org.junit.Test;
 
 import java.nio.file.ClosedFileSystemException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;

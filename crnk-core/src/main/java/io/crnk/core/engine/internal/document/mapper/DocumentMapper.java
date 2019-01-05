@@ -116,9 +116,9 @@ public class DocumentMapper {
 			if (doc.getData().isPresent()) {
 				if (doc.isMultiple()) {
 					compact(doc.getCollectionData().get());
+				} else {
+					compact(doc.getSingleData().get());
 				}
-			} else {
-				compact(doc.getSingleData().get());
 			}
 		}
 	}

@@ -379,12 +379,14 @@ Field or getter annotated with `JsonApiField` allows to define  the behavior of 
 
 Following options are supported:
 
-- `sortable` defines whether an attribute can be sorted.
-- `filterable` defines whether an attribute can be filtered.
-- `postable` defines whether an attribute can be set with a POST request.
-- `patchable` defines whether an attribute can be changed with a PATCH request.
-- `readable` defines whether an attribute can be read with a GET request.
+- `sortable` defines whether a field can be sorted.
+- `filterable` defines whether a field can be filtered.
+- `postable` defines whether a field can be set with a POST request.
+- `patchable` defines whether a field can be changed with a PATCH request.
+- `deletable` defines whether a multi-valued relationship field can be changed with a DELETE request.
+- `readable` defines whether a field can be read with a GET request.
 - `patchStrategy` defines the behavior of value with PATCH request. It can be either `MERGE` if you want the value be merged with an original one or `SET` if you want the value be totaly replaced with a new one.
+
 
 anchor:jackson_annotations[]
 

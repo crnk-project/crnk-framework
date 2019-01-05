@@ -10,6 +10,7 @@ import io.crnk.core.engine.filter.RepositoryMetaFilterChain;
 import io.crnk.core.engine.filter.RepositoryRequestFilterChain;
 import io.crnk.core.engine.filter.RepositoryResultFilterChain;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
@@ -246,6 +247,12 @@ public abstract class ResponseRepositoryAdapter {
 			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod(), queryContext);
 			if (filterBehavior != FilterBehavior.NONE) {
 				throw new ForbiddenException(resourceInformation, request.getMethod());
+			}
+
+			ResourceField relationshipField = request.getRelationshipField();
+			if(relationshipField != null){
+				boolean canAccess = resourceFilterDirectory.canAccess(relationshipField, request.getMethod(), queryContext, false);
+				PreconditionUtil.verify(canAccess, "ignoring not allowed, should not get here");
 			}
 		}
 

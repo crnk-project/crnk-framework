@@ -7,7 +7,7 @@ import javax.persistence.RollbackException;
 /**
  * RollbackException can hide the more interesting causes.
  */
-public class PersistenceRollbackExceptionMapper extends AbstractWrappedExceptionMapper<RollbackException> {
+public class PersistenceRollbackExceptionMapper extends AbstractJpaExceptionMapper<RollbackException> {
 
 
 	public PersistenceRollbackExceptionMapper(Module.ModuleContext context) {

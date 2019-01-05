@@ -3,7 +3,6 @@ package io.crnk.jpa.meta.internal;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PropertyUtils;
-import io.crnk.core.utils.Optional;
 import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
@@ -19,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 public class JpaMetaFilter extends MetaFilterBase {
 

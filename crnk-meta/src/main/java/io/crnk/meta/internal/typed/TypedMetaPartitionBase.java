@@ -2,12 +2,12 @@ package io.crnk.meta.internal.typed;
 
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.module.Module;
-import io.crnk.core.utils.Optional;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaPartitionBase;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class TypedMetaPartitionBase extends MetaPartitionBase {

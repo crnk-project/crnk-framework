@@ -3,13 +3,13 @@ package io.crnk.gen.runtime.cdi;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.utils.Optional;
 import io.crnk.gen.runtime.GeneratorTrigger;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import org.jboss.weld.environment.se.Weld;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class CdiRunner {
 

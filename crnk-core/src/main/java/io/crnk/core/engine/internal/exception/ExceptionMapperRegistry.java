@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.exception;
 
+import java.util.Optional;
 import java.util.Set;
 
 import io.crnk.core.engine.dispatcher.Response;
@@ -8,7 +9,6 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.InternalServerErrorException;
-import io.crnk.core.utils.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

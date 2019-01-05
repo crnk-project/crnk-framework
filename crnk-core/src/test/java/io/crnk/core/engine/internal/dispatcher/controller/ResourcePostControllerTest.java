@@ -1,4 +1,4 @@
-package io.crnk.core.engine.internal.dispatcher.controller.resource;
+package io.crnk.core.engine.internal.dispatcher.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
@@ -10,7 +10,7 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.dispatcher.controller.BaseControllerTest;
+import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -40,7 +40,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResourcePostControllerTest extends BaseControllerTest {
+public class ResourcePostControllerTest extends ControllerTestBase {
 
 	private static final String REQUEST_TYPE = "POST";
 
@@ -220,7 +220,7 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 			sut.handle(path, emptyTaskQuery, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
 		} catch (ForbiddenException e) {
-			Assert.assertEquals("field 'readOnlyValue' cannot be modified", e.getMessage());
+			Assert.assertEquals("field 'tasks.readOnlyValue' cannot be accessed for POST", e.getMessage());
 		}
 	}
 
@@ -570,5 +570,31 @@ public class ResourcePostControllerTest extends BaseControllerTest {
 
 		// WHEN
 		sut.handle(pojoPath, container.toQueryAdapter(new QuerySpec(Pojo.class)), pojoBody);
+	}
+
+	@Test
+	public void ignoreNonPostableRelationship() throws Exception {
+		JsonPath taskPath = pathBuilder.build("/tasks/");
+
+		// try set relationship
+		Document taskPatch = new Document();
+		Relationship relationship = new Relationship();
+		relationship.setData(Nullable.of(new ResourceIdentifier("13", "things")));
+		Resource data = new Resource();
+		data.setType("tasks");
+		data.setAttribute("name", objectMapper.readTree("\"task created\""));
+		data.getRelationships().put("statusThing", relationship);
+		taskPatch.setData(Nullable.of(data));
+		ResourcePostController sut = new ResourcePostController();
+		sut.init(controllerContext);
+		Response response = sut.handle(taskPath, emptyTaskQuery, taskPatch);
+
+		// not relationship not posted since not not postable due to @JsonApiField(postable=false)
+		Assert.assertNotNull(response);
+		Resource savedTask = response.getDocument().getSingleData().get();
+		assertThat(savedTask.getType()).isEqualTo("tasks");
+		assertThat(savedTask.getAttributes().get("name").asText()).isEqualTo("task created");
+		Relationship savedRelationshipId = savedTask.getRelationships().get("statusThing");
+		assertThat(savedRelationshipId.getData().get()).isNull();
 	}
 }

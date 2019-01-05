@@ -20,7 +20,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Optional;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -230,9 +230,10 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         boolean sortable = isSortable(attributeDesc);
         boolean filterable = isFilterable(attributeDesc);
         boolean postable = isPostable(attributeDesc);
+        boolean deletable = isDeletable(attributeDesc);
         boolean patchable = isPatchable(attributeDesc, resourceFieldType);
         boolean readable = isReadable(attributeDesc);
-        return new ResourceFieldAccess(readable, postable, patchable, sortable, filterable);
+        return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
     }
 
     private boolean isSortable(BeanAttributeInformation attributeDesc) {
@@ -280,6 +281,20 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
         return true;
     }
+
+    private boolean isDeletable(BeanAttributeInformation attributeDesc) {
+        if (isReadOnly(attributeDesc)) {
+            return false;
+        }
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<Boolean> deletable = fieldInformationProvider.isDeletable(attributeDesc);
+            if (deletable.isPresent()) {
+                return deletable.get();
+            }
+        }
+        return true;
+    }
+
 
     private boolean isReadable(BeanAttributeInformation attributeDesc) {
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {

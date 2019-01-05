@@ -25,10 +25,10 @@ import io.crnk.core.engine.internal.dispatcher.controller.Controller;
 import io.crnk.core.engine.internal.dispatcher.controller.ControllerContext;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.FieldResourcePost;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceDeleteController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationsDeleteController;
 import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourceGetController;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePatchController;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsResourcePostController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPatchController;
+import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPostController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceDeleteController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
 import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
@@ -316,9 +316,9 @@ public class CrnkBoot {
 
 	protected ControllerRegistry createControllerRegistry() {
 		Set<Controller> controllers = new HashSet<>();
-		controllers.add(new RelationshipsResourceDeleteController());
-		controllers.add(new RelationshipsResourcePatchController());
-		controllers.add(new RelationshipsResourcePostController());
+		controllers.add(new RelationsDeleteController());
+		controllers.add(new RelationshipsPatchController());
+		controllers.add(new RelationshipsPostController());
 		controllers.add(new ResourceDeleteController());
 		controllers.add(new CollectionGetController());
 		controllers.add(new FieldResourceGetController());

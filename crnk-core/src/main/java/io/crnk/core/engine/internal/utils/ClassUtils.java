@@ -1,7 +1,6 @@
 package io.crnk.core.engine.internal.utils;
 
 import io.crnk.core.exception.ResourceException;
-import io.crnk.core.utils.Optional;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -20,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 
 /**

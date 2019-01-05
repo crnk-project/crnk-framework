@@ -6,7 +6,6 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.utils.Optional;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.jpa.query.JpaQuery;
 import io.crnk.meta.model.MetaAttribute;
@@ -22,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?, ?>> implements JpaQuery<T> {
 

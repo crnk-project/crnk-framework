@@ -5,7 +5,8 @@ import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.resource.annotations.SerializeType;
-import io.crnk.core.utils.Optional;
+
+import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;

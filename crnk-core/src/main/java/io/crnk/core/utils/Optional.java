@@ -3,6 +3,7 @@ package io.crnk.core.utils;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+@Deprecated
 public class Optional<T> {
 	private static final Optional<?> EMPTY = new Optional<>(null);
 

@@ -39,25 +39,6 @@ can be registered with `ModuleContext.addRepositoryDecoratorFactory`. The factor
 notified about every repository registration and is then free do decorate it or not.
 
 
-anchor:resourcefilter[]
-
-## Resource Filtering
-
-`ResourceFilter` allows to restrict access to resources and fields. To methods `filterResource` and
-`filterField` can be implemented for this purpose. Both return a `FilterBehavior` which allows to
-distinguish between `NONE`, `IGNORE` and `FORBIDDEN`. For example, a field like a
-lock count can make use of `IGNORE` in order to be ignored for POST and PATCH requests (the current value
-on the server is left untouched). While access to an unauthorized resource or
-field results in a forbidden error with `FORBIDDEN`.
-
-The `SecurityModule` makes use of `ResourceFilter` to perform access control.
-`SecurityResourceFilter` in 'crnk-security` gives an example how it is used. The `MetaModule` and
-`HomeModule` make use of `ResourceFilterDirectory` obtained with `ModuleContext.getResourceFilterDirectory(...)` to
-query those `ResourceFilter` and only display information about resources and fields accessible in the context
-of the current re quest. The `ResourceFilterDirectory` makes use of per-request caching as the information
-may be accessed repeatedly for a request.
-
-
 anchor:modificationfilter[]
 
 ## Filter Modifications
