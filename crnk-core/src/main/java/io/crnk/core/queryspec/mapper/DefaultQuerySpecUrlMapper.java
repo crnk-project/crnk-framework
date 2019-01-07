@@ -291,7 +291,7 @@ public class DefaultQuerySpecUrlMapper
             if (entry != null && entry.getResourceInformation() != null
                     && entry.getResourceInformation().getPagingSpecType() != null) {
                 PagingBehavior pagingBehavior = entry.getPagingBehavior();
-                map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
+                map.putAll(pagingBehavior.serialize(querySpec.getPaging(entry.getResourceInformation().getPagingSpecType()), resourceType));
             }
 
             for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {

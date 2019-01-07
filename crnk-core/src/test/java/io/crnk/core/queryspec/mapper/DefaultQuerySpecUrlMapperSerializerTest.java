@@ -11,6 +11,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.mock.MockConstants;
+import io.crnk.core.mock.models.CustomPagingPojo;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
@@ -19,6 +20,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
+import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +39,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		CoreTestContainer container = new CoreTestContainer();
 		container.setPackage(MockConstants.TEST_MODELS_PACKAGE);
 		container.getBoot().getModuleRegistry().addPagingBehavior(new OffsetLimitPagingBehavior());
+		container.getBoot().getModuleRegistry().addPagingBehavior(new NumberSizePagingBehavior());
 		container.boot();
 
 		urlMapper = (DefaultQuerySpecUrlMapper) container.getBoot().getUrlMapper();
@@ -228,6 +231,13 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
 		check("http://127.0.0.1/tasks?include[tasks]=project", null, querySpec);
+	}
+
+	@Test
+	public void testIncludeRelationsOfDifferentTypes() {
+		QuerySpec querySpec = new QuerySpec(CustomPagingPojo.class);
+		querySpec.includeRelation(Arrays.asList("task"));
+		check("http://127.0.0.1/custom-paging?include[custom-paging]=task", null, querySpec);
 	}
 
 	@Test
