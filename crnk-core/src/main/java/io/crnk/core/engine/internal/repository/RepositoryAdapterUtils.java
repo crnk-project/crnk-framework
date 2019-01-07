@@ -46,7 +46,7 @@ public class RepositoryAdapterUtils {
 
 		RegistryEntry entry = moduleRegistry.getResourceRegistry().getEntry(responseResourceInformation.getResourceType());
 		PreconditionUtil.verify(entry != null, "resourceType=%s not found", responseResourceInformation.getResourceType());
-		PagingBehavior pagingBehavior = entry.getPagingBehavior();
+		PagingBehavior pagingBehavior = moduleRegistry.findPagingBehavior(requestSpec.getQueryAdapter().getPagingSpec().getClass());
 		if (pagingBehavior != null && pagingBehavior.isRequired(requestSpec.getQueryAdapter().getPagingSpec())) {
 			if (linksInformation == null) {
 				// use default implementation if no link information provided by resource
