@@ -291,7 +291,16 @@ public class DefaultQuerySpecUrlMapper
             if (entry != null && entry.getResourceInformation() != null
                     && entry.getResourceInformation().getPagingSpecType() != null) {
                 PagingBehavior pagingBehavior = entry.getPagingBehavior();
-                map.putAll(pagingBehavior.serialize(querySpec.getPagingSpec(), resourceType));
+	            /**
+	             * Until we have order-based determination of pagination, we can not really rely on crnk finding proper one
+	             * since it will return first suitable pagination behavior even if there is an exact one.
+	             * As a result, we must always check whether resource's paging equals to the one query-spec holds.
+	             * If yes, use it as it is, otherwise try to convert it.
+	             */
+                PagingSpec pagingSpec = pagingBehavior.createDefaultPagingSpec().getClass().isInstance(querySpec.getPagingSpec())
+		                ? querySpec.getPagingSpec()
+		                : querySpec.getPaging(entry.getResourceInformation().getPagingSpecType());
+                map.putAll(pagingBehavior.serialize(pagingSpec, resourceType));
             }
 
             for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
