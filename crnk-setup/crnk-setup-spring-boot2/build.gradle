@@ -57,6 +57,7 @@ dependencies {
 	testCompile 'org.springframework.security:spring-security-core'
 	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
 	testCompile 'org.mockito:mockito-core:2.18.3'
+	testCompile 'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 
