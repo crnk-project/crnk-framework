@@ -32,10 +32,15 @@ public class QuerySpecAdapter implements QueryAdapter {
 
 	private boolean compactMode;
 
+	private boolean isSelfLink;
+
 	public QuerySpecAdapter(QuerySpec querySpec, ResourceRegistry resourceRegistry, QueryContext queryContext) {
 		this.querySpec = querySpec;
 		this.resourceRegistry = resourceRegistry;
 		this.queryContext = queryContext;
+		if (queryContext != null && queryContext.getRequestPath() != null) {
+			this.isSelfLink = queryContext.getRequestPath().contains("/relationships");
+		}
 	}
 
 	public QuerySpec getQuerySpec() {
@@ -175,5 +180,10 @@ public class QuerySpecAdapter implements QueryAdapter {
 	@Override
 	public String toString() {
 		return querySpec.toString();
+	}
+
+	@Override
+	public boolean isSelfLink() {
+		return isSelfLink;
 	}
 }
