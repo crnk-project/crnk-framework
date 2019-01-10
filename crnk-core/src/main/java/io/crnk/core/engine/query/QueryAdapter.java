@@ -66,4 +66,6 @@ public interface QueryAdapter {
 	PagingSpec getPagingSpec();
 
 	boolean isEmpty();
+
+	boolean isSelfLink();
 }

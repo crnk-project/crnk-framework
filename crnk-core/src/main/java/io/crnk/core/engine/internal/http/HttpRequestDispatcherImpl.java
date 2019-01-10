@@ -64,6 +64,7 @@ public class HttpRequestDispatcherImpl implements RequestDispatcher {
 			if (serviceUrlProvider != null) {
 				queryContext.setBaseUrl(serviceUrlProvider.getUrl());
 			}
+			queryContext.setRequestPath(requestContext.getPath());
 
 			List<HttpRequestProcessor> processors = moduleRegistry.getHttpRequestProcessors();
 			PreconditionUtil.verify(!processors.isEmpty(), "no processors available");

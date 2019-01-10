@@ -10,6 +10,8 @@ public class QueryContext {
 
 	private Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	private String requestPath;
+
 	public String getBaseUrl() {
 		return Objects.requireNonNull(baseUrl);
 	}
@@ -32,5 +34,13 @@ public class QueryContext {
 
 	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
+	}
+
+	public String getRequestPath() {
+		return requestPath;
+	}
+
+	public void setRequestPath(String requestPath) {
+		this.requestPath = requestPath;
 	}
 }

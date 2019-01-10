@@ -32,7 +32,7 @@ public class PagingSpecUrlBuilder {
 		} else {
 			rootInfo = relationshipField.getParentResourceInformation();
 		}
-		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter,
-				relationshipField != null ? relationshipField.getJsonName() : null);
+		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter.toQuerySpec(),
+				relationshipField != null ? relationshipField.getJsonName() : null, queryAdapter.isSelfLink());
 	}
 }
