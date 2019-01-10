@@ -76,7 +76,7 @@ public class HttpRequestContextBaseAdapterTest {
 	@Test
 	public void getPath() {
 		adapter.getPath();
-		Mockito.verify(base, Mockito.times(1)).getPath();
+		Mockito.verify(base, Mockito.times(2)).getPath();
 	}
 
 	@Test

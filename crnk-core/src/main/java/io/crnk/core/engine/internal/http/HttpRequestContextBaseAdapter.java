@@ -27,6 +27,7 @@ public class HttpRequestContextBaseAdapter implements HttpRequestContext {
 		this.base = base;
 		this.queryContext.setBaseUrl(base.getBaseUrl());
 		this.queryContext.setAttributes(requestAttributes);
+		this.queryContext.setRequestPath(base.getPath());
 	}
 
 	public boolean hasResponse() {
