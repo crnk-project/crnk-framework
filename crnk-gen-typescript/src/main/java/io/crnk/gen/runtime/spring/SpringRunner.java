@@ -1,17 +1,18 @@
 package io.crnk.gen.runtime.spring;
 
-import io.crnk.gen.runtime.GeneratorTrigger;
-import io.crnk.meta.MetaLookup;
-import io.crnk.meta.MetaModule;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
+
+import io.crnk.gen.runtime.GeneratorTrigger;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaModule;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.context.ConfigurableApplicationContext;
 
 public class SpringRunner {
 
@@ -40,7 +41,7 @@ public class SpringRunner {
 					new Object[]{configurationClass} : new Class[]{configurationClass};
 
 			SpringApplication application = (SpringApplication) constructor.newInstance(constructorParam);
-			application.setWebEnvironment(false);
+			application.setWebApplicationType(WebApplicationType.NONE);
 			application.setAdditionalProfiles(springConfig.getProfile());
 			application.setDefaultProperties(springConfig.getDefaultProperties());
 
