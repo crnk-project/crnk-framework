@@ -3,13 +3,12 @@ package io.crnk.core.repository;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * Wraps another resource repository. In contrast to decorators, a wrapped repository is still a repository and treated as such.
  */
-public abstract class WrappedResourceRepository<T, I extends Serializable> implements ResourceRepository<T, I> {
+public abstract class WrappedResourceRepository<T, I> implements ResourceRepository<T, I> {
 
 	private ResourceRepository<T, I> wrappedRepository;
 
@@ -52,7 +51,7 @@ public abstract class WrappedResourceRepository<T, I extends Serializable> imple
 		return wrappedRepository;
 	}
 
-	public void setWrappedRepository(ResourceRepositoryV2<T, I> wrappedRepository) {
+	public void setWrappedRepository(ResourceRepository<T, I> wrappedRepository) {
 		this.wrappedRepository = wrappedRepository;
 	}
 }

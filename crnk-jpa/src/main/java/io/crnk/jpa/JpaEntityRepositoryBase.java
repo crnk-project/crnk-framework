@@ -32,6 +32,7 @@ import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -69,7 +70,7 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
     }
 
     @Override
-    public final ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+    public final ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
         QuerySpec idQuerySpec = querySpec.duplicate();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));

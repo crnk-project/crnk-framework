@@ -1,7 +1,7 @@
 package io.crnk.core.repository.decorate;
 
 import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ public class RepositoryDecoratorFactoryBase implements RepositoryDecoratorFactor
 
 	@Override
 	public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
-			ResourceRepositoryV2<T, I> repository) {
+			ResourceRepository<T, I> repository) {
 		// nothing to decorate
 		return null;
 	}
