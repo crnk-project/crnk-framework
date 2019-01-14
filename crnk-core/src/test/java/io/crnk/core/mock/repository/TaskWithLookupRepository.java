@@ -6,8 +6,6 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-import java.util.Collection;
-
 public class TaskWithLookupRepository implements ResourceRepository<TaskWithLookup, String> {
 
 	@Override
@@ -29,7 +27,7 @@ public class TaskWithLookupRepository implements ResourceRepository<TaskWithLook
 	}
 
 	@Override
-	public ResourceList<TaskWithLookup> findAll(Collection<String> ids, QuerySpec querySpec) {
+	public ResourceList<TaskWithLookup> findAll(Iterable<String> ids, QuerySpec querySpec) {
 		throw new UnsupportedOperationException();
 	}
 
