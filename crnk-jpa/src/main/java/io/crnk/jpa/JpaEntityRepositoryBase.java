@@ -27,7 +27,6 @@ import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.Tuple;
-import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 
 import javax.persistence.EntityManager;
 import java.io.Serializable;
@@ -185,6 +184,10 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
         // id may differ from primary key
         ResourceField idField = getIdField();
         I id = (I) idField.getAccessor().getValue(resource);
+        // id could have been created during persist
+        if (id == null && pk != null && idField.getElementType().isAssignableFrom(pk.getClass())) {
+        	id = (I) pk;
+		}
         PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
         return (S) findOne(id, querySpec);
     }
