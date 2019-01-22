@@ -175,22 +175,36 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
         // save since reads do a detach
         EntityManager em = getEntityManager();
         em.persist(entity);
-        Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
 
         // fetch again since we may have to fetch tuple data and do DTO mapping
         QuerySpec querySpec = new QuerySpec(repositoryConfig.getResourceClass());
-        PreconditionUtil.verify(pk != null, "pk not available for entity %s", resource);
 
         // id may differ from primary key
         ResourceField idField = getIdField();
         I id = (I) idField.getAccessor().getValue(resource);
         // id could have been created during persist
-        if (id == null && pk != null && idField.getElementType().isAssignableFrom(pk.getClass())) {
-        	id = (I) pk;
+        if (id == null) {
+        	id = getIdFromEntity(em, entity, idField);
 		}
         PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
         return (S) findOne(id, querySpec);
     }
+
+    /**
+	 * Extracts the resource ID from the entity.
+	 * By default it uses the entity's primary key if the field name matches the DTO's ID field.
+	 * Override in subclasses if a different entity field should be used.
+	 * @return the resource ID or <code>null</code> when it could not be determined
+	 */
+    @SuppressWarnings("unchecked")
+    protected I getIdFromEntity(EntityManager em, Object entity, ResourceField idField) {
+    	Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
+		PreconditionUtil.verify(pk != null, "pk not available for entity %s", entity);
+		if (pk != null && primaryKeyAttribute.getName().equals(idField.getUnderlyingName()) && idField.getElementType().isAssignableFrom(pk.getClass())) {
+			return (I) pk;
+		}
+		return null;
+	}
 
     @Override
     public void delete(I id) {
