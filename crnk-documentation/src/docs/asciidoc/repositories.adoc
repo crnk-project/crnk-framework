@@ -333,7 +333,7 @@ Some further examples:
 
   { "OR": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
 
-4. To filter by multiple attributes with the `AMD` operator:
+4. To filter by multiple attributes with the `AND` operator:
 
   { "AND": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
 +
