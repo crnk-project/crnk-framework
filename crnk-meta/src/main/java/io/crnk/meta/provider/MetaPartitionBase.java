@@ -1,5 +1,15 @@
 package io.crnk.meta.provider;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaElement;
@@ -10,16 +20,6 @@ import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaPrimitiveType;
 import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.MetaType;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 public abstract class MetaPartitionBase implements MetaPartition {
 
@@ -64,6 +64,10 @@ public abstract class MetaPartitionBase implements MetaPartition {
 	}
 
 	public final Optional<MetaElement> allocateMetaElement(Type type) {
+		if (typeMapping.containsKey(type)) {
+			return Optional.of(typeMapping.get(type));
+		}
+
 		return context.runDiscovery(new Callable<Optional<MetaElement>>() {
 
 			@Override

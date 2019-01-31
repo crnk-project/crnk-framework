@@ -1,17 +1,5 @@
 package io.crnk.meta;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.module.Module.ModuleContext;
-import io.crnk.meta.internal.BaseMetaPartition;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.provider.MetaFilter;
-import io.crnk.meta.provider.MetaPartition;
-import io.crnk.meta.provider.MetaPartitionContext;
-import io.crnk.meta.provider.MetaProvider;
-import io.crnk.meta.provider.MetaProviderContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +11,18 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.module.Module.ModuleContext;
+import io.crnk.meta.internal.BaseMetaPartition;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.provider.MetaFilter;
+import io.crnk.meta.provider.MetaPartition;
+import io.crnk.meta.provider.MetaPartitionContext;
+import io.crnk.meta.provider.MetaProvider;
+import io.crnk.meta.provider.MetaProviderContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetaLookup {
 
@@ -54,7 +54,7 @@ public class MetaLookup {
 		addPartition(basePartition);
 	}
 
-	public void addProvider(MetaProvider provider) {
+	public synchronized  void addProvider(MetaProvider provider) {
 		providers.add(provider);
 
 		provider.init(new MetaProviderContext() {
@@ -88,7 +88,7 @@ public class MetaLookup {
 		metaTypes.addAll(provider.getMetaTypes());
 	}
 
-	private void addPartition(MetaPartition partition) {
+	private synchronized   void addPartition(MetaPartition partition) {
 		partitions.add(partition);
 		partition.init(new MetaPartitionContext() {
 			@Override
@@ -127,7 +127,7 @@ public class MetaLookup {
 		this.moduleContext = moduleContext;
 	}
 
-	public void registerPrimitiveType(Class<?> clazz) {
+	public synchronized void registerPrimitiveType(Class<?> clazz) {
 		basePartition.registerPrimitiveType(clazz);
 	}
 
@@ -136,7 +136,7 @@ public class MetaLookup {
 		return Collections.unmodifiableMap(idElementMap);
 	}
 
-	public void add(MetaElement element) {
+	public synchronized  void add(MetaElement element) {
 		PreconditionUtil.verify(discovering, "no discovering");
 		PreconditionUtil.verify(element.getName() != null, "no name provided for %s", element);
 
@@ -161,29 +161,25 @@ public class MetaLookup {
 		//}
 	}
 
-	private void checkInitialized() {
+	private synchronized void checkInitialized() {
 		if (!discovered && !discovering) {
 			initialize();
 		}
 	}
 
-	public void initialize() {
-		discover(new Callable<Object>() {
-
-			@Override
-			public Object call() {
-				if (!discovered) {
-					for (MetaPartition provider : partitions) {
-						provider.discoverElements();
-					}
-					discovered = true;
+	public synchronized void initialize() {
+		discover(() -> {
+			if (!discovered) {
+				for (MetaPartition provider : partitions) {
+					provider.discoverElements();
 				}
-				return null;
+				discovered = true;
 			}
+			return null;
 		});
 	}
 
-	private <T> T discover(Callable<T> callable) {
+	private synchronized <T> T discover(Callable<T> callable) {
 		if (discovering) {
 			try {
 				return callable.call();
