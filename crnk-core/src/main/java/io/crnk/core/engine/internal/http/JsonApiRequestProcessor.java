@@ -182,6 +182,9 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 		Optional<JsonApiExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 		if (!exceptionMapper.isPresent()) {
 			LOGGER.error("failed to process request, unknown exception thrown", e);
+
+			// we do not propagate causes because we do not know the nature of the error.
+			// one could consider hiding the message as well
 			e = new InternalServerErrorException(e.getMessage());
 			exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 			PreconditionUtil
