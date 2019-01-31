@@ -1,5 +1,12 @@
 package io.crnk.jpa;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
@@ -18,14 +25,6 @@ import io.crnk.jpa.mapping.IdentityMapper;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.JpaQueryFactory;
 import net.jodah.typetools.TypeResolver;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * @param <T> document type (entity or mapped dto)
@@ -62,7 +61,7 @@ public class JpaRepositoryConfig<T> {
      * queries.
      */
     public JpaQueryFactory getQueryFactory() {
-        PreconditionUtil.verify(queryFactory != null, "queryFactory not set");
+        PreconditionUtil.verify(queryFactory != null, "queryFactory not set, make sure the JpaModule is setup and discovered by Crnk");
         return queryFactory.get();
     }
 
