@@ -1,11 +1,11 @@
 package io.crnk.jpa.internal;
 
+import java.util.List;
+import javax.persistence.EntityManager;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.jpa.JpaRepositoryConfig;
-
-import javax.persistence.EntityManager;
-import java.util.List;
 
 /**
  * Base class for resource repositories backed by a JPA entity. Subclasses may perform
@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @param <T>
  */
-public abstract class JpaRepositoryBase<T> {
+public abstract class JpaRepositoryBase<T> implements JpaRepositoryConfigSupplier {
 
     protected JpaRepositoryConfig<T> repositoryConfig;
 
@@ -30,6 +30,7 @@ public abstract class JpaRepositoryBase<T> {
         return em;
     }
 
+    @Override
     public JpaRepositoryConfig<T> getRepositoryConfig() {
         return repositoryConfig;
     }

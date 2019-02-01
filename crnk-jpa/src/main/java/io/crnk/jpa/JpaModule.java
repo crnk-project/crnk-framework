@@ -1,5 +1,18 @@
 package io.crnk.jpa;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
@@ -25,6 +38,7 @@ import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
+import io.crnk.jpa.internal.JpaRepositoryConfigSupplier;
 import io.crnk.jpa.internal.JpaRepositoryUtils;
 import io.crnk.jpa.internal.JpaRequestContext;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
@@ -47,19 +61,6 @@ import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * Crnk module that adds support to expose JPA entities as repositories. It
@@ -419,8 +420,8 @@ public class JpaModule implements InitializingModule {
         Collection<Object> repositories = context.getModuleRegistry().getRepositories();
         for (Object repository : repositories) {
             Object unwrappedRepository = JpaRepositoryUtils.unwrap(repository);
-            if (unwrappedRepository instanceof JpaEntityRepositoryBase) {
-                JpaEntityRepositoryBase entityRepository = (JpaEntityRepositoryBase) unwrappedRepository;
+            if (unwrappedRepository instanceof JpaRepositoryConfigSupplier) {
+				JpaRepositoryConfigSupplier entityRepository = (JpaRepositoryConfigSupplier) unwrappedRepository;
                 JpaRepositoryConfig repositoryConfig = entityRepository.getRepositoryConfig();
                 JpaRepositoryUtils.setDefaultConfig(config, repositoryConfig);
                 customConfig.add(repositoryConfig);
