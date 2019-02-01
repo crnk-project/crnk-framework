@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
@@ -37,12 +42,6 @@ import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
@@ -184,7 +183,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	private Map<ResourceField, RelationshipRepositoryAdapter> buildRelationshipAdapters(ResourceInformation
-																								resourceInformation) {
+			resourceInformation) {
 		checkRelationshipNaming(resourceInformation);
 
 		Map<ResourceField, RelationshipRepositoryAdapter> map = new HashMap<>();
@@ -192,7 +191,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getAdapter());
-			} else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
+			}
+			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -209,7 +209,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
 			if (relationshipEntry != null) {
 				map.put(relationshipField, relationshipEntry.getLegacyEntry());
-			} else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
+			}
+			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
 				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
 						relationshipField.getUnderlyingName());
 			}
@@ -240,16 +241,10 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 	private MatchedRelationship findRelationshipMatch(ResourceField relationshipField) {
-		Collection<Object> repositories = moduleRegistry.getRepositories();
-		RepositoryInformationProvider repositoryInformationBuilder = moduleRegistry.getRepositoryInformationBuilder();
-
 		MatchedRelationship matchedEntry = null;
 
-
-		for (Object repository : repositories) {
-			RepositoryInformation repositoryInformation = repositoryInformationBuilder.build(repository, new
-					DefaultRepositoryInformationProviderContext(moduleRegistry));
-
+		for (Object repository : moduleRegistry.getRepositories()) {
+			RepositoryInformation repositoryInformation = moduleRegistry.getRepositoryInformation(repository);
 			if (repositoryInformation instanceof RelationshipRepositoryInformation) {
 				RelationshipRepositoryInformation relationshipRepositoryInformation =
 						(RelationshipRepositoryInformation) repositoryInformation;
@@ -304,7 +299,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ResourceEntry buildResourceRepository(ResourceInformation resourceInformation) {
 		resourceRepository.information().setResourceInformation(resourceInformation);
 		ResourceRepositoryInformation repositoryInformation = resourceRepository.information().build();
@@ -328,7 +323,8 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (relationshipField.hasIdField()
 					|| relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
 				behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
-			} else {
+			}
+			else {
 				behavior = RelationshipRepositoryBehavior.CUSTOM;
 			}
 		}
@@ -364,10 +360,12 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OWNER, ForwardingDirection.OWNER);
-			} else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+			}
+			else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
-			} else {
+			}
+			else {
 				PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
 						.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
@@ -376,12 +374,13 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
 			repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
 			return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object decorateRepository(Object repository) {
 		Object decoratedRepository = repository;
 		List<RepositoryDecoratorFactory> repositoryDecorators = moduleRegistry.getRepositoryDecoratorFactories();
@@ -406,14 +405,14 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		private final Object relRepository;
 
 		public MatchedRelationship(final ResourceField relationshipField,
-								   RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
+				RelationshipRepositoryInformation relationshipRepositoryInformation, Object relRepository) {
 			this.relationshipField = relationshipField;
 			this.relationshipRepositoryInformation = relationshipRepositoryInformation;
 			this.relRepository = relRepository;
 		}
 
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private ResponseRelationshipEntry getLegacyEntry() {
 
 			final Object decoratedRepository = decorateRepository(relRepository);
@@ -461,7 +460,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 	}
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ResourceRepositoryAdapter buildResourceRepositoryAdapter(ResourceInformation resourceInformation) {
 		if (resourceRepository == null) {
 			return null;

@@ -1,5 +1,12 @@
 package io.crnk.gen.runtime.reflections;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
@@ -23,13 +30,6 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 
@@ -88,7 +88,13 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 						if (method.getName().equals("getResourceClass")) {
 							return resourceClass;
 						}
-						throw new UnsupportedOperationException();
+						if (method.getName().equals("hashCode")) {
+							return resourceClass.hashCode();
+						}
+						if (method.getName().equals("equals")) {
+							return proxy == args[0];
+						}
+						throw new UnsupportedOperationException(method.toString());
 					};
 					Object repository = Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterface}, handler);
 					reflectionsModule.addRepository(repository);
