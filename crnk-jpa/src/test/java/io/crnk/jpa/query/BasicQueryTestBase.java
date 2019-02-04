@@ -1,5 +1,17 @@
 package io.crnk.jpa.query;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -12,18 +24,6 @@ import org.hibernate.Hibernate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.criteria.JoinType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 @Transactional
 public abstract class BasicQueryTestBase extends AbstractJpaTest {
@@ -266,7 +266,7 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 	}
 
 	@Test
-	public void testJoinFilter() {
+	public void testOneJoinFilter() {
 		assertEquals((Long) 0L, builder()
 				.addFilter(TestEntity.ATTR_oneRelatedValue + "." + RelatedEntity.ATTR_stringValue, FilterOperator.EQ, "related0")
 				.buildExecutor().getUniqueResult(false).getId());
@@ -382,7 +382,8 @@ public abstract class BasicQueryTestBase extends AbstractJpaTest {
 			if (i == 4) {
 				assertTrue(entity.getEmbValue().getNestedValue().getEmbBoolValue());
 				assertEquals(0, entity.getId().intValue());
-			} else {
+			}
+			else {
 				assertFalse(entity.getEmbValue().getNestedValue().getEmbBoolValue());
 				assertEquals(1 + i, entity.getId().intValue());
 			}
