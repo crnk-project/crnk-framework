@@ -1,17 +1,5 @@
 package io.crnk.activiti.mapper;
 
-import io.crnk.activiti.resource.HistoricProcessInstanceResource;
-import io.crnk.activiti.resource.ProcessInstanceResource;
-import io.crnk.activiti.resource.TaskResource;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.queryspec.Direction;
-import io.crnk.core.queryspec.FilterOperator;
-import io.crnk.core.queryspec.FilterSpec;
-import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.SortSpec;
-import org.activiti.engine.query.Query;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.OffsetDateTime;
@@ -21,7 +9,23 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import io.crnk.activiti.resource.HistoricProcessInstanceResource;
+import io.crnk.activiti.resource.ProcessInstanceResource;
+import io.crnk.activiti.resource.TaskResource;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.exception.BadRequestException;
+import io.crnk.core.queryspec.Direction;
+import io.crnk.core.queryspec.FilterOperator;
+import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.queryspec.SortSpec;
+import org.activiti.engine.query.Query;
 
 public class ActivitiQuerySpecMapper {
 
@@ -37,13 +41,16 @@ public class ActivitiQuerySpecMapper {
 			Long limit = querySpec.getLimit();
 			if (limit != null) {
 				return activitiQuery.listPage((int) querySpec.getOffset(), querySpec.getLimit().intValue());
-			} else {
+			}
+			else {
 				PreconditionUtil.verifyEquals(Long.valueOf(0L), querySpec.getOffset(), "page offset not supported");
 				return activitiQuery.list();
 			}
-		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+		}
+		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw new BadRequestException(e.getMessage(), e);
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 	}
@@ -56,28 +63,89 @@ public class ActivitiQuerySpecMapper {
 		filters.addAll(baseFilters);
 		filters.addAll(querySpec.getFilters());
 
+		Class<?> resourceClass = querySpec.getResourceClass();
+		BeanInformation resourceInfo = BeanInformation.get(resourceClass);
+
 		for (FilterSpec filterSpec : filters) {
 			List<String> attributePath = filterSpec.getAttributePath();
-			if (attributePath.size() == 2 && "id".equals(attributePath.get(1))) {
-				attributePath = Arrays.asList(attributePath.get(0) + "Id");
+
+			BeanAttributeInformation firstAttribute = resourceInfo.getAttribute(attributePath.get(0));
+			if (firstAttribute == null) {
+				throw new BadRequestException("attribute " + attributePath.get(0) + " not found in " + resourceInfo.getImplementationClass());
 			}
-			PreconditionUtil.verify(attributePath.size() == 1, "nested attribute paths not available, path=%s", attributePath);
-			String attrName = attributePath.get(0);
 
 			FilterOperator op = filterSpec.getOperator();
-			Class valueClass = filterSpec.getValue().getClass();
-			String attributeName = mapAttributeName(attrName, querySpec.getResourceClass(), op, valueClass);
 			Object value = filterSpec.getValue();
+			Class valueClass = filterSpec.getValue().getClass();
 
-			Method method = getMethod(activitiQuery.getClass(), attributeName);
-			if (method.getParameterCount() == 0) {
-				PreconditionUtil.verifyEquals(Boolean.TRUE, value,
-						"only filtering by true supported for boolean values, attributeName=%s", attributeName);
-				method.invoke(activitiQuery);
-			} else {
-				Class<?> expectedType = method.getParameterTypes()[0];
-				method.invoke(activitiQuery, unmapValue(value, expectedType));
+			boolean isReference = attributePath.size() == 2 && "id".equals(attributePath.get(1)) && resourceInfo.getAttribute(firstAttribute.getName() + "Id") != null;
+			if (ActivitiResourceMapper.isStaticField(firstAttribute) || isReference) {
+				if (attributePath.size() == 2 && "id".equals(attributePath.get(1))) {
+					attributePath = Arrays.asList(attributePath.get(0) + "Id");
+				}
+				PreconditionUtil.verify(attributePath.size() == 1, "nested attribute paths not available, path=%s", attributePath);
+				String attrName = attributePath.get(0);
+
+				String mappedAttributeName = mapAttributeName(attrName, resourceClass, op, valueClass);
+				Optional<Method> optMethod = getMethod(activitiQuery.getClass(), mappedAttributeName);
+				if (!optMethod.isPresent()) {
+					throw new BadRequestException("unable to filter by " + optMethod + " with operator " + op);
+				}
+				Method method = optMethod.get();
+				if (method.getParameterCount() == 0) {
+					PreconditionUtil.verifyEquals(Boolean.TRUE, value,
+							"only filtering by true supported for boolean values, attributeName=%s", attrName);
+					method.invoke(activitiQuery);
+				}
+				else {
+					Class<?> expectedType = method.getParameterTypes()[0];
+					method.invoke(activitiQuery, unmapValue(value, expectedType));
+				}
 			}
+			else {
+				Method method = getGenericMethod(activitiQuery.getClass(), resourceClass, op);
+				String variableName = attributePath.stream().collect(Collectors.joining("."));
+				method.invoke(activitiQuery, variableName, value);
+			}
+		}
+	}
+
+	private static Method getGenericMethod(Class queryClass, Class resourceClass, FilterOperator operator) {
+		String prefix = "variable";
+		if(TaskResource.class.isAssignableFrom(resourceClass)){
+			prefix = "taskVariable";
+		}
+
+		try {
+			String methodName;
+			if (operator == FilterOperator.EQ) {
+				methodName = prefix + "ValueEquals";
+			}
+			else if (operator == FilterOperator.LE) {
+				methodName = prefix + "ValueLessThanOrEqual";
+			}
+			else if (operator == FilterOperator.NEQ) {
+				methodName = prefix + "ValueNotEquals";
+			}
+			else if (operator == FilterOperator.GT) {
+				methodName = prefix + "ValueGreaterThan";
+			}
+			else if (operator == FilterOperator.GE) {
+				methodName = prefix + "ValueGreaterThanOrEqual";
+			}
+			else if (operator == FilterOperator.LT) {
+				methodName = prefix + "ValueLessThan";
+			}
+			else if (operator == FilterOperator.LIKE) {
+				methodName = prefix + "ValueLikeIgnoreCase";
+			}
+			else {
+				throw new IllegalStateException("operator not support: " + operator);
+			}
+			return queryClass.getMethod(methodName, String.class, Object.class);
+		}
+		catch (NoSuchMethodException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -92,17 +160,17 @@ public class ActivitiQuerySpecMapper {
 		return value;
 	}
 
-	private static Method getMethod(Class<? extends Query> clazz, String methodName) {
+	private static Optional<Method> getMethod(Class<? extends Query> clazz, String methodName) {
 		for (Method method : clazz.getMethods()) {
 			if (methodName.equals(method.getName())) {
-				return method;
+				return Optional.of(method);
 			}
 		}
-		throw new BadRequestException("parameter '" + methodName + "' not found");
+		return Optional.empty();
 	}
 
 	private static String mapAttributeName(String attributeName, Class<?> resourceClass, FilterOperator operator,
-										   Class valueClass) {
+			Class valueClass) {
 		String name = attributeName;
 
 		boolean many = Collection.class.isAssignableFrom(valueClass);
@@ -111,22 +179,29 @@ public class ActivitiQuerySpecMapper {
 		if (operator.equals(FilterOperator.EQ) && many) {
 			if (name.toLowerCase().endsWith("id")) {
 				name = name + "s";
-			} else {
+			}
+			else {
 				name = name + "Ids";
 			}
-		} else if (operator.equals(FilterOperator.LIKE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.LIKE) && !many) {
 			name = name + "LikeIgnoreCase";
-		} else if (operator.equals(FilterOperator.GT) && isDate) {
+		}
+		else if (operator.equals(FilterOperator.GT) && isDate) {
 			name = mapDateTimeName(name);
 			name = name + "After";
-		} else if (operator.equals(FilterOperator.LT) && isDate) {
+		}
+		else if (operator.equals(FilterOperator.LT) && isDate) {
 			name = mapDateTimeName(name);
 			name = name + "Before";
-		} else if (operator.equals(FilterOperator.GE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.GE) && !many) {
 			name = "min" + firstToUpper(name);
-		} else if (operator.equals(FilterOperator.LE) && !many) {
+		}
+		else if (operator.equals(FilterOperator.LE) && !many) {
 			name = "max" + firstToUpper(name);
-		} else if (!operator.equals(FilterOperator.EQ)) {
+		}
+		else if (!operator.equals(FilterOperator.EQ)) {
 			throw new BadRequestException("filter operator '" + operator + "' not supported");
 		}
 
@@ -160,7 +235,8 @@ public class ActivitiQuerySpecMapper {
 
 			if (orderSpec.getDirection() == Direction.DESC) {
 				activitiQuery.desc();
-			} else {
+			}
+			else {
 				activitiQuery.asc();
 			}
 		}

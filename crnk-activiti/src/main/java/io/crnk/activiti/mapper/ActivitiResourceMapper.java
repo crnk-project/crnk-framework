@@ -1,5 +1,18 @@
 package io.crnk.activiti.mapper;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import io.crnk.activiti.resource.ExecutionResource;
 import io.crnk.activiti.resource.FormResource;
 import io.crnk.activiti.resource.HistoricProcessInstanceResource;
@@ -18,19 +31,6 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskInfo;
 import org.apache.commons.lang3.ClassUtils;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 public class ActivitiResourceMapper {
 
@@ -122,7 +122,7 @@ public class ActivitiResourceMapper {
 		}
 	}
 
-	private boolean isStaticField(BeanAttributeInformation attribute) {
+	public static boolean isStaticField(BeanAttributeInformation attribute) {
 		Package activitiPackage = ExecutionResource.class.getPackage();
 		Method getter = attribute.getGetter();
 		Class declaringClass = getter.getDeclaringClass();

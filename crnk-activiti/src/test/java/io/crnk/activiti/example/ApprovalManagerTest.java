@@ -1,5 +1,8 @@
 package io.crnk.activiti.example;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.crnk.activiti.example.approval.ApprovalManager;
 import io.crnk.activiti.example.approval.ApprovalMapper;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
@@ -21,9 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ApprovalManagerTest {
 
@@ -84,7 +84,7 @@ public class ApprovalManagerTest {
 				.startProcessInstanceByKey(Mockito.eq("scheduleChange"), processVariablesCaptor.capture());
 		Map processVariables = processVariablesCaptor.getValue();
 
-		Assert.assertEquals(4, processVariables.size());
+		Assert.assertEquals(6, processVariables.size());
 		Assert.assertEquals(mockId.toString(), processVariables.get("resourceId"));
 		Assert.assertEquals("schedule", processVariables.get("resourceType"));
 		Assert.assertEquals("John", processVariables.get("newValues.name"));

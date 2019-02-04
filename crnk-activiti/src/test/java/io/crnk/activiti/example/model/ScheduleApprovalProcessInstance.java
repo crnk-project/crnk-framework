@@ -14,6 +14,26 @@ public class ScheduleApprovalProcessInstance extends ApprovalProcessInstance {
 
 	private ScheduleApprovalValues previousValues;
 
+	private String stringValue;
+
+	private int intValue;
+
+	public int getIntValue() {
+		return intValue;
+	}
+
+	public void setIntValue(int intValue) {
+		this.intValue = intValue;
+	}
+
+	public String getStringValue() {
+		return stringValue;
+	}
+
+	public void setStringValue(String stringValue) {
+		this.stringValue = stringValue;
+	}
+
 	// end::docs1[]
 
 	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
@@ -34,6 +54,7 @@ public class ScheduleApprovalProcessInstance extends ApprovalProcessInstance {
 	public void setPreviousValues(ApprovalValues previousValues) {
 		this.previousValues = (ScheduleApprovalValues) previousValues;
 	}
+
 
 	public ApproveTask getApproveTask() {
 		return approveTask;

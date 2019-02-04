@@ -1,5 +1,7 @@
 package io.crnk.activiti.resource;
 
+import java.time.OffsetDateTime;
+
 import io.crnk.core.resource.annotations.JsonApiField;
 
 public class ProcessInstanceResource extends ExecutionResource {
@@ -8,6 +10,16 @@ public class ProcessInstanceResource extends ExecutionResource {
 
 	@JsonApiField(patchable = false)
 	private String processDefinitionKey;
+
+	private OffsetDateTime startTime;
+
+	public OffsetDateTime getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(OffsetDateTime startTime) {
+		this.startTime = startTime;
+	}
 
 	public String getBusinessKey() {
 		return businessKey;

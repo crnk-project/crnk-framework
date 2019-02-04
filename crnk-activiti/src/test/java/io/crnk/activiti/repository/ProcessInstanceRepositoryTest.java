@@ -1,5 +1,9 @@
 package io.crnk.activiti.repository;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Map;
+
 import io.crnk.activiti.example.ApprovalTestApplication;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalValues;
@@ -10,15 +14,12 @@ import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.resource.list.ResourceList;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Map;
 
 public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 
@@ -50,6 +51,8 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		ScheduleApprovalProcessInstance resource = new ScheduleApprovalProcessInstance();
 		resource.setResourceType("schedules");
 		resource.setResourceId("12");
+		resource.setIntValue(13);
+		resource.setStringValue("someValue");
 		resource.setNewValues(newValues);
 
 		Map<String, Object> processVariables = resourceMapper.mapToVariables(resource);
@@ -111,6 +114,7 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		resource.setName(name);
 		resource.setResourceId("newScheduleId");
 		resource.setResourceType("schedules");
+		resource.setStringValue("someValue");
 		resource.setTenantId(tenantId);
 		resource.setBusinessKey(businessKey);
 		resource.setProcessDefinitionKey("scheduleChange");
@@ -168,7 +172,8 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		try {
 			processRepository.findOne(processInstance.getId(), new QuerySpec(ScheduleApprovalProcessInstance.class));
 			Assert.fail();
-		} catch (ResourceNotFoundException e) {
+		}
+		catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}
@@ -202,6 +207,45 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 
 
 	@Test
+	public void checkCustomVariable() {
+		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		ResourceList<ScheduleApprovalProcessInstance> test = processRepository.findAll(querySpec);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.EQ, "someValue"));
+		Assert.assertEquals(1, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.LT, "someValue"));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("intValue"), FilterOperator.LT, 12));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
+		// TODO GT/LT operators do not seem to work properly
+		/*
+		 querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("intValue"), FilterOperator.LT, 14));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.LE, "someValue"));
+		Assert.assertEquals(1, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.GE, "someValue"));
+		Assert.assertEquals(1, processRepository.findAll(querySpec).size());
+		*/
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.EQ, "doesNotExist"));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.NEQ, "doesNotExist"));
+		Assert.assertNotEquals(0, processRepository.findAll(querySpec).size());
+	}
+
+	@Test
 	public void checkEqualId() {
 		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
@@ -211,7 +255,6 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "doesNotExists"));
 		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
 	}
-
 
 	@Test(expected = BadRequestException.class)
 	public void checkNotEqualsNotSupported() {
