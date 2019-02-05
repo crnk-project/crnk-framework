@@ -59,7 +59,7 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
     }
 
     @Override
-    public final T findOne(I id, QuerySpec querySpec) {
+    public T findOne(I id, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
         QuerySpec idQuerySpec = querySpec.duplicate();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, id));
@@ -68,7 +68,7 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
     }
 
     @Override
-    public final ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+    public ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
         QuerySpec idQuerySpec = querySpec.duplicate();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));
