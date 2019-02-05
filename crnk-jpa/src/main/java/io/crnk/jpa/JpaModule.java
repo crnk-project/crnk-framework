@@ -49,6 +49,7 @@ import io.crnk.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.meta.internal.JpaMetaEnricher;
+import io.crnk.jpa.meta.internal.JpaMetaPartition;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.JpaQueryFactoryContext;
 import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
@@ -425,6 +426,9 @@ public class JpaModule implements InitializingModule {
                 JpaRepositoryConfig repositoryConfig = entityRepository.getRepositoryConfig();
                 JpaRepositoryUtils.setDefaultConfig(config, repositoryConfig);
                 customConfig.add(repositoryConfig);
+
+                MetaPartition partition = jpaMetaLookup.getPartition(JpaMetaPartition.class);
+                partition.allocateMetaElement(repositoryConfig.getEntityClass());
             }
         }
 
