@@ -17,6 +17,7 @@ import io.crnk.gen.runtime.spring.SpringRuntimeConfig;
 import io.crnk.gen.typescript.RuntimeMetaResolver;
 import io.crnk.gen.typescript.TSGeneratorConfig;
 import io.crnk.gen.typescript.TSNpmConfiguration;
+import io.crnk.gen.typescript.TSResourceFormat;
 import io.crnk.gen.typescript.TSRuntimeConfiguration;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.model.TSElement;
@@ -78,6 +79,7 @@ public class RuntimeClassLoaderFactory {
 
 			sharedClasses = new HashMap<>();
 			sharedClasses.put(GeneratorTrigger.class.getName(), GeneratorTrigger.class);
+			sharedClasses.put(TSResourceFormat.class.getName(), TSResourceFormat.class);
 			sharedClasses.put(TSGeneratorConfig.class.getName(), TSGeneratorConfig.class);
 			sharedClasses.put(TSNpmConfiguration.class.getName(), TSNpmConfiguration.class);
 			sharedClasses.put(SpringRuntimeConfig.class.getName(), SpringRuntimeConfig.class);
