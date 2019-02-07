@@ -147,6 +147,7 @@ public class RuntimeClassLoaderFactory {
 				if (availableSourceSetNames.contains(sourceSetName)) {
 					SourceSet sourceSet = sourceSets.getByName(sourceSetName);
 					classpath.addAll(sourceSet.getOutput().getClassesDirs().getFiles());
+					classpath.add(sourceSet.getOutput().getResourcesDir());
 				}
 			}
 		}
