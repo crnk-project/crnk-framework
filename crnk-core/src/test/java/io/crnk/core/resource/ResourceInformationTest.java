@@ -18,6 +18,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -46,7 +47,7 @@ public class ResourceInformationTest {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		ResourceFieldAccessor valueIdAccessor = Mockito.mock(ResourceFieldAccessor.class);
 		valueField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, String.class,
-				String.class, "projects", null, SerializeType.LAZY, LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
+				String.class, "projects", null, SerializeType.LAZY, JsonIncludeStrategy.DEFAULT, LookupIncludeBehavior.AUTOMATICALLY_ALWAYS,
 				new ResourceFieldAccess(true, true, true, true, true),
 				"valueId", String.class, valueIdAccessor, RelationshipRepositoryBehavior.DEFAULT, null);
 		sut = new ResourceInformation(typeParser, Task.class, "tasks", null, Arrays.asList(idField, valueField),
