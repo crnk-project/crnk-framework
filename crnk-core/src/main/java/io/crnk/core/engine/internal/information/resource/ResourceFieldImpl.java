@@ -12,6 +12,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -28,6 +29,8 @@ public class ResourceFieldImpl implements ResourceField {
 	private final Type genericType;
 
 	private final SerializeType serializeType;
+
+	private final JsonIncludeStrategy jsonIncludeStrategy;
 
 	private final String oppositeResourceType;
 
@@ -56,20 +59,21 @@ public class ResourceFieldImpl implements ResourceField {
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 			Type genericType, String oppositeResourceType) {
 		this(jsonName, underlyingName, resourceFieldType, type, genericType,
-				oppositeResourceType, null, SerializeType.LAZY, LookupIncludeBehavior.NONE,
+				oppositeResourceType, null, SerializeType.LAZY, JsonIncludeStrategy.DEFAULT, LookupIncludeBehavior.NONE,
 				new ResourceFieldAccess(true, true, true, true, true, true),
 				null, null, null, RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
 	}
 
 	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
 			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
-			LookupIncludeBehavior lookupIncludeBehavior,
+			JsonIncludeStrategy jsonIncludeStrategy, LookupIncludeBehavior lookupIncludeBehavior,
 			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
 			RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
 		this.jsonName = jsonName;
 		this.underlyingName = underlyingName;
 		this.resourceFieldType = resourceFieldType;
 		this.serializeType = serializeType;
+		this.jsonIncludeStrategy = jsonIncludeStrategy;
 		this.type = type;
 		this.genericType = genericType;
 		this.lookupIncludeBehavior = lookupIncludeBehavior;
@@ -147,6 +151,11 @@ public class ResourceFieldImpl implements ResourceField {
 
 	public SerializeType getSerializeType() {
 		return serializeType;
+	}
+
+
+	public JsonIncludeStrategy getJsonIncludeStrategy() {
+		return jsonIncludeStrategy;
 	}
 
 	@Override

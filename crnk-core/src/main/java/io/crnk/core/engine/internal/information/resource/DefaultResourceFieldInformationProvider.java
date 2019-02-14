@@ -15,6 +15,7 @@ import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiToMany;
 import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -72,6 +73,11 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 		if (jsonApiToOne.isPresent() && !jsonApiToOne.get().lazy()) {
 			return Optional.of(SerializeType.ONLY_ID);
 		}
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<JsonIncludeStrategy> getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
 		return Optional.empty();
 	}
 

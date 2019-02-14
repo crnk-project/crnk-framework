@@ -1,5 +1,6 @@
 package io.crnk.core.engine.information.resource;
 
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -45,6 +46,8 @@ public interface ResourceField {
 	Type getGenericType();
 
 	SerializeType getSerializeType();
+
+	JsonIncludeStrategy getJsonIncludeStrategy();
 
 	/**
 	 * @return the non-collection type. Matches {@link #getType()} for
