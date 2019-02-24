@@ -1,2 +1,10 @@
-Next release will be a new major release. Will be a drama-free upgrade with various deprecations being
-cleaned up and the V2 suffixes of repositories deprecated in favor of new ones without the prefix.
+
+
+
+
+<h4>More flexible EntityManager setup with JPA module</h4>
+
+JpaModule.createServerModule(...) comes with a new flavor that allows to pass the EntityManager
+as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
+return an instance. The supplier together with the existing TransactionRunner
+allows for custom JPA setups and transaction handling.
