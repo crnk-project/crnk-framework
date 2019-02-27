@@ -51,4 +51,18 @@
 		<sequenceFlow id="flow5" sourceRef="scheduleChangeDenied" targetRef="endEvent"></sequenceFlow>
 		<sequenceFlow id="flow6" sourceRef="scheduleChangeApproved" targetRef="endEvent"></sequenceFlow>
 	</process>
+
+
+	<process id="immediateTerminationFlow" name="Directly terminates" isExecutable="true">
+		<documentation>
+			This process directly terminates
+		</documentation>
+
+		<startEvent id="quickStartEvent" name="Start" activiti:initiator="initiator"></startEvent>
+
+		<sequenceFlow id="quickStartFlow" sourceRef="quickStartEvent" targetRef="quickEndEvent"></sequenceFlow>
+
+		<endEvent id="quickEndEvent" name="End"></endEvent>
+
+	</process>
 </definitions>
