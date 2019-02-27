@@ -1,5 +1,10 @@
 package io.crnk.activiti.example;
 
+import java.util.Arrays;
+import java.util.List;
+import javax.inject.Singleton;
+import javax.ws.rs.ApplicationPath;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,6 +21,7 @@ import io.crnk.activiti.example.model.ApproveForm;
 import io.crnk.activiti.example.model.ApproveTask;
 import io.crnk.activiti.example.model.HistoricApproveTask;
 import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
+import io.crnk.activiti.example.model.ImmediateTerminatationProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.activiti.mapper.DefaultDateTimeMapper;
@@ -32,11 +38,6 @@ import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.glassfish.jersey.server.ResourceConfig;
-
-import javax.inject.Singleton;
-import javax.ws.rs.ApplicationPath;
-import java.util.Arrays;
-import java.util.List;
 
 @ApplicationPath("/")
 @Singleton
@@ -100,6 +101,10 @@ public class ApprovalTestApplication extends ResourceConfig {
 	// tag::activitiModule[]
 	public static ActivitiModule createActivitiModule(ProcessEngine processEngine) {
 		ActivitiModuleConfig config = new ActivitiModuleConfig();
+
+		ProcessInstanceConfig terminatationProcessConfig = config.addProcessInstance(ImmediateTerminatationProcessInstance.class);
+		terminatationProcessConfig.filterByProcessDefinitionKey("immediateTerminationFlow");
+
 		ProcessInstanceConfig processConfig = config.addProcessInstance(ScheduleApprovalProcessInstance.class);
 		processConfig.historic(HistoricScheduleApprovalProcessInstance.class);
 		processConfig.filterByProcessDefinitionKey("scheduleChange");
