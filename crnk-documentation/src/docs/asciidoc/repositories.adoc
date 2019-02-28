@@ -345,7 +345,9 @@ or more simply:
 
   {"name": "Great Task", "OR": {"id": 122, "name": "Other Task"}}
 
+6. To filter an attribute `name` on relationship `assignee`:
 
+  {"assignee": {"name": "test"}}
 
 
 
