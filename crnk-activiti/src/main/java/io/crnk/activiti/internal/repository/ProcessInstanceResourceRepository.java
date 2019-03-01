@@ -72,6 +72,7 @@ public class ProcessInstanceResourceRepository<T extends ProcessInstanceResource
 
 		// process already terminated, unfortunately no shared interfaces
 		HistoricProcessInstanceQuery historicQuery = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstance.getId());
+		historicQuery.includeProcessVariables();
 		HistoricProcessInstance historicProcessInstance = historicQuery.singleResult();
 		PreconditionUtil.verify(historicProcessInstance != null, "could not found potentially terminated process instance with id %s", processInstance.getId());
 		ProcessInstance finishedProcessInstance = new MappedHistoricProcessInstance(historicProcessInstance);

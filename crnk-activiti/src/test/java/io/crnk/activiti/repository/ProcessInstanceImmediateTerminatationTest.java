@@ -25,6 +25,7 @@ public class ProcessInstanceImmediateTerminatationTest extends ActivitiTestBase 
 	@Test
 	public void test() {
 		ImmediateTerminatationProcessInstance processInstance = new ImmediateTerminatationProcessInstance();
+		processInstance.setValue("test");
 
 		ImmediateTerminatationProcessInstance createdProcessInstance = processRepository.create(processInstance);
 		Assert.assertNotNull(createdProcessInstance);
@@ -32,6 +33,7 @@ public class ProcessInstanceImmediateTerminatationTest extends ActivitiTestBase 
 		Assert.assertFalse(createdProcessInstance.isSuspended());
 		Assert.assertNull(createdProcessInstance.getDescription());
 		Assert.assertEquals("quickStartEvent", createdProcessInstance.getActivityId());
+		Assert.assertEquals("test", createdProcessInstance.getValue());
 
 		Assert.assertNotNull(createdProcessInstance.getId());
 	}
