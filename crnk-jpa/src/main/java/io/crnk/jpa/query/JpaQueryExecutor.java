@@ -2,6 +2,8 @@ package io.crnk.jpa.query;
 
 import java.util.List;
 
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+
 public interface JpaQueryExecutor<T> {
 
 	/**
@@ -28,4 +30,6 @@ public interface JpaQueryExecutor<T> {
 	<U extends Tuple> List<U> getResultTuples();
 
 	int getLimit();
+
+	void setPaging(PagingSpec paging);
 }

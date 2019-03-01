@@ -1,5 +1,11 @@
 package io.crnk.jpa.internal;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.criteria.CriteriaQuery;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeSpec;
@@ -19,12 +25,6 @@ import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilter;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
-
-import javax.persistence.criteria.CriteriaQuery;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 public class JpaRepositoryUtils {
 
@@ -62,16 +62,7 @@ public class JpaRepositoryUtils {
                 executor.fetch(included.getAttributePath());
             }
         }
-        executor.setOffset((int) querySpec.getOffset());
-        if (querySpec.getOffset() > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("offset cannot be larger than Integer.MAX_VALUE");
-        }
-        if (querySpec.getLimit() != null) {
-            if (querySpec.getLimit() > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("limit cannot be larger than Integer.MAX_VALUE");
-            }
-            executor.setLimit((int) querySpec.getLimit().longValue());
-        }
+        executor.setPaging(querySpec.getPaging());
     }
 
     public static void setDefaultConfig(JpaModuleConfig moduleConfig, JpaRepositoryConfig<?> repositoryConfig) {
