@@ -65,6 +65,7 @@ public class ProcessInstanceResourceRepository<T extends ProcessInstanceResource
 		applyUpdates(processInstance, resource);
 
 		ProcessInstanceQuery processInstanceQuery = runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId());
+		processInstanceQuery.includeProcessVariables();
 		ProcessInstance updatedProcessInstance = processInstanceQuery.singleResult();
 		if (updatedProcessInstance != null) {
 			return (S) mapResult(updatedProcessInstance);
