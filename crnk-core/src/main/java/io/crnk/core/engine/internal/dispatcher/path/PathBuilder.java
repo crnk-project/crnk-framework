@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
@@ -15,13 +22,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Builder responsible for parsing URL path.
@@ -176,7 +176,11 @@ public class PathBuilder {
 		Serializable parentId = ids.get(0);
 		List<Serializable> nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
 
-		return parseFieldPath(oppositeEntry, nestedIds, pathElements);
+		JsonPath jsonPath = parseFieldPath(oppositeEntry, nestedIds, pathElements);
+		if(jsonPath != null){
+			jsonPath.addParentField(field);
+		}
+		return jsonPath;
 	}
 
 	private RegistryEntry getRootEntry(LinkedList<String> pathElements) {

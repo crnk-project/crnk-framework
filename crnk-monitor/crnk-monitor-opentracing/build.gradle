@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':crnk-core')
+	compileOnly 'io.opentracing:opentracing-api:0.31.0'
+	testCompile 'io.opentracing:opentracing-api:0.31.0'
+	testCompile project(':crnk-test')
+	testCompile project(':crnk-setup:crnk-setup-servlet')
+
+	testCompile 'org.springframework:spring-test:4.3.1.RELEASE'
+	testCompile 'org.springframework:spring-web:4.3.1.RELEASE'
+}

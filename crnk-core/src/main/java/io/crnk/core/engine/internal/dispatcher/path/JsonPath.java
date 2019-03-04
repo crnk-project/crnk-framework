@@ -1,11 +1,13 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.registry.RegistryEntry;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.registry.RegistryEntry;
 
 /**
  * Represent a JSON API path sent to the server. Each resource or field defined in the path is represented by one
@@ -17,11 +19,14 @@ import java.util.List;
 public abstract class JsonPath {
 
 	public static final String ID_SEPARATOR = ",";
+
 	public static final String ID_SEPARATOR_PATTERN = ",|%2C";
 
 	private RegistryEntry rootEntry;
 
 	private List<Serializable> ids;
+
+	private ResourceField parentField;
 
 	public JsonPath(RegistryEntry rootEntry, List<Serializable> ids) {
 		this.rootEntry = rootEntry;
@@ -70,4 +75,33 @@ public abstract class JsonPath {
 		return rootEntry;
 	}
 
+	/**
+	 * Replaces resource identifiers with {id} to have nice urls for e.g. tracing.
+	 */
+	public String toGroupPath() {
+		RegistryEntry rootEntry = getRootEntry();
+		ResourceInformation resourceInformation = rootEntry.getResourceInformation();
+
+		String resourcePath;
+		if (parentField != null) {
+			// TODO nested resource can be queried through two means, nested or direct flat (maybe). should be stored and considered somewhere here
+			ResourceInformation parentType = parentField.getParentResourceInformation();
+			resourcePath = parentType.getResourcePath() + "/{id}/" + parentField.getJsonName();
+		}
+		else {
+			resourcePath = resourceInformation.getResourcePath();
+		}
+
+		if (getIds() != null) {
+			resourcePath += "/{id}";
+		}
+		return resourcePath;
+	}
+
+	/**
+	 * Used in case of nesting of resources.
+	 */
+	void addParentField(ResourceField parentField){
+		this.parentField = parentField;
+	}
 }

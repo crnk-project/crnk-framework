@@ -144,6 +144,8 @@ public class NestedResourceTest extends ControllerTestBase {
 		Assert.assertEquals("a", id.getId());
 		Assert.assertEquals("b", id.getParentId());
 		Assert.assertEquals("related", path.getRelationship().getJsonName());
+		Assert.assertEquals("test/{id}/manyNested/{id}/relationships/related", path.toGroupPath());
+
 	}
 
 	@Test

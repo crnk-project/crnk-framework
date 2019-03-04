@@ -25,3 +25,10 @@ JpaCriteriaQuery&lt;TestEntity&gt; query = queryFactory.query(TestEntity.class);
 JpaQueryExecutor&lt;TestEntity&gt; executor = query.buildExecutor(querySpec);
 List&lt;TestEntity&gt; resultList = executor.getResultList();
 </pre>
+
+
+<h4>OpenTracing Support</h4>
+
+OpenTracing is a standard API to write trace information. crnk-monitor-opentracing introduces a new module OpenTracingServerModule
+that brings support for OpenTracing to Crnk. It can be used properly set the names of spans. More information is available
+in the documentation.

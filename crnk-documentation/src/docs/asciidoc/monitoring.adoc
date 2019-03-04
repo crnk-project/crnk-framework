@@ -4,7 +4,25 @@ anchor:monitoring[]
 
 anchor:brave_module[]
 
+
+## OpenTracing
+
+https://opentracing.io/[OpenTracing] is a standard API for tracing similar to SLF4J for logging.
+`crnk-monitor-opentracing` provides a `OpenTracingServerModule`. The module sets a
+human-readable name to any span tracing a JSON:API call, for example:
+
+- `/api/users`
+- `/api/users/{id}`
+
+Notice the `{id}` that will prevent dynamic parts of the URL from polluting the tracing data stores.
+
+INFORMATION:  The module does not start spans on its own. It is the duty of the underlying HTTP layer
+  to start spans to support tracing any kind of call, not just JSON_API ones.
+
+
 ## Tracing with Zipkin/Brave
+
+WARNING: This module is deprecated. The use of OpenTracing is recommended instead.
 
 A `BraveClientModule` and `BraveServletModule` provided by `io.crnk:crnk-monitor-brave4` provides
 integration into Zipkin/Brave to implement tracing for your repositories.  The module is applicable to
