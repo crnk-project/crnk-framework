@@ -42,7 +42,7 @@ public class OpenTracingFilter implements DocumentFilter {
 			catch (MalformedURLException e) {
 				throw new IllegalStateException("cannot parse base url", e);
 			}
-			String spanName = baseUrl.getPath() + "/" + jsonPath.toGroupPath();
+			String spanName = filterRequestContext.getMethod() + " " + baseUrl.getPath() + "/" + jsonPath.toGroupPath();
 
 			LOGGER.debug("setting span name {} on {}", spanName, span);
 			span.setOperationName(spanName);

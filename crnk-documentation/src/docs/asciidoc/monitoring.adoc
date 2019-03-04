@@ -11,8 +11,8 @@ https://opentracing.io/[OpenTracing] is a standard API for tracing similar to SL
 `crnk-monitor-opentracing` provides a `OpenTracingServerModule`. The module sets a
 human-readable name to any span tracing a JSON:API call, for example:
 
-- `/api/users`
-- `/api/users/{id}`
+- `GET /api/users`
+- `PATCH /api/users/{id}`
 
 Notice the `{id}` that will prevent dynamic parts of the URL from polluting the tracing data stores.
 

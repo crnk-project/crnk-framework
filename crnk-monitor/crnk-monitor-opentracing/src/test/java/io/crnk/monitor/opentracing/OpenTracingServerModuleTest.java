@@ -54,7 +54,7 @@ public class OpenTracingServerModuleTest {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 
-		Mockito.verify(span, Mockito.times(1)).setOperationName(Mockito.eq("/api/tasks"));
+		Mockito.verify(span, Mockito.times(1)).setOperationName(Mockito.eq("GET /api/tasks"));
 	}
 
 	@Test
