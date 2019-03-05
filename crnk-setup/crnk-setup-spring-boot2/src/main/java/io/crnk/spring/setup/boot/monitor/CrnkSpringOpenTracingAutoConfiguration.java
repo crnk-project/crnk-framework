@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnClass(Tracer.class)
+@ConditionalOnClass(OpenTracingServerModule.class)
 @EnableConfigurationProperties(CrnkTracingProperties.class)
 @ConditionalOnProperty(prefix = "crnk.monitor.tracing", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CrnkSpringOpenTracingAutoConfiguration {
