@@ -19,6 +19,7 @@ Notice the `{id}` that will prevent dynamic parts of the URL from polluting the 
 INFORMATION:  The module does not start spans on its own. It is the duty of the underlying HTTP layer
   to start spans to support tracing any kind of call, not just JSON_API ones.
 
+image:images/tracing.png[]
 
 ## Tracing with Zipkin/Brave
 
