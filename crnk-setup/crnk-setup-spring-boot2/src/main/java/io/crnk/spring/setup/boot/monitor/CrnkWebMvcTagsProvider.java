@@ -2,7 +2,8 @@ package io.crnk.spring.setup.boot.monitor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,11 +15,9 @@ import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.servlet.internal.ServletRequestContext;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.metrics.web.servlet.DefaultWebMvcTagsProvider;
-import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTags;
 import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTagsProvider;
 
 /**
@@ -29,10 +28,7 @@ public class CrnkWebMvcTagsProvider extends DefaultWebMvcTagsProvider {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkWebMvcTagsProvider.class);
 
-	private static final String SEPARATOR = "/";
-
-	private static final Pattern SEPARATOR_PATTER = Pattern.compile(SEPARATOR);
-
+	private static final String URI_TAG = "uri";
 
 	private final CrnkBoot boot;
 
@@ -44,27 +40,36 @@ public class CrnkWebMvcTagsProvider extends DefaultWebMvcTagsProvider {
 	@Override
 	public Iterable<Tag> getTags(HttpServletRequest request, HttpServletResponse response, Object handler, Throwable exception) {
 		LOGGER.debug("getTags for {}", request.getRequestURI());
-		Tag uri = uri(request);
-		if (uri != null) {
-			return Tags.of(WebMvcTags.method(request), uri(request), WebMvcTags.exception(exception), WebMvcTags.status(response));
-		}
-
-		return super.getTags(request, response, handler, exception);
+		Iterable<Tag> tags = super.getTags(request, response, handler, exception);
+		return enhanceUri(tags, request);
 	}
 
 	@Override
 	public Iterable<Tag> getLongRequestTags(HttpServletRequest request, Object handler) {
 		LOGGER.debug("getLongRequestTags for {}", request.getRequestURI());
+		Iterable<Tag> tags = super.getLongRequestTags(request, handler);
+		return enhanceUri(tags, request);
+	}
+
+	private Iterable<Tag> enhanceUri(Iterable<Tag> tags, HttpServletRequest request) {
 		Tag uri = uri(request);
 		if (uri != null) {
-			return Tags.of(WebMvcTags.method(request), uri);
+			List<Tag> enhancedTags = new ArrayList<>();
+			for (Tag tag : tags) {
+				if (tag.getKey().equals(URI_TAG)) {
+					enhancedTags.add(uri);
+				}
+				else {
+					enhancedTags.add(tag);
+				}
+			}
+			return enhancedTags;
 		}
-
-		return super.getLongRequestTags(request, handler);
+		return tags;
 	}
 
 	private Tag uri(final HttpServletRequest request) {
-		if(matchesPrefix(request)) {
+		if (matchesPrefix(request)) {
 			ServletContext servletContext = request.getServletContext();
 			ServletRequestContext context = new ServletRequestContext(servletContext, request, null, boot.getWebPathPrefix());
 			String path = context.getPath();
@@ -83,7 +88,7 @@ public class CrnkWebMvcTagsProvider extends DefaultWebMvcTagsProvider {
 				}
 				String uri = baseUrl.getPath() + "/" + jsonPath.toGroupPath();
 				LOGGER.debug("computed mvc tag: uri={}", uri);
-				return Tag.of("uri", uri);
+				return Tag.of(URI_TAG, uri);
 			}
 			LOGGER.debug("unknown path, using default mvc tags: uri={}", request.getRequestURI());
 		}

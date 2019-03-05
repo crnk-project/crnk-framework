@@ -3,7 +3,6 @@ package io.crnk.spring.metrics;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.collect.Iterators;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.spring.setup.boot.monitor.CrnkWebMvcTagsProvider;
@@ -40,8 +39,7 @@ public class CrnkWebMvcTagsProviderTest {
 		request.setAttribute("org.springframework.web.servlet.HandlerMapping.bestMatchingPattern", "/any");
 
 		Iterable<Tag> tags = compositeTagsProvider.getTags(request, new MockHttpServletResponse(), mock(Object.class), mock(Throwable.class));
-
-		assertEquals("/any", Iterators.get(tags.iterator(), 1).getValue());
+		assertEquals("/any", getUriTag(tags));
 	}
 
 	@SuppressWarnings("unused")
@@ -76,6 +74,15 @@ public class CrnkWebMvcTagsProviderTest {
 
 		Iterable<Tag> tags = compositeTagsProvider.getTags(request, new MockHttpServletResponse(), mock(Object.class), mock(Throwable.class));
 
-		assertEquals(expected, Iterators.get(tags.iterator(), 1).getValue());
+		assertEquals(expected, getUriTag(tags));
+	}
+
+	private String getUriTag(Iterable<Tag> tags) {
+		for (Tag tag : tags) {
+			if (tag.getKey().equals("uri")) {
+				return tag.getValue();
+			}
+		}
+		throw new IllegalStateException();
 	}
 }
