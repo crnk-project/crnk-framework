@@ -197,7 +197,8 @@ the respective HTTP client implementation. This allows to cover various use case
 
 Some examples:
 
-- https://github.com/crnk-project/crnk-framework/blob/master/crnk-monitor-brave4/src/main/java/io/crnk/monitor/brave/BraveClientModule.java[crnk-monitor-brave4] for an advanced example.
+- https://github.com/crnk-project/crnk-framework/blob/master/crnk-monitor/crnk-monitor-brave4/src/main/java/io/crnk/monitor/brave/BraveClientModule.java[crnk-monitor-brave4] for
+ an advanced example.
 - https://stackoverflow.com/questions/32196424/how-to-add-headers-to-okhttp-request-interceptor?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa[How to add
    headers to OkHttp request interceptor].
 
