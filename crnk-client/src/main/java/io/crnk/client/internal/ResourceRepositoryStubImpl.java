@@ -1,5 +1,8 @@
 package io.crnk.client.internal;
 
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.document.Document;
@@ -17,9 +20,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
 		implements ResourceRepositoryV2<T, I> {
 
@@ -27,7 +27,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 
 
 	public ResourceRepositoryStubImpl(CrnkClient client, Class<T> resourceClass, ResourceInformation resourceInformation,
-									  JsonApiUrlBuilder urlBuilder) {
+			JsonApiUrlBuilder urlBuilder) {
 		super(client, urlBuilder, resourceClass);
 		this.resourceInformation = resourceInformation;
 	}
@@ -62,20 +62,17 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 
 	@SuppressWarnings("unchecked")
 	private <S extends T> S modify(S entity, boolean create) {
-		Object id = getId(entity, create);
+		Object id = getId(entity);
 
-		String url;
-		if (create && resourceInformation.isNested()) {
-			// TODO align with other cases, consider adding Method/complete object to url computation
-			// workaround to get parentId out of id
-			ResourceField idField = resourceInformation.getIdField();
-			id = idField.getAccessor().getValue(entity);
-			url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
-			url = url.substring(0, url.lastIndexOf('/'));
-		} else {
-			url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
+		if (create && !resourceInformation.isNested()) {
+			id = null;
 		}
 
+		String url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
+		if (create && resourceInformation.isNested() && !resourceInformation.isSingularNesting()) {
+			// for multi-valued nested resource drop the nested id part
+			url = url.substring(0, url.lastIndexOf('/'));
+		}
 		return (S) executeUpdate(url, entity, create);
 	}
 
@@ -84,15 +81,14 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		return modify(entity, true);
 	}
 
-	private <S extends T> Object getId(S entity, boolean create) {
+	private <S extends T> Object getId(S entity) {
 		if (client.getPushAlways()) {
 			return null;
 		}
-		if (create) {
-			return null;
-		} else if (entity instanceof Resource) {
+		else if (entity instanceof Resource) {
 			return ((Resource) entity).getId();
-		} else {
+		}
+		else {
 			ResourceField idField = resourceInformation.getIdField();
 			return idField.getAccessor().getValue(entity);
 		}

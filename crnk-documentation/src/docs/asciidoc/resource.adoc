@@ -421,17 +421,44 @@ anchor:nested_resources[]
 
 WARNING: This feature is experimental and will be refined in subsequent releases.
 
-A resource may be nested and belong to a parent resource. In this case the nested resource is access through its parent resource.
-An URL then looks like:
+A resource may be nested and belong to a parent resource. URLs then look like:
 
-`http://example.com/posts/1/comments/2`
+- `http://example.com/posts/1/header` (single)
+- `http://example.com/posts/1/comments/2` (multiple)
 
-For a resource to become nested, it must make use of a structured identifier:
+Here a `post` resource holds two nested relationships: `header` and `comments`. Both of those relationships have resources
+that cannot exist without the `post` itself. The former case the relationship holds a single resource, while the later
+there might be multiple comments.
 
-[source]
-.NestedId.java
+Nested resources are implemented like any other resource, most notably by providing a resource repository.
+The subsequent two section go into detail how to setup such resources.
+
+### Single Nested Resources
+
+Single nested resources share the identifier with the parent resource. From the example aboce:
+
+`http://example.com/posts/1/header`
+
+Both the `post` and its `header` share the identifier `1`. A resource looks like:
+
+[source,java]
+.PostHeader.java
 ----
-include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/NestedId.java[]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostHeader.java[tags=docs]
+----
+
+Notice the `nested = true` and that the ID also serves as `@JsonApiRelationId` to point to the parent `post`. This two
+properties introduce the singular nesting to the resource. The repository itself can then be implemented like any other
+repository.
+
+### Multiple Nested Resources
+
+To nest multiple resource below a parent, structured identifier can be used:
+
+[source,java]
+.PostCommendId.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostCommentId.java[tags=docs]
 ----
 
 The id is setup of two parts:
@@ -439,15 +466,26 @@ The id is setup of two parts:
 - the local identifier of the child resource, annotated with `@JsonApiId`. It must be unique among all nested resources having the same parent.
 - the identifier of the parent resource, annotated with a `@JsonApiRelationId`. The nested resource must have matching relationship field (in this case `parent`)`.
 
-`NestedId` further implements `parse`, `toString`, `hashCode` and `equals` to deal with String serialization and equality.
+`PostCommentId` further implements `public PostCommentId(String idString)`, `toString`, `hashCode` and `equals` and carries the
+`@JsonSerialize(using = ToStringSerializer.class)` annotation to deal with String serialization and equality.
+
+The resource itself looks like:
+
+[source,java]
+.PostComment.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostComment.java[tags=docs]
+----
+
+### Usage
 
 For an example have a look at `NestedRepositoryClientTest` and its parent class. Depending on the use of <<JsonApiExposed>> it
 is or is not be possible to also directly access `http://example.com/comments` without going
 through the parents.
 
-Current Limitations:
+When creating new resources with CrnkClient, the nested identifier must be set to let CrnkClient access the postId
+to compute URLs.
 
-- Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
-- When creating new resources with CrnkClient, the nested identifier must be setup in order to let CrnkClient access the parentId.
-- Being experimental.
+WARNING: Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
+
 

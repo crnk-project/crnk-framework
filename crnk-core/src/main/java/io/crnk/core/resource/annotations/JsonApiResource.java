@@ -1,14 +1,14 @@
 package io.crnk.core.resource.annotations;
 
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import io.crnk.core.queryspec.pagingspec.PagingBehavior;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 
 
 /**
@@ -27,6 +27,11 @@ public @interface JsonApiResource {
 	 * @see <a href="http://jsonapi.org/format/#document-structure-resource-types">JSON API - Resource Types</a>
 	 */
 	String type();
+
+	/**
+	 * @return if true the resource is the child of another resource. E.g. /api/tasks/assignee or /api/tasks/subTasks/x.
+	 */
+	boolean nested() default false;
 
 	/**
 	 * Defines path of the resource specified by <i>type</i>. According to JSON API, the <i>type</i> can be either singular or

@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
@@ -15,11 +20,6 @@ import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
-
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceRegistryImpl extends ResourceRegistryPartBase implements ResourceRegistry {
 
@@ -156,17 +156,21 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		if (resourceInformation.isNested()) {
 			ResourceField parentField = resourceInformation.getParentField();
 
-			Object parentId = parentField.getIdAccessor().getValue(id);
-			Object nestedId = resourceInformation.getNestedIdAccessor().getValue(id);
-			PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
-			PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
-
 			RegistryEntry parentEntry = getEntry(parentField.getOppositeResourceType());
 			ResourceInformation parentInformation = parentEntry.getResourceInformation();
 			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
-			String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
 
-			return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
+			if(resourceInformation.isSingularNesting()){
+				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(id);
+				return parentUrl + "/" + childrenField.getJsonName();
+			}else{
+				Object parentId = parentField.getIdAccessor().getValue(id);
+				Object nestedId = resourceInformation.getNestedIdAccessor().getValue(id);
+				PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
+				PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
+				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
+				return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
+			}
 		}
 
 		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.toIdString(id));

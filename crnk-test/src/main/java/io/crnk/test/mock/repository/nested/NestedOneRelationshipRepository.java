@@ -1,18 +1,17 @@
 package io.crnk.test.mock.repository.nested;
 
+import java.io.Serializable;
+
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.test.mock.models.nested.ManyNestedResource;
 import io.crnk.test.mock.models.nested.NestedRelatedResource;
 
-import java.io.Serializable;
-
-public class NestedRelationshipRepository implements RelationshipRepositoryV2 {
+public class NestedOneRelationshipRepository implements RelationshipRepositoryV2 {
 
 	@Override
 	public Class getSourceResourceClass() {
-		return ManyNestedResource.class;
+		return OneNestedRepository.class;
 	}
 
 	@Override

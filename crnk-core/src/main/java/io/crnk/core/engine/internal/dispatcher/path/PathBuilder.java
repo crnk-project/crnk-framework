@@ -31,9 +31,11 @@ public class PathBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PathBuilder.class);
 
 	public static final String SEPARATOR = "/";
+
 	public static final String RELATIONSHIP_MARK = "relationships";
 
 	private final ResourceRegistry resourceRegistry;
+
 	private final TypeParser parser;
 
 	public PathBuilder(ResourceRegistry resourceRegistry, TypeParser parser) {
@@ -154,12 +156,17 @@ public class PathBuilder {
 			throw new BadRequestException("field not found: " + fieldName);
 		}
 		if (pathElements.isEmpty()) {
+			if (isNestedField(field) && !field.isCollection()) {
+				RegistryEntry nestedEntry = getNestedEntry(field);
+				ResourcePath path = new ResourcePath(nestedEntry, ids);
+				path.addParentField(field);
+				return path;
+			}
 			return new FieldPath(entry, ids, field);
 		}
 
-		String strNestedId = pathElements.poll();
 		if (field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP || field.getOppositeName() == null) {
-			LOGGER.debug("cannot process nestedId={} because field={} is not a relationship with an opposite field", strNestedId, field);
+			LOGGER.debug("cannot process field={} is not a relationship with an opposite field", field);
 			throw new BadRequestException("invalid url, cannot add further url fragements after field");
 		}
 
@@ -167,20 +174,47 @@ public class PathBuilder {
 		ResourceInformation oppositeInformation = oppositeEntry.getResourceInformation();
 		ResourceField oppositeField = oppositeInformation.findRelationshipFieldByName(field.getOppositeName());
 		if (!oppositeInformation.isNested()) {
-			LOGGER.debug("cannot process nestedId={} because opposite={} is not an nested resource", strNestedId, oppositeInformation);
+			LOGGER.debug("cannot process field={} because opposite={} is not an nested resource", field, oppositeInformation);
 			throw new BadRequestException("invalid url, cannot specify ID of related resource");
 		}
-		PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+
 		PreconditionUtil.verify(oppositeField != null, "nested resource must specify opposite on relationship from parent to child, got null for %s", field);
 
-		Serializable parentId = ids.get(0);
-		List<Serializable> nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
+		List<Serializable> nestedIds;
+		if (field.isCollection()) {
+			PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+			Serializable parentId = ids.get(0);
+
+			// nested many-relationship must specify a nested id
+			String strNestedId = pathElements.poll();
+			nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
+		}
+		else {
+			nestedIds = ids;
+		}
 
 		JsonPath jsonPath = parseFieldPath(oppositeEntry, nestedIds, pathElements);
-		if(jsonPath != null){
+		if (jsonPath != null) {
 			jsonPath.addParentField(field);
 		}
 		return jsonPath;
+	}
+
+	private boolean isNestedField(ResourceField field) {
+		if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
+			RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+			PreconditionUtil.verify(oppositeType != null, "opposite type %s not found for %s", field.getOppositeResourceType(), field.getUnderlyingName());
+			return oppositeType.getResourceInformation().isNested();
+		}
+		return false;
+	}
+
+	private RegistryEntry getNestedEntry(ResourceField field) {
+		PreconditionUtil.verify(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP, "not a relationship");
+		RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+		ResourceInformation resourceInformation = oppositeType.getResourceInformation();
+		PreconditionUtil.verify(resourceInformation.isNested(), "not a nested relationship");
+		return oppositeType;
 	}
 
 	private RegistryEntry getRootEntry(LinkedList<String> pathElements) {

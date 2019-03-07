@@ -26,11 +26,18 @@ public abstract class JsonPath {
 
 	private List<Serializable> ids;
 
-	private ResourceField parentField;
+	protected ResourceField parentField;
 
 	public JsonPath(RegistryEntry rootEntry, List<Serializable> ids) {
 		this.rootEntry = rootEntry;
 		this.ids = ids;
+	}
+
+	/**
+	 * @return parent relationship field in case of a nested resource
+	 */
+	public ResourceField getParentField(){
+		return parentField;
 	}
 
 	public Collection<Serializable> getIds() {
@@ -92,7 +99,7 @@ public abstract class JsonPath {
 			resourcePath = resourceInformation.getResourcePath();
 		}
 
-		if (getIds() != null) {
+		if (getIds() != null && (!resourceInformation.isNested() || !resourceInformation.isSingularNesting())) {
 			resourcePath += "/{id}";
 		}
 		return resourcePath;
@@ -101,7 +108,7 @@ public abstract class JsonPath {
 	/**
 	 * Used in case of nesting of resources.
 	 */
-	void addParentField(ResourceField parentField){
+	void addParentField(ResourceField parentField) {
 		this.parentField = parentField;
 	}
 }
