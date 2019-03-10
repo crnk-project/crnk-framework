@@ -5,7 +5,7 @@ import io.crnk.jpa.JpaEntityRepositoryBase;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserRepositoryImpl extends JpaEntityRepositoryBase<UserEntity, Long> {
+public class UserRepositoryImpl extends JpaEntityRepositoryBase<UserEntity, String> implements UserRepository {
 
     public UserRepositoryImpl() {
         super(UserEntity.class);

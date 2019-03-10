@@ -70,7 +70,6 @@ public class SpringBootSimpleExampleApplicationTests extends BaseTest {
         Assert.assertEquals(1, tasks.size());
     }
 
-
     @Test
     public void testUi() {
         Response response = RestAssured.given().when().get("/api/browse/");

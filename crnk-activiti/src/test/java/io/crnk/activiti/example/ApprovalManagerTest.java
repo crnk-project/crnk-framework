@@ -107,8 +107,6 @@ public class ApprovalManagerTest {
 		ArgumentCaptor<Object> savedEntityCaptor = ArgumentCaptor.forClass(Object.class);
 		Mockito.verify(repositoryFacade, Mockito.times(1)).save(savedEntityCaptor.capture());
 
-		System.out.println(savedEntityCaptor.getValue());
-
 		// check value updated on original resource
 		Schedule savedEntity = (Schedule) savedEntityCaptor.getValue();
 		Assert.assertSame(originalResource, savedEntity);

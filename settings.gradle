@@ -30,7 +30,8 @@ include ':crnk-operations'
 
 include ':crnk-documentation'
 include ':crnk-bom'
-include ':crnk-gen-typescript'
+include ':crnk-gen:crnk-gen-typescript'
+include ':crnk-gen:crnk-gen-java'
 
 include ':crnk-integration-examples:jersey-example'
 include ':crnk-integration-examples:dropwizard-simple-example'
