@@ -58,10 +58,10 @@ include::format.adoc[]
 include::reactive.adoc[]
 include::security.adoc[]
 include::dataaccess.adoc[]
+include::generation.adoc[]
 include::operations.adoc[]
 include::monitoring.adoc[]
-include::module_development.adoc[]
-include::generation.adoc[]
 include::faq.adoc[]
+include::module_development.adoc[]
 
 :leveloffset: 0

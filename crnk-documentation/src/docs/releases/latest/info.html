@@ -1,4 +1,18 @@
 
+<h4>Experimental Annotation Processor for type-safe QuerySpec construction</h4>
+
+An annotation processor is introduced that generates type-safe QuerySpec and PathSpec subtypes for their
+type-safe construction:
+
+<pre class="prettyprint">
+UserQuerySpec querySpec = new UserQuerySpec();
+        querySpec.sort().loginId().desc();
+        querySpec.filter().projects().id().filter(FilterOperator.EQ, 12);
+        querySpec.field().loginId();
+        querySpec.include().projects();
+</pre>
+
+More information can be found <a href="www.crnk.io/releases/latest/documentation/#_generation_java">here</a>.
 
 <h4>More flexible EntityManager setup with JPA module</h4>
 
@@ -40,7 +54,7 @@ Support for nested resources has been improved by introducing support singular n
 single-valued relationships. Urls then look like:
 
 <p>
-	http://example.com/posts/1/header
+    http://example.com/posts/1/header
 </p>
 
 

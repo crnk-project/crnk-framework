@@ -1,0 +1,29 @@
+apply plugin: 'java'
+
+apply plugin: 'java-gradle-plugin'
+
+gradlePlugin {
+    plugins {
+        'crnk-gen-typescript' {
+            id = "crnk-gen-typescript"
+            implementationClass = "io.crnk.gen.typescript.TSGeneratorPlugin"
+        }
+    }
+}
+
+dependencies {
+    compile gradleApi()
+
+    compile project(':crnk-core')
+    compile project(':crnk-jpa')
+    compile 'com.squareup:javapoet:1.11.1'
+    compileOnly 'junit:junit:4.12'
+    testCompile 'com.google.testing.compile:compile-testing:0.15'
+    testCompile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+}
+
+
+
+
+
+

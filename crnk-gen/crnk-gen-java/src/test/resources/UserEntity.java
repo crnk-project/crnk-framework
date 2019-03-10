@@ -1,4 +1,4 @@
-package io.crnk.example.springboot.domain.model;
+package test;
 
 import io.crnk.core.resource.annotations.JsonApiResource;
 
@@ -19,8 +19,8 @@ public class UserEntity {
 
     private UserAddress address;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator")
-    private Set<ScheduleEntity> createdSchedules;
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Project> projects;
 
     public UserAddress getAddress() {
         return address;
@@ -46,11 +46,11 @@ public class UserEntity {
         this.name = name;
     }
 
-    public Set<ScheduleEntity> getCreatedSchedules() {
-        return createdSchedules;
+    public Set<Project> getProjects() {
+        return projects;
     }
 
-    public void setCreatedSchedules(Set<ScheduleEntity> createdSchedules) {
-        this.createdSchedules = createdSchedules;
+    public void setProjects(Set<Project> projects) {
+        this.projects = projects;
     }
 }

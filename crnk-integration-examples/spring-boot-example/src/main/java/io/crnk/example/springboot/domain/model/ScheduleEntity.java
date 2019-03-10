@@ -2,6 +2,7 @@ package io.crnk.example.springboot.domain.model;
 
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
 
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import java.util.Set;
 
+@JsonApiResource(type = "schedule")
 @Entity
 public class ScheduleEntity {
 
