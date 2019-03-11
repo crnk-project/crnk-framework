@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -130,9 +131,9 @@ public class ResourceInformation {
 		}
 	};
 
-	private ResourceFieldAccessor nestedIdAccessor;
+	private ResourceFieldAccessor childIdAccessor;
 
-	private ResourceInformation resourceInformation;
+	private ResourceFieldAccessor parentIdAccessor;
 
 	private boolean singularNesting;
 
@@ -205,11 +206,12 @@ public class ResourceInformation {
 		}
 
 		PreconditionUtil.verify(parentField != null, "resource {} is marked as nested but no parent relationship found");
-		nestedIdAccessor = new ResourceFieldAccessor() {
+		childIdAccessor = new ResourceFieldAccessor() {
 
 			@Override
 			public Object getValue(Object object) {
 				if (idField.getType().isInstance(object)) {
+					// parent and child have same ID
 					return object;
 				}
 				return idField.getAccessor().getValue(object);
@@ -217,9 +219,19 @@ public class ResourceInformation {
 
 			@Override
 			public void setValue(Object resource, Object fieldValue) {
-				throw new UnsupportedOperationException("cannot update nested ids");
+				if (idField.getType().isInstance(resource)) {
+					// parent and child have same ID, cannot pass ID as resource
+					throw new UnsupportedOperationException();
+				}
+				idField.getAccessor().getValue(fieldValue);
+			}
+
+			@Override
+			public Class getImplementationClass() {
+				return idField.getType();
 			}
 		};
+		parentIdAccessor = childIdAccessor;
 		singularNesting = true;
 	}
 
@@ -258,57 +270,70 @@ public class ResourceInformation {
 			PreconditionUtil.verify(parentAttribute != null,
 					"nested identifiers must have attribute annotated with @JsonApiRelationId, got none for %s",
 					beanInformation.getImplementationClass());
-			PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"),
-					"nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s",
-					parentAttribute.getName());
-			String relationshipName = parentAttribute.getName().substring(0, parentAttribute.getName().length() - 2);
 
-			parentField = findRelationshipFieldByName(relationshipName);
-			BeanAttributeInformation finalParentAttribute = parentAttribute;
-			ResourceFieldAccessor parentIdAccessor = new ResourceFieldAccessor() {
+			// accessors for nested and parent id, able to deal with both resources and identifiers as parameters
+			this.parentIdAccessor = new NestedIdAccessor(parentAttribute);
+			this.childIdAccessor = new NestedIdAccessor(idAttribute);
 
-				@Override
-				public Object getValue(Object object) {
-					if (idField.getType().isInstance(object)) {
-						return finalParentAttribute.getValue(object);
-					}
+			// check whether parentField is duplicated in ID. This can be a valid use case if the nested identifier is considered
+			// an add-on to an existing object.
+			String parentName = parentAttribute.getName();
+			Optional<ResourceField> optParentField = relationshipFields.stream().filter(it -> it.hasIdField() && it.getIdName().equals(parentName)).findFirst();
+			if (optParentField.isPresent()) {
+				parentField = optParentField.get();
+			}
+			else {
+				PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"),
+						"nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s",
+						parentAttribute.getName());
+				String relationshipName = parentAttribute.getName().substring(0, parentAttribute.getName().length() - 2);
 
-					Object id = getIdField().getAccessor().getValue(object);
-					return finalParentAttribute.getValue(id);
-				}
+				parentField = findRelationshipFieldByName(relationshipName);
+				PreconditionUtil.verify(parentField != null,
+						"naming of relationship to parent resource and relationship identifier within resource identifier must "
+								+ "match, not found for %s of %s",
+						parentAttribute.getName(), implementationClass);
 
-				@Override
-				public void setValue(Object resource, Object fieldValue) {
-					throw new UnsupportedOperationException("cannot update nested ids");
-				}
-			};
-			PreconditionUtil.verify(parentField != null,
-					"naming of relationship to parent resource and relationship identifier within resource identifier must "
-							+ "match, not found for %s of %s",
-					parentAttribute.getName(),
-					implementationClass);
-			((ResourceFieldImpl) parentField)
-					.setIdField(parentAttribute.getName(), parentAttribute.getImplementationClass(), parentIdAccessor);
-			BeanAttributeInformation finalIdAttribute = idAttribute;
-			this.nestedIdAccessor = new ResourceFieldAccessor() {
+				((ResourceFieldImpl) parentField).setIdField(parentAttribute.getName(), parentAttribute.getImplementationClass(), parentIdAccessor);
+			}
 
-				@Override
-				public Object getValue(Object object) {
-					if (idField.getType().isInstance(object)) {
-						return finalIdAttribute.getValue(object);
-					}
-					Object id = getIdField().getAccessor().getValue(object);
-					return finalIdAttribute.getValue(id);
-				}
-
-				@Override
-				public void setValue(Object resource, Object fieldValue) {
-					throw new UnsupportedOperationException("cannot update nested ids");
-				}
-			};
 			return true;
 		}
 		return false;
+	}
+
+	class NestedIdAccessor implements ResourceFieldAccessor {
+
+		private final BeanAttributeInformation nestedField;
+
+		protected NestedIdAccessor(BeanAttributeInformation nestedField) {
+			this.nestedField = nestedField;
+		}
+
+		@Override
+		public Object getValue(Object object) {
+			if (idField.getType().isInstance(object)) {
+				return nestedField.getValue(object);
+			}
+			Object id = getIdField().getAccessor().getValue(object);
+			return nestedField.getValue(id);
+		}
+
+		@Override
+		public void setValue(Object object, Object fieldValue) {
+			if (idField.getType().isInstance(object)) {
+				nestedField.setValue(object, fieldValue);
+			}
+			else {
+				Object id = getIdField().getAccessor().getValue(object);
+				nestedField.setValue(id, fieldValue);
+			}
+		}
+
+		@Override
+		public Class getImplementationClass() {
+			return nestedField.getImplementationClass();
+		}
 	}
 
 	@Deprecated
@@ -663,15 +688,26 @@ public class ResourceInformation {
 
 
 	/**
-	 *
+	 * @return resource field pointing to the parent this resource belongs to.
 	 */
 	public ResourceField getParentField() {
 		PreconditionUtil.verify(parentField != null, "not a nested resource, cannot access parent field");
 		return parentField;
 	}
 
-	public ResourceFieldAccessor getNestedIdAccessor() {
-		PreconditionUtil.verify(parentField != null, "not a nested resource, cannot access nested id accessor");
-		return nestedIdAccessor;
+	/**
+	 * @return Allows to get child ID from a nested resource or its ID.
+	 */
+	public ResourceFieldAccessor getChildIdAccessor() {
+		PreconditionUtil.verify(isNested(), "not a nested resource, cannot access nested id accessor");
+		return childIdAccessor;
+	}
+
+	/**
+	 * @return Allows to get identifier of parent resource from a nested resource or its ID.
+	 */
+	public ResourceFieldAccessor getParentIdAccessor() {
+		PreconditionUtil.verify(isNested(), "not a nested resource, cannot access nested id accessor");
+		return parentIdAccessor;
 	}
 }

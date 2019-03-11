@@ -9,6 +9,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -164,12 +165,14 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(id);
 				return parentUrl + "/" + childrenField.getJsonName();
 			}else{
-				Object parentId = parentField.getIdAccessor().getValue(id);
-				Object nestedId = resourceInformation.getNestedIdAccessor().getValue(id);
+				Object parentId = resourceInformation.getParentIdAccessor().getValue(id);
+				Object nestedId = resourceInformation.getChildIdAccessor().getValue(id);
 				PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
 				PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
 				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
-				return parentUrl + "/" + childrenField.getJsonName() + "/" + nestedId;
+
+				TypeParser typeParser = moduleRegistry.getTypeParser();
+				return parentUrl + "/" + childrenField.getJsonName() + "/" + typeParser.toString(nestedId);
 			}
 		}
 

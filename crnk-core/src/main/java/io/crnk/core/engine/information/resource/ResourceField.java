@@ -1,11 +1,11 @@
 package io.crnk.core.engine.information.resource;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.reflect.Type;
 
 public interface ResourceField {
 
@@ -55,8 +55,15 @@ public interface ResourceField {
 
 	/**
 	 * @return resourceInformation this field belongs to.
+	 * @deprecated use {@link #getResourceInformation()}
 	 */
+	@Deprecated
 	ResourceInformation getParentResourceInformation();
+
+	/**
+	 * @return resourceInformation this field belongs to.
+	 */
+	ResourceInformation getResourceInformation();
 
 	void setResourceInformation(ResourceInformation resourceInformation);
 

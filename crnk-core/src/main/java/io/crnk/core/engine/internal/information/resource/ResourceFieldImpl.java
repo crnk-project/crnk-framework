@@ -39,7 +39,7 @@ public class ResourceFieldImpl implements ResourceField {
 
 	private final RelationshipRepositoryBehavior relationshipRepositoryBehavior;
 
-	private ResourceInformation parentResourceInformation;
+	private ResourceInformation resourceInformation;
 
 	private ResourceFieldAccessor accessor;
 
@@ -129,10 +129,10 @@ public class ResourceFieldImpl implements ResourceField {
 
 	public String getOppositeResourceType() {
 		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association",
-				underlyingName, parentResourceInformation.getResourceType());
+				underlyingName, resourceInformation.getResourceType());
 		if (getElementType() != Object.class) {
 			PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type",
-					underlyingName, parentResourceInformation.getResourceType());
+					underlyingName, resourceInformation.getResourceType());
 		}
 		return oppositeResourceType;
 	}
@@ -158,12 +158,12 @@ public class ResourceFieldImpl implements ResourceField {
 			return false;
 		}
 		ResourceFieldImpl that = (ResourceFieldImpl) o;
-		return Objects.equals(jsonName, that.jsonName) && parentResourceInformation == that.parentResourceInformation;
+		return Objects.equals(jsonName, that.jsonName) && resourceInformation == that.resourceInformation;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(jsonName, parentResourceInformation);
+		return Objects.hash(jsonName, resourceInformation);
 	}
 
 	/**
@@ -176,8 +176,14 @@ public class ResourceFieldImpl implements ResourceField {
 		return ClassUtils.getRawType(ClassUtils.getElementType(genericType));
 	}
 
+	@Deprecated
 	public ResourceInformation getParentResourceInformation() {
-		return parentResourceInformation;
+		return getResourceInformation();
+	}
+
+	@Override
+	public ResourceInformation getResourceInformation() {
+		return resourceInformation;
 	}
 
 	@Override
@@ -242,7 +248,7 @@ public class ResourceFieldImpl implements ResourceField {
 				this.idAccessor = new ResourceIdentifierAccessorAdapter(idAccessor);
 			}
 		}
-		this.parentResourceInformation = resourceInformation;
+		this.resourceInformation = resourceInformation;
 	}
 
 
@@ -262,6 +268,11 @@ public class ResourceFieldImpl implements ResourceField {
 		@Override
 		public void setValue(Object resource, Object fieldValue) {
 			wrappedAccessor.setValue(resource, fieldValue);
+		}
+
+		@Override
+		public Class getImplementationClass() {
+			return wrappedAccessor.getImplementationClass();
 		}
 	}
 
@@ -288,8 +299,8 @@ public class ResourceFieldImpl implements ResourceField {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getClass().getSimpleName());
 		sb.append("[jsonName=").append(jsonName);
-		if (parentResourceInformation != null && parentResourceInformation.getResourceType() != null) {
-			sb.append(",resourceType=").append(parentResourceInformation.getResourceType());
+		if (resourceInformation != null && resourceInformation.getResourceType() != null) {
+			sb.append(",resourceType=").append(resourceInformation.getResourceType());
 		}
 		sb.append("]");
 		return sb.toString();

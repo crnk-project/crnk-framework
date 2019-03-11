@@ -1,5 +1,12 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -16,13 +23,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import org.junit.Before;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class AbstractQuerySpecTest {
 
@@ -64,6 +64,11 @@ public abstract class AbstractQuerySpecTest {
 
 						public void setValue(Object resource, Object fieldValue) {
 
+						}
+
+						@Override
+						public Class getImplementationClass() {
+							return Integer.class;
 						}
 					});
 					fields.add(fieldBuilder.build());

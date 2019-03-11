@@ -69,7 +69,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 		}
 
 		String url = urlBuilder.buildUrl(resourceInformation, id, (QuerySpec) null);
-		if (create && resourceInformation.isNested() && !resourceInformation.isSingularNesting()) {
+		if (create && resourceInformation.isNested() && !resourceInformation.isSingularNesting() && id != null) {
 			// for multi-valued nested resource drop the nested id part
 			url = url.substring(0, url.lastIndexOf('/'));
 		}

@@ -7,11 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -57,17 +56,18 @@ public class PathBuilder {
 	private List<Serializable> parseNestedIds(String idsString, Serializable parentId, ResourceField parentField) {
 		String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
-		ResourceInformation resourceInformation = parentField.getParentResourceInformation();
+		ResourceInformation resourceInformation = parentField.getResourceInformation();
+		Class<?> idType = resourceInformation.getIdField().getType();
 
-		BeanInformation beanInformation = BeanInformation.get(resourceInformation.getIdField().getType());
-		BeanAttributeInformation idAttr = beanInformation.getAttribute("id");
-		BeanAttributeInformation parentAttr = beanInformation.getAttribute(parentField.getIdName());
+		ResourceFieldAccessor nestedIdAccessor = resourceInformation.getChildIdAccessor();
+		ResourceFieldAccessor parentIdAccessor = resourceInformation.getParentIdAccessor();
 
 		List<Serializable> pathIds = new ArrayList<>();
 		for (String strPathId : strPathIds) {
-			Serializable nestedId = (Serializable) ClassUtils.newInstance(beanInformation.getImplementationClass());
-			parentAttr.setValue(nestedId, parentId);
-			idAttr.setValue(nestedId, parser.parse(strPathId, idAttr.getImplementationClass()));
+			Serializable nestedId = (Serializable) ClassUtils.newInstance(idType);
+			Object childId = parser.parse(strPathId, nestedIdAccessor.getImplementationClass());
+			parentIdAccessor.setValue(nestedId, parentId);
+			nestedIdAccessor.setValue(nestedId, childId);
 			pathIds.add(nestedId);
 		}
 

@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,8 +18,6 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-
-import java.util.List;
 
 public class ResourceMapper {
 
@@ -87,7 +87,7 @@ public class ResourceMapper {
 		}
 		if (info instanceof SelfLinksInformation) {
 			SelfLinksInformation self = (SelfLinksInformation) info;
-			if (self.getSelf() == null) {
+			if (self.getSelf() == null && !client) {
 				self.setSelf(util.getSelfUrl(queryContext, resourceInformation, entity));
 			}
 		}

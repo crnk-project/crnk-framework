@@ -106,4 +106,9 @@ public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 
 	}
 
+	@Override
+	public Class getImplementationClass() {
+		return fieldType;
+	}
+
 }
