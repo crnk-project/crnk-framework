@@ -59,7 +59,7 @@ public class ActivitiResourceMapper {
 	}
 
 	public <T extends HistoricProcessInstanceResource> T mapToResource(Class<T> resourceClass,
-																	   HistoricProcessInstance processInstance) {
+			HistoricProcessInstance processInstance) {
 		T resource = io.crnk.core.engine.internal.utils.ClassUtils.newInstance(resourceClass);
 		Map<String, Object> processVariables = processInstance.getProcessVariables();
 		copyInternal(resource, null, processVariables, true, Optional.of(processInstance));
@@ -105,7 +105,7 @@ public class ActivitiResourceMapper {
 
 
 	private void copyInternal(Object resource, String prefix, Map<String, Object> variables, boolean toResource,
-							  Optional<Object> variableHolder) {
+			Optional<Object> variableHolder) {
 		BeanInformation beanInformation = BeanInformation.get(resource.getClass());
 		for (String attributeName : beanInformation.getAttributeNames()) {
 			BeanAttributeInformation attribute = beanInformation.getAttribute(attributeName);
@@ -116,7 +116,8 @@ public class ActivitiResourceMapper {
 
 			if (isStaticField(attribute)) {
 				copyStaticField(resource, attributeName, variableHolder, toResource);
-			} else {
+			}
+			else {
 				copyDynamicField(resource, attribute, variableHolder, variables, prefix, toResource);
 			}
 		}
@@ -142,7 +143,8 @@ public class ActivitiResourceMapper {
 			if (toResource) {
 				Object value = PropertyUtils.getProperty(activitiBean.get(), unmapName(attributeName));
 				PropertyUtils.setProperty(resource, attributeName, mapValue(value));
-			} else {
+			}
+			else {
 				BeanAttributeInformation attribute = activitiBeanInformation.getAttribute(attributeName);
 				if (attribute != null && attribute.getSetter() != null) {
 					Object value = PropertyUtils.getProperty(resource, unmapName(attributeName));
@@ -167,7 +169,7 @@ public class ActivitiResourceMapper {
 	}
 
 	private void copyDynamicField(Object resource, BeanAttributeInformation attribute, Optional<Object> variableHolder,
-								  Map<String, Object> variables, String prefix, boolean toResource) {
+			Map<String, Object> variables, String prefix, boolean toResource) {
 		String attributeName = attribute.getName();
 		Method getter = attribute.getGetter();
 		try {
@@ -180,11 +182,13 @@ public class ActivitiResourceMapper {
 						Object mappedValue = mapValue(value, attribute.getImplementationClass());
 						PropertyUtils.setProperty(resource, attributeName, mappedValue);
 					}
-				} else {
-					Object value = getter.invoke(resource);
-					variables.put(key, value);
 				}
-			} else {
+				else {
+					Object value = getter.invoke(resource);
+					variables.put(key, unmapValue(value));
+				}
+			}
+			else {
 				Object childResource = getter.invoke(resource);
 				if (childResource == null) {
 					childResource =
@@ -197,7 +201,8 @@ public class ActivitiResourceMapper {
 					copyInternal(childResource, key, variables, toResource, childVariableHolder);
 				}
 			}
-		} catch (IllegalAccessException | InvocationTargetException e) {
+		}
+		catch (IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -211,7 +216,11 @@ public class ActivitiResourceMapper {
 		return value;
 	}
 
-	private Object unmapValue(Object value) {
+	public static Object unmapValue(Object value) {
+		if (value instanceof Enum) {
+			// no (decent) enum support by activiti, gets serialized as blob
+			return value.toString();
+		}
 		if (value instanceof OffsetDateTime) {
 			OffsetDateTime date = (OffsetDateTime) value;
 			return Date.from(date.toInstant());
@@ -220,7 +229,7 @@ public class ActivitiResourceMapper {
 	}
 
 
-	private Object mapValue(Object value, Class<?> type) {
+	public Object mapValue(Object value, Class<?> type) {
 		if (value instanceof String && type != String.class) {
 			return typeParser.parse((String) value, type);
 		}

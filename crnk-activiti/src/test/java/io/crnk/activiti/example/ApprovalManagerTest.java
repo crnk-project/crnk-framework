@@ -84,11 +84,12 @@ public class ApprovalManagerTest {
 				.startProcessInstanceByKey(Mockito.eq("scheduleChange"), processVariablesCaptor.capture());
 		Map processVariables = processVariablesCaptor.getValue();
 
-		Assert.assertEquals(6, processVariables.size());
+		Assert.assertEquals(7, processVariables.size());
 		Assert.assertEquals(mockId.toString(), processVariables.get("resourceId"));
 		Assert.assertEquals("schedule", processVariables.get("resourceType"));
 		Assert.assertEquals("John", processVariables.get("newValues.name"));
 		Assert.assertEquals("Jane", processVariables.get("previousValues.name"));
+		Assert.assertEquals("SHIPPED", processVariables.get("status"));
 	}
 
 	@Test

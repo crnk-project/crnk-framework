@@ -1,5 +1,8 @@
 package io.crnk.activiti.example.approval;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
 import io.crnk.core.engine.http.HttpMethod;
@@ -16,9 +19,6 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.Map;
 
 public class ApprovalManager {
 
@@ -79,7 +79,9 @@ public class ApprovalManager {
 	}
 
 	protected ApprovalProcessInstance newApprovalProcessInstance(Class<?> clazz) {
-		return new ScheduleApprovalProcessInstance();
+		ScheduleApprovalProcessInstance instance = new ScheduleApprovalProcessInstance();
+		instance.setStatus(ScheduleApprovalProcessInstance.ScheduleStatus.SHIPPED);
+		return instance;
 	}
 
 

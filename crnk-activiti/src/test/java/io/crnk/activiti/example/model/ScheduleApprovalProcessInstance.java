@@ -10,6 +10,11 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 @JsonApiResource(type = "approval/schedule")
 public class ScheduleApprovalProcessInstance extends ApprovalProcessInstance {
 
+	public enum ScheduleStatus {
+		DONE,
+		SHIPPED
+	}
+
 	private ScheduleApprovalValues newValues;
 
 	private ScheduleApprovalValues previousValues;
@@ -17,6 +22,17 @@ public class ScheduleApprovalProcessInstance extends ApprovalProcessInstance {
 	private String stringValue;
 
 	private int intValue;
+
+	private ScheduleStatus status;
+
+	public ScheduleStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ScheduleStatus status) {
+		this.status = status;
+	}
+
 
 	public int getIntValue() {
 		return intValue;

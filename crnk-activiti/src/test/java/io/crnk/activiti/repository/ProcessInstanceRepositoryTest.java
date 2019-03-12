@@ -54,6 +54,7 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		resource.setIntValue(13);
 		resource.setStringValue("someValue");
 		resource.setNewValues(newValues);
+		resource.setStatus(ScheduleApprovalProcessInstance.ScheduleStatus.DONE);
 
 		Map<String, Object> processVariables = resourceMapper.mapToVariables(resource);
 		runtimeService = processEngine.getRuntimeService();
@@ -221,6 +222,15 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("intValue"), FilterOperator.LT, 12));
 		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("status"), FilterOperator.EQ, ScheduleApprovalProcessInstance.ScheduleStatus.DONE));
+		Assert.assertEquals(1, processRepository.findAll(querySpec).size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("status"), FilterOperator.EQ, ScheduleApprovalProcessInstance.ScheduleStatus.SHIPPED));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+
 
 		// TODO GT/LT operators do not seem to work properly
 		/*

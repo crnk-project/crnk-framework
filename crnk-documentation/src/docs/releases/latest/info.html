@@ -65,3 +65,9 @@ public class PostHeader {
 </pre>
 
 More information can be found <a href="/documentation/#_nested_resources">here</a>.
+
+
+<h4>Enum support for Activiti</h4>
+
+crnk-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
+treats the enum like a java.lang.Object by storing it is as serialized blob and not supporting filtering.

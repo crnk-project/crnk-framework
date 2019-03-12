@@ -105,14 +105,15 @@ public class ActivitiQuerySpecMapper {
 			else {
 				Method method = getGenericMethod(activitiQuery.getClass(), resourceClass, op);
 				String variableName = attributePath.stream().collect(Collectors.joining("."));
-				method.invoke(activitiQuery, variableName, value);
+				method.invoke(activitiQuery, variableName, ActivitiResourceMapper.unmapValue(value));
 			}
 		}
 	}
 
+
 	private static Method getGenericMethod(Class queryClass, Class resourceClass, FilterOperator operator) {
 		String prefix = "variable";
-		if(TaskResource.class.isAssignableFrom(resourceClass)){
+		if (TaskResource.class.isAssignableFrom(resourceClass)) {
 			prefix = "taskVariable";
 		}
 
