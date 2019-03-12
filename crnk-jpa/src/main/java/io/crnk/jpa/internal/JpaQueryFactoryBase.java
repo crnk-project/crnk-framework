@@ -13,21 +13,18 @@ import java.util.Collections;
 
 public abstract class JpaQueryFactoryBase implements JpaQueryFactory {
 
-	protected EntityManager em;
-
 	protected ComputedAttributeRegistryImpl computedAttrs = new ComputedAttributeRegistryImpl();
 
 	protected JpaQueryFactoryContext context;
 
 	@Override
 	public void initalize(JpaQueryFactoryContext context) {
-		this.em = context.getEntityManager();
 		this.computedAttrs.init(context);
 		this.context = context;
 	}
 
 	public EntityManager getEntityManager() {
-		return em;
+		return context.getEntityManager();
 	}
 
 	public ComputedAttributeRegistry getComputedAttributes() {

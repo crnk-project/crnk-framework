@@ -1,2 +1,67 @@
-Next release will be a new major release. Will be a drama-free upgrade with various deprecations being
-cleaned up and the V2 suffixes of repositories deprecated in favor of new ones without the prefix.
+
+
+<h4>More flexible EntityManager setup with JPA module</h4>
+
+JpaModule.createServerModule(...) comes with a new flavor that allows to pass the EntityManager
+as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
+return an instance. The supplier together with the existing TransactionRunner
+allows for custom JPA setups and transaction handling.
+
+
+<h4>Allow QuerySpec conversion to Criteria query</h4>
+
+The following code snipped shows how to convert a QuerySpec to Criteria query without involving repositories:
+
+<pre class="prettyprint">
+JpaCriteriaQueryFactory queryFactory = JpaCriteriaQueryFactory.newInstance(em);
+
+PathSpec idAttr = PathSpec.of(TestEntity.ATTR_id);
+QuerySpec querySpec = new QuerySpec(TestEntity.class);
+querySpec.addFilter(idAttr.filter(FilterOperator.GT, 0L));
+querySpec.addSort(idAttr.sort(Direction.DESC));
+querySpec.includeField(PathSpec.of("oneRelatedValue"));
+
+JpaCriteriaQuery&lt;TestEntity&gt; query = queryFactory.query(TestEntity.class);
+JpaQueryExecutor&lt;TestEntity&gt; executor = query.buildExecutor(querySpec);
+List&lt;TestEntity&gt; resultList = executor.getResultList();
+</pre>
+
+
+<h4>OpenTracing Support</h4>
+
+OpenTracing is a vendor-neutral API to write trace information. crnk-monitor-opentracing introduces a new module OpenTracingServerModule
+that brings support for OpenTracing to Crnk. It can be used properly set the names of spans. More information is available
+in the documentation.
+
+
+<h4>Singular Nested Resources</h4>
+
+Support for nested resources has been improved by introducing support singular nested resources. Thereby a parent can hold a single nested resource as
+single-valued relationships. Urls then look like:
+
+<p>
+	http://example.com/posts/1/header
+</p>
+
+
+<p>An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(type = "header", nested = true)
+public class PostHeader {
+
+	@JsonApiId
+	@JsonApiRelationId
+	private String postId;
+
+	private String value;
+
+	@JsonApiRelation(opposite = "header", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+	private Post post;
+
+	...
+}
+</pre>
+
+More information can be found <a href="/documentation/#_nested_resources">here</a>.

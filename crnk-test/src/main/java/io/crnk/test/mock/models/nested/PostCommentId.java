@@ -7,26 +7,27 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 
+// tag::docs[]
 @JsonSerialize(using = ToStringSerializer.class)
-public class NestedId implements Serializable {
+public class PostCommentId implements Serializable {
 
 	@JsonApiId
 	private String id;
 
 	@JsonApiRelationId
-	private String parentId;
+	private String postId;
 
-	public NestedId() {
+	public PostCommentId() {
 	}
 
-	public NestedId(String idString) {
+	public PostCommentId(String idString) {
 		String[] elements = idString.split("\\-");
-		parentId = elements[0];
+		postId = elements[0];
 		id = elements[1];
 	}
 
-	public NestedId(String parentId, String id) {
-		this.parentId = parentId;
+	public PostCommentId(String postId, String id) {
+		this.postId = postId;
 		this.id = id;
 	}
 
@@ -38,12 +39,12 @@ public class NestedId implements Serializable {
 		this.id = id;
 	}
 
-	public String getParentId() {
-		return parentId;
+	public String getPostId() {
+		return postId;
 	}
 
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
+	public void setPostId(String postId) {
+		this.postId = postId;
 	}
 
 	public int hashCode() {
@@ -51,10 +52,11 @@ public class NestedId implements Serializable {
 	}
 
 	public boolean equals(Object object) {
-		return object instanceof NestedId && object.toString().equals(toString());
+		return object instanceof PostCommentId && object.toString().equals(toString());
 	}
 
 	public String toString() {
-		return parentId + "-" + id;
+		return postId + "-" + id;
 	}
 }
+// end::docs[]

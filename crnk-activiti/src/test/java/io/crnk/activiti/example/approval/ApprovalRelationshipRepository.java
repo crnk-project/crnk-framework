@@ -1,6 +1,10 @@
 package io.crnk.activiti.example.approval;
 
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.common.collect.Lists;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -22,10 +26,6 @@ import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.list.ResourceList;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource> extends ReadOnlyRelationshipRepositoryBase<R,
 		Serializable, P, String> implements ResourceRegistryAware, ResourceFieldContributor {
 
@@ -46,7 +46,7 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 	private String oppositeResourceType;
 
 	public ApprovalRelationshipRepository(Class<R> resourceClass, Class<P> processInfoClass, String relationshipName,
-										  String oppositeResourceType, List<FilterSpec> baseFilters) {
+			String oppositeResourceType, List<FilterSpec> baseFilters) {
 		this.resourceClass = resourceClass;
 		this.processInfoClass = processInfoClass;
 		this.relationshipName = relationshipName;
@@ -81,6 +81,11 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 			@Override
 			public void setValue(Object resource, Object fieldValue) {
 			}
+
+			@Override
+			public Class getImplementationClass() {
+				return processInfoClass;
+			}
 		});
 		fieldBuilder.type(processInfoClass);
 		fieldBuilder.genericType(processInfoClass);
@@ -105,7 +110,8 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 			ResourceList list = processRepository.findAll(querySpec);
 			PreconditionUtil.assertTrue("unique result expected", list.size() <= 1);
 			return list.isEmpty() ? null : (P) list.get(0);
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
 		}
 	}

@@ -7,7 +7,9 @@ include ':crnk-meta'
 include ':crnk-jpa'
 include ':crnk-validation'
 
-include ':crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-opentracing'
+
 include ':crnk-security'
 include ':crnk-activiti'
 include ':crnk-ui'

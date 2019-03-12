@@ -1,5 +1,10 @@
 package io.crnk.jpa.mapping;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import javax.persistence.EntityManager;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
@@ -29,11 +34,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * Example of how to add a custom ResourceField and in turn change the from an
@@ -144,6 +144,11 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 												translations.add(translation);
 											}
 											translation.setTxt((String) fieldValue);
+										}
+
+										@Override
+										public Class getImplementationClass() {
+											throw new UnsupportedOperationException();
 										}
 
 										private CountryTranslationEntity getTranslation(

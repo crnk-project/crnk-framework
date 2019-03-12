@@ -1,12 +1,12 @@
 package io.crnk.test.mock.repository.nested;
 
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.test.mock.models.nested.ParentResource;
+import io.crnk.test.mock.models.nested.Post;
 
-public class ParentRepository extends InMemoryResourceRepository<ParentResource, String> {
+public class ParentRepository extends InMemoryResourceRepository<Post, String> {
 
 	public ParentRepository() {
-		super(ParentResource.class);
+		super(Post.class);
 	}
 }
 

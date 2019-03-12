@@ -1,18 +1,5 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
@@ -63,6 +50,20 @@ import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+
 /**
  * Crnk module that adds support to expose JPA entities as repositories. It
  * supports:
@@ -100,7 +101,7 @@ public class JpaModule implements InitializingModule {
 
     private EntityManagerFactory emFactory;
 
-    private EntityManager em;
+    private Supplier<EntityManager> emSupplier;
 
     private ResourceInformationProvider resourceInformationProvider;
 
@@ -127,13 +128,13 @@ public class JpaModule implements InitializingModule {
     /**
      * Constructor used on server side.
      */
-    private JpaModule(JpaModuleConfig config, EntityManagerFactory emFactory, EntityManager em, TransactionRunner
+    private JpaModule(JpaModuleConfig config, EntityManagerFactory emFactory, Supplier<EntityManager> em, TransactionRunner
             transactionRunner) {
         this();
 
         this.config = config;
         this.emFactory = emFactory;
-        this.em = em;
+        this.emSupplier = em;
         this.transactionRunner = transactionRunner;
     }
 
@@ -158,7 +159,7 @@ public class JpaModule implements InitializingModule {
      */
     @Deprecated
     public static JpaModule newServerModule(EntityManager em, TransactionRunner transactionRunner) {
-        return new JpaModule(new JpaModuleConfig(), null, em, transactionRunner);
+        return new JpaModule(new JpaModuleConfig(), null, () -> em, transactionRunner);
     }
 
     /**
@@ -177,7 +178,7 @@ public class JpaModule implements InitializingModule {
                                             TransactionRunner transactionRunner) {
         JpaModuleConfig config = new JpaModuleConfig();
         config.exposeAllEntities(emFactory);
-        return new JpaModule(config, emFactory, em, transactionRunner);
+        return new JpaModule(config, emFactory, () -> em, transactionRunner);
     }
 
     /**
@@ -190,6 +191,19 @@ public class JpaModule implements InitializingModule {
      * @return created module
      */
     public static JpaModule createServerModule(JpaModuleConfig config, EntityManager em, TransactionRunner transactionRunner) {
+        return createServerModule(config, () -> em, transactionRunner);
+    }
+
+    /**
+     * Creates a new JpaModule for a Crnk server. No entities are by
+     * default exposed as JSON API resources. Make use of
+     * {@link #addRepository(JpaRepositoryConfig)} to add resources.
+     *
+     * @param em                to use
+     * @param transactionRunner to use
+     * @return created module
+     */
+    public static JpaModule createServerModule(JpaModuleConfig config, Supplier<EntityManager> em, TransactionRunner transactionRunner) {
         return new JpaModule(config, null, em, transactionRunner);
     }
 
@@ -309,7 +323,7 @@ public class JpaModule implements InitializingModule {
         addTransactionRollbackExceptionMapper();
         context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
 
-        if (em != null) {
+        if (emSupplier != null) {
             metaEnricher = new JpaMetaEnricher();
 
             // enrich resource meta model with JPA information where incomplete
@@ -341,7 +355,7 @@ public class JpaModule implements InitializingModule {
 
             @Override
             public EntityManager getEntityManager() {
-                return em;
+                return emSupplier.get();
             }
 
             @Override
@@ -358,7 +372,7 @@ public class JpaModule implements InitializingModule {
 
     @Override
     public void init() {
-        if (em != null) {
+        if (emSupplier != null) {
             setupServerRepositories();
         }
     }
@@ -422,7 +436,7 @@ public class JpaModule implements InitializingModule {
         for (Object repository : repositories) {
             Object unwrappedRepository = JpaRepositoryUtils.unwrap(repository);
             if (unwrappedRepository instanceof JpaRepositoryConfigSupplier) {
-				JpaRepositoryConfigSupplier entityRepository = (JpaRepositoryConfigSupplier) unwrappedRepository;
+                JpaRepositoryConfigSupplier entityRepository = (JpaRepositoryConfigSupplier) unwrappedRepository;
                 JpaRepositoryConfig repositoryConfig = entityRepository.getRepositoryConfig();
                 JpaRepositoryUtils.setDefaultConfig(config, repositoryConfig);
                 customConfig.add(repositoryConfig);
@@ -624,7 +638,7 @@ public class JpaModule implements InitializingModule {
      * @return {@link EntityManager}} in use.
      */
     public EntityManager getEntityManager() {
-        return em;
+        return emSupplier.get();
     }
 
     /**

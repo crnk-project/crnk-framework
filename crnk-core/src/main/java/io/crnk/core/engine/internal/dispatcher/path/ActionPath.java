@@ -1,9 +1,9 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import io.crnk.core.engine.registry.RegistryEntry;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.crnk.core.engine.registry.RegistryEntry;
 
 /**
  * Represents a part of a path which relate a field of a resource e.g. for /resource/1/field the first element will be
@@ -12,6 +12,7 @@ import java.util.List;
  * FieldPath can refer only to relationship fields.
  */
 public class ActionPath extends JsonPath {
+
 	private final String actionName;
 
 	public ActionPath(RegistryEntry rootEntry, List<Serializable> ids, String actionName) {
@@ -31,5 +32,11 @@ public class ActionPath extends JsonPath {
 	@Override
 	public String toString() {
 		return super.toString() + "/" + actionName;
+	}
+
+	@Override
+	public String toGroupPath() {
+		String groupedUrl = super.toGroupPath();
+		return groupedUrl + "/" + actionName;
 	}
 }

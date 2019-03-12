@@ -123,6 +123,7 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		resource.setDescription(ENFORCED_DESCRIPTION);
 		ScheduleApprovalProcessInstance createdProcessInstance = processRepository.create(resource);
 		Assert.assertEquals(name, createdProcessInstance.getName());
+		Assert.assertEquals("someValue", createdProcessInstance.getStringValue());
 		Assert.assertNotNull(createdProcessInstance.getId());
 
 		createdProcessInstance = processRepository.findOne(createdProcessInstance.getId(), querySpec);

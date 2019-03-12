@@ -1,7 +1,5 @@
 package io.crnk.test.mock.models.nested;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -11,13 +9,21 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.links.DefaultSelfLinksInformation;
 
-@JsonApiResource(type = "nested")
-public class ManyNestedResource {
+// tag::docs[]
+@JsonApiResource(type = "header", nested = true)
+public class PostHeader {
 
 	@JsonApiId
-	private NestedId id;
+	@JsonApiRelationId
+	private String postId;
 
 	private String value;
+
+	@JsonApiRelation(opposite = "header", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+	private Post post;
+
+	// end::docs[]
 
 	@JsonApiRelationId
 	private String relatedId;
@@ -26,19 +32,16 @@ public class ManyNestedResource {
 			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
 	private NestedRelatedResource related;
 
-	@JsonApiRelation(opposite = "manyNested", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
-			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
-	private ParentResource parent;
 
 	@JsonApiLinksInformation
 	private DefaultSelfLinksInformation links = new DefaultSelfLinksInformation();
 
-	public NestedId getId() {
-		return id;
+	public String getPostId() {
+		return postId;
 	}
 
-	public void setId(NestedId id) {
-		this.id = id;
+	public void setPostId(String postId) {
+		this.postId = postId;
 	}
 
 	public DefaultSelfLinksInformation getLinks() {
@@ -49,12 +52,12 @@ public class ManyNestedResource {
 		this.links = links;
 	}
 
-	public ParentResource getParent() {
-		return parent;
+	public Post getPost() {
+		return post;
 	}
 
-	public void setParent(ParentResource parent) {
-		this.parent = parent;
+	public void setPost(Post post) {
+		this.post = post;
 	}
 
 	public String getValue() {
@@ -80,4 +83,6 @@ public class ManyNestedResource {
 	public void setRelated(NestedRelatedResource related) {
 		this.related = related;
 	}
+	// tag::docs[]
 }
+// end::docs[]

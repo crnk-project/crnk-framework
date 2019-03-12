@@ -1,10 +1,10 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.registry.RegistryEntry;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.registry.RegistryEntry;
 
 /**
  * Represents a part of a path which relate a field of a resource e.g. for /resource/1/field the first element will be
@@ -35,4 +35,9 @@ public class FieldPath extends JsonPath {
 		return super.toString() + "/" + field;
 	}
 
+	@Override
+	public String toGroupPath() {
+		String groupedUrl = super.toGroupPath();
+		return groupedUrl + "/" + field.getJsonName();
+	}
 }

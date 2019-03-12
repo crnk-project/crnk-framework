@@ -21,6 +21,9 @@ dependencies {
 	compileOnly project(':crnk-client')
 	compileOnly project(':crnk-data:crnk-data-facet')
 	compileOnly project(':crnk-format:crnk-format-plain-json')
+	compileOnly project(':crnk-monitor:crnk-monitor-opentracing')
+
+	compileOnly 'io.opentracing:opentracing-api:0.31.0'
 
 	compileOnly 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'

@@ -1,18 +1,20 @@
 package io.crnk.jpa.internal.query;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.jpa.query.JpaQueryExecutor;
-import io.crnk.meta.model.MetaAttributePath;
-import io.crnk.meta.model.MetaDataObject;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
+import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.jpa.query.JpaQueryExecutor;
+import io.crnk.meta.model.MetaAttributePath;
+import io.crnk.meta.model.MetaDataObject;
 
 public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T> {
 
@@ -35,7 +37,7 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	protected Map<String, Integer> selectionBindings;
 
 	public AbstractQueryExecutorImpl(EntityManager em, MetaDataObject meta, int numAutoSelections,
-									 Map<String, Integer> selectionBindings) {
+			Map<String, Integer> selectionBindings) {
 		this.em = em;
 		this.meta = meta;
 		this.numAutoSelections = numAutoSelections;
@@ -91,6 +93,21 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 	}
 
 	@Override
+	public void setPaging(PagingSpec pagingSpec) {
+		OffsetLimitPagingSpec offsetLimit = pagingSpec.convert(OffsetLimitPagingSpec.class);
+		setOffset((int) offsetLimit.getOffset());
+		if (offsetLimit.getOffset() > Integer.MAX_VALUE) {
+			throw new IllegalArgumentException("offset cannot be larger than Integer.MAX_VALUE");
+		}
+		if (offsetLimit.getLimit() != null) {
+			if (offsetLimit.getLimit() > Integer.MAX_VALUE) {
+				throw new IllegalArgumentException("limit cannot be larger than Integer.MAX_VALUE");
+			}
+			setLimit((int) offsetLimit.getLimit().longValue());
+		}
+	}
+
+	@Override
 	public JpaQueryExecutor<T> setWindow(int offset, int limit) {
 		this.offset = offset;
 		this.limit = limit;
@@ -111,7 +128,8 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 				entityList.add((T) values[0]);
 			}
 			resultList = entityList;
-		} else {
+		}
+		else {
 			resultList = (List<T>) list;
 		}
 		return resultList;
@@ -127,9 +145,11 @@ public abstract class AbstractQueryExecutorImpl<T> implements JpaQueryExecutor<T
 		}
 		if (!list.isEmpty()) {
 			return list.get(0);
-		} else if (nullable) {
+		}
+		else if (nullable) {
 			return null;
-		} else {
+		}
+		else {
 			throw new IllegalStateException("no result found");
 		}
 	}

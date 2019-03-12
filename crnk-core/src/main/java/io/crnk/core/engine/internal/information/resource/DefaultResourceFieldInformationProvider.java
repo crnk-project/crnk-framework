@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.information.resource;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Optional;
+
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -20,11 +25,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Optional;
 
 /**
  * Process the Crnk JSON API annotations.
@@ -149,7 +149,8 @@ public class DefaultResourceFieldInformationProvider implements ResourceFieldInf
 		Field field = attributeDesc.getField();
 		boolean isTransient = field != null && Modifier.isTransient(field.getModifiers());
 		boolean relationshipIdField = attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent();
-		if (isTransient || relationshipIdField) {
+		boolean idField = attributeDesc.getAnnotation(JsonApiId.class).isPresent();
+		if (isTransient || relationshipIdField && !idField) {
 			return Optional.of(true);
 		}
 		return Optional.empty();

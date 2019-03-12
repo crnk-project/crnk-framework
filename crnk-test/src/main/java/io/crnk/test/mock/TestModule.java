@@ -13,7 +13,9 @@ import io.crnk.test.mock.repository.TaskSubtypeRepository;
 import io.crnk.test.mock.repository.TaskToProjectRepository;
 import io.crnk.test.mock.repository.TaskToScheduleRepo;
 import io.crnk.test.mock.repository.nested.ManyNestedRepository;
-import io.crnk.test.mock.repository.nested.NestedRelationshipRepository;
+import io.crnk.test.mock.repository.nested.NestedManyRelationshipRepository;
+import io.crnk.test.mock.repository.nested.NestedOneRelationshipRepository;
+import io.crnk.test.mock.repository.nested.OneNestedRepository;
 import io.crnk.test.mock.repository.nested.ParentRepository;
 import io.crnk.test.mock.repository.nested.RelatedRepository;
 
@@ -21,11 +23,15 @@ public class TestModule implements Module {
 
 	private static ManyNestedRepository manyNestedRepository = new ManyNestedRepository();
 
+	private static OneNestedRepository oneNestedRepository = new OneNestedRepository();
+
 	private static RelatedRepository relatedRepository = new RelatedRepository();
 
 	private static ParentRepository parentRepository = new ParentRepository();
 
-	private static NestedRelationshipRepository nestedRelationshipRepository = new NestedRelationshipRepository();
+	private static NestedManyRelationshipRepository nestedManyRelationshipRepository = new NestedManyRelationshipRepository();
+
+	private static NestedOneRelationshipRepository nestedOneRelationshipRepository = new NestedOneRelationshipRepository();
 
 	@Override
 	public String getModuleName() {
@@ -47,9 +53,11 @@ public class TestModule implements Module {
 		context.addRepository(new RenamedIdRepository());
 
 		context.addRepository(manyNestedRepository);
+		context.addRepository(oneNestedRepository);
 		context.addRepository(relatedRepository);
 		context.addRepository(parentRepository);
-		context.addRepository(nestedRelationshipRepository);
+		context.addRepository(nestedManyRelationshipRepository);
+		context.addRepository(nestedOneRelationshipRepository);
 
 		context.addExceptionMapper(new TestExceptionMapper());
 	}

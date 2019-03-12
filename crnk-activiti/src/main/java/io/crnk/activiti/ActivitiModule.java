@@ -98,15 +98,14 @@ public class ActivitiModule implements Module {
 
 		resourceMapper = new ActivitiResourceMapper(context.getTypeParser(), config.getDateTimeMapper());
 
-
+		HistoryService historyService = processEngine.getHistoryService();
 		for (ProcessInstanceConfig processInstanceConfig : config.getProcessInstances().values()) {
 			context.addRepository(
-					new ProcessInstanceResourceRepository(runtimeService, resourceMapper,
+					new ProcessInstanceResourceRepository(runtimeService, historyService, resourceMapper,
 							processInstanceConfig.getProcessInstanceClass(), processInstanceConfig.getBaseFilters()));
 
 			Class<? extends HistoricProcessInstanceResource> historyClass = processInstanceConfig.getHistoryClass();
 			if (historyClass != null) {
-				HistoryService historyService = processEngine.getHistoryService();
 				context.addRepository(
 						new HistoricProcessInstanceResourceRepository(historyService, resourceMapper, historyClass,
 								processInstanceConfig.getBaseFilters())
@@ -125,7 +124,6 @@ public class ActivitiModule implements Module {
 
 			Class<? extends TaskResource> historyClass = taskConfig.getHistoryClass();
 			if (historyClass != null) {
-				HistoryService historyService = processEngine.getHistoryService();
 				context.addRepository(
 						new HistoricTaskResourceRepository(historyService, resourceMapper, historyClass,
 								taskConfig.getBaseFilters())

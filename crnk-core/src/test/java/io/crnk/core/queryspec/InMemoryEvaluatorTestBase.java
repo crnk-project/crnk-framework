@@ -1,5 +1,9 @@
 package io.crnk.core.queryspec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
@@ -11,10 +15,6 @@ import io.crnk.core.resource.meta.PagedMetaInformation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public abstract class InMemoryEvaluatorTestBase {
 
@@ -64,7 +64,8 @@ public abstract class InMemoryEvaluatorTestBase {
 		try {
 			evaluator.eval(tasks, spec).size();
 			Assert.fail();
-		} catch (BadRequestException e) {
+		}
+		catch (BadRequestException e) {
 			// ok
 		}
 	}
@@ -321,5 +322,13 @@ public abstract class InMemoryEvaluatorTestBase {
 		spec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.GT, 1L));
 		List<Task> results = evaluator.eval(tasks, spec);
 		Assert.assertEquals(3, results.size());
+	}
+
+	@Test
+	public void testLike() {
+		QuerySpec spec = new QuerySpec(Task.class);
+		spec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.LIKE, "test%"));
+		List<Task> results = evaluator.eval(tasks, spec);
+		Assert.assertEquals(5, results.size());
 	}
 }

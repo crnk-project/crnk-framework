@@ -1,10 +1,20 @@
 package io.crnk.jpa.internal.query;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeFieldSpec;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.jpa.internal.query.backend.JpaQueryBackend;
 import io.crnk.jpa.query.JpaQuery;
@@ -14,15 +24,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaPartition;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.JoinType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?, ?>> implements JpaQuery<T> {
 
 	protected final EntityManager em;
@@ -30,8 +31,11 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 	protected final MetaDataObject meta;
 
 	protected final Class<T> clazz;
+
 	protected final Map<MetaAttributePath, JoinType> joinTypes = new HashMap<>();
+
 	protected JoinType defaultJoinType = JoinType.INNER;
+
 	protected ArrayList<FilterSpec> filterSpecs = new ArrayList<>();
 
 	protected ArrayList<SortSpec> sortSpecs = new ArrayList<>();
@@ -61,7 +65,7 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 	private Object privateData;
 
 	protected AbstractJpaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<T> clazz,
-								   ComputedAttributeRegistryImpl computedAttrs) {
+			ComputedAttributeRegistryImpl computedAttrs) {
 		this.em = em;
 		this.clazz = clazz;
 		this.computedAttrs = computedAttrs;
@@ -73,7 +77,7 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	@SuppressWarnings("unchecked")
 	public AbstractJpaQueryImpl(MetaPartition metaPartition, EntityManager em, Class<?> entityClass,
-								ComputedAttributeRegistryImpl virtualAttrs, String attrName, String parentKey, List<?> entityIds) {
+			ComputedAttributeRegistryImpl virtualAttrs, String attrName, String parentKey, List<?> entityIds) {
 		this.em = em;
 		this.computedAttrs = virtualAttrs;
 
@@ -81,7 +85,8 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 		MetaAttribute attrMeta = parentMeta.getAttribute(attrName);
 		if (attrMeta.getType().isCollection()) {
 			this.meta = (MetaDataObject) attrMeta.getType().asCollection().getElementType();
-		} else {
+		}
+		else {
 			this.meta = (MetaDataObject) attrMeta.getType();
 		}
 		this.clazz = (Class<T>) meta.getImplementationClass();
@@ -183,8 +188,9 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 
 	public JoinType getJoinType(MetaAttributePath path) {
 		JoinType joinType = joinTypes.get(path);
-		if (joinType == null)
+		if (joinType == null) {
 			joinType = defaultJoinType;
+		}
 		return joinType;
 	}
 
@@ -202,10 +208,22 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 	}
 
 	@Override
+	public AbstractQueryExecutorImpl<T> buildExecutor(QuerySpec querySpec) {
+		querySpec.getFilters().forEach(filter -> addFilter(filter));
+		querySpec.getSort().forEach(sort -> addSortBy(sort));
+
+		AbstractQueryExecutorImpl<T> executor = buildExecutor();
+		querySpec.getIncludedRelations().forEach(include -> executor.fetch(include.getAttributePath()));
+		executor.setPaging(querySpec.getPaging());
+		return executor;
+	}
+
+
+	@Override
 	public AbstractQueryExecutorImpl<T> buildExecutor() {
 		B backend = newBackend();
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		QueryBuilder executorFactory = new QueryBuilder(this, backend);
 		Map<String, Integer> selectionBindings = executorFactory.applySelectionSpec();
 		executorFactory.applyFilterSpec();
@@ -215,11 +233,11 @@ public abstract class AbstractJpaQueryImpl<T, B extends JpaQueryBackend<?, ?, ?,
 	}
 
 	protected abstract AbstractQueryExecutorImpl<T> newExecutor(B ctx, int numAutoSelections,
-																Map<String, Integer> selectionBindings);
+			Map<String, Integer> selectionBindings);
 
 	protected abstract B newBackend();
 
-	@SuppressWarnings({"unchecked", "hiding"})
+	@SuppressWarnings({ "unchecked", "hiding" })
 	public <T> List<T> getParentIds() {
 		return (List<T>) parentIds;
 	}

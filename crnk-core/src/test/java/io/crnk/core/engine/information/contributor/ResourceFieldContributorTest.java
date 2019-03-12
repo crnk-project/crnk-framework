@@ -1,5 +1,12 @@
 package io.crnk.core.engine.information.contributor;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.dispatcher.Response;
@@ -33,13 +40,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ResourceFieldContributorTest {
 
@@ -153,6 +153,11 @@ public class ResourceFieldContributorTest {
 
 				@Override
 				public void setValue(Object resource, Object fieldValue) {
+				}
+
+				@Override
+				public Class getImplementationClass() {
+					return Project.class;
 				}
 			});
 			return Arrays.asList(fieldBuilder.build());

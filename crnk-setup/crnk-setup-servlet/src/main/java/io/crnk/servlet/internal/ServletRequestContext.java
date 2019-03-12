@@ -1,16 +1,5 @@
 package io.crnk.servlet.internal;
 
-import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContextBase;
-import io.crnk.core.engine.http.HttpResponse;
-import io.crnk.core.engine.internal.utils.UrlUtils;
-import io.crnk.core.utils.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +9,17 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.HttpResponse;
+import io.crnk.core.engine.internal.utils.UrlUtils;
+import io.crnk.core.utils.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServletRequestContext implements HttpRequestContextBase {
 
@@ -168,6 +168,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			if (characterEncoding == null) {
 				characterEncoding = defaultCharacterEncoding;
 				request.setCharacterEncoding(characterEncoding);
+				LOGGER.debug("setting default character encoding on servlet request: {}", characterEncoding);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
@@ -181,6 +182,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 			}
 			queryParameters.put(queryEntry.getKey(), paramValues);
 		}
+		LOGGER.debug("obtained url parameters from servlet engine: {}", queryParameters);
 		return queryParameters;
 	}
 

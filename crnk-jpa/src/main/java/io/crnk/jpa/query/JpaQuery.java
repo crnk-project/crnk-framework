@@ -1,12 +1,13 @@
 package io.crnk.jpa.query;
 
+import java.util.List;
+import javax.persistence.criteria.JoinType;
+
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-
-import javax.persistence.criteria.JoinType;
-import java.util.List;
 
 public interface JpaQuery<T> {
 
@@ -31,6 +32,8 @@ public interface JpaQuery<T> {
 	JpaQuery<T> addFilter(String attrPath, FilterOperator operator, Object value);
 
 	JpaQueryExecutor<T> buildExecutor();
+
+	JpaQueryExecutor<T> buildExecutor(QuerySpec querySpec);
 
 	Class<T> getEntityClass();
 
