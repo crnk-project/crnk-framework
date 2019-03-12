@@ -1,12 +1,13 @@
 package io.crnk.core.queryspec;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.crnk.core.engine.internal.utils.CompareUtils;
+import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.mapper.QueryParameter;
-
-import java.lang.reflect.Type;
-import java.util.Collection;
 
 /**
  * Filter operator used to compare attributes to values by {@link FilterSpec}.
@@ -54,31 +55,34 @@ public class FilterOperator {
 		}
 
 		@Override
-		public boolean matches(Object value1, Object value2) {
-			if (value2 == null) {
+		public boolean matches(Object value, Object likePattern) {
+			if (likePattern == null) {
+				throw new BadRequestException("LIKE pattern cannot be null");
+			}
+			if (value == null) {
 				return false;
 			}
-			String text = value1.toString();
+			String text = value.toString();
 
 			// translate queryterm to a regex pattern
-			char[] queryTerm = value2.toString().toCharArray();
+			char[] queryTerm = likePattern.toString().toCharArray();
 
-			StringBuilder pattern = new StringBuilder();
-			pattern.append(".*");
+			StringBuilder regex = new StringBuilder();
+			regex.append(".*");
 			String escapedCharacters = "[\\^$.|?*+()";
 			for (char c : queryTerm) {
 				if (escapedCharacters.contains(Character.toString(c))) {
-					pattern.append('\\');
-					pattern.append(c);
+					regex.append('\\');
+					regex.append(c);
 				} else if (c == '%') {
-					pattern.append(".*");
+					regex.append(".*");
 				} else {
-					pattern.append(Character.toLowerCase(c));
+					regex.append(Character.toLowerCase(c));
 				}
 			}
-			pattern.append(".*");
+			regex.append(".*");
 
-			return text.toLowerCase().matches(pattern.toString());
+			return text.toLowerCase().matches(regex.toString());
 		}
 
 	};
