@@ -20,10 +20,12 @@ import java.lang.annotation.Target;
  * resources is expensive.
  * <p>
  * A field type can either by a primitive (matching the resource id) or ${@link io.crnk.core.engine.document.ResourceIdentifier}.
+ * <p>
+ * For more information see <a href="http://www.crnk.io/releases/stable/documentation/#_jsonapirelationid">here</a>.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ ElementType.FIELD, ElementType.METHOD })
 public @interface JsonApiRelationId {
 
 

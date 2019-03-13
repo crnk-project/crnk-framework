@@ -1,6 +1,7 @@
 package io.crnk.core.resource.annotations;
 
-import io.crnk.core.boot.CrnkProperties;
+import static io.crnk.core.resource.annotations.LookupIncludeBehavior.DEFAULT;
+import static io.crnk.core.resource.annotations.SerializeType.LAZY;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,14 +9,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static io.crnk.core.resource.annotations.LookupIncludeBehavior.DEFAULT;
-import static io.crnk.core.resource.annotations.SerializeType.LAZY;
+import io.crnk.core.boot.CrnkProperties;
 
 /**
- * Indicates an association to either a single value or collection which needs to be handled by a separate
+ * Indicates a relationship to eithe to either a single value or collection which needs to be handled by a separate
  * relationship resource.
  *
- * @since 3.0
+ * For detailed information see <a href="http://www.crnk.io/releases/stable/documentation/#_jsonapirelation">here</a>.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

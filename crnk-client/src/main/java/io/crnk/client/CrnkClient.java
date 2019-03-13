@@ -1,5 +1,15 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -78,16 +88,6 @@ import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.RelationshipRepository;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -361,9 +361,24 @@ public class CrnkClient {
 		exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
+		RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
+		if (entry != null) {
+			return entry;
+		}
+
+		// allocate super types first
 		ResourceInformationProvider resourceInformationProvider = moduleRegistry.getResourceInformationBuilder();
+		Class<? super T> superclass = resourceClass.getSuperclass();
+		if (parentEntry == null && superclass != null && superclass != Object.class && resourceInformationProvider.accept(superclass)) {
+			parentEntry = allocateRepository(superclass, null);
+		}
+
+		entry = resourceRegistry.getEntry(resourceClass);
+		if (entry != null) {
+			return entry;
+		}
 
 		ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
 		final ClientStubBase repositoryStub = new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder);
@@ -398,7 +413,7 @@ public class CrnkClient {
 		return registryEntry;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void allocateRepositoryRelations(RegistryEntry registryEntry) {
 		ResourceInformation resourceInformation = registryEntry.getResourceInformation();
 		List<ResourceField> relationshipFields = resourceInformation.getRelationshipFields();
@@ -471,7 +486,7 @@ public class CrnkClient {
 		ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
 		InvocationHandler invocationHandler =
 				new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-		return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepositoryV2.class},
+		return (R) Proxy.newProxyInstance(classLoader, new Class[] { repositoryInterfaceClass, ResourceRepositoryV2.class },
 				invocationHandler);
 	}
 
@@ -479,7 +494,7 @@ public class CrnkClient {
 	 * @param resourceClass repository class
 	 * @return stub for the given resourceClass
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
 		init();
 
@@ -511,7 +526,7 @@ public class CrnkClient {
 	 * Generic access using {@link Resource} class without type mapping.
 	 */
 	public RelationshipRepositoryV2<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType,
-																							 String targetResourceType) {
+			String targetResourceType) {
 		init();
 
 		ResourceInformation sourceResourceInformation =
@@ -526,7 +541,7 @@ public class CrnkClient {
 	 * @return stub for the relationship between the given source and target
 	 * class
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(
 			Class<T> sourceClass, Class<D> targetClass) {
 		init();

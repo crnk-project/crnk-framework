@@ -1,5 +1,7 @@
 package io.crnk.core.engine.registry;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -7,8 +9,6 @@ import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.repository.ResourceRepositoryV2;
-
-import java.io.Serializable;
 
 public interface RegistryEntry {
 
@@ -37,13 +37,13 @@ public interface RegistryEntry {
 
 
 	/**
-	 * Check the legacy is a parent of <b>this</b> {@link RegistryEntry}
+	 * Check whether the passed entry is a parent of <b>this</b> {@link RegistryEntry}
 	 * instance
 	 *
-	 * @param registryEntry parent to check
-	 * @return true if the legacy is a parent
+	 * @param potentialParent parent to check
+	 * @return true if the entry is a parent
 	 */
-	boolean isParent(RegistryEntry registryEntry);
+	boolean isParent(RegistryEntry potentialParent);
 
 
 	/**
