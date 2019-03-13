@@ -1,5 +1,18 @@
 package io.crnk.jpa.internal;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.persistence.EmbeddedId;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OptimisticLockException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -29,7 +42,6 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.jpa.annotations.JpaResource;
 import io.crnk.jpa.meta.JpaMetaProvider;
 import io.crnk.jpa.meta.MetaEntity;
-import io.crnk.jpa.meta.MetaJpaDataObject;
 import io.crnk.jpa.meta.internal.JpaMetaUtils;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
@@ -37,19 +49,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OptimisticLockException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -88,9 +87,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
                 MetaEntity metaEntity = (MetaEntity) meta;
                 MetaKey primaryKey = metaEntity.getPrimaryKey();
                 return primaryKey != null && primaryKey.getElements().size() == 1;
-            } else {
-                // note that DTOs cannot be handled here
-                return meta instanceof MetaJpaDataObject;
             }
         }
         return false;

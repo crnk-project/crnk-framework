@@ -140,6 +140,7 @@ public class PathBuilder {
 			}
 			fieldName = pathElements.poll();
 
+			entry = findSelfOrSubtypeByField(entry, fieldName);
 			ResourceField field = entry.getResourceInformation().findRelationshipFieldByName(fieldName);
 			if (field == null) {
 				throw new BadRequestException("invalid url, requested field not found: " + fieldName);
@@ -151,6 +152,8 @@ public class PathBuilder {
 
 			return new RelationshipsPath(entry, ids, field);
 		}
+
+		entry = findSelfOrSubtypeByField(entry, fieldName);
 		ResourceField field = entry.getResourceInformation().findFieldByName(fieldName);
 		if (field == null) {
 			throw new BadRequestException("field not found: " + fieldName);
@@ -198,6 +201,24 @@ public class PathBuilder {
 			jsonPath.addParentField(field);
 		}
 		return jsonPath;
+	}
+
+	private RegistryEntry findSelfOrSubtypeByField(RegistryEntry entry, String fieldName) {
+		if(entry.getResourceInformation().findFieldByName(fieldName) == null) {
+			// consider introducing RegistyEntry.getSubTypes in the future
+			for (RegistryEntry someEntry : resourceRegistry.getResources()) {
+				ResourceInformation resourceInformation = someEntry.getResourceInformation();
+				ResourceField field = resourceInformation.findFieldByName(fieldName);
+				if (field != null && someEntry.isParent(entry)) {
+					RegistryEntry parentEntry = someEntry.getParentRegistryEntry();
+					while (parentEntry != null && parentEntry.getResourceInformation().findFieldByName(fieldName) != null) {
+						someEntry = parentEntry;
+					}
+					return someEntry;
+				}
+			}
+		}
+		return entry; // may not contain the field in case of errorous request
 	}
 
 	private boolean isNestedField(ResourceField field) {
