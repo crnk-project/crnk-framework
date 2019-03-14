@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -16,9 +19,6 @@ import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -47,8 +47,8 @@ public class RegistryEntryImpl implements RegistryEntry {
 	 * Used for resources with repositories (default).
 	 */
 	public RegistryEntryImpl(ResourceInformation resourceInformation, ResourceRepositoryAdapter resourceRepositoryAdapter,
-							 Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
-							 ModuleRegistry moduleRegistry) {
+			Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
+			ModuleRegistry moduleRegistry) {
 		this.resourceRepositoryAdapter = resourceRepositoryAdapter;
 		this.relationshipRepositoryAdapter = relationshipRepositoryAdapters;
 		this.moduleRegistry = moduleRegistry;
@@ -90,8 +90,7 @@ public class RegistryEntryImpl implements RegistryEntry {
 			return parentRegistryEntry.getRelationshipRepository(field);
 		}
 		if (adapter == null) {
-			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
-					field.getUnderlyingName());
+			throw new RelationshipRepositoryNotFoundException(field);
 		}
 		return adapter;
 	}

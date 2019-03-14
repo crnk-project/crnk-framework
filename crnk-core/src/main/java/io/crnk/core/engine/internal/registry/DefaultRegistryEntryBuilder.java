@@ -193,8 +193,9 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 				map.put(relationshipField, relationshipEntry.getAdapter());
 			}
 			else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
-				LOGGER.warn("no relationship repository found for " + resourceInformation.getResourceType() + "." +
-						relationshipField.getUnderlyingName());
+				LOGGER.warn("no replationship repository setup for {}.{} relationship, repositoryBehavior={}, hasIdField={}",
+						resourceInformation.getResourceType(), relationshipField.getUnderlyingName(),
+						relationshipField.getRelationshipRepositoryBehavior(), relationshipField.hasIdField());
 			}
 		}
 		return map;
@@ -231,6 +232,10 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		// check for match
 		if (match == null) {
 			match = findRelationshipMatch(relationshipField);
+		} else{
+			ResourceInformation sourceInformation = relationshipField.getResourceInformation();
+			LOGGER.debug("found relationship repository for {}.{} relationship: {}",
+					sourceInformation.getResourceType(), relationshipField.getUnderlyingName(), match);
 		}
 
 		// check for implicit
@@ -335,6 +340,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			behavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER;
 		}
 
+		ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
 		if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
 
 			if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE
@@ -343,8 +349,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 						"field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
 								+ "behavior.", relationshipField.getUnderlyingName());
 			}
-
-			ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
 
 			ResourceFieldAccess fieldAccess = relationshipField.getAccess();
 
@@ -358,14 +362,18 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
 			ForwardingRelationshipRepository repository;
 			if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
+				LOGGER.debug("setting up owner/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OWNER, ForwardingDirection.OWNER);
 			}
 			else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+				LOGGER.debug("setting up opposite/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
 						ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
 			}
 			else {
+				LOGGER.debug("setting up opposite/opposite forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(),
+						relationshipField.getUnderlyingName());
 				PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
 						.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
 				repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
