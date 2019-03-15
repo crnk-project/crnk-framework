@@ -82,7 +82,6 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, field);
 			if (targets != null) {
-			{
 				for (D target : targets) {
 					currentTargets.remove(target);
 				}
