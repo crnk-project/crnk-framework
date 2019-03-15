@@ -58,8 +58,10 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			Iterable<D> targets = context.findAll(targetEntry, targetIds, queryContext);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, field);
-			for (D target : targets) {
-				currentTargets.add(target);
+			if (targets != null) {
+				for (D target : targets) {
+					currentTargets.add(target);
+				}
 			}
 		}
 		sourceAdapter.update(source, context.createSaveQueryAdapter(fieldName, queryContext));
@@ -79,8 +81,11 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			Iterable<D> targets = context.findAll(targetEntry, targetIds, queryContext);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, field);
-			for (D target : targets) {
-				currentTargets.remove(target);
+			if (targets != null) {
+			{
+				for (D target : targets) {
+					currentTargets.remove(target);
+				}
 			}
 		}
 		sourceAdapter.update(source, context.createSaveQueryAdapter(fieldName, queryContext));
