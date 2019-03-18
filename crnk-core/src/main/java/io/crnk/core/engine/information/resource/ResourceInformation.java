@@ -270,6 +270,7 @@ public class ResourceInformation {
 			PreconditionUtil.verify(parentAttribute != null,
 					"nested identifiers must have attribute annotated with @JsonApiRelationId, got none for %s",
 					beanInformation.getImplementationClass());
+			String relationshipName = parentAttribute.getName().substring(0, parentAttribute.getName().length() - 2);
 
 			// accessors for nested and parent id, able to deal with both resources and identifiers as parameters
 			this.parentIdAccessor = new NestedIdAccessor(parentAttribute);
@@ -284,9 +285,8 @@ public class ResourceInformation {
 			}
 			else {
 				PreconditionUtil.verify(parentAttribute.getName().endsWith("Id"),
-						"nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix, got %s",
-						parentAttribute.getName());
-				String relationshipName = parentAttribute.getName().substring(0, parentAttribute.getName().length() - 2);
+						"nested identifier must have @JsonApiRelationId field being named with a 'Id' suffix or match in name with a @JsonApiRelationId annotated field on the resource, got %s for %s",
+						parentAttribute.getName(), beanInformation.getImplementationClass());
 
 				parentField = findRelationshipFieldByName(relationshipName);
 				PreconditionUtil.verify(parentField != null,
