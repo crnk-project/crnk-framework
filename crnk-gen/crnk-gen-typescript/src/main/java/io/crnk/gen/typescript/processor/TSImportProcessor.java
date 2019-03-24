@@ -14,7 +14,7 @@ import io.crnk.gen.typescript.model.TSNamedElement;
 import io.crnk.gen.typescript.model.TSPrimitiveType;
 import io.crnk.gen.typescript.model.TSSource;
 import io.crnk.gen.typescript.model.TSType;
-import io.crnk.gen.typescript.writer.TSTypeReferenceResolver;
+import io.crnk.gen.typescript.model.writer.TSTypeReferenceResolver;
 
 /**
  * Computes Typescript import statements for the given source model.

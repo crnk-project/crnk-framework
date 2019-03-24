@@ -1,33 +1,38 @@
 package io.crnk.gen.typescript;
 
-import io.crnk.gen.typescript.runtime.DummyInitialContextFactory;
+import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.module.Module;
+import io.crnk.core.module.SimpleModule;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaModule;
+import io.crnk.meta.MetaModuleConfig;
+import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.repository.ProjectRepository;
+import io.crnk.test.mock.repository.ProjectToTaskRepository;
+import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
+import io.crnk.test.mock.repository.ScheduleToTaskRepository;
+import io.crnk.test.mock.repository.TaskRepository;
+import io.crnk.test.mock.repository.TaskSubtypeRepository;
+import io.crnk.test.mock.repository.TaskToProjectRepository;
+import io.crnk.test.mock.repository.TaskToScheduleRepo;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.tasks.AbstractCopyTask;
-import org.gradle.api.tasks.Copy;
-import org.gradle.internal.impldep.org.junit.Assert;
-import org.gradle.testfixtures.ProjectBuilder;
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 public class GenerateTypescriptTaskTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
 
-    @Rule
-    public TemporaryFolder testProjectDir = new TemporaryFolder();
 
     private File outputDir;
 
@@ -48,13 +53,8 @@ public class GenerateTypescriptTaskTest {
 
 
     private void test(boolean expressions, TSResourceFormat resourceFormat) throws IOException {
-        // Deltaspike sometimes really wants to have a retarded JNDI context
-        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, DummyInitialContextFactory.class.getName());
-
-        testProjectDir.newFolder("src", "main", "java");
-
-        outputDir = testProjectDir.getRoot();
         outputDir = new File("build/tmp/gen");
+        FileUtils.deleteDirectory(outputDir);
         outputDir.mkdirs();
 
         File npmrcFile = new File(outputDir, ".npmrc");
@@ -62,52 +62,25 @@ public class GenerateTypescriptTaskTest {
         npmrcWriter.write("");
         npmrcWriter.close();
 
-        Project project = ProjectBuilder.builder().withName("crnk-gen-typescript-test").withProjectDir(outputDir).build();
-        project.setVersion("0.0.1");
 
-        project.getPluginManager().apply("com.moowork.node");
-        project.getPluginManager().apply(JavaPlugin.class);
-        project.getPluginManager().apply(TSGeneratorPlugin.class);
+        MetaLookup lookup = createLookup();
 
-        TSGeneratorExtension config = project.getExtensions().getByType(TSGeneratorExtension.class);
-        config.setForked(false);
-        config.setGenerateExpressions(expressions);
-        configure(config);
-        String testPackage = "@crnk/gen-typescript-test";
-        config.getNpm().setPackagingEnabled(true);
-        config.getNpm().setPackageName(testPackage);
-        config.getNpm().setGitRepository("someThing");
-        config.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
-        config.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
-        config.getNpm().setPackageVersion("0.0.1");
-        config.setFormat(resourceFormat);
+        TSGeneratorModule module = new TSGeneratorModule();
+        createConfig(module.getConfig(), resourceFormat, expressions);
+        module.getConfig().setGenDir(outputDir);
+        module.initDefaults(outputDir);
+        module.generate(lookup);
 
-        TSGeneratorPlugin plugin = project.getPlugins().getPlugin(TSGeneratorPlugin.class);
-        plugin.init(project);
-
-        GenerateTypescriptTask task = (GenerateTypescriptTask) project.getTasks().getByName("generateTypescript");
-        task.runGeneration(Thread.currentThread().getContextClassLoader());
-
-        Copy processTask = (Copy) project.getTasks().getByName("processTypescript");
-        try {
-            Method method = AbstractCopyTask.class.getDeclaredMethod("copy");
-            method.setAccessible(true);
-            method.invoke(processTask);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-
-        assertExists("build/generated/source/typescript/package.json");
-        assertExists("build/generated/source/typescript/src/index.ts");
-        assertExists("build/generated/source/typescript/src/projects.ts");
-        assertExists("build/generated/source/typescript/src/types/project.data.ts");
-        assertExists("build/generated/source/typescript/src/schedule.ts");
-        assertExists("build/generated/source/typescript/src/tasks.ts");
+        assertExists("index.ts");
+        assertExists("projects.ts");
+        assertExists("types/project.data.ts");
+        assertExists("schedule.ts");
+        assertExists("tasks.ts");
         if (resourceFormat == TSResourceFormat.PLAINJSON) {
-            assertExists("build/generated/source/typescript/src/crnk.ts");
+            assertExists("crnk.ts");
         }
-        assertNotExists("build/generated/source/typescript/src/tasks.links.ts");
-        assertNotExists("build/generated/source/typescript/src/tasks.meta.ts");
+        assertNotExists("tasks.links.ts");
+        assertNotExists("tasks.meta.ts");
 
         checkSchedule(expressions, resourceFormat);
         checkProject();
@@ -116,21 +89,60 @@ public class GenerateTypescriptTaskTest {
         }
     }
 
-    protected void configure(TSGeneratorExtension config) {
-        config.getRuntime().setConfiguration("test");
+    private TSGeneratorConfig createConfig(TSGeneratorConfig tsConfig, TSResourceFormat resourceFormat, boolean expressions) {
+        String testPackage = "@crnk/gen-typescript-test";
+        tsConfig.getNpm().setPackageName(testPackage);
+        tsConfig.getNpm().setGitRepository("someThing");
+        tsConfig.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
+        tsConfig.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
+        tsConfig.getNpm().setPackageVersion("0.0.1");
+        tsConfig.setExpressions(expressions);
+        tsConfig.setFormat(resourceFormat);
+        return tsConfig;
+    }
+
+    private MetaLookup createLookup() {
+        MetaModule metaModule = createMetaModule();
+        CrnkBoot boot = new CrnkBoot();
+        boot.addModule(metaModule);
+        boot.addModule(createRepositoryModule());
+        boot.boot();
+        return metaModule.getLookup();
+    }
+
+    public MetaModule createMetaModule() {
+        MetaModuleConfig metaConfig = new MetaModuleConfig();
+        metaConfig.addMetaProvider(new ResourceMetaProvider());
+        MetaModule metaModule = MetaModule.createServerModule(metaConfig);
+        return metaModule;
+    }
+
+    public Module createRepositoryModule() {
+        SimpleModule module = new SimpleModule("mock");
+        module.addRepository(new ScheduleRepositoryImpl());
+        module.addRepository(new ProjectRepository());
+        module.addRepository(new TaskRepository());
+        module.addRepository(new ProjectToTaskRepository());
+        module.addRepository(new ScheduleToTaskRepository());
+        module.addRepository(new TaskSubtypeRepository());
+        module.addRepository(new TaskToProjectRepository());
+        module.addRepository(new TaskToScheduleRepo());
+        return module;
     }
 
     private void checkProjectData() throws IOException {
         String expectedSourceFileName = "expected_project_data.ts";
-        String actualSourcePath = "build/generated/source/typescript/src/types/project.data.ts";
+        String actualSourcePath = "types/project.data.ts";
         compare(expectedSourceFileName, actualSourcePath);
     }
 
     private void checkProject() throws IOException {
         Charset utf8 = Charset.forName("UTF8");
-        String actualSource = IOUtils
-                .toString(new FileInputStream(new File(outputDir, "build/generated/source/typescript/src/projects.ts")), utf8);
-        Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
+        try (InputStream in = new FileInputStream(new File(outputDir, "projects.ts"))) {
+            String actualSource = IOUtils
+                    .toString(in, utf8);
+            Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
+        }
     }
 
     private void checkSchedule(boolean expressions, TSResourceFormat format) throws IOException {
@@ -143,29 +155,33 @@ public class GenerateTypescriptTaskTest {
             expectedSourceFileName = "expected_schedule_without_expressions.ts";
         }
 
-        String actualSourcePath = "build/generated/source/typescript/src/schedule.ts";
+        String actualSourcePath = "schedule.ts";
         compare(expectedSourceFileName, actualSourcePath);
     }
 
     private void compare(String expectedSourceFileName, String actualSourcePath) throws IOException {
         Charset utf8 = Charset.forName("UTF8");
 
-        String expectedSource = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(expectedSourceFileName), utf8);
-        String actualSource = IOUtils
-                .toString(new FileInputStream(new File(outputDir, actualSourcePath)), utf8);
+        String expectedSource;
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(expectedSourceFileName)) {
+            expectedSource = IOUtils.toString(in, utf8);
+        }
+
+        String actualSource;
+        try (FileInputStream in = new FileInputStream(new File(outputDir, actualSourcePath))) {
+            actualSource = IOUtils.toString(in, utf8);
+        }
 
         expectedSource = expectedSource.replace("\r\n", "\n");
 
         LoggerFactory.getLogger(getClass()).info(actualSource);
-
-        System.out.println(actualSource);
-
         LOGGER.info(actualSource);
+        System.err.println(actualSource);
 
         String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
         String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
         for (int i = 0; i < expectedLines.length; i++) {
-            Assert.assertEquals("line: " + Integer.toString(i) + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
+            Assert.assertEquals("line: " + i + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
         }
         Assert.assertEquals(expectedLines.length, actualLines.length);
     }
