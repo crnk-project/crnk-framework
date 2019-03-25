@@ -205,7 +205,7 @@ gradle.beforeProject { Project project ->
 								def root = asNode()
 								root.appendNode('description', 'JSON API with Crnk')
 								root.appendNode('name', 'Crnk')
-								root.appendNode('url', 'http://wwww.crnk.io')
+								root.appendNode('url', 'https://www.crnk.io')
 								root.children().last() + pomConfig
 							}
 						}
