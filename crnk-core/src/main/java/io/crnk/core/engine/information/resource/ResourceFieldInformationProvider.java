@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -82,6 +83,11 @@ public interface ResourceFieldInformationProvider {
 	 * Returns the SerializeType to use.
 	 */
 	Optional<SerializeType> getSerializeType(BeanAttributeInformation attributeDesc);
+
+	/**
+	 * Return a strategy indicating whether the specified field should be included when doing serialization.
+	 */
+	Optional<JsonIncludeStrategy> getJsonIncludeStrategy(BeanAttributeInformation attributeDesc);
 
 	/**
 	 * Returns the RelationshipRepositoryBehavior to use.

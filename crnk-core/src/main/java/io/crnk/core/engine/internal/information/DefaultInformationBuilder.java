@@ -21,6 +21,7 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -264,6 +265,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 		private SerializeType serializeType = SerializeType.LAZY;
 
+		private JsonIncludeStrategy jsonIncludeStrategy = JsonIncludeStrategy.DEFAULT;
+
 		private String oppositeName;
 
 		private ResourceFieldAccessor accessor;
@@ -290,6 +293,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			accessor = field.getAccessor();
 			access = field.getAccess();
 			serializeType = field.getSerializeType();
+			jsonIncludeStrategy = field.getJsonIncludeStrategy();
 			if (fieldType == ResourceFieldType.RELATIONSHIP) {
 				relationshipRepositoryBehavior = field.getRelationshipRepositoryBehavior();
 				oppositeResourceType = field.getOppositeResourceType();
@@ -317,7 +321,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 			}
 
 			ResourceFieldImpl impl = new ResourceFieldImpl(jsonName, underlyingName, fieldType, type,
-					genericType, oppositeResourceType, oppositeName, serializeType,
+					genericType, oppositeResourceType, oppositeName, serializeType, jsonIncludeStrategy,
 					lookupIncludeBehavior,
 					access, idName, idType, idAccessor, relationshipRepositoryBehavior, this.patchStrategy);
 			if (accessor != null) {
@@ -374,6 +378,12 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		@Override
 		public DefaultField serializeType(SerializeType serializeType) {
 			this.serializeType = serializeType;
+			return this;
+		}
+
+		@Override
+		public Field jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy) {
+			this.jsonIncludeStrategy = jsonIncludeStrategy;
 			return this;
 		}
 

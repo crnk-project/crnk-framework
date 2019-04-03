@@ -11,6 +11,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -98,6 +99,8 @@ public interface InformationBuilder {
 		Field genericType(Type genericType);
 
 		Field serializeType(SerializeType serializeType);
+
+		Field jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
 
 		Field oppositeResourceType(String oppositeResourceType);
 

@@ -15,6 +15,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -116,8 +117,10 @@ public class ResourceMapper {
 
 	protected void setAttribute(Resource resource, ResourceField field, Object entity) {
 		Object value = field.getAccessor().getValue(entity);
-		JsonNode valueNode = objectMapper.valueToTree(value);
-		resource.getAttributes().put(field.getJsonName(), valueNode);
+		if (value != null || JsonIncludeStrategy.DEFAULT.equals(field.getJsonIncludeStrategy())) {
+			JsonNode valueNode = objectMapper.valueToTree(value);
+			resource.getAttributes().put(field.getJsonName(), valueNode);
+		}
 	}
 
 	protected void setRelationships(Resource resource, Object entity, ResourceInformation resourceInformation,

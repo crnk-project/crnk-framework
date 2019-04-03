@@ -16,6 +16,7 @@ import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -105,6 +106,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         fieldBuilder.fieldType(fieldType);
         fieldBuilder.access(getAccess(attributeDesc, fieldType));
         fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
+        fieldBuilder.jsonIncludeStrategy(getJsonIncludeStrategy(attributeDesc));
         fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
         fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc));
         fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
@@ -195,6 +197,16 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
         return resourceFieldType == ResourceFieldType.RELATIONSHIP ? SerializeType.LAZY : SerializeType.EAGER;
     }
+
+    public JsonIncludeStrategy getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
+		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+			Optional<JsonIncludeStrategy> jsonIncludeStrategy = fieldInformationProvider.getJsonIncludeStrategy(attributeDesc);
+			if (jsonIncludeStrategy.isPresent()) {
+				return jsonIncludeStrategy.get();
+			}
+		}
+		return JsonIncludeStrategy.DEFAULT;
+	}
 
     protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
         LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
