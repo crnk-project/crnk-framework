@@ -1,4 +1,3 @@
-
 <h4>Experimental Annotation Processor for type-safe QuerySpec construction</h4>
 
 An annotation processor is introduced that generates type-safe QuerySpec and PathSpec subtypes for their
@@ -13,6 +12,40 @@ UserQuerySpec querySpec = new UserQuerySpec();
 </pre>
 
 More information can be found <a href="www.crnk.io/releases/latest/documentation/#_generation_java">here</a>.
+
+
+<h4>Refactored Gradle generator plugin</h4>
+
+The Gradle Typescript generator has been refactored to support the generator of artifacts other than Typescript.
+For this purpose the project has been split into `crnk-gen-gradle`, `crnk-gen-typescript` and a number of
+helper projects. The new setup looks like:
+
+<pre class="prettyprint">
+buildscript {
+	dependencies {
+		classpath "io.crnk:crnk-gen-gradle:${version}"
+	}
+}
+
+apply plugin: 'crnk-gen'
+crnkGen {
+    runtime {
+        configuration = 'typescriptGenRuntime'
+    }
+
+    forked = true
+    resourcePackages = ['ch.adnovum.sb4b.management.api', 'ch.adnovum.sb4b.identity.api', 'ch.adnovum.sb4b.corda.base.contract']
+
+    typescript {
+        enabled = true
+        format = 'PLAINJSON'
+        genDir = file('src/resources')
+    }
+}
+</pre>
+
+More information about Typescript generation is available
+<a href="documentation/#_typescript">here</a>.
 
 <h4>More flexible EntityManager setup with JPA module</h4>
 
@@ -78,7 +111,7 @@ public class PostHeader {
 }
 </pre>
 
-More information can be found <a href="/documentation/#_nested_resources">here</a>.
+More information can be found <a href="documentation/#_nested_resources">here</a>.
 
 
 <h4>Enum support for Activiti</h4>
