@@ -240,8 +240,11 @@ public class DefaultQuerySpecUrlMapper
         return StringUtils.join(".", pathSpec.getAttributePath());
     }
 
-    protected String addResourceType(QueryParameterType type, String key, ResourceInformation resourceInformation) {
+    protected String addResourceType(QueryParameterType type, String key, ResourceInformation resourceInformation, boolean isRoot) {
         String resourceType = resourceInformation.getResourceType();
+        if (isRoot) {
+            return type.toString().toLowerCase() + (key != null ? key : "");
+        }
         return type.toString().toLowerCase() + "[" + resourceType + "]" + (key != null ? key : "");
     }
 
@@ -262,7 +265,7 @@ public class DefaultQuerySpecUrlMapper
         return map;
     }
 
-    protected void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec parentQuerySpec) {
+    protected void serialize(QuerySpec querySpec, Map<String, Set<String>> map, QuerySpec rootQuerySpec) {
         ResourceRegistry resourceRegistry = context.getResourceRegistry();
         if (querySpec != null) {
             String resourceType = querySpec.getResourceType();
@@ -283,23 +286,26 @@ public class DefaultQuerySpecUrlMapper
                 }
             }
 
-            serializeFilters(querySpec, resourceInformation, map);
-            serializeSorting(querySpec, resourceInformation, map);
-            serializeIncludedFields(querySpec, resourceInformation, map);
-            serializeIncludedRelations(querySpec, resourceInformation, map);
-            RegistryEntry entry = resourceRegistry.getEntry(parentQuerySpec.getResourceClass());
-            if (entry != null && entry.getResourceInformation() != null
-                    && entry.getResourceInformation().getPagingSpecType() != null) {
-                PagingBehavior pagingBehavior = entry.getPagingBehavior();
-	            /**
-	             * Until we have order-based determination of pagination, we can not really rely on crnk finding proper one
-	             * since it will return first suitable pagination behavior even if there is an exact one.
-	             * As a result, we must always check whether resource's paging equals to the one query-spec holds.
-	             * If yes, use it as it is, otherwise try to convert it.
-	             */
+            boolean isRoot = querySpec == rootQuerySpec;
+
+            serializeFilters(querySpec, resourceInformation, map, isRoot);
+            serializeSorting(querySpec, resourceInformation, map, isRoot);
+            serializeIncludedFields(querySpec, resourceInformation, map, isRoot);
+            serializeIncludedRelations(querySpec, resourceInformation, map, isRoot);
+
+            RegistryEntry rootEntry = resourceRegistry.getEntry(rootQuerySpec.getResourceClass());
+            if (rootEntry != null && rootEntry.getResourceInformation() != null
+                    && rootEntry.getResourceInformation().getPagingSpecType() != null) {
+                PagingBehavior pagingBehavior = rootEntry.getPagingBehavior();
+                /**
+                 * Until we have order-based determination of pagination, we can not really rely on crnk finding proper one
+                 * since it will return first suitable pagination behavior even if there is an exact one.
+                 * As a result, we must always check whether resource's paging equals to the one query-spec holds.
+                 * If yes, use it as it is, otherwise try to convert it.
+                 */
                 PagingSpec pagingSpec = pagingBehavior.createDefaultPagingSpec().getClass().isInstance(querySpec.getPagingSpec())
-		                ? querySpec.getPagingSpec()
-		                : querySpec.getPaging(entry.getResourceInformation().getPagingSpecType());
+                        ? querySpec.getPagingSpec()
+                        : querySpec.getPaging(rootEntry.getResourceInformation().getPagingSpecType());
                 map.putAll(pagingBehavior.serialize(pagingSpec, resourceType));
             }
 
@@ -309,7 +315,7 @@ public class DefaultQuerySpecUrlMapper
         }
     }
 
-    protected void serializeFilters(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
+    protected void serializeFilters(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map, boolean isRoot) {
         if (jsonParser.isNested(querySpec.getFilters())) {
             JsonNode jsonNode = jsonParser.serialize(querySpec.getFilters());
             String json;
@@ -329,9 +335,12 @@ public class DefaultQuerySpecUrlMapper
 
                 String key;
                 if (filterSpec.getAttributePath() != null) {
-                    String attrKey = "[" + toJsonPath(resourceInformation, filterSpec.getAttributePath()) + "][" + filterSpec.getOperator()
-                            .getName() + "]";
-                    key = addResourceType(QueryParameterType.FILTER, attrKey, resourceInformation);
+                    String attrKey = "[" + toJsonPath(resourceInformation, filterSpec.getAttributePath()) + "]";
+                    if (!defaultOperator.equals(filterSpec.getOperator())) {
+                        attrKey += "[" + filterSpec.getOperator().getName() + "]";
+                    }
+
+                    key = addResourceType(QueryParameterType.FILTER, attrKey, resourceInformation, isRoot);
                 } else {
                     // TODO support nested query spec
                     key = QueryParameterType.FILTER.toString().toLowerCase();
@@ -359,9 +368,9 @@ public class DefaultQuerySpecUrlMapper
         }
     }
 
-    public void serializeSorting(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map) {
+    public void serializeSorting(QuerySpec querySpec, ResourceInformation resourceInformation, Map<String, Set<String>> map, boolean isRoot) {
         if (!querySpec.getSort().isEmpty()) {
-            String key = addResourceType(QueryParameterType.SORT, null, resourceInformation);
+            String key = addResourceType(QueryParameterType.SORT, null, resourceInformation, isRoot);
 
             StringBuilder builder = new StringBuilder();
             for (SortSpec filterSpec : querySpec.getSort()) {
@@ -378,9 +387,9 @@ public class DefaultQuerySpecUrlMapper
     }
 
     protected void serializeIncludedFields(QuerySpec querySpec, ResourceInformation resourceInformation,
-                                           Map<String, Set<String>> map) {
+                                           Map<String, Set<String>> map, boolean isRoot) {
         if (!querySpec.getIncludedFields().isEmpty()) {
-            String key = addResourceType(QueryParameterType.FIELDS, null, resourceInformation);
+            String key = addResourceType(QueryParameterType.FIELDS, null, resourceInformation, isRoot);
 
             StringBuilder builder = new StringBuilder();
             for (IncludeFieldSpec includedField : querySpec.getIncludedFields()) {
@@ -394,9 +403,9 @@ public class DefaultQuerySpecUrlMapper
     }
 
     protected void serializeIncludedRelations(QuerySpec querySpec, ResourceInformation resourceInformation,
-                                              Map<String, Set<String>> map) {
+                                              Map<String, Set<String>> map, boolean isRoot) {
         if (!querySpec.getIncludedRelations().isEmpty()) {
-            String key = addResourceType(QueryParameterType.INCLUDE, null, resourceInformation);
+            String key = addResourceType(QueryParameterType.INCLUDE, null, resourceInformation, isRoot);
 
             StringBuilder builder = new StringBuilder();
             for (IncludeRelationSpec includedField : querySpec.getIncludedRelations()) {

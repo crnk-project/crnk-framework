@@ -1,8 +1,11 @@
 package io.crnk.gen.base;
 
-public class GeneratorModuleConfigBase {
+import java.io.File;
+
+public abstract class GeneratorModuleConfigBase {
 
     private boolean enabled;
+
 
     public boolean isEnabled() {
         return enabled;
@@ -11,4 +14,6 @@ public class GeneratorModuleConfigBase {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    public abstract File getGenDir();
 }

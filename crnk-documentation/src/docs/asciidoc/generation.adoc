@@ -149,3 +149,86 @@ crnkGen.init()
 ----
 
 Typically a test profile is used to bring the Spring application up in order to then extract the repositories for generation.
+
+
+
+
+
+
+## Documentation with AsciiDoc
+
+WARNING: This is still experimental. Feedback welcomed.
+
+Documentation of REST APIs has a long history of various tooling. Swagger/OpenAPI there is the classical choice,
+but comes with a variety of disadvantages:
+
+- Mechanisms used to extract information from an implementation often fail understand the full scope of it.
+- Annotations for descriptions lead to a large amount of boiler-plate.
+- Swagger UI is delivered as webapp and hard to enrich with custom information.
+
+This triggered, for example, the development of https://github.com/Swagger2Markup/swagger2markup[swagger2markup] to
+make is of AsciiDoc as output target. This in turn lets developers manually written and generated
+documentation and publish it as HTML and PDF in a potentially versioned manner.
+
+Further progress iad made by https://docs.spring.io/spring-restdocs/docs/1.2.6.RELEASE/reference/html5/[spring-restdocs].
+Instead of attempting to write a specification, request and responses are captured from unit tests and
+enriched with documentation to then save as AsciiDoc.  This ensures 100% accurate documentation at all time since.
+
+JSON:API enables developers to take a further leap. Since it provides a well-defined standard for many aspects
+of a REST endpoint, such as parameter handling, status codes and linking, it greatly simplifies the documentation task.
+Many things are covered by the standard and the documentation can focus on the essential aspects of the
+application. This in turn is realized by the AsciiDoc module of the Crnk generator.
+
+The setup looks like:
+
+[source]
+----
+crnkGen{
+    runtime {
+        configuration = 'typescriptGenRuntime'
+    }
+
+    // specify the package to look for resources
+    resourcePackages = ['io.crnk.test']
+
+    asciidoc {
+        // enable Typescript generation within Gradle plugin
+        enabled = true
+
+        // title of generated document
+        title = "Api Documentation"
+
+        // specify location of generated sources
+        genDir = file('build/generated/source/asciidoc')
+    }
+}
+crnkGen.init()
+----
+
+This results in a `generateAsciidoc` task to perform the generation.  The output directory then
+contains a collection of files that can either be included individually or together with the main `index.adoc`.
+
+Descriptions for resources and fields are extracted from JavaDoc.
+
+The generated documentation can be enriched with request/response examples from unit tests. An example looks like:
+
+[source]
+----
+include::../../../../crnk-gen/crnk-gen-asciidoc/src/test/main/io/crnk/gen/asciidoc/AsciiDocCaptureTest.java[]
+----
+
+The example sets up a Crnk client and server. They are directly connected through `InMemoryHttpAdapter` to
+by-pass the HTTP layer and forgo the setup of a web server. The `AsciidocCaptureModule` is add to the
+client to do the capturing. To then capture a request:
+
+[source]
+----
+asciidoc.capture("Create new Task").call(() -> repository.create(newTask));
+----
+
+If the output is matched with Crnk generator plugin, then the captured test cases will be picked up automatically.
+A full setup is available in the main https://github.com/crnk-project/crnk-example[crnk-example] application.
+
+
+
+

@@ -5,17 +5,17 @@ import io.crnk.core.engine.security.SecurityProvider;
 
 public class ServletSecurityProvider implements SecurityProvider {
 
-	private HttpRequestContextProvider contextProvider;
+    private HttpRequestContextProvider contextProvider;
 
-	public ServletSecurityProvider(HttpRequestContextProvider contextProvider) {
-		this.contextProvider = contextProvider;
-	}
+    public ServletSecurityProvider(HttpRequestContextProvider contextProvider) {
+        this.contextProvider = contextProvider;
+    }
 
-	@Override
-	public boolean isUserInRole(String role) {
-		ServletRequestContext request = contextProvider.getRequestContext().unwrap
-				(ServletRequestContext.class);
-		return request.getRequest().isUserInRole(role);
-	}
+    @Override
+    public boolean isUserInRole(String role) {
+        ServletRequestContext request = contextProvider.getRequestContext().unwrap
+                (ServletRequestContext.class);
+        return request.getServletRequest().isUserInRole(role);
+    }
 
 }

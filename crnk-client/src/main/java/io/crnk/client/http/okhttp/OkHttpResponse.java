@@ -4,6 +4,7 @@ import io.crnk.client.http.HttpAdapterResponse;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.util.Set;
 
 public class OkHttpResponse implements HttpAdapterResponse {
 
@@ -36,6 +37,11 @@ public class OkHttpResponse implements HttpAdapterResponse {
 	@Override
 	public String getResponseHeader(String name) {
 		return response.header(name);
+	}
+
+	@Override
+	public Set<String> getHeaderNames() {
+		return response.headers().names();
 	}
 
 }

@@ -20,7 +20,9 @@ dependencies {
     compile project(':crnk-meta')
     compile project(':crnk-jpa')
     compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+
     compile project(':crnk-gen:crnk-gen-typescript')
+    compile project(':crnk-gen:crnk-gen-asciidoc')
 
     compile 'com.fasterxml.jackson.core:jackson-databind'
 

@@ -1,18 +1,26 @@
 package io.crnk.gen.gradle;
 
+import io.crnk.gen.asciidoc.internal.AsciidocGeneratorModule;
 import io.crnk.gen.base.GeneratorConfig;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.gradle.task.ForkedGenerateTask;
 import io.crnk.gen.gradle.task.GeneratorTaskContract;
 import io.crnk.gen.gradle.task.InMemoryGeneratorTask;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.javadoc.Javadoc;
+import org.gradle.external.javadoc.JavadocMemberLevel;
+import org.gradle.external.javadoc.MinimalJavadocOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -36,7 +44,7 @@ public class GeneratorPlugin implements Plugin<Project> {
                     init(project);
 
                     for (GeneratorModule module : modules) {
-                        String taskName = getTaskName(module);
+                        String taskName = getGenerateTaskName(module);
                         Task task = project.getTasks().getByName(taskName);
                         task.setEnabled(module.getConfig().isEnabled());
                     }
@@ -58,17 +66,51 @@ public class GeneratorPlugin implements Plugin<Project> {
         project.afterEvaluate(project1 -> initRunner.run());
     }
 
+    private Task createXmlJavaDocTask(Project project) {
+        Configuration config = project.getConfigurations().create("crnkJavaDocToXml");
+
+        project.getDependencies().add("crnkJavaDocToXml", "com.github.markusbernhardt:xml-doclet:1.0.5");
+
+        Javadoc task = project.getTasks().create("crnkJavadocToXml", Javadoc.class);
+        task.setTitle(null);
+        task.setDestinationDir(new File(project.getBuildDir(), "crnk-xml-docs"));
+
+        MinimalJavadocOptions options = task.getOptions();
+        options.setDoclet("com.github.markusbernhardt.xmldoclet.XmlDoclet");
+        options.setMemberLevel(JavadocMemberLevel.PRIVATE);
+        options.setDocletpath(new ArrayList<>(config.getFiles()));
+
+        SourceSetContainer sourceSets = (SourceSetContainer) project.getProperties().get("sourceSets");
+        SourceSet mainSourceSet = sourceSets.getByName("main");
+        task.source(mainSourceSet.getAllJava());
+        task.setClasspath(mainSourceSet.getRuntimeClasspath());
+
+        return task;
+    }
+
 
     protected void init(Project project) {
         for (GeneratorModule module : modules) {
-            setupGenerateTask(project, module);
+            setupCleanTask(project, module);
+            Task generateTask = setupGenerateTask(project, module);
+
+            if (module instanceof AsciidocGeneratorModule) {
+                Task javaDocTask = createXmlJavaDocTask(project);
+                generateTask.dependsOn(javaDocTask);
+            }
         }
+    }
+
+    private Task setupCleanTask(Project project, GeneratorModule module) {
+        Task task = project.getTasks().create(getCleanTaskName(module), DefaultTask.class);
+        task.doFirst(task1 -> project.delete(module.getConfig().getGenDir()));
+        return task;
     }
 
     private Task setupGenerateTask(Project project, GeneratorModule module) {
         GeneratorConfig config = project.getExtensions().getByType(GeneratorConfig.class);
         Class taskClass = config.isForked() ? ForkedGenerateTask.class : InMemoryGeneratorTask.class;
-        Task task = project.getTasks().create(getTaskName(module), taskClass);
+        Task task = project.getTasks().create(getGenerateTaskName(module), taskClass);
 
         ((GeneratorTaskContract) task).setModule(module);
 
@@ -85,10 +127,16 @@ public class GeneratorPlugin implements Plugin<Project> {
         return task;
     }
 
-    private String getTaskName(GeneratorModule module) {
+    private String getGenerateTaskName(GeneratorModule module) {
         return InMemoryGeneratorTask.NAME +
                 Character.toUpperCase(module.getName().charAt(0)) + module.getName().substring(1);
     }
+
+    private String getCleanTaskName(GeneratorModule module) {
+        return "clean" +
+                Character.toUpperCase(module.getName().charAt(0)) + module.getName().substring(1);
+    }
+
 
     private void setupRuntimeDependencies(Project project, Task generateTask) {
         GeneratorConfig config = project.getExtensions().getByType(GeneratorConfig.class);
