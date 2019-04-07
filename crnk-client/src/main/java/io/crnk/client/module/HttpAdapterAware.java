@@ -7,5 +7,5 @@ import io.crnk.client.http.HttpAdapter;
  */
 public interface HttpAdapterAware {
 
-	void setHttpAdapter(HttpAdapter client);
+	void setHttpAdapter(HttpAdapter httpAdapter);
 }

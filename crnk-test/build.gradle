@@ -4,7 +4,11 @@ dependencies {
 	compile project(':crnk-core')
 	compile project(':crnk-reactive')
 
-	compile 'junit:junit:4.12'
+	compile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	compile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	compile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	compile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+
 	compile 'org.mockito:mockito-core:2.18.3'
 	compile 'org.assertj:assertj-core:3.9.1'
 

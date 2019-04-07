@@ -1,6 +1,8 @@
 package io.crnk.gen.gradle;
 
 import groovy.lang.Closure;
+import io.crnk.gen.asciidoc.AsciidocGeneratorConfig;
+import io.crnk.gen.asciidoc.internal.AsciidocGeneratorModule;
 import io.crnk.gen.base.GeneratorConfig;
 import io.crnk.gen.base.RuntimeConfiguration;
 import io.crnk.gen.typescript.TSGeneratorConfig;
@@ -30,12 +32,19 @@ public class GeneratorExtension extends GeneratorConfig {
         return (RuntimeConfiguration) project.configure(getRuntime(), closure);
     }
 
-
     public TSGeneratorConfig getTypescript() {
         return (TSGeneratorConfig) getModuleConfig(TSGeneratorModule.NAME);
     }
 
     public TSGeneratorConfig typescript(Closure<TSGeneratorConfig> closure) {
         return (TSGeneratorConfig) project.configure(getTypescript(), closure);
+    }
+
+    public AsciidocGeneratorConfig getAsciidoc() {
+        return (AsciidocGeneratorConfig) getModuleConfig(AsciidocGeneratorModule.NAME);
+    }
+
+    public AsciidocGeneratorConfig asciidoc(Closure<AsciidocGeneratorConfig> closure) {
+        return (AsciidocGeneratorConfig) project.configure(getAsciidoc(), closure);
     }
 }

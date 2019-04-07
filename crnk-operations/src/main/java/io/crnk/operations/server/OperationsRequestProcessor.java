@@ -1,9 +1,5 @@
 package io.crnk.operations.server;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.http.HttpRequestContext;
@@ -17,46 +13,51 @@ import io.crnk.operations.OperationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 public class OperationsRequestProcessor implements HttpRequestProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OperationsRequestProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationsRequestProcessor.class);
 
-	public static final String JSONPATCH_CONTENT_TYPE = "application/json-patch+json";
+    public static final String JSONPATCH_CONTENT_TYPE = "application/json-patch+json";
 
-	private Module.ModuleContext moduleContext;
+    private Module.ModuleContext moduleContext;
 
-	private OperationsModule operationsModule;
+    private OperationsModule operationsModule;
 
-	public OperationsRequestProcessor(OperationsModule operationsModule, Module.ModuleContext moduleContext) {
-		this.operationsModule = operationsModule;
-		this.moduleContext = moduleContext;
-	}
+    public OperationsRequestProcessor(OperationsModule operationsModule, Module.ModuleContext moduleContext) {
+        this.operationsModule = operationsModule;
+        this.moduleContext = moduleContext;
+    }
 
-	@Override
-	public void process(HttpRequestContext context) throws IOException {
-		if (context.accepts(JSONPATCH_CONTENT_TYPE)) {
-			ObjectMapper mapper = moduleContext.getObjectMapper();
-			try {
+    @Override
+    public void process(HttpRequestContext context) throws IOException {
+        if (context.accepts(JSONPATCH_CONTENT_TYPE)) {
+            ObjectMapper mapper = moduleContext.getObjectMapper();
+            try {
+                List<Operation> operations = Arrays.asList(mapper.readValue(context.getRequestBody(), Operation[].class));
 
-				List<Operation> operations = Arrays.asList(mapper.readValue(context.getRequestBody(), Operation[].class));
+                QueryContext queryContext = context.getQueryContext();
+                List<OperationResponse> responses = operationsModule.apply(operations, queryContext);
 
-				QueryContext queryContext = context.getQueryContext();
-				List<OperationResponse> responses = operationsModule.apply(operations, queryContext);
+                String responseJson = mapper.writeValueAsString(responses);
 
-				String responseJson = mapper.writeValueAsString(responses);
-				context.setContentType(JSONPATCH_CONTENT_TYPE);
-				context.setResponse(200, responseJson);
-			}
-			catch (Exception e) {
-				Response response = toErrorResponse(e);
-				HttpResponse httpResponse = response.toHttpResponse(mapper);
-				context.setResponse(httpResponse);
-			}
-		}
-	}
+                HttpResponse response = new HttpResponse();
+                response.setStatusCode(200);
+                response.setBody(responseJson);
+                context.setResponse(response);
+            } catch (Exception e) {
+                Response response = toErrorResponse(e);
+                HttpResponse httpResponse = response.toHttpResponse(mapper);
+                context.setResponse(httpResponse);
+            }
+        }
+    }
 
-	private Response toErrorResponse(Throwable e) {
-		ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
-		return exceptionMapperRegistry.toResponse(e);
-	}
+    private Response toErrorResponse(Throwable e) {
+        ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
+        return exceptionMapperRegistry.toResponse(e);
+    }
 }
