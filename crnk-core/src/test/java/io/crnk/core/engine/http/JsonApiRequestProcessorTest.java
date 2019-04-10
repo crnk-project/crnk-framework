@@ -1,8 +1,5 @@
 package io.crnk.core.engine.http;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.document.Document;
@@ -25,265 +22,267 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.util.List;
+
 public class JsonApiRequestProcessorTest {
 
-	private JsonApiRequestProcessor processor;
+    private JsonApiRequestProcessor processor;
 
-	private Module.ModuleContext moduleContext;
+    private Module.ModuleContext moduleContext;
 
-	private CoreTestContainer container;
+    private CoreTestContainer container;
 
-	private HttpRequestContextBase requestContextBase;
+    private HttpRequestContextBase requestContextBase;
 
-	private HttpRequestContextBaseAdapter requestContext;
-
-
-	@Before
-	public void setup() {
-		TaskRepository.clear();
-
-		container = new CoreTestContainer();
-		container.setDefaultPackage();
-		container.addModule(new Module() {
-			@Override
-			public String getModuleName() {
-				return "test";
-			}
-
-			@Override
-			public void setupModule(ModuleContext context) {
-				moduleContext = context;
-			}
-		});
-		container.boot();
+    private HttpRequestContextBaseAdapter requestContext;
 
 
-		Task task = new Task();
-		task.setId(1L);
-		task.setName("SomeTask");
-		task.setLinksInformation(new TaskLinks());
-		TaskRepository tasks = new TaskRepository();
-		tasks.save(task);
+    @Before
+    public void setup() {
+        TaskRepository.clear();
 
-		processor = new JsonApiRequestProcessor(moduleContext);
+        container = new CoreTestContainer();
+        container.setDefaultPackage();
+        container.addModule(new Module() {
+            @Override
+            public String getModuleName() {
+                return "test";
+            }
 
-		requestContextBase = container.getRequestContextBase();
-		requestContext = container.getRequestContext();
-	}
-
-	@After
-	public void teardown() {
-		TaskRepository.clear();
-	}
-
-	@Test
-	public void ignoreRequestForContentTypeMismatch() {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept"))
-				.thenReturn("*");
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
-		Mockito.when(requestContextBase.getRequestHeader("Accept"))
-				.thenReturn("something");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
-	}
+            @Override
+            public void setupModule(ModuleContext context) {
+                moduleContext = context;
+            }
+        });
+        container.boot();
 
 
-	@Test
-	public void acceptPlainJsonDependingOnFlag() {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept"))
-				.thenReturn("application/json");
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, true));
-		Mockito.when(requestContextBase.getRequestHeader("Accept"))
-				.thenReturn("application/json");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
-	}
+        Task task = new Task();
+        task.setId(1L);
+        task.setName("SomeTask");
+        task.setLinksInformation(new TaskLinks());
+        TaskRepository tasks = new TaskRepository();
+        tasks.save(task);
 
-	@Test
-	public void handleRequestForGetAndWildcardContentType() {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
-	}
+        processor = new JsonApiRequestProcessor(moduleContext);
 
-	@Test
-	public void ignoreRequestForPatchAndWildcardContentType() throws IOException {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("PATCH");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/12");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+        requestContextBase = container.getRequestContextBase();
+        requestContext = container.getRequestContext();
+    }
 
-		processor.process(requestContext);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
-	}
+    @After
+    public void teardown() {
+        TaskRepository.clear();
+    }
 
-	@Test
-	public void return405ForInvalidMethod() {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("PUT");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/12");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-
-		Result<HttpResponse> result = processor.processAsync(requestContext);
-		Assert.assertEquals(HttpStatus.METHOD_NOT_ALLOWED_405, result.get().getStatusCode());
-	}
-
-	@Test
-	public void ignoreRequestForPostAndWildcardContentType() throws IOException {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
-
-		processor.process(requestContext);
-		Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.anyInt(), Mockito.any(byte[].class));
-	}
+    @Test
+    public void ignoreRequestForContentTypeMismatch() {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept"))
+                .thenReturn("*");
+        Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+        Mockito.when(requestContextBase.getRequestHeader("Accept"))
+                .thenReturn("something");
+        Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+    }
 
 
-	@Test
-	public void getTasks() throws IOException {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+    @Test
+    public void acceptPlainJsonDependingOnFlag() {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept"))
+                .thenReturn("application/json");
+        Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, true));
+        Mockito.when(requestContextBase.getRequestHeader("Accept"))
+                .thenReturn("application/json");
+        Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+    }
 
-		processor.process(requestContext);
+    @Test
+    public void handleRequestForGetAndWildcardContentType() {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+        Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+    }
 
-		ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
+    @Test
+    public void ignoreRequestForPatchAndWildcardContentType() throws IOException {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("PATCH");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/12");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+        Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 
-		String json = new String(contentCaptor.getValue().getBody());
-		Assert.assertEquals(200, contentCaptor.getValue().getStatusCode());
-		Document document = container.getBoot().getObjectMapper().readerFor(Document.class).readValue(json);
-		Assert.assertTrue(document.getData().isPresent());
+        processor.process(requestContext);
+        Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
+    }
 
-		List<Resource> resources = document.getCollectionData().get();
-		Assert.assertEquals(1, resources.size());
-		Resource resource = resources.get(0);
-		Assert.assertEquals("http://127.0.0.1/tasks/1", resource.getLinks().get("self").asText());
-		Assert.assertNotNull(resource.getLinks().get("value"));
-	}
+    @Test
+    public void return405ForInvalidMethod() {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("PUT");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/12");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
-	@Test
-	public void getTasksWithCompactHeader() throws IOException {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_HEADER_CRNK_COMPACT)).thenReturn("true");
+        Result<HttpResponse> result = processor.processAsync(requestContext);
+        Assert.assertEquals(HttpStatus.METHOD_NOT_ALLOWED_405, result.get().getStatusCode());
+    }
 
-		processor.process(requestContext);
+    @Test
+    public void ignoreRequestForPostAndWildcardContentType() throws IOException {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+        Assert.assertFalse(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
 
-		ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
+        processor.process(requestContext);
+        Mockito.verify(requestContextBase, Mockito.times(0)).setResponse(Mockito.any(HttpResponse.class));
+    }
 
-		Assert.assertEquals(200, contentCaptor.getValue().getStatusCode());
-		String json = new String(contentCaptor.getValue().getBody());
+    @Test
+    public void getTasks() throws IOException {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
 
-		Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
-		Assert.assertTrue(document.getData().isPresent());
-		List<Resource> resources = document.getCollectionData().get();
-		Assert.assertEquals(1, resources.size());
-		Resource resource = resources.get(0);
-		Assert.assertNull(resource.getLinks().get("self"));
-		Assert.assertNotNull(resource.getLinks().get("value"));
-	}
+        processor.process(requestContext);
 
+        ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+        Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
 
-	private String createRequestBody(String name) throws JsonProcessingException {
-		Task task = new Task();
-		task.setId(1L);
-		task.setName(name);
-		task.setCategory("testCategory");
+        String json = new String(contentCaptor.getValue().getBody());
+        Assert.assertEquals(200, contentCaptor.getValue().getStatusCode());
+        Document document = container.getBoot().getObjectMapper().readerFor(Document.class).readValue(json);
+        Assert.assertTrue(document.getData().isPresent());
 
-		JsonApiResponse request = new JsonApiResponse();
-		request.setEntity(task);
-		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
-		Document requestDocument = container.getDocumentMapper()
-				.toDocument(request, container.toQueryAdapter(new QuerySpec(Task.class)), mappingConfig).get();
-		return container.getObjectMapper().writeValueAsString(requestDocument);
-	}
+        List<Resource> resources = document.getCollectionData().get();
+        Assert.assertEquals(1, resources.size());
+        Resource resource = resources.get(0);
+        Assert.assertEquals("http://127.0.0.1/tasks/1", resource.getLinks().get("self").asText());
+        Assert.assertNotNull(resource.getLinks().get("value"));
+    }
 
+    @Test
+    public void getTasksWithCompactHeader() throws IOException {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("GET");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+        Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_HEADER_CRNK_COMPACT)).thenReturn("true");
 
-	@Test
-	public void postTasks() throws IOException {
-		String requestBody = createRequestBody("test");
-		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
-		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        processor.process(requestContext);
 
-		processor.process(requestContext);
+        ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+        Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
 
-		ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
+        Assert.assertEquals(200, contentCaptor.getValue().getStatusCode());
+        String json = new String(contentCaptor.getValue().getBody());
 
-		String json = new String(contentCaptor.getValue().getBody());
-		Assert.assertEquals(HttpStatus.CREATED_201, contentCaptor.getValue().getStatusCode());
-
-		Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
-		Assert.assertTrue(document.getData().isPresent());
-		Resource updatedTask = (Resource) document.getData().get();
-		Assert.assertEquals("1", updatedTask.getId());
-		Assert.assertEquals("tasks", updatedTask.getType());
-	}
+        Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
+        Assert.assertTrue(document.getData().isPresent());
+        List<Resource> resources = document.getCollectionData().get();
+        Assert.assertEquals(1, resources.size());
+        Resource resource = resources.get(0);
+        Assert.assertNull(resource.getLinks().get("self"));
+        Assert.assertNotNull(resource.getLinks().get("value"));
+    }
 
 
-	@Test
-	public void postTasksWithBadRequestException() throws IOException {
-		String requestBody = createRequestBody("badName"); // badName triggers an error in repository
+    private String createRequestBody(String name) throws JsonProcessingException {
+        Task task = new Task();
+        task.setId(1L);
+        task.setName(name);
+        task.setCategory("testCategory");
 
-		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
-		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        JsonApiResponse request = new JsonApiResponse();
+        request.setEntity(task);
+        DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+        Document requestDocument = container.getDocumentMapper()
+                .toDocument(request, container.toQueryAdapter(new QuerySpec(Task.class)), mappingConfig).get();
+        return container.getObjectMapper().writeValueAsString(requestDocument);
+    }
 
-		processor.process(requestContext);
 
-		ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
-		Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
+    @Test
+    public void postTasks() throws IOException {
+        String requestBody = createRequestBody("test");
+        Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
+        Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
+                .thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 
-		Assert.assertEquals(HttpStatus.BAD_REQUEST_400, contentCaptor.getValue().getStatusCode());
-		String json = new String(contentCaptor.getValue().getBody());
+        processor.process(requestContext);
 
-		Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
-		Assert.assertFalse(document.getData().isPresent());
-		Assert.assertEquals(1, document.getErrors().size());
-		ErrorData errorData = document.getErrors().get(0);
-		Assert.assertEquals("400", errorData.getStatus());
-	}
+        ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+        Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
 
-	@Test
-	public void requestWithInvalidJson() throws IOException {
-		Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
-		Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
-		Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
-		Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
-				.thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
-		Mockito.when(requestContext.getRequestBody()).thenReturn("{ INVALID }".getBytes());
+        String json = new String(contentCaptor.getValue().getBody());
+        Assert.assertEquals(HttpStatus.CREATED_201, contentCaptor.getValue().getStatusCode());
 
-		Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+        Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
+        Assert.assertTrue(document.getData().isPresent());
+        Resource updatedTask = (Resource) document.getData().get();
+        Assert.assertEquals("1", updatedTask.getId());
+        Assert.assertEquals("tasks", updatedTask.getType());
+    }
 
-		processor.process(requestContext);
 
-		ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
-		Mockito.verify(requestContextBase, Mockito.times(1))
-				.setResponse(contentCaptor.capture());
+    @Test
+    public void postTasksWithBadRequestException() throws IOException {
+        String requestBody = createRequestBody("badName"); // badName triggers an error in repository
 
-		Assert.assertEquals(HttpStatus.BAD_REQUEST_400, contentCaptor.getValue().getStatusCode());
+        Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestBody()).thenReturn(requestBody.getBytes());
+        Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
+                .thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
 
-		String json = new String(contentCaptor.getValue().getBody());
+        processor.process(requestContext);
 
-		Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
-		Assert.assertFalse(document.getData().isPresent());
-		Assert.assertEquals(1, document.getErrors().size());
-		ErrorData errorData = document.getErrors().get(0);
-		Assert.assertEquals("400", errorData.getStatus());
-		Assert.assertEquals("Json Parsing failed", errorData.getTitle());
-		Assert.assertNotNull(errorData.getDetail());
-	}
+        ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+        Mockito.verify(requestContextBase, Mockito.times(1)).setResponse(contentCaptor.capture());
+
+        Assert.assertEquals(HttpStatus.BAD_REQUEST_400, contentCaptor.getValue().getStatusCode());
+        String json = new String(contentCaptor.getValue().getBody());
+
+        Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
+        Assert.assertFalse(document.getData().isPresent());
+        Assert.assertEquals(1, document.getErrors().size());
+        ErrorData errorData = document.getErrors().get(0);
+        Assert.assertEquals("400", errorData.getStatus());
+    }
+
+    @Test
+    public void requestWithInvalidJson() throws IOException {
+        Mockito.when(requestContextBase.getMethod()).thenReturn("POST");
+        Mockito.when(requestContextBase.getPath()).thenReturn("/tasks/");
+        Mockito.when(requestContextBase.getRequestHeader("Accept")).thenReturn("*");
+        Mockito.when(requestContextBase.getRequestHeader(HttpHeaders.HTTP_CONTENT_TYPE))
+                .thenReturn(HttpHeaders.JSONAPI_CONTENT_TYPE);
+        Mockito.when(requestContext.getRequestBody()).thenReturn("{ INVALID }".getBytes());
+
+        Assert.assertTrue(JsonApiRequestProcessor.isJsonApiRequest(requestContext, false));
+
+        processor.process(requestContext);
+
+        ArgumentCaptor<HttpResponse> contentCaptor = ArgumentCaptor.forClass(HttpResponse.class);
+        Mockito.verify(requestContextBase, Mockito.times(1))
+                .setResponse(contentCaptor.capture());
+
+        Assert.assertEquals(HttpStatus.BAD_REQUEST_400, contentCaptor.getValue().getStatusCode());
+
+        String json = new String(contentCaptor.getValue().getBody());
+
+        Document document = container.getObjectMapper().readerFor(Document.class).readValue(json);
+        Assert.assertFalse(document.getData().isPresent());
+        Assert.assertEquals(1, document.getErrors().size());
+        ErrorData errorData = document.getErrors().get(0);
+        Assert.assertEquals("400", errorData.getStatus());
+        Assert.assertEquals("Json Parsing failed", errorData.getTitle());
+        Assert.assertNotNull(errorData.getDetail());
+    }
 }

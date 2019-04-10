@@ -2,6 +2,7 @@ package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.ClientException;
+import io.crnk.client.ClientFormat;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.ResponseBodyException;
 import io.crnk.client.TransportException;
@@ -18,7 +19,6 @@ import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
-import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.resource.list.DefaultResourceList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,7 @@ public class ClientStubBase {
     protected JsonApiUrlBuilder urlBuilder;
 
     protected Class<?> resourceClass;
+
 
     public ClientStubBase(CrnkClient client, JsonApiUrlBuilder urlBuilder, Class<?> resourceClass) {
         this.client = client;
@@ -62,11 +63,11 @@ public class ClientStubBase {
                 LOGGER.debug("request body: {}", requestBody);
             }
 
+            ClientFormat format = client.getFormat();
             if (method == HttpMethod.POST || method == HttpMethod.PATCH) {
-                request.header("Content-Type", HttpHeaders.JSONAPI_CONTENT_TYPE + "; charset=" +
-                        HttpHeaders.DEFAULT_CHARSET);
+                request.header("Content-Type", format.getContentType());
             }
-            request.header("Accept", HttpHeaders.JSONAPI_CONTENT_TYPE);
+            request.header("Accept", format.getAcceptType());
 
             HttpAdapterResponse response = request.execute();
 
@@ -83,10 +84,10 @@ public class ClientStubBase {
                     throw new ResponseBodyException("no body received");
                 }
                 if (Resource.class.equals(resourceClass)) {
-                    Document document = objectMapper.readValue(body, Document.class);
+                    Document document = objectMapper.readValue(body, format.getDocumentClass());
                     return toResourceResponse(document, objectMapper);
                 } else {
-                    Document document = objectMapper.readValue(body, Document.class);
+                    Document document = objectMapper.readValue(body, format.getDocumentClass());
 
                     ClientDocumentMapper documentMapper = client.getDocumentMapper();
                     return documentMapper.fromDocument(document, responseType == ResponseType.RESOURCES);
@@ -116,17 +117,16 @@ public class ClientStubBase {
     }
 
     protected RuntimeException handleError(HttpAdapterResponse response) throws IOException {
-        return handleError(client, response);
+        return handleError(client, response, client.getFormat());
     }
 
-    public static RuntimeException handleError(CrnkClient client, HttpAdapterResponse response) throws IOException {
+    public static RuntimeException handleError(CrnkClient client, HttpAdapterResponse response, ClientFormat format) throws IOException {
         ErrorResponse errorResponse = null;
         String body = response.body();
         String contentType = response.getResponseHeader(HttpHeaders.HTTP_CONTENT_TYPE);
-        if (body != null && body.length() > 0 && contentType != null && contentType.toLowerCase().contains(HttpHeaders.JSONAPI_CONTENT_TYPE)) {
-
+        if (body != null && body.length() > 0 && contentType != null && contentType.toLowerCase().contains(format.getAcceptType())) {
             ObjectMapper objectMapper = client.getObjectMapper();
-            Document document = objectMapper.readValue(body, Document.class);
+            Document document = objectMapper.readValue(body, format.getDocumentClass());
             if (document.getErrors() != null && !document.getErrors().isEmpty()) {
                 errorResponse = new ErrorResponse(document.getErrors(), response.code());
             }
@@ -152,13 +152,4 @@ public class ClientStubBase {
     public enum ResponseType {
         NONE, RESOURCE, RESOURCES
     }
-
-    public QuerySpecSerializer getQuerySpecSerializer() {
-        return this.urlBuilder.getQuerySpecSerializer();
-    }
-
-    public void setQuerySpecSerializer(QuerySpecSerializer querySpecSerializer) {
-        this.urlBuilder.setQuerySpecSerializer(querySpecSerializer);
-    }
-
 }

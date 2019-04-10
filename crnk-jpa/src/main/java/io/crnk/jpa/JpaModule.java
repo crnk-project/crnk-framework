@@ -321,7 +321,10 @@ public class JpaModule implements InitializingModule {
 
         addHibernateConstraintViolationExceptionMapper();
         addTransactionRollbackExceptionMapper();
-        context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
+
+        if(config != null) {
+            context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
+        }
 
         if (emSupplier != null) {
             metaEnricher = new JpaMetaEnricher();

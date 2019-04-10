@@ -36,126 +36,125 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
 
-	protected ResourceMetaProvider resourceMetaProvider;
+    protected ResourceMetaProvider resourceMetaProvider;
 
-	protected JpaMetaProvider jpaMetaProvider;
+    protected JpaMetaProvider jpaMetaProvider;
 
-	protected CrnkClient client;
+    protected CrnkClient client;
 
-	protected AnnotationConfigApplicationContext context;
+    protected AnnotationConfigApplicationContext context;
 
-	protected MetaModule metaModule;
+    protected MetaModule metaModule;
 
-	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
-		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
-		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+    public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
+        OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
+        httpAdapter.addListener(new OkHttpAdapterListenerBase() {
 
-			@Override
-			public void onBuild(Builder builder) {
-				builder.readTimeout(timeout, timeUnit);
-			}
-		});
-	}
+            @Override
+            public void onBuild(Builder builder) {
+                builder.readTimeout(timeout, timeUnit);
+            }
+        });
+    }
 
-	@Before
-	public void setup() {
-		client = new CrnkClient(getBaseUri().toString());
-		client.setPushAlways(false);
-		client.getObjectMapper().registerModule(new JavaTimeModule());
+    @Before
+    public void setup() {
+        client = new CrnkClient(getBaseUri().toString());
+        client.getObjectMapper().registerModule(new JavaTimeModule());
 
-		JpaModule module = JpaModule.newClientModule();
-		setupModule(module, false);
-		client.addModule(module);
+        JpaModule module = JpaModule.newClientModule();
+        setupModule(module, false);
+        client.addModule(module);
 
-		MetaModule clientMetaModule = MetaModule.create();
-		clientMetaModule.addMetaProvider(new ResourceMetaProvider());
-		client.addModule(clientMetaModule);
+        MetaModule clientMetaModule = MetaModule.create();
+        clientMetaModule.addMetaProvider(new ResourceMetaProvider());
+        client.addModule(clientMetaModule);
 
-		metaModule.getLookup().initialize();
+        metaModule.getLookup().initialize();
 
-		setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
-	}
+        setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
+    }
 
-	protected void setupModule(JpaModule module, boolean server) {
+    protected void setupModule(JpaModule module, boolean server) {
 
-	}
+    }
 
-	@Override
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
 
-		SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
-		transactionRunner.doInTransaction(new Callable<Object>() {
+        SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
+        transactionRunner.doInTransaction(new Callable<Object>() {
 
-			@Override
-			public Object call() {
-				EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
-				AbstractJpaTest.clear(em);
-				return null;
-			}
-		});
+            @Override
+            public Object call() {
+                EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
+                AbstractJpaTest.clear(em);
+                return null;
+            }
+        });
 
-		if (context != null) {
-			context.destroy();
-		}
-	}
+        if (context != null) {
+            context.destroy();
+        }
+    }
 
-	@Override
-	protected Application configure() {
-		return new TestApplication();
-	}
+    @Override
+    protected Application configure() {
+        return new TestApplication();
+    }
 
-	@ApplicationPath("/")
-	private class TestApplication extends ResourceConfig {
+    @ApplicationPath("/")
+    private class TestApplication extends ResourceConfig {
 
-		public TestApplication() {
+        public TestApplication() {
 
-			Assert.assertNull(context);
+            Assert.assertNull(context);
 
-			context = new AnnotationConfigApplicationContext(JpaTestConfig.class);
-			context.start();
-			EntityManagerFactory emFactory = context.getBean(EntityManagerFactory.class);
-			EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
-			SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
+            context = new AnnotationConfigApplicationContext(JpaTestConfig.class);
+            context.start();
+            EntityManagerFactory emFactory = context.getBean(EntityManagerFactory.class);
+            EntityManager em = context.getBean(EntityManagerProducer.class).getEntityManager();
+            SpringTransactionRunner transactionRunner = context.getBean(SpringTransactionRunner.class);
 
-			CrnkFeature feature = new CrnkFeature();
-			feature.addModule(new FacetModule());
-			feature.addModule(new TestModule());
+            CrnkFeature feature = new CrnkFeature();
+            feature.addModule(new FacetModule());
+            feature.addModule(new TestModule());
 
-			JpaModule module = JpaModule.newServerModule(em, transactionRunner);
-			setupModule(module, true);
+            JpaModule module = JpaModule.newServerModule(em, transactionRunner);
+            setupModule(module, true);
 
-			Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
-			for (ManagedType<?> managedType : managedTypes) {
-				Class<?> managedJavaType = managedType.getJavaType();
-				if (managedJavaType.getAnnotation(Entity.class) != null && managedJavaType != CountryTranslationEntity.class) {
-					if (!module.hasRepository(managedJavaType)) {
-						module.addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
-					}
-				}
-			}
+            Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
+            for (ManagedType<?> managedType : managedTypes) {
+                Class<?> managedJavaType = managedType.getJavaType();
+                if (managedJavaType.getAnnotation(Entity.class) != null && managedJavaType != CountryTranslationEntity.class) {
+                    if (!module.hasRepository(managedJavaType)) {
+                        module.addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
+                    }
+                }
+            }
 
-			feature.addModule(module);
+            feature.addModule(module);
 
-			MetaModuleConfig metaConfig = new MetaModuleConfig();
-			resourceMetaProvider = new ResourceMetaProvider();
-			jpaMetaProvider = new JpaMetaProvider(emFactory);
-			metaConfig.addMetaProvider(resourceMetaProvider);
-			metaConfig.addMetaProvider(jpaMetaProvider);
-			metaModule = MetaModule.createServerModule(metaConfig);
-			feature.addModule(metaModule);
-			feature.getObjectMapper().registerModule(new JavaTimeModule());
+            MetaModuleConfig metaConfig = new MetaModuleConfig();
+            resourceMetaProvider = new ResourceMetaProvider();
+            jpaMetaProvider = new JpaMetaProvider(emFactory);
+            metaConfig.addMetaProvider(resourceMetaProvider);
+            metaConfig.addMetaProvider(jpaMetaProvider);
+            metaModule = MetaModule.createServerModule(metaConfig);
+            feature.addModule(metaModule);
+            feature.getObjectMapper().registerModule(new JavaTimeModule());
 
-			setupFeature(feature);
+            setupFeature(feature);
 
-			register(feature);
+            register(feature);
 
-		}
-	}
+        }
+    }
 
-	protected void setupFeature(CrnkFeature feature) {
+    protected void setupFeature(CrnkFeature feature) {
 
-	}
+    }
 
 }

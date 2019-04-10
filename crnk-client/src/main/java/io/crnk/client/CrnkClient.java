@@ -87,6 +87,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
@@ -130,6 +131,7 @@ public class CrnkClient {
 
     private List<HttpAdapterProvider> httpAdapterProviders = new ArrayList<>();
 
+    private ClientFormat format = ClientFormat.JSONAPI;
 
     public enum ClientType {
         SIMPLE_lINKS,
@@ -189,6 +191,10 @@ public class CrnkClient {
         }
 
         setProxyFactory(new BasicProxyFactory());
+    }
+
+    public ClientFormat getFormat() {
+        return format;
     }
 
     public ServiceDiscovery getServiceDiscovery() {
@@ -318,6 +324,11 @@ public class CrnkClient {
         initModuleRegistry();
         initExceptionMapperRegistry();
         initResources();
+
+        Optional<Module> plainJsonModule = moduleRegistry.getModules().stream().filter(it -> it.getModuleName().equals("plain-json")).findFirst();
+        if(plainJsonModule.isPresent()){
+            format = ClientFormat.PLAINJSON;
+        }
     }
 
     private void initHttpAdapter() {

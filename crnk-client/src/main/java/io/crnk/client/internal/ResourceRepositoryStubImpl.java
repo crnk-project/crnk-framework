@@ -1,6 +1,7 @@
 package io.crnk.client.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.ClientFormat;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -43,8 +44,9 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
         // do not write empty values like 0 and false => not necessary
         mappingConfig.getResourceMapping().setIgnoreDefaults(create);
 
+        ClientFormat format = client.getFormat();
         QueryAdapter queryAdapter = new QuerySpecAdapter(null, client.getRegistry(), client.getQueryContext());
-        final Document requestDocument = documentMapper.toDocument(response, queryAdapter, mappingConfig).get();
+        final Document requestDocument = format.toTransportDocument(documentMapper.toDocument(response, queryAdapter, mappingConfig).get());
 
         final ObjectMapper objectMapper = client.getObjectMapper();
         String requestBodyValue = ExceptionUtil.wrapCatchedExceptions(new Callable<String>() {

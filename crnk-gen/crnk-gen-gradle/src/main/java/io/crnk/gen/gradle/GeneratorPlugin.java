@@ -94,7 +94,7 @@ public class GeneratorPlugin implements Plugin<Project> {
             setupCleanTask(project, module);
             Task generateTask = setupGenerateTask(project, module);
 
-            if (module instanceof AsciidocGeneratorModule) {
+            if (module instanceof AsciidocGeneratorModule && module.getConfig().isEnabled()) {
                 Task javaDocTask = createXmlJavaDocTask(project);
                 generateTask.dependsOn(javaDocTask);
             }

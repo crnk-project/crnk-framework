@@ -8,6 +8,7 @@ import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.resource.list.ResourceList;
+import io.crnk.format.plainjson.PlainJsonFormatModule;
 import io.crnk.gen.asciidoc.capture.AsciidocCaptureConfig;
 import io.crnk.gen.asciidoc.capture.AsciidocCaptureModule;
 import io.crnk.test.mock.TestModule;
@@ -40,13 +41,13 @@ public class AsciiDocCaptureTest {
 
         CrnkClient client = new CrnkClient(baseUrl);
         client.addModule(module);
+        client.addModule(new PlainJsonFormatModule());
         client.setHttpAdapter(httpAdapter);
         return client;
     }
 
     private AsciidocCaptureModule setupAsciidoc() {
         File outputDir = new File("build/tmp/asciidoc/generated/source/asciidoc");
-
         AsciidocCaptureConfig asciidocConfig = new AsciidocCaptureConfig();
         asciidocConfig.setGenDir(outputDir);
         return new AsciidocCaptureModule(asciidocConfig);
@@ -55,6 +56,7 @@ public class AsciiDocCaptureTest {
     private CrnkBoot setupServer() {
         CrnkBoot boot = new CrnkBoot();
         boot.addModule(new TestModule());
+        boot.addModule(new PlainJsonFormatModule());
         boot.boot();
         return boot;
     }

@@ -10,7 +10,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.rs.internal.JaxrsModule;
@@ -36,104 +35,97 @@ import java.util.Collection;
 @ConstrainedTo(RuntimeType.SERVER)
 public class CrnkFeature implements Feature {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkFeature.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrnkFeature.class);
 
-	private CrnkBoot boot = new CrnkBoot();
+    private CrnkBoot boot = new CrnkBoot();
 
-	@Context
-	protected SecurityContext securityContext;
+    @Context
+    protected SecurityContext securityContext;
 
-	private boolean securityEnabled = true;
+    private boolean securityEnabled = true;
 
-	public CrnkFeature() {
-		// nothing to do
-	}
+    public CrnkFeature() {
+        // nothing to do
+    }
 
-	/**
-	 * Sets a custom ServiceUrlProvider.
-	 */
-	public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
-		boot.setServiceUrlProvider(serviceUrlProvider);
-	}
+    /**
+     * Sets a custom ServiceUrlProvider.
+     */
+    public void setServiceUrlProvider(ServiceUrlProvider serviceUrlProvider) {
+        boot.setServiceUrlProvider(serviceUrlProvider);
+    }
 
-	public void addModule(Module module) {
-		boot.addModule(module);
-	}
+    public void addModule(Module module) {
+        boot.addModule(module);
+    }
 
-	@Override
-	public boolean configure(final FeatureContext context) {
-		LOGGER.debug("configuring CrnkFeature");
-		boot.setPropertiesProvider(createPropertiesProvider(context));
-		boot.getCoreModule()
-				.setDefaultRepositoryInformationProvider(new JaxrsModule.JaxrsResourceRepositoryInformationProvider());
-		boot.addModule(new JaxrsModule(securityEnabled ? securityContext : null));
+    @Override
+    public boolean configure(final FeatureContext context) {
+        LOGGER.debug("configuring CrnkFeature");
+        boot.setPropertiesProvider(createPropertiesProvider(context));
+        boot.getCoreModule()
+                .setDefaultRepositoryInformationProvider(new JaxrsModule.JaxrsResourceRepositoryInformationProvider());
+        boot.addModule(new JaxrsModule(securityEnabled ? securityContext : null));
 
-		boot.boot();
+        boot.boot();
 
-		CrnkFilter crnkFilter = createCrnkFilter();
-		context.register(crnkFilter);
+        CrnkFilter crnkFilter = createCrnkFilter();
+        context.register(crnkFilter);
 
-		registerActionRepositories(context, boot);
-		LOGGER.debug("configured CrnkFeature");
-		return true;
-	}
+        registerActionRepositories(context, boot);
+        LOGGER.debug("configured CrnkFeature");
+        return true;
+    }
 
-	protected PropertiesProvider createPropertiesProvider(FeatureContext context) {
-		return key -> (String) context.getConfiguration().getProperty(key);
-	}
+    protected PropertiesProvider createPropertiesProvider(FeatureContext context) {
+        return key -> (String) context.getConfiguration().getProperty(key);
+    }
 
-	public void setSecurityEnabled(boolean securityEnabled) {
-		this.securityEnabled = securityEnabled;
-	}
+    public void setSecurityEnabled(boolean securityEnabled) {
+        this.securityEnabled = securityEnabled;
+    }
 
-	/**
-	 * All repositories with JAX-RS action need to be registered with JAX-RS as singletons.
-	 *
-	 * @param context of jaxrs
-	 * @param boot    of crnk
-	 */
-	private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
-		ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-		Collection<RegistryEntry> registryEntries = resourceRegistry.getResources();
-		for (RegistryEntry registryEntry : registryEntries) {
-			ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
-			if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {
-				ResourceRepositoryAdapter repositoryAdapter = registryEntry.getResourceRepository();
-				Object resourceRepository = repositoryAdapter.getResourceRepository();
-				context.register(resourceRepository);
-			}
-		}
-	}
+    /**
+     * All repositories with JAX-RS action need to be registered with JAX-RS as singletons.
+     *
+     * @param context of jaxrs
+     * @param boot    of crnk
+     */
+    private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
+        ResourceRegistry resourceRegistry = boot.getResourceRegistry();
+        Collection<RegistryEntry> registryEntries = resourceRegistry.getResources();
+        for (RegistryEntry registryEntry : registryEntries) {
+            ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
+            if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {
+                ResourceRepositoryAdapter repositoryAdapter = registryEntry.getResourceRepository();
+                Object resourceRepository = repositoryAdapter.getResourceRepository();
+                context.register(resourceRepository);
+            }
+        }
+    }
 
-	protected CrnkFilter createCrnkFilter() {
-		return new CrnkFilter(this);
-	}
+    protected CrnkFilter createCrnkFilter() {
+        return new CrnkFilter(this);
+    }
 
-	public ObjectMapper getObjectMapper() {
-		return boot.getObjectMapper();
-	}
+    public ObjectMapper getObjectMapper() {
+        return boot.getObjectMapper();
+    }
 
-	public void setDefaultPageLimit(Long defaultPageLimit) {
-		boot.setDefaultPageLimit(defaultPageLimit);
-	}
+    public void setDefaultPageLimit(Long defaultPageLimit) {
+        boot.setDefaultPageLimit(defaultPageLimit);
+    }
 
-	/**
-	 * @deprecated use {@link #getUrlMapper()}
-	 */
-	public QuerySpecDeserializer getQuerySpecDeserializer() {
-		return boot.getQuerySpecDeserializer();
-	}
+    public QuerySpecUrlMapper getUrlMapper() {
+        return boot.getUrlMapper();
+    }
 
-	public QuerySpecUrlMapper getUrlMapper() {
-		return boot.getUrlMapper();
-	}
+    public CrnkBoot getBoot() {
+        return boot;
+    }
 
-	public CrnkBoot getBoot() {
-		return boot;
-	}
-
-	public String getWebPathPrefix() {
-		return UrlUtils.removeLeadingSlash(boot.getWebPathPrefix());
-	}
+    public String getWebPathPrefix() {
+        return UrlUtils.removeLeadingSlash(boot.getWebPathPrefix());
+    }
 
 }

@@ -10,7 +10,7 @@ dependencies {
     testCompile 'commons-io:commons-io:2.5'
     testCompile project(':crnk-meta')
     testCompile project(':crnk-test')
-    testCompile project(':crnk-testkit')
+    testCompile project(':crnk-format:crnk-format-plain-json')
 }
 
 

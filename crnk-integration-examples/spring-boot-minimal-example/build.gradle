@@ -11,6 +11,11 @@ dependencies {
 
 	compile 'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'
 
+	testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+
 	testCompile project(':crnk-client')
 	testCompile 'com.squareup.okhttp3:okhttp:3.4.1'
 	testCompile 'com.jayway.restassured:rest-assured:2.9.0'

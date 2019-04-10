@@ -21,6 +21,7 @@ import okhttp3.Response;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -224,6 +225,7 @@ public abstract class BasicRepositoryAccessTestBase {
     }
 
     @Test
+    @Ignore
     public void testSetRelation() {
         Schedule schedule = new Schedule();
         schedule.setId(1L);

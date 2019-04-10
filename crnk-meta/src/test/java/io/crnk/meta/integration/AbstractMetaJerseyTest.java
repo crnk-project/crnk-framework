@@ -22,56 +22,55 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
 
-	protected CrnkClient client;
+    protected CrnkClient client;
 
-	protected CrnkBoot boot;
+    protected CrnkBoot boot;
 
-	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
-		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
-		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+    public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
+        OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
+        httpAdapter.addListener(new OkHttpAdapterListenerBase() {
 
-			@Override
-			public void onBuild(Builder builder) {
-				builder.readTimeout(timeout, timeUnit);
-			}
-		});
-	}
+            @Override
+            public void onBuild(Builder builder) {
+                builder.readTimeout(timeout, timeUnit);
+            }
+        });
+    }
 
-	@Before
-	public void setup() {
-		client = new CrnkClient(getBaseUri().toString());
-		client.setPushAlways(false);
-		client.addModule(createModule());
-		setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
-	}
+    @Before
+    public void setup() {
+        client = new CrnkClient(getBaseUri().toString());
+        client.addModule(createModule());
+        setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
+    }
 
-	@Override
-	protected Application configure() {
-		return new TestApplication();
-	}
+    @Override
+    protected Application configure() {
+        return new TestApplication();
+    }
 
-	public MetaModule createModule() {
-		MetaModule module = MetaModule.create();
-		module.addMetaProvider(new ResourceMetaProvider());
-		return module;
-	}
+    public MetaModule createModule() {
+        MetaModule module = MetaModule.create();
+        module.addMetaProvider(new ResourceMetaProvider());
+        return module;
+    }
 
-	@ApplicationPath("/")
-	private class TestApplication extends ResourceConfig {
+    @ApplicationPath("/")
+    private class TestApplication extends ResourceConfig {
 
-		public TestApplication() {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, ScheduleRepository.class.getPackage().getName());
-			CrnkFeature feature = new CrnkFeature();
-			ObjectMapper objectMapper = feature.getObjectMapper();
-			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-			feature.addModule(createModule());
-			boot = feature.getBoot();
-			setupFeature(feature);
-			register(feature);
-		}
-	}
+        public TestApplication() {
+            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, ScheduleRepository.class.getPackage().getName());
+            CrnkFeature feature = new CrnkFeature();
+            ObjectMapper objectMapper = feature.getObjectMapper();
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+            feature.addModule(createModule());
+            boot = feature.getBoot();
+            setupFeature(feature);
+            register(feature);
+        }
+    }
 
-	protected void setupFeature(CrnkFeature feature) {
-	}
+    protected void setupFeature(CrnkFeature feature) {
+    }
 
 }
