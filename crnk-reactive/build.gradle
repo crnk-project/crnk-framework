@@ -4,7 +4,13 @@ dependencies {
 	compile project(':crnk-core')
 
 	compile 'io.projectreactor:reactor-core'
+
 	testCompile 'io.projectreactor:reactor-test'
 	testCompile 'ch.qos.logback:logback-classic:1.2.3'
 	testCompile 'org.springframework.boot:spring-boot-starter-test:1.5.8.RELEASE'
+
+	testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
 }

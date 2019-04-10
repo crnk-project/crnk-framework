@@ -19,9 +19,6 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.QuerySpecDeserializer;
-import io.crnk.core.queryspec.QuerySpecDeserializerContext;
-import io.crnk.core.queryspec.QuerySpecSerializer;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.internal.DefaultQueryPathResolver;
 import io.crnk.core.queryspec.internal.JsonFilterSpecMapper;
@@ -43,7 +40,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DefaultQuerySpecUrlMapper
-        implements QuerySpecUrlMapper, QuerySpecDeserializer, QuerySpecSerializer, UnkonwnMappingAware {
+        implements QuerySpecUrlMapper, UnkonwnMappingAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultQuerySpecUrlMapper.class);
 
@@ -158,26 +155,6 @@ public class DefaultQuerySpecUrlMapper
 
     protected QuerySpec createQuerySpec(ResourceInformation resourceInformation) {
         return new QuerySpec(resourceInformation);
-    }
-
-    @Override
-    public void init(QuerySpecDeserializerContext ctx) {
-        init(new QuerySpecUrlContext() {
-            @Override
-            public ResourceRegistry getResourceRegistry() {
-                return ctx.getResourceRegistry();
-            }
-
-            @Override
-            public TypeParser getTypeParser() {
-                return ctx.getTypeParser();
-            }
-
-            @Override
-            public ObjectMapper getObjectMapper() {
-                return ctx.getObjectMapper();
-            }
-        });
     }
 
     @Override

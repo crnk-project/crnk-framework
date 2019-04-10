@@ -1,5 +1,6 @@
 package io.crnk.setup.vertx;
 
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.home.HomeModule;
 import io.crnk.test.mock.reactive.ReactiveTestModule;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -10,29 +11,35 @@ import org.slf4j.LoggerFactory;
 // tag::docs[]
 public class CrnkVerticle extends AbstractVerticle {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrnkVerticle.class);
 
-	public ReactiveTestModule testModule = new ReactiveTestModule();
+    public ReactiveTestModule testModule = new ReactiveTestModule();
 
-	private int port;
+    private int port;
 
-	public CrnkVerticle(int port) {
-		this.port = port;
-	}
+    private CrnkVertxHandler handler;
 
-	@Override
-	public void start() {
-		HttpServer server = vertx.createHttpServer();
+    public CrnkVerticle(int port) {
+        this.port = port;
 
-		CrnkVertxHandler handler = new CrnkVertxHandler((boot) -> {
-			boot.addModule(HomeModule.create());
-			boot.addModule(testModule);
-		});
+        handler = new CrnkVertxHandler((boot) -> {
+            boot.addModule(HomeModule.create());
+            boot.addModule(testModule);
+        });
+    }
 
-		server.requestStream().toFlowable()
-				.flatMap(request -> handler.process(request))
-				.subscribe((response) -> LOGGER.debug("delivered response {}", response), error -> LOGGER.debug("error occured", error));
-		server.listen(port);
-	}
+    @Override
+    public void start() {
+        HttpServer server = vertx.createHttpServer();
+
+        server.requestStream().toFlowable()
+                .flatMap(request -> handler.process(request))
+                .subscribe((response) -> LOGGER.debug("delivered response {}", response), error -> LOGGER.debug("error occured", error));
+        server.listen(port);
+    }
+
+    public CrnkBoot getBoot() {
+        return handler.getBoot();
+    }
 }
 // end::docs[]

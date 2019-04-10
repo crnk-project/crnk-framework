@@ -47,7 +47,7 @@ public class CrnkCoreAutoConfigurationTest {
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.ALLOW_UNKNOWN_ATTRIBUTES));
 		Assert.assertEquals("true", propertiesProvider.getProperty(CrnkProperties.RETURN_404_ON_NULL));
 
-		DefaultQuerySpecUrlMapper deserializer = (DefaultQuerySpecUrlMapper) boot.getQuerySpecDeserializer();
+		DefaultQuerySpecUrlMapper deserializer = (DefaultQuerySpecUrlMapper) boot.getUrlMapper();
 		Assert.assertTrue(deserializer.getAllowUnknownAttributes());
 
 		ConstantServiceUrlProvider constantServiceUrlProvider = (ConstantServiceUrlProvider) boot.getServiceUrlProvider();

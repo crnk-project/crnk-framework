@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.client.ClientFormat;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterRequest;
@@ -104,7 +105,7 @@ public class OperationsCall {
 			HttpAdapterResponse response = request.execute();
 
 			if (!response.isSuccessful()) {
-				throw ClientStubBase.handleError(client.getCrnk(), response);
+				throw ClientStubBase.handleError(client.getCrnk(), response, ClientFormat.JSONAPI);
 			}
 			String json = response.body();
 			responses = Arrays.asList(mapper.readValue(json, OperationResponse[].class));

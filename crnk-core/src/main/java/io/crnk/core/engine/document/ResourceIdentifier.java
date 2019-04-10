@@ -69,4 +69,8 @@ public class ResourceIdentifier implements Comparable<ResourceIdentifier> {
                 ", type='" + type + '\'' +
                 '}';
     }
+
+    public ResourceIdentifier toIdentifier(){
+        return this;
+    }
 }

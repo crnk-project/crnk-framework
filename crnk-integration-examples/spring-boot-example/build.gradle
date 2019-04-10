@@ -19,6 +19,11 @@ dependencies {
     compileOnly project(':crnk-gen:crnk-gen-java')
     annotationProcessor project(':crnk-gen:crnk-gen-java')
 
+    testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+    testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+    testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+    testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+
     compile 'org.springframework.boot:spring-boot-starter-data-jpa:2.0.1.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-web:2.0.1.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.0.1.RELEASE'

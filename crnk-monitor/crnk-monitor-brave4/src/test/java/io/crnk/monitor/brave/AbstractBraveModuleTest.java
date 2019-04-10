@@ -160,7 +160,7 @@ public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
 		assertTag(repositorySpan, "lc", "crnk");
-		assertTag(repositorySpan, "crnk.query", "?filter[tasks][name][EQ]=doe");
+		assertTag(repositorySpan, "crnk.query", "?filter[name]=doe");
 		assertTag(repositorySpan, "crnk.results", "0");
 		assertTag(repositorySpan, "crnk.status", "OK");
 	}

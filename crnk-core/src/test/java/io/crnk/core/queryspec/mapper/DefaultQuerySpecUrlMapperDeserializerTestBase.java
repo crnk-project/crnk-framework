@@ -22,7 +22,6 @@ import io.crnk.core.queryspec.IncludeFieldSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.QuerySpecDeserializerContext;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
@@ -53,13 +52,13 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 
     private ResourceInformation taskWithPagingBehaviorInformation;
 
-    private QuerySpecDeserializerContext deserializerContext;
+    private QuerySpecUrlContext deserializerContext;
 
     @Before
     public void setup() {
         super.setup();
 
-        deserializerContext = new QuerySpecDeserializerContext() {
+        deserializerContext = new QuerySpecUrlContext() {
 
             @Override
             public ResourceRegistry getResourceRegistry() {
@@ -233,7 +232,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         expectedSpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 
         Map<String, Set<String>> params = new HashMap<>();
-        add(params, "sort[tasks]", "name");
+        add(params, "sort", "name");
         QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
         Assert.assertEquals(expectedSpec, actualSpec);
 
@@ -255,7 +254,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         Assert.assertEquals(expectedSpec, actualSpec);
 
         Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-        Assert.assertEquals(new HashSet(Arrays.asList("data.data")), serialized.get("sort[projects]"));
+        Assert.assertEquals(new HashSet(Arrays.asList("data.data")), serialized.get("sort"));
     }
 
     @Test
@@ -265,7 +264,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         expectedSpec.addSort(new SortSpec(Arrays.asList("id"), Direction.ASC));
 
         Map<String, Set<String>> params = new HashMap<>();
-        add(params, "sort[tasks]", "name,id");
+        add(params, "sort", "name,id");
         QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
         Assert.assertEquals(expectedSpec, actualSpec);
 
@@ -279,7 +278,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         expectedSpec.addSort(new SortSpec(Arrays.asList("name"), Direction.DESC));
 
         Map<String, Set<String>> params = new HashMap<>();
-        add(params, "sort[tasks]", "-name");
+        add(params, "sort", "-name");
 
         QuerySpec actualSpec = urlMapper.deserialize(taskInformation, params);
         Assert.assertEquals(expectedSpec, actualSpec);
@@ -360,7 +359,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         Assert.assertEquals(expectedSpec, actualSpec);
 
         Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-        Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.name][EQ]"));
+        Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[project.name]"));
     }
 
     @Test
@@ -405,7 +404,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         Assert.assertEquals(expectedSpec, actualSpec);
 
         Map<String, Set<String>> serialized = urlMapper.serialize(actualSpec);
-        Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[tasks][project.task.name][EQ]"));
+        Assert.assertEquals(new HashSet(Arrays.asList("value")), serialized.get("filter[project.task.name]"));
     }
 
     @Test
