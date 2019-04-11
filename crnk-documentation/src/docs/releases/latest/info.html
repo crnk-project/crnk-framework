@@ -54,7 +54,6 @@ as java.util.Supplier. Every time a repository makes use of the EntityManager, t
 return an instance. The supplier together with the existing TransactionRunner
 allows for custom JPA setups and transaction handling.
 
-
 <h4>Allow QuerySpec conversion to Criteria query</h4>
 
 The following code snipped shows how to convert a QuerySpec to Criteria query without involving repositories:
@@ -72,6 +71,52 @@ JpaCriteriaQuery&lt;TestEntity&gt; query = queryFactory.query(TestEntity.class);
 JpaQueryExecutor&lt;TestEntity&gt; executor = query.buildExecutor(querySpec);
 List&lt;TestEntity&gt; resultList = executor.getResultList();
 </pre>
+
+
+
+<h4>InMemoryHttpAdapter to connect CrnkClient with a server</h4>
+
+There is a new InMemoryHttpAdapter implementation completing OkHttp, Apache HTTP client and RestTemplate.
+InMemoryHttpAdapter takes a CrnkBoot instance as parameter to directly connecting to a server without
+having to go through any TCP/HTTP transport layer. Requests are still serialized and deserialized, but
+no running HTTP server is necessary. Unit testing can greatly benefit from such a more simpler
+and faster setup:
+
+<pre class="prettyprint">
+    String url = ...
+    CrnkClient client = new CnrkClient(url).
+    client.setHttpAdapter(new InMemoryHttpAdapter(crnkBoot, url));
+</pre>
+
+
+
+<h4>HttpAdapterListener for a vendor-neutral HTTP request/response interception</h4>
+
+A new HttpAdapterListener can be added with addListener to HttpAdapter. It allows to cover many of the typical
+use cases like adding security headers without having to get and customize the underlying HTTP implementation.
+
+
+<h4>crnk-format-plain-json in CrnkClient</h4>
+
+The PlainJsonFormatModule can now be added to CrnkClient. This is in particular useful together with
+the Asciidoc generator to create documentation in the plain json format for consumer making use of it.
+
+
+<h4>Prettier URLs computation</h4>
+
+Computed links (CrnkClient, pagination, etc.) by default omit the `EQ` operator and type information where
+not necessary. This leads to more readable URLs like:
+
+<pre class="prettyprint">
+    http://127.0.0.1/api/tasks?filter[name]=Doe
+</pre>
+
+rather than
+
+<pre class="prettyprint">
+    http://127.0.0.1/api/tasks?filter[tasks][name][EQ]=Doe
+</pre>
+
 
 
 <h4>OpenTracing Support</h4>
