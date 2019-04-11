@@ -214,7 +214,7 @@ The generated documentation can be enriched with request/response examples from 
 
 [source]
 ----
-include::../../../../crnk-gen/crnk-gen-asciidoc/src/test/main/io/crnk/gen/asciidoc/AsciiDocCaptureTest.java[]
+include::../../../../crnk-gen/crnk-gen-asciidoc/src/test/java/io/crnk/gen/asciidoc/AsciiDocCaptureTest.java[]
 ----
 
 The example sets up a Crnk client and server. They are directly connected through `InMemoryHttpAdapter` to
