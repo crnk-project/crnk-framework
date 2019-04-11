@@ -12,8 +12,8 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecoratorBase;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
@@ -86,12 +86,12 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
     private class AsciidocDecoratorFactory implements RepositoryDecoratorFactory {
         @Override
-        public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepositoryV2<T, I> repository) {
+        public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepository<T, I> repository) {
             return new AsciidocResourceDecorator();
         }
 
         @Override
-        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepositoryV2<T, I, D, J> repository) {
+        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
             return new AsciidocRelationshipDecorator();
         }
     }

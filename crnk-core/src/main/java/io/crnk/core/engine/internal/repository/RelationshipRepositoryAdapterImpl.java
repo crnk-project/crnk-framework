@@ -11,8 +11,8 @@ import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
@@ -51,8 +51,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Serializable targetId = request.getId();
 				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
+				if (relationshipRepository instanceof RelationshipRepository) {
+					((RelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
 				} else {
 					((LegacyRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
 				}
@@ -75,8 +75,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
+				if (relationshipRepository instanceof RelationshipRepository) {
+					((RelationshipRepository) relationshipRepository)
 							.setRelations(source, targetIds, field.getUnderlyingName());
 				} else {
 					((LegacyRelationshipRepository) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
@@ -100,8 +100,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
+				if (relationshipRepository instanceof RelationshipRepository) {
+					((RelationshipRepository) relationshipRepository)
 							.addRelations(source, targetIds, field.getUnderlyingName());
 				} else {
 					((LegacyRelationshipRepository) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
@@ -125,8 +125,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				Object source = request.getEntity();
 				Iterable<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
+				if (relationshipRepository instanceof RelationshipRepository) {
+					((RelationshipRepository) relationshipRepository)
 							.removeRelations(source, targetIds, field.getUnderlyingName());
 				} else {
 					((LegacyRelationshipRepository) relationshipRepository)
@@ -151,8 +151,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				ResourceField field = request.getRelationshipField();
 
 				Object resource;
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
+				if (relationshipRepository instanceof RelationshipRepository) {
+					RelationshipRepository querySpecRepository = (RelationshipRepository) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
 									.getResourceInformation();
@@ -180,8 +180,8 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				ResourceField field = request.getRelationshipField();
 
 				Object resources;
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
+				if (relationshipRepository instanceof RelationshipRepository) {
+					RelationshipRepository querySpecRepository = (RelationshipRepository) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
 									.getResourceInformation();
@@ -202,7 +202,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 	@SuppressWarnings("rawtypes")
 	public Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field,
 																	QueryAdapter queryAdapter) {
-		if (relationshipRepository instanceof BulkRelationshipRepositoryV2) {
+		if (relationshipRepository instanceof BulkRelationshipRepository) {
 			RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
 
 				@Override
@@ -212,7 +212,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 					ResourceField field = request.getRelationshipField();
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 
-					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
+					BulkRelationshipRepository bulkRepository = (BulkRelationshipRepository) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
 					QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
@@ -238,7 +238,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 	public Result<Map<Object, JsonApiResponse>> findBulkOneTargets(Collection sourceIds, ResourceField field, QueryAdapter
 			queryAdapter) {
 
-		if (relationshipRepository instanceof BulkRelationshipRepositoryV2) {
+		if (relationshipRepository instanceof BulkRelationshipRepository) {
 
 			RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
 
@@ -249,7 +249,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 					ResourceField field = request.getRelationshipField();
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 
-					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
+					BulkRelationshipRepository bulkRepository = (BulkRelationshipRepository) relationshipRepository;
 					ResourceInformation targetResourceInformation =
 							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
 									.getResourceInformation();

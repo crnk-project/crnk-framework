@@ -18,7 +18,7 @@ import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
 import io.crnk.rs.internal.JaxrsModule;
 import io.crnk.test.mock.models.Task;
@@ -146,7 +146,7 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface TaskRepository extends ResourceRepositoryV2<Task, Long> {
+	public interface TaskRepository extends ResourceRepository<Task, Long> {
 
 		@GET
 		@Path("repositoryAction")
@@ -171,7 +171,7 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface InvalidRootPathRepository extends ResourceRepositoryV2<Task, Long> {
+	public interface InvalidRootPathRepository extends ResourceRepository<Task, Long> {
 
 		@GET
 		@Path("")
@@ -180,7 +180,7 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface MissingPathRepository1 extends ResourceRepositoryV2<Task, Long> {
+	public interface MissingPathRepository1 extends ResourceRepository<Task, Long> {
 
 		@GET
 		String resourceAction();
@@ -188,14 +188,14 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface MissingPathRepository2 extends ResourceRepositoryV2<Task, Long> {
+	public interface MissingPathRepository2 extends ResourceRepository<Task, Long> {
 
 		String resourceAction(@PathParam("id") long id);
 
 	}
 
 	@Path("schedules")
-	public interface PathToLongRepository extends ResourceRepositoryV2<Task, Long> {
+	public interface PathToLongRepository extends ResourceRepository<Task, Long> {
 
 		@GET
 		@Path("a/b/c")
@@ -204,7 +204,7 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface InvalidIdPathRepository1 extends ResourceRepositoryV2<Task, Long> {
+	public interface InvalidIdPathRepository1 extends ResourceRepository<Task, Long> {
 
 		@GET
 		@Path("{something}/test")
@@ -213,7 +213,7 @@ public class JaxrsModuleTest {
 	}
 
 	@Path("schedules")
-	public interface InvalidIdPathRepository2 extends ResourceRepositoryV2<Task, Long> {
+	public interface InvalidIdPathRepository2 extends ResourceRepository<Task, Long> {
 
 		@GET
 		@Path("{id}")

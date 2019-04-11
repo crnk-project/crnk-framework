@@ -1,5 +1,6 @@
 package io.crnk.core.resource.annotations;
 
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 
 /**
@@ -17,7 +18,7 @@ public enum RelationshipRepositoryBehavior {
 	DEFAULT,
 
 	/**
-	 * The application brings a long a custom {@link io.crnk.core.repository.ResourceRepositoryV2} implementation and
+	 * The application brings a long a custom {@link ResourceRepository} implementation and
 	 * is in full control.
 	 */
 	CUSTOM,

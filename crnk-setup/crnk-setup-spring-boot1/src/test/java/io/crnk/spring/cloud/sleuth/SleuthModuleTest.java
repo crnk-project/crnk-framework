@@ -4,8 +4,8 @@ import io.crnk.client.CrnkClient;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.spring.app.TestSpanReporter;
 import io.crnk.spring.client.RestTemplateAdapter;
 import io.crnk.test.JerseyTestBase;
@@ -36,12 +36,12 @@ public abstract class SleuthModuleTest extends JerseyTestBase {
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	@Autowired
 	private TestSpanReporter reportedSpans;
 
-	private ResourceRepositoryV2<Project, Serializable> projectRepo;
+	private ResourceRepository<Project, Serializable> projectRepo;
 
 
 	@Before
@@ -143,7 +143,7 @@ public abstract class SleuthModuleTest extends JerseyTestBase {
 
 	@Test
 	public void testFindTargets() {
-		RelationshipRepositoryV2<Project, Serializable, Task, Serializable> relRepo = client
+		RelationshipRepository<Project, Serializable, Task, Serializable> relRepo = client
 				.getRepositoryForType(Project.class, Task.class);
 		relRepo.findManyTargets(123L, "tasks", new QuerySpec(Task.class));
 

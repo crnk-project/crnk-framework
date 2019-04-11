@@ -4,8 +4,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -79,7 +78,7 @@ public class InheritanceWithoutSubtypeRepositoryClientTest extends AbstractClien
 		resource.setId("test0");
 		repository.create(resource);
 
-		ResourceRepositoryV2<TestResourceA, Serializable> repository = client.getRepositoryForType(TestResourceA.class);
+		ResourceRepository<TestResourceA, Serializable> repository = client.getRepositoryForType(TestResourceA.class);
 
 		ResourceList<TestResourceA> list = repository.findAll(new QuerySpec(TestResourceA.class));
 		Assert.assertEquals(1, list.size());
@@ -180,7 +179,7 @@ public class InheritanceWithoutSubtypeRepositoryClientTest extends AbstractClien
 		}
 	}
 
-	public static class RelationshipRepository implements RelationshipRepositoryV2 {
+	public static class RelationshipRepository implements io.crnk.core.repository.RelationshipRepository {
 
 		@Override
 		public Class getSourceResourceClass() {

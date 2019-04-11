@@ -11,7 +11,7 @@ import io.crnk.legacy.repository.LegacyResourceRepository;
  * <p>
  * consisder the use ResourceList instead
  */
-public interface LinksRepositoryV2<T> {
+public interface LinksRepository<T> {
 
 	/**
 	 * Return meta information about a resource. Can be called after find resource methods call

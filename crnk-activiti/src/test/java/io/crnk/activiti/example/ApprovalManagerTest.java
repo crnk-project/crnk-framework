@@ -14,7 +14,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Schedule;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -33,7 +33,7 @@ public class ApprovalManagerTest {
 
 	private RuntimeService runtimeService;
 
-	private ResourceRepositoryV2 repositoryFacade;
+	private ResourceRepository repositoryFacade;
 
 	private RegistryEntry registryEntry;
 
@@ -43,7 +43,7 @@ public class ApprovalManagerTest {
 	public void setup() {
 		runtimeService = Mockito.mock(RuntimeService.class);
 		TaskService taskService = Mockito.mock(TaskService.class);
-		repositoryFacade = Mockito.mock(ResourceRepositoryV2.class);
+		repositoryFacade = Mockito.mock(ResourceRepository.class);
 		ApprovalMapper approvalMapper = new ApprovalMapper();
 		ActivitiResourceMapper resourceMapper = new ActivitiResourceMapper(new TypeParser(), new DefaultDateTimeMapper());
 

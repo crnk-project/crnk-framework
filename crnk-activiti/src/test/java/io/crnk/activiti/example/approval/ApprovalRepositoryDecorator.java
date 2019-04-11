@@ -2,7 +2,7 @@ package io.crnk.activiti.example.approval;
 
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
@@ -23,7 +23,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 
 			@Override
 			public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
-					ResourceRepositoryV2<T, I> repository) {
+					ResourceRepository<T, I> repository) {
 				if (repository.getResourceClass() == Schedule.class) {
 					return (ResourceRepositoryDecorator<T, I>) new ApprovalRepositoryDecorator(approvalManager);
 				}

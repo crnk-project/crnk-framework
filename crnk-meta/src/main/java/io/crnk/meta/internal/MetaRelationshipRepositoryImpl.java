@@ -8,7 +8,7 @@ import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MetaRelationshipRepositoryImpl implements RelationshipRepositoryV2<MetaElement, String, MetaElement, String>, HttpRequestContextAware {
+public class MetaRelationshipRepositoryImpl implements RelationshipRepository<MetaElement, String, MetaElement, String>, HttpRequestContextAware {
 
 	private Supplier<MetaLookup> lookupSupplier;
 

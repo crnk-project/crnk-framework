@@ -68,8 +68,8 @@ import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.legacy.internal.DirectResponseRelationshipEntry;
@@ -373,7 +373,7 @@ public class CrnkClient {
         }
 
         ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
-        final ResourceRepositoryV2 repositoryStub = decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
+        final ResourceRepository repositoryStub = decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
 
         // create interface for it!
         RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
@@ -436,7 +436,7 @@ public class CrnkClient {
 
         if (!relationshipEntries.containsKey(targetResourceType)) {
 
-            final RelationshipRepositoryV2 relationshipRepositoryStub = decorate(
+            final RelationshipRepository relationshipRepositoryStub = decorate(
                     new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
             );
             RepositoryInstanceBuilder<LegacyRelationshipRepository> relationshipRepositoryInstanceBuilder =
@@ -464,7 +464,7 @@ public class CrnkClient {
 
 
     @SuppressWarnings("unchecked")
-    public <R extends ResourceRepositoryV2<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
+    public <R extends ResourceRepository<?, ?>> R getRepositoryForInterface(Class<R> repositoryInterfaceClass) {
         init();
         RepositoryInformationProvider informationBuilder = moduleRegistry.getRepositoryInformationBuilder();
         PreconditionUtil.verify(informationBuilder.accept(repositoryInterfaceClass), "%s is not a valid repository interface",
@@ -474,12 +474,12 @@ public class CrnkClient {
         Class<?> resourceClass = repositoryInformation.getResourceInformation().get().getResourceClass();
 
         Object actionStub = actionStubFactory != null ? actionStubFactory.createStub(repositoryInterfaceClass) : null;
-        ResourceRepositoryV2<?, Serializable> repositoryStub = getRepositoryForType(resourceClass);
+        ResourceRepository<?, Serializable> repositoryStub = getRepositoryForType(resourceClass);
 
         ClassLoader classLoader = repositoryInterfaceClass.getClassLoader();
         InvocationHandler invocationHandler =
                 new ClientStubInvocationHandler(repositoryInterfaceClass, repositoryStub, actionStub);
-        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepositoryV2.class},
+        return (R) Proxy.newProxyInstance(classLoader, new Class[]{repositoryInterfaceClass, ResourceRepository.class},
                 invocationHandler);
     }
 
@@ -488,19 +488,19 @@ public class CrnkClient {
      * @return stub for the given resourceClass
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         init();
 
         RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
         ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
-        return (ResourceRepositoryV2<T, I>) repositoryAdapter.getResourceRepository();
+        return (ResourceRepository<T, I>) repositoryAdapter.getResourceRepository();
 
     }
 
     /**
      * Generic access using {@link Resource} class without type mapping.
      */
-    public ResourceRepositoryV2<Resource, String> getRepositoryForPath(String resourceType) {
+    public ResourceRepository<Resource, String> getRepositoryForPath(String resourceType) {
         init();
 
         ResourceInformation resourceInformation =
@@ -518,8 +518,8 @@ public class CrnkClient {
     /**
      * Generic access using {@link Resource} class without type mapping.
      */
-    public RelationshipRepositoryV2<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType,
-                                                                                             String targetResourceType) {
+    public RelationshipRepository<Resource, String, Resource, String> getRepositoryForPath(String sourceResourceType,
+                                                                                           String targetResourceType) {
         init();
 
         ResourceInformation sourceResourceInformation =
@@ -529,15 +529,15 @@ public class CrnkClient {
     }
 
 
-    protected ResourceRepositoryV2 decorate(ResourceRepositoryStubImpl repository) {
+    protected ResourceRepository decorate(ResourceRepositoryStubImpl repository) {
         DefaultRegistryEntryBuilder entryBuilder = new DefaultRegistryEntryBuilder(moduleRegistry);
-        return (ResourceRepositoryV2) entryBuilder.decorateRepository(repository);
+        return (ResourceRepository) entryBuilder.decorateRepository(repository);
     }
 
 
-    protected RelationshipRepositoryV2 decorate(RelationshipRepositoryStubImpl repository) {
+    protected RelationshipRepository decorate(RelationshipRepositoryStubImpl repository) {
         DefaultRegistryEntryBuilder entryBuilder = new DefaultRegistryEntryBuilder(moduleRegistry);
-        return (RelationshipRepositoryV2) entryBuilder.decorateRepository(repository);
+        return (RelationshipRepository) entryBuilder.decorateRepository(repository);
     }
 
     /**
@@ -547,12 +547,12 @@ public class CrnkClient {
      * class
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(
+    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(
             Class<T> sourceClass, Class<D> targetClass) {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (RelationshipRepositoryV2<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
     }
 
     /**

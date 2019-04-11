@@ -3,7 +3,7 @@ package io.crnk.test.suite;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.models.UnknownResource;
@@ -16,7 +16,7 @@ public abstract class ExceptionAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
 	@Before
 	public void setup() {
@@ -62,7 +62,7 @@ public abstract class ExceptionAccessTestBase {
 		UnknownResource task = new UnknownResource();
 		task.setId("test");
 
-		ResourceRepositoryV2<UnknownResource, String> taskRepo = testContainer.getRepositoryForType(UnknownResource.class);
+		ResourceRepository<UnknownResource, String> taskRepo = testContainer.getRepositoryForType(UnknownResource.class);
 
 		try {
 			taskRepo.create(task);

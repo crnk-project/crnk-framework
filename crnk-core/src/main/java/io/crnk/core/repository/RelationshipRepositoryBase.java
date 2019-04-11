@@ -39,7 +39,7 @@ import io.crnk.core.resource.list.ResourceList;
  * {@link RelationshipRepositoryBase} will be removed in the near
  * future.
  * <p>
- * Base implementation for {@link RelationshipRepositoryV2} implementing
+ * Base implementation for {@link RelationshipRepository} implementing
  * <b>ALL</b> of the methods. Makes use of the source and target resource
  * repository to implement the relationship features. Modification are
  * implemented by fetching the target resources, adding them the the source
@@ -64,7 +64,7 @@ import io.crnk.core.resource.list.ResourceList;
  */
 @Deprecated
 public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
-		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
+		implements BulkRelationshipRepository<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 
 	protected ResourceRegistry resourceRegistry;

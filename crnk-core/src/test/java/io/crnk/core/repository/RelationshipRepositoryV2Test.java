@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class RelationshipRepositoryV2Test {
 
 
-	private RelationshipRepositoryV2 untypedRepo = new UntypedRelationshipRepository() {
+	private RelationshipRepository untypedRepo = new UntypedRelationshipRepository() {
 
 		@Override
 		public Class getSourceResourceClass() {
@@ -65,7 +65,7 @@ public class RelationshipRepositoryV2Test {
 		}
 	};
 
-	private RelationshipRepositoryV2 nullRepo = new RelationshipRepositoryV2() {
+	private RelationshipRepository nullRepo = new RelationshipRepository() {
 
 		@Override
 		public Class getSourceResourceClass() {

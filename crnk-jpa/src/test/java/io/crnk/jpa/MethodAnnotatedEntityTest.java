@@ -1,7 +1,7 @@
 package io.crnk.jpa;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.jpa.meta.MetaEntity;
 import io.crnk.jpa.model.MethodAnnotatedEntity;
 import io.crnk.meta.model.MetaAttribute;
@@ -40,7 +40,7 @@ public class MethodAnnotatedEntityTest extends AbstractJpaJerseyTest {
 	@Test
 	public void testMethodAnnotatedFields() {
 		// tests whether JPA annotations on methods are supported as well
-		ResourceRepositoryV2<MethodAnnotatedEntity, Long> methodRepo = client.getRepositoryForType(MethodAnnotatedEntity.class);
+		ResourceRepository<MethodAnnotatedEntity, Long> methodRepo = client.getRepositoryForType(MethodAnnotatedEntity.class);
 
 		MethodAnnotatedEntity task = new MethodAnnotatedEntity();
 		task.setId(1L);

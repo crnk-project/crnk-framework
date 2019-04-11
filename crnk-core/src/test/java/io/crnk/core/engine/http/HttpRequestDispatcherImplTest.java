@@ -43,7 +43,7 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.module.Module;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import org.junit.Assert;
@@ -103,7 +103,7 @@ public class HttpRequestDispatcherImplTest {
 		@Override
 		public void setupModule(ModuleContext context) {
 
-			final ResourceRepositoryV2 mockRepository = Mockito.mock(ResourceRepositoryV2.class);
+			final ResourceRepository mockRepository = Mockito.mock(ResourceRepository.class);
 			Mockito.when(mockRepository.getResourceClass()).thenReturn(ActionResource.class);
 
 			context.addFilter(documentFilter);

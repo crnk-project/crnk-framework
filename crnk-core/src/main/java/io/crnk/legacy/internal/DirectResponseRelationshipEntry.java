@@ -2,7 +2,7 @@ package io.crnk.legacy.internal;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
@@ -23,7 +23,7 @@ public class DirectResponseRelationshipEntry implements ResponseRelationshipEntr
 	@Override
 	public String getTargetResourceType() {
 		Class<?> repoClass = repositoryInstanceBuilder.getRepositoryClass();
-		Class<?> repoInterface = RelationshipRepositoryV2.class.isAssignableFrom(repoClass) ? RelationshipRepositoryV2.class
+		Class<?> repoInterface = RelationshipRepository.class.isAssignableFrom(repoClass) ? RelationshipRepository.class
 				: LegacyRelationshipRepository.class;
 
 		Class<?>[] typeArgs = TypeResolver

@@ -3,7 +3,7 @@ package io.crnk.jpa.integration;
 import io.crnk.client.response.JsonLinksInformation;
 import io.crnk.client.response.JsonMetaInformation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
 import io.crnk.core.resource.meta.PagedMetaInformation;
@@ -16,7 +16,7 @@ import org.junit.Test;
 
 public class JpaDefaultPagingIntTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
 	@Override
 	@Before

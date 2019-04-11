@@ -15,7 +15,7 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.exception.BadRequestException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 
@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.concurrent.Callable;
 
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
-        implements ResourceRepositoryV2<T, I> {
+        implements ResourceRepository<T, I> {
 
     protected ResourceInformation resourceInformation;
 

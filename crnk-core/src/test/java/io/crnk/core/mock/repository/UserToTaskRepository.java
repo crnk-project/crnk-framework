@@ -5,7 +5,7 @@ import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 
@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class UserToTaskRepository implements BulkRelationshipRepositoryV2<User, Long, Task, Long> {
+public class UserToTaskRepository implements BulkRelationshipRepository<User, Long, Task, Long> {
 
 	private static final ConcurrentMap<Relation<User>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

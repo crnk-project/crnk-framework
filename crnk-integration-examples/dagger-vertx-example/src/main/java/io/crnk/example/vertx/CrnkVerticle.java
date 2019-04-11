@@ -1,7 +1,7 @@
 package io.crnk.example.vertx;
 
 import io.crnk.core.module.SimpleModule;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.home.HomeModule;
 import io.crnk.setup.vertx.CrnkVertxHandler;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -16,12 +16,12 @@ public class CrnkVerticle extends AbstractVerticle {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrnkVerticle.class);
 
-	private final Set<ResourceRepositoryV2> repositories;
+	private final Set<ResourceRepository> repositories;
 
 	private int port = 8080;
 
 	@Inject
-	public CrnkVerticle(Set<ResourceRepositoryV2> repositories) {
+	public CrnkVerticle(Set<ResourceRepository> repositories) {
 		this.repositories = repositories;
 	}
 

@@ -22,7 +22,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.list.ResourceList;
 
@@ -99,8 +99,8 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 			RegistryEntry processEntry = resourceRegistry.getEntry(processInfoClass);
 			String resourceType = resourceEntry.getResourceInformation().getResourceType();
 
-			ResourceRepositoryV2 processRepository =
-					(ResourceRepositoryV2) processEntry.getResourceRepository().getResourceRepository();
+			ResourceRepository processRepository =
+					(ResourceRepository) processEntry.getResourceRepository().getResourceRepository();
 
 			QuerySpec processQuerySpec = querySpec.duplicate();
 			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_ID_FIELD), FilterOperator.EQ, sourceId.toString()));

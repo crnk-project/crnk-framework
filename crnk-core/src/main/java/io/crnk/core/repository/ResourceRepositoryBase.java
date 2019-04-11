@@ -19,7 +19,7 @@ import java.util.Iterator;
  * QuerySpec and ResourceList. Note that the former
  * {@link ResourceRepositoryBase} will be removed in the near future.
  * <p>
- * Base implements for {@link ResourceRepositoryV2} implementing most of the
+ * Base implements for {@link ResourceRepository} implementing most of the
  * methods. Unless {@link #save(T)} and {@link #delete(I)} get
  * overridden, this repository is read-only. Only {@link #findAll(QuerySpec)}
  * needs to be implemented to have a working repository.
@@ -27,7 +27,7 @@ import java.util.Iterator;
  * @param <T> resource type
  * @param <I> identity type
  */
-public abstract class ResourceRepositoryBase<T, I extends Serializable> implements ResourceRepositoryV2<T, I>, ResourceRegistryAware {
+public abstract class ResourceRepositoryBase<T, I extends Serializable> implements ResourceRepository<T, I>, ResourceRegistryAware {
 
 	private Class<T> resourceClass;
 

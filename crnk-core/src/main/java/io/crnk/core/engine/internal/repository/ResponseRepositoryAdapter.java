@@ -17,8 +17,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.LinksRepositoryV2;
-import io.crnk.core.repository.MetaRepositoryV2;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -103,8 +103,8 @@ public abstract class ResponseRepositoryAdapter {
 			return resourceList.getMeta();
 		}
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
-		if (repository instanceof MetaRepositoryV2) {
-			return ((MetaRepositoryV2) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
+		if (repository instanceof MetaRepository) {
+			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
 		} else if (repository instanceof LegacyMetaRepository) {
 			return ((LegacyMetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
 		}
@@ -140,9 +140,9 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		LinksInformation linksInformation = null;
-		if (repository instanceof LinksRepositoryV2) {
+		if (repository instanceof LinksRepository) {
 			linksInformation =
-					((LinksRepositoryV2) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
+					((LinksRepository) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
 		} else if (repository instanceof LegacyLinksRepository) {
 			linksInformation = ((LegacyLinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}

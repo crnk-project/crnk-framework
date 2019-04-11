@@ -7,7 +7,7 @@ import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingSpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Schedule;
@@ -44,7 +44,7 @@ public class PageNumberSizeClientTest extends AbstractClientTest {
 
 	@Test
 	public void testDefault() {
-		ResourceRepositoryV2<Schedule, Serializable> repo = client.getRepositoryForType(Schedule.class);
+		ResourceRepository<Schedule, Serializable> repo = client.getRepositoryForType(Schedule.class);
 		for (int i = 100; i < 120; i++) {
 			Schedule schedule = new Schedule();
 			schedule.setName("someSchedule" + i);
@@ -69,7 +69,7 @@ public class PageNumberSizeClientTest extends AbstractClientTest {
 	public void testOffsetLimitInteroperablity() {
 		JsonApiResource annotation = Task.class.getAnnotation(JsonApiResource.class);
 		Assert.assertEquals(OffsetLimitPagingSpec.class, annotation.pagingSpec());
-		ResourceRepositoryV2<Task, Serializable> repo = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Serializable> repo = client.getRepositoryForType(Task.class);
 		for (int i = 100; i < 120; i++) {
 			Task task = new Task();
 			task.setName("someTask" + i);

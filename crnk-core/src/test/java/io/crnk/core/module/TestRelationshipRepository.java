@@ -1,10 +1,10 @@
 package io.crnk.core.module;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-class TestRelationshipRepository implements RelationshipRepositoryV2<TestResource, Integer, TestResource, Integer> {
+class TestRelationshipRepository implements RelationshipRepository<TestResource, Integer, TestResource, Integer> {
 
 	@Override
 	public void setRelation(TestResource source, Integer targetId, String fieldName) {

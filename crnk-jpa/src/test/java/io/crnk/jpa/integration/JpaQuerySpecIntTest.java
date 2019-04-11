@@ -6,8 +6,8 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.CustomTypeTestEntity;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
-    private ResourceRepositoryV2<TestEntity, Long> testRepo;
+    private ResourceRepository<TestEntity, Long> testRepo;
 
     @Override
     @Before
@@ -77,9 +77,9 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testMappedSuperTypeWithPkOnSuperType() {
-        ResourceRepositoryV2<TestSubclassWithSuperclassPk, Serializable> repo =
+        ResourceRepository<TestSubclassWithSuperclassPk, Serializable> repo =
                 client.getRepositoryForType(TestSubclassWithSuperclassPk.class);
-        ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+        ResourceRepository<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 
         RelatedEntity related = new RelatedEntity();
         related.setId(23423L);
@@ -128,7 +128,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testMappedSuperTypeWithPkOnSubclass() {
-        ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+        ResourceRepository<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 
         RelatedEntity related = new RelatedEntity();
         related.setId(23423L);
@@ -228,8 +228,8 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
         test.setStringValue("test");
         testRepo.create(test);
 
-        ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
-        RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
+        ResourceRepository<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+        RelationshipRepository<TestEntity, Long, RelatedEntity, Long> relRepo = client
                 .getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
         for (long i = 0; i < 5; i++) {
@@ -282,7 +282,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testEagerOneRelation() {
-        ResourceRepositoryV2<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+        ResourceRepository<RelatedEntity, Serializable> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
         RelatedEntity related = new RelatedEntity();
         related.setId(1L);
         related.setStringValue("project");
@@ -307,7 +307,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testEmbeddableIds() {
-        ResourceRepositoryV2<TestEmbeddedIdEntity, Serializable> rep = client
+        ResourceRepository<TestEmbeddedIdEntity, Serializable> rep = client
                 .getRepositoryForType(TestEmbeddedIdEntity.class);
 
         // add
@@ -349,7 +349,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testCustomType() {
-        ResourceRepositoryV2<CustomTypeTestEntity, Serializable> repo =
+        ResourceRepository<CustomTypeTestEntity, Serializable> repo =
                 client.getRepositoryForType(CustomTypeTestEntity.class);
 
         CustomTypeTestEntity.CustomType customValue = new CustomTypeTestEntity.CustomType();
@@ -368,7 +368,7 @@ public class JpaQuerySpecIntTest extends AbstractJpaJerseyTest {
 
     @Test
     public void testOverridenPrimaryKey() {
-        ResourceRepositoryV2<OverrideIdTestEntity, Serializable> repo =
+        ResourceRepository<OverrideIdTestEntity, Serializable> repo =
                 client.getRepositoryForType(OverrideIdTestEntity.class);
 
         OverrideIdTestEntity entity = new OverrideIdTestEntity();

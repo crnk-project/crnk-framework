@@ -11,7 +11,7 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResource;
@@ -30,7 +30,7 @@ import java.util.Arrays;
 public class MetaFilteringTest extends AbstractMetaJerseyTest {
 
 
-	private ResourceRepositoryV2<MetaResource, Serializable> repository;
+	private ResourceRepository<MetaResource, Serializable> repository;
 
 	private ResourceFilter filter;
 

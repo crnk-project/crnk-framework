@@ -8,9 +8,9 @@ import java.io.Serializable;
 /**
  * Wraps another resource repository. In contrast to decorators, a wrapped repository is still a repository and treated as such.
  */
-public abstract class WrappedResourceRepository<T, I extends Serializable> implements ResourceRepositoryV2<T, I> {
+public abstract class WrappedResourceRepository<T, I extends Serializable> implements ResourceRepository<T, I> {
 
-	private ResourceRepositoryV2<T, I> wrappedRepository;
+	private ResourceRepository<T, I> wrappedRepository;
 
 	@Override
 	public Class<T> getResourceClass() {
@@ -47,11 +47,11 @@ public abstract class WrappedResourceRepository<T, I extends Serializable> imple
 		wrappedRepository.delete(id);
 	}
 
-	public ResourceRepositoryV2<T, I> getWrappedRepository() {
+	public ResourceRepository<T, I> getWrappedRepository() {
 		return wrappedRepository;
 	}
 
-	public void setWrappedRepository(ResourceRepositoryV2<T, I> wrappedRepository) {
+	public void setWrappedRepository(ResourceRepository<T, I> wrappedRepository) {
 		this.wrappedRepository = wrappedRepository;
 	}
 }

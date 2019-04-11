@@ -11,7 +11,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Schedule;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -124,7 +124,7 @@ public class ApprovalManager {
 	}
 
 	private void save(RegistryEntry entry, Object resource) {
-		ResourceRepositoryV2 resourceRepository = entry.getResourceRepositoryFacade();
+		ResourceRepository resourceRepository = entry.getResourceRepositoryFacade();
 		resourceRepository.save(resource);
 	}
 
@@ -132,7 +132,7 @@ public class ApprovalManager {
 		ResourceInformation resourceInformation = entry.getResourceInformation();
 		Object id = resourceInformation.parseIdString(idString);
 
-		ResourceRepositoryV2 resourceRepository = entry.getResourceRepositoryFacade();
+		ResourceRepository resourceRepository = entry.getResourceRepositoryFacade();
 		QuerySpec querySpec = new QuerySpec(resourceInformation.getResourceType());
 		return resourceRepository.findOne((Serializable) id, querySpec);
 	}

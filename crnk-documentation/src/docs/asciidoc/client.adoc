@@ -84,7 +84,7 @@ An example of the usage:
 [source]
 ----
   CrnkClient client = new CrnkClient("http://localhost:8080/api");
-  ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
+  ResourceRepository<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
   List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
 ----
 

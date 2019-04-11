@@ -3,7 +3,7 @@ package io.crnk.jpa.internal.facet;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.facet.FacetResource;
 import io.crnk.data.facet.FacetValue;
@@ -23,9 +23,9 @@ import java.util.Map;
 
 public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
-	private ResourceRepositoryV2<FacetResource, Serializable> facetRepository;
+	private ResourceRepository<FacetResource, Serializable> facetRepository;
 
 
 	@Override

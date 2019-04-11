@@ -3,8 +3,8 @@ package io.crnk.data;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.inmemory.InMemoryHttpAdapter;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.format.plainjson.PlainJsonFormatModule;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.RelationIdTestResource;
@@ -40,12 +40,12 @@ public class PlainJsonTestContainer implements TestContainer {
     }
 
     @Override
-    public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         return client.getRepositoryForType(resourceClass);
     }
 
     @Override
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
+    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
         return client.getRepositoryForType(sourceClass, targetClass);
     }
 

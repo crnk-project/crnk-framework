@@ -4,10 +4,9 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.Repository;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -39,7 +38,7 @@ import java.util.Set;
  */
 @Deprecated
 public class JpaRelationshipRepository<S, I extends Serializable, T, J extends Serializable> extends JpaRepositoryBase<T>
-		implements RelationshipRepositoryV2<S, I, T, J>, BulkRelationshipRepositoryV2<S, I, T, J> {
+		implements RelationshipRepository<S, I, T, J>, BulkRelationshipRepository<S, I, T, J> {
 
 	private final ResourceField resourceField;
 

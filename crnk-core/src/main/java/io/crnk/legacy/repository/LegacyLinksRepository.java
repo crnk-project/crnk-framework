@@ -8,7 +8,7 @@ import io.crnk.legacy.queryParams.QueryParams;
  * {@link LegacyResourceRepository} or {@link LegacyRelationshipRepository} to get links
  * information about returned document(s).
  *
- * @deprecated Make use of LinksRepositoryV2 or ResourceList
+ * @deprecated Make use of LinksRepository or ResourceList
  */
 @Deprecated
 public interface LegacyLinksRepository<T> {

@@ -6,7 +6,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.format.plainjson.PlainJsonFormatModule;
 import io.crnk.gen.asciidoc.capture.AsciidocCaptureConfig;
@@ -22,7 +22,7 @@ import java.io.File;
 
 public class AsciiDocCaptureTest {
 
-    private ResourceRepositoryV2<Task, Long> repository;
+    private ResourceRepository<Task, Long> repository;
 
     private AsciidocCaptureModule asciidoc;
 

@@ -2,8 +2,8 @@ package io.crnk.client;
 
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
@@ -16,17 +16,17 @@ import java.util.Collection;
 
 public abstract class AbstractProxiedObjectsClientTest extends AbstractClientTest {
 
-    protected ResourceRepositoryV2<Task, Long> taskRepo;
+    protected ResourceRepository<Task, Long> taskRepo;
 
-    protected ResourceRepositoryV2<Project, Long> projectRepo;
+    protected ResourceRepository<Project, Long> projectRepo;
 
-    protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+    protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
-    private ResourceRepositoryV2<Schedule, Long> scheduleRepo;
+    private ResourceRepository<Schedule, Long> scheduleRepo;
 
-    private RelationshipRepositoryV2<Schedule, Serializable, Task, Serializable> scheduleTaskRepo;
+    private RelationshipRepository<Schedule, Serializable, Task, Serializable> scheduleTaskRepo;
 
-    private RelationshipRepositoryV2<Task, Serializable, Schedule, Serializable> taskScheduleRepo;
+    private RelationshipRepository<Task, Serializable, Schedule, Serializable> taskScheduleRepo;
 
     @Before
     public void setup() {

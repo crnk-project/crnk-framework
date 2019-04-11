@@ -2,7 +2,7 @@ package io.crnk.core.repository.decorate;
 
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.WrappedResourceRepository;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 public abstract class ResourceRepositoryDecoratorBase<T, I extends Serializable> extends WrappedResourceRepository<T, I>
 		implements ResourceRepositoryDecorator<T, I>, ResourceRegistryAware {
 
-	protected ResourceRepositoryV2<T, I> decoratedObject;
+	protected ResourceRepository<T, I> decoratedObject;
 
 	@Override
 	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
@@ -23,12 +23,12 @@ public abstract class ResourceRepositoryDecoratorBase<T, I extends Serializable>
 	}
 
 	@Override
-	public void setDecoratedObject(ResourceRepositoryV2<T, I> wrappedRepository) {
+	public void setDecoratedObject(ResourceRepository<T, I> wrappedRepository) {
 		this.decoratedObject = wrappedRepository;
 		super.setWrappedRepository(wrappedRepository);
 	}
 
-	public ResourceRepositoryV2<T, I> getDecoratedObject() {
+	public ResourceRepository<T, I> getDecoratedObject() {
 		return decoratedObject;
 	}
 }

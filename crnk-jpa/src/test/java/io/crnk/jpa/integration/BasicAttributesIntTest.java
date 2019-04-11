@@ -3,7 +3,7 @@ package io.crnk.jpa.integration;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.BasicAttributesTestEntity;
@@ -21,7 +21,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testCanStoreBasicAttributeValues() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		BasicAttributesTestEntity test = new BasicAttributesTestEntity();
@@ -46,7 +46,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 	public void testJpaTransientFieldIgnored() {
 		QuerySpec querySpec = new QuerySpec(JpaTransientTestEntity.class);
 
-		ResourceRepositoryV2<JpaTransientTestEntity, Serializable> repo =
+		ResourceRepository<JpaTransientTestEntity, Serializable> repo =
 				client.getRepositoryForType(JpaTransientTestEntity.class);
 
 		JpaTransientTestEntity entity = new JpaTransientTestEntity();
@@ -66,7 +66,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testExactLikeFilterByEnum() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
@@ -89,7 +89,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testWildcardLikeFilterByEnum() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
@@ -113,7 +113,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testNullFilterByEnum() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
@@ -136,7 +136,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testCollectionLikeFilter() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		BasicAttributesTestEntity test1 = new BasicAttributesTestEntity();
@@ -162,7 +162,7 @@ public class BasicAttributesIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testFilterByOffsetDateTime() {
-		ResourceRepositoryV2<BasicAttributesTestEntity, Serializable> repo =
+		ResourceRepository<BasicAttributesTestEntity, Serializable> repo =
 				client.getRepositoryForType(BasicAttributesTestEntity.class);
 
 		OffsetDateTime now = OffsetDateTime.now();

@@ -18,7 +18,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeRelationSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.HasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
@@ -38,7 +38,7 @@ import io.crnk.jpa.query.Tuple;
  * Exposes a JPA entity as ResourceRepository. Inherit from this class to setup
  * a repository.
  */
-public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepositoryBase<T> implements ResourceRepositoryV2<T, I>,
+public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepositoryBase<T> implements ResourceRepository<T, I>,
         ResourceRegistryAware {
 
     private final BeanAttributeInformation primaryKeyAttribute;

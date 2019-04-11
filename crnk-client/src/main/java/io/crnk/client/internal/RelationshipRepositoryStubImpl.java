@@ -11,16 +11,15 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
-		implements RelationshipRepositoryV2<T, I, D, J> {
+		implements RelationshipRepository<T, I, D, J> {
 
 	private Class<T> sourceClass;
 
