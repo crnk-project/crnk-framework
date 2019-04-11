@@ -4,11 +4,11 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.ComplexPojo;
 import io.crnk.core.mock.models.ContainedPojo;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ComplexPojoRepository implements ResourceRepository<ComplexPojo, Long> {
+public class ComplexPojoRepository implements LegacyResourceRepository<ComplexPojo, Long> {
 
 	private static final ConcurrentHashMap<Long, ComplexPojo> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

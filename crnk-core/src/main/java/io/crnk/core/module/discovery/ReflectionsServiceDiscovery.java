@@ -6,7 +6,7 @@ import io.crnk.core.repository.Repository;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -48,11 +48,11 @@ public class ReflectionsServiceDiscovery implements ServiceDiscovery {
 			filter.includePackage(resourceSearchPackage);
 		}
 		filter.includePackage(Repository.class.getPackage().getName());
-		filter.includePackage(ResourceRepository.class.getPackage().getName());
+		filter.includePackage(LegacyResourceRepository.class.getPackage().getName());
 		builder = builder.filterInputsBy(filter);
 
 		builder = builder.addUrls(ClasspathHelper.forClass(Repository.class));
-		builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepository.class));
+		builder = builder.addUrls(ClasspathHelper.forClass(LegacyResourceRepository.class));
 		builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepositoryV2.class));
 
 		builder = builder.setScanners(new SubTypesScanner(false), new TypeAnnotationsScanner());

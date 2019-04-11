@@ -2,9 +2,9 @@ package io.crnk.core.mock.repository;
 
 import io.crnk.core.mock.models.Pojo;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
-public class PojoRepository implements ResourceRepository<Pojo, Long> {
+public class PojoRepository implements LegacyResourceRepository<Pojo, Long> {
 
 	private static Pojo entity;
 

@@ -4,13 +4,13 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ProjectEager;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ProjectToProjectEagerRepository extends AbstractRelationShipRepository<Project> implements RelationshipRepository<Project, Long, ProjectEager, Long> {
+public class ProjectToProjectEagerRepository extends AbstractRelationShipRepository<Project> implements LegacyRelationshipRepository<Project, Long, ProjectEager, Long> {
 
 	private final static ConcurrentMap<Relation<Project>, Integer> STATIC_REPOSITORY = new ConcurrentHashMap<>();
 

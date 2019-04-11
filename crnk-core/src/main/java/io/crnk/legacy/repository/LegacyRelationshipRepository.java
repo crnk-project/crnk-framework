@@ -35,7 +35,7 @@ import java.io.Serializable;
  * @deprecated Make use of RelationshipRepositoryV2
  */
 @Deprecated
-public interface RelationshipRepository<T, T_ID extends Serializable, D, D_ID extends Serializable> extends Repository {
+public interface LegacyRelationshipRepository<T, T_ID extends Serializable, D, D_ID extends Serializable> extends Repository {
 
 	/**
 	 * Set a relation defined by a field. targetId legacy can be either in a form of an object or null value,
