@@ -1,3 +1,17 @@
+With this release the first version of Crnk 3.x is released. There are many new, incremental
+improvements and cleanups. The cleanup can cause minor API breaks due to deprecations being
+removed and repositories losing the historic V2 suffix. The release is labelled as BETA because
+further cleanup and changes are expected. Otherwise the release builds upon previous releases
+and should be a drama-free upgrade.
+
+
+<h4>ResourceRepository instead of ResourceRepositoryV2</h4>
+
+The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
+to follow the former QueryParams-based repositories. QueryParams continue to be supported, but the repository
+now carry a &quot;Legacy&quot; prefix.
+
+
 <h4>Experimental Annotation Processor for type-safe QuerySpec construction</h4>
 
 An annotation processor is introduced that generates type-safe QuerySpec and PathSpec subtypes for their
