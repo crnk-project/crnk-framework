@@ -2,7 +2,7 @@ package io.crnk.operations;
 
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.operations.client.OperationsCall;
 import io.crnk.operations.client.OperationsClient;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class OperationsPostTest extends io.crnk.operations.AbstractOperationsTest {
 
-	protected ResourceRepositoryV2<MovieEntity, UUID> movieRepo;
+	protected ResourceRepository<MovieEntity, UUID> movieRepo;
 
 
 	@Before
@@ -32,7 +32,7 @@ public class OperationsPostTest extends io.crnk.operations.AbstractOperationsTes
 
 	@Test
 	public void testMultiplePost() {
-		ResourceRepositoryV2<PersonEntity, UUID> personRepo = client.getRepositoryForType(PersonEntity.class);
+		ResourceRepository<PersonEntity, UUID> personRepo = client.getRepositoryForType(PersonEntity.class);
 
 		PersonEntity person1 = newPerson("1");
 		PersonEntity person2 = newPerson("2");

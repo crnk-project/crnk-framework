@@ -2,14 +2,14 @@ package io.crnk.core.resource.paging.total;
 
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TotalResourceCountTestRepository implements ResourceRepositoryV2<Task, Long> {
+public class TotalResourceCountTestRepository implements ResourceRepository<Task, Long> {
 
 	private static List<Task> tasks = new ArrayList<>();
 

@@ -8,7 +8,7 @@ import io.crnk.core.engine.internal.information.repository.RelationshipRepositor
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.repository.MatchedRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.UntypedRelationshipRepository;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import net.jodah.typetools.TypeResolver;
@@ -24,7 +24,7 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
 		return !UntypedRelationshipRepository.class.isAssignableFrom(repositoryClass) && (
-				LegacyRelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepositoryV2.class
+				LegacyRelationshipRepository.class.isAssignableFrom(repositoryClass) || RelationshipRepository.class
 						.isAssignableFrom(repositoryClass));
 	}
 
@@ -70,10 +70,10 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyRelationshipRepository.class, repositoryClass);
 			return typeArgs[0];
 		} else if (repository != null) {
-			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
+			RelationshipRepository<?, ?, ?, ?> querySpecRepo = (RelationshipRepository<?, ?, ?, ?>) repository;
 			return querySpecRepo.getSourceResourceClass();
 		} else {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepositoryV2.class, repositoryClass);
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[0];
 		}
 	}
@@ -83,10 +83,10 @@ public class DefaultRelationshipRepositoryInformationProvider implements Reposit
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyRelationshipRepository.class, repositoryClass);
 			return typeArgs[2];
 		} else if (repository != null) {
-			RelationshipRepositoryV2<?, ?, ?, ?> querySpecRepo = (RelationshipRepositoryV2<?, ?, ?, ?>) repository;
+			RelationshipRepository<?, ?, ?, ?> querySpecRepo = (RelationshipRepository<?, ?, ?, ?>) repository;
 			return querySpecRepo.getTargetResourceClass();
 		} else {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepositoryV2.class, repositoryClass);
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(RelationshipRepository.class, repositoryClass);
 			return typeArgs[2];
 		}
 	}

@@ -1,7 +1,7 @@
 package io.crnk.jpa.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -48,18 +48,18 @@ public class JpaRepositoryConfigTest {
 		builder.setInterfaceClass(InvalidReturnTypeTestRepository.class);
 	}
 
-	public interface TestRepository extends ResourceRepositoryV2<TestEntity, Long> {
+	public interface TestRepository extends ResourceRepository<TestEntity, Long> {
 
 		@Override
 		TestList findAll(QuerySpec querySpec);
 
 	}
 
-	public interface IncompleteTestRepository extends ResourceRepositoryV2<TestEntity, Long> {
+	public interface IncompleteTestRepository extends ResourceRepository<TestEntity, Long> {
 
 	}
 
-	public interface InvalidReturnTypeTestRepository extends ResourceRepositoryV2<TestEntity, Long> {
+	public interface InvalidReturnTypeTestRepository extends ResourceRepository<TestEntity, Long> {
 
 		@Override
 		ResourceList<TestEntity> findAll(QuerySpec querySpec);

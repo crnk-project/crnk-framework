@@ -8,7 +8,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.strategy.ForwardingGetStrategy;
 import io.crnk.core.repository.foward.strategy.ForwardingSetStrategy;
@@ -34,7 +34,7 @@ import java.io.Serializable;
  * This class provides the basis to implement {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior}.
  */
 public class ForwardingRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
-		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
+		implements BulkRelationshipRepository<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 
 	private RelationshipMatcher matcher;

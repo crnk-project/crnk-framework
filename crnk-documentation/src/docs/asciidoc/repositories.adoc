@@ -5,8 +5,8 @@ The modelled resources and relationships must be complemented by a corresponding
 repository implementation. This is achieved by implementing
 one of those two repository interfaces:
 
-  * ResourceRepositoryV2 for resources.
-  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for relationships.
+  * ResourceRepository for resources.
+  * RelationshipRepository resp. BulkRelationshipRepository for relationships.
 
 The repositories are used to serve `POST`, `GET`, `PATCH` and `DELETE` requests as specified by
 JSON:API specification. The repository contract closely resembles the JSON:API specification. Subsequent
@@ -19,9 +19,9 @@ IMPORTANT: When accessing repositories, do not forget to use the `application/vn
 
 anchor:resource_repository[]
 
-## ResourceRepositoryV2
+## ResourceRepository
 
-`ResourceRepositoryV2` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
+`ResourceRepository` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
 The interface takes two generic arguments:
 
 1. The type of a resource. Typically this is a plain Java Bean making use of the JSON:API annotations. But may also be something
@@ -30,7 +30,7 @@ The interface takes two generic arguments:
 2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
   can also be a more complex type that serializes to a URL-friendly String.
 
-The methods of `ResourceRepositoryV2` look as follows:
+The methods of `ResourceRepository` look as follows:
 
 * `findOne(ID id, QuerySpec querySpec)`
   Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown
@@ -150,7 +150,7 @@ implementations. For this reason the engine part in `crnk-core` makes use of `Qu
 QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
 is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
 
-For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
+For example showing its use URLs also have a look at the <<resource_repository,ResourceRepository>> section.
 
 
 ### API
@@ -544,14 +544,14 @@ Some of those methods are also available from some of the integrations like `Crn
 
 anchor:relationshipRepository[]
 
-## RelationshipRepositoryV2
+## RelationshipRepository
 
 IMPORTANT: Before getting started with the development of relationship repositories, familiarize yourself
 with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation is unnecessary!
 
 
 Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
-defined implementing `RelationshipRepositoryV2`. `RelationshipRepositoryV2` implements the methods
+defined implementing `RelationshipRepository`. `RelationshipRepository` implements the methods
 necessary to work with a relationship. It provides methods for both single-valued and multi-valued
 relationships:
 
@@ -596,7 +596,7 @@ include::../../../../crnk-integration-examples/spring-boot-example/src/main/java
 
 ### RelationshipMatcher
 
-With `RelationshipRepositoryV2.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
+With `RelationshipRepository.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
 serving. Rules can look like:
 
 [source]
@@ -686,22 +686,22 @@ Note that to access the opposite side for `GET` operations, relations must be se
 	}
 ----
 
-### BulkRelationshipRepositoryV2
+### BulkRelationshipRepository
 
-BulkRelationshipRepositoryV2 extends RelationshipRepositoryV2 and provides an additional
+BulkRelationshipRepository extends RelationshipRepository and provides an additional
 `findTargets` method. It allows to fetch a relation for multiple resources at once.
 It is recommended to make use of this implementation if a relationship is loaded frequently
 (either by a eager declaration or trough the `include` parameter) and it is costly to
 fetch that relation. RelationshipRepositoryBase provides a default implementation where
 `findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
 
-Note that in contrast to `ResourceRepositoryV2` and `RelationshipRepositoryV2` that are symmetric
-and applicable to Crnk servers and client, `BulkRelationshipRepositoryV2` is applicable on the server-side only.
+Note that in contrast to `ResourceRepository` and `RelationshipRepository` that are symmetric
+and applicable to Crnk servers and client, `BulkRelationshipRepository` is applicable on the server-side only.
 
 
 ## ResourceList
 
-ResourceRepositoryV2 and RelationshipRepositoryV2 return lists of type ResourceList. The ResourceList can carry, next
+ResourceRepository and RelationshipRepository return lists of type ResourceList. The ResourceList can carry, next
 to the actual resources, also meta and links information:
 
 * `getLinks()`
@@ -745,7 +745,7 @@ and used by both servers and clients:
 
 [source]
 ----
-	public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+	public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 
 		@Override
 		public ScheduleList findAll(QuerySpec querySpec);

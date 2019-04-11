@@ -1,7 +1,7 @@
 package io.crnk.jpa;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.jpa.model.TestEntity;
 import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
 import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilterBase;
@@ -15,7 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 
 public class JpaFilterTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
 	private JpaCriteriaRepositoryFilterBase filter;
 

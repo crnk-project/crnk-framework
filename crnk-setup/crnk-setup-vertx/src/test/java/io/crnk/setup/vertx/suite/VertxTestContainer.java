@@ -2,8 +2,8 @@ package io.crnk.setup.vertx.suite;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.utils.Supplier;
 import io.crnk.setup.vertx.CrnkVerticle;
 import io.crnk.test.mock.ClientTestModule;
@@ -80,12 +80,12 @@ public class VertxTestContainer implements TestContainer {
     }
 
     @Override
-    public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         return client.get().getRepositoryForType(resourceClass);
     }
 
     @Override
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
+    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
         return client.get().getRepositoryForType(sourceClass, targetClass);
     }
 

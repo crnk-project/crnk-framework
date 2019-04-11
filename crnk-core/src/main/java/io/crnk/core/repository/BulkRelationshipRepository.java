@@ -9,12 +9,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * {@code RelationshipRepositoryV2} implementation that provides additional support to bulk-request relations. This
+ * {@code RelationshipRepository} implementation that provides additional support to bulk-request relations. This
  * is beneficial in most cases where inclusions are involved, as it allows to request all relationships in one step
  * instead of individual steps for each resource.
  */
-public interface BulkRelationshipRepositoryV2<T, I extends Serializable, D, J extends Serializable>
-		extends RelationshipRepositoryV2<T, I, D, J> {
+public interface BulkRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
+		extends RelationshipRepository<T, I, D, J> {
 
 	/**
 	 * Bulk request multiple targets at once.

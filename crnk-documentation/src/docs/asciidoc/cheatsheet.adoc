@@ -170,7 +170,7 @@ To query a remote JSON:API repository:
 [source,java]
 ----
 CrnkClient client = new CrnkClient("http://localhost:8080");
-ResourceRepositoryV2<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
+ResourceRepository<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
 QuerySpec querySpec = new QuerySpec(Task.class);
 querySpec.addFilter(
   new FilterSpec(PathSpec.of("task.assignee.name"), FilterOperator.NEQ, "Joe")

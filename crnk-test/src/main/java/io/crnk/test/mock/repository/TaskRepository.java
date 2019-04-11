@@ -2,7 +2,7 @@ package io.crnk.test.mock.repository;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.TestException;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @JsonApiExposed
-public class TaskRepository implements ResourceRepositoryV2<Task, Long> {
+public class TaskRepository implements ResourceRepository<Task, Long> {
 
     private static final ConcurrentHashMap<Long, Task> map = new ConcurrentHashMap<>();
 

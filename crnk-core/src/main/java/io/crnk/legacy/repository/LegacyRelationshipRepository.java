@@ -32,7 +32,7 @@ import java.io.Serializable;
  * @param <T_ID> T class id type
  * @param <D>    target class type
  * @param <D_ID> D class id type
- * @deprecated Make use of RelationshipRepositoryV2
+ * @deprecated Make use of RelationshipRepository
  */
 @Deprecated
 public interface LegacyRelationshipRepository<T, T_ID extends Serializable, D, D_ID extends Serializable> extends Repository {

@@ -3,8 +3,8 @@ package io.crnk.client.suite;
 import io.crnk.client.AbstractClientTest;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.RelationIdTestResource;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.RelationIdTestRepository;
@@ -66,12 +66,12 @@ public class ClientTestContainer implements TestContainer {
     }
 
     @Override
-    public <T, I extends Serializable> ResourceRepositoryV2<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         return test.client.getRepositoryForType(resourceClass);
     }
 
     @Override
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryV2<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
+    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
         return test.client.getRepositoryForType(sourceClass, targetClass);
     }
 

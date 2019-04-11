@@ -4,7 +4,7 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipMatcher;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializable, D, J extends Serializable>
 		implements RelationshipRepositoryDecorator<T, I, D, J>, ResourceRegistryAware {
 
-	private RelationshipRepositoryV2<T, I, D, J> decoratedObject;
+	private RelationshipRepository<T, I, D, J> decoratedObject;
 
 	@Override
 	public Class<T> getSourceResourceClass() {
@@ -60,7 +60,7 @@ public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializa
 	}
 
 	@Override
-	public void setDecoratedObject(RelationshipRepositoryV2<T, I, D, J> decoratedObject) {
+	public void setDecoratedObject(RelationshipRepository<T, I, D, J> decoratedObject) {
 		this.decoratedObject = decoratedObject;
 	}
 

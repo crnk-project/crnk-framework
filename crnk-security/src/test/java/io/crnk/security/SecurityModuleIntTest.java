@@ -7,8 +7,8 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.security.SecurityConfig.Builder;
@@ -48,11 +48,11 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 
     protected CrnkClient client;
 
-    protected ResourceRepositoryV2<Task, Long> taskRepo;
+    protected ResourceRepository<Task, Long> taskRepo;
 
-    protected ResourceRepositoryV2<Project, Long> projectRepo;
+    protected ResourceRepository<Project, Long> projectRepo;
 
-    protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+    protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
     private SecurityModule module;
 

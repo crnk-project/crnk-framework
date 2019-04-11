@@ -6,7 +6,7 @@ import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ScheduleRepository;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecoratorBase;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
 import org.junit.Assert;
@@ -69,7 +69,7 @@ public class DecoratorTest {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	public void testDecoratedRelationshipRepositoryBase() {
-		RelationshipRepositoryV2<Schedule, Long, Task, Long> repository = Mockito.mock(RelationshipRepositoryV2.class);
+		RelationshipRepository<Schedule, Long, Task, Long> repository = Mockito.mock(RelationshipRepository.class);
 		RelationshipRepositoryDecoratorBase<Schedule, Long, Task, Long> decorator = new RelationshipRepositoryDecoratorBase() {
 		};
 		decorator.setDecoratedObject(repository);
@@ -105,7 +105,7 @@ public class DecoratorTest {
 		Mockito.verify(repository, Mockito.times(1)).getSourceResourceClass();
 	}
 
-	interface RegistryAwareRelationshipRepository extends RelationshipRepositoryV2, ResourceRegistryAware {
+	interface RegistryAwareRelationshipRepository extends RelationshipRepository, ResourceRegistryAware {
 
 	}
 

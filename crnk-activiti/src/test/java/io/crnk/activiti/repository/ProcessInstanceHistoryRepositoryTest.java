@@ -12,7 +12,7 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -33,9 +33,9 @@ public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 	private RuntimeService runtimeService;
 
 
-	private ResourceRepositoryV2<HistoricScheduleApprovalProcessInstance, String> processHistoryRepository;
+	private ResourceRepository<HistoricScheduleApprovalProcessInstance, String> processHistoryRepository;
 
-	private ResourceRepositoryV2<ScheduleApprovalProcessInstance, String> processRepository;
+	private ResourceRepository<ScheduleApprovalProcessInstance, String> processRepository;
 
 	@Before
 	public void setup() {

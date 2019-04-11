@@ -1,7 +1,7 @@
 package io.crnk.jpa.integration;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.NamingTestEntity;
@@ -14,7 +14,7 @@ public class AttributeNamingIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testCanStoreBasicAttributeValues() {
-		ResourceRepositoryV2<NamingTestEntity, Serializable> repo = client.getRepositoryForType(NamingTestEntity.class);
+		ResourceRepository<NamingTestEntity, Serializable> repo = client.getRepositoryForType(NamingTestEntity.class);
 
 		NamingTestEntity test = new NamingTestEntity();
 		test.setId(1L);

@@ -8,7 +8,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.data.facet.FacetValue;
@@ -29,7 +29,7 @@ public class InMemoryFacetProvider extends FacetProviderBase implements Prioriti
 	@Override
 	public List<FacetValue> findValues(FacetInformation facetInformation, QuerySpec querySpec) {
 		String resourceType = facetInformation.getResource().getType();
-		ResourceRepositoryV2 repository = context.getRepository(resourceType);
+		ResourceRepository repository = context.getRepository(resourceType);
 		ResourceInformation resourceInformation = context.getResourceInformation(resourceType);
 
 		if (facetInformation instanceof BasicFacetInformation) {

@@ -458,7 +458,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 			}
 			if (adapter == null) {
 				throw new IllegalStateException("no RepositoryAdapterFactory found for " + decoratedRepository
-						+ ", make sure it is a valid repository, e.g. by implementing ResourceRepositoryV2");
+						+ ", make sure it is a valid repository, e.g. by implementing ResourceRepository");
 			}
 			for (RepositoryAdapterFactory adapterFactory : adapterFactories) {
 				adapter = adapterFactory.decorate(adapter);
@@ -488,7 +488,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 		}
 		if (adapter == null) {
 			throw new IllegalStateException("no RepositoryAdapterFactory found for " + decoratedRepository
-					+ ", make sure it is a valid repository, e.g. by implementing ResourceRepositoryV2");
+					+ ", make sure it is a valid repository, e.g. by implementing ResourceRepository");
 		}
 		for (RepositoryAdapterFactory adapterFactory : adapterFactories) {
 			adapter = adapterFactory.decorate(adapter);

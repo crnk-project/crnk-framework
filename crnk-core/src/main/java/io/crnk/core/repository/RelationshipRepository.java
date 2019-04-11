@@ -33,7 +33,7 @@ import java.io.Serializable;
  * @param <D> target class type
  * @param <J> D class id type
  */
-public interface RelationshipRepositoryV2<T, I extends Serializable, D, J extends Serializable>
+public interface RelationshipRepository<T, I extends Serializable, D, J extends Serializable>
 		extends Repository, MatchedRelationshipRepository {
 
 	/**

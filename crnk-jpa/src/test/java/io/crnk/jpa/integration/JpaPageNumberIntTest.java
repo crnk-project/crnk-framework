@@ -5,7 +5,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.model.TestEntity;
@@ -38,7 +38,7 @@ public class JpaPageNumberIntTest extends AbstractJpaJerseyTest {
 		Assert.assertEquals(1, boot.getPagingBehaviors().size());
 		Assert.assertTrue(boot.getPagingBehaviors().get(0) instanceof NumberSizePagingBehavior);
 
-		ResourceRepositoryV2<TestEntity, Serializable> repository = client.getRepositoryForType(TestEntity.class);
+		ResourceRepository<TestEntity, Serializable> repository = client.getRepositoryForType(TestEntity.class);
 		for (int i = 0; i < 20; i++) {
 			TestEntity test = new TestEntity();
 			test.setId((long) i);

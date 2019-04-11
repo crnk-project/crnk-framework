@@ -12,7 +12,7 @@ import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.task.Task;
 import org.junit.Assert;
@@ -29,9 +29,9 @@ public class TaskHistoryResourceRepositoryTest extends ActivitiTestBase {
 
 	private Task isolatedTask;
 
-	private ResourceRepositoryV2<HistoricApproveTask, String> historicTaskRepository;
+	private ResourceRepository<HistoricApproveTask, String> historicTaskRepository;
 
-	private ResourceRepositoryV2<ScheduleApprovalProcessInstance, String> processInstanceRepository;
+	private ResourceRepository<ScheduleApprovalProcessInstance, String> processInstanceRepository;
 
 	@Before
 	public void setup() {

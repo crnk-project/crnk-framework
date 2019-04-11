@@ -3,10 +3,10 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-public class TaskWithLookupRepository implements ResourceRepositoryV2<TaskWithLookup, String> {
+public class TaskWithLookupRepository implements ResourceRepository<TaskWithLookup, String> {
 
 	@Override
 	public Class<TaskWithLookup> getResourceClass() {

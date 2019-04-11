@@ -1,7 +1,7 @@
 package io.crnk.test.mock.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class TaskToProjectRepository implements RelationshipRepositoryV2<Task, Long, Project, Long> {
+public class TaskToProjectRepository implements RelationshipRepository<Task, Long, Project, Long> {
 
 	private static final ConcurrentMap<Relation<Task>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

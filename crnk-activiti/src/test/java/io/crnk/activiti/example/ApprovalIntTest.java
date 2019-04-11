@@ -9,8 +9,8 @@ import io.crnk.client.http.HttpAdapter;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.repository.ScheduleRepository;
@@ -27,17 +27,17 @@ public class ApprovalIntTest extends JerseyTest {
 
 	protected ScheduleRepository scheduleRepo;
 
-	private ResourceRepositoryV2<ScheduleApprovalProcessInstance, String> approvalRepo;
+	private ResourceRepository<ScheduleApprovalProcessInstance, String> approvalRepo;
 
-	private ResourceRepositoryV2<ApproveTask, Serializable> taskRepo;
+	private ResourceRepository<ApproveTask, Serializable> taskRepo;
 
-	private RelationshipRepositoryV2<Schedule, Serializable, ScheduleApprovalProcessInstance, Serializable> approvalRelRepo;
+	private RelationshipRepository<Schedule, Serializable, ScheduleApprovalProcessInstance, Serializable> approvalRelRepo;
 
-	private ResourceRepositoryV2<ApproveForm, Serializable> formRepo;
+	private ResourceRepository<ApproveForm, Serializable> formRepo;
 
 	protected CrnkClient client;
 
-	private RelationshipRepositoryV2<ScheduleApprovalProcessInstance, Serializable, ApproveTask, Serializable> processTaskRepo;
+	private RelationshipRepository<ScheduleApprovalProcessInstance, Serializable, ApproveTask, Serializable> processTaskRepo;
 
 	@Override
 	protected ApprovalTestApplication configure() {

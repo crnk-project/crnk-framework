@@ -13,9 +13,8 @@ import java.io.Serializable;
  *
  * @param <T> Type of an entity
  * @param <I> Type of Identifier of an entity
- * @param <L> List type
  */
-public interface ResourceRepositoryV2<T, I extends Serializable> extends Repository {
+public interface ResourceRepository<T, I extends Serializable> extends Repository {
 
 	/**
 	 * @return the class returned by this resource

@@ -10,8 +10,8 @@ import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.AbstractJpaJerseyTest;
 import io.crnk.jpa.JpaModule;
@@ -32,7 +32,7 @@ import org.junit.Test;
 
 public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
-	private ResourceRepositoryV2<TestEntity, Long> testRepo;
+	private ResourceRepository<TestEntity, Long> testRepo;
 
 	private SessionFactory sessionFactory;
 
@@ -65,9 +65,9 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
 	private void testOneToOneUniDirectional(boolean relationship) {
 		int n = 10;
-		ResourceRepositoryV2<OneToOneTestEntity, Serializable> testRepo = client.getRepositoryForType(OneToOneTestEntity.class);
-		ResourceRepositoryV2<RelatedEntity, Serializable> otherRepo = client.getRepositoryForType(RelatedEntity.class);
-		RelationshipRepositoryV2 relRepo = client.getRepositoryForType(OneToOneTestEntity.class, RelatedEntity.class);
+		ResourceRepository<OneToOneTestEntity, Serializable> testRepo = client.getRepositoryForType(OneToOneTestEntity.class);
+		ResourceRepository<RelatedEntity, Serializable> otherRepo = client.getRepositoryForType(RelatedEntity.class);
+		RelationshipRepository relRepo = client.getRepositoryForType(OneToOneTestEntity.class, RelatedEntity.class);
 
 		for (int i = 0; i < n; i++) {
 			RelatedEntity related = new RelatedEntity();
@@ -120,8 +120,8 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
 	private void testOneToOneBiDirectional(boolean oppositeUpdate, boolean relationship) {
 		int n = 10;
-		ResourceRepositoryV2<OneToOneTestEntity, Serializable> testRepo = client.getRepositoryForType(OneToOneTestEntity.class);
-		ResourceRepositoryV2<OneToOneOppositeEntity, Serializable> otherRepo = client.getRepositoryForType(OneToOneOppositeEntity.class);
+		ResourceRepository<OneToOneTestEntity, Serializable> testRepo = client.getRepositoryForType(OneToOneTestEntity.class);
+		ResourceRepository<OneToOneOppositeEntity, Serializable> otherRepo = client.getRepositoryForType(OneToOneOppositeEntity.class);
 
 		for (int i = 0; i < n; i++) {
 			OneToOneOppositeEntity opposite = new OneToOneOppositeEntity();
@@ -136,11 +136,11 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 			testRepo.create(test);
 
 			if (relationship && oppositeUpdate) {
-				RelationshipRepositoryV2 relRepo = client.getRepositoryForType(OneToOneOppositeEntity.class, OneToOneTestEntity.class);
+				RelationshipRepository relRepo = client.getRepositoryForType(OneToOneOppositeEntity.class, OneToOneTestEntity.class);
 				relRepo.setRelation(opposite, test.getId(), "test");
 			}
 			else if (relationship) {
-				RelationshipRepositoryV2 relRepo = client.getRepositoryForType(OneToOneTestEntity.class, OneToOneOppositeEntity.class);
+				RelationshipRepository relRepo = client.getRepositoryForType(OneToOneTestEntity.class, OneToOneOppositeEntity.class);
 				relRepo.setRelation(test, opposite.getId(), "oppositeValue");
 			}
 		}
@@ -179,9 +179,9 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	}
 
 	public void testManyToMany(boolean opposite, boolean relationship) {
-		ResourceRepositoryV2<ManyToManyTestEntity, Serializable> testRepo =
+		ResourceRepository<ManyToManyTestEntity, Serializable> testRepo =
 				client.getRepositoryForType(ManyToManyTestEntity.class);
-		ResourceRepositoryV2<ManyToManyOppositeEntity, Serializable> relatedRepo =
+		ResourceRepository<ManyToManyOppositeEntity, Serializable> relatedRepo =
 				client.getRepositoryForType(ManyToManyOppositeEntity.class);
 
 		for (int i = 0; i < 10; i++) {
@@ -195,14 +195,14 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 				testRepo.create(test);
 				relatedRepo.create(related);
 
-				RelationshipRepositoryV2 relRepo = client.getRepositoryForType(ManyToManyOppositeEntity.class, ManyToManyTestEntity.class);
+				RelationshipRepository relRepo = client.getRepositoryForType(ManyToManyOppositeEntity.class, ManyToManyTestEntity.class);
 				relRepo.addRelations(related, Arrays.asList(test.getId()), "tests");
 			}
 			else if (relationship) {
 				testRepo.create(test);
 				relatedRepo.create(related);
 
-				RelationshipRepositoryV2 relRepo = client.getRepositoryForType(ManyToManyTestEntity.class, ManyToManyOppositeEntity.class);
+				RelationshipRepository relRepo = client.getRepositoryForType(ManyToManyTestEntity.class, ManyToManyOppositeEntity.class);
 				relRepo.addRelations(test, Arrays.asList(related.getId()), "opposites");
 			}
 			else {
@@ -258,7 +258,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 		test.setStringValue("test");
 		testRepo.create(test);
 
-		RelationshipRepositoryV2<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
+		RelationshipRepository<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		RelatedEntity related =
@@ -345,7 +345,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	}
 
 	private void testAddManyRelation(boolean onSave) {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+		ResourceRepository<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related1 = new RelatedEntity();
 		related1.setId(1L);
 		related1.setStringValue("related1");
@@ -365,7 +365,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 		testRepo.create(test);
 
 		// query relation
-		RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
+		RelationshipRepository<TestEntity, Long, RelatedEntity, Long> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		if (!onSave) {
@@ -376,7 +376,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 		Assert.assertEquals(2, related.size());
 
 		// query relation in opposite direction
-		RelationshipRepositoryV2<RelatedEntity, Serializable, TestEntity, Serializable> backRelRepo = client
+		RelationshipRepository<RelatedEntity, Serializable, TestEntity, Serializable> backRelRepo = client
 				.getRepositoryForType(RelatedEntity.class, TestEntity.class);
 
 		test = backRelRepo.findOneTarget(2L, RelatedEntity.ATTR_testEntity, new QuerySpec(TestEntity.class));
@@ -415,7 +415,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	public void testFindOneTarget() {
 		TestEntity test = addTestWithOneRelation();
 
-		RelationshipRepositoryV2<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
+		RelationshipRepository<TestEntity, Serializable, RelatedEntity, Serializable> relRepo = client
 				.getRepositoryForType(TestEntity.class, RelatedEntity.class);
 
 		RelatedEntity related =
@@ -435,7 +435,7 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	}
 
 	private TestEntity addTestWithOneRelation() {
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+		ResourceRepository<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 		RelatedEntity related = new RelatedEntity();
 		related.setId(1L);
 		related.setStringValue("project");
@@ -475,12 +475,12 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 		TestEntity test = null;
 		for (int j = 0; j < n; j++) {
 			int offset = j * 1000;
-			ResourceRepositoryV2<OtherRelatedEntity, Long> otherRepo = client
+			ResourceRepository<OtherRelatedEntity, Long> otherRepo = client
 					.getRepositoryForType(OtherRelatedEntity.class);
-			ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
-			RelationshipRepositoryV2<TestEntity, Long, RelatedEntity, Long> relRepo = client
+			ResourceRepository<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+			RelationshipRepository<TestEntity, Long, RelatedEntity, Long> relRepo = client
 					.getRepositoryForType(TestEntity.class, RelatedEntity.class);
-			RelationshipRepositoryV2<RelatedEntity, Long, OtherRelatedEntity, Long> otherRelRepo = client
+			RelationshipRepository<RelatedEntity, Long, OtherRelatedEntity, Long> otherRelRepo = client
 					.getRepositoryForType(RelatedEntity.class, OtherRelatedEntity.class);
 
 			test = new TestEntity();
@@ -543,8 +543,8 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testFilterByManyJoin() {
-		ResourceRepositoryV2<TestEntity, Long> testRepo = client.getRepositoryForType(TestEntity.class);
-		ResourceRepositoryV2<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
+		ResourceRepository<TestEntity, Long> testRepo = client.getRepositoryForType(TestEntity.class);
+		ResourceRepository<RelatedEntity, Long> relatedRepo = client.getRepositoryForType(RelatedEntity.class);
 
 		TestEntity test = new TestEntity();
 		test.setId(1L);

@@ -12,7 +12,7 @@ import java.io.Serializable;
  *
  * @param <T>  Type of an entity
  * @param <ID> Type of Identifier of an entity
- * @deprecated Make use of ResourceRepositoryV2
+ * @deprecated Make use of ResourceRepository
  */
 @Deprecated
 public interface LegacyResourceRepository<T, ID extends Serializable> extends Repository {

@@ -4,7 +4,7 @@ import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
@@ -21,7 +21,7 @@ import java.util.List;
 @Ignore
 public class JpaPartialEntityExposureTest extends AbstractJpaJerseyTest {
 
-	protected ResourceRepositoryV2<TestEntity, Serializable> testRepo;
+	protected ResourceRepository<TestEntity, Serializable> testRepo;
 
 	private JpaModule module;
 

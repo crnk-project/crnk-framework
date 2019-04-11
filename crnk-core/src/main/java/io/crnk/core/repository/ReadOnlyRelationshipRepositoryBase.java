@@ -6,7 +6,7 @@ import io.crnk.core.resource.list.ResourceList;
 import java.io.Serializable;
 
 public abstract class ReadOnlyRelationshipRepositoryBase<S, I extends Serializable, T, J extends Serializable>
-		implements RelationshipRepositoryV2<S, I, T, J> {
+		implements RelationshipRepository<S, I, T, J> {
 
 
 	@Override

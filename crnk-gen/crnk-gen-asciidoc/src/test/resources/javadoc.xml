@@ -926,7 +926,7 @@
         <class name="ScreeningLocationRepository" qualified="io.crnk.example.service.relationship.basic.ScreeningLocationRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
             <comment>Establishes a relationship between screenings and location.</comment>
             <class qualified="java.lang.Object"/>
-            <interface qualified="io.crnk.core.repository.RelationshipRepositoryV2">
+            <interface qualified="io.crnk.core.repository.RelationshipRepository">
                 <generic qualified="io.crnk.example.service.basic.Screening"/>
                 <generic qualified="java.util.UUID"/>
                 <generic qualified="io.crnk.example.service.basic.Location"/>

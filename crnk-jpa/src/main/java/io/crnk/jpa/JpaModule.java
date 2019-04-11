@@ -17,8 +17,8 @@ import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.module.ModuleExtension;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
@@ -482,7 +482,7 @@ public class JpaModule implements InitializingModule {
             JpaEntityRepository<?, Serializable> jpaRepository = repositoryFactory.createEntityRepository(this,
                     repositoryConfig);
 
-            ResourceRepositoryV2<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
+            ResourceRepository<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
 
             context.addRepository(repository);
 
@@ -498,7 +498,7 @@ public class JpaModule implements InitializingModule {
         }
     }
 
-    private ResourceRepositoryV2<?, ?> filterResourceCreation(Class<?> resourceClass, JpaEntityRepository<?, ?> repository) {
+    private ResourceRepository<?, ?> filterResourceCreation(Class<?> resourceClass, JpaEntityRepository<?, ?> repository) {
         JpaEntityRepository<?, ?> filteredRepository = repository;
         for (JpaRepositoryFilter filter : config.getFilters()) {
             if (filter.accept(resourceClass)) {
@@ -508,8 +508,8 @@ public class JpaModule implements InitializingModule {
         return filteredRepository;
     }
 
-    private RelationshipRepositoryV2<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass,
-                                                                            JpaRelationshipRepository<?, ?, ?, ?> repository) {
+    private RelationshipRepository<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass,
+                                                                          JpaRelationshipRepository<?, ?, ?, ?> repository) {
         JpaRelationshipRepository<?, ?, ?, ?> filteredRepository = repository;
         for (JpaRepositoryFilter filter : config.getFilters()) {
             if (filter.accept(resourceClass)) {
@@ -552,7 +552,7 @@ public class JpaModule implements InitializingModule {
         // only include relations that are exposed as repositories
         if (attrConfig != null) {
             JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
-            RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType,
+            RelationshipRepository<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType,
                     repositoryFactory.createRelationshipRepository(this, field, attrConfig));
             context.addRepository(relationshipRepository);
         }
@@ -571,7 +571,7 @@ public class JpaModule implements InitializingModule {
             Class<?> targetResourceClass = targetConfig.getResourceClass();
 
             JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
-            RelationshipRepositoryV2<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
+            RelationshipRepository<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
                     repositoryFactory.createRelationshipRepository(this, field, attrConfig));
             context.addRepository(relationshipRepository);
         }
@@ -723,7 +723,7 @@ public class JpaModule implements InitializingModule {
 
         @Override
         public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
-                ResourceRepositoryV2<T, I> repository) {
+                ResourceRepository<T, I> repository) {
             JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
             if (config != null) {
                 return config.getRepositoryDecorator();
@@ -732,7 +732,7 @@ public class JpaModule implements InitializingModule {
         }
 
         @Override
-        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepositoryV2<T, I, D, J> repository) {
+        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
             return null;
         }
     }

@@ -10,7 +10,7 @@ import io.crnk.legacy.queryParams.QueryParams;
  * <p>
  * <b>Consider the use of ResourceList instead.</b>
  *
- * @deprecated Make use of MetaRepositoryV2 or ResourceList
+ * @deprecated Make use of MetaRepository or ResourceList
  */
 @Deprecated
 public interface LegacyMetaRepository<T> {

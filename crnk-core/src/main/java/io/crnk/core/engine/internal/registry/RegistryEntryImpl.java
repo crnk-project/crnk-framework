@@ -16,7 +16,7 @@ import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,16 +146,16 @@ public class RegistryEntryImpl implements RegistryEntry {
 	}
 
 	/**
-	 * @return {@link ResourceRepositoryV2} facade to access the repository. Note that this is not the original
-	 * {@link ResourceRepositoryV2}
+	 * @return {@link ResourceRepository} facade to access the repository. Note that this is not the original
+	 * {@link ResourceRepository}
 	 * implementation backing the repository, but a facade that will also invoke all filters, decorators, etc. The actual
-	 * repository may or may not be implemented with {@link ResourceRepositoryV2}.
+	 * repository may or may not be implemented with {@link ResourceRepository}.
 	 * <p>
 	 * Note that currently there is not (yet) any inclusion mechanism supported. This is currently done on a
 	 * resource/document level only. But there might be some benefit to also be able to do it here on some occasions.
 	 */
-	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade() {
-		return (ResourceRepositoryV2<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
+	public <T, I extends Serializable> ResourceRepository<T, I> getResourceRepositoryFacade() {
+		return (ResourceRepository<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
 	}
 
 	@Override

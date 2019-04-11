@@ -4,7 +4,7 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.microservice.MicroServiceApplication;
 import io.crnk.example.springboot.microservice.project.Project;
@@ -48,7 +48,7 @@ public class MicroServiceApplicationTest {
 		querySpec.setLimit(10L);
 		querySpec.includeRelation(Arrays.asList("project"));
 
-		ResourceRepositoryV2<Task, Serializable> repository = taskClient.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Serializable> repository = taskClient.getRepositoryForType(Task.class);
 		ResourceList<Task> tasks = repository.findAll(querySpec);
 		Assert.assertNotEquals(0, tasks.size());
 		for (Task task : tasks) {

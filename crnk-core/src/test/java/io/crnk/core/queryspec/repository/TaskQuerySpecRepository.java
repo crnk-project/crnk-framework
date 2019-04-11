@@ -3,8 +3,8 @@ package io.crnk.core.queryspec.repository;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.LinksRepositoryV2;
-import io.crnk.core.repository.MetaRepositoryV2;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.ResourceRepositoryBase;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceList;
@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class TaskQuerySpecRepository extends ResourceRepositoryBase<Task, Long>
-		implements MetaRepositoryV2<Task>, LinksRepositoryV2<Task> {
+		implements MetaRepository<Task>, LinksRepository<Task> {
 
 	private static Set<Task> tasks = new HashSet<>();
 

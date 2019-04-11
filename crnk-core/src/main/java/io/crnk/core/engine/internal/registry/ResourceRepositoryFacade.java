@@ -14,7 +14,7 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class ResourceRepositoryFacade implements ResourceRepositoryV2<Object, Serializable> {
+class ResourceRepositoryFacade implements ResourceRepository<Object, Serializable> {
 
 	private final ModuleRegistry moduleRegistry;
 

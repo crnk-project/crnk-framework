@@ -6,7 +6,7 @@ import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.gen.runtime.RuntimeContext;
 import io.crnk.gen.runtime.RuntimeMetaResolver;
@@ -46,9 +46,9 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
                 builder = builder.addUrls(ClasspathHelper.forPackage(resourceSearchPackage));
                 filter.includePackage(resourceSearchPackage);
             }
-            filter.includePackage(ResourceRepositoryV2.class.getPackage().getName());
+            filter.includePackage(ResourceRepository.class.getPackage().getName());
             builder = builder.filterInputsBy(filter);
-            builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepositoryV2.class));
+            builder = builder.addUrls(ClasspathHelper.forClass(ResourceRepository.class));
             builder = builder.setScanners(new SubTypesScanner(false), new TypeAnnotationsScanner());
             Reflections reflections = new Reflections(builder);
 
@@ -61,12 +61,12 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
                 throw new IllegalStateException("no classes found annotated with @JsonApiResource");
             }
 
-            Set<Class<? extends ResourceRepositoryV2>> repositoryClasses = reflections.getSubTypesOf(ResourceRepositoryV2.class);
+            Set<Class<? extends ResourceRepository>> repositoryClasses = reflections.getSubTypesOf(ResourceRepository.class);
 
             Map<Class, Class> resourceRepositoryMap = new HashMap<>();
             for (Class repositoryClass : repositoryClasses) {
                 if (repositoryClass.isInterface()) {
-                    Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
+                    Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repositoryClass);
                     if (typeArgs != null) {
                         Class<?> resourceClass = typeArgs[0];
                         resourceRepositoryMap.put(resourceClass, repositoryClass);

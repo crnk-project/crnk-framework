@@ -58,8 +58,8 @@ import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.resource.annotations.JsonApiId;
@@ -533,7 +533,7 @@ public class ModuleRegistryTest {
 		}
 	}
 
-	class TestRelationshipRepository2 implements RelationshipRepositoryV2<TestResource2, Integer, TestResource2, Integer> {
+	class TestRelationshipRepository2 implements RelationshipRepository<TestResource2, Integer, TestResource2, Integer> {
 
 		@Override
 		public void setRelation(TestResource2 source, Integer targetId, String fieldName) {
@@ -572,7 +572,7 @@ public class ModuleRegistryTest {
 		}
 	}
 
-	class TestRepository2 implements ResourceRepositoryV2<TestResource2, Integer> {
+	class TestRepository2 implements ResourceRepository<TestResource2, Integer> {
 
 		@Override
 		public <S extends TestResource2> S save(S entity) {
