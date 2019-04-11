@@ -17,10 +17,10 @@
 package io.crnk.servlet.resource.repository;
 
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import io.crnk.servlet.resource.model.Project;
 
-public class ProjectRepository implements ResourceRepository<Project, Long> {
+public class ProjectRepository implements LegacyResourceRepository<Project, Long> {
 	@Override
 	public <S extends Project> S save(S entity) {
 		return null;

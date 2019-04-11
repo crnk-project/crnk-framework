@@ -4,13 +4,13 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ProjectPatchStrategy;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectPatchStrategyRepository implements ResourceRepository<ProjectPatchStrategy, Long> {
+public class ProjectPatchStrategyRepository implements LegacyResourceRepository<ProjectPatchStrategy, Long> {
 
 	private static final ConcurrentHashMap<Long, ProjectPatchStrategy> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

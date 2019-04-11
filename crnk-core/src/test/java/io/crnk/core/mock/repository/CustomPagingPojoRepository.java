@@ -1,11 +1,10 @@
 package io.crnk.core.mock.repository;
 
 import io.crnk.core.mock.models.CustomPagingPojo;
-import io.crnk.core.mock.models.Pojo;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
-public class CustomPagingPojoRepository implements ResourceRepository<CustomPagingPojo, Long> {
+public class CustomPagingPojoRepository implements LegacyResourceRepository<CustomPagingPojo, Long> {
 
 	private static CustomPagingPojo entity;
 

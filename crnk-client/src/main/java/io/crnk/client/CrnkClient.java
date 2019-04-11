@@ -77,7 +77,7 @@ import io.crnk.legacy.internal.DirectResponseResourceEntry;
 import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -439,7 +439,7 @@ public class CrnkClient {
             final RelationshipRepositoryV2 relationshipRepositoryStub = decorate(
                     new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
             );
-            RepositoryInstanceBuilder<RelationshipRepository> relationshipRepositoryInstanceBuilder =
+            RepositoryInstanceBuilder<LegacyRelationshipRepository> relationshipRepositoryInstanceBuilder =
                     new RepositoryInstanceBuilder(null, null) {
 
                         @Override

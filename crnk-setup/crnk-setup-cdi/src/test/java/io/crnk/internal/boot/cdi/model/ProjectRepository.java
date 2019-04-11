@@ -2,7 +2,7 @@ package io.crnk.internal.boot.cdi.model;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.LinkedList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
-public class ProjectRepository implements ResourceRepository<Project, Long> {
+public class ProjectRepository implements LegacyResourceRepository<Project, Long> {
 
 	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

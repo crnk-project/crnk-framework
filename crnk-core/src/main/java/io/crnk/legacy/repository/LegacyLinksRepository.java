@@ -5,13 +5,13 @@ import io.crnk.legacy.queryParams.QueryParams;
 
 /**
  * An optional interface that can be implemented along with
- * {@link ResourceRepository} or {@link RelationshipRepository} to get links
+ * {@link LegacyResourceRepository} or {@link LegacyRelationshipRepository} to get links
  * information about returned document(s).
  *
  * @deprecated Make use of LinksRepositoryV2 or ResourceList
  */
 @Deprecated
-public interface LinksRepository<T> {
+public interface LegacyLinksRepository<T> {
 	/**
 	 * Return meta information about a document. Can be called after find
 	 * document methods call

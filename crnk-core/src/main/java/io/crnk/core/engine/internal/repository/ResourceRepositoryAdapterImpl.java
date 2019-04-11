@@ -14,7 +14,7 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryV2;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.io.Serializable;
 
@@ -62,7 +62,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 					resource = ((ResourceRepositoryV2) resourceRepository).findOne(id, request.getQuerySpec
 							(resourceInformation));
 				} else {
-					resource = ((ResourceRepository) resourceRepository).findOne(id, request.getQueryParams());
+					resource = ((LegacyResourceRepository) resourceRepository).findOne(id, request.getQueryParams());
 				}
 				if (resource == null && return404OnNull) {
 					throw new ResourceNotFoundException(resourceInformation.getResourceType());
@@ -90,7 +90,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 					QuerySpec querySpec = request.getQuerySpec(resourceInformation);
 					resources = ((ResourceRepositoryV2) resourceRepository).findAll(querySpec);
 				} else {
-					resources = ((ResourceRepository) resourceRepository).findAll(request.getQueryParams());
+					resources = ((LegacyResourceRepository) resourceRepository).findAll(request.getQueryParams());
 				}
 				return getResponse(resourceRepository, resources, request);
 			}
@@ -116,7 +116,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 					resources =
 							((ResourceRepositoryV2) resourceRepository).findAll(ids, request.getQuerySpec(resourceInformation));
 				} else {
-					resources = ((ResourceRepository) resourceRepository).findAll(ids, request.getQueryParams());
+					resources = ((LegacyResourceRepository) resourceRepository).findAll(ids, request.getQueryParams());
 				}
 				return getResponse(resourceRepository, resources, request);
 			}
@@ -154,7 +154,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 						resource = ((ResourceRepositoryV2) resourceRepository).save(entity);
 					}
 				} else {
-					resource = ((ResourceRepository) resourceRepository).save(entity);
+					resource = ((LegacyResourceRepository) resourceRepository).save(entity);
 				}
 				return getResponse(resourceRepository, resource, request);
 			}
@@ -177,7 +177,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 				if (resourceRepository instanceof ResourceRepositoryV2) {
 					((ResourceRepositoryV2) resourceRepository).delete(id);
 				} else {
-					((ResourceRepository) resourceRepository).delete(id);
+					((LegacyResourceRepository) resourceRepository).delete(id);
 				}
 				return new JsonApiResponse();
 			}

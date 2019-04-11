@@ -3,15 +3,15 @@ package io.crnk.legacy.internal;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.registry.ResourceEntry;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 public class DirectResponseResourceEntry implements ResourceEntry {
 
-	private final RepositoryInstanceBuilder<ResourceRepository> repositoryInstanceBuilder;
+	private final RepositoryInstanceBuilder<LegacyResourceRepository> repositoryInstanceBuilder;
 
 	private ResourceRepositoryInformation information;
 
-	public DirectResponseResourceEntry(RepositoryInstanceBuilder<ResourceRepository> repositoryInstanceBuilder,
+	public DirectResponseResourceEntry(RepositoryInstanceBuilder<LegacyResourceRepository> repositoryInstanceBuilder,
 									   ResourceRepositoryInformation information) {
 		this.repositoryInstanceBuilder = repositoryInstanceBuilder;
 		this.information = information;

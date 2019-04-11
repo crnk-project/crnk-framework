@@ -4,7 +4,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
 
-public abstract class AbstractSimpleRepository<T, ID extends Serializable> implements ResourceRepository<T, ID> {
+public abstract class AbstractSimpleLegacyRepository<T, ID extends Serializable> implements LegacyResourceRepository<T, ID> {
 
 	public T findOne(ID id) {
 		throw new UnsupportedOperationException("findOne not implemented");
