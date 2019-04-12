@@ -79,7 +79,7 @@ public class JavaDocModel {
         NodeList childNodes = fieldNode.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node item = childNodes.item(i);
-            if (item instanceof Element && ((Element) item).getNodeName().equals(name)) {
+            if (item instanceof Element && item.getNodeName().equals(name)) {
                 elements.add((Element) item);
             }
         }

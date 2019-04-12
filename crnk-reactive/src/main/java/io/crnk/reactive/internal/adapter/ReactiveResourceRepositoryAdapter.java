@@ -58,7 +58,7 @@ public class ReactiveResourceRepositoryAdapter extends ReactiveRepositoryAdapter
 		QuerySpec querySpec = queryAdapter.toQuerySpec();
 		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindIds(moduleRegistry, resourceInformation,
 				queryAdapter, ids);
-		Mono result = repository.findAll((Collection) ids, querySpec);
+		Mono result = repository.findAll(ids, querySpec);
 		return toResponse(result, requestSpec);
 	}
 
