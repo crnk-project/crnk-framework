@@ -134,7 +134,7 @@ public class ApprovalManager {
 
 		ResourceRepository resourceRepository = entry.getResourceRepositoryFacade();
 		QuerySpec querySpec = new QuerySpec(resourceInformation.getResourceType());
-		return resourceRepository.findOne((Serializable) id, querySpec);
+		return resourceRepository.findOne(id, querySpec);
 	}
 
 	public void denied(Execution execution) {

@@ -173,7 +173,7 @@ public class RelationshipRepositoryBase<T, I , D, J >
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			Collection currentIds = (Collection) field.getIdAccessor().getValue(source);
-			currentIds.addAll((Collection) targetIds);
+			currentIds.addAll(targetIds);
 		}
 		else {
 			RegistryEntry targetEntry = getTargetEntry(field);
@@ -195,7 +195,7 @@ public class RelationshipRepositoryBase<T, I , D, J >
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
 		if (field.hasIdField()) {
 			Collection currentIds = (Collection) field.getIdAccessor().getValue(source);
-			currentIds.removeAll((Collection) targetIds);
+			currentIds.removeAll(targetIds);
 		}
 		else {
 			RegistryEntry targetEntry = getTargetEntry(field);
