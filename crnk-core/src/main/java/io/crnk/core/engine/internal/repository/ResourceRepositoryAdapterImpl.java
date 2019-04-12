@@ -17,6 +17,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * A repository adapter for resource repository
@@ -102,7 +103,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 	}
 
 	@Override
-	public Result<JsonApiResponse> findAll(Iterable ids, QueryAdapter queryAdapter) {
+	public Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter) {
 		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
 			@SuppressWarnings("rawtypes")
@@ -110,7 +111,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				QueryAdapter queryAdapter = request.getQueryAdapter();
-				Iterable<?> ids = request.getIds();
+				Collection<?> ids = request.getIds();
 				Object resources;
 				if (resourceRepository instanceof ResourceRepository) {
 					resources =

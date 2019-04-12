@@ -24,7 +24,7 @@ public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serial
 
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
+	public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);

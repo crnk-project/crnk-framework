@@ -29,7 +29,7 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 	}
 
 	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+	public void setRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
@@ -38,14 +38,14 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			field.getIdAccessor().setValue(source, targetIds);
 		} else {
 			RegistryEntry targetEntry = context.getTargetEntry(field);
-			Iterable<D> targets = context.findAll(targetEntry, targetIds, queryContext);
+			Collection<D> targets = context.findAll(targetEntry, targetIds, queryContext);
 			field.getAccessor().setValue(source, targets);
 		}
 		sourceAdapter.update(source, context.createSaveQueryAdapter(fieldName, queryContext));
 	}
 
 	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+	public void addRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
@@ -55,7 +55,7 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			currentIds.addAll((Collection) targetIds);
 		} else {
 			RegistryEntry targetEntry = context.getTargetEntry(field);
-			Iterable<D> targets = context.findAll(targetEntry, targetIds, queryContext);
+			Collection<D> targets = context.findAll(targetEntry, targetIds, queryContext);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, field);
 			for (D target : targets) {
@@ -66,7 +66,7 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 	}
 
 	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+	public void removeRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
@@ -76,7 +76,7 @@ public class SetOwnerStrategy<T, I extends Serializable, D, J extends Serializab
 			currentIds.removeAll((Collection) targetIds);
 		} else {
 			RegistryEntry targetEntry = context.getTargetEntry(field);
-			Iterable<D> targets = context.findAll(targetEntry, targetIds, queryContext);
+			Collection<D> targets = context.findAll(targetEntry, targetIds, queryContext);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, field);
 			for (D target : targets) {

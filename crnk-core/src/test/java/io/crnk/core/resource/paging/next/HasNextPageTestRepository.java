@@ -8,6 +8,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class HasNextPageTestRepository implements ResourceRepository<Task, Long>
 	}
 
 	@Override
-	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
+	public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec querySpec) {
 		DefaultResourceList<Task> list = new DefaultResourceList<>();
 		list.setMeta(new DefaultHasMoreResourcesMetaInformation());
 		querySpec.apply(tasks, list);

@@ -149,7 +149,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void setRelations(T source, Collection<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
@@ -159,14 +159,14 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		}
 		else {
 			RegistryEntry targetEntry = getTargetEntry(field);
-			Iterable<D> targets = getTargets(targetEntry, targetIds);
+			Collection<D> targets = getTargets(targetEntry, targetIds);
 			field.getAccessor().setValue(source, targets);
 		}
 		sourceAdapter.update(source, getSaveQueryAdapter(fieldName));
 	}
 
 	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void addRelations(T source, Collection<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
@@ -177,7 +177,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		}
 		else {
 			RegistryEntry targetEntry = getTargetEntry(field);
-			Iterable<D> targets = getTargets(targetEntry, targetIds);
+			Collection<D> targets = getTargets(targetEntry, targetIds);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, fieldName);
 			for (D target : targets) {
@@ -188,7 +188,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
 		RegistryEntry sourceEntry = getSourceEntry();
 		ResourceRepositoryAdapter sourceAdapter = sourceEntry.getResourceRepository();
 		ResourceInformation sourceInformation = getSourceEntry().getResourceInformation();
@@ -199,7 +199,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		}
 		else {
 			RegistryEntry targetEntry = getTargetEntry(field);
-			Iterable<D> targets = getTargets(targetEntry, targetIds);
+			Collection<D> targets = getTargets(targetEntry, targetIds);
 			@SuppressWarnings("unchecked")
 			Collection<D> currentTargets = getOrCreateCollection(source, fieldName);
 			for (D target : targets) {
@@ -234,7 +234,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@Deprecated
-	protected Iterable<D> getTargets(Iterable<J> targetIds) {
+	protected Collection<D> getTargets(Collection<J> targetIds) {
 		RegistryEntry entry = resourceRegistry.getEntry(targetResourceClass);
 		return getTargets(entry, targetIds);
 	}
@@ -261,16 +261,16 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Iterable<D> getTargets(RegistryEntry entry, Iterable<J> targetIds) {
+	protected Collection<D> getTargets(RegistryEntry entry, Collection<J> targetIds) {
 		ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
 		QueryContext queryContext = requestContextProvider.getRequestContext().getQueryContext();
 		QueryAdapter queryAdapter =
 				new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
-		return (Iterable<D>) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
+		return (Collection<D>) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
 	}
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
+	public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
 		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceResourceClass);
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 
@@ -318,8 +318,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 					+ ", make sure to properly implement relationship inclusions");
 		}
 
-		if (property instanceof Iterable) {
-			for (T potentialSource : (Iterable<T>) property) {
+		if (property instanceof Collection) {
+			for (T potentialSource : (Collection<T>) property) {
 				I sourceId = (I) sourceInformation.getId(potentialSource);
 				PreconditionUtil.assertNotNull("id must not be null", sourceId);
 

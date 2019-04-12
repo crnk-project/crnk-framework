@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.contributor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -119,7 +120,7 @@ public class ResourceFieldContributorTest {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public MultivaluedMap<Long, Project> findTargets(Iterable<Long> sourceIds, String fieldName, QuerySpec querySpec) {
+		public MultivaluedMap<Long, Project> findTargets(Collection<Long> sourceIds, String fieldName, QuerySpec querySpec) {
 			MultivaluedMap<Long, Project> map = new MultivaluedMap<>();
 
 			Iterator<Long> iterator = sourceIds.iterator();

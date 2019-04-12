@@ -1,11 +1,5 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.EntityManager;
-
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -33,6 +27,13 @@ import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.JpaQueryFactory;
 import io.crnk.jpa.query.Tuple;
+
+import javax.persistence.EntityManager;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Exposes a JPA entity as ResourceRepository. Inherit from this class to setup
@@ -68,7 +69,7 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
     }
 
     @Override
-    public ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+    public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
         QuerySpec idQuerySpec = querySpec.duplicate();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));
@@ -184,27 +185,28 @@ public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepos
         I id = (I) idField.getAccessor().getValue(resource);
         // id could have been created during persist
         if (id == null) {
-        	id = getIdFromEntity(em, entity, idField);
-		}
+            id = getIdFromEntity(em, entity, idField);
+        }
         PreconditionUtil.verify(id != null, "id not available for entity %s", resource);
         return (S) findOne(id, querySpec);
     }
 
     /**
-	 * Extracts the resource ID from the entity.
-	 * By default it uses the entity's primary key if the field name matches the DTO's ID field.
-	 * Override in subclasses if a different entity field should be used.
-	 * @return the resource ID or <code>null</code> when it could not be determined
-	 */
+     * Extracts the resource ID from the entity.
+     * By default it uses the entity's primary key if the field name matches the DTO's ID field.
+     * Override in subclasses if a different entity field should be used.
+     *
+     * @return the resource ID or <code>null</code> when it could not be determined
+     */
     @SuppressWarnings("unchecked")
     protected I getIdFromEntity(EntityManager em, Object entity, ResourceField idField) {
-    	Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
-		PreconditionUtil.verify(pk != null, "pk not available for entity %s", entity);
-		if (pk != null && primaryKeyAttribute.getName().equals(idField.getUnderlyingName()) && idField.getElementType().isAssignableFrom(pk.getClass())) {
-			return (I) pk;
-		}
-		return null;
-	}
+        Object pk = em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
+        PreconditionUtil.verify(pk != null, "pk not available for entity %s", entity);
+        if (pk != null && primaryKeyAttribute.getName().equals(idField.getUnderlyingName()) && idField.getElementType().isAssignableFrom(pk.getClass())) {
+            return (I) pk;
+        }
+        return null;
+    }
 
     @Override
     public void delete(I id) {

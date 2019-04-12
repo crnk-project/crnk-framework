@@ -7,6 +7,7 @@ import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * {@code RelationshipRepository} implementation that provides additional support to bulk-request relations. This
@@ -19,7 +20,7 @@ public interface BulkRelationshipRepository<T, I extends Serializable, D, J exte
 	/**
 	 * Bulk request multiple targets at once.
 	 */
-	MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec);
+	MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec);
 
 	@Override
 	default D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {

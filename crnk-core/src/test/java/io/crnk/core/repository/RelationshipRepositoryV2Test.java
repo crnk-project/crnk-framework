@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public class RelationshipRepositoryV2Test {
 
@@ -30,17 +31,17 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
@@ -83,17 +84,17 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 

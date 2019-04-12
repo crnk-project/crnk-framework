@@ -50,22 +50,22 @@ public class SetOppositeStrategy<T, I extends Serializable, D, J extends Seriali
     }
 
     @Override
-    public void setRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+    public void setRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    public void addRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+    public void addRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
         updateRelations(source, targetIds, fieldName, queryContext, true);
     }
 
     @Override
-    public void removeRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext) {
+    public void removeRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext) {
         updateRelations(source, targetIds, fieldName, queryContext, false);
     }
 
 
-    private void updateRelations(T source, Iterable<J> targetIds, String fieldName, QueryContext queryContext, boolean add) {
+    private void updateRelations(T source, Collection<J> targetIds, String fieldName, QueryContext queryContext, boolean add) {
         ResourceInformation sourceInformation = context.getSourceEntry().getResourceInformation();
 
         ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);
@@ -77,7 +77,7 @@ public class SetOppositeStrategy<T, I extends Serializable, D, J extends Seriali
 
         QueryAdapter queryAdapter = context.createEmptyQueryAdapter(targetEntry, queryContext);
 
-        Iterable<Object> targets = context.findAll(targetEntry, targetIds, queryContext);
+        Collection<Object> targets = context.findAll(targetEntry, targetIds, queryContext);
         for (Object target : targets) {
             // in contract to SetOwnerStrategy no need to honor idAccessor since source already loaded
             if (oppositeField.isCollection()) {

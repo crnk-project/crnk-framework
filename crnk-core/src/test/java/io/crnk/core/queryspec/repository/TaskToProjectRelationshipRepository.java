@@ -9,6 +9,8 @@ import io.crnk.core.repository.RelationshipRepositoryBase;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
+import java.util.Collection;
+
 public class TaskToProjectRelationshipRepository extends RelationshipRepositoryBase<Task, Long, Project, Long>
 		implements MetaRepository<Project>, LinksRepository<Project> {
 
@@ -17,7 +19,7 @@ public class TaskToProjectRelationshipRepository extends RelationshipRepositoryB
 	}
 
 	@Override
-	public LinksInformation getLinksInformation(Iterable<Project> resources, QuerySpec querySpec) {
+	public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec) {
 		return new LinksInformation() {
 
 			public String name = "value";
@@ -25,7 +27,7 @@ public class TaskToProjectRelationshipRepository extends RelationshipRepositoryB
 	}
 
 	@Override
-	public MetaInformation getMetaInformation(Iterable<Project> resources, QuerySpec querySpec) {
+	public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec) {
 		return new MetaInformation() {
 
 			public String name = "value";

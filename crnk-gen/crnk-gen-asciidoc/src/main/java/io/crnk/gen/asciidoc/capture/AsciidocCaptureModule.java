@@ -25,6 +25,7 @@ import io.crnk.gen.asciidoc.internal.AsciidocBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 
 public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
@@ -230,7 +231,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
 
         @Override
-        public ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+        public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
             try {
                 return super.findAll(ids, querySpec);
             } finally {
@@ -278,7 +279,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
 
         @Override
-        public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
+        public void setRelations(T source, Collection<J> targetIds, String fieldName) {
             try {
                 super.setRelations(source, targetIds, fieldName);
             } finally {
@@ -287,7 +288,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
 
         @Override
-        public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
+        public void addRelations(T source, Collection<J> targetIds, String fieldName) {
             try {
                 super.addRelations(source, targetIds, fieldName);
             } finally {
@@ -296,7 +297,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
 
         @Override
-        public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
+        public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
             try {
                 super.removeRelations(source, targetIds, fieldName);
             } finally {

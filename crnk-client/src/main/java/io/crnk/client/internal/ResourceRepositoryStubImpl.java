@@ -20,6 +20,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.list.DefaultResourceList;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 
 public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
@@ -123,7 +124,7 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
     }
 
     @Override
-    public DefaultResourceList<T> findAll(Iterable<I> ids, QuerySpec queryPaquerySpecrams) {
+    public DefaultResourceList<T> findAll(Collection<I> ids, QuerySpec queryPaquerySpecrams) {
         String url = urlBuilder.buildUrl(resourceInformation, ids, queryPaquerySpecrams);
         return findAll(url);
     }

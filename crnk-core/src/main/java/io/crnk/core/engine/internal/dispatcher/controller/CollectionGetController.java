@@ -15,6 +15,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public class CollectionGetController extends ResourceIncludeField {
 
@@ -41,7 +42,7 @@ public class CollectionGetController extends ResourceIncludeField {
 			logger.debug("finding {}", queryAdapter);
 			response = resourceRepository.findAll(queryAdapter);
 		} else {
-			Iterable<? extends Serializable> parsedIds = jsonPath.getIds();
+			Collection<? extends Serializable> parsedIds = jsonPath.getIds();
 			logger.debug("finding {} with ids {}", queryAdapter, parsedIds);
 			response = resourceRepository.findAll(parsedIds, queryAdapter);
 		}

@@ -7,6 +7,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -32,7 +33,7 @@ public class TaskToProjectRepository implements RelationshipRepository<Task, Lon
 	}
 
 	@Override
-	public void setRelations(Task source, Iterable<Long> targetIds, String fieldName) {
+	public void setRelations(Task source, Collection<Long> targetIds, String fieldName) {
 		removeRelations(fieldName);
 		if (targetIds != null) {
 			for (Long targetId : targetIds) {
@@ -42,14 +43,14 @@ public class TaskToProjectRepository implements RelationshipRepository<Task, Lon
 	}
 
 	@Override
-	public void addRelations(Task source, Iterable<Long> targetIds, String fieldName) {
+	public void addRelations(Task source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			THREAD_LOCAL_REPOSITORY.put(new Relation<>(source, targetId, fieldName), 0);
 		}
 	}
 
 	@Override
-	public void removeRelations(Task source, Iterable<Long> targetIds, String fieldName) {
+	public void removeRelations(Task source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			Iterator<Relation<Task>> iterator = THREAD_LOCAL_REPOSITORY.keySet().iterator();
 			while (iterator.hasNext()) {

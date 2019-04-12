@@ -10,6 +10,7 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class TaskQuerySpecRepository extends ResourceRepositoryBase<Task, Long>
 	}
 
 	@Override
-	public LinksInformation getLinksInformation(Iterable<Task> resources, QuerySpec queryParams) {
+	public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams) {
 		return new LinksInformation() {
 
 			public String name = "value";
@@ -66,7 +67,7 @@ public class TaskQuerySpecRepository extends ResourceRepositoryBase<Task, Long>
 	}
 
 	@Override
-	public MetaInformation getMetaInformation(Iterable<Task> resources, QuerySpec queryParams) {
+	public MetaInformation getMetaInformation(Collection<Task> resources, QuerySpec queryParams) {
 		return new MetaInformation() {
 
 			public String name = "value";

@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -116,8 +117,8 @@ public class RepositoryFilterTest {
 		queryAdapter = container.toQueryAdapter(querySpec);
 		scheduleResourceAdapter.findAll(queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -147,8 +148,8 @@ public class RepositoryFilterTest {
 	public void findAllWithResourceList() {
 		resourceAdapter.findAll(queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -178,8 +179,8 @@ public class RepositoryFilterTest {
 
 		resourceAdapter.findOne(1L, queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -208,8 +209,8 @@ public class RepositoryFilterTest {
 	public void findAllById() {
 		resourceAdapter.findAll(Arrays.asList(2L), queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -241,8 +242,8 @@ public class RepositoryFilterTest {
 		user.setLoginId(3L);
 		resourceAdapter.create(user, queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -274,8 +275,8 @@ public class RepositoryFilterTest {
 		user.setLoginId(3L);
 		resourceAdapter.update(user, queryAdapter);
 
-		ArgumentCaptor<Iterable> linksResources = ArgumentCaptor.forClass(Iterable.class);
-		ArgumentCaptor<Iterable> metaResources = ArgumentCaptor.forClass(Iterable.class);
+		ArgumentCaptor<Collection> linksResources = ArgumentCaptor.forClass(Collection.class);
+		ArgumentCaptor<Collection> metaResources = ArgumentCaptor.forClass(Collection.class);
 		ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
 		Mockito.verify(filter, Mockito.times(1))
@@ -312,10 +313,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(0))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -340,10 +341,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(1))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -368,10 +369,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(1))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -397,10 +398,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(0))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -427,10 +428,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(0))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -456,10 +457,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(0))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -484,10 +485,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(0))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(0))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -515,10 +516,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(2))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(2, contexts.getAllValues().size());
@@ -549,10 +550,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(2))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(2, contexts.getAllValues().size());
@@ -583,10 +584,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(1))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(1))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());
@@ -615,10 +616,10 @@ public class RepositoryFilterTest {
 		Mockito.verify(filter, Mockito.times(2))
 				.filterResult(Mockito.any(RepositoryFilterContext.class), Mockito.any(RepositoryResultFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterLinks(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryLinksFilterChain.class));
 		Mockito.verify(filter, Mockito.times(2))
-				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Iterable.class),
+				.filterMeta(Mockito.any(RepositoryFilterContext.class), Mockito.any(Collection.class),
 						Mockito.any(RepositoryMetaFilterChain.class));
 
 		Assert.assertEquals(1, contexts.getAllValues().size());

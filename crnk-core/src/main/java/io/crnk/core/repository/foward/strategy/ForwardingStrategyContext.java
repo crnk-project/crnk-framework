@@ -13,6 +13,7 @@ import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 public class ForwardingStrategyContext {
@@ -56,10 +57,10 @@ public class ForwardingStrategyContext {
         return new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
     }
 
-    public <Q> Iterable<Q> findAll(RegistryEntry entry, Iterable<?> targetIds, QueryContext queryContext) {
+    public <Q> Collection<Q> findAll(RegistryEntry entry, Collection<?> targetIds, QueryContext queryContext) {
         ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
         QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
-        return (Iterable) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
+        return (Collection) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
     }
 
     public <Q> Q findOne(RegistryEntry entry, Serializable id, QueryContext queryContext) {

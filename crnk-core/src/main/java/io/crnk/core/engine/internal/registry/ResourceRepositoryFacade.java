@@ -57,7 +57,7 @@ class ResourceRepositoryFacade implements ResourceRepository<Object, Serializabl
 	}
 
 	@Override
-	public ResourceList findAll(Iterable ids, QuerySpec querySpec) {
+	public ResourceList findAll(Collection ids, QuerySpec querySpec) {
 		ResourceRepositoryAdapter adapter = entry.getResourceRepository();
 		return toResources(adapter.findAll(ids, toAdapter(querySpec)));
 	}

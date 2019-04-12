@@ -15,6 +15,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	private QueryAdapter queryAdapter;
 
-	private Iterable<?> ids;
+	private Collection<?> ids;
 
 	private Object entity;
 
@@ -66,7 +67,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpec forFindIds(ModuleRegistry moduleRegistry, ResourceInformation owningResourceInformation,
-												   QueryAdapter queryAdapter, Iterable<?> ids) {
+												   QueryAdapter queryAdapter, Collection<?> ids) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.queryAdapter = queryAdapter;
 		spec.ids = ids;
@@ -108,7 +109,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 	}
 
 	public static RepositoryRequestSpecImpl forRelation(ModuleRegistry moduleRegistry, HttpMethod method, Object entity,
-														QueryAdapter queryAdapter, Iterable<?> ids, ResourceField relationshipField) {
+														QueryAdapter queryAdapter, Collection<?> ids, ResourceField relationshipField) {
 		RepositoryRequestSpecImpl spec = new RepositoryRequestSpecImpl(moduleRegistry);
 		spec.entity = entity;
 		spec.queryAdapter = queryAdapter;
@@ -170,9 +171,9 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@Override
 	public Serializable getId() {
-		Iterable<Object> iterable = getIds();
-		if (iterable != null) {
-			Iterator<?> iterator = iterable.iterator();
+		Collection<Object> Collection = getIds();
+		if (Collection != null) {
+			Iterator<?> iterator = Collection.iterator();
 			if (iterator.hasNext()) {
 				return (Serializable) iterator.next();
 			}
@@ -182,12 +183,12 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Iterable<T> getIds() {
+	public <T> Collection<T> getIds() {
 		if (ids == null && entity != null) {
 			ResourceInformation resourceInformation = queryAdapter.getResourceInformation();
-			return (Iterable<T>) Collections.singleton(resourceInformation.getId(entity));
+			return (Collection<T>) Collections.singleton(resourceInformation.getId(entity));
 		}
-		return (Iterable<T>) ids;
+		return (Collection<T>) ids;
 	}
 
 	@Override

@@ -75,17 +75,17 @@ public class MetaRelationshipRepositoryImpl implements RelationshipRepository<Me
 	}
 
 	@Override
-	public void setRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
+	public void setRelations(MetaElement source, Collection<String> targetIds, String fieldName) {
 		throw newReadOnlyException();
 	}
 
 	@Override
-	public void addRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
+	public void addRelations(MetaElement source, Collection<String> targetIds, String fieldName) {
 		throw newReadOnlyException();
 	}
 
 	@Override
-	public void removeRelations(MetaElement source, Iterable<String> targetIds, String fieldName) {
+	public void removeRelations(MetaElement source, Collection<String> targetIds, String fieldName) {
 		throw newReadOnlyException();
 	}
 

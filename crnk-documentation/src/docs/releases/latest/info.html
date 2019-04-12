@@ -1,15 +1,24 @@
 With this release the first version of Crnk 3.x is released. There are many new, incremental
-improvements and cleanups. The cleanup can cause minor API breaks due to deprecations being
-removed and repositories losing the historic V2 suffix. The release is labelled as BETA because
+improvements and cleanups. The cleanups address a number of historic issues to improve
+usability. They cause cause minor API breaks due but are easy to fix.
+The release is labelled as BETA because
 further cleanup and changes are expected. Otherwise the release builds upon previous releases
 and should be a drama-free upgrade.
 
 
-<h4>ResourceRepository instead of ResourceRepositoryV2</h4>
+<h4>Cleanup &amp; Migration</h4>
 
-The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
-to follow the former QueryParams-based repositories. QueryParams continue to be supported, but the repository
-now carry a &quot;Legacy&quot; prefix.
+<ul>
+    <li>
+        The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
+        to follow the former QueryParams-based repositories. QueryParams continue to be supported, but the repository
+        now carry a &quot;Legacy&quot; prefix.
+    </li>
+    <li>
+        Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to use
+        and not necessary for this particular use cases.
+    </li>
+</ul>
 
 
 <h4>Experimental Annotation Processor for type-safe QuerySpec construction</h4>
@@ -87,7 +96,6 @@ List&lt;TestEntity&gt; resultList = executor.getResultList();
 </pre>
 
 
-
 <h4>InMemoryHttpAdapter to connect CrnkClient with a server</h4>
 
 There is a new InMemoryHttpAdapter implementation completing OkHttp, Apache HTTP client and RestTemplate.
@@ -101,7 +109,6 @@ and faster setup:
     CrnkClient client = new CnrkClient(url).
     client.setHttpAdapter(new InMemoryHttpAdapter(crnkBoot, url));
 </pre>
-
 
 
 <h4>HttpAdapterListener for a vendor-neutral HTTP request/response interception</h4>
@@ -130,7 +137,6 @@ rather than
 <pre class="prettyprint">
     http://127.0.0.1/api/tasks?filter[tasks][name][EQ]=Doe
 </pre>
-
 
 
 <h4>OpenTracing Support</h4>
