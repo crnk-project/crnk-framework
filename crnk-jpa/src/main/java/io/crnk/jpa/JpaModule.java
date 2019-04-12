@@ -5,9 +5,6 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
@@ -50,7 +47,6 @@ import io.crnk.meta.provider.MetaPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.io.Serializable;
@@ -322,7 +318,7 @@ public class JpaModule implements InitializingModule {
         addHibernateConstraintViolationExceptionMapper();
         addTransactionRollbackExceptionMapper();
 
-        if(config != null) {
+        if (config != null) {
             context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
         }
 
@@ -485,16 +481,6 @@ public class JpaModule implements InitializingModule {
             ResourceRepository<?, ?> repository = filterResourceCreation(resourceClass, jpaRepository);
 
             context.addRepository(repository);
-
-            boolean relationshipsEnabled = config.getRelationshipsEnabled();
-            boolean dtoMapping = repositoryConfig.getResourceClass() != repositoryConfig.getEntityClass();
-
-            // deprecated DTP mapping must make use of JpaRelationshipRepository to maintain
-            // backward compatibility
-            if (relationshipsEnabled || dtoMapping) {
-                setupRelationshipRepositories(resourceClass,
-                        repositoryConfig.getResourceClass() != entityClass);
-            }
         }
     }
 
@@ -506,75 +492,6 @@ public class JpaModule implements InitializingModule {
             }
         }
         return filteredRepository;
-    }
-
-    private RelationshipRepository<?, ?, ?, ?> filterRelationshipCreation(Class<?> resourceClass,
-                                                                          JpaRelationshipRepository<?, ?, ?, ?> repository) {
-        JpaRelationshipRepository<?, ?, ?, ?> filteredRepository = repository;
-        for (JpaRepositoryFilter filter : config.getFilters()) {
-            if (filter.accept(resourceClass)) {
-                filteredRepository = filter.filterCreation(filteredRepository);
-            }
-        }
-        return filteredRepository;
-    }
-
-    /**
-     * Sets up relationship repositories for the given document class. In case
-     * of a mapper the resource class might not correspond to the entity class.
-     */
-    private void setupRelationshipRepositories(Class<?> resourceClass, boolean mapped) {
-        if (context.getResourceInformationBuilder().accept(resourceClass)) {
-            ResourceInformation information = context.getResourceInformationBuilder().build(resourceClass);
-
-
-            for (ResourceField field : information.getFields()) {
-                if (field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP) {
-                    continue;
-                }
-
-                Class<?> attrType = field.getElementType();
-                boolean isEntity = attrType.getAnnotation(Entity.class) != null;
-                if (isEntity) {
-                    setupRelationshipRepositoryForEntity(resourceClass, field);
-                } else {
-                    setupRelationshipRepositoryForResource(resourceClass, field);
-                }
-            }
-        }
-    }
-
-    private void setupRelationshipRepositoryForEntity(Class<?> resourceClass, ResourceField field) {
-        // normal entity association
-        Class<?> attrType = field.getElementType();
-        JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrType);
-
-        // only include relations that are exposed as repositories
-        if (attrConfig != null) {
-            JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
-            RelationshipRepository<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(attrType,
-                    repositoryFactory.createRelationshipRepository(this, field, attrConfig));
-            context.addRepository(relationshipRepository);
-        }
-    }
-
-    private void setupRelationshipRepositoryForResource(Class<?> resourceClass, ResourceField field) {
-        Class<?> attrImplClass = field.getElementType();
-        JpaRepositoryConfig<?> attrConfig = getRepositoryConfig(attrImplClass);
-
-        if (attrConfig != null) {
-            PreconditionUtil.verify(attrConfig.getMapper() != null,
-                    "no mapped entity %s referenced from %s.%s registered", attrImplClass.getName(),
-                    field.getParentResourceInformation().getResourceType(), field.getUnderlyingName());
-
-            JpaRepositoryConfig<?> targetConfig = getRepositoryConfig(attrImplClass);
-            Class<?> targetResourceClass = targetConfig.getResourceClass();
-
-            JpaRepositoryFactory repositoryFactory = config.getRepositoryFactory();
-            RelationshipRepository<?, ?, ?, ?> relationshipRepository = filterRelationshipCreation(targetResourceClass,
-                    repositoryFactory.createRelationshipRepository(this, field, attrConfig));
-            context.addRepository(relationshipRepository);
-        }
     }
 
 
@@ -722,7 +639,7 @@ public class JpaModule implements InitializingModule {
     class JpaRepositoryDecoratorFactory implements RepositoryDecoratorFactory {
 
         @Override
-        public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(
+        public <T, I> ResourceRepositoryDecorator<T, I> decorateRepository(
                 ResourceRepository<T, I> repository) {
             JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
             if (config != null) {
@@ -732,7 +649,7 @@ public class JpaModule implements InitializingModule {
         }
 
         @Override
-        public <T, I , D, J > RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
+        public <T, I, D, J> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
             return null;
         }
     }

@@ -16,57 +16,57 @@ import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
 
 
 public class FormRelationshipRepository<T extends TaskResource, F extends FormResource> extends ReadOnlyRelationshipRepositoryBase<T,
-		String, F, String> implements ResourceRegistryAware, HttpRequestContextAware {
+        String, F, String> implements ResourceRegistryAware, HttpRequestContextAware {
 
-	private static final String RELATIONSHIP_NAME = "form";
+    private static final String RELATIONSHIP_NAME = "form";
 
-	private final Class<T> taskClass;
+    private final Class<T> taskClass;
 
-	private final Class<F> formClass;
+    private final Class<F> formClass;
 
-	private ResourceRegistry resourceRegistry;
+    private ResourceRegistry resourceRegistry;
 
-	private HttpRequestContextProvider requestContextProvider;
+    private HttpRequestContextProvider requestContextProvider;
 
-	public FormRelationshipRepository(Class<T> taskClass, Class<F> formClass) {
-		this.taskClass = taskClass;
-		this.formClass = formClass;
-	}
+    public FormRelationshipRepository(Class<T> taskClass, Class<F> formClass) {
+        this.taskClass = taskClass;
+        this.formClass = formClass;
+    }
 
-	@Override
-	public Class<T> getSourceResourceClass() {
-		return taskClass;
-	}
+    @Override
+    public Class<T> getSourceResourceClass() {
+        return taskClass;
+    }
 
-	@Override
-	public Class<F> getTargetResourceClass() {
-		return formClass;
-	}
+    @Override
+    public Class<F> getTargetResourceClass() {
+        return formClass;
+    }
 
-	@Override
-	public F findOneTarget(String taskId, String fieldName, QuerySpec querySpec) {
-		if (RELATIONSHIP_NAME.equals(fieldName)) {
+    @Override
+    public F findOneTarget(String taskId, String fieldName, QuerySpec querySpec) {
+        if (RELATIONSHIP_NAME.equals(fieldName)) {
 
-			ResourceRepositoryAdapter resourceRepository = resourceRegistry.getEntry(formClass).getResourceRepository();
+            ResourceRepositoryAdapter resourceRepository = resourceRegistry.getEntry(formClass).getResourceRepository();
 
-			HttpRequestContext requestContext = requestContextProvider.getRequestContext();
-			QueryContext queryContext = requestContext.getQueryContext();
-			QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
+            HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+            QueryContext queryContext = requestContext.getQueryContext();
+            QuerySpecAdapter querySpecAdapter = new QuerySpecAdapter(querySpec, resourceRegistry, queryContext);
 
-			return (F) resourceRepository.findOne(taskId, querySpecAdapter).get().getEntity();
-		} else {
-			throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
-		}
-	}
+            return (F) resourceRepository.findOne(taskId, querySpecAdapter).get().getEntity();
+        } else {
+            throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
+        }
+    }
 
 
-	@Override
-	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
-		this.resourceRegistry = resourceRegistry;
-	}
+    @Override
+    public void setResourceRegistry(ResourceRegistry resourceRegistry) {
+        this.resourceRegistry = resourceRegistry;
+    }
 
-	@Override
-	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
-		this.requestContextProvider = requestContextProvider;
-	}
+    @Override
+    public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+        this.requestContextProvider = requestContextProvider;
+    }
 }

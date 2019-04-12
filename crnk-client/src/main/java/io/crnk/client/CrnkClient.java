@@ -68,6 +68,8 @@ import io.crnk.core.queryspec.pagingspec.LimitBoundedPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -326,7 +328,7 @@ public class CrnkClient {
         initResources();
 
         Optional<Module> plainJsonModule = moduleRegistry.getModules().stream().filter(it -> it.getModuleName().equals("plain-json")).findFirst();
-        if(plainJsonModule.isPresent()){
+        if (plainJsonModule.isPresent()) {
             format = ClientFormat.PLAINJSON;
         }
     }
@@ -354,7 +356,7 @@ public class CrnkClient {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private <T, I > RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
+    private <T, I> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
         RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
         if (entry != null) {
             return entry;
@@ -447,14 +449,7 @@ public class CrnkClient {
                             return relationshipRepositoryStub;
                         }
                     };
-            relationshipEntry =
-                    new DirectResponseRelationshipEntry(relationshipRepositoryInstanceBuilder) {
-
-                        @Override
-                        public String getTargetResourceType() {
-                            return targetEntry.getResourceInformation().getResourceType();
-                        }
-                    };
+            relationshipEntry = new DirectResponseRelationshipEntry(relationshipRepositoryInstanceBuilder);
             relationshipEntries.put(targetResourceType, relationshipEntry);
         }
         Object repoInstance = relationshipEntry.getRepositoryInstanceBuilder();
@@ -488,7 +483,7 @@ public class CrnkClient {
      * @return stub for the given resourceClass
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I > ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         init();
 
         RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
@@ -547,12 +542,40 @@ public class CrnkClient {
      * class
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I , D, J > RelationshipRepository<T, I, D, J> getRepositoryForType(
+    public <T, I, D, J> RelationshipRepository<T, I, D, J> getRepositoryForType(
             Class<T> sourceClass, Class<D> targetClass) {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
         return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+    }
+
+    /**
+     * @param sourceClass source class
+     * @param targetClass target class
+     * @return stub for the relationship between the given source and target
+     * class
+     */
+    public <T, I, D, J> ManyRelationshipRepository<T, I, D, J> getManyRepositoryForType(
+            Class<T> sourceClass, Class<D> targetClass) {
+        init();
+
+        RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
+        return (ManyRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+    }
+
+    /**
+     * @param sourceClass source class
+     * @param targetClass target class
+     * @return stub for the relationship between the given source and target
+     * class
+     */
+    public <T, I, D, J> OneRelationshipRepository<T, I, D, J> getOneRepositoryForType(
+            Class<T> sourceClass, Class<D> targetClass) {
+        init();
+
+        RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
+        return (OneRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
     }
 
     /**

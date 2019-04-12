@@ -4,7 +4,8 @@ import io.crnk.core.engine.information.repository.RelationshipRepositoryInformat
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.legacy.repository.LegacyResourceRepository;
@@ -23,7 +24,8 @@ public class DefaultRepositoryAdapterFactory implements RepositoryAdapterFactory
 	public boolean accepts(Object repository) {
 		Objects.requireNonNull(repository);
 		return repository instanceof LegacyResourceRepository || repository instanceof ResourceRepository
-				|| repository instanceof LegacyRelationshipRepository || repository instanceof RelationshipRepository;
+				|| repository instanceof LegacyRelationshipRepository || repository instanceof ManyRelationshipRepository
+				|| repository instanceof OneRelationshipRepository;
 	}
 
 	@Override
