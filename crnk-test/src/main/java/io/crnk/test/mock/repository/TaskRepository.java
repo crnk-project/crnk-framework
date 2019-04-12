@@ -9,6 +9,7 @@ import io.crnk.test.mock.TestException;
 import io.crnk.test.mock.UnknownException;
 import io.crnk.test.mock.models.Task;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,7 +71,7 @@ public class TaskRepository implements ResourceRepository<Task, Long> {
     }
 
     @Override
-    public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec queryParams) {
+    public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec queryParams) {
         List<Task> querySpec = new LinkedList<>();
         for (Task value : map.values()) {
             if (contains(value, ids)) {
@@ -80,7 +81,7 @@ public class TaskRepository implements ResourceRepository<Task, Long> {
         return queryParams.apply(querySpec);
     }
 
-    private boolean contains(Task value, Iterable<Long> ids) {
+    private boolean contains(Task value, Collection<Long> ids) {
         for (Long id : ids) {
             if (value.getId().equals(id)) {
                 return true;

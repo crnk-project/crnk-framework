@@ -20,6 +20,7 @@ import io.crnk.core.repository.foward.strategy.SetOwnerStrategy;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Implements a RelationshipRepository for relationships making use of one or both adjacent resource repositories.
@@ -126,25 +127,25 @@ public class ForwardingRelationshipRepository<T, I extends Serializable, D, J ex
 	}
 
 	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void setRelations(T source, Collection<J> targetIds, String fieldName) {
 		QueryContext queryContext = getQueryContext();
 		setStrategy.setRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void addRelations(T source, Collection<J> targetIds, String fieldName) {
 		QueryContext queryContext = getQueryContext();
 		setStrategy.addRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
 		QueryContext queryContext = getQueryContext();
 		setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
 	}
 
 	@Override
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
+	public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
 		QueryContext queryContext = getQueryContext();
 		return getStrategy.findTargets(sourceIds, fieldName, querySpec, queryContext);
 	}

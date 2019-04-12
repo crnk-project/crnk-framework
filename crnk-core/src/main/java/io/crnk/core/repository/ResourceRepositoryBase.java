@@ -12,6 +12,7 @@ import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -56,8 +57,8 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 
 		QuerySpec idQuerySpec = querySpec.duplicate();
 		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idName), FilterOperator.EQ, id));
-		Iterable<T> iterable = findAll(idQuerySpec);
-		Iterator<T> iterator = iterable.iterator();
+		Collection<T> Collection = findAll(idQuerySpec);
+		Iterator<T> iterator = Collection.iterator();
 		if (iterator.hasNext()) {
 			T resource = iterator.next();
 			PreconditionUtil.verify(!iterator.hasNext(), "expected unique result for id=%s, querySpec=%s", id, querySpec);
@@ -75,7 +76,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 	 * @return resources
 	 */
 	@Override
-	public ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+	public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 		String idName = entry.getResourceInformation().getIdField().getUnderlyingName();
 

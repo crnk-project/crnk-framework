@@ -1,6 +1,7 @@
 package io.crnk.test.mock.repository.nested;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.RelationshipRepository;
@@ -25,17 +26,17 @@ public class NestedOneRelationshipRepository implements RelationshipRepository {
 	}
 
 	@Override
-	public void setRelations(Object source, Iterable targetIds, String fieldName) {
+	public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 	}
 
 	@Override
-	public void addRelations(Object source, Iterable targetIds, String fieldName) {
+	public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 	}
 
 	@Override
-	public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+	public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 	}
 

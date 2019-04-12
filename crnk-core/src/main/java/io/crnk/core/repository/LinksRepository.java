@@ -5,6 +5,8 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.legacy.repository.LegacyResourceRepository;
 
+import java.util.Collection;
+
 /**
  * An optional interface that can be implemented along with {@link LegacyResourceRepository} or {@link
  * LegacyRelationshipRepository} to get links information about returned resource(s).
@@ -20,5 +22,5 @@ public interface LinksRepository<T> {
 	 * @param querySpec sent along with the request
 	 * @return meta information object
 	 */
-	LinksInformation getLinksInformation(Iterable<T> resources, QuerySpec querySpec);
+	LinksInformation getLinksInformation(Collection<T> resources, QuerySpec querySpec);
 }

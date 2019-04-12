@@ -8,6 +8,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Information about the current request.
@@ -72,6 +73,6 @@ public interface RepositoryRequestSpec {
 	/**
 	 * @return involved id or null if not available.
 	 */
-	<T> Iterable<T> getIds();
+	<T> Collection<T> getIds();
 
 }

@@ -5,6 +5,8 @@ import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.legacy.repository.LegacyResourceRepository;
 
+import java.util.Collection;
+
 /**
  * An optional interface that can be implemented along with {@link LegacyResourceRepository} or {@link
  * LegacyRelationshipRepository} to get meta information about returned resource(s).
@@ -20,5 +22,5 @@ public interface MetaRepository<T> {
 	 * @param querySpec sent along with the request
 	 * @return meta information object
 	 */
-	MetaInformation getMetaInformation(Iterable<T> resources, QuerySpec querySpec);
+	MetaInformation getMetaInformation(Collection<T> resources, QuerySpec querySpec);
 }

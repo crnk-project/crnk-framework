@@ -8,66 +8,67 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializable, D, J extends Serializable>
-		implements RelationshipRepositoryDecorator<T, I, D, J>, ResourceRegistryAware {
+        implements RelationshipRepositoryDecorator<T, I, D, J>, ResourceRegistryAware {
 
-	private RelationshipRepository<T, I, D, J> decoratedObject;
+    private RelationshipRepository<T, I, D, J> decoratedObject;
 
-	@Override
-	public Class<T> getSourceResourceClass() {
-		return decoratedObject.getSourceResourceClass();
-	}
+    @Override
+    public Class<T> getSourceResourceClass() {
+        return decoratedObject.getSourceResourceClass();
+    }
 
-	@Override
-	public Class<D> getTargetResourceClass() {
-		return decoratedObject.getTargetResourceClass();
-	}
+    @Override
+    public Class<D> getTargetResourceClass() {
+        return decoratedObject.getTargetResourceClass();
+    }
 
-	@Override
-	public RelationshipMatcher getMatcher() {
-		return decoratedObject.getMatcher();
-	}
+    @Override
+    public RelationshipMatcher getMatcher() {
+        return decoratedObject.getMatcher();
+    }
 
-	@Override
-	public void setRelation(T source, J targetId, String fieldName) {
-		decoratedObject.setRelation(source, targetId, fieldName);
-	}
+    @Override
+    public void setRelation(T source, J targetId, String fieldName) {
+        decoratedObject.setRelation(source, targetId, fieldName);
+    }
 
-	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
-		decoratedObject.setRelations(source, targetIds, fieldName);
-	}
+    @Override
+    public void setRelations(T source, Collection<J> targetIds, String fieldName) {
+        decoratedObject.setRelations(source, targetIds, fieldName);
+    }
 
-	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
-		decoratedObject.addRelations(source, targetIds, fieldName);
-	}
+    @Override
+    public void addRelations(T source, Collection<J> targetIds, String fieldName) {
+        decoratedObject.addRelations(source, targetIds, fieldName);
+    }
 
-	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
-		decoratedObject.removeRelations(source, targetIds, fieldName);
-	}
+    @Override
+    public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
+        decoratedObject.removeRelations(source, targetIds, fieldName);
+    }
 
-	@Override
-	public D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
-		return decoratedObject.findOneTarget(sourceId, fieldName, querySpec);
-	}
+    @Override
+    public D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
+        return decoratedObject.findOneTarget(sourceId, fieldName, querySpec);
+    }
 
-	@Override
-	public ResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
-		return decoratedObject.findManyTargets(sourceId, fieldName, querySpec);
-	}
+    @Override
+    public ResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
+        return decoratedObject.findManyTargets(sourceId, fieldName, querySpec);
+    }
 
-	@Override
-	public void setDecoratedObject(RelationshipRepository<T, I, D, J> decoratedObject) {
-		this.decoratedObject = decoratedObject;
-	}
+    @Override
+    public void setDecoratedObject(RelationshipRepository<T, I, D, J> decoratedObject) {
+        this.decoratedObject = decoratedObject;
+    }
 
-	@Override
-	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
-		if (decoratedObject instanceof ResourceRegistryAware) {
-			((ResourceRegistryAware) decoratedObject).setResourceRegistry(resourceRegistry);
-		}
-	}
+    @Override
+    public void setResourceRegistry(ResourceRegistry resourceRegistry) {
+        if (decoratedObject instanceof ResourceRegistryAware) {
+            ((ResourceRegistryAware) decoratedObject).setResourceRegistry(resourceRegistry);
+        }
+    }
 }

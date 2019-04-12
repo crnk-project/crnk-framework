@@ -73,7 +73,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
+				Collection<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				if (relationshipRepository instanceof RelationshipRepository) {
 					((RelationshipRepository) relationshipRepository)
@@ -98,7 +98,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
+				Collection<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				if (relationshipRepository instanceof RelationshipRepository) {
 					((RelationshipRepository) relationshipRepository)
@@ -123,7 +123,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 			protected JsonApiResponse invoke(RepositoryFilterContext context) {
 				RepositoryRequestSpec request = context.getRequest();
 				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
+				Collection<?> targetIds = request.getIds();
 				ResourceField field = request.getRelationshipField();
 				if (relationshipRepository instanceof RelationshipRepository) {
 					((RelationshipRepository) relationshipRepository)
@@ -208,7 +208,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				@Override
 				protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
 					RepositoryRequestSpec request = context.getRequest();
-					Iterable sourceIds = request.getIds();
+					Collection sourceIds = request.getIds();
 					ResourceField field = request.getRelationshipField();
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 
@@ -245,7 +245,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
 				@Override
 				protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
 					RepositoryRequestSpec request = context.getRequest();
-					Iterable<?> sourceIds = request.getIds();
+					Collection<?> sourceIds = request.getIds();
 					ResourceField field = request.getRelationshipField();
 					QueryAdapter queryAdapter = request.getQueryAdapter();
 

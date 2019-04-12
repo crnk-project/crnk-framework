@@ -6,6 +6,7 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class TotalResourceCountTestRepository implements ResourceRepository<Task
 	}
 
 	@Override
-	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
+	public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec querySpec) {
 		return querySpec.apply(tasks);
 	}
 

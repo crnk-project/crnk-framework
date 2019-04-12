@@ -6,6 +6,8 @@ import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.servlet.resource.model.Task;
 
+import java.util.Collection;
+
 public class TaskRepository implements ResourceRepository<Task, Long> {
 
 	public <S extends Task> S save(S entity) {
@@ -33,7 +35,7 @@ public class TaskRepository implements ResourceRepository<Task, Long> {
 	}
 
 	@Override
-	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
+	public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec querySpec) {
 		DefaultResourceList list = new DefaultResourceList();
 		list.add(new Task(1L, "First task"));
 		return list;

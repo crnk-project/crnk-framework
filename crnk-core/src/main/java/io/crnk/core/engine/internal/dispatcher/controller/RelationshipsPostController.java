@@ -12,6 +12,7 @@ import io.crnk.core.engine.result.Result;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class RelationshipsPostController extends RelationshipsResourceUpsert {
 	}
 
 	@Override
-	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
+	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Collection<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
 											RelationshipRepositoryAdapter relationshipRepositoryForClass) {
 		return resourceResult.merge(resource -> {
 			List<ResourceIdentifier> resourceIds = new ArrayList<>();

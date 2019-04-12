@@ -1,5 +1,6 @@
 package io.crnk.core.module;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -540,15 +541,15 @@ public class ModuleRegistryTest {
 		}
 
 		@Override
-		public void setRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void setRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
-		public void addRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void addRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
-		public void removeRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void removeRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
@@ -599,7 +600,7 @@ public class ModuleRegistryTest {
 		}
 
 		@Override
-		public ResourceList<TestResource2> findAll(Iterable<Integer> ids, QuerySpec querySpec) {
+		public ResourceList<TestResource2> findAll(Collection<Integer> ids, QuerySpec querySpec) {
 			return null;
 		}
 

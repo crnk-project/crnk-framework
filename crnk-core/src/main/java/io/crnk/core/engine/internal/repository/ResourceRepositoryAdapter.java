@@ -5,6 +5,8 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 
+import java.util.Collection;
+
 /**
  * A repository adapter for resource repository
  */
@@ -15,7 +17,7 @@ public interface ResourceRepositoryAdapter {
 
 	Result<JsonApiResponse> findAll(QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> findAll(Iterable ids, QueryAdapter queryAdapter);
+	Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter);
 
 	Result<JsonApiResponse> update(Object entity, QueryAdapter queryAdapter);
 

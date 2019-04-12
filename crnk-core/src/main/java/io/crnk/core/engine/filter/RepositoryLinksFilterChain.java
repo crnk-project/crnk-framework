@@ -2,6 +2,8 @@ package io.crnk.core.engine.filter;
 
 import io.crnk.core.resource.links.LinksInformation;
 
+import java.util.Collection;
+
 /**
  * Manages the chain of repository filters to resolve links.
  */
@@ -15,6 +17,6 @@ public interface RepositoryLinksFilterChain {
 	 * @param resources for which to compute the links information (as a whole, not for the individual items)
 	 * @return filtered links information
 	 */
-	<T> LinksInformation doFilter(RepositoryFilterContext context, Iterable<T> resources);
+	<T> LinksInformation doFilter(RepositoryFilterContext context, Collection<T> resources);
 
 }

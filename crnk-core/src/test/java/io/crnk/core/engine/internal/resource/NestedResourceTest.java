@@ -2,6 +2,7 @@ package io.crnk.core.engine.internal.resource;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -614,17 +615,17 @@ public class NestedResourceTest extends ControllerTestBase {
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 

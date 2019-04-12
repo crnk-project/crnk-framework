@@ -17,6 +17,7 @@ import io.crnk.core.utils.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
 		implements RelationshipRepository<T, I, D, J> {
@@ -43,21 +44,21 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	}
 
 	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void setRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.PATCH, targetIds);
 	}
 
 	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void addRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.POST, targetIds);
 	}
 
 	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.DELETE, targetIds);
@@ -84,7 +85,7 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		return (DefaultResourceList<D>) executeGet(url, ResponseType.RESOURCES);
 	}
 
-	private void executeWithIds(String requestUrl, HttpMethod method, Iterable<?> targetIds) {
+	private void executeWithIds(String requestUrl, HttpMethod method, Collection<?> targetIds) {
 		Document document = new Document();
 		ArrayList<ResourceIdentifier> resourceIdentifiers = new ArrayList<>();
 		for (Object targetId : targetIds) {

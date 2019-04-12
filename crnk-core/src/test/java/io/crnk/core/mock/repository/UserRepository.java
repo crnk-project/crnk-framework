@@ -7,6 +7,7 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class UserRepository implements ResourceRepository<User, Long> {
@@ -43,7 +44,7 @@ public class UserRepository implements ResourceRepository<User, Long> {
 	}
 
 	@Override
-	public ResourceList<User> findAll(Iterable<Long> ids, QuerySpec queryParams) {
+	public ResourceList<User> findAll(Collection<Long> ids, QuerySpec queryParams) {
 		DefaultResourceList<User> values = new DefaultResourceList<>();
 		for (User value : THREAD_LOCAL_REPOSITORY.values()) {
 			if (contains(value, ids)) {
@@ -53,7 +54,7 @@ public class UserRepository implements ResourceRepository<User, Long> {
 		return values;
 	}
 
-	private boolean contains(User value, Iterable<Long> ids) {
+	private boolean contains(User value, Collection<Long> ids) {
 		for (Long id : ids) {
 			if (value.getLoginId().equals(id)) {
 				return true;

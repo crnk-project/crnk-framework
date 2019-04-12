@@ -4,6 +4,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public abstract class ReadOnlyRelationshipRepositoryBase<S, I extends Serializable, T, J extends Serializable>
 		implements RelationshipRepository<S, I, T, J> {
@@ -35,17 +36,17 @@ public abstract class ReadOnlyRelationshipRepositoryBase<S, I extends Serializab
 	}
 
 	@Override
-	public void setRelations(S source, Iterable<J> targetIds, String fieldName) {
+	public void setRelations(S source, Collection<J> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addRelations(S source, Iterable<J> targetIds, String fieldName) {
+	public void addRelations(S source, Collection<J> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeRelations(S source, Iterable<J> targetIds, String fieldName) {
+	public void removeRelations(S source, Collection<J> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 }

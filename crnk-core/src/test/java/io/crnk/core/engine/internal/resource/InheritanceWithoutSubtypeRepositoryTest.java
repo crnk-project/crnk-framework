@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase {
@@ -328,17 +329,17 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 

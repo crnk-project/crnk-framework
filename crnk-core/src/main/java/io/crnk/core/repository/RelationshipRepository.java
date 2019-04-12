@@ -4,6 +4,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * <p>
@@ -84,7 +85,7 @@ public interface RelationshipRepository<T, I extends Serializable, D, J extends 
 	 * @param targetIds ids of a target repository
 	 * @param fieldName name of target's filed
 	 */
-	void setRelations(T source, Iterable<J> targetIds, String fieldName);
+	void setRelations(T source, Collection<J> targetIds, String fieldName);
 
 	/**
 	 * Add a relation to a field. It is used only for To-Many relationship, that is if this method is called, a new
@@ -94,7 +95,7 @@ public interface RelationshipRepository<T, I extends Serializable, D, J extends 
 	 * @param targetIds ids of the target resource
 	 * @param fieldName name of target's field
 	 */
-	void addRelations(T source, Iterable<J> targetIds, String fieldName);
+	void addRelations(T source, Collection<J> targetIds, String fieldName);
 
 	/**
 	 * Removes a relationship from a set of relationships. It is used only for To-Many relationship.
@@ -103,7 +104,7 @@ public interface RelationshipRepository<T, I extends Serializable, D, J extends 
 	 * @param targetIds ids of the target repository
 	 * @param fieldName name of target's field
 	 */
-	void removeRelations(T source, Iterable<J> targetIds, String fieldName);
+	void removeRelations(T source, Collection<J> targetIds, String fieldName);
 
 	/**
 	 * Find a relation's target identifier. It is used only for To-One relationship.
