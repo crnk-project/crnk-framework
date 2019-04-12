@@ -15,12 +15,27 @@ and should be a drama-free upgrade.
         now carry a &quot;Legacy&quot; prefix.
     </li>
     <li>
-        Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to use
+        Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to
+        use
         and not necessary for this particular use cases.
     </li>
     <li>
         Resource identifier no longer must extend Serializable. There has been no requirements and complicated
         their usage.
+    </li>
+    <li>
+        RelationshipRepositoryV2 and BulkRelationshipRepositoryV2 have been deprecated in favor
+        of OneRelationshipRepository and ManyRelationshipRepository. The new repositories
+        have a number of advantages. Finders of the new repositories follow
+        the concepts of BulkRelationshipRepositoryV2 to have efficiency by default. RelationshipMatch
+        is used by default to bind the repository to resources.
+        Repositories may still implement
+        both interfaces to gain the original RelationshipRepositoryV2 functionality.
+    </li>
+    <li>
+        JPA repositories with DTO mapping now behave exactly like regular resources. Make sure that
+        the DTOs are properly annotation with @JsonApiRelation and @JsonApiRelationId. No information is
+        inferred from the underlying entities.
     </li>
 </ul>
 

@@ -6,7 +6,6 @@ import io.crnk.jpa.query.JpaQuery;
 import io.crnk.jpa.query.JpaQueryExecutor;
 import io.crnk.jpa.query.Tuple;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -22,15 +21,6 @@ public interface JpaRepositoryFilter {
 	 * @return decorated or customized repository
 	 */
 	<T, I > JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository);
-
-	/**
-	 * Decorate or customize the given JPA resource repository upon creation.
-	 *
-	 * @param relationship to decorate
-	 * @return decorated or customized repository
-	 */
-	<S, I , T, J > JpaRelationshipRepository<S, I, T, J> filterCreation(
-			JpaRelationshipRepository<S, I, T, J> repository);
 
 	/**
 	 * Specifies whether any of the filter methods should be executed for the given resourceType.;

@@ -1,7 +1,9 @@
 package io.crnk.jpa.mapping;
 
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.jpa.model.RelatedEntity;
 import io.crnk.jpa.model.TestEntity;
+import io.crnk.jpa.model.dto.RelatedDTO;
 import io.crnk.jpa.model.dto.TestDTO;
 import io.crnk.jpa.query.Tuple;
 
@@ -27,6 +29,12 @@ public class TestDTOMapper implements JpaMapper<TestEntity, TestDTO> {
 		dto.setStringValue(entity.getStringValue());
 		dto.setComputedUpperStringValue(tuple.get("computedUpperStringValue", String.class));
 		dto.setComputedNumberOfSmallerIds(tuple.get("computedNumberOfSmallerIds", Long.class));
+
+		RelatedEntity oneRelatedValue = entity.getOneRelatedValue();
+		if(oneRelatedValue != null){
+			RelatedDTOMapper relatedMapper = new RelatedDTOMapper(em);
+			dto.setOneRelatedValue(relatedMapper.map(oneRelatedValue));
+		}
 		return dto;
 	}
 
@@ -38,6 +46,12 @@ public class TestDTOMapper implements JpaMapper<TestEntity, TestDTO> {
 			entity.setId(dto.getId());
 		}
 		entity.setStringValue(dto.getStringValue());
+
+		RelatedDTO oneRelatedValue = dto.getOneRelatedValue();
+		if(oneRelatedValue != null){
+			RelatedEntity relatedEntity = em.find(RelatedEntity.class, oneRelatedValue.getId());
+			entity.setOneRelatedValue(relatedEntity);
+		}
 
 		// real application may or may not choose to do something
 		// with the computed attribute. Usually they do not.

@@ -301,6 +301,7 @@ public class RelationshipRepositoryBase<T, I , D, J >
 		Set<I> sourceIdSet = new HashSet<>();
 		for (I sourceId : sourceIds) {
 			sourceIdSet.add(sourceId);
+			bulkResult.set(sourceId, new DefaultResourceList<>());
 		}
 
 		for (D result : results) {

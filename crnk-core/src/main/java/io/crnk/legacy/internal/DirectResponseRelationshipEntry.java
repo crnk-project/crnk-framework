@@ -1,45 +1,22 @@
 package io.crnk.legacy.internal;
 
-import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.registry.ResponseRelationshipEntry;
-import io.crnk.core.repository.RelationshipRepository;
-import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.legacy.registry.RepositoryInstanceBuilder;
-import io.crnk.legacy.repository.LegacyRelationshipRepository;
-import net.jodah.typetools.TypeResolver;
-
-import java.util.Optional;
 
 public class DirectResponseRelationshipEntry implements ResponseRelationshipEntry {
 
-	private static final int TARGET_TYPE_GENERIC_PARAMETER_IDX = 2;
+    private RepositoryInstanceBuilder repositoryInstanceBuilder;
 
-	private RepositoryInstanceBuilder repositoryInstanceBuilder;
+    public DirectResponseRelationshipEntry(RepositoryInstanceBuilder repositoryInstanceBuilder) {
+        this.repositoryInstanceBuilder = repositoryInstanceBuilder;
+    }
 
-	public DirectResponseRelationshipEntry(RepositoryInstanceBuilder repositoryInstanceBuilder) {
-		this.repositoryInstanceBuilder = repositoryInstanceBuilder;
-	}
+    public Object getRepositoryInstanceBuilder() {
+        return repositoryInstanceBuilder.buildRepository();
+    }
 
-	@Override
-	public String getTargetResourceType() {
-		Class<?> repoClass = repositoryInstanceBuilder.getRepositoryClass();
-		Class<?> repoInterface = RelationshipRepository.class.isAssignableFrom(repoClass) ? RelationshipRepository.class
-				: LegacyRelationshipRepository.class;
-
-		Class<?>[] typeArgs = TypeResolver
-				.resolveRawArguments(repoInterface, repoClass);
-
-		Class<?> typeArg = typeArgs[TARGET_TYPE_GENERIC_PARAMETER_IDX];
-		Optional<JsonApiResource> annotation = ClassUtils.getAnnotation(typeArg, JsonApiResource.class);
-		return annotation.get().type();
-	}
-
-	public Object getRepositoryInstanceBuilder() {
-		return repositoryInstanceBuilder.buildRepository();
-	}
-
-	@Override
-	public String toString() {
-		return repositoryInstanceBuilder.buildRepository().toString();
-	}
+    @Override
+    public String toString() {
+        return repositoryInstanceBuilder.buildRepository().toString();
+    }
 }
