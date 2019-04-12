@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
+public class RelationshipRepositoryStubImpl<T, I , D, J > extends ClientStubBase
 		implements RelationshipRepository<T, I, D, J> {
 
 	private Class<T> sourceClass;

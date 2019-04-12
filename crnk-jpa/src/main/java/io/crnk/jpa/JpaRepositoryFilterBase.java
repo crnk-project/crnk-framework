@@ -45,12 +45,12 @@ public class JpaRepositoryFilterBase implements JpaRepositoryFilter {
 	}
 
 	@Override
-	public <T, I extends Serializable> JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository) {
+	public <T, I > JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository) {
 		return repository;
 	}
 
 	@Override
-	public <S, I extends Serializable, T, J extends Serializable> JpaRelationshipRepository<S, I, T, J> filterCreation(
+	public <S, I , T, J > JpaRelationshipRepository<S, I, T, J> filterCreation(
 			JpaRelationshipRepository<S, I, T, J> repository) {
 		return repository;
 	}

@@ -7,7 +7,7 @@ import io.crnk.core.queryspec.QuerySpec;
 import java.io.Serializable;
 import java.util.Collection;
 
-public interface ForwardingGetStrategy<T, I extends Serializable, D, J extends Serializable>
+public interface ForwardingGetStrategy<T, I , D, J >
 		extends ForwardingStrategy<T, I, D, J> {
 
 

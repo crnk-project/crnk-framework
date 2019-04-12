@@ -28,7 +28,7 @@ import java.util.Iterator;
  * @param <T> resource type
  * @param <I> identity type
  */
-public abstract class ResourceRepositoryBase<T, I extends Serializable> implements ResourceRepository<T, I>, ResourceRegistryAware {
+public abstract class ResourceRepositoryBase<T, I > implements ResourceRepository<T, I>, ResourceRegistryAware {
 
 	private Class<T> resourceClass;
 

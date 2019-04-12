@@ -37,7 +37,7 @@ import java.util.Set;
  * @deprecated in favor of {@link io.crnk.core.repository.foward.ForwardingRelationshipRepository}
  */
 @Deprecated
-public class JpaRelationshipRepository<S, I extends Serializable, T, J extends Serializable> extends JpaRepositoryBase<T>
+public class JpaRelationshipRepository<S, I , T, J > extends JpaRepositoryBase<T>
         implements RelationshipRepository<S, I, T, J>, BulkRelationshipRepository<S, I, T, J> {
 
     private final ResourceField resourceField;

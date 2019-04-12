@@ -354,7 +354,7 @@ public class CrnkClient {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private <T, I extends Serializable> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
+    private <T, I > RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
         RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
         if (entry != null) {
             return entry;
@@ -488,7 +488,7 @@ public class CrnkClient {
      * @return stub for the given resourceClass
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I > ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         init();
 
         RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
@@ -547,7 +547,7 @@ public class CrnkClient {
      * class
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(
+    public <T, I , D, J > RelationshipRepository<T, I, D, J> getRepositoryForType(
             Class<T> sourceClass, Class<D> targetClass) {
         init();
 

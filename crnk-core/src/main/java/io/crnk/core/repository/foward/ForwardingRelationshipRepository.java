@@ -34,7 +34,7 @@ import java.util.Collection;
  * <p>
  * This class provides the basis to implement {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior}.
  */
-public class ForwardingRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
+public class ForwardingRelationshipRepository<T, I , D, J >
 		implements BulkRelationshipRepository<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 

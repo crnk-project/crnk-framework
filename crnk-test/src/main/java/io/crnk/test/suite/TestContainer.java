@@ -12,9 +12,9 @@ public interface TestContainer {
 
     void stop();
 
-    <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass);
+    <T, I > ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass);
 
-    <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(
+    <T, I , D, J > RelationshipRepository<T, I, D, J> getRepositoryForType(
             Class<T> sourceClass, Class<D> targetClass);
 
     <T> T getTestData(Class<T> clazz, Object id);

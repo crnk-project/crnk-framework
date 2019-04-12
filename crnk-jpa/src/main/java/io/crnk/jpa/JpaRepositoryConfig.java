@@ -229,12 +229,12 @@ public class JpaRepositoryConfig<T> {
 
 
     @SuppressWarnings("unchecked")
-    public <I extends Serializable> ResourceRepositoryDecorator<T, I> getRepositoryDecorator() {
+    public <I > ResourceRepositoryDecorator<T, I> getRepositoryDecorator() {
         return (ResourceRepositoryDecorator<T, I>) resourceRepositoryDecorator;
     }
 
     @SuppressWarnings("unchecked")
-    public <D, I extends Serializable, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> getRepositoryDecorator(
+    public <D, I , J > RelationshipRepositoryDecorator<T, I, D, J> getRepositoryDecorator(
             Class<D> targetResourceType) {
         return (RelationshipRepositoryDecorator<T, I, D, J>) relationshipRepositoriesDecorators.get(targetResourceType);
     }

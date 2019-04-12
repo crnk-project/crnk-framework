@@ -20,7 +20,7 @@ public interface JpaRepositoryFactory {
 	 * @param config for this document
 	 * @return created document
 	 */
-	<T, I extends Serializable> JpaEntityRepository<T, I> createEntityRepository(JpaModule module,
+	<T, I > JpaEntityRepository<T, I> createEntityRepository(JpaModule module,
 																				 JpaRepositoryConfig<T> config);
 
 	/**
@@ -36,7 +36,7 @@ public interface JpaRepositoryFactory {
 	 * @param config        for this document
 	 * @return created document
 	 */
-	<S, I extends Serializable, T, J extends Serializable> JpaRelationshipRepository<S, I, T, J> createRelationshipRepository(
+	<S, I , T, J > JpaRelationshipRepository<S, I, T, J> createRelationshipRepository(
 			JpaModule module, ResourceField resourceField, JpaRepositoryConfig<T> config);
 
 }

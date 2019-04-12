@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serializable> extends ForwardingStrategyBase
+public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		implements ForwardingGetStrategy<T, I, D, J> {
 
 

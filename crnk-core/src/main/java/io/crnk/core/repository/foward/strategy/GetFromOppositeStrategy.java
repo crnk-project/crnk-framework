@@ -37,7 +37,7 @@ import java.util.Set;
  * the other resource. To fetch all tasks of a project, this strategy will use a filter <i>project.id EQ xy</i> since
  * project is the opposite relationship to tasks.
  */
-public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Serializable>
+public class GetFromOppositeStrategy<T, I , D, J >
         extends ForwardingStrategyBase implements ForwardingGetStrategy<T, I, D, J> {
 
 

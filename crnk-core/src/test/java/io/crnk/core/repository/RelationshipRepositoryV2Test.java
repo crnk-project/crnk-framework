@@ -26,7 +26,7 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
@@ -46,12 +46,12 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
@@ -79,7 +79,7 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
@@ -99,12 +99,12 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 	};

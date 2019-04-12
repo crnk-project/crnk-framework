@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Exposes a JPA entity as ResourceRepository.
  */
-public class JpaEntityRepository<T, I extends Serializable> extends JpaEntityRepositoryBase<T, I> {
+public class JpaEntityRepository<T, I > extends JpaEntityRepositoryBase<T, I> {
 
     public JpaEntityRepository(JpaRepositoryConfig<T> config) {
         super(config);

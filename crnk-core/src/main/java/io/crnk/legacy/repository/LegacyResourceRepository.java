@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @deprecated Make use of ResourceRepository
  */
 @Deprecated
-public interface LegacyResourceRepository<T, ID extends Serializable> extends Repository {
+public interface LegacyResourceRepository<T, ID > extends Repository {
 
 	/**
 	 * Search one document with a given ID. If a document cannot be found, a {@link ResourceNotFoundException}

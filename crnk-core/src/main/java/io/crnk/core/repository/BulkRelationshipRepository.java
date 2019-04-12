@@ -14,7 +14,7 @@ import java.util.Collection;
  * is beneficial in most cases where inclusions are involved, as it allows to request all relationships in one step
  * instead of individual steps for each resource.
  */
-public interface BulkRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
+public interface BulkRelationshipRepository<T, I , D, J >
 		extends RelationshipRepository<T, I, D, J> {
 
 	/**

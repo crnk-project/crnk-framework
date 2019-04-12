@@ -15,7 +15,7 @@ import java.util.Collection;
  * @param <T> Type of an entity
  * @param <I> Type of Identifier of an entity
  */
-public interface ResourceRepository<T, I extends Serializable> extends Repository {
+public interface ResourceRepository<T, I > extends Repository {
 
 	/**
 	 * @return the class returned by this resource

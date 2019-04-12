@@ -10,7 +10,7 @@ import io.crnk.core.resource.list.ResourceList;
 import java.io.Serializable;
 import java.util.Collection;
 
-public abstract class RelationshipRepositoryDecoratorBase<T, I extends Serializable, D, J extends Serializable>
+public abstract class RelationshipRepositoryDecoratorBase<T, I , D, J >
         implements RelationshipRepositoryDecorator<T, I, D, J>, ResourceRegistryAware {
 
     private RelationshipRepository<T, I, D, J> decoratedObject;

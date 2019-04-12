@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Note that ResourceRepositoryDecorator are ignored by the Crnk engine and not treated as repositories themselves.
  */
-public abstract class ResourceRepositoryDecoratorBase<T, I extends Serializable> extends WrappedResourceRepository<T, I>
+public abstract class ResourceRepositoryDecoratorBase<T, I > extends WrappedResourceRepository<T, I>
 		implements ResourceRepositoryDecorator<T, I>, ResourceRegistryAware {
 
 	protected ResourceRepository<T, I> decoratedObject;

@@ -38,7 +38,7 @@ public interface RepositoryDecoratorFactory {
 	 * @param repository to wrap
 	 * @return decorated repository
 	 */
-	<T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
+	<T, I > ResourceRepositoryDecorator<T, I> decorateRepository(
 			ResourceRepository<T, I> repository);
 
 	/**
@@ -47,7 +47,7 @@ public interface RepositoryDecoratorFactory {
 	 * @param repository to wrap
 	 * @return decorated repository
 	 */
-	<T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(
+	<T, I , D, J > RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(
 			RelationshipRepository<T, I, D, J> repository);
 
 }

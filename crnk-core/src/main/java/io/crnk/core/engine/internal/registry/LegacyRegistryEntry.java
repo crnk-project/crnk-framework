@@ -159,7 +159,7 @@ public class LegacyRegistryEntry implements RegistryEntry {
 	 * Note that currently there is not (yet) any inclusion mechanism supported. This is currently done on a
 	 * resource/document level only. But there might be some benefit to also be able to do it here on some occasions.
 	 */
-	public <T, I extends Serializable> ResourceRepository<T, I> getResourceRepositoryFacade() {
+	public <T, I > ResourceRepository<T, I> getResourceRepositoryFacade() {
 		return (ResourceRepository<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
 	}
 

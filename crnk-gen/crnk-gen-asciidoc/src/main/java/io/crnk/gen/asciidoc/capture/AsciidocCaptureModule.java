@@ -87,12 +87,12 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
     private class AsciidocDecoratorFactory implements RepositoryDecoratorFactory {
         @Override
-        public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepository<T, I> repository) {
+        public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepository<T, I> repository) {
             return new AsciidocResourceDecorator();
         }
 
         @Override
-        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
+        public <T, I , D, J > RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
             return new AsciidocRelationshipDecorator();
         }
     }
@@ -208,7 +208,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         builder.write(file);
     }
 
-    class AsciidocResourceDecorator<T, I extends Serializable> extends ResourceRepositoryDecoratorBase<T, I> {
+    class AsciidocResourceDecorator<T, I > extends ResourceRepositoryDecoratorBase<T, I> {
 
 
         @Override
@@ -267,7 +267,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
     }
 
-    class AsciidocRelationshipDecorator<T, I extends Serializable, D, J extends Serializable> extends RelationshipRepositoryDecoratorBase<T, I, D, J> {
+    class AsciidocRelationshipDecorator<T, I , D, J > extends RelationshipRepositoryDecoratorBase<T, I, D, J> {
 
         @Override
         public void setRelation(T source, J targetId, String fieldName) {
