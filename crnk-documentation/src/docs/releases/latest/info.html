@@ -1,5 +1,5 @@
 With this release the first version of Crnk 3.x is released. There are many new, incremental
-improvements and cleanups. The cleanups address a number of historic issues to improve
+improvements and cleanups. The cleanups address a number of (rather old) historic issues to improve
 usability. They cause cause minor API breaks due but are easy to fix.
 The release is labelled as BETA because
 further cleanup and changes are expected. Otherwise the release builds upon previous releases
@@ -17,6 +17,10 @@ and should be a drama-free upgrade.
     <li>
         Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to use
         and not necessary for this particular use cases.
+    </li>
+    <li>
+        Resource identifier no longer must extend Serializable. There has been no requirements and complicated
+        their usage.
     </li>
 </ul>
 

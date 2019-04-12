@@ -5,7 +5,7 @@ import io.crnk.core.repository.ResourceRepository;
 
 import java.io.Serializable;
 
-public interface ResourceRepositoryDecorator<T, I extends Serializable> extends ResourceRepository<T, I>, Decorator<ResourceRepository<T, I>> {
+public interface ResourceRepositoryDecorator<T, I > extends ResourceRepository<T, I>, Decorator<ResourceRepository<T, I>> {
 
 	@Override
 	void setDecoratedObject(ResourceRepository<T, I> decoratedObject);

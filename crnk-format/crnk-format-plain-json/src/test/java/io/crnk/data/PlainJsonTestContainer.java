@@ -40,12 +40,12 @@ public class PlainJsonTestContainer implements TestContainer {
     }
 
     @Override
-    public <T, I extends Serializable> ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
+    public <T, I > ResourceRepository<T, I> getRepositoryForType(Class<T> resourceClass) {
         return client.getRepositoryForType(resourceClass);
     }
 
     @Override
-    public <T, I extends Serializable, D, J extends Serializable> RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
+    public <T, I , D, J > RelationshipRepository<T, I, D, J> getRepositoryForType(Class<T> sourceClass, Class<D> targetClass) {
         return client.getRepositoryForType(sourceClass, targetClass);
     }
 

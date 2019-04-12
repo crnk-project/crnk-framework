@@ -22,7 +22,7 @@ public class ApprovalRepositoryDecorator<T> extends ResourceRepositoryDecoratorB
 		return new RepositoryDecoratorFactoryBase() {
 
 			@Override
-			public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
+			public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(
 					ResourceRepository<T, I> repository) {
 				if (repository.getResourceClass() == Schedule.class) {
 					return (ResourceRepositoryDecorator<T, I>) new ApprovalRepositoryDecorator(approvalManager);

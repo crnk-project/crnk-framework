@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class SetOppositeStrategy<T, I extends Serializable, D, J extends Serializable>
+public class SetOppositeStrategy<T, I , D, J >
         extends ForwardingStrategyBase implements ForwardingSetStrategy<T, I, D, J> {
 
 

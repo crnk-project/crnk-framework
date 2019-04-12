@@ -722,7 +722,7 @@ public class JpaModule implements InitializingModule {
     class JpaRepositoryDecoratorFactory implements RepositoryDecoratorFactory {
 
         @Override
-        public <T, I extends Serializable> ResourceRepositoryDecorator<T, I> decorateRepository(
+        public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(
                 ResourceRepository<T, I> repository) {
             JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
             if (config != null) {
@@ -732,7 +732,7 @@ public class JpaModule implements InitializingModule {
         }
 
         @Override
-        public <T, I extends Serializable, D, J extends Serializable> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
+        public <T, I , D, J > RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
             return null;
         }
     }

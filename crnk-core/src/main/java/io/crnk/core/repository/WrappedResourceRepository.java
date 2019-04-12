@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * Wraps another resource repository. In contrast to decorators, a wrapped repository is still a repository and treated as such.
  */
-public abstract class WrappedResourceRepository<T, I extends Serializable> implements ResourceRepository<T, I> {
+public abstract class WrappedResourceRepository<T, I > implements ResourceRepository<T, I> {
 
 	private ResourceRepository<T, I> wrappedRepository;
 

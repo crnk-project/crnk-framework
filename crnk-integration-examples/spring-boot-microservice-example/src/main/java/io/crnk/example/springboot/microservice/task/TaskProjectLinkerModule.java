@@ -30,7 +30,7 @@ public class TaskProjectLinkerModule implements Module {
 	}
 
 	@JsonApiExposed(false)
-	class MicroServiceRepository<T, I extends Serializable> extends WrappedResourceRepository<T, I> {
+	class MicroServiceRepository<T, I > extends WrappedResourceRepository<T, I> {
 
 		public MicroServiceRepository(ResourceRepository<T, I> remoteRepository) {
 			super();

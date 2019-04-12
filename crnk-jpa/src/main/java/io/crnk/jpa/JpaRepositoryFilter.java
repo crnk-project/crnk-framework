@@ -21,7 +21,7 @@ public interface JpaRepositoryFilter {
 	 * @param repository to decorate
 	 * @return decorated or customized repository
 	 */
-	<T, I extends Serializable> JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository);
+	<T, I > JpaEntityRepository<T, I> filterCreation(JpaEntityRepository<T, I> repository);
 
 	/**
 	 * Decorate or customize the given JPA resource repository upon creation.
@@ -29,7 +29,7 @@ public interface JpaRepositoryFilter {
 	 * @param relationship to decorate
 	 * @return decorated or customized repository
 	 */
-	<S, I extends Serializable, T, J extends Serializable> JpaRelationshipRepository<S, I, T, J> filterCreation(
+	<S, I , T, J > JpaRelationshipRepository<S, I, T, J> filterCreation(
 			JpaRelationshipRepository<S, I, T, J> repository);
 
 	/**

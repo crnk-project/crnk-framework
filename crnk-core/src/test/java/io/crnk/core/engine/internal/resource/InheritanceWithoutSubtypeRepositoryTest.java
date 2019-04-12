@@ -324,7 +324,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
@@ -344,14 +344,14 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			RelatedResource related = new RelatedResource();
 			related.setId("related1");
 			return related;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 	}

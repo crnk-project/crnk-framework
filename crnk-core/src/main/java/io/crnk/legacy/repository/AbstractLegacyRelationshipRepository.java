@@ -4,7 +4,7 @@ import io.crnk.legacy.queryParams.QueryParams;
 
 import java.io.Serializable;
 
-public abstract class AbstractLegacyRelationshipRepository<S, S_ID extends Serializable, T, T_ID extends Serializable>
+public abstract class AbstractLegacyRelationshipRepository<S, S_ID , T, T_ID >
 		implements LegacyRelationshipRepository<S, S_ID, T, T_ID> {
 
 

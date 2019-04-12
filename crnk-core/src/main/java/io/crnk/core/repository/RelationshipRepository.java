@@ -34,7 +34,7 @@ import java.util.Collection;
  * @param <D> target class type
  * @param <J> D class id type
  */
-public interface RelationshipRepository<T, I extends Serializable, D, J extends Serializable>
+public interface RelationshipRepository<T, I , D, J >
 		extends Repository, MatchedRelationshipRepository {
 
 	/**

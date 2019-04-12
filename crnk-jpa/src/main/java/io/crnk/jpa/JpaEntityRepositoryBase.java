@@ -39,7 +39,7 @@ import java.util.Set;
  * Exposes a JPA entity as ResourceRepository. Inherit from this class to setup
  * a repository.
  */
-public class JpaEntityRepositoryBase<T, I extends Serializable> extends JpaRepositoryBase<T> implements ResourceRepository<T, I>,
+public class JpaEntityRepositoryBase<T, I > extends JpaRepositoryBase<T> implements ResourceRepository<T, I>,
         ResourceRegistryAware {
 
     private final BeanAttributeInformation primaryKeyAttribute;

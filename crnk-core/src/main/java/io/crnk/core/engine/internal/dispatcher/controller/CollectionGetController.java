@@ -42,7 +42,7 @@ public class CollectionGetController extends ResourceIncludeField {
 			logger.debug("finding {}", queryAdapter);
 			response = resourceRepository.findAll(queryAdapter);
 		} else {
-			Collection<? extends Serializable> parsedIds = jsonPath.getIds();
+			Collection<? > parsedIds = jsonPath.getIds();
 			logger.debug("finding {} with ids {}", queryAdapter, parsedIds);
 			response = resourceRepository.findAll(parsedIds, queryAdapter);
 		}

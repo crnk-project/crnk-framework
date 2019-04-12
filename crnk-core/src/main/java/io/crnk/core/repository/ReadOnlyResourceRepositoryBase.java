@@ -2,7 +2,7 @@ package io.crnk.core.repository;
 
 import java.io.Serializable;
 
-public abstract class ReadOnlyResourceRepositoryBase<T, I extends Serializable> extends ResourceRepositoryBase<T, I> {
+public abstract class ReadOnlyResourceRepositoryBase<T, I > extends ResourceRepositoryBase<T, I> {
 
 	protected ReadOnlyResourceRepositoryBase(Class<T> resourceClass) {
 		super(resourceClass);

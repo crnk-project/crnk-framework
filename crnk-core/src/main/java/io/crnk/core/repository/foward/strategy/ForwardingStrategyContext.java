@@ -11,7 +11,6 @@ import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -63,7 +62,7 @@ public class ForwardingStrategyContext {
         return (Collection) targetAdapter.findAll(targetIds, queryAdapter).get().getEntity();
     }
 
-    public <Q> Q findOne(RegistryEntry entry, Serializable id, QueryContext queryContext) {
+    public <Q> Q findOne(RegistryEntry entry, Object id, QueryContext queryContext) {
         ResourceRepositoryAdapter targetAdapter = entry.getResourceRepository();
         QueryAdapter queryAdapter = new QuerySpecAdapter(new QuerySpec(entry.getResourceInformation()), resourceRegistry, queryContext);
         return (Q) targetAdapter.findOne(id, queryAdapter).get().getEntity();

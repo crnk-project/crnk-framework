@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * Represents a non-existing resource. It is assigned to a resource class if Crnk couldn't find any resource.
  */
-public class LegacyNotFoundRepository<T, ID extends Serializable> implements LegacyResourceRepository<T, ID> {
+public class LegacyNotFoundRepository<T, ID > implements LegacyResourceRepository<T, ID> {
 
 	private final Class<?> repositoryClass;
 

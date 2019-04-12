@@ -63,7 +63,7 @@ import io.crnk.core.resource.list.ResourceList;
  * @deprecated use {@link ForwardingRelationshipRepository}
  */
 @Deprecated
-public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
+public class RelationshipRepositoryBase<T, I , D, J >
 		implements BulkRelationshipRepository<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
 
 

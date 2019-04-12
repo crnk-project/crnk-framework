@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
-public class ResourceRepositoryStubImpl<T, I extends Serializable> extends ClientStubBase
+public class ResourceRepositoryStubImpl<T, I > extends ClientStubBase
         implements ResourceRepository<T, I> {
 
     protected ResourceInformation resourceInformation;
