@@ -1,17 +1,11 @@
 package io.crnk.jpa.internal;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.criteria.CriteriaQuery;
-
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.IncludeSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.repository.WrappedResourceRepository;
+import io.crnk.core.repository.decorate.WrappedResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.jpa.JpaModuleConfig;
 import io.crnk.jpa.JpaRepositoryConfig;
@@ -25,6 +19,12 @@ import io.crnk.jpa.query.criteria.JpaCriteriaRepositoryFilter;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaKey;
+
+import javax.persistence.criteria.CriteriaQuery;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class JpaRepositoryUtils {
 
@@ -145,7 +145,7 @@ public class JpaRepositoryUtils {
 
     public static Object unwrap(Object repository) {
         while (repository instanceof WrappedResourceRepository) {
-            repository = ((WrappedResourceRepository) repository).getWrappedRepository();
+            repository = ((WrappedResourceRepository) repository).getWrappedObject();
         }
         return repository;
     }

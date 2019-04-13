@@ -21,9 +21,9 @@ import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
-	Field createResourceField();
+	FieldInformationBuilder createResourceField();
 
-	interface RelationshipRepository {
+	interface RelationshipRepositoryInformationBuilder {
 
 		void setAccess(RepositoryMethodAccess access);
 
@@ -31,7 +31,7 @@ public interface InformationBuilder {
 
 	}
 
-	interface ResourceRepository {
+	interface ResourceRepositoryInformationBuilder {
 
 		void from(ResourceRepositoryInformation information);
 
@@ -45,92 +45,92 @@ public interface InformationBuilder {
 
 	}
 
-	interface Resource {
+	interface ResourceInformationBuilder {
 
 		void from(ResourceInformation information);
 
-		InformationBuilder.Field addField();
+		FieldInformationBuilder addField();
 
-		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
+		FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
 
 		/**
 		 * @deprecated use {@link #implementationType(Type)}
 		 */
 		@Deprecated
-		Resource resourceClass(Class<?> resourceClass);
+		ResourceInformationBuilder resourceClass(Class<?> resourceClass);
 
-		Resource implementationType(Type implementationType);
+		ResourceInformationBuilder implementationType(Type implementationType);
 
-		Resource resourceType(String resourceType);
+		ResourceInformationBuilder resourceType(String resourceType);
 
-		Resource resourcePath(String resourcePath);
+		ResourceInformationBuilder resourcePath(String resourcePath);
 
-		Resource superResourceType(String superResourceType);
+		ResourceInformationBuilder superResourceType(String superResourceType);
 
 		/**
 		 * @deprecated use pagingSpecType
 		 */
 		@Deprecated
-		Resource pagingBehavior(PagingBehavior pagingBehavior);
+		ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
 
-		Resource pagingSpecType(Class<PagingSpec> pagingSpecType);
+		ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
 
 		ResourceInformation build();
 
 	}
 
-	interface Field {
+	interface FieldInformationBuilder {
 
 		ResourceField build();
 
 		void from(ResourceField field);
 
-		Field relationshipRepositoryBehavior(
+		FieldInformationBuilder relationshipRepositoryBehavior(
 				RelationshipRepositoryBehavior relationshipRepositoryBehavior);
 
-		Field jsonName(String jsonName);
+		FieldInformationBuilder jsonName(String jsonName);
 
-		Field underlyingName(String underlyingName);
+		FieldInformationBuilder underlyingName(String underlyingName);
 
-		Field name(String name);
+		FieldInformationBuilder name(String name);
 
-		Field type(Class<?> type);
+		FieldInformationBuilder type(Class<?> type);
 
-		Field genericType(Type genericType);
+		FieldInformationBuilder genericType(Type genericType);
 
-		Field serializeType(SerializeType serializeType);
+		FieldInformationBuilder serializeType(SerializeType serializeType);
 
-		Field jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
+		FieldInformationBuilder jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
 
-		Field oppositeResourceType(String oppositeResourceType);
+		FieldInformationBuilder oppositeResourceType(String oppositeResourceType);
 
-		Field lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
+		FieldInformationBuilder lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		Field fieldType(ResourceFieldType fieldType);
+		FieldInformationBuilder fieldType(ResourceFieldType fieldType);
 
-		Field oppositeName(String oppositeName);
+		FieldInformationBuilder oppositeName(String oppositeName);
 
-		Field accessor(ResourceFieldAccessor accessor);
+		FieldInformationBuilder accessor(ResourceFieldAccessor accessor);
 
-		Field access(ResourceFieldAccess access);
+		FieldInformationBuilder access(ResourceFieldAccess access);
 
-		Field idAccessor(ResourceFieldAccessor idAccessor);
+		FieldInformationBuilder idAccessor(ResourceFieldAccessor idAccessor);
 
-		Field idName(String idName);
+		FieldInformationBuilder idName(String idName);
 
-		Field idType(Class idType);
+		FieldInformationBuilder idType(Class idType);
 
-		Field patchStrategy(PatchStrategy patchStrategy);
+		FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
 	}
 
-	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
+	RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
-	RelationshipRepository createRelationshipRepository(RelationshipMatcher matcher);
+	RelationshipRepositoryInformationBuilder createRelationshipRepository(RelationshipMatcher matcher);
 
-	ResourceRepository createResourceRepository();
+	ResourceRepositoryInformationBuilder createResourceRepository();
 
-	Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+	ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath);
 
-	Resource createResource(Class<?> resourceClass, String resourceType);
+	ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType);
 
 }

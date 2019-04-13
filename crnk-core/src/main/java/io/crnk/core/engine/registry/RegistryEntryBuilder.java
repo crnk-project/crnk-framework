@@ -9,25 +9,25 @@ public interface RegistryEntryBuilder {
 	 */
 	void fromImplementation(Object repository);
 
-	interface ResourceRepository {
+	interface ResourceRepositoryEntryBuilder {
 
-		InformationBuilder.ResourceRepository information();
-
-		void instance(Object repository);
-	}
-
-	interface RelationshipRepository {
-
-		InformationBuilder.RelationshipRepository information();
+		InformationBuilder.ResourceRepositoryInformationBuilder information();
 
 		void instance(Object repository);
 	}
 
-	ResourceRepository resourceRepository();
+	interface RelationshipRepositoryEntryBuilder {
 
-	InformationBuilder.Resource resource();
+		InformationBuilder.RelationshipRepositoryInformationBuilder information();
 
-	RelationshipRepository relationshipRepositoryForField(String fieldName);
+		void instance(Object repository);
+	}
+
+	ResourceRepositoryEntryBuilder resourceRepository();
+
+	InformationBuilder.ResourceInformationBuilder resource();
+
+	RelationshipRepositoryEntryBuilder relationshipRepositoryForField(String fieldName);
 
 	RegistryEntry build();
 

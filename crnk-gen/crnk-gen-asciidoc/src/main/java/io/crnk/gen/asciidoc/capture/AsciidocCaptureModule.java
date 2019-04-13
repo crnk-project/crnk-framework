@@ -12,20 +12,20 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecoratorBase;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
+import io.crnk.core.repository.decorate.WrappedManyRelationshipRepository;
+import io.crnk.core.repository.decorate.WrappedOneRelationshipRepository;
+import io.crnk.core.repository.decorate.WrappedResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.gen.asciidoc.internal.AsciidocBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
@@ -87,13 +87,17 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
     private class AsciidocDecoratorFactory implements RepositoryDecoratorFactory {
         @Override
-        public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(ResourceRepository<T, I> repository) {
-            return new AsciidocResourceDecorator();
-        }
-
-        @Override
-        public <T, I , D, J > RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
-            return new AsciidocRelationshipDecorator();
+        public Object decorateRepository(Object repository) {
+            if (repository instanceof ResourceRepository) {
+                return new AsciidocResourceDecorator((ResourceRepository) repository);
+            }
+            if (repository instanceof OneRelationshipRepository) {
+                return new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository);
+            }
+            if (repository instanceof ManyRelationshipRepository) {
+                return new AsciidocManyRelationshipDecorator((ManyRelationshipRepository) repository);
+            }
+            return repository;
         }
     }
 
@@ -208,8 +212,12 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         builder.write(file);
     }
 
-    class AsciidocResourceDecorator<T, I > extends ResourceRepositoryDecoratorBase<T, I> {
+    class AsciidocResourceDecorator<T, I> extends WrappedResourceRepository<T, I> {
 
+
+        public AsciidocResourceDecorator(ResourceRepository<T, I> wrappedRepository) {
+            super(wrappedRepository);
+        }
 
         @Override
         public T findOne(I id, QuerySpec querySpec) {
@@ -267,7 +275,11 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
         }
     }
 
-    class AsciidocRelationshipDecorator<T, I , D, J > extends RelationshipRepositoryDecoratorBase<T, I, D, J> {
+    class AsciidocOneRelationshipDecorator<T, I, D, J> extends WrappedOneRelationshipRepository<T, I, D, J> {
+
+        public AsciidocOneRelationshipDecorator(OneRelationshipRepository<T, I, D, J> decoratedObject) {
+            super(decoratedObject);
+        }
 
         @Override
         public void setRelation(T source, J targetId, String fieldName) {
@@ -276,6 +288,23 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
             } finally {
                 finalizeDoc(source.getClass());
             }
+        }
+
+        @Override
+        public Map<I, D> findOneRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
+            try {
+                return super.findOneRelations(sourceIds, fieldName, querySpec);
+            } finally {
+                finalizeDoc(querySpec.getResourceClass());
+            }
+        }
+    }
+
+
+    class AsciidocManyRelationshipDecorator<T, I, D, J> extends WrappedManyRelationshipRepository<T, I, D, J> {
+
+        public AsciidocManyRelationshipDecorator(ManyRelationshipRepository<T, I, D, J> decoratedObject) {
+            super(decoratedObject);
         }
 
         @Override
@@ -305,23 +334,14 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
             }
         }
 
-        @Override
-        public D findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
-            try {
-                return super.findOneTarget(sourceId, fieldName, querySpec);
-            } finally {
-                finalizeDoc(querySpec.getResourceClass());
-            }
-        }
 
         @Override
-        public ResourceList<D> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
+        public Map<I, ResourceList<D>> findManyRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
             try {
-                return super.findManyTargets(sourceId, fieldName, querySpec);
+                return super.findManyRelations(sourceIds, fieldName, querySpec);
             } finally {
                 finalizeDoc(querySpec.getResourceClass());
             }
         }
     }
-
 }

@@ -375,7 +375,8 @@ public class CrnkClient {
         }
 
         ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
-        final ResourceRepository repositoryStub = decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
+        final ResourceRepository repositoryStub = (ResourceRepository)
+                decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
 
         // create interface for it!
         RepositoryInstanceBuilder repositoryInstanceBuilder = new RepositoryInstanceBuilder(null, null) {
@@ -438,7 +439,7 @@ public class CrnkClient {
 
         if (!relationshipEntries.containsKey(targetResourceType)) {
 
-            final RelationshipRepository relationshipRepositoryStub = decorate(
+            final Object relationshipRepositoryStub = decorate(
                     new RelationshipRepositoryStubImpl(this, sourceClass, targetClass, sourceEntry.getResourceInformation(), urlBuilder)
             );
             RepositoryInstanceBuilder<LegacyRelationshipRepository> relationshipRepositoryInstanceBuilder =
@@ -507,7 +508,7 @@ public class CrnkClient {
                         , null
                         , PagingSpec.class
                 );
-        return decorate(new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder));
+        return (ResourceRepository<Resource, String>) decorate(new ResourceRepositoryStubImpl<>(this, Resource.class, resourceInformation, urlBuilder));
     }
 
     /**
@@ -520,20 +521,15 @@ public class CrnkClient {
         ResourceInformation sourceResourceInformation =
                 new ResourceInformation(moduleRegistry.getTypeParser(), Resource.class, sourceResourceType, null, null,
                         PagingSpec.class);
-        return decorate(new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder));
+        return (RelationshipRepository<Resource, String, Resource, String>) decorate(new RelationshipRepositoryStubImpl<>(this, Resource.class, Resource.class, sourceResourceInformation, urlBuilder));
     }
 
 
-    protected ResourceRepository decorate(ResourceRepositoryStubImpl repository) {
+    protected Object decorate(Object repository) {
         DefaultRegistryEntryBuilder entryBuilder = new DefaultRegistryEntryBuilder(moduleRegistry);
-        return (ResourceRepository) entryBuilder.decorateRepository(repository);
+        return entryBuilder.decorateRepository(repository);
     }
 
-
-    protected RelationshipRepository decorate(RelationshipRepositoryStubImpl repository) {
-        DefaultRegistryEntryBuilder entryBuilder = new DefaultRegistryEntryBuilder(moduleRegistry);
-        return (RelationshipRepository) entryBuilder.decorateRepository(repository);
-    }
 
     /**
      * @param sourceClass source class

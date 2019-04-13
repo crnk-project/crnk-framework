@@ -139,7 +139,7 @@ public class ResourceFieldContributorTest {
 
 		@Override
 		public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
-			InformationBuilder.Field fieldBuilder = context.getInformationBuilder().createResourceField();
+			InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
 			fieldBuilder.jsonName("contributedProject");
 			fieldBuilder.underlyingName("contributedProject");
 			fieldBuilder.type(Project.class);
