@@ -78,7 +78,7 @@ public class DefaultInformationBuilderTest {
 		ResourceField projectInfo = info.findFieldByName("project");
 		Assert.assertEquals("project", projectInfo.getUnderlyingName());
 		Assert.assertEquals("tasks", projectInfo.getOppositeName());
-		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeAutomatically());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeBehavior());
 		Assert.assertEquals(Project.class, projectInfo.getType());
 		Assert.assertSame(accessor, projectInfo.getAccessor());
 		Assert.assertFalse(projectInfo.getAccess().isFilterable());
@@ -122,7 +122,7 @@ public class DefaultInformationBuilderTest {
 		ResourceField projectInfo = info.findFieldByName("project");
 		Assert.assertEquals("project", projectInfo.getUnderlyingName());
 		Assert.assertEquals("tasks", projectInfo.getOppositeName());
-		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeAutomatically());
+		Assert.assertEquals(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS, projectInfo.getLookupIncludeBehavior());
 		Assert.assertEquals(Project.class, projectInfo.getType());
 		Assert.assertSame(accessor, projectInfo.getAccessor());
 		Assert.assertFalse(projectInfo.getAccess().isFilterable());

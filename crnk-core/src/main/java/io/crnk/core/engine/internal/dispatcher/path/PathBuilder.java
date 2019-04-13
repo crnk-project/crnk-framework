@@ -94,6 +94,7 @@ public class PathBuilder {
 	public JsonPath build(String path) {
 		String[] pathElements = splitPath(path);
 		if (pathElements.length == 0 || (pathElements.length == 1 && "".equals(pathElements[0]))) {
+			LOGGER.debug("requested root path: {}", path);
 			return null;
 		}
 		return parseResourcePath(new LinkedList<>(Arrays.asList(pathElements)));
@@ -105,6 +106,7 @@ public class PathBuilder {
 			return null;
 		}
 		if (pathElements.isEmpty()) {
+			LOGGER.debug("resource path to root entry found: {}", rootEntry);
 			return new ResourcePath(rootEntry, null);
 		}
 		Map<String, RepositoryAction> actions = rootEntry.getRepositoryInformation().getActions();
@@ -123,12 +125,14 @@ public class PathBuilder {
 
 	private JsonPath parseFieldPath(RegistryEntry entry, List<Serializable> ids, LinkedList<String> pathElements) {
 		if (pathElements.isEmpty()) {
+			LOGGER.debug("resource path for {} with ids {} found", entry, ids);
 			return new ResourcePath(entry, ids);
 		}
 
 		Map<String, RepositoryAction> actions = entry.getRepositoryInformation().getActions();
 		if (actions.containsKey(pathElements.peek())) {
 			String pathElement = pathElements.pop();
+			LOGGER.debug("action path {} for {} with ids {} found", pathElement, entry, ids);
 			return new ActionPath(entry, ids, pathElement);
 		}
 
@@ -149,7 +153,7 @@ public class PathBuilder {
 			if (!pathElements.isEmpty()) {
 				throw new BadRequestException("invalid url, cannot add further url fragments after relationship name");
 			}
-
+			LOGGER.debug("relationship path {} for {} with ids {} found", field, entry, ids);
 			return new RelationshipsPath(entry, ids, field);
 		}
 
@@ -165,6 +169,7 @@ public class PathBuilder {
 				path.addParentField(field);
 				return path;
 			}
+			LOGGER.debug("field path {} for {} with ids {} found", field, entry, ids);
 			return new FieldPath(entry, ids, field);
 		}
 
@@ -206,7 +211,7 @@ public class PathBuilder {
 	private RegistryEntry findSelfOrSubtypeByField(RegistryEntry entry, String fieldName) {
 		if(entry.getResourceInformation().findFieldByName(fieldName) == null) {
 			// consider introducing RegistyEntry.getSubTypes in the future
-			for (RegistryEntry someEntry : resourceRegistry.getResources()) {
+			for (RegistryEntry someEntry : resourceRegistry.getEntries()) {
 				ResourceInformation resourceInformation = someEntry.getResourceInformation();
 				ResourceField field = resourceInformation.findFieldByName(fieldName);
 				if (field != null && someEntry.isParent(entry)) {
@@ -243,8 +248,11 @@ public class PathBuilder {
 		while (true) {
 			RegistryEntry entry = getEntryByPath(potentialResourcePath.toString());
 			if (entry != null) {
+				LOGGER.debug("registry entry found for: {}", potentialResourcePath);
 				return entry;
 			}
+
+			LOGGER.debug("no registry entry found for: {}", potentialResourcePath);
 
 			if (pathElements.isEmpty() || pathElements.peek().equals(RELATIONSHIP_MARK)) {
 				break;

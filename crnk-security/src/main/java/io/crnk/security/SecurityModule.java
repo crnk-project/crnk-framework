@@ -126,7 +126,7 @@ public class SecurityModule implements Module {
 			}
 
 			if (resourceType == null) {
-				Collection<RegistryEntry> entries = context.getResourceRegistry().getResources();
+				Collection<RegistryEntry> entries = context.getResourceRegistry().getEntries();
 				for (RegistryEntry entry : entries) {
 					String entryResourceType = entry.getResourceInformation().getResourceType();
 					configureRule(newPermissions, entryResourceType, rule.getRole(), rule.getPermission());

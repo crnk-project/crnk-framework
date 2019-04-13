@@ -113,7 +113,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	}
 
 	private void collectInformation() {
-		Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getResources();
+		Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getEntries();
 		for (RegistryEntry entry : entries) {
 			ResourceInformation resourceInformation = entry.getResourceInformation();
 

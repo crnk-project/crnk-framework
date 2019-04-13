@@ -12,6 +12,7 @@ import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
 import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
 import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.exception.InvalidResourceException;
 import io.crnk.core.resource.annotations.JsonApiRelation;
@@ -21,6 +22,8 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -36,6 +39,8 @@ import java.util.Set;
 
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     protected ResourceInformationProviderContext context;
 
@@ -108,7 +113,6 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
         fieldBuilder.jsonIncludeStrategy(getJsonIncludeStrategy(attributeDesc));
         fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
-        fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc));
         fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
 
         Type genericType;
@@ -152,10 +156,15 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
                 }
             }
 
+            // if id field has been explicitly declared, then it must also exist
+            PreconditionUtil.verify(idAttribute != null || !hasIdNameReference, "idField {} not found for {}", idFieldName, attributeDesc);
+
             if (idAttribute != null && (hasIdNameReference || idAttribute.getAnnotation(JsonApiRelationId.class).isPresent())) {
                 fieldBuilder.idName(idFieldName);
                 fieldBuilder.idType(idAttribute.getImplementationClass());
             }
+
+            fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc, idAttribute != null));
         }
     }
 
@@ -225,7 +234,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         return JsonIncludeStrategy.DEFAULT;
     }
 
-    protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
+    protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc, boolean hasIdField) {
         LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
 
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
@@ -237,22 +246,24 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
         }
 
-        // If the field-level behavior is DEFAULT, then look to the global setting
-        if (behavior == LookupIncludeBehavior.DEFAULT) {
-            behavior = globalLookupIncludeBehavior;
+        if (behavior != LookupIncludeBehavior.DEFAULT) {
+            LOGGER.debug("{}: using configured LookupIncludeBehavior.{}", attributeDesc, behavior);
+            return behavior;
         }
 
         // If the global behavior was also default, fall all they way back to the
         // information provider's default
-        if (behavior == LookupIncludeBehavior.DEFAULT) {
-            behavior = getDefaultLookupIncludeBehavior(attributeDesc);
-        }
-
-        return behavior;
+        return getDefaultLookupIncludeBehavior(attributeDesc);
     }
 
     protected LookupIncludeBehavior getDefaultLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
-        return LookupIncludeBehavior.NONE;
+        // If the field-level behavior is DEFAULT, then look to the global setting
+        if (globalLookupIncludeBehavior != LookupIncludeBehavior.DEFAULT) {
+            LOGGER.debug("{}: using global/configured default LookupIncludeBehavior.{}", attributeDesc, globalLookupIncludeBehavior);
+            return globalLookupIncludeBehavior;
+        }
+
+        return LookupIncludeBehavior.DEFAULT;
     }
 
     private ResourceFieldAccess getAccess(BeanAttributeInformation attributeDesc, ResourceFieldType resourceFieldType) {

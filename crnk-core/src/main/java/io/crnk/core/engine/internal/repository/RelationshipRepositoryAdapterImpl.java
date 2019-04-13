@@ -14,6 +14,8 @@ import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.LegacyRelationshipRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unchecked")
 public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter implements RelationshipRepositoryAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipRepositoryAdapterImpl.class);
 
     private final Object relationshipRepository;
 
@@ -50,6 +54,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Object source = request.getEntity();
                 Serializable targetId = request.getId();
                 ResourceField field = request.getRelationshipField();
+                LOGGER.debug("setRelation {} on {} with {}", targetId, field, relationshipRepository);
                 if (relationshipRepository instanceof OneRelationshipRepository) {
                     ((OneRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
                 } else {
@@ -74,6 +79,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Object source = request.getEntity();
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
+                LOGGER.debug("setRelations {} on {} with {}", targetIds, field, relationshipRepository);
                 if (relationshipRepository instanceof ManyRelationshipRepository) {
                     ((ManyRelationshipRepository) relationshipRepository)
                             .setRelations(source, targetIds, field.getUnderlyingName());
@@ -99,6 +105,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Object source = request.getEntity();
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
+                LOGGER.debug("addRelation {} on {} with {}", targetIds, field, relationshipRepository);
                 if (relationshipRepository instanceof ManyRelationshipRepository) {
                     ((ManyRelationshipRepository) relationshipRepository)
                             .addRelations(source, targetIds, field.getUnderlyingName());
@@ -124,6 +131,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Object source = request.getEntity();
                 Collection<?> targetIds = request.getIds();
                 ResourceField field = request.getRelationshipField();
+                LOGGER.debug("removeRelations {} on {} with {}", targetIds, field, relationshipRepository);
                 if (relationshipRepository instanceof ManyRelationshipRepository) {
                     ((ManyRelationshipRepository) relationshipRepository)
                             .removeRelations(source, targetIds, field.getUnderlyingName());
@@ -140,7 +148,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
     }
 
     @SuppressWarnings("rawtypes")
-    public Result<JsonApiResponse> findOneTarget(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+    public Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
         RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
             @Override
@@ -149,6 +157,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Serializable sourceId = request.getId();
                 ResourceField field = request.getRelationshipField();
 
+                LOGGER.debug("findOneRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
                 Object resource;
                 if (relationshipRepository instanceof OneRelationshipRepository) {
                     OneRelationshipRepository querySpecRepository = (OneRelationshipRepository) relationshipRepository;
@@ -170,7 +179,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
         return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
     }
 
-    public Result<JsonApiResponse> findManyTargets(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+    public Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
         RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
             @Override
@@ -179,6 +188,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                 Serializable sourceId = request.getId();
                 ResourceField field = request.getRelationshipField();
 
+                LOGGER.debug("findManyRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
                 Object resources;
                 if (relationshipRepository instanceof ManyRelationshipRepository) {
                     ManyRelationshipRepository querySpecRepository = (ManyRelationshipRepository) relationshipRepository;
@@ -213,6 +223,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                     ResourceField field = request.getRelationshipField();
                     QueryAdapter queryAdapter = request.getQueryAdapter();
 
+                    LOGGER.debug("findManyTargets for sourceIds={} on {} with {}", sourceIds, field, relationshipRepository);
                     ManyRelationshipRepository bulkRepository = (ManyRelationshipRepository) relationshipRepository;
                     ResourceInformation targetResourceInformation =
                             moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
@@ -228,7 +239,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
             // fallback to non-bulk operation
             Map<Object, JsonApiResponse> responseMap = new HashMap<>();
             for (Object sourceId : sourceIds) {
-                JsonApiResponse response = findManyTargets(sourceId, field, queryAdapter).get();
+                JsonApiResponse response = findManyRelations(sourceId, field, queryAdapter).get();
                 responseMap.put(sourceId, response);
             }
             return new ImmediateResult<>(responseMap);
@@ -254,6 +265,9 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
                     ResourceInformation targetResourceInformation =
                             moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
                                     .getResourceInformation();
+
+                    LOGGER.debug("findOneRelations for sourceId={} on {} with {}", sourceIds, field, relationshipRepository);
+
                     Map targetsMap = bulkRepository
                             .findOneRelations(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
                     return toResponses(targetsMap, false, queryAdapter, field, HttpMethod.GET);
@@ -266,7 +280,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
             // fallback to non-bulk operation
             Map<Object, JsonApiResponse> responseMap = new HashMap<>();
             for (Object sourceId : sourceIds) {
-                JsonApiResponse response = findOneTarget(sourceId, field, queryAdapter).get();
+                JsonApiResponse response = findOneRelations(sourceId, field, queryAdapter).get();
                 responseMap.put(sourceId, response);
             }
             return new ImmediateResult<>(responseMap);

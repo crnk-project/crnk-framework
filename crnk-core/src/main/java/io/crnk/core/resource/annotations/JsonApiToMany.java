@@ -27,7 +27,7 @@ public @interface JsonApiToMany {
 
 	/**
 	 * @return opposite attribute name in case of a bidirectional association. Used by {@link RelationshipRepositoryBase} to implement
-	 * its findOneTarget and findManyTarget functions by directly searching in the related resource repository with a filter in the opposite direction.
+	 * its findOneRelations and findManyTarget functions by directly searching in the related resource repository with a filter in the opposite direction.
 	 * Allow to work with relations with only implementing resource repositories!
 	 */
 	String opposite() default "";

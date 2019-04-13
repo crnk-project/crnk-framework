@@ -121,6 +121,7 @@ public class ModuleRegistryTest {
         SimpleModule module = new SimpleModule("test");
         module.addFilter(filter1);
         module.addFilter(filter2);
+        moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
         moduleRegistry.addModule(module);
         moduleRegistry.init(new ObjectMapper());
 
@@ -147,6 +148,7 @@ public class ModuleRegistryTest {
         module.addResourceModificationFilter(filter1);
         module.addResourceModificationFilter(filter2);
         moduleRegistry.addModule(module);
+        moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
         moduleRegistry.init(new ObjectMapper());
 
         List<ResourceModificationFilter> filters = moduleRegistry.getResourceModificationFilters();
@@ -158,6 +160,7 @@ public class ModuleRegistryTest {
     public void checkNullResourcePath() {
         ModuleRegistry moduleRegistry = new ModuleRegistry();
         SimpleModule module = new SimpleModule("test");
+        moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
         moduleRegistry.addModule(module);
         moduleRegistry.init(new ObjectMapper());
         Assert.assertEquals(moduleRegistry.getResourceInformationBuilder().getResourcePath(TestResource2.class), null);
@@ -180,6 +183,7 @@ public class ModuleRegistryTest {
         module.addRepositoryFilter(filter1);
         module.addRepositoryFilter(filter2);
         moduleRegistry.addModule(module);
+        moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
         moduleRegistry.init(new ObjectMapper());
 
         List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();

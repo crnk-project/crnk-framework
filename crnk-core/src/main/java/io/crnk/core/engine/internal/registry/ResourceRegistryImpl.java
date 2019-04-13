@@ -258,8 +258,8 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
-	public Collection<RegistryEntry> getResources() {
-		return rootPart.getResources();
+	public Collection<RegistryEntry> getEntries() {
+		return rootPart.getEntries();
 	}
 
 	public void setRootPart(ResourceRegistryPart rootPart) {

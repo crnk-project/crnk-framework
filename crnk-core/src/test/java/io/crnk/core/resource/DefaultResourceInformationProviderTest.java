@@ -337,12 +337,12 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveNoneForDefaultLookupBehavior() {
+	public void shouldHaveDefaultForDefaultLookupBehavior() {
 		ResourceInformation resourceInformation =
 				resourceInformationProvider.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-				.contains(LookupIncludeBehavior.NONE);
+				.contains(LookupIncludeBehavior.DEFAULT);
 	}
 
 	@Test
@@ -399,7 +399,7 @@ public class DefaultResourceInformationProviderTest {
 		assertThat(resourceInformation.getRelationshipFields()).extracting("serializeType")
 				.contains(SerializeType.LAZY, SerializeType.LAZY);
 		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-				.contains(LookupIncludeBehavior.NONE, LookupIncludeBehavior.NONE);
+				.contains(LookupIncludeBehavior.DEFAULT);
 		assertThat(resourceInformation.getRelationshipFields()).extracting("resourceFieldType")
 				.contains(ResourceFieldType.RELATIONSHIP, ResourceFieldType.RELATIONSHIP);
 	}

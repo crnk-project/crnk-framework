@@ -12,6 +12,8 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.reactive.repository.ReactiveManyRelationshipRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import java.util.Map;
 
 
 public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositoryAdapterBase implements RelationshipRepositoryAdapter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReactiveManyRelationshipRepository.class);
 
 	private final ReactiveManyRelationshipRepository repository;
 
@@ -44,6 +48,8 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 			queryAdapter) {
 		RepositoryRequestSpec requestSpec =
 				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, targetIds, field);
+
+		LOGGER.debug("setRelations for {} on {} with {}", targetIds, field, repository);
 		Mono result = repository.setRelations(source, targetIds, field);
 		return toResponse(result, requestSpec);
 	}
@@ -53,6 +59,8 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 			queryAdapter) {
 		RepositoryRequestSpec requestSpec =
 				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.POST, source, queryAdapter, targetIds, field);
+
+		LOGGER.debug("addRelations for {} on {} with {}", targetIds, field, repository);
 		Mono result = repository.addRelations(source, targetIds, field);
 		return toResponse(result, requestSpec);
 	}
@@ -60,6 +68,8 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 	@Override
 	public Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field,
 												   QueryAdapter queryAdapter) {
+
+		LOGGER.debug("removeRelations for {} on {} with {}", targetIds, field, repository);
 		RepositoryRequestSpec requestSpec =
 				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.DELETE, source, queryAdapter, targetIds, field);
 		Mono result = repository.removeRelations(source, targetIds, field);
@@ -67,12 +77,13 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 	}
 
 	@Override
-	public Result<JsonApiResponse> findOneTarget(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+	public Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Result<JsonApiResponse> findManyTargets(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+	public Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+		LOGGER.debug("findManyRelations for sourceId={} on {} with {}",sourceId, field, repository);
 		RepositoryRequestSpec requestSpec =
 				RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
 		QuerySpec querySpec = queryAdapter.toQuerySpec();
@@ -84,6 +95,7 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 	@Override
 	public Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field,
 																	QueryAdapter queryAdapter) {
+		LOGGER.debug("findManyRelations for sourceIds={} on {} with {}",sourceIds, field, repository);
 		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, new ArrayList<>(sourceIds), field);
 		QuerySpec querySpec = queryAdapter.toQuerySpec();
 		Mono<Map> result = repository.findManyTargets(sourceIds, field, querySpec);

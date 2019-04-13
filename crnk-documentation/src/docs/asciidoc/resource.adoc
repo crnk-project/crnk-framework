@@ -132,9 +132,7 @@ anchor:jsonApiRelation[]
 ## JsonApiRelation
 
 Indicates a relationship to either a single value or collection of resources. The type of such fields
-must be a valid resource.
-
-The example below shows an example of a bi-directional relationship between `Task` and `Project`.
+must be a valid resource. The next example showcases a bi-directional relationship between `Task` and `Project`:
 
 [source]
 ----
@@ -157,15 +155,14 @@ public class Task {
 }
 ----
 
-The two fields are linked through the `mappedBy` property by pointing from the non-owning to the owning side
-of the relationship. In this regard, `mappedBy` has exactly the same semantics as for JPA-related annotations.
+The `project` and `tasks` field are linked through the `mappedBy` property by pointing from the non-owning
+to the owning field of the relationship. `project` as owning field will be used for all read and update operations.
+The semantics of `mappedBy` matches with the concepts of, for example, JPA-related annotations.
+It is typical for single-valued fields like `project` to be the owner. Such fields are usually backed by something like
+a column in a database and are simple to read and write. In contrast,
+multi-valued fields like `tasks` can only be obtained by issuing a query against the single-valued counter-part.
 
-In one-to-many cases like in this is example, it is typical for the single-valued field to be the owner.
-Usually it is backed by something like a column in a database and can be read and written. In contrast,
-the multi-valued field can only be obtained by issuing a query against the single-valued field. In the same
-fashion Crnk will by default access repository implementations outlined in the next chapter.
-
-@JsonApiRelation comes with a number of attributes to customize its behavior. And
+@JsonApiRelation comes with a number of attributes to customize its behavior.
 <<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
 
 [source]
@@ -174,7 +171,7 @@ fashion Crnk will by default access repository implementations outlined in the n
 private Project project;
 ----
 
-The optional `serialize` parameter specifies how the association should be serialized when making a request.
+The optional `serialize` parameter specifies how an association should be serialized when making a request.
 There are two things to consider. Whether related resources should be added to the `include` section of the
 response document. And whether the id of related resources should be serialized along with the resource
 in the corresponding `relationships.[name].data` section. Either `LAZY`, `ONLY_ID` or `EAGER` can be specified:
@@ -193,19 +190,20 @@ JSON:API comes with support for inclusions based on the `include` parameter. It 
 object graphs where also related resources can be fetched.  There are two possibilities of how this is implemented.
 Either the requested repository also directly returns related resources with the returned ones. Or Crnk can take-over that
 work by doing nested calls to adjacent `ResourceRepository`, `OneRelationshipRepository` and `ManyRelationshipRepository`
-implementations. The behavior is controlled by the optional `lookUp` parameter. There are three options:
+implementations. The behavior is controlled by the optional `lookUp` parameter. There are four options:
 
-- `NONE` makes the requested repository responsible for returning related resources. This is the default.
+- `NONE` makes the requested repository responsible for returning related resources.
 - `AUTOMATICALLY_WHEN_NULL` will let Crnk lookup related resources if not already done by the requested repository.
 - `AUTOMATICALLY_ALWAYS` will force Crnk to always lookup related resource regardless whether it is already done by the requested repository.
+- `DEFAULT` attempts to find the optimal setting automatically. If a custom relationship repository is found,
+  `@JsonApiRelationId` is in use or `@JsonApiRelation.repositoryBehavior` fetches from the opposite side, then
+   `AUTOMATICALLY_WHEN_NULL` is chosen, otherwise it falls back to `NONE`. This default behavior should
+   be sufficient for most use cases.
 
 There are many different ways how a relationship may end-up being implemented. In the best case, no implementation is necessary
 at all and requests can be dispatches to one of the two related resource repositories. The `repositoryBehavior` allows
 to configure behavior:
 
-- `DEFAULT` makes use of `FORWARD_OWNER` if a relationship also makes use of `@JsonApiRelationId` (see below),
-   is designated as owner by a `mappedBy` or `lookUp=NONE` is declared (see above). `DEFAULT` makes use of `FORWARD_OPPOSITE`
-   if `mappedBy` points to another owner. In any other case it expects a custom implementation.
 - `CUSTOM` expects a custom implementation.
 - `FORWARD_OWNER` forward any relationship request to the owning resource repository, the repository that defines the
   requested relationship field. GET requests will fetch the owning resources and grab the related resources from there (with the
@@ -221,12 +219,87 @@ to configure behavior:
 	  single resource repository is involved with a slightly more complex filter parameter, giving performance benefits.
 	  An implementation is provided by `RelationshipRepositoryBase`.
 - `FORWARD_OPPOSITE` the opposite to `FORWARD_OWNER`. Querying works like `IMPLICIT_GET_OPPOSITE_MODIFY_OWNER`.
+- `DEFAULT` makes use of `FORWARD_OWNER` if the relationship makes use of `@JsonApiRelationId` (see below),
+   `lookUp=NONE` or `lookUp=DEFAULT`. `FORWARD_OPPOSITE` if `mappedBy` points to another field. `CUSTOM` if a
+    matching relationship repository is found. For all other scenarios it it expects a custom implementation.
 
 The forwarding behaviors are implemented by `ForwardingRelationshipRepository`.
+
+The subsequent two resources show case a number of scenarios:
+
+[source]
+----
+@JsonApiResource(type = "task")
+public class Task {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation // not backed by repository
+    public Project project;
+
+    @JsonApiRelation // backed by repository
+    public List<Task> subTasks;
+}
+
+@JsonApiResource(type = "project")
+public class Project {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation(mappedBy = "project")
+    public Set<Task> tasks;
+
+    @JsonApiRelationId
+    public Project parentId;
+
+    @JsonApiRelation
+    public Project parent;
+}
+
+class SubTaskRepository extends OneRelationshipRepositoryBase {
+    @Override
+    public RelationshipMatcher getMatcher() {
+        RelationshipMatcher matcher = new RelationshipMatcher();
+        matcher.rule().field("subTasks").add();
+        return matcher;
+    }
+    ...
+}
+----
+
+- `parent` has a `@JsonApiRelationId` backed by `parentId`. This triggers the use
+  of `RelationshipRepositoryBehavior.FORWARD_OWNER` and `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`.
+  Only `parentId` must be populated by the project resource repository, `project` can
+  then be looked up on the opposite resource repository (which in this case is the same repository).
+- `project` just carries an empty `@JsonApiRelation` and has no relationship repository backing it. This
+  triggers the assumption that the resource repository can handle all requests, translating to
+  `LookupIncludeBehavior.NONE` and `RelationshipRepositoryBehavior.FORWARD_OWNER`.
+- `tasks` declares a `mappedBy` to its owner `project`. Accordingly all requests go with
+  `RelationshipRepositoryBehavior.FORWARD_OPPOSITE` to the opposite task resource repository. Inclusions
+  are resolved automatically with `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`.
+- `subTasks` is backed by the `SubTaskRepository` relationship repository. This
+  sets `RelationshipRepositoryBehavior.CUSTOM` and performs look-ups on that repository with
+  `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL` to compute the inclusions.
+
 
 IMPORTANT: It likely takes a moment to familiarize oneself with all configuration options of `@JsonApiRelation` and the
   subsequent `@JsonApiRelationId`. But at the same time it is one area where a native resource-oriented REST library like Crnk
   can provide significant benefit and reduce manual work compared to more classical REST libraries like Spring MVC or JAX-RS.
+
+IMPORTANT: If you run into problems in this area, set `io.crnk` to `DEBUG` in your logger. It will print information such as:
+
+[source]
+----
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: using configured LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: using configured LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: choosing default RelationshipRepositoryBehavior: mappedBy enforces FORWARD_OPPOSITE
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: setting up opposite/opposite forwarding repository
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: RelationshipRepositoryBehavior.FORWARD_OPPOSITE enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve relationship from opposite side
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: choosing default RelationshipRepositoryBehavior: relationId field enforces FORWARD_OWNER
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: setting up owner/owner forwarding repository
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: choosing default RelationshipRepositoryBehavior: relationId field enforces FORWARD_OWNER
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: setting up owner/owner forwarding repository
+----
 
 
 anchor:jsonApiRelationId[]

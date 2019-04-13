@@ -5,6 +5,7 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.repository.RelationshipRepository;
@@ -21,7 +22,6 @@ import okhttp3.Response;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -225,7 +225,6 @@ public abstract class BasicRepositoryAccessTestBase {
     }
 
     @Test
-    @Ignore
     public void testSetRelation() {
         Schedule schedule = new Schedule();
         schedule.setId(1L);
@@ -257,9 +256,17 @@ public abstract class BasicRepositoryAccessTestBase {
         task.setSchedule(schedule);
         taskRepo.create(task);
 
-        // check relationship available
+        // check relationship available => ID is serialized, so a proxy is available
         Task savedTask = taskRepo.findOne(task.getId(), new QuerySpec(Task.class));
         Assert.assertNotNull(savedTask.getSchedule());
+
+        // check available from opposite side
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        querySpec.includeRelation(PathSpec.of("tasks"));
+        Schedule savedSchedule = scheduleRepo.findOne(schedule.getId(), querySpec);
+        Assert.assertEquals(1, savedSchedule.getTasks().size());
+        Task relatedTask = savedSchedule.getTasks().iterator().next();
+        Assert.assertEquals(task.getId(), relatedTask.getId());
     }
 
     @Test
@@ -289,34 +296,34 @@ public abstract class BasicRepositoryAccessTestBase {
 
     @Test
     public void testCannotNullLazyRelationWithSave() {
+        Project project = new Project();
+        project.setId(2L);
+        project.setName("project");
+        project = projectRepo.create(project);
+
         Task task = new Task();
-        task.setId(2L);
-        task.setName("test");
+        task.setId(1L);
+        task.setName("task");
+        task.setProject(project);
         taskRepo.create(task);
 
-        Schedule schedule = new Schedule();
-        schedule.setId(1L);
-        schedule.setName("schedule");
-        schedule.setLazyTask(task);
-        scheduleRepo.create(schedule);
-
         // since lazy, will not be sent to client if not requested
-        QuerySpec querySpec = new QuerySpec(Schedule.class);
-        Schedule savedSchedule = scheduleRepo.findOne(schedule.getId(), querySpec);
-        Assert.assertNull(savedSchedule.getLazyTask());
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        Task svaedTask = taskRepo.findOne(task.getId(), querySpec);
+        Assert.assertNull(svaedTask.getProject());
 
-        querySpec.includeRelation(Arrays.asList("lazyTask"));
-        savedSchedule = scheduleRepo.findOne(schedule.getId(), querySpec);
-        Assert.assertNotNull(savedSchedule.getLazyTask());
+        querySpec.includeRelation(Arrays.asList("project"));
+        svaedTask = taskRepo.findOne(task.getId(), querySpec);
+        Assert.assertNotNull(svaedTask.getProject());
 
         // null
-        savedSchedule.setLazyTask(task);
-        scheduleRepo.save(savedSchedule);
+        svaedTask.setProject(project);
+        taskRepo.save(svaedTask);
 
         // still not null because cannot differantiate between not loaded and
         // nulled
-        Schedule updatedSchedule = scheduleRepo.findOne(schedule.getId(), querySpec);
-        Assert.assertNotNull(updatedSchedule.getLazyTask());
+        Task updatedSchedule = taskRepo.findOne(task.getId(), querySpec);
+        Assert.assertNotNull(updatedSchedule.getProject());
     }
 
     @Test
@@ -372,7 +379,7 @@ public abstract class BasicRepositoryAccessTestBase {
 		/*
 		relRepo.removeRelations(task, Arrays.asList(project1.getId()),
 				"projects");
-		relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+		relProjects = relRepo.findManyRelations(task.getId(), "projects", new QuerySpec(Task.class));
 		Assert.assertEquals(0, relProjects.size());
 		*/
     }

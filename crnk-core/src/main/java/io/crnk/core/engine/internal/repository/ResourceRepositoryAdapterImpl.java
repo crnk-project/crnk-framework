@@ -15,6 +15,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.legacy.repository.LegacyResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -24,6 +26,8 @@ import java.util.Collection;
  */
 @SuppressWarnings("unchecked")
 public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter implements ResourceRepositoryAdapter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceRepositoryAdapterImpl.class);
 
 	private final Object resourceRepository;
 

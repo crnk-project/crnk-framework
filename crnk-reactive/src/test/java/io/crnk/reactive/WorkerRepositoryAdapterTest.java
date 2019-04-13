@@ -162,24 +162,24 @@ public class WorkerRepositoryAdapterTest {
 
 	@Test
 	public void findOneTarget() {
-		Mockito.when(relAdapter.findOneTarget(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
-		workerRelAdapter.findOneTarget(id, field, queryAdapter).get();
-		Mockito.verify(relAdapter, Mockito.times(1)).findOneTarget(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
+		Mockito.when(relAdapter.findOneRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
+		workerRelAdapter.findOneRelations(id, field, queryAdapter).get();
+		Mockito.verify(relAdapter, Mockito.times(1)).findOneRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
 	}
 
 
 	@Test
 	public void findManyTargets() {
-		Mockito.when(relAdapter.findManyTargets(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
-		workerRelAdapter.findManyTargets(id, field, queryAdapter).get();
-		Mockito.verify(relAdapter, Mockito.times(1)).findManyTargets(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
+		Mockito.when(relAdapter.findManyRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
+		workerRelAdapter.findManyRelations(id, field, queryAdapter).get();
+		Mockito.verify(relAdapter, Mockito.times(1)).findManyRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
 	}
 
 	@Test
 	public void findIdsManyTargets() {
-		Mockito.when(relAdapter.findManyTargets(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
-		workerRelAdapter.findManyTargets(id, field, queryAdapter).get();
-		Mockito.verify(relAdapter, Mockito.times(1)).findManyTargets(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
+		Mockito.when(relAdapter.findManyRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter))).thenReturn(response);
+		workerRelAdapter.findManyRelations(id, field, queryAdapter).get();
+		Mockito.verify(relAdapter, Mockito.times(1)).findManyRelations(Mockito.eq(id), Mockito.eq(field), Mockito.eq(queryAdapter));
 	}
 
 	@Test

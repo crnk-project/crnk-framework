@@ -34,11 +34,11 @@ public class ResourceFieldImpl implements ResourceField {
 
     private final String oppositeResourceType;
 
-    private final LookupIncludeBehavior lookupIncludeBehavior;
+    private LookupIncludeBehavior lookupIncludeBehavior;
 
     private ResourceFieldType resourceFieldType;
 
-    private final String oppositeName;
+    private String oppositeName;
 
     private RelationshipRepositoryBehavior relationshipRepositoryBehavior;
 
@@ -123,7 +123,7 @@ public class ResourceFieldImpl implements ResourceField {
      *
      * @return if lookup should be performed
      */
-    public LookupIncludeBehavior getLookupIncludeAutomatically() {
+    public LookupIncludeBehavior getLookupIncludeBehavior() {
         return lookupIncludeBehavior;
     }
 
@@ -270,10 +270,17 @@ public class ResourceFieldImpl implements ResourceField {
         this.resourceInformation = resourceInformation;
     }
 
-    public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior behavior) {
+    public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior relationshipRepositoryBehavior) {
         this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
     }
 
+    public void setLookupIncludeBehavior(LookupIncludeBehavior behavior) {
+        this.lookupIncludeBehavior = behavior;
+    }
+
+    public void setOppositeName(String oppositeName) {
+        this.oppositeName = oppositeName;
+    }
 
     static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
 
@@ -321,10 +328,10 @@ public class ResourceFieldImpl implements ResourceField {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
         sb.append("[");
-        if (resourceInformation != null) {
-            sb.append("resourceClass=").append(resourceInformation.getResourceClass());
+        if (resourceInformation != null && resourceInformation.getResourceClass() != null) {
+            sb.append("resourceClass=").append(resourceInformation.getResourceClass().getName());
         }
-        sb.append(", jsonName=").append(jsonName);
+        sb.append(", name=").append(underlyingName);
         if (resourceInformation != null && resourceInformation.getResourceType() != null) {
             sb.append(",resourceType=").append(resourceInformation.getResourceType());
         }

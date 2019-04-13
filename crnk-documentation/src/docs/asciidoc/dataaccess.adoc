@@ -70,7 +70,7 @@ it with `@JsonIgnore`).
 [source,java]
 .JpaTransientTestEntity.java
 ----
-include::../../../../crnk-data/crnk-data-jpa/src/test/java/io/crnk/jpa/model/JpaTransientTestEntity.java[tags=docs]
+include::../../../../crnk-data/crnk-data-jpa/src/test/java/io/crnk/data/jpa/model/JpaTransientTestEntity.java[tags=docs]
 ----
 
 `@JsonApiRelationId` is also supported for JPA entities:
@@ -183,7 +183,7 @@ To setup a Crnk client with the JPA module use:
 	TaskRepository typedRepo = client.getRepositoryForInterface(TaskRepository.class)
 ----
 
-Have a look at https://github.com/crnk-project/crnk-framework/blob/master/crnk-data/crnk-data-jpa/src/test/java/io/crnk/jpa/data/JpaQuerySpecEndToEndTest.java within the `crnk-data-jpa`
+Have a look at https://github.com/crnk-project/crnk-framework/blob/master/crnk-data/crnk-data-jpa/src/test/java/io/crnk/data/jpa/data/JpaQuerySpecEndToEndTest.java within the `crnk-data-jpa`
 test cases to see how everything is used together with `crnk-client`.
 
 There is also the possibility to specify a repository interface. The interface has the benefit of providing proper typing of meta information,
@@ -514,9 +514,9 @@ the application specific fields. For example:
 [source,java]
 .ApprovalProcessInstance.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalProcessInstance.java[tag=docs1]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalProcessInstance.java[tag=docs1]
 	...
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalProcessInstance.java[tag=docs2]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalProcessInstance.java[tag=docs2]
 ----
 
 and
@@ -524,9 +524,9 @@ and
 [source,java]
 .ScheduleApprovalProcessInstance.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs1]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs1]
 	...
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs2]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/model/ScheduleApprovalProcessInstance.java[tag=docs2]
 ----
 
 The example application makes use of an intermediate `ApprovalProcessInstance` base class to potentially share the approval
@@ -542,7 +542,7 @@ Finally, the setup of the `ActiviModule` looks like:
 [source,java]
 .ApprovalTestApplication.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/ApprovalTestApplication.java[tag=activitiModule]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/ApprovalTestApplication.java[tag=activitiModule]
 ----
 
 - `ActivitiModuleConfig` allows to register processes and tasks that then will be exposed as repositories.
@@ -565,7 +565,7 @@ The workflow looks as follows:
 ]
 .approval.bpmn20.xml
 ----
-include::../../../../crnk-data-activiti/src/test/resources/approval.bpmn20.xml[]
+include::../../../../crnk-data/crnk-data-activiti/src/test/resources/approval.bpmn20.xml[]
 ----
 
 There is a:
@@ -583,7 +583,7 @@ For the approval-related functionality a second module is registered:
 [source,java]
 .ApprovalTestApplication.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/ApprovalTestApplication.java[tag=approvalModule]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/ApprovalTestApplication.java[tag=approvalModule]
 ----
 
 - `ApprovalRepositoryDecorator` hooks into the request processing of the Crnk engine and intercepts

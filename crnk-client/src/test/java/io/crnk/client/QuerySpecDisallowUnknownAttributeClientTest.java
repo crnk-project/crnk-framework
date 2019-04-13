@@ -55,7 +55,7 @@ public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientT
 		try {
 			taskRepo.findAll(querySpec);
 		} catch (BadRequestException e) {
-			Assert.assertEquals("Failed to resolve path to field 'unknownAttr'", e.getMessage());
+			Assert.assertEquals("Failed to resolve path to field 'unknownAttr' from class io.crnk.test.mock.models.Task", e.getMessage());
 		}
 	}
 

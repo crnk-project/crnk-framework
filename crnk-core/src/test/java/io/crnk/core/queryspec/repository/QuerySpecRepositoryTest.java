@@ -102,11 +102,11 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		projectRelAdapter.setRelation(task, project.getId(), projectField, queryAdapter);
 		Assert.assertNotNull(task.getProject());
 		Assert.assertEquals(1, project.getTasks().size());
-		JsonApiResponse response = projectRelAdapter.findOneTarget(2L, projectField, queryAdapter).get();
+		JsonApiResponse response = projectRelAdapter.findOneRelations(2L, projectField, queryAdapter).get();
 		Assert.assertEquals(project.getId(), ((Project) response.getEntity()).getId());
 
 		projectRelAdapter.setRelation(task, null, projectField, queryAdapter);
-		response = projectRelAdapter.findOneTarget(2L, projectField, queryAdapter).get();
+		response = projectRelAdapter.findOneRelations(2L, projectField, queryAdapter).get();
 		Assert.assertNull(task.getProject());
 
 		// warning: bidirectionality not properly implemented here, would
@@ -117,20 +117,20 @@ public class QuerySpecRepositoryTest extends AbstractQuerySpecTest {
 		tasksRelAdapter.addRelations(project, Arrays.asList(task.getId()), tasksField, queryAdapter);
 		Assert.assertEquals(project, task.getProject());
 		Assert.assertEquals(1, project.getTasks().size());
-		List<Project> projects = (List<Project>) tasksRelAdapter.findManyTargets(3L, tasksField, queryAdapter).get().getEntity();
+		List<Project> projects = (List<Project>) tasksRelAdapter.findManyRelations(3L, tasksField, queryAdapter).get().getEntity();
 		Assert.assertEquals(1, projects.size());
 
 		tasksRelAdapter.removeRelations(project, Arrays.asList(task.getId()), tasksField, queryAdapter);
 		Assert.assertEquals(0, project.getTasks().size());
 		task.setProject(null); // fix bidirectionality
 
-		projects = (List<Project>) tasksRelAdapter.findManyTargets(3L, tasksField, queryAdapter).get().getEntity();
+		projects = (List<Project>) tasksRelAdapter.findManyRelations(3L, tasksField, queryAdapter).get().getEntity();
 		Assert.assertEquals(0, projects.size());
 
 		tasksRelAdapter.setRelations(project, Arrays.asList(task.getId()), tasksField, queryAdapter);
 		Assert.assertEquals(project, task.getProject());
 		Assert.assertEquals(1, project.getTasks().size());
-		projects = (List<Project>) tasksRelAdapter.findManyTargets(3L, tasksField, queryAdapter).get().getEntity();
+		projects = (List<Project>) tasksRelAdapter.findManyRelations(3L, tasksField, queryAdapter).get().getEntity();
 		Assert.assertEquals(1, projects.size());
 
 		// check bulk find

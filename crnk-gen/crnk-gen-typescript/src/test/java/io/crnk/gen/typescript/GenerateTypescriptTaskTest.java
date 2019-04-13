@@ -10,11 +10,10 @@ import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.test.mock.repository.ScheduleToTaskRepository;
+import io.crnk.test.mock.repository.ScheduleStatusRepositoryImpl;
 import io.crnk.test.mock.repository.TaskRepository;
 import io.crnk.test.mock.repository.TaskSubtypeRepository;
 import io.crnk.test.mock.repository.TaskToProjectRepository;
-import io.crnk.test.mock.repository.TaskToScheduleRepo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -123,10 +122,9 @@ public class GenerateTypescriptTaskTest {
         module.addRepository(new ProjectRepository());
         module.addRepository(new TaskRepository());
         module.addRepository(new ProjectToTaskRepository());
-        module.addRepository(new ScheduleToTaskRepository());
         module.addRepository(new TaskSubtypeRepository());
         module.addRepository(new TaskToProjectRepository());
-        module.addRepository(new TaskToScheduleRepo());
+        module.addRepository(new ScheduleStatusRepositoryImpl());
         return module;
     }
 

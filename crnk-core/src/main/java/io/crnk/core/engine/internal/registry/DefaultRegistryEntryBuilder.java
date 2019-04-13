@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.registry;
 
+import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributorContext;
@@ -195,7 +196,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
                 map.put(relationshipField, relationshipEntry.getAdapter());
             } else {
                 // does only happen if checking is disabled in general (currently just crnk-core tests)
-                LOGGER.warn("no relationship repository found for {}", relationshipField);
+                LOGGER.warn("{}.{}: no relationship repository found for {}", toShortName(resourceInformation), relationshipField.getUnderlyingName());
             }
         }
         return map;
@@ -209,21 +210,50 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
         if (repository != null) {
             RelationshipRepositoryInformation relationshipInformation = repository.information.build();
             match = new MatchedRelationship(relationshipField, relationshipInformation, repository.instance);
+
+            ResourceInformation sourceInformation = relationshipField.getResourceInformation();
+            LOGGER.debug("{}.{}: using configured relationship repository: {}",
+                    toShortName(sourceInformation), relationshipField.getUnderlyingName(), match);
+            ((ResourceFieldImpl) relationshipField).setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior.CUSTOM);
         }
 
         // check for match
         if (match == null) {
             match = findRelationshipMatch(relationshipField);
-        } else {
-            ResourceInformation sourceInformation = relationshipField.getResourceInformation();
-            LOGGER.debug("found relationship repository for {}.{} relationship: {}",
-                    sourceInformation.getResourceType(), relationshipField.getUnderlyingName(), match);
+            if (match != null) {
+                ResourceInformation sourceInformation = relationshipField.getResourceInformation();
+                ((ResourceFieldImpl) relationshipField).setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior.CUSTOM);
+                LOGGER.debug("{}.{}: found matching relationship repository: {}",
+                        toShortName(sourceInformation), relationshipField.getUnderlyingName(), match);
+            }
         }
 
         // check for implicit
         if (match == null) {
             match = setupForwardingRepository(relationshipField);
         }
+
+
+        LookupIncludeBehavior lookupIncludeBehavior = relationshipField.getLookupIncludeBehavior();
+        if (lookupIncludeBehavior == LookupIncludeBehavior.DEFAULT) {
+            if (relationshipField.hasIdField()) {
+                LOGGER.debug("{}.{}: relationId field enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve resource from id", toShortName(relationshipField.getResourceInformation()), relationshipField.getUnderlyingName());
+                ((ResourceFieldImpl) relationshipField).setLookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
+            } else if (relationshipField.getRelationshipRepositoryBehavior() == RelationshipRepositoryBehavior.FORWARD_OPPOSITE) {
+                LOGGER.debug("{}.{}: RelationshipRepositoryBehavior.FORWARD_OPPOSITE enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve relationship from opposite side", toShortName(relationshipField.getResourceInformation()), relationshipField.getUnderlyingName());
+                ((ResourceFieldImpl) relationshipField).setLookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
+            } else if (relationshipField.getRelationshipRepositoryBehavior() == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+                LOGGER.debug("{}.{}: RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve relationship from opposite side", toShortName(relationshipField.getResourceInformation()), relationshipField.getUnderlyingName());
+                ((ResourceFieldImpl) relationshipField).setLookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
+            } else if (relationshipField.getRelationshipRepositoryBehavior() == RelationshipRepositoryBehavior.CUSTOM) {
+                LOGGER.debug("{}.{}: RelationshipRepositoryBehavior.CUSTOM enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve relationship from custom repository", toShortName(relationshipField.getResourceInformation()), relationshipField.getUnderlyingName());
+                ((ResourceFieldImpl) relationshipField).setLookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL);
+            } else {
+                LOGGER.debug("{}.{}: fall back to LookupIncludeBehavior.NONE", toShortName(relationshipField.getResourceInformation()), relationshipField.getUnderlyingName());
+                ((ResourceFieldImpl) relationshipField).setLookupIncludeBehavior(LookupIncludeBehavior.NONE);
+            }
+        }
+
         return match;
     }
 
@@ -305,13 +335,22 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
     private MatchedRelationship setupForwardingRepository(ResourceField relationshipField) {
+        ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
+
         RelationshipRepositoryBehavior behavior = relationshipField.getRelationshipRepositoryBehavior();
         if (behavior == RelationshipRepositoryBehavior.DEFAULT) {
-            if (relationshipField.hasIdField()
-                    || relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
+            if (relationshipField.hasIdField()) {
                 behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
+                LOGGER.debug("{}.{}: choosing default RelationshipRepositoryBehavior: relationId field enforces FORWARD_OWNER", toShortName(sourceInformation), relationshipField.getUnderlyingName());
             } else if (relationshipField.isMappedBy()) {
+                LOGGER.debug("{}.{}: choosing default RelationshipRepositoryBehavior: mappedBy enforces FORWARD_OPPOSITE", toShortName(sourceInformation), relationshipField.getUnderlyingName());
                 behavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
+            } else if (relationshipField.getLookupIncludeBehavior() == LookupIncludeBehavior.NONE) {
+                LOGGER.debug("{}.{}: choosing default RelationshipRepositoryBehavior: NONE lookup behavior enforces FORWARD_OWNER", toShortName(sourceInformation), relationshipField.getUnderlyingName());
+                behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
+            } else if (relationshipField.getLookupIncludeBehavior() == LookupIncludeBehavior.DEFAULT) {
+                LOGGER.debug("{}.{}: choosing default RelationshipRepositoryBehavior: default fallback to FORWARD_OWNER, no custom repository nor custom configuration", toShortName(sourceInformation), relationshipField.getUnderlyingName());
+                behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
             } else if (FAIL_ON_MISSING_REPOSITORY) {
                 throw new IllegalStateException("no relationship repository available for " + relationshipField + ", provide a custom relationship reposit implementation, add a @JsonApiRelationId field, use @JsonApiRelation.mappedBy, set @JsonApiRelation.repositoryBehavior or set @JsonApiRelation.LOOKUP to NONE");
             } else {
@@ -323,8 +362,6 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
         if (behavior == RelationshipRepositoryBehavior.CUSTOM) {
             throw new IllegalStateException("RelationshipRepositoryBehavior.CUSTOM used for " + relationshipField + " but no implementation provided");
         }
-
-        ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
 
         if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE
                 || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
@@ -342,24 +379,26 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
         ForwardingRelationshipRepository repository;
         if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
-            LOGGER.debug("setting up owner/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
+            LOGGER.debug("{}.{}: setting up owner/owner forwarding repository", toShortName(sourceInformation), relationshipField.getUnderlyingName());
             repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
                     ForwardingDirection.OWNER, ForwardingDirection.OWNER);
         } else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
-            LOGGER.debug("setting up opposite/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
-            repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
-                    ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
+            LOGGER.debug("{}.{}: setting up opposite/owner forwarding repository", toShortName(sourceInformation), relationshipField.getUnderlyingName());
+            repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher, ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
         } else {
-            LOGGER.debug("setting up opposite/opposite forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(),
-                    relationshipField.getUnderlyingName());
-            PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
-                    .FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
+            LOGGER.debug("{}.{}: setting up opposite/opposite forwarding repository", toShortName(sourceInformation), relationshipField.getUnderlyingName());
+            PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior.FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
             repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
                     ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
         }
         repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
         repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
         return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
+    }
+
+    private Object toShortName(ResourceInformation information) {
+        Class<?> resourceClass = information.getResourceClass();
+        return resourceClass != Resource.class ? resourceClass.getName() : information.getResourceType();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -397,6 +436,10 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
             this.relRepository = relRepository;
         }
 
+        @Override
+        public String toString() {
+            return relRepository.toString();
+        }
 
         @SuppressWarnings({"rawtypes", "unchecked"})
         private ResponseRelationshipEntry getLegacyEntry() {

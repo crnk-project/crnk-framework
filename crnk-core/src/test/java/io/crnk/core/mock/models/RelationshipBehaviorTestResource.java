@@ -25,9 +25,6 @@ public class RelationshipBehaviorTestResource {
     @JsonApiRelation(repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
     private Project testImplicityFromOwner;
 
-    @JsonApiRelation(opposite = "test", repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
-    private Task testImplicitGetOppositeModifyOwner;
-
     @JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
     private LazyTask testNoLookup;
 
@@ -72,14 +69,6 @@ public class RelationshipBehaviorTestResource {
 
     public void setTestImplicityFromOwner(Project testImplicityFromOwner) {
         this.testImplicityFromOwner = testImplicityFromOwner;
-    }
-
-    public Task getTestImplicitGetOppositeModifyOwner() {
-        return testImplicitGetOppositeModifyOwner;
-    }
-
-    public void setTestImplicitGetOppositeModifyOwner(Task testImplicitGetOppositeModifyOwner) {
-        this.testImplicitGetOppositeModifyOwner = testImplicitGetOppositeModifyOwner;
     }
 
     public LazyTask getTestNoLookup() {

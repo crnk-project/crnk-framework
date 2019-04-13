@@ -99,7 +99,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 			String closedPackageName = null;
 			String closedResourceType = null;
-			for (RegistryEntry entry : resourceRegistry.getResources()) {
+			for (RegistryEntry entry : resourceRegistry.getEntries()) {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				Class<?> resourceClass = resourceInformation.getResourceClass();
 				String resourcePackageName = resourceClass.getPackage().getName();
@@ -134,7 +134,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
 
 		// enforce setup of meta data
-		Collection<RegistryEntry> entries = resourceRegistry.getResources();
+		Collection<RegistryEntry> entries = resourceRegistry.getEntries();
 		for (RegistryEntry entry : entries) {
 			ResourceInformation resourceInformation = entry.getResourceInformation();
 			MetaResource metaResource = discoverResource(resourceInformation);

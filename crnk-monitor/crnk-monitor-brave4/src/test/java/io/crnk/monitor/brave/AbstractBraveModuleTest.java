@@ -36,207 +36,213 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractBraveModuleTest extends JerseyTestBase {
 
-	protected CrnkClient client;
+    protected CrnkClient client;
 
-	protected ResourceRepository<Task, Long> taskRepo;
+    protected ResourceRepository<Task, Long> taskRepo;
 
-	private Reporter<Span> clientReporter;
+    private Reporter<Span> clientReporter;
 
-	private Reporter<Span> serverReporter;
+    private Reporter<Span> serverReporter;
 
-	private HttpAdapter httpAdapter;
+    private HttpAdapter httpAdapter;
 
-	private boolean isOkHttp;
-
-
-	public AbstractBraveModuleTest(HttpAdapter httpAdapter) {
-		this.httpAdapter = httpAdapter;
-		this.isOkHttp = httpAdapter instanceof OkHttpAdapter;
-	}
+    private boolean isOkHttp;
 
 
-	@Before
-	@SuppressWarnings("unchecked")
-	public void setup() {
-		Endpoint localEndpoint = Endpoint.newBuilder().serviceName("testClient").build();
+    public AbstractBraveModuleTest(HttpAdapter httpAdapter) {
+        this.httpAdapter = httpAdapter;
+        this.isOkHttp = httpAdapter instanceof OkHttpAdapter;
+    }
 
-		clientReporter = Mockito.mock(Reporter.class);
-		Tracing clientTracing = Tracing.newBuilder()
-				.spanReporter(clientReporter)
-				.localEndpoint(localEndpoint)
-				.build();
 
-		client = new CrnkClient(getBaseUri().toString());
-		client.setHttpAdapter(httpAdapter);
-		client.addModule(BraveClientModule.create(clientTracing));
-		taskRepo = client.getRepositoryForType(Task.class);
-		TaskRepository.clear();
-		ProjectRepository.clear();
-		httpAdapter.setReceiveTimeout(10000, TimeUnit.SECONDS);
-	}
+    @Before
+    @SuppressWarnings("unchecked")
+    public void setup() {
+        Endpoint localEndpoint = Endpoint.newBuilder().serviceName("testClient").build();
 
-	@Test
-	public void testCreate() {
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("myTask");
-		taskRepo.create(task);
+        clientReporter = Mockito.mock(Reporter.class);
+        Tracing clientTracing = Tracing.newBuilder()
+                .spanReporter(clientReporter)
+                .localEndpoint(localEndpoint)
+                .build();
 
-		// check client call and link span
-		ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
-		List<Span> clientSpans = clientSpanCaptor.getAllValues();
-		Span callSpan = clientSpans.get(0);
-		Assert.assertEquals("post", callSpan.name());
-		Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
+        client = new CrnkClient(getBaseUri().toString());
+        client.setHttpAdapter(httpAdapter);
+        client.addModule(BraveClientModule.create(clientTracing));
+        taskRepo = client.getRepositoryForType(Task.class);
+        TaskRepository.clear();
+        ProjectRepository.clear();
+        httpAdapter.setReceiveTimeout(10000, TimeUnit.SECONDS);
+    }
 
-		// check server local span
-		ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
-		List<Span> serverSpans = serverSpanCaptor.getAllValues();
-		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name());
-		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
+    @Test
+    public void testCreate() {
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("myTask");
+        taskRepo.create(task);
 
-		assertTag(repositorySpan, "lc", "crnk");
-		assertTag(repositorySpan, "crnk.query", "?");
-	}
+        // check client call and link span
+        ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
+        List<Span> clientSpans = clientSpanCaptor.getAllValues();
+        Span callSpan = clientSpans.get(0);
+        Assert.assertEquals("post", callSpan.name());
+        Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
 
-	@Test
-	public void testError() {
-		Task task = new Task();
-		task.setId(13L);
-		try {
-			taskRepo.create(task);
-		} catch (Exception e) {
-			// ok
-		}
+        // check server local span
+        ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
 
-		// check client call and link span
-		ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
-		List<Span> clientSpans = clientSpanCaptor.getAllValues();
-		Span callSpan = clientSpans.get(0);
-		Assert.assertEquals("post", callSpan.name());
-		Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
-		assertTag(callSpan, "http.status_code", "500");
+        // will resolve resource + relationship
+        Mockito.verify(serverReporter, Mockito.times(2)).report(serverSpanCaptor.capture());
+        List<Span> serverSpans = serverSpanCaptor.getAllValues();
+        Span repositorySpan = serverSpans.get(0);
+        Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name());
+        Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
+        assertTag(repositorySpan, "lc", "crnk");
+        assertTag(repositorySpan, "crnk.query", "?");
 
-		// check server local span
-		ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
-		List<Span> serverSpans = serverSpanCaptor.getAllValues();
-		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name());
-		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
+        repositorySpan = serverSpans.get(1);
+        Assert.assertEquals("crnk:get:/projects/", repositorySpan.name());
+        Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
-		assertTag(repositorySpan, "lc", "crnk");
-		assertTag(repositorySpan, "crnk.query", "?");
-		assertTag(repositorySpan, "crnk.status", "EXCEPTION");
-	}
+    }
 
-	@Test
-	public void testFindAll() {
-		Task task = new Task();
-		task.setId(13L);
-		task.setName("myTask");
-		QuerySpec querySpec = new QuerySpec(Task.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "doe"));
-		taskRepo.findAll(querySpec);
+    @Test
+    public void testError() {
+        Task task = new Task();
+        task.setId(13L);
+        try {
+            taskRepo.create(task);
+        } catch (Exception e) {
+            // ok
+        }
 
-		// check client call and link span
-		ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(clientReporter, Mockito.times(isOkHttp ? 1 : 1)).report(clientSpanCaptor.capture());
-		List<Span> clientSpans = clientSpanCaptor.getAllValues();
-		Span callSpan = clientSpans.get(0);
-		Assert.assertEquals("get", callSpan.name());
-		Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
+        // check client call and link span
+        ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
+        List<Span> clientSpans = clientSpanCaptor.getAllValues();
+        Span callSpan = clientSpans.get(0);
+        Assert.assertEquals("post", callSpan.name());
+        Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
+        assertTag(callSpan, "http.status_code", "500");
 
-		// check server local span
-		ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
-		List<Span> serverSpans = serverSpanCaptor.getAllValues();
-		Span repositorySpan = serverSpans.get(0);
-		Assert.assertEquals("crnk:get:/tasks/", repositorySpan.name());
-		Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
+        // check server local span
+        ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
+        List<Span> serverSpans = serverSpanCaptor.getAllValues();
+        Span repositorySpan = serverSpans.get(0);
+        Assert.assertEquals("crnk:post:/tasks/13/", repositorySpan.name());
+        Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
-		assertTag(repositorySpan, "lc", "crnk");
-		assertTag(repositorySpan, "crnk.query", "?filter[name]=doe");
-		assertTag(repositorySpan, "crnk.results", "0");
-		assertTag(repositorySpan, "crnk.status", "OK");
-	}
+        assertTag(repositorySpan, "lc", "crnk");
+        assertTag(repositorySpan, "crnk.query", "?");
+        assertTag(repositorySpan, "crnk.status", "EXCEPTION");
+    }
 
-	@Test
-	public void testFindTargets() {
-		RelationshipRepository<Project, Serializable, Task, Serializable> relRepo = client
-				.getRepositoryForType(Project.class, Task.class);
-		relRepo.findManyTargets(123L, "tasks", new QuerySpec(Task.class));
+    @Test
+    public void testFindAll() {
+        Task task = new Task();
+        task.setId(13L);
+        task.setName("myTask");
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "doe"));
+        taskRepo.findAll(querySpec);
 
-		// check client call and link span
-		ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
-		List<Span> clientSpans = clientSpanCaptor.getAllValues();
-		Span callSpan = clientSpans.get(0);
-		Assert.assertEquals("get", callSpan.name());
-		Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
+        // check client call and link span
+        ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(clientReporter, Mockito.times(isOkHttp ? 1 : 1)).report(clientSpanCaptor.capture());
+        List<Span> clientSpans = clientSpanCaptor.getAllValues();
+        Span callSpan = clientSpans.get(0);
+        Assert.assertEquals("get", callSpan.name());
+        Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
 
-		// check server local span
-		ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
-		Mockito.verify(serverReporter, Mockito.times(2)).report(serverSpanCaptor.capture());
-		List<Span> serverSpans = serverSpanCaptor.getAllValues();
+        // check server local span
+        ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(serverReporter, Mockito.times(1)).report(serverSpanCaptor.capture());
+        List<Span> serverSpans = serverSpanCaptor.getAllValues();
+        Span repositorySpan = serverSpans.get(0);
+        Assert.assertEquals("crnk:get:/tasks/", repositorySpan.name());
+        Assert.assertTrue(repositorySpan.toString().contains("\"lc\""));
 
-		Span repositorySpan0 = serverSpans.get(0);
-		Assert.assertEquals("crnk:get:/tasks/", repositorySpan0.name());
-		Assert.assertTrue(repositorySpan0.toString().contains("\"lc\""));
+        assertTag(repositorySpan, "lc", "crnk");
+        assertTag(repositorySpan, "crnk.query", "?filter[name]=doe");
+        assertTag(repositorySpan, "crnk.results", "0");
+        assertTag(repositorySpan, "crnk.status", "OK");
+    }
 
-		assertTag(repositorySpan0, "lc", "crnk");
-		assertTag(repositorySpan0, "crnk.results", "0");
-		assertTag(repositorySpan0, "crnk.status", "OK");
+    @Test
+    public void testFindTargets() {
+        RelationshipRepository<Project, Serializable, Task, Serializable> relRepo = client
+                .getRepositoryForType(Project.class, Task.class);
+        relRepo.findManyTargets(123L, "tasks", new QuerySpec(Task.class));
 
-		Span repositorySpan1 = serverSpans.get(1);
-		Assert.assertEquals("crnk:get:/projects/123/tasks/", repositorySpan1.name());
-		Assert.assertTrue(repositorySpan1.toString().contains("\"lc\""));
+        // check client call and link span
+        ArgumentCaptor<Span> clientSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(clientReporter, Mockito.times(1)).report(clientSpanCaptor.capture());
+        List<Span> clientSpans = clientSpanCaptor.getAllValues();
+        Span callSpan = clientSpans.get(0);
+        Assert.assertEquals("get", callSpan.name());
+        Assert.assertEquals(Span.Kind.CLIENT, callSpan.kind());
 
-		assertTag(repositorySpan1, "lc", "crnk");
-		assertTag(repositorySpan1, "crnk.query", "?");
-		assertTag(repositorySpan1, "crnk.results", "0");
-		assertTag(repositorySpan1, "crnk.status", "OK");
-	}
+        // check server local span
+        ArgumentCaptor<Span> serverSpanCaptor = ArgumentCaptor.forClass(Span.class);
+        Mockito.verify(serverReporter, Mockito.times(2)).report(serverSpanCaptor.capture());
+        List<Span> serverSpans = serverSpanCaptor.getAllValues();
 
-	private void assertTag(Span span, String name, String value) {
-		for (Map.Entry<String, String> entry : span.tags().entrySet()) {
-			if (entry.getKey().equals(name)) {
-				if (value != null) {
-					Assert.assertEquals(value, entry.getValue());
-				}
-				return;
-			}
-		}
-		Assert.fail(name + " not found");
-	}
+        Span repositorySpan0 = serverSpans.get(0);
+        Assert.assertEquals("crnk:get:/tasks/", repositorySpan0.name());
+        Assert.assertTrue(repositorySpan0.toString().contains("\"lc\""));
 
-	@Override
-	protected Application configure() {
-		return new TestApplication();
-	}
+        assertTag(repositorySpan0, "lc", "crnk");
+        assertTag(repositorySpan0, "crnk.results", "0");
+        assertTag(repositorySpan0, "crnk.status", "OK");
 
-	@ApplicationPath("/")
-	private class TestApplication extends ResourceConfig {
+        Span repositorySpan1 = serverSpans.get(1);
+        Assert.assertEquals("crnk:get:/projects/123/tasks/", repositorySpan1.name());
+        Assert.assertTrue(repositorySpan1.toString().contains("\"lc\""));
 
-		@SuppressWarnings("unchecked")
-		public TestApplication() {
-			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, getClass().getPackage().getName());
-			property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://test.local");
+        assertTag(repositorySpan1, "lc", "crnk");
+        assertTag(repositorySpan1, "crnk.query", "?");
+        assertTag(repositorySpan1, "crnk.results", "0");
+        assertTag(repositorySpan1, "crnk.status", "OK");
+    }
 
-			serverReporter = Mockito.mock(Reporter.class);
+    private void assertTag(Span span, String name, String value) {
+        for (Map.Entry<String, String> entry : span.tags().entrySet()) {
+            if (entry.getKey().equals(name)) {
+                if (value != null) {
+                    Assert.assertEquals(value, entry.getValue());
+                }
+                return;
+            }
+        }
+        Assert.fail(name + " not found");
+    }
 
-			Tracing tracing = Tracing.newBuilder()
-					.localServiceName("testServer")
-					.spanReporter(serverReporter)
-					.build();
+    @Override
+    protected Application configure() {
+        return new TestApplication();
+    }
 
-			CrnkFeature feature = new CrnkFeature();
-			feature.addModule(BraveServerModule.create(tracing));
-			register(feature);
-		}
-	}
+    @ApplicationPath("/")
+    private class TestApplication extends ResourceConfig {
+
+        @SuppressWarnings("unchecked")
+        public TestApplication() {
+            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, getClass().getPackage().getName());
+            property(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, "http://test.local");
+
+            serverReporter = Mockito.mock(Reporter.class);
+
+            Tracing tracing = Tracing.newBuilder()
+                    .localServiceName("testServer")
+                    .spanReporter(serverReporter)
+                    .build();
+
+            CrnkFeature feature = new CrnkFeature();
+            feature.addModule(BraveServerModule.create(tracing));
+            register(feature);
+        }
+    }
 }
