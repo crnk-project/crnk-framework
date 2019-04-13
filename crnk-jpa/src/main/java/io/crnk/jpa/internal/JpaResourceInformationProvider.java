@@ -1,18 +1,5 @@
 package io.crnk.jpa.internal;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.persistence.EmbeddedId;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OptimisticLockException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -49,6 +36,19 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.MetaType;
+
+import javax.persistence.EmbeddedId;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OptimisticLockException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Extracts resource information from JPA and Crnk annotations. Crnk
@@ -177,27 +177,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
     }
 
     @Override
-    protected RelationshipRepositoryBehavior getDefaultRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
-        Optional<OneToOne> oneToOne = attributeDesc.getAnnotation(OneToOne.class);
-        Optional<OneToMany> oneToMany = attributeDesc.getAnnotation(OneToMany.class);
-        Optional<ManyToOne> manyToOne = attributeDesc.getAnnotation(ManyToOne.class);
-        Optional<ManyToMany> manyToMany = attributeDesc.getAnnotation(ManyToMany.class);
-        if (oneToOne.isPresent() || manyToOne.isPresent() || oneToMany.isPresent() || manyToMany.isPresent()) {
-            if (oneToMany.isPresent() && oneToMany.get().mappedBy().length() > 0) {
-                return RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
-            }
-            if (manyToMany.isPresent() && manyToMany.get().mappedBy().length() > 0) {
-                return RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
-            }
-            if (oneToOne.isPresent() && oneToOne.get().mappedBy().length() > 0) {
-                return RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
-            }
-            return RelationshipRepositoryBehavior.FORWARD_OWNER;
-        }
-        return RelationshipRepositoryBehavior.DEFAULT;
-    }
-
-    @Override
     public String getResourcePath(Class<?> entityClass) {
         JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
         if (annotation != null && !"".equals(annotation.resourcePath())) {
@@ -213,9 +192,26 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
     }
 
     @Override
-    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior() {
+    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior(BeanAttributeInformation attr) {
         // related repositories should lookup, we ignore the hibernate proxies
         return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
+    }
+
+
+    @Override
+    protected RelationshipRepositoryBehavior getDefaultRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
+        Optional<OneToOne> oneToOne = attributeDesc.getAnnotation(OneToOne.class);
+        Optional<OneToMany> oneToMany = attributeDesc.getAnnotation(OneToMany.class);
+        Optional<ManyToOne> manyToOne = attributeDesc.getAnnotation(ManyToOne.class);
+        Optional<ManyToMany> manyToMany = attributeDesc.getAnnotation(ManyToMany.class);
+        if (oneToOne.isPresent() || manyToOne.isPresent() || oneToMany.isPresent() || manyToMany.isPresent()) {
+            Optional<String> mappedBy = getMappedBy(attributeDesc);
+            if (mappedBy.isPresent() && mappedBy.get().length() > 0) {
+                return RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
+            }
+            return RelationshipRepositoryBehavior.FORWARD_OWNER;
+        }
+        return RelationshipRepositoryBehavior.DEFAULT;
     }
 
     @Override

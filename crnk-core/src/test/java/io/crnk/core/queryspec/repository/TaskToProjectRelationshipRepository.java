@@ -12,25 +12,25 @@ import io.crnk.core.resource.meta.MetaInformation;
 import java.util.Collection;
 
 public class TaskToProjectRelationshipRepository extends RelationshipRepositoryBase<Task, Long, Project, Long>
-		implements MetaRepository<Project>, LinksRepository<Project> {
+        implements MetaRepository<Project>, LinksRepository<Project> {
 
-	public TaskToProjectRelationshipRepository() {
-		super(Task.class, Project.class);
-	}
+    public TaskToProjectRelationshipRepository() {
+        super(Task.class, Project.class);
+    }
 
-	@Override
-	public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec) {
-		return new LinksInformation() {
+    @Override
+    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec) {
+        return new LinksInformation() {
 
-			public String name = "value";
-		};
-	}
+            public String name = "value";
+        };
+    }
 
-	@Override
-	public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec) {
-		return new MetaInformation() {
+    @Override
+    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec) {
+        return new MetaInformation() {
 
-			public String name = "value";
-		};
-	}
+            public String name = "value";
+        };
+    }
 }

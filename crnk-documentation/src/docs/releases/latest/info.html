@@ -47,7 +47,55 @@ While being a major release, changes required are minimal (see below).
         Decorators have been removed form the JpaRepositoryConfig. The regular RepositoryDecoratorFactory can be
         used instead.
     </li>
+    <li>
+        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy.
+        See below for more information. Be aware of the changed semantics. The property must only be
+        set on one side.
+    </li>
 </ul>
+
+<h4>Simplified Relationship Setup with @JsonApiRelation.mappedBy</h4>
+
+        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy. MappedBy works
+        in exactly the same fashion as known from JPA-related annotations. It must be set on one side of
+        a bidirectional relationship to point to the opposite owning side. By default requests are then served
+        from the resource repository of the owning side.
+
+
+<pre class="prettyprint">
+@JsonApiResource(type = "tasks")
+public class Task {
+
+    @JsonApiRelation
+    private Project project;
+
+    ...
+}
+
+@JsonApiResource(type = "tasks")
+public class Task {
+
+    @JsonApiRelation(mappedBy="project")
+    private Set&lt;Task&gt; tasks;
+
+    ...
+}
+</pre>
+
+<p>
+    For example, for a one-to-many relationship, the owning side is typically the single-valued field, whereas
+    the
+    multi-valued
+    field declares the mappedBy to point to the single-valued field. This is because the single-valued field
+    is typically something like a column in a database table that can be accessed and updated. In contrast,
+    the multi-valued field can only be obtained by specifying issuing a query against the single-valued field.
+</p>
+
+Under the hood the mappedBy property will trigger a suitable default for @JsonApiRelation.repositoryBehavior
+and @JsonApiRelation.lookup on both sides, simplifying the relationship setup for most use cases.
+If no relationship repository can be setup, Crnk will no fail directly upon startup.
+More information is available in the documentation.
+
 
 <h4>Go Faster with Graal Native</h4>
 

@@ -38,13 +38,6 @@ public class RelationshipRepositoryBehaviorTest {
 		Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
 	}
 
-	@Test(expected = RelationshipRepositoryNotFoundException.class)
-	public void checkAlwaysLookupTriggersNoImplicitRepo() {
-		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
-		Object relRepository = entry.getRelationshipRepository("testAlwaysLookup");
-		Assert.assertNull(relRepository);
-	}
-
 	@Test
 	public void checkImplicitOwnerRepo() {
 		RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);

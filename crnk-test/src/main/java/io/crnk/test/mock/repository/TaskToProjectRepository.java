@@ -31,7 +31,7 @@ public class TaskToProjectRepository implements OneRelationshipRepository<Task, 
     @Override
     public RelationshipMatcher getMatcher() {
         RelationshipMatcher matcher = new RelationshipMatcher();
-        matcher.rule().source(Task.class).target(Project.class).add();
+        matcher.rule().source(Task.class, true).target(Project.class).add();
         return matcher;
     }
 

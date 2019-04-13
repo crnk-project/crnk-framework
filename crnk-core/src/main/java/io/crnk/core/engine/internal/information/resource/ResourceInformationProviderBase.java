@@ -121,6 +121,12 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
         fieldBuilder.genericType(genericType);
         if (fieldType == ResourceFieldType.RELATIONSHIP) {
+
+            Optional<String> mappedBy = getMappedBy(attributeDesc);
+            if (mappedBy.isPresent() && !mappedBy.get().isEmpty()) {
+                fieldBuilder.setMappedBy(true);
+            }
+
             fieldBuilder.oppositeResourceType(getResourceType(genericType, context));
             fieldBuilder.oppositeName(getOppositeName(attributeDesc));
 
@@ -164,6 +170,17 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         return getDefaultRelationshipRepositoryBehavior(attributeDesc);
     }
 
+    protected Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
+        Optional<String> mappedBy = Optional.empty();
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<String> opt = fieldInformationProvider.getMappedBy(attributeDesc);
+            if (opt.isPresent() && (!mappedBy.isPresent() || mappedBy.get().isEmpty())) {
+                mappedBy = opt;
+            }
+        }
+        return mappedBy;
+    }
+
     protected RelationshipRepositoryBehavior getDefaultRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
         return RelationshipRepositoryBehavior.DEFAULT;
     }
@@ -199,14 +216,14 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
     }
 
     public JsonIncludeStrategy getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
-		for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
-			Optional<JsonIncludeStrategy> jsonIncludeStrategy = fieldInformationProvider.getJsonIncludeStrategy(attributeDesc);
-			if (jsonIncludeStrategy.isPresent()) {
-				return jsonIncludeStrategy.get();
-			}
-		}
-		return JsonIncludeStrategy.DEFAULT;
-	}
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<JsonIncludeStrategy> jsonIncludeStrategy = fieldInformationProvider.getJsonIncludeStrategy(attributeDesc);
+            if (jsonIncludeStrategy.isPresent()) {
+                return jsonIncludeStrategy.get();
+            }
+        }
+        return JsonIncludeStrategy.DEFAULT;
+    }
 
     protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
         LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
@@ -228,13 +245,13 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         // If the global behavior was also default, fall all they way back to the
         // information provider's default
         if (behavior == LookupIncludeBehavior.DEFAULT) {
-            behavior = getDefaultLookupIncludeBehavior();
+            behavior = getDefaultLookupIncludeBehavior(attributeDesc);
         }
 
         return behavior;
     }
 
-    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior() {
+    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
         return LookupIncludeBehavior.NONE;
     }
 
@@ -375,6 +392,11 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
     }
 
     private String getOppositeName(BeanAttributeInformation attributeDesc) {
+        Optional<String> mappedBy = getMappedBy(attributeDesc);
+        if (mappedBy.isPresent() && !mappedBy.get().isEmpty()) {
+            return mappedBy.get();
+        }
+
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
             Optional<String> oppositeName = fieldInformationProvider.getOppositeName(attributeDesc);
             if (oppositeName.isPresent()) {

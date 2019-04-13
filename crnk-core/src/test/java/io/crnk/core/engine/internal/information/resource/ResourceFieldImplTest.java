@@ -19,7 +19,7 @@ public class ResourceFieldImplTest {
 		Mockito.when(resourceInformation.getResourceClass()).thenReturn((Class) Resource.class);
 		impl.setResourceInformation(resourceInformation);
 
-		Assert.assertEquals("ResourceFieldImpl[jsonName=test-name,resourceType=someResource]", impl.toString());
+		Assert.assertEquals("ResourceFieldImpl[resourceClass=class io.crnk.core.engine.document.Resource, jsonName=test-name,resourceType=someResource]", impl.toString());
 	}
 
 }

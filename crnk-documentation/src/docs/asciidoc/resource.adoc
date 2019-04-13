@@ -118,39 +118,61 @@ The example below shows a sample class which contains a definition of a field wh
 
 [source]
 ----
-  @JsonApiResource(type = "tasks")
-  public class Task {
-    @JsonApiId
-    private Long id;
+@JsonApiResource(type = "tasks")
+public class Task {
+@JsonApiId
+private Long id;
 
-    // fields, getters and setters
-  }
+// fields, getters and setters
+}
 ----
 
 anchor:jsonApiRelation[]
 
 ## JsonApiRelation
 
-Indicates an association to either a single value or collection of resources. The type of such fields
+Indicates a relationship to either a single value or collection of resources. The type of such fields
 must be a valid resource.
 
-The example below shows a sample class which contains this kind of relationship.
-
+The example below shows an example of a bi-directional relationship between `Task` and `Project`.
 
 [source]
 ----
-  @JsonApiResource(type = "tasks")
-  public class Task {
+@JsonApiResource(type = "tasks")
+public class Task {
 
-    // ID field
-
-    @JsonApiRelation(lookUp=LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,serialize=SerializeType.ONLY_ID)
+    @JsonApiRelation
     private Project project;
 
-    // fields, getters and setters
-  }
+    ...
+}
+
+@JsonApiResource(type = "tasks")
+public class Task {
+
+    @JsonApiRelation(mappedBy="project")
+    private Set<Task> tasks;
+
+    ...
+}
 ----
 
+The two fields are linked through the `mappedBy` property by pointing from the non-owning to the owning side
+of the relationship. In this regard, `mappedBy` has exactly the same semantics as for JPA-related annotations.
+
+In one-to-many cases like in this is example, it is typical for the single-valued field to be the owner.
+Usually it is backed by something like a column in a database and can be read and written. In contrast,
+the multi-valued field can only be obtained by issuing a query against the single-valued field. In the same
+fashion Crnk will by default access repository implementations outlined in the next chapter.
+
+@JsonApiRelation comes with a number of attributes to customize its behavior. And
+<<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
+
+[source]
+----
+@JsonApiRelation(serialize = SerializeType.ONLY_ID)
+private Project project;
+----
 
 The optional `serialize` parameter specifies how the association should be serialized when making a request.
 There are two things to consider. Whether related resources should be added to the `include` section of the
@@ -159,12 +181,19 @@ in the corresponding `relationships.[name].data` section. Either `LAZY`, `ONLY_I
 
 - `LAZY` only serializes the ID and does the inclusion if explicitly requested by the `include` URL parameter. This is the default.
 - `ONLY_ID` always serializes the ID, but does only to an inclusion  if explicitly requested by the `include` URL parameter.
-- `EAGER` always both serializes the ID and does an inclusion.
+- `EAGER` always both serializes the ID and does an inclusion. Be aware of performance implication when enabling this.
 
-There are two possibilities of how related resources are fetched. Either the requested repository directly
-returns related resources with the returned resources. Or Crnk can take-over that
-work by doing nested calls to the corresponding `RelationshipRepositoryV2` implementations. The behavior
-is controlled by the optional `lookUp` parameter. There are three options:
+[source]
+----
+@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
+private Project project;
+----
+
+JSON:API comes with support for inclusions based on the `include` parameter. It allows to request complex
+object graphs where also related resources can be fetched.  There are two possibilities of how this is implemented.
+Either the requested repository also directly returns related resources with the returned ones. Or Crnk can take-over that
+work by doing nested calls to adjacent `ResourceRepository`, `OneRelationshipRepository` and `ManyRelationshipRepository`
+implementations. The behavior is controlled by the optional `lookUp` parameter. There are three options:
 
 - `NONE` makes the requested repository responsible for returning related resources. This is the default.
 - `AUTOMATICALLY_WHEN_NULL` will let Crnk lookup related resources if not already done by the requested repository.
@@ -174,8 +203,9 @@ There are many different ways how a relationship may end-up being implemented. I
 at all and requests can be dispatches to one of the two related resource repositories. The `repositoryBehavior` allows
 to configure behavior:
 
-- `DEFAULT` makes use of `IMPLICIT_FROM_OWNER` if a relationship also makes use of `@JsonApiRelationId` (see below) or
-  `lookUp=NONE` (see above). In any other case it expects a custom implementation.
+- `DEFAULT` makes use of `FORWARD_OWNER` if a relationship also makes use of `@JsonApiRelationId` (see below),
+   is designated as owner by a `mappedBy` or `lookUp=NONE` is declared (see above). `DEFAULT` makes use of `FORWARD_OPPOSITE`
+   if `mappedBy` points to another owner. In any other case it expects a custom implementation.
 - `CUSTOM` expects a custom implementation.
 - `FORWARD_OWNER` forward any relationship request to the owning resource repository, the repository that defines the
   requested relationship field. GET requests will fetch the owning resources and grab the related resources from there (with the
@@ -245,6 +275,7 @@ Notice that:
 - `Schedule` resource holds both a `project` and `projectId` field that point to the same related resource.
 - setters must set both properties to make sure they stay in sync. If only the ID is set, the object must be nulled.
 - `propertyId` will never show in requests and responses. It can be considered to be `transient`.
+- Bi-directional relationships can simply make use of `@JsonRelationId(mappedBy="project")` on the other side.
 
 By default, the naming convention for `@JsonApiRelationId` field is to end with a `Id` or `Ids` suffix. Crnk will
 the pair those two objects automatically. Trailing `s` are ignored for multi-valued fields, meaning that `projectIds` matches with

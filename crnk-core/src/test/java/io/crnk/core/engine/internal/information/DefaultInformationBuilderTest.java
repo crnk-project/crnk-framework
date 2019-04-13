@@ -56,7 +56,7 @@ public class DefaultInformationBuilderTest {
 		projectField.serializeType(SerializeType.EAGER);
 		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
 		projectField.oppositeName("tasks");
-		projectField.relationshipRepositoryBehavior(RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER);
+		projectField.relationshipRepositoryBehavior(RelationshipRepositoryBehavior.FORWARD_OWNER);
 		projectField.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
 		projectField.accessor(accessor);
 
@@ -86,7 +86,7 @@ public class DefaultInformationBuilderTest {
 		Assert.assertFalse(projectInfo.getAccess().isPostable());
 		Assert.assertTrue(projectInfo.getAccess().isPatchable());
 		Assert.assertEquals(SerializeType.EAGER, projectInfo.getSerializeType());
-		Assert.assertEquals(RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER, projectInfo.getRelationshipRepositoryBehavior());
+		Assert.assertEquals(RelationshipRepositoryBehavior.FORWARD_OWNER, projectInfo.getRelationshipRepositoryBehavior());
 		Assert.assertFalse(projectInfo.isCollection());
 	}
 
