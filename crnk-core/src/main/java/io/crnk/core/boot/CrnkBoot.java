@@ -228,7 +228,7 @@ public class CrnkBoot {
     }
 
     private void logInfo() {
-        int numResources = resourceRegistry.getResources().size();
+        int numResources = resourceRegistry.getEntries().size();
         List<String> modules = moduleRegistry.getModules().stream().map(Module::getModuleName).collect(Collectors.toList());
         // hide internal module names
         modules.remove(ResourceInformationProviderModule.NAME);

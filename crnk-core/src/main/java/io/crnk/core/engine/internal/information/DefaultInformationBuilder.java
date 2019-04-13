@@ -296,10 +296,11 @@ public class DefaultInformationBuilder implements InformationBuilder {
             access = field.getAccess();
             serializeType = field.getSerializeType();
             jsonIncludeStrategy = field.getJsonIncludeStrategy();
+            mappedBy = field.isMappedBy();
             if (fieldType == ResourceFieldType.RELATIONSHIP) {
                 relationshipRepositoryBehavior = field.getRelationshipRepositoryBehavior();
                 oppositeResourceType = field.getOppositeResourceType();
-                lookupIncludeBehavior = field.getLookupIncludeAutomatically();
+                lookupIncludeBehavior = field.getLookupIncludeBehavior();
                 oppositeName = field.getOppositeName();
                 if (field.hasIdField()) {
                     idName = field.getIdName();

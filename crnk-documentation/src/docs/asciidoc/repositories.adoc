@@ -912,7 +912,7 @@ An example can look like:
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
 ----
 
 The particular example, for example, intercepts the `save` operation and may trigger an approval workflow:
@@ -920,7 +920,7 @@ The particular example, for example, intercepts the `save` operation and may tri
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
 ----
 
 

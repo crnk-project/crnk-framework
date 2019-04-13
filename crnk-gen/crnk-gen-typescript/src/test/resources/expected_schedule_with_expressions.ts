@@ -5,6 +5,10 @@ import {
 	QProjects
 } from './projects';
 import {
+	QScheduleStatus,
+	ScheduleStatus
+} from './schedule.status';
+import {
 	QTasks,
 	Tasks
 } from './tasks';
@@ -28,12 +32,10 @@ import {
 export module Schedule {
 	export interface Relationships {
 		[key: string]: ResourceRelationship;
-		task?: TypedOneResourceRelationship<Tasks>;
-		lazyTask?: TypedOneResourceRelationship<Tasks>;
 		taskSet?: TypedManyResourceRelationship<Tasks>;
-		tasksList?: TypedManyResourceRelationship<Tasks>;
 		project?: TypedOneResourceRelationship<Projects>;
 		projects?: TypedManyResourceRelationship<Projects>;
+		status?: TypedOneResourceRelationship<ScheduleStatus>;
 	}
 	export interface Attributes {
 		name?: string;
@@ -69,22 +71,6 @@ export class QSchedule extends BeanPath<Schedule> {
 }
 export module QSchedule {
 	export class QRelationships extends BeanPath<Schedule.Relationships> {
-		private _task: QTypedOneResourceRelationship<QTasks, Tasks>;
-		get task(): QTypedOneResourceRelationship<QTasks, Tasks> {
-			if (!this._task) {
-				this._task =
-					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'task', QTasks);
-			}
-			return this._task;
-		};
-		private _lazyTask: QTypedOneResourceRelationship<QTasks, Tasks>;
-		get lazyTask(): QTypedOneResourceRelationship<QTasks, Tasks> {
-			if (!this._lazyTask) {
-				this._lazyTask =
-					new QTypedOneResourceRelationship<QTasks, Tasks>(this, 'lazyTask', QTasks);
-			}
-			return this._lazyTask;
-		};
 		private _taskSet: QTypedManyResourceRelationship<QTasks, Tasks>;
 		get taskSet(): QTypedManyResourceRelationship<QTasks, Tasks> {
 			if (!this._taskSet) {
@@ -92,14 +78,6 @@ export module QSchedule {
 					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'taskSet', QTasks);
 			}
 			return this._taskSet;
-		};
-		private _tasksList: QTypedManyResourceRelationship<QTasks, Tasks>;
-		get tasksList(): QTypedManyResourceRelationship<QTasks, Tasks> {
-			if (!this._tasksList) {
-				this._tasksList =
-					new QTypedManyResourceRelationship<QTasks, Tasks>(this, 'tasksList', QTasks);
-			}
-			return this._tasksList;
 		};
 		private _project: QTypedOneResourceRelationship<QProjects, Projects>;
 		get project(): QTypedOneResourceRelationship<QProjects, Projects> {
@@ -117,6 +95,14 @@ export module QSchedule {
 			}
 			return this._projects;
 		};
+		private _status: QTypedOneResourceRelationship<QScheduleStatus, ScheduleStatus>;
+		get status(): QTypedOneResourceRelationship<QScheduleStatus, ScheduleStatus> {
+			if (!this._status) {
+				this._status =
+					new QTypedOneResourceRelationship<QScheduleStatus, ScheduleStatus>(this, 'status', QScheduleStatus);
+			}
+			return this._status;
+		};
 	}
 	export class QAttributes extends BeanPath<Schedule.Attributes> {
 		name: StringPath = this.createString('name');
@@ -132,12 +118,10 @@ export let createEmptySchedule = function(id: string): Schedule {
 		attributes: {
 		},
 		relationships: {
-			task: {data: null},
-			lazyTask: {data: null},
 			taskSet: {data: []},
-			tasksList: {data: []},
 			project: {data: null},
 			projects: {data: []},
+			status: {data: null},
 		},
 	};
 };

@@ -14,7 +14,7 @@ public interface ResourceField {
     ResourceFieldType getResourceFieldType();
 
     /**
-     * @return if {@link JsonApiRelation#mappedBy()} is pointed to.
+     * @return if this relationship field points to another owner with {@link JsonApiRelation#mappedBy()}.
      */
     boolean isMappedBy();
 
@@ -25,7 +25,7 @@ public interface ResourceField {
      *
      * @return if lookup should be performed
      */
-    LookupIncludeBehavior getLookupIncludeAutomatically();
+    LookupIncludeBehavior getLookupIncludeBehavior();
 
     /**
      * @return name of opposite attribute in case of a bidirectional relation.
@@ -102,4 +102,5 @@ public interface ResourceField {
     RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
 
     PatchStrategy getPatchStrategy();
+
 }

@@ -44,7 +44,7 @@ public class HierarchicalResourceRegistryPartTest {
 		RegistryEntry savedEntry = part.addEntry(entry);
 		Assert.assertSame(savedEntry, entry);
 
-		Collection<RegistryEntry> resources = part.getResources();
+		Collection<RegistryEntry> resources = part.getEntries();
 		Assert.assertEquals(1, resources.size());
 		Assert.assertSame(entry, part.getEntry("test"));
 		Assert.assertSame(entry, part.getEntry(TestResource.class));
@@ -69,7 +69,7 @@ public class HierarchicalResourceRegistryPartTest {
 		Assert.assertSame(savedEntry, entry);
 		Mockito.verify(listener, Mockito.times(1)).onChanged(Mockito.any(ResourceRegistryPartEvent.class));
 
-		Collection<RegistryEntry> resources = part.getResources();
+		Collection<RegistryEntry> resources = part.getEntries();
 		Assert.assertEquals(1, resources.size());
 		Assert.assertSame(entry, part.getEntry("child/test"));
 		Assert.assertSame(entry, part.getEntry(TestResource.class));

@@ -85,7 +85,7 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 	 *
 	 * @return resources
 	 */
-	public Set<RegistryEntry> getResources() {
+	public Set<RegistryEntry> getEntries() {
 		return Collections.unmodifiableSet(new HashSet<>(resourcesByType.values()));
 	}
 

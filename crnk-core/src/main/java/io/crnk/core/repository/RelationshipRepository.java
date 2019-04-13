@@ -15,7 +15,7 @@ import java.util.Map;
  * There are two methods that are used for To-One relationships:
  * <ul>
  * <li>setRelation</li>
- * <li>findOneTarget</li>
+ * <li>findOneRelations</li>
  * </ul>
  * <p>
  * There are four methods that are used for To-Many relationships:
@@ -23,7 +23,7 @@ import java.util.Map;
  * <li>setRelations</li>
  * <li>addRelation</li>
  * <li>removeRelation</li>
- * <li>findManyTargets</li>
+ * <li>findManyRelations</li>
  * </ul>
  * <p>
  * The reason why there is more than one method for To-Many relationships manipulation is to prevent

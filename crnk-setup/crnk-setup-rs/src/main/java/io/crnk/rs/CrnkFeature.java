@@ -93,7 +93,7 @@ public class CrnkFeature implements Feature {
      */
     private void registerActionRepositories(FeatureContext context, CrnkBoot boot) {
         ResourceRegistry resourceRegistry = boot.getResourceRegistry();
-        Collection<RegistryEntry> registryEntries = resourceRegistry.getResources();
+        Collection<RegistryEntry> registryEntries = resourceRegistry.getEntries();
         for (RegistryEntry registryEntry : registryEntries) {
             ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
             if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {

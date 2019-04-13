@@ -71,7 +71,7 @@ public class ReactiveManyRelationshipRepositoryAdapterTest extends ReactiveTestB
 		taskRepository.getMap().put(3L, task3);
 		projectToTasks.getRelationMap().addAll(1L, Arrays.asList(2L, 3L));
 
-		JsonApiResponse response = adapter.findManyTargets(1L, adapter.getResourceField(), queryAdapter).get();
+		JsonApiResponse response = adapter.findManyRelations(1L, adapter.getResourceField(), queryAdapter).get();
 		Assert.assertEquals(Arrays.asList(task2, task3), response.getEntity());
 	}
 
@@ -97,7 +97,7 @@ public class ReactiveManyRelationshipRepositoryAdapterTest extends ReactiveTestB
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void findOneTarget() {
-		adapter.findOneTarget(null, null, null);
+		adapter.findOneRelations(null, null, null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

@@ -165,7 +165,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 		boolean hasEntries = false;
 		boolean hasUnfilteredEntries = false;
-		for (RegistryEntry resourceEntry : resourceRegistry.getResources()) {
+		for (RegistryEntry resourceEntry : resourceRegistry.getEntries()) {
 			ResourceRepositoryInformation repositoryInformation = resourceEntry.getRepositoryInformation();
 			if (repositoryInformation == null || !repositoryInformation.isExposed()) {
 				continue;

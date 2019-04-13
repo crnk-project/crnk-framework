@@ -8,17 +8,16 @@ import {
 import {DefaultPagedMetaInformation} from './default.paged.meta.information';
 import {DefaultPagedLinksInformation} from './information/default.paged.links.information';
 import {Projects} from './projects';
+import {ScheduleStatus} from './schedule.status';
 import {Tasks} from './tasks';
 
 export interface Schedule extends Resource {
 	name?: string;
 	description?: string;
-	task?: OneResourceRelationship<Tasks>;
-	lazyTask?: OneResourceRelationship<Tasks>;
 	taskSet?: ManyResourceRelationship<Tasks>;
-	tasksList?: ManyResourceRelationship<Tasks>;
 	project?: OneResourceRelationship<Projects>;
 	projects?: ManyResourceRelationship<Projects>;
+	status?: OneResourceRelationship<ScheduleStatus>;
 	delayed?: boolean;
 	customData?: { [key: string]: string };
 }

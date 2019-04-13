@@ -332,7 +332,7 @@ public class RepositoryFilterTest {
     @SuppressWarnings({"unchecked"})
     @Test
     public void findOneTarget() {
-        projectRelationAdapter.findOneTarget(1L, assignedProjectsField, queryAdapter);
+        projectRelationAdapter.findOneRelations(1L, assignedProjectsField, queryAdapter);
 
         ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 
@@ -360,7 +360,7 @@ public class RepositoryFilterTest {
     @SuppressWarnings({"unchecked"})
     @Test
     public void findManyTarget() {
-        projectRelationAdapter.findManyTargets(1L, assignedProjectsField, queryAdapter);
+        projectRelationAdapter.findManyRelations(1L, assignedProjectsField, queryAdapter);
 
         ArgumentCaptor<RepositoryFilterContext> contexts = ArgumentCaptor.forClass(RepositoryFilterContext.class);
 

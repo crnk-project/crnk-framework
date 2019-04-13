@@ -1,6 +1,5 @@
 package io.crnk.core.resource.paging.next;
 
-import io.crnk.core.mock.models.Task;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -12,56 +11,56 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class HasNextPageTestRepository implements ResourceRepository<Task, Long> {
+public class HasNextPageTestRepository implements ResourceRepository<HasNextPageResource, Long> {
 
-	private static List<Task> tasks = new ArrayList<>();
+	private static List<HasNextPageResource> HasNextPageResources = new ArrayList<>();
 
 	public static void clear() {
-		tasks.clear();
+		HasNextPageResources.clear();
 	}
 
 	@Override
-	public Class<Task> getResourceClass() {
-		return Task.class;
+	public Class<HasNextPageResource> getResourceClass() {
+		return HasNextPageResource.class;
 	}
 
 	@Override
-	public Task findOne(Long id, QuerySpec querySpec) {
-		for (Task task : tasks) {
-			if (task.getId().equals(id)) {
-				return task;
+	public HasNextPageResource findOne(Long id, QuerySpec querySpec) {
+		for (HasNextPageResource HasNextPageResource : HasNextPageResources) {
+			if (HasNextPageResource.getId().equals(id)) {
+				return HasNextPageResource;
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public ResourceList<Task> findAll(QuerySpec querySpec) {
-		DefaultResourceList<Task> list = new DefaultResourceList<>();
+	public ResourceList<HasNextPageResource> findAll(QuerySpec querySpec) {
+		DefaultResourceList<HasNextPageResource> list = new DefaultResourceList<>();
 		list.setMeta(new DefaultHasMoreResourcesMetaInformation());
-		querySpec.apply(tasks, list);
+		querySpec.apply(HasNextPageResources, list);
 		return list;
 	}
 
 	@Override
-	public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec querySpec) {
-		DefaultResourceList<Task> list = new DefaultResourceList<>();
+	public ResourceList<HasNextPageResource> findAll(Collection<Long> ids, QuerySpec querySpec) {
+		DefaultResourceList<HasNextPageResource> list = new DefaultResourceList<>();
 		list.setMeta(new DefaultHasMoreResourcesMetaInformation());
-		querySpec.apply(tasks, list);
+		querySpec.apply(HasNextPageResources, list);
 		return list;
 	}
 
 	@Override
-	public <S extends Task> S save(S entity) {
-		tasks.add(entity);
+	public <S extends HasNextPageResource> S save(S entity) {
+		HasNextPageResources.add(entity);
 		return null;
 	}
 
 	@Override
 	public void delete(Long id) {
-		Iterator<Task> iterator = tasks.iterator();
+		Iterator<HasNextPageResource> iterator = HasNextPageResources.iterator();
 		while (iterator.hasNext()) {
-			Task next = iterator.next();
+			HasNextPageResource next = iterator.next();
 			if (next.getId().equals(id)) {
 				iterator.remove();
 			}
@@ -69,7 +68,7 @@ public class HasNextPageTestRepository implements ResourceRepository<Task, Long>
 	}
 
 	@Override
-	public <S extends Task> S create(S entity) {
+	public <S extends HasNextPageResource> S create(S entity) {
 		return save(entity);
 	}
 }

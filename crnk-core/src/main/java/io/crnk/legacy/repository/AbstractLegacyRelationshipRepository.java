@@ -33,13 +33,13 @@ public abstract class AbstractLegacyRelationshipRepository<S, S_ID , T, T_ID >
 
 	@Override
 	public T findOneTarget(S_ID entityId, String fieldName, QueryParams queryParams) {
-		throw new UnsupportedOperationException("findOneTarget not implemented");
+		throw new UnsupportedOperationException("findOneRelations not implemented");
 
 	}
 
 	@Override
 	public Iterable<T> findManyTargets(S_ID entityId, String fieldName, QueryParams queryParams) {
-		throw new UnsupportedOperationException("findManyTargets not implemented");
+		throw new UnsupportedOperationException("findManyRelations not implemented");
 	}
 
 }

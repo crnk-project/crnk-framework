@@ -60,7 +60,7 @@ public class PlainTextFormatIntTest extends JerseyTestBase {
 
 	@Test
 	public void checkGet() {
-		Response getResponse = RestAssured.get(getBaseUri() + "/tasks/12");
+		Response getResponse = RestAssured.get(getBaseUri() + "/tasks/12?include=project");
 		Assert.assertEquals(200, getResponse.getStatusCode());
 		getResponse.then().assertThat().body("data.id", Matchers.equalTo("12"));
 		getResponse.then().assertThat().body("data.type", Matchers.equalTo("tasks"));
