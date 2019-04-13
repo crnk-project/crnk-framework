@@ -1,8 +1,5 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import java.lang.reflect.Type;
-import java.util.Objects;
-
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -18,314 +15,334 @@ import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
+import java.lang.reflect.Type;
+import java.util.Objects;
+
 public class ResourceFieldImpl implements ResourceField {
 
-	private String jsonName;
+    private String jsonName;
 
-	private final String underlyingName;
+    private final String underlyingName;
 
-	private final Class<?> type;
+    private final Class<?> type;
 
-	private final Type genericType;
+    private final Type genericType;
 
-	private final SerializeType serializeType;
+    private final SerializeType serializeType;
 
-	private final JsonIncludeStrategy jsonIncludeStrategy;
+    private final JsonIncludeStrategy jsonIncludeStrategy;
 
-	private final String oppositeResourceType;
+    private final String oppositeResourceType;
 
-	private final LookupIncludeBehavior lookupIncludeBehavior;
+    private final LookupIncludeBehavior lookupIncludeBehavior;
 
-	private ResourceFieldType resourceFieldType;
+    private ResourceFieldType resourceFieldType;
 
-	private final String oppositeName;
+    private final String oppositeName;
 
-	private final RelationshipRepositoryBehavior relationshipRepositoryBehavior;
+    private RelationshipRepositoryBehavior relationshipRepositoryBehavior;
 
-	private ResourceInformation resourceInformation;
+    private ResourceInformation resourceInformation;
 
-	private ResourceFieldAccessor accessor;
+    private ResourceFieldAccessor accessor;
 
-	private final ResourceFieldAccess access;
+    private final ResourceFieldAccess access;
 
-	private String idName;
+    private String idName;
 
-	private ResourceFieldAccessor idAccessor;
+    private ResourceFieldAccessor idAccessor;
 
-	private Class idType;
+    private Class idType;
 
-	private PatchStrategy patchStrategy;
+    private PatchStrategy patchStrategy;
 
-	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType) {
-		this(jsonName, underlyingName, resourceFieldType, type, genericType,
-				oppositeResourceType, null, SerializeType.LAZY, JsonIncludeStrategy.DEFAULT, LookupIncludeBehavior.NONE,
-				new ResourceFieldAccess(true, true, true, true, true, true),
-				null, null, null, RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
-	}
+    private boolean mappedBy;
 
-	public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
-			Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
-			JsonIncludeStrategy jsonIncludeStrategy, LookupIncludeBehavior lookupIncludeBehavior,
-			ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
-			RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
-		this.jsonName = jsonName;
-		this.underlyingName = underlyingName;
-		this.resourceFieldType = resourceFieldType;
-		this.serializeType = serializeType;
-		this.jsonIncludeStrategy = jsonIncludeStrategy;
-		this.type = type;
-		this.genericType = genericType;
-		this.lookupIncludeBehavior = lookupIncludeBehavior;
-		this.oppositeName = oppositeName;
-		this.oppositeResourceType = oppositeResourceType;
-		this.access = access;
-		this.idName = idName;
-		this.idType = idType;
-		this.idAccessor = idAccessor;
-		this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
-		this.patchStrategy = patchStrategy;
-	}
+    public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
+                             Type genericType, String oppositeResourceType) {
+        this(jsonName, underlyingName, resourceFieldType, type, genericType,
+                oppositeResourceType, null, SerializeType.LAZY, JsonIncludeStrategy.DEFAULT, LookupIncludeBehavior.NONE,
+                new ResourceFieldAccess(true, true, true, true, true, true),
+                null, null, null, RelationshipRepositoryBehavior.DEFAULT, PatchStrategy.DEFAULT);
+    }
 
-	@Deprecated
-	public void setJsonName(String jsonName) {
-		this.jsonName = jsonName;
-	}
+    public ResourceFieldImpl(String jsonName, String underlyingName, ResourceFieldType resourceFieldType, Class<?> type,
+                             Type genericType, String oppositeResourceType, String oppositeName, SerializeType serializeType,
+                             JsonIncludeStrategy jsonIncludeStrategy, LookupIncludeBehavior lookupIncludeBehavior,
+                             ResourceFieldAccess access, String idName, Class idType, ResourceFieldAccessor idAccessor,
+                             RelationshipRepositoryBehavior relationshipRepositoryBehavior, PatchStrategy patchStrategy) {
+        this.jsonName = jsonName;
+        this.underlyingName = underlyingName;
+        this.resourceFieldType = resourceFieldType;
+        this.serializeType = serializeType;
+        this.jsonIncludeStrategy = jsonIncludeStrategy;
+        this.type = type;
+        this.genericType = genericType;
+        this.lookupIncludeBehavior = lookupIncludeBehavior;
+        this.oppositeName = oppositeName;
+        this.oppositeResourceType = oppositeResourceType;
+        this.access = access;
+        this.idName = idName;
+        this.idType = idType;
+        this.idAccessor = idAccessor;
+        this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+        this.patchStrategy = patchStrategy;
+    }
 
-	@Deprecated
-	public void setResourceFieldType(ResourceFieldType resourceFieldType) {
-		this.resourceFieldType = resourceFieldType;
-	}
+    public void setMappedBy(boolean mappedBy) {
+        this.mappedBy = mappedBy;
+    }
 
-	public ResourceFieldType getResourceFieldType() {
-		return resourceFieldType;
-	}
+    @Deprecated
+    public void setJsonName(String jsonName) {
+        this.jsonName = jsonName;
+    }
 
-	public RelationshipRepositoryBehavior getRelationshipRepositoryBehavior() {
-		return relationshipRepositoryBehavior;
-	}
+    @Deprecated
+    public void setResourceFieldType(ResourceFieldType resourceFieldType) {
+        this.resourceFieldType = resourceFieldType;
+    }
 
-	/**
-	 * See also
-	 * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
-	 * }
-	 *
-	 * @return if lookup should be performed
-	 */
-	public LookupIncludeBehavior getLookupIncludeAutomatically() {
-		return lookupIncludeBehavior;
-	}
+    public ResourceFieldType getResourceFieldType() {
+        return resourceFieldType;
+    }
 
-	/**
-	 * @return name of opposite attribute in case of a bidirectional relation.
-	 */
-	public String getOppositeName() {
-		return oppositeName;
-	}
+    @Override
+    public boolean isMappedBy() {
+        return mappedBy;
+    }
 
-	public String getJsonName() {
-		return jsonName;
-	}
+    public RelationshipRepositoryBehavior getRelationshipRepositoryBehavior() {
+        return relationshipRepositoryBehavior;
+    }
 
-	public String getUnderlyingName() {
-		return underlyingName;
-	}
+    /**
+     * See also
+     * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
+     * }
+     *
+     * @return if lookup should be performed
+     */
+    public LookupIncludeBehavior getLookupIncludeAutomatically() {
+        return lookupIncludeBehavior;
+    }
 
-	public String getOppositeResourceType() {
-		PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association",
-				underlyingName, resourceInformation.getResourceType());
-		if (getElementType() != Object.class) {
-			PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type",
-					underlyingName, resourceInformation.getResourceType());
-		}
-		return oppositeResourceType;
-	}
+    /**
+     * @return name of opposite attribute in case of a bidirectional relation.
+     */
+    public String getOppositeName() {
+        return oppositeName;
+    }
 
-	public Class<?> getType() {
-		return type;
-	}
+    public String getJsonName() {
+        return jsonName;
+    }
 
-	public Type getGenericType() {
-		return genericType;
-	}
+    public String getUnderlyingName() {
+        return underlyingName;
+    }
 
-	public SerializeType getSerializeType() {
-		return serializeType;
-	}
+    public String getOppositeResourceType() {
+        PreconditionUtil.verifyEquals(ResourceFieldType.RELATIONSHIP, resourceFieldType, "field %s of %s is not an association",
+                underlyingName, resourceInformation.getResourceType());
+        if (getElementType() != Object.class) {
+            PreconditionUtil.verify(oppositeResourceType != null, "field %s of %s does not have an opposite resource type",
+                    underlyingName, resourceInformation.getResourceType());
+        }
+        return oppositeResourceType;
+    }
 
+    public Class<?> getType() {
+        return type;
+    }
 
-	public JsonIncludeStrategy getJsonIncludeStrategy() {
-		return jsonIncludeStrategy;
-	}
+    public Type getGenericType() {
+        return genericType;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		ResourceFieldImpl that = (ResourceFieldImpl) o;
-		return Objects.equals(jsonName, that.jsonName) && resourceInformation == that.resourceInformation;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(jsonName, resourceInformation);
-	}
-
-	/**
-	 * Returns the non-collection type. Matches {@link #getType()} for
-	 * non-collections. Returns the type argument in case of a collection type.
-	 *
-	 * @return Ask Remmo
-	 */
-	public Class<?> getElementType() {
-		return ClassUtils.getRawType(ClassUtils.getElementType(genericType));
-	}
-
-	@Deprecated
-	public ResourceInformation getParentResourceInformation() {
-		return getResourceInformation();
-	}
-
-	@Override
-	public ResourceInformation getResourceInformation() {
-		return resourceInformation;
-	}
-
-	@Override
-	public ResourceFieldAccessor getAccessor() {
-		PreconditionUtil.verify(accessor != null, "field %s not properly initialized", underlyingName);
-		return accessor;
-	}
-
-	@Override
-	public boolean hasIdField() {
-		assertRelationship();
-		return idName != null;
-	}
-
-	@Override
-	public String getIdName() {
-		return idName;
-	}
-
-	@Override
-	public Class getIdType() {
-		assertRelationship();
-		return idType;
-	}
-
-	@Override
-	public ResourceFieldAccessor getIdAccessor() {
-		assertRelationship();
-		return idAccessor;
-	}
-
-	public void setIdField(String idName, Class idType, ResourceFieldAccessor idAccessor) {
-		assertRelationship();
-		// TODO to be eliminated by a builder pattern soon
-		this.idName = idName;
-		this.idType = idType;
-		this.idAccessor = idAccessor;
-	}
-
-	private void assertRelationship() {
-		PreconditionUtil
-				.assertEquals("not available for non-relationship fields", ResourceFieldType.RELATIONSHIP, getResourceFieldType
-						());
-	}
+    public SerializeType getSerializeType() {
+        return serializeType;
+    }
 
 
-	public void setAccessor(ResourceFieldAccessor accessor) {
-		// TODO to be eliminated by a builder pattern soon
-		this.accessor = accessor;
-	}
+    public JsonIncludeStrategy getJsonIncludeStrategy() {
+        return jsonIncludeStrategy;
+    }
 
-	public void setResourceInformation(ResourceInformation resourceInformation) {
-		if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
-			this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
-		}
-		else if (this.accessor == null) {
-			this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
-		}
-		if (this.idAccessor == null && idName != null) {
-			this.idAccessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), idName, idType);
-			if (idType == ResourceIdentifier.class) {
-				this.idAccessor = new ResourceIdentifierAccessorAdapter(idAccessor);
-			}
-		}
-		this.resourceInformation = resourceInformation;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ResourceFieldImpl that = (ResourceFieldImpl) o;
+        return Objects.equals(jsonName, that.jsonName) && resourceInformation == that.resourceInformation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(jsonName, resourceInformation);
+    }
+
+    /**
+     * Returns the non-collection type. Matches {@link #getType()} for
+     * non-collections. Returns the type argument in case of a collection type.
+     *
+     * @return Ask Remmo
+     */
+    public Class<?> getElementType() {
+        return ClassUtils.getRawType(ClassUtils.getElementType(genericType));
+    }
+
+    @Deprecated
+    public ResourceInformation getParentResourceInformation() {
+        return getResourceInformation();
+    }
+
+    @Override
+    public ResourceInformation getResourceInformation() {
+        return resourceInformation;
+    }
+
+    @Override
+    public ResourceFieldAccessor getAccessor() {
+        PreconditionUtil.verify(accessor != null, "field %s not properly initialized", underlyingName);
+        return accessor;
+    }
+
+    @Override
+    public boolean hasIdField() {
+        assertRelationship();
+        return idName != null;
+    }
+
+    @Override
+    public String getIdName() {
+        return idName;
+    }
+
+    @Override
+    public Class getIdType() {
+        assertRelationship();
+        return idType;
+    }
+
+    @Override
+    public ResourceFieldAccessor getIdAccessor() {
+        assertRelationship();
+        return idAccessor;
+    }
+
+    public void setIdField(String idName, Class idType, ResourceFieldAccessor idAccessor) {
+        assertRelationship();
+        // TODO to be eliminated by a builder pattern soon
+        this.idName = idName;
+        this.idType = idType;
+        this.idAccessor = idAccessor;
+    }
+
+    private void assertRelationship() {
+        PreconditionUtil
+                .assertEquals("not available for non-relationship fields", ResourceFieldType.RELATIONSHIP, getResourceFieldType
+                        ());
+    }
 
 
-	static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
+    public void setAccessor(ResourceFieldAccessor accessor) {
+        // TODO to be eliminated by a builder pattern soon
+        this.accessor = accessor;
+    }
 
-		protected final ResourceFieldAccessor wrappedAccessor;
+    public void setResourceInformation(ResourceInformation resourceInformation) {
+        if (this.accessor == null && resourceInformation.getResourceClass() == Resource.class) {
+            this.accessor = new RawResourceFieldAccessor(underlyingName, resourceFieldType, type);
+        } else if (this.accessor == null) {
+            this.accessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), underlyingName, type);
+        }
+        if (this.idAccessor == null && idName != null) {
+            this.idAccessor = new ReflectionFieldAccessor(resourceInformation.getResourceClass(), idName, idType);
+            if (idType == ResourceIdentifier.class) {
+                this.idAccessor = new ResourceIdentifierAccessorAdapter(idAccessor);
+            }
+        }
+        this.resourceInformation = resourceInformation;
+    }
 
-		public ResourceFieldAccessorWrapper(ResourceFieldAccessor wrappedAccessor) {
-			this.wrappedAccessor = wrappedAccessor;
-		}
+    public void setRelationshipRepositoryBehavior(RelationshipRepositoryBehavior behavior) {
+        this.relationshipRepositoryBehavior = relationshipRepositoryBehavior;
+    }
 
-		@Override
-		public Object getValue(Object resource) {
-			return wrappedAccessor.getValue(resource);
-		}
 
-		@Override
-		public void setValue(Object resource, Object fieldValue) {
-			wrappedAccessor.setValue(resource, fieldValue);
-		}
+    static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {
 
-		@Override
-		public Class getImplementationClass() {
-			return wrappedAccessor.getImplementationClass();
-		}
-	}
+        protected final ResourceFieldAccessor wrappedAccessor;
 
-	class ResourceIdentifierAccessorAdapter extends ResourceFieldAccessorWrapper {
+        public ResourceFieldAccessorWrapper(ResourceFieldAccessor wrappedAccessor) {
+            this.wrappedAccessor = wrappedAccessor;
+        }
 
-		public ResourceIdentifierAccessorAdapter(ResourceFieldAccessor idAccessor) {
-			super(idAccessor);
-		}
+        @Override
+        public Object getValue(Object resource) {
+            return wrappedAccessor.getValue(resource);
+        }
 
-		@Override
-		public void setValue(Object resource, Object fieldValue) {
-			if (fieldValue == null || fieldValue instanceof ResourceIdentifier) {
-				super.setValue(resource, fieldValue);
-			}
-			else {
-				// TODO try to get access to opposite ResourceInformation in the future, ok for basic use cases
-				super.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
-			}
-		}
-	}
+        @Override
+        public void setValue(Object resource, Object fieldValue) {
+            wrappedAccessor.setValue(resource, fieldValue);
+        }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName());
-		sb.append("[jsonName=").append(jsonName);
-		if (resourceInformation != null && resourceInformation.getResourceType() != null) {
-			sb.append(",resourceType=").append(resourceInformation.getResourceType());
-		}
-		sb.append("]");
-		return sb.toString();
-	}
+        @Override
+        public Class getImplementationClass() {
+            return wrappedAccessor.getImplementationClass();
+        }
+    }
 
-	public boolean isCollection() {
-		return Iterable.class.isAssignableFrom(getType());
-	}
+    class ResourceIdentifierAccessorAdapter extends ResourceFieldAccessorWrapper {
 
-	@Override
-	public ResourceFieldAccess getAccess() {
-		return access;
-	}
+        public ResourceIdentifierAccessorAdapter(ResourceFieldAccessor idAccessor) {
+            super(idAccessor);
+        }
 
-	@Override
-	public PatchStrategy getPatchStrategy() {
-		return patchStrategy;
-	}
+        @Override
+        public void setValue(Object resource, Object fieldValue) {
+            if (fieldValue == null || fieldValue instanceof ResourceIdentifier) {
+                super.setValue(resource, fieldValue);
+            } else {
+                // TODO try to get access to opposite ResourceInformation in the future, ok for basic use cases
+                super.setValue(resource, new ResourceIdentifier(fieldValue.toString(), oppositeResourceType));
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append("[");
+        if (resourceInformation != null) {
+            sb.append("resourceClass=").append(resourceInformation.getResourceClass());
+        }
+        sb.append(", jsonName=").append(jsonName);
+        if (resourceInformation != null && resourceInformation.getResourceType() != null) {
+            sb.append(",resourceType=").append(resourceInformation.getResourceType());
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public boolean isCollection() {
+        return Iterable.class.isAssignableFrom(getType());
+    }
+
+    @Override
+    public ResourceFieldAccess getAccess() {
+        return access;
+    }
+
+    @Override
+    public PatchStrategy getPatchStrategy() {
+        return patchStrategy;
+    }
 }

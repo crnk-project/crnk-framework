@@ -1,10 +1,6 @@
 package io.crnk.activiti.example.approval;
 
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import io.crnk.activiti.resource.ProcessInstanceResource;
 import io.crnk.core.engine.information.InformationBuilder;
@@ -21,105 +17,118 @@ import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ReadOnlyRelationshipRepositoryBase;
+import io.crnk.core.repository.OneRelationshipRepositoryBase;
+import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.list.ResourceList;
 
-public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource> extends ReadOnlyRelationshipRepositoryBase<R,
-		Serializable, P, String> implements ResourceRegistryAware, ResourceFieldContributor {
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-	private static final String RESOURCE_ID_FIELD = "resourceId";
+public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource> extends OneRelationshipRepositoryBase<R,
+        Serializable, P, String> implements ResourceRegistryAware, ResourceFieldContributor {
 
-	private static final String RESOURCE_TYPE_FIELD = "resourceType";
+    private static final String RESOURCE_ID_FIELD = "resourceId";
 
-	private final Class<R> resourceClass;
+    private static final String RESOURCE_TYPE_FIELD = "resourceType";
 
-	private final Class<P> processInfoClass;
+    private final Class<R> resourceClass;
 
-	private final List<FilterSpec> baseFilters;
+    private final Class<P> processInfoClass;
 
-	private ResourceRegistry resourceRegistry;
+    private final List<FilterSpec> baseFilters;
 
-	private String relationshipName;
+    private ResourceRegistry resourceRegistry;
 
-	private String oppositeResourceType;
+    private String relationshipName;
 
-	public ApprovalRelationshipRepository(Class<R> resourceClass, Class<P> processInfoClass, String relationshipName,
-			String oppositeResourceType, List<FilterSpec> baseFilters) {
-		this.resourceClass = resourceClass;
-		this.processInfoClass = processInfoClass;
-		this.relationshipName = relationshipName;
-		this.oppositeResourceType = oppositeResourceType;
-		this.baseFilters = baseFilters;
-	}
+    private String oppositeResourceType;
 
-	@Override
-	public Class<R> getSourceResourceClass() {
-		return resourceClass;
-	}
+    public ApprovalRelationshipRepository(Class<R> resourceClass, Class<P> processInfoClass, String relationshipName,
+                                          String oppositeResourceType, List<FilterSpec> baseFilters) {
+        this.resourceClass = resourceClass;
+        this.processInfoClass = processInfoClass;
+        this.relationshipName = relationshipName;
+        this.oppositeResourceType = oppositeResourceType;
+        this.baseFilters = baseFilters;
+    }
 
-	@Override
-	public Class<P> getTargetResourceClass() {
-		return processInfoClass;
-	}
+    @Override
+    public RelationshipMatcher getMatcher() {
+        RelationshipMatcher matcher = new RelationshipMatcher();
+        matcher.rule().field(relationshipName).add();
+        return matcher;
+    }
 
-	@Override
-	public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
-		InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
-		fieldBuilder.name(relationshipName);
-		fieldBuilder.oppositeResourceType(oppositeResourceType);
-		fieldBuilder.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
-		fieldBuilder.fieldType(ResourceFieldType.RELATIONSHIP);
-		fieldBuilder.access(new ResourceFieldAccess(true, false, false, false, false, false));
-		fieldBuilder.accessor(new ResourceFieldAccessor() {
-			@Override
-			public Object getValue(Object resource) {
-				return null;
-			}
+    @Override
+    public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
+        if (context.getResourceInformation().getImplementationClass().equals(resourceClass)) {
+            InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
+            fieldBuilder.name(relationshipName);
+            fieldBuilder.oppositeResourceType(oppositeResourceType);
+            fieldBuilder.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);
+            fieldBuilder.fieldType(ResourceFieldType.RELATIONSHIP);
+            fieldBuilder.access(new ResourceFieldAccess(true, false, false, false, false, false));
+            fieldBuilder.accessor(new ResourceFieldAccessor() {
+                @Override
+                public Object getValue(Object resource) {
+                    return null;
+                }
 
-			@Override
-			public void setValue(Object resource, Object fieldValue) {
-			}
+                @Override
+                public void setValue(Object resource, Object fieldValue) {
+                }
 
-			@Override
-			public Class getImplementationClass() {
-				return processInfoClass;
-			}
-		});
-		fieldBuilder.type(processInfoClass);
-		fieldBuilder.genericType(processInfoClass);
-		return Lists.newArrayList(fieldBuilder.build());
-	}
+                @Override
+                public Class getImplementationClass() {
+                    return processInfoClass;
+                }
+            });
+            fieldBuilder.type(processInfoClass);
+            fieldBuilder.genericType(processInfoClass);
+            return Lists.newArrayList(fieldBuilder.build());
+        }
+        return Collections.emptyList();
+    }
 
-	@Override
-	public P findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
-		if (relationshipName.equals(fieldName)) {
-			RegistryEntry resourceEntry = resourceRegistry.getEntry(resourceClass);
-			RegistryEntry processEntry = resourceRegistry.getEntry(processInfoClass);
-			String resourceType = resourceEntry.getResourceInformation().getResourceType();
+    @Override
+    public Map<Serializable, P> findOneRelations(Collection<Serializable> sourceIds, String fieldName, QuerySpec querySpec) {
+        if (relationshipName.equals(fieldName)) {
+            Map<Serializable, P> map = new HashMap<>();
+            for (Serializable sourceId : sourceIds) {
+                RegistryEntry resourceEntry = resourceRegistry.getEntry(resourceClass);
+                RegistryEntry processEntry = resourceRegistry.getEntry(processInfoClass);
+                String resourceType = resourceEntry.getResourceInformation().getResourceType();
 
-			ResourceRepository processRepository =
-					(ResourceRepository) processEntry.getResourceRepository().getResourceRepository();
+                ResourceRepository processRepository =
+                        (ResourceRepository) processEntry.getResourceRepository().getResourceRepository();
 
-			QuerySpec processQuerySpec = querySpec.duplicate();
-			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_ID_FIELD), FilterOperator.EQ, sourceId.toString()));
-			processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_TYPE_FIELD), FilterOperator.EQ, resourceType));
-			baseFilters.forEach(processQuerySpec::addFilter);
+                QuerySpec processQuerySpec = querySpec.duplicate();
+                processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_ID_FIELD), FilterOperator.EQ, sourceId.toString()));
+                processQuerySpec.addFilter(new FilterSpec(Arrays.asList(RESOURCE_TYPE_FIELD), FilterOperator.EQ, resourceType));
+                baseFilters.forEach(processQuerySpec::addFilter);
 
-			ResourceList list = processRepository.findAll(querySpec);
-			PreconditionUtil.assertTrue("unique result expected", list.size() <= 1);
-			return list.isEmpty() ? null : (P) list.get(0);
-		}
-		else {
-			throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
-		}
-	}
+                ResourceList list = processRepository.findAll(querySpec);
+                PreconditionUtil.assertTrue("unique result expected", list.size() <= 1);
+                map.put(sourceId, list.isEmpty() ? null : (P) list.get(0));
+            }
+            return map;
+        } else {
+            throw new UnsupportedOperationException("unknown fieldName '" + fieldName + "'");
+        }
 
-	@Override
-	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
-		this.resourceRegistry = resourceRegistry;
-	}
+    }
+
+    @Override
+    public void setResourceRegistry(ResourceRegistry resourceRegistry) {
+        this.resourceRegistry = resourceRegistry;
+    }
 
 
 }

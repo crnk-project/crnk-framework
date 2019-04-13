@@ -21,116 +21,118 @@ import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
-	FieldInformationBuilder createResourceField();
+    FieldInformationBuilder createResourceField();
 
-	interface RelationshipRepositoryInformationBuilder {
+    interface RelationshipRepositoryInformationBuilder {
 
-		void setAccess(RepositoryMethodAccess access);
+        void setAccess(RepositoryMethodAccess access);
 
-		RelationshipRepositoryInformation build();
+        RelationshipRepositoryInformation build();
 
-	}
+    }
 
-	interface ResourceRepositoryInformationBuilder {
+    interface ResourceRepositoryInformationBuilder {
 
-		void from(ResourceRepositoryInformation information);
+        void from(ResourceRepositoryInformation information);
 
-		void setResourceInformation(ResourceInformation resourceInformation);
+        void setResourceInformation(ResourceInformation resourceInformation);
 
-		void setAccess(RepositoryMethodAccess access);
+        void setAccess(RepositoryMethodAccess access);
 
-		void setExposed(boolean exposed);
+        void setExposed(boolean exposed);
 
-		ResourceRepositoryInformation build();
+        ResourceRepositoryInformation build();
 
-	}
+    }
 
-	interface ResourceInformationBuilder {
+    interface ResourceInformationBuilder {
 
-		void from(ResourceInformation information);
+        void from(ResourceInformation information);
 
-		FieldInformationBuilder addField();
+        FieldInformationBuilder addField();
 
-		FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
+        FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-		/**
-		 * @deprecated use {@link #implementationType(Type)}
-		 */
-		@Deprecated
-		ResourceInformationBuilder resourceClass(Class<?> resourceClass);
+        /**
+         * @deprecated use {@link #implementationType(Type)}
+         */
+        @Deprecated
+        ResourceInformationBuilder resourceClass(Class<?> resourceClass);
 
-		ResourceInformationBuilder implementationType(Type implementationType);
+        ResourceInformationBuilder implementationType(Type implementationType);
 
-		ResourceInformationBuilder resourceType(String resourceType);
+        ResourceInformationBuilder resourceType(String resourceType);
 
-		ResourceInformationBuilder resourcePath(String resourcePath);
+        ResourceInformationBuilder resourcePath(String resourcePath);
 
-		ResourceInformationBuilder superResourceType(String superResourceType);
+        ResourceInformationBuilder superResourceType(String superResourceType);
 
-		/**
-		 * @deprecated use pagingSpecType
-		 */
-		@Deprecated
-		ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
+        /**
+         * @deprecated use pagingSpecType
+         */
+        @Deprecated
+        ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
 
-		ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
+        ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
 
-		ResourceInformation build();
+        ResourceInformation build();
 
-	}
+    }
 
-	interface FieldInformationBuilder {
+    interface FieldInformationBuilder {
 
-		ResourceField build();
+        ResourceField build();
 
-		void from(ResourceField field);
+        void from(ResourceField field);
 
-		FieldInformationBuilder relationshipRepositoryBehavior(
-				RelationshipRepositoryBehavior relationshipRepositoryBehavior);
+        FieldInformationBuilder relationshipRepositoryBehavior(
+                RelationshipRepositoryBehavior relationshipRepositoryBehavior);
 
-		FieldInformationBuilder jsonName(String jsonName);
+        FieldInformationBuilder jsonName(String jsonName);
 
-		FieldInformationBuilder underlyingName(String underlyingName);
+        FieldInformationBuilder underlyingName(String underlyingName);
 
-		FieldInformationBuilder name(String name);
+        FieldInformationBuilder name(String name);
 
-		FieldInformationBuilder type(Class<?> type);
+        FieldInformationBuilder type(Class<?> type);
 
-		FieldInformationBuilder genericType(Type genericType);
+        FieldInformationBuilder genericType(Type genericType);
 
-		FieldInformationBuilder serializeType(SerializeType serializeType);
+        FieldInformationBuilder serializeType(SerializeType serializeType);
 
-		FieldInformationBuilder jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
+        FieldInformationBuilder jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
 
-		FieldInformationBuilder oppositeResourceType(String oppositeResourceType);
+        FieldInformationBuilder oppositeResourceType(String oppositeResourceType);
 
-		FieldInformationBuilder lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
+        FieldInformationBuilder lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		FieldInformationBuilder fieldType(ResourceFieldType fieldType);
+        FieldInformationBuilder fieldType(ResourceFieldType fieldType);
 
-		FieldInformationBuilder oppositeName(String oppositeName);
+        FieldInformationBuilder oppositeName(String oppositeName);
 
-		FieldInformationBuilder accessor(ResourceFieldAccessor accessor);
+        FieldInformationBuilder accessor(ResourceFieldAccessor accessor);
 
-		FieldInformationBuilder access(ResourceFieldAccess access);
+        FieldInformationBuilder access(ResourceFieldAccess access);
 
-		FieldInformationBuilder idAccessor(ResourceFieldAccessor idAccessor);
+        FieldInformationBuilder idAccessor(ResourceFieldAccessor idAccessor);
 
-		FieldInformationBuilder idName(String idName);
+        FieldInformationBuilder idName(String idName);
 
-		FieldInformationBuilder idType(Class idType);
+        FieldInformationBuilder idType(Class idType);
 
-		FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
-	}
+        FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
 
-	RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);
+        FieldInformationBuilder setMappedBy(boolean mappedBy);
+    }
 
-	RelationshipRepositoryInformationBuilder createRelationshipRepository(RelationshipMatcher matcher);
+    RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
-	ResourceRepositoryInformationBuilder createResourceRepository();
+    RelationshipRepositoryInformationBuilder createRelationshipRepository(RelationshipMatcher matcher);
 
-	ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+    ResourceRepositoryInformationBuilder createResourceRepository();
 
-	ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType);
+    ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+
+    ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType);
 
 }

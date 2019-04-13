@@ -14,6 +14,7 @@ import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
 import io.crnk.core.engine.internal.information.repository.RelationshipRepositoryInformationImpl;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
@@ -46,6 +47,8 @@ import java.util.Map;
 public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRegistryEntryBuilder.class);
+
+    public static boolean FAIL_ON_MISSING_REPOSITORY = true;
 
     /**
      * @deprecated find better solution
@@ -182,8 +185,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
     }
 
-    private Map<ResourceField, RelationshipRepositoryAdapter> buildRelationshipAdapters(ResourceInformation
-                                                                                                resourceInformation) {
+    private Map<ResourceField, RelationshipRepositoryAdapter> buildRelationshipAdapters(ResourceInformation resourceInformation) {
         checkRelationshipNaming(resourceInformation);
 
         Map<ResourceField, RelationshipRepositoryAdapter> map = new HashMap<>();
@@ -191,10 +193,9 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
             MatchedRelationship relationshipEntry = findMatchedRelationship(relationshipField);
             if (relationshipEntry != null) {
                 map.put(relationshipField, relationshipEntry.getAdapter());
-            } else if (WARN_MISSING_RELATIONSHIP_REPOSITORIES) {
-                LOGGER.warn("no replationship repository setup for {}.{} relationship, repositoryBehavior={}, hasIdField={}",
-                        resourceInformation.getResourceType(), relationshipField.getUnderlyingName(),
-                        relationshipField.getRelationshipRepositoryBehavior(), relationshipField.hasIdField());
+            } else {
+                // does only happen if checking is disabled in general (currently just crnk-core tests)
+                LOGGER.warn("no relationship repository found for {}", relationshipField);
             }
         }
         return map;
@@ -221,7 +222,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
         // check for implicit
         if (match == null) {
-            match = setupImplicitRelationshipRepository(relationshipField);
+            match = setupForwardingRepository(relationshipField);
         }
         return match;
     }
@@ -303,66 +304,62 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
         return new DirectResponseResourceEntry(repositoryInstanceBuilder, repositoryInformation);
     }
 
-    private MatchedRelationship setupImplicitRelationshipRepository(ResourceField relationshipField) {
+    private MatchedRelationship setupForwardingRepository(ResourceField relationshipField) {
         RelationshipRepositoryBehavior behavior = relationshipField.getRelationshipRepositoryBehavior();
         if (behavior == RelationshipRepositoryBehavior.DEFAULT) {
             if (relationshipField.hasIdField()
                     || relationshipField.getLookupIncludeAutomatically() == LookupIncludeBehavior.NONE) {
                 behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
+            } else if (relationshipField.isMappedBy()) {
+                behavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE;
+            } else if (FAIL_ON_MISSING_REPOSITORY) {
+                throw new IllegalStateException("no relationship repository available for " + relationshipField + ", provide a custom relationship reposit implementation, add a @JsonApiRelationId field, use @JsonApiRelation.mappedBy, set @JsonApiRelation.repositoryBehavior or set @JsonApiRelation.LOOKUP to NONE");
             } else {
-                behavior = RelationshipRepositoryBehavior.CUSTOM;
+                return null;
             }
+            ((ResourceFieldImpl) relationshipField).setRelationshipRepositoryBehavior(behavior);
         }
-        if (behavior == RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER) {
-            behavior = RelationshipRepositoryBehavior.FORWARD_OWNER;
-        }
-        if (behavior == RelationshipRepositoryBehavior.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER) {
-            behavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER;
+
+        if (behavior == RelationshipRepositoryBehavior.CUSTOM) {
+            throw new IllegalStateException("RelationshipRepositoryBehavior.CUSTOM used for " + relationshipField + " but no implementation provided");
         }
 
         ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
-        if (behavior != RelationshipRepositoryBehavior.CUSTOM) {
 
-            if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE
-                    || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
-                PreconditionUtil.verify(relationshipField.getOppositeName() != null,
-                        "field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
-                                + "behavior.", relationshipField.getUnderlyingName());
-            }
-
-            ResourceFieldAccess fieldAccess = relationshipField.getAccess();
-
-            RepositoryMethodAccess access = new RepositoryMethodAccess(fieldAccess.isPostable(), fieldAccess.isPatchable(),
-                    fieldAccess.isReadable(), fieldAccess.isPatchable());
-
-            RelationshipMatcher matcher = new RelationshipMatcher().rule().field(relationshipField).add();
-
-            RelationshipRepositoryInformationImpl implicitRepoInformation =
-                    new RelationshipRepositoryInformationImpl(matcher, access);
-
-            ForwardingRelationshipRepository repository;
-            if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
-                LOGGER.debug("setting up owner/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
-                repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
-                        ForwardingDirection.OWNER, ForwardingDirection.OWNER);
-            } else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
-                LOGGER.debug("setting up opposite/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
-                repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
-                        ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
-            } else {
-                LOGGER.debug("setting up opposite/opposite forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(),
-                        relationshipField.getUnderlyingName());
-                PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
-                        .FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
-                repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
-                        ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
-            }
-            repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
-            repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
-            return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
-        } else {
-            return null;
+        if (behavior == RelationshipRepositoryBehavior.FORWARD_OPPOSITE
+                || behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+            PreconditionUtil.verify(relationshipField.getOppositeName() != null,
+                    "field %s must specify @JsonApiRelation.opposite to make use of opposite forwarding "
+                            + "behavior.", relationshipField.getUnderlyingName());
         }
+
+        ResourceFieldAccess fieldAccess = relationshipField.getAccess();
+        RepositoryMethodAccess access = new RepositoryMethodAccess(fieldAccess.isPostable(), fieldAccess.isPatchable(),
+                fieldAccess.isReadable(), fieldAccess.isPatchable());
+        RelationshipMatcher matcher = new RelationshipMatcher().rule().field(relationshipField).add();
+        RelationshipRepositoryInformationImpl implicitRepoInformation =
+                new RelationshipRepositoryInformationImpl(matcher, access);
+
+        ForwardingRelationshipRepository repository;
+        if (behavior == RelationshipRepositoryBehavior.FORWARD_OWNER) {
+            LOGGER.debug("setting up owner/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
+            repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+                    ForwardingDirection.OWNER, ForwardingDirection.OWNER);
+        } else if (behavior == RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER) {
+            LOGGER.debug("setting up opposite/owner forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(), relationshipField.getUnderlyingName());
+            repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+                    ForwardingDirection.OPPOSITE, ForwardingDirection.OWNER);
+        } else {
+            LOGGER.debug("setting up opposite/opposite forwarding  repository for {}.{} relationship", sourceInformation.getResourceType(),
+                    relationshipField.getUnderlyingName());
+            PreconditionUtil.verifyEquals(RelationshipRepositoryBehavior
+                    .FORWARD_OPPOSITE, behavior, "unknown behavior for field=%s", relationshipField);
+            repository = new ForwardingRelationshipRepository(sourceInformation.getResourceType(), matcher,
+                    ForwardingDirection.OPPOSITE, ForwardingDirection.OPPOSITE);
+        }
+        repository.setResourceRegistry(moduleRegistry.getResourceRegistry());
+        repository.setHttpRequestContextProvider(moduleRegistry.getHttpRequestContextProvider());
+        return new MatchedRelationship(relationshipField, implicitRepoInformation, repository);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

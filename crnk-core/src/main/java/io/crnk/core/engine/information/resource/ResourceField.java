@@ -1,98 +1,105 @@
 package io.crnk.core.engine.information.resource;
 
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonIncludeStrategy;
-import java.lang.reflect.Type;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 
+import java.lang.reflect.Type;
+
 public interface ResourceField {
 
-	ResourceFieldType getResourceFieldType();
+    ResourceFieldType getResourceFieldType();
 
-	/**
-	 * See also
-	 * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
-	 * }
-	 *
-	 * @return if lookup should be performed
-	 */
-	LookupIncludeBehavior getLookupIncludeAutomatically();
+    /**
+     * @return if {@link JsonApiRelation#mappedBy()} is pointed to.
+     */
+    boolean isMappedBy();
 
-	/**
-	 * @return name of opposite attribute in case of a bidirectional relation.
-	 */
-	String getOppositeName();
+    /**
+     * See also
+     * {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically}
+     * }
+     *
+     * @return if lookup should be performed
+     */
+    LookupIncludeBehavior getLookupIncludeAutomatically();
 
-	/**
-	 * @return resourceType of the opposite resource in case of a relation.
-	 */
-	String getOppositeResourceType();
+    /**
+     * @return name of opposite attribute in case of a bidirectional relation.
+     */
+    String getOppositeName();
 
-	/**
-	 * @return name used in Json
-	 */
-	String getJsonName();
+    /**
+     * @return resourceType of the opposite resource in case of a relation.
+     */
+    String getOppositeResourceType();
 
-	/**
-	 * @return name used in Java
-	 */
-	String getUnderlyingName();
+    /**
+     * @return name used in Json
+     */
+    String getJsonName();
 
-	Class<?> getType();
+    /**
+     * @return name used in Java
+     */
+    String getUnderlyingName();
 
-	Type getGenericType();
+    Class<?> getType();
 
-	SerializeType getSerializeType();
+    Type getGenericType();
 
-	JsonIncludeStrategy getJsonIncludeStrategy();
+    SerializeType getSerializeType();
 
-	/**
-	 * @return the non-collection type. Matches {@link #getType()} for
-	 * non-collections. Returns the type argument in case of a
-	 * collection type.
-	 */
-	Class<?> getElementType();
+    JsonIncludeStrategy getJsonIncludeStrategy();
 
-	/**
-	 * @return resourceInformation this field belongs to.
-	 * @deprecated use {@link #getResourceInformation()}
-	 */
-	@Deprecated
-	ResourceInformation getParentResourceInformation();
+    /**
+     * @return the non-collection type. Matches {@link #getType()} for
+     * non-collections. Returns the type argument in case of a
+     * collection type.
+     */
+    Class<?> getElementType();
 
-	/**
-	 * @return resourceInformation this field belongs to.
-	 */
-	ResourceInformation getResourceInformation();
+    /**
+     * @return resourceInformation this field belongs to.
+     * @deprecated use {@link #getResourceInformation()}
+     */
+    @Deprecated
+    ResourceInformation getParentResourceInformation();
 
-	void setResourceInformation(ResourceInformation resourceInformation);
+    /**
+     * @return resourceInformation this field belongs to.
+     */
+    ResourceInformation getResourceInformation();
 
-	boolean isCollection();
+    void setResourceInformation(ResourceInformation resourceInformation);
 
-	/**
-	 * Allows to get and set the value of this field.
-	 */
-	ResourceFieldAccessor getAccessor();
+    boolean isCollection();
 
-	/**
-	 * @return whether this relationship field is backed by an id Field.
-	 */
-	boolean hasIdField();
+    /**
+     * Allows to get and set the value of this field.
+     */
+    ResourceFieldAccessor getAccessor();
 
-	String getIdName();
+    /**
+     * @return whether this relationship field is backed by an id Field.
+     */
+    boolean hasIdField();
 
-	Class getIdType();
+    String getIdName();
 
-	ResourceFieldAccessor getIdAccessor();
+    Class getIdType();
 
-	/**
-	 * @return access information for this resource (postable, patchable)
-	 */
-	ResourceFieldAccess getAccess();
+    ResourceFieldAccessor getIdAccessor();
 
-	RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
+    /**
+     * @return access information for this resource (postable, patchable)
+     */
+    ResourceFieldAccess getAccess();
 
-	PatchStrategy getPatchStrategy();
+    RelationshipRepositoryBehavior getRelationshipRepositoryBehavior();
+
+    PatchStrategy getPatchStrategy();
 }

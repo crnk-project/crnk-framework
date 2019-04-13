@@ -544,16 +544,17 @@ Some of those methods are also available from some of the integrations like `Crn
 
 anchor:relationshipRepository[]
 
-## RelationshipRepository
+## Relationship Repositories
 
 IMPORTANT: Before getting started with the development of relationship repositories, familiarize yourself
-with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation is unnecessary!
-
+with <<jsonApiRelation,@JsonApiRelation>>. In various scenarios, a custom implementation is unnecessary!
+In many cases `@JsonApiRelationId` provides the simplest solution to a relationship. Any opposite
+relationship can then make use of `@JsonApiRelation.mappedBy`.
 
 Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
-defined implementing `RelationshipRepository`. `RelationshipRepository` implements the methods
-necessary to work with a relationship. It provides methods for both single-valued and multi-valued
-relationships:
+defined implementing `OneRelationshipRepository` or `ManyRelationshipRepository`. The
+repository implements the methods necessary to work with a relationship. They provide the methods to work
+with single-valued and multi-valued relationships:
 
 
 * `getMatcher()`
@@ -574,14 +575,15 @@ relationships:
 * `removeRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
   Removes relationships from a list of relationships.
 
-* `findOneTarget(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds one field's value defined by fieldName in a source defined by sourceId.
+* `findOneRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the single-valued relationship for sources with the ids `sourceIds`.
 
-* `findManyTargets(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds an Iterable of field's values defined by fieldName in a source defined by sourceId .
+* `findManyRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the multi-valued relationship for sources with the ids `sourceIds`.
 
-All of the methods in this interface have fieldName field as their last parameter in case there
-are multiple relationships between two resources.
+All of the methods in this interface have a `fieldName` as last parameter in case multiple fields are served
+by the same repository. The `findOneRelations` and `findManyRelations` methods gain access to the source
+class through `querySpec.getResourceClass`, whereas the other methods directly obtain a `source` instance.
 
 
 ### Example
@@ -685,18 +687,6 @@ Note that to access the opposite side for `GET` operations, relations must be se
 	    ...
 	}
 ----
-
-### BulkRelationshipRepository
-
-BulkRelationshipRepository extends RelationshipRepository and provides an additional
-`findTargets` method. It allows to fetch a relation for multiple resources at once.
-It is recommended to make use of this implementation if a relationship is loaded frequently
-(either by a eager declaration or trough the `include` parameter) and it is costly to
-fetch that relation. RelationshipRepositoryBase provides a default implementation where
-`findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
-
-Note that in contrast to `ResourceRepository` and `RelationshipRepository` that are symmetric
-and applicable to Crnk servers and client, `BulkRelationshipRepository` is applicable on the server-side only.
 
 
 ## ResourceList

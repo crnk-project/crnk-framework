@@ -97,4 +97,9 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
     public Optional<PatchStrategy> getPatchStrategy(BeanAttributeInformation attributeDesc) {
         return Optional.empty();
     }
+
+    @Override
+    public Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
+        return Optional.empty();
+    }
 }

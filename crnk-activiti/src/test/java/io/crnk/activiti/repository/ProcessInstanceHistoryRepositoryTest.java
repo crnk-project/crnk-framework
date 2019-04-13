@@ -1,12 +1,10 @@
 package io.crnk.activiti.repository;
 
 import io.crnk.activiti.ActivitiModule;
-import io.crnk.activiti.example.ApprovalTestApplication;
 import io.crnk.activiti.example.model.HistoricScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalProcessInstance;
 import io.crnk.activiti.example.model.ScheduleApprovalValues;
 import io.crnk.activiti.internal.repository.ProcessInstanceResourceRepository;
-import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
@@ -28,91 +26,86 @@ import java.util.Map;
 public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 
 
-	private ProcessInstance processInstance;
+    private ProcessInstance processInstance;
 
-	private RuntimeService runtimeService;
-
-
-	private ResourceRepository<HistoricScheduleApprovalProcessInstance, String> processHistoryRepository;
-
-	private ResourceRepository<ScheduleApprovalProcessInstance, String> processRepository;
-
-	@Before
-	public void setup() {
-		super.setup();
-
-		processRepository =
-				(ProcessInstanceResourceRepository<ScheduleApprovalProcessInstance>) boot.getResourceRegistry().getEntry
-						(ScheduleApprovalProcessInstance.class).getResourceRepository().getResourceRepository();
+    private RuntimeService runtimeService;
 
 
-		ActivitiModule activitiModule = boot.getModuleRegistry().getModule(ActivitiModule.class).get();
-		processRepository = activitiModule.getProcessInstanceRepository(ScheduleApprovalProcessInstance.class);
-		processHistoryRepository =
-				activitiModule.getHistoricProcessInstanceRepository(HistoricScheduleApprovalProcessInstance.class);
+    private ResourceRepository<HistoricScheduleApprovalProcessInstance, String> processHistoryRepository;
 
-		processInstance = addCompletedProcessInstance();
-	}
+    private ResourceRepository<ScheduleApprovalProcessInstance, String> processRepository;
 
-	private ProcessInstance addCompletedProcessInstance() {
-		ScheduleApprovalValues newValues = new ScheduleApprovalValues();
-		newValues.setName("newName");
+    @Before
+    public void setup() {
+        super.setup();
 
-		ScheduleApprovalProcessInstance resource = new ScheduleApprovalProcessInstance();
-		resource.setResourceId("12");
-		resource.setResourceType("schedules");
-		resource.setNewValues(newValues);
-
-		Map<String, Object> processVariables = resourceMapper.mapToVariables(resource);
-		runtimeService = processEngine.getRuntimeService();
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("scheduleChange",
-				"testBusinessKey", processVariables);
-		runtimeService.setProcessInstanceName(processInstance.getId(), "testName");
+        processRepository =
+                (ProcessInstanceResourceRepository<ScheduleApprovalProcessInstance>) boot.getResourceRegistry().getEntry
+                        (ScheduleApprovalProcessInstance.class).getResourceRepository().getResourceRepository();
 
 
-		processInstance = runtimeService.createProcessInstanceQuery()
-				.processInstanceId(processInstance.getId())
-				.includeProcessVariables()
-				.singleResult();
+        ActivitiModule activitiModule = boot.getModuleRegistry().getModule(ActivitiModule.class).get();
+        processRepository = activitiModule.getProcessInstanceRepository(ScheduleApprovalProcessInstance.class);
+        processHistoryRepository =
+                activitiModule.getHistoricProcessInstanceRepository(HistoricScheduleApprovalProcessInstance.class);
 
-		// complete process
-		TaskService taskService = processEngine.getTaskService();
-		Task task = taskService.createTaskQuery().list().get(0);
-		Assert.assertEquals(task.getProcessInstanceId(), processInstance.getId());
-		Map<String, Object> variables = new HashMap<>();
-		variables.put("approved", false);
-		taskService.complete(task.getId(), variables);
-		return processInstance;
-	}
+        processInstance = addCompletedProcessInstance();
+    }
 
-	@Override
-	protected Module createActivitiModule() {
-		return ApprovalTestApplication.createActivitiModule(processEngine);
-	}
+    private ProcessInstance addCompletedProcessInstance() {
+        ScheduleApprovalValues newValues = new ScheduleApprovalValues();
+        newValues.setName("newName");
 
-	@Test
-	public void checkCompletedTaskNotFoundByMainRepository() {
-		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
-		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
-	}
+        ScheduleApprovalProcessInstance resource = new ScheduleApprovalProcessInstance();
+        resource.setResourceId("12");
+        resource.setResourceType("schedules");
+        resource.setNewValues(newValues);
 
-	@Test
-	public void checkEqualId() {
-		QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
-		Assert.assertEquals(1, processHistoryRepository.findAll(querySpec).size());
+        Map<String, Object> processVariables = resourceMapper.mapToVariables(resource);
+        runtimeService = processEngine.getRuntimeService();
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("scheduleChange",
+                "testBusinessKey", processVariables);
+        runtimeService.setProcessInstanceName(processInstance.getId(), "testName");
 
-		querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
-		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "doesNotExists"));
-		Assert.assertEquals(0, processHistoryRepository.findAll(querySpec).size());
-	}
 
-	@Test
-	public void checkOrderByDuration() {
-		QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
-		querySpec.addSort(new SortSpec(Arrays.asList("duration"), Direction.DESC));
-		Assert.assertNotEquals(0, processHistoryRepository.findAll(querySpec).size());
+        processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstance.getId())
+                .includeProcessVariables()
+                .singleResult();
 
-	}
+        // complete process
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.createTaskQuery().list().get(0);
+        Assert.assertEquals(task.getProcessInstanceId(), processInstance.getId());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("approved", false);
+        taskService.complete(task.getId(), variables);
+        return processInstance;
+    }
+
+    @Test
+    public void checkCompletedTaskNotFoundByMainRepository() {
+        QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+        querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
+        Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+    }
+
+    @Test
+    public void checkEqualId() {
+        QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
+        querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, processInstance.getId()));
+        Assert.assertEquals(1, processHistoryRepository.findAll(querySpec).size());
+
+        querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
+        querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, "doesNotExists"));
+        Assert.assertEquals(0, processHistoryRepository.findAll(querySpec).size());
+    }
+
+    @Test
+    public void checkOrderByDuration() {
+        QuerySpec querySpec = new QuerySpec(HistoricScheduleApprovalProcessInstance.class);
+        querySpec.addSort(new SortSpec(Arrays.asList("duration"), Direction.DESC));
+        Assert.assertNotEquals(0, processHistoryRepository.findAll(querySpec).size());
+
+    }
 }

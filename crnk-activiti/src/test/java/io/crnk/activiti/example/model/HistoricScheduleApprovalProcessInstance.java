@@ -14,8 +14,8 @@ public class HistoricScheduleApprovalProcessInstance extends HistoricApprovalPro
 
 	private ScheduleApprovalValues previousValues;
 
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
-	private HistoricApproveTask approveTask;
+	//@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
+	//private HistoricApproveTask approveTask;
 
 	public ScheduleApprovalValues getNewValues() {
 		return newValues;
@@ -33,6 +33,7 @@ public class HistoricScheduleApprovalProcessInstance extends HistoricApprovalPro
 		this.previousValues = (ScheduleApprovalValues) previousValues;
 	}
 
+	/*
 	public HistoricApproveTask getApproveTask() {
 		return approveTask;
 	}
@@ -40,6 +41,7 @@ public class HistoricScheduleApprovalProcessInstance extends HistoricApprovalPro
 	public void setApproveTask(HistoricApproveTask approveTask) {
 		this.approveTask = approveTask;
 	}
+	 */
 	// tag::docs2[]
 }
 // end::docs2[]

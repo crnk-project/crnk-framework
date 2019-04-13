@@ -3,10 +3,7 @@ package io.crnk.jpa.internal;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.resource.ResourceFieldInformationProviderBase;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.resource.annotations.SerializeType;
-
-import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -20,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
+import java.util.Optional;
 
 public class JpaResourceFieldInformationProvider extends ResourceFieldInformationProviderBase {
 
@@ -89,24 +87,10 @@ public class JpaResourceFieldInformationProvider extends ResourceFieldInformatio
         return Optional.empty();
     }
 
-
     @Override
     public Optional<String> getOppositeName(BeanAttributeInformation attributeDesc) {
-        Optional<OneToMany> oneToMany = attributeDesc.getAnnotation(OneToMany.class);
-        if (oneToMany.isPresent()) {
-            return Optional.ofNullable(StringUtils.emptyToNull(oneToMany.get().mappedBy()));
-        }
-        Optional<ManyToMany> manyToMany = attributeDesc.getAnnotation(ManyToMany.class);
-        if (manyToMany.isPresent()) {
-            return Optional.ofNullable(StringUtils.emptyToNull(manyToMany.get().mappedBy()));
-        }
-        Optional<OneToOne> oneToOne = attributeDesc.getAnnotation(OneToOne.class);
-        if (oneToOne.isPresent()) {
-            return Optional.ofNullable(StringUtils.emptyToNull(oneToOne.get().mappedBy()));
-        }
         return Optional.empty();
     }
-
 
     @Override
     public Optional<SerializeType> getSerializeType(BeanAttributeInformation attributeDesc) {
@@ -125,6 +109,25 @@ public class JpaResourceFieldInformationProvider extends ResourceFieldInformatio
         Optional<ElementCollection> elementCollection = attributeDesc.getAnnotation(ElementCollection.class);
         if (elementCollection.isPresent()) {
             return toSerializeType(elementCollection.get().fetch());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
+        Optional<OneToMany> oneToMany = attributeDesc.getAnnotation(OneToMany.class);
+        if (oneToMany.isPresent()) {
+            return Optional.of(oneToMany.get().mappedBy());
+        }
+
+        Optional<OneToOne> oneToOne = attributeDesc.getAnnotation(OneToOne.class);
+        if (oneToOne.isPresent()) {
+            return Optional.of(oneToOne.get().mappedBy());
+        }
+
+        Optional<ManyToMany> manyToMany = attributeDesc.getAnnotation(ManyToMany.class);
+        if (manyToMany.isPresent()) {
+            return Optional.of(manyToMany.get().mappedBy());
         }
         return Optional.empty();
     }

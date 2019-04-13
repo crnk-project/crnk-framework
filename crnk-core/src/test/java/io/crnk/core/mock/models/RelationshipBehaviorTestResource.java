@@ -10,94 +10,84 @@ import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 @JsonApiResource(type = "relationshipBehaviorTest")
 public class RelationshipBehaviorTestResource {
 
-	@JsonApiId
-	private Long id;
+    @JsonApiId
+    private Long id;
 
-	private String name;
+    private String name;
 
-	@JsonApiRelationId
-	private Long testRelationIdId;
+    @JsonApiRelationId
+    private Long testRelationIdId;
 
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
-	private Schedule testRelationId;
-
-
-	@JsonApiRelation(repositoryBehavior = RelationshipRepositoryBehavior.IMPLICIT_FROM_OWNER)
-	private Project testImplicityFromOwner;
-
-	@JsonApiRelation(opposite = "test", repositoryBehavior = RelationshipRepositoryBehavior.IMPLICIT_GET_OPPOSITE_MODIFY_OWNER)
-	private Task testImplicitGetOppositeModifyOwner;
-
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
-	private LazyTask testNoLookup;
-
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
-	private ProjectPolymorphic testAlwaysLookup;
+    @JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
+    private Schedule testRelationId;
 
 
-	public Long getId() {
-		return id;
-	}
+    @JsonApiRelation(repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+    private Project testImplicityFromOwner;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @JsonApiRelation(opposite = "test", repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_GET_OPPOSITE_SET_OWNER)
+    private Task testImplicitGetOppositeModifyOwner;
 
-	public String getName() {
-		return name;
-	}
+    @JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
+    private LazyTask testNoLookup;
 
-	public void setName(String name) {
-		this.name = name;
-	}
 
-	public void setTestRelationIdId(Long testRelationIdId) {
-		this.testRelationIdId = testRelationIdId;
-		this.testRelationId = null;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Schedule getTestRelationId() {
-		return testRelationId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setTestRelationId(Schedule testRelationId) {
-		this.testRelationId = testRelationId;
-		this.testRelationIdId = testRelationId != null ? testRelationId.getId() : null;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Long getTestRelationIdId() {
-		return testRelationIdId;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Project getTestImplicityFromOwner() {
-		return testImplicityFromOwner;
-	}
+    public void setTestRelationIdId(Long testRelationIdId) {
+        this.testRelationIdId = testRelationIdId;
+        this.testRelationId = null;
+    }
 
-	public void setTestImplicityFromOwner(Project testImplicityFromOwner) {
-		this.testImplicityFromOwner = testImplicityFromOwner;
-	}
+    public Schedule getTestRelationId() {
+        return testRelationId;
+    }
 
-	public Task getTestImplicitGetOppositeModifyOwner() {
-		return testImplicitGetOppositeModifyOwner;
-	}
+    public void setTestRelationId(Schedule testRelationId) {
+        this.testRelationId = testRelationId;
+        this.testRelationIdId = testRelationId != null ? testRelationId.getId() : null;
+    }
 
-	public void setTestImplicitGetOppositeModifyOwner(Task testImplicitGetOppositeModifyOwner) {
-		this.testImplicitGetOppositeModifyOwner = testImplicitGetOppositeModifyOwner;
-	}
+    public Long getTestRelationIdId() {
+        return testRelationIdId;
+    }
 
-	public LazyTask getTestNoLookup() {
-		return testNoLookup;
-	}
+    public Project getTestImplicityFromOwner() {
+        return testImplicityFromOwner;
+    }
 
-	public void setTestNoLookup(LazyTask testNoLookup) {
-		this.testNoLookup = testNoLookup;
-	}
+    public void setTestImplicityFromOwner(Project testImplicityFromOwner) {
+        this.testImplicityFromOwner = testImplicityFromOwner;
+    }
 
-	public ProjectPolymorphic getTestAlwaysLookup() {
-		return testAlwaysLookup;
-	}
+    public Task getTestImplicitGetOppositeModifyOwner() {
+        return testImplicitGetOppositeModifyOwner;
+    }
 
-	public void setTestAlwaysLookup(ProjectPolymorphic testAlwaysLookup) {
-		this.testAlwaysLookup = testAlwaysLookup;
-	}
+    public void setTestImplicitGetOppositeModifyOwner(Task testImplicitGetOppositeModifyOwner) {
+        this.testImplicitGetOppositeModifyOwner = testImplicitGetOppositeModifyOwner;
+    }
+
+    public LazyTask getTestNoLookup() {
+        return testNoLookup;
+    }
+
+    public void setTestNoLookup(LazyTask testNoLookup) {
+        this.testNoLookup = testNoLookup;
+    }
+
 }

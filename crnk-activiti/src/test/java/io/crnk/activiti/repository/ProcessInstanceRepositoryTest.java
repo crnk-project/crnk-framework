@@ -70,11 +70,6 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		return processInstance;
 	}
 
-	@Override
-	protected Module createActivitiModule() {
-		return ApprovalTestApplication.createActivitiModule(processEngine);
-	}
-
 	@Test
 	public void checkResourceMapping() {
 		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);

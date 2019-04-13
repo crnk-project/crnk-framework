@@ -1,5 +1,6 @@
 package io.crnk.activiti.repository;
 
+import io.crnk.activiti.example.ApprovalTestApplication;
 import io.crnk.activiti.example.model.ApproveTask;
 import io.crnk.activiti.internal.repository.TaskResourceRepository;
 import io.crnk.activiti.mapper.ActivitiResourceMapper;
@@ -22,62 +23,63 @@ import java.util.List;
 
 public abstract class ActivitiTestBase {
 
-	protected ProcessEngine processEngine;
+    protected ProcessEngine processEngine;
 
-	protected TaskResourceRepository<ApproveTask> taskRepository;
+    protected TaskResourceRepository<ApproveTask> taskRepository;
 
-	protected CrnkBoot boot;
+    protected CrnkBoot boot;
 
-	protected ActivitiResourceMapper resourceMapper = new ActivitiResourceMapper(new TypeParser(), new DefaultDateTimeMapper());
+    protected ActivitiResourceMapper resourceMapper = new ActivitiResourceMapper(new TypeParser(), new DefaultDateTimeMapper());
 
-	@Before
-	public void setup() {
-		processEngine = ProcessEngines.getDefaultProcessEngine();
+    @Before
+    public void setup() {
+        processEngine = ProcessEngines.getDefaultProcessEngine();
 
-		processEngine.getRepositoryService().createDeployment()
-				.addClasspathResource("approval.bpmn20.xml")
-				.deploy();
+        processEngine.getRepositoryService().createDeployment()
+                .addClasspathResource("approval.bpmn20.xml")
+                .deploy();
 
-		boot = new CrnkBoot();
-		boot.addModule(new TestModule());
-		boot.addModule(createActivitiModule());
-		boot.boot();
+        boot = new CrnkBoot();
+        boot.addModule(new TestModule());
+        boot.addModule(createActivitiModule());
+        boot.boot();
 
-		taskRepository = (TaskResourceRepository<ApproveTask>) boot.getResourceRegistry().getEntry(ApproveTask.class)
-				.getResourceRepository().getResourceRepository();
-	}
+        taskRepository = (TaskResourceRepository<ApproveTask>) boot.getResourceRegistry().getEntry(ApproveTask.class)
+                .getResourceRepository().getResourceRepository();
+    }
 
-	protected abstract Module createActivitiModule();
+    protected Module createActivitiModule() {
+        return ApprovalTestApplication.createActivitiModule(processEngine);
+    }
 
+    @After
+    public void teardown() {
+        RuntimeService runtimeService = processEngine.getRuntimeService();
+        List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().list();
+        for (ProcessInstance processInstance : processInstances) {
+            runtimeService.deleteProcessInstance(processInstance.getId(), "");
+        }
 
-	@After
-	public void teardown() {
-		RuntimeService runtimeService = processEngine.getRuntimeService();
-		List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery().list();
-		for (ProcessInstance processInstance : processInstances) {
-			runtimeService.deleteProcessInstance(processInstance.getId(), "");
-		}
+        TaskService taskService = processEngine.getTaskService();
+        List<Task> tasks = taskService.createTaskQuery().list();
+        for (Task task : tasks) {
+            taskService.deleteTask(task.getId());
+        }
+    }
 
-		TaskService taskService = processEngine.getTaskService();
-		List<Task> tasks = taskService.createTaskQuery().list();
-		for (Task task : tasks) {
-			taskService.deleteTask(task.getId());
-		}
-	}
+    protected Task addTask(String name, int priority) {
+        TaskService taskService = processEngine.getTaskService();
+        Task task = taskService.newTask();
+        task.setName(name);
+        task.setPriority(priority);
+        task.setAssignee("john");
+        task.setCategory("testCategory");
+        task.setDueDate(new Date());
+        task.setOwner("jane");
+        task.setDescription("testDescription");
+        task.setTenantId("testTenant");
+        taskService.saveTask(task);
+        return task;
 
-	protected Task addTask(String name, int priority) {
-		TaskService taskService = processEngine.getTaskService();
-		Task task = taskService.newTask();
-		task.setName(name);
-		task.setPriority(priority);
-		task.setAssignee("john");
-		task.setCategory("testCategory");
-		task.setDueDate(new Date());
-		task.setOwner("jane");
-		task.setDescription("testDescription");
-		task.setTenantId("testTenant");
-		taskService.saveTask(task);
-		return task;
-
-	}
+    }
 }
