@@ -52,14 +52,20 @@ While being a major release, changes required are minimal (see below).
         See below for more information. Be aware of the changed semantics. The property must only be
         set on one side.
     </li>
+    <li>
+        crnk-jpa has been renamed to crnk-data-jpa and the Java package updated accordingly.
+    </li>
+    <li>
+        crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
+    </li>
 </ul>
 
 <h4>Simplified Relationship Setup with @JsonApiRelation.mappedBy</h4>
 
-        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy. MappedBy works
-        in exactly the same fashion as known from JPA-related annotations. It must be set on one side of
-        a bidirectional relationship to point to the opposite owning side. By default requests are then served
-        from the resource repository of the owning side.
+@JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy. MappedBy works
+in exactly the same fashion as known from JPA-related annotations. It must be set on one side of
+a bidirectional relationship to point to the opposite owning side. By default requests are then served
+from the resource repository of the owning side.
 
 
 <pre class="prettyprint">
@@ -145,7 +151,7 @@ crnkGen {
     }
 
     forked = true
-    resourcePackages = ['ch.adnovum.sb4b.management.api', 'ch.adnovum.sb4b.identity.api', 'ch.adnovum.sb4b.corda.base.contract']
+    resourcePackages = ['io.crnk.example.api']
 
     typescript {
         enabled = true
@@ -277,7 +283,7 @@ More information can be found <a href="documentation/#_nested_resources">here</a
 
 <h4>Enum support for Activiti</h4>
 
-crnk-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
+crnk-data-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
 treats the enum like a java.lang.Object by storing it is as serialized blob and not supporting filtering.
 
 

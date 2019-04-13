@@ -134,7 +134,7 @@ public class RuntimeClassLoaderFactory {
         for (URL gradleClassUrl : classLoader.getURLs()) {
             String file = gradleClassUrl.getFile();
             if (file.contains("crnk-gen-") || file.contains("reflections") || file.contains("crnk-meta-")
-                    || file.contains("crnk-jpa-")) {
+                    || file.contains("crnk-data-jpa-")) {
                 urls.add(gradleClassUrl);
             }
         }

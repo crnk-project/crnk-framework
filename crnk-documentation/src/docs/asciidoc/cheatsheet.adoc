@@ -342,7 +342,7 @@ See http://www.crnk.io/releases/latest/documentation/#_security[here], a longer 
 
 There are a number of ready-to-use repository implementation that can greatly speed up development.
 
-- Use crnk-jpa to access JPA entities.
+- Use crnk-data-jpa to access JPA entities.
 - Use crnk-activity to access Activiti workflow and tasks.
 - Use crnk-meta to get information about resources and repositories themselves.
 

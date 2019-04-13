@@ -912,7 +912,7 @@ An example can look like:
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
+include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
 ----
 
 The particular example, for example, intercepts the `save` operation and may trigger an approval workflow:
@@ -920,7 +920,7 @@ The particular example, for example, intercepts the `save` operation and may tri
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
+include::../../../../crnk-data-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
 ----
 
 
@@ -928,7 +928,7 @@ include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approv
 ## ResourceFieldContributor
 
 The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
-touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
+touching them. This is useful, for example, if you have a JPA entity exposed with crnk-data-jpa and
 want to add further fields like that mentioned history relationship from the earlier relationship example.
 `ResourceFieldContributor` can
 be implemented by a repository or obtained from the regular service discovery mechanism.

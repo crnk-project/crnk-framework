@@ -1,9 +1,9 @@
 package io.crnk.spring.boot.autoconfigure;
 
-import io.crnk.jpa.JpaModule;
-import io.crnk.jpa.JpaModuleConfig;
-import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
-import io.crnk.jpa.query.querydsl.QuerydslQueryFactory;
+import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
+import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
+import io.crnk.data.jpa.query.querydsl.QuerydslQueryFactory;
 import io.crnk.spring.boot.CrnkJpaProperties;
 import io.crnk.spring.boot.CrnkSpringBootProperties;
 import io.crnk.spring.boot.JpaModuleConfigurer;
@@ -31,7 +31,7 @@ import java.util.List;
  * <p>
  * Activates when there is a bean of type {@link javax.persistence.EntityManagerFactory} and
  * {@link javax.persistence.EntityManager} on the classpath and there is no other existing
- * {@link io.crnk.jpa.JpaModule} configured.
+ * {@link JpaModule} configured.
  * <p>
  * Disable with the property <code>crnk.jpa.enabled = false</code>. By default all entities are exposed.
  * <p>

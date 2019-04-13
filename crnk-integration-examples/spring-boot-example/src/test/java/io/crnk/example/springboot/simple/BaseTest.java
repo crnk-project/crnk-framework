@@ -4,7 +4,7 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.ValidatableResponse;
 import io.crnk.client.CrnkClient;
 import io.crnk.example.springboot.SpringBootExampleApplication;
-import io.crnk.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModule;
 import io.crnk.validation.ValidationModule;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;

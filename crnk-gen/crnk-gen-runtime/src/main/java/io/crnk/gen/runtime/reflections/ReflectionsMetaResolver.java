@@ -10,7 +10,7 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.gen.runtime.RuntimeContext;
 import io.crnk.gen.runtime.RuntimeMetaResolver;
-import io.crnk.jpa.internal.JpaResourceInformationProvider;
+import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;

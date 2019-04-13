@@ -68,7 +68,7 @@ of related resources. Since the traditional repositories will block the caller, 
 - `DocumentFilter`, `RepositoryFilter` cannot be used in a reactive setup. Reactive counter-party will be available in the near future.
 - `HttpRequestContextProvider.getRequestContext` can only be used in a non-reactive setting or while the reactive request is being setup.
   `HttpRequestContextProvider.getRequestContextResult` must be used instead that makes use of the subscriber context of Reactor.
-- `crnk-jpa` has not yet been ported yet. JDBC and JPA are blocking and require a transaction.
+- `crnk-data-jpa` has not yet been ported yet. JDBC and JPA are blocking and require a transaction.
 - Spring, Vert.x and Ratpack integrations are target for the near future.
 - More testing will be necessary.
 

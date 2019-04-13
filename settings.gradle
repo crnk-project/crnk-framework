@@ -4,14 +4,12 @@ include ':crnk-home'
 include ':crnk-test'
 include ':crnk-client'
 include ':crnk-meta'
-include ':crnk-jpa'
 include ':crnk-validation'
 
 include ':crnk-monitor:crnk-monitor-brave4'
 include ':crnk-monitor:crnk-monitor-opentracing'
 
 include ':crnk-security'
-include ':crnk-activiti'
 include ':crnk-ui'
 
 include ':crnk-setup:crnk-setup-spring'
@@ -24,6 +22,9 @@ include ':crnk-setup:crnk-setup-guice'
 include ':crnk-setup:crnk-setup-rs'
 
 include ':crnk-data:crnk-data-facet'
+include ':crnk-data:crnk-data-jpa'
+include ':crnk-data:crnk-data-activiti'
+
 include ':crnk-format:crnk-format-plain-json'
 
 include ':crnk-operations'

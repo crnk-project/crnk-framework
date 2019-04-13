@@ -9,12 +9,13 @@ dependencies {
 	testCompile project(':crnk-client')
 	testCompile project(':crnk-setup:crnk-setup-rs')
 	testCompile project(':crnk-test')
-	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-data:crnk-data-jpa')
 	testCompile project(':crnk-setup:crnk-setup-spring')
 	testCompile project(':crnk-validation')
 
 	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
 
+	testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
 	testCompile group: 'javax', name: 'javaee-api', version: '7.0'
 	testCompile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.10.Final'
 	testCompile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
@@ -23,6 +24,4 @@ dependencies {
 	testCompile group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.2.10.Final'
 	testCompile group: 'com.h2database', name: 'h2', version: '1.4.187'
 	testCompile(group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final')
-	testCompile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.1.Final'
-
 }

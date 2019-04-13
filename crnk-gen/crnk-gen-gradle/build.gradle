@@ -18,7 +18,7 @@ dependencies {
     compile project(':crnk-gen:crnk-gen-base')
     compile project(':crnk-gen:crnk-gen-runtime')
     compile project(':crnk-meta')
-    compile project(':crnk-jpa')
+    compile project(':crnk-data:crnk-data-jpa')
     compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
 
     compile project(':crnk-gen:crnk-gen-typescript')
