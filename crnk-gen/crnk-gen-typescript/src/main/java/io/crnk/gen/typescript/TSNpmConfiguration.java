@@ -33,7 +33,7 @@ public class TSNpmConfiguration {
         String crnkNpm = "@crnk/angular-ngrx";
         packageMapping.put("io.crnk.meta", crnkNpm);
         packageMapping.put("io.crnk.meta.resource", crnkNpm);
-        packageMapping.put("io.crnk.jpa", crnkNpm);
+        packageMapping.put("io.crnk.data.jpa", crnkNpm);
 
         peerDependencies.put("ngrx-json-api", ">=2.2.0");
         peerDependencies.put("rxjs", ">=5.2.0");

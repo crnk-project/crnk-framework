@@ -610,7 +610,7 @@
             </field>
         </class>
         <class name="MovieRepository" qualified="io.crnk.example.service.jpa.MovieRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
-            <class qualified="io.crnk.jpa.JpaEntityRepositoryBase">
+            <class qualified="JpaEntityRepositoryBase">
                 <generic qualified="io.crnk.example.service.jpa.MovieEntity"/>
                 <generic qualified="java.util.UUID"/>
             </class>
@@ -725,7 +725,7 @@
             </field>
         </class>
         <class name="PersonRepository" qualified="io.crnk.example.service.jpa.PersonRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
-            <class qualified="io.crnk.jpa.JpaEntityRepositoryBase">
+            <class qualified="JpaEntityRepositoryBase">
                 <generic qualified="io.crnk.example.service.jpa.PersonEntity"/>
                 <generic qualified="java.util.UUID"/>
             </class>
@@ -857,7 +857,7 @@
             </field>
         </class>
         <class name="RoleRepository" qualified="io.crnk.example.service.jpa.RoleRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
-            <class qualified="io.crnk.jpa.JpaEntityRepositoryBase">
+            <class qualified="JpaEntityRepositoryBase">
                 <generic qualified="io.crnk.example.service.jpa.RoleEntity"/>
                 <generic qualified="java.util.UUID"/>
             </class>
@@ -914,7 +914,7 @@
             </field>
         </class>
         <class name="ScheduleRepository" qualified="io.crnk.example.service.jpa.ScheduleRepository" scope="public" abstract="false" error="false" exception="false" externalizable="false" included="true" serializable="false">
-            <class qualified="io.crnk.jpa.JpaEntityRepositoryBase">
+            <class qualified="JpaEntityRepositoryBase">
                 <generic qualified="io.crnk.example.service.jpa.ScheduleEntity"/>
                 <generic qualified="java.util.UUID"/>
             </class>

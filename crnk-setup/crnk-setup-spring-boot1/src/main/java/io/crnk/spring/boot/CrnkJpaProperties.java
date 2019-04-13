@@ -1,15 +1,17 @@
 package io.crnk.spring.boot;
 
+import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
+import io.crnk.data.jpa.query.querydsl.QuerydslQueryFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Configuration properties for crnk-jpa
+ * Configuration properties for crnk-data-jpa
  */
 @ConfigurationProperties("crnk.jpa")
 public class CrnkJpaProperties {
 
 	/**
-	 * The crnk-jpa query factory type to use.
+	 * The crnk-data-jpa query factory type to use.
 	 */
 	private JpaQueryFactoryType queryFactory;
 
@@ -49,11 +51,11 @@ public class CrnkJpaProperties {
 
 	public enum JpaQueryFactoryType {
 		/**
-		 * {@link io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory}
+		 * {@link JpaCriteriaQueryFactory}
 		 */
 		CRITERIA,
 		/**
-		 * {@link io.crnk.jpa.query.querydsl.QuerydslQueryFactory}
+		 * {@link QuerydslQueryFactory}
 		 */
 		QUERYDSL,
 	}

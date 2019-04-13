@@ -11,7 +11,7 @@ dependencies {
 
 	compile project(':crnk-setup:crnk-setup-servlet')
 	compile project(':crnk-setup:crnk-setup-spring')
-	compileOnly project(':crnk-jpa')
+	compileOnly project(':crnk-data:crnk-data-jpa')
 	compileOnly project(':crnk-validation')
 	compileOnly project(':crnk-home')
 	compileOnly project(':crnk-meta')
@@ -33,8 +33,7 @@ dependencies {
 
 	compileOnly 'org.springframework:spring-orm'
 
-	testCompile project(':crnk-jpa')
-	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-data:crnk-data-jpa')
 	testCompile project(':crnk-validation')
 	testCompile project(':crnk-home')
 	testCompile project(':crnk-meta')

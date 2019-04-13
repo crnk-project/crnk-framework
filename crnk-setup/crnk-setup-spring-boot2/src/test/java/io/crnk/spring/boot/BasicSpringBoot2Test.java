@@ -17,7 +17,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.facet.FacetModuleConfig;
 import io.crnk.data.facet.FacetRepository;
 import io.crnk.data.facet.FacetResource;
-import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBoot2Application;
 import io.crnk.spring.setup.boot.core.CrnkCoreProperties;

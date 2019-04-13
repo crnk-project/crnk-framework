@@ -184,7 +184,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaElement$List", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaAttribute", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType", querySpec));
-		Assert.assertNotNull(repository.findOne("io.crnk.jpa.metaEmbeddableAttribute.laz", querySpec));
+		Assert.assertNotNull(repository.findOne("io.crnk.data.jpa.metaEmbeddableAttribute.laz", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType$primaryKey", querySpec));
 	}
 }
