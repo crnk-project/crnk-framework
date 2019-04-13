@@ -66,7 +66,7 @@ public class ApprovalRelationshipRepository<R, P extends ProcessInstanceResource
 
 	@Override
 	public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
-		InformationBuilder.Field fieldBuilder = context.getInformationBuilder().createResourceField();
+		InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
 		fieldBuilder.name(relationshipName);
 		fieldBuilder.oppositeResourceType(oppositeResourceType);
 		fieldBuilder.lookupIncludeBehavior(LookupIncludeBehavior.AUTOMATICALLY_ALWAYS);

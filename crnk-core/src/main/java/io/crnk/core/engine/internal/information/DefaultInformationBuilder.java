@@ -38,19 +38,19 @@ public class DefaultInformationBuilder implements InformationBuilder {
 	private final TypeParser typeParser;
 
 	@Override
-	public Field createResourceField() {
+	public FieldInformationBuilder createResourceField() {
 		return new DefaultField();
 	}
 
 	@Override
-	public RelationshipRepository createRelationshipRepository(String sourceResourceType, String targetResourceType) {
+	public RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targetResourceType) {
 		RelationshipMatcher matcher = new RelationshipMatcher();
 		matcher.rule().target(targetResourceType).source(sourceResourceType).add();
 		return createRelationshipRepository(matcher);
 	}
 
 	@Override
-	public RelationshipRepository createRelationshipRepository(RelationshipMatcher matcher) {
+	public RelationshipRepositoryInformationBuilder createRelationshipRepository(RelationshipMatcher matcher) {
 		DefaultRelationshipRepository repository = new DefaultRelationshipRepository();
 		repository.matcher = matcher;
 		return repository;
@@ -58,17 +58,17 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
 
 	@Override
-	public ResourceRepository createResourceRepository() {
+	public ResourceRepositoryInformationBuilder createResourceRepository() {
 		return new DefaultResourceRepository();
 	}
 
 	@Override
-	public Resource createResource(Class<?> resourceClass, String resourceType) {
+	public ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType) {
 		return createResource(resourceClass, resourceType, null);
 	}
 
 	@Override
-	public Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
+	public ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
 		DefaultResource resource = new DefaultResource();
 		resource.resourceClass(resourceClass);
 		resource.resourceType(resourceType);
@@ -76,7 +76,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		return resource;
 	}
 
-	public class DefaultRelationshipRepository implements RelationshipRepository {
+	public class DefaultRelationshipRepository implements RelationshipRepositoryInformationBuilder {
 
 		private RelationshipMatcher matcher;
 
@@ -92,7 +92,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 	}
 
-	public class DefaultResourceRepository implements ResourceRepository {
+	public class DefaultResourceRepository implements ResourceRepositoryInformationBuilder {
 
 		private ResourceInformation resourceInformation;
 
@@ -133,7 +133,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 	}
 
-	public class DefaultResource implements Resource {
+	public class DefaultResource implements ResourceInformationBuilder {
 
 		private List<DefaultField> fields = new ArrayList<>();
 
@@ -217,12 +217,12 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 
 		@Override
-		public Resource pagingBehavior(PagingBehavior pagingBehavior) {
+		public ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior) {
 			this.pagingSpecType = pagingBehavior.createEmptyPagingSpec().getClass();
 			return this;
 		}
 
-		public Resource pagingSpecType(Class<PagingSpec> pagingSpecType) {
+		public ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType) {
 			this.pagingSpecType = pagingSpecType;
 			return this;
 		}
@@ -247,7 +247,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 	}
 
-	public class DefaultField implements InformationBuilder.Field {
+	public class DefaultField implements FieldInformationBuilder {
 
 		private String jsonName;
 
@@ -382,7 +382,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 
 		@Override
-		public Field jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy) {
+		public FieldInformationBuilder jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy) {
 			this.jsonIncludeStrategy = jsonIncludeStrategy;
 			return this;
 		}
@@ -436,7 +436,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
 		}
 
 		@Override
-		public Field patchStrategy(PatchStrategy patchStrategy) {
+		public FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy) {
 			this.patchStrategy = patchStrategy;
 			return this;
 		}

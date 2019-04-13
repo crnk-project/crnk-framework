@@ -61,7 +61,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
     private Map<String, DefaultRelationshipRepository> relationshipRepositoryMap = new HashMap<>();
 
-    private InformationBuilder.Resource resource;
+    private InformationBuilder.ResourceInformationBuilder resource;
 
     public DefaultRegistryEntryBuilder(ModuleRegistry moduleRegistry) {
         this.moduleRegistry = moduleRegistry;
@@ -69,18 +69,18 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
 
-    class DefaultResourceRepository implements ResourceRepository {
+    class DefaultResourceRepository implements ResourceRepositoryEntryBuilder {
 
         private Object instance;
 
-        private InformationBuilder.ResourceRepository information;
+        private InformationBuilder.ResourceRepositoryInformationBuilder information;
 
         public DefaultResourceRepository() {
             this.information = informationBuilder.createResourceRepository();
         }
 
         @Override
-        public InformationBuilder.ResourceRepository information() {
+        public InformationBuilder.ResourceRepositoryInformationBuilder information() {
             return information;
         }
 
@@ -90,11 +90,11 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
         }
     }
 
-    class DefaultRelationshipRepository implements RelationshipRepository {
+    class DefaultRelationshipRepository implements RelationshipRepositoryEntryBuilder {
 
         private final String fieldName;
 
-        private InformationBuilder.RelationshipRepository information;
+        private InformationBuilder.RelationshipRepositoryInformationBuilder information;
 
         private Object instance;
 
@@ -105,7 +105,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
         }
 
         @Override
-        public InformationBuilder.RelationshipRepository information() {
+        public InformationBuilder.RelationshipRepositoryInformationBuilder information() {
             return information;
         }
 
@@ -132,7 +132,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
     @Override
-    public ResourceRepository resourceRepository() {
+    public ResourceRepositoryEntryBuilder resourceRepository() {
         if (resourceRepository == null) {
             resourceRepository = new DefaultResourceRepository();
         }
@@ -140,7 +140,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
     @Override
-    public InformationBuilder.Resource resource() {
+    public InformationBuilder.ResourceInformationBuilder resource() {
         if (resource == null) {
             resource = informationBuilder.createResource(null, null, null);
         }
@@ -148,7 +148,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
     @Override
-    public RelationshipRepository relationshipRepositoryForField(String fieldName) {
+    public RelationshipRepositoryEntryBuilder relationshipRepositoryForField(String fieldName) {
         DefaultRelationshipRepository repository = relationshipRepositoryMap.get(fieldName);
         if (repository == null) {
             repository = new DefaultRelationshipRepository(null);
@@ -367,14 +367,18 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object decorateRepository(Object repository) {
+        if (repository instanceof ResourceRegistryAware) {
+            ((ResourceRegistryAware) repository).setResourceRegistry(moduleRegistry.getResourceRegistry());
+        }
+
         Object decoratedRepository = repository;
         List<RepositoryDecoratorFactory> repositoryDecorators = moduleRegistry.getRepositoryDecoratorFactories();
         for (RepositoryDecoratorFactory repositoryDecorator : repositoryDecorators) {
             decoratedRepository = repositoryDecorator.decorateRepository(decoratedRepository);
-        }
 
-        if (decoratedRepository instanceof ResourceRegistryAware) {
-            ((ResourceRegistryAware) decoratedRepository).setResourceRegistry(moduleRegistry.getResourceRegistry());
+            if (decoratedRepository instanceof ResourceRegistryAware) {
+                ((ResourceRegistryAware) decoratedRepository).setResourceRegistry(moduleRegistry.getResourceRegistry());
+            }
         }
 
         return decoratedRepository;

@@ -4,30 +4,30 @@ import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.repository.ScheduleRepository;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecoratorBase;
+import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
+import io.crnk.core.repository.decorate.WrappedResourceRepository;
 
-import java.io.Serializable;
+public class TestRepositoryDecorator implements RepositoryDecoratorFactory {
 
-public class TestRepositoryDecorator extends RepositoryDecoratorFactoryBase {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T, I > ResourceRepositoryDecorator<T, I> decorateRepository(
-			ResourceRepository<T, I> repository) {
-		if (repository.getResourceClass() == Schedule.class) {
-			return (ResourceRepositoryDecorator<T, I>) new DecoratedScheduleRepository();
-		}
-		return null;
-	}
+    @Override
+    public Object decorateRepository(Object repository) {
+        if (repository instanceof ResourceRepository && ((ResourceRepository) repository).getResourceClass() == Schedule.class) {
+            return new DecoratedScheduleRepository((ResourceRepository<Schedule, Long>) repository);
+        }
+        return repository;
+    }
 
-	public static class DecoratedScheduleRepository extends ResourceRepositoryDecoratorBase<Schedule, Long>
-			implements ScheduleRepository {
+    public static class DecoratedScheduleRepository extends WrappedResourceRepository<Schedule, Long>
+            implements ScheduleRepository {
 
-		@Override
-		public ScheduleList findAll(QuerySpec querySpec) {
-			return (ScheduleList) super.findAll(querySpec);
-		}
-	}
+        public DecoratedScheduleRepository(ResourceRepository<Schedule, Long> wrappedRepository) {
+            super(wrappedRepository);
+        }
+
+        @Override
+        public ScheduleList findAll(QuerySpec querySpec) {
+            return (ScheduleList) super.findAll(querySpec);
+        }
+    }
 }

@@ -32,7 +32,7 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void resourceWithNoResourcePath() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks");
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks");
 		ResourceInformation info = resource.build();
 		resource.superResourceType("superTask");
 		resource.resourceClass(Project.class);
@@ -42,17 +42,17 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void resource() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks", null);
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
 		resource.resourceClass(Project.class);
 
-		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
+		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
 		idField.access(new ResourceFieldAccess(true, true, true, false, false));
 
 		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
-		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
+		InformationBuilder.FieldInformationBuilder projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
 		projectField.serializeType(SerializeType.EAGER);
 		projectField.access(new ResourceFieldAccess(true, false, true, false, false));
 		projectField.oppositeName("tasks");
@@ -93,18 +93,18 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void checkRelationIdFieldCreation() {
-		InformationBuilder.Resource resource = builder.createResource(Task.class, "tasks", null);
+		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
 		resource.resourceClass(Project.class);
 
-		InformationBuilder.Field idField = resource.addField("id", ResourceFieldType.ID, String.class);
+		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
 		idField.access(new ResourceFieldAccess(true, true, true, false, false));
 
 		ResourceFieldAccessor idAccessor = Mockito.mock(ResourceFieldAccessor.class);
 		ResourceFieldAccessor accessor = Mockito.mock(ResourceFieldAccessor.class);
-		InformationBuilder.Field projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
+		InformationBuilder.FieldInformationBuilder projectField = resource.addField("project", ResourceFieldType.RELATIONSHIP, Project.class);
 		projectField.idName("taskId");
 		projectField.idAccessor(idAccessor);
 		projectField.idType(Long.class);
@@ -141,7 +141,7 @@ public class DefaultInformationBuilderTest {
 	public void checkResourceRepository() {
 		ResourceInformation resourceInformation = builder.createResource(Task.class, "tasks", null).build();
 
-		InformationBuilder.ResourceRepository repositoryBuilder = builder.createResourceRepository();
+		InformationBuilder.ResourceRepositoryInformationBuilder repositoryBuilder = builder.createResourceRepository();
 		repositoryBuilder.setResourceInformation(resourceInformation);
 		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
 		repositoryBuilder.setAccess(expectedAccess);
@@ -153,7 +153,7 @@ public class DefaultInformationBuilderTest {
 
 	@Test
 	public void checkRelationshipRepository() {
-		InformationBuilder.RelationshipRepository repositoryBuilder = builder.createRelationshipRepository("projects", "tasks");
+		InformationBuilder.RelationshipRepositoryInformationBuilder repositoryBuilder = builder.createRelationshipRepository("projects", "tasks");
 		RepositoryMethodAccess expectedAccess = new RepositoryMethodAccess(true, false, true, false);
 		repositoryBuilder.setAccess(expectedAccess);
 		RelationshipRepositoryInformation repositoryInformation = repositoryBuilder.build();

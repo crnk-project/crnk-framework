@@ -51,7 +51,7 @@ public abstract class AbstractQuerySpecTest {
 
 					InformationBuilder informationBuilder = new DefaultInformationBuilder(new TypeParser());
 
-					InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
+					InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
 					fieldBuilder.type(Integer.class);
 					fieldBuilder.jsonName(name);
 					fieldBuilder.underlyingName(name);

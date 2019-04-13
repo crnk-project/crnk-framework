@@ -1,9 +1,10 @@
-With this release the first version of Crnk 3.x is released. There are many new, incremental
-improvements and cleanups. The cleanups address a number of (rather old) historic issues to improve
-usability. They cause cause minor API breaks due but are easy to fix.
-The release is labelled as BETA because
-further cleanup and changes are expected. Otherwise the release builds upon previous releases
-and should be a drama-free upgrade.
+With this release the first version of Crnk 3.x is released. The major change brings two different things.
+There are a variety of new features and usability improvements by cleaning up historic issues.
+While being a major release, changes required are minimal (see below).
+<p>
+    A first BETA is available. Further BETA releases are going to finalize the new features
+    and providing more documentation and examples.
+</p>
 
 
 <h4>Cleanup &amp; Migration</h4>
@@ -37,13 +38,35 @@ and should be a drama-free upgrade.
         the DTOs are properly annotation with @JsonApiRelation and @JsonApiRelationId. No information is
         inferred from the underlying entities.
     </li>
+    <li>
+        RepositoryDecoratorFactory has been simplified to a single decorateRepository method and
+        WrappedResourceRepository, WrappedOneRelationshipRepository and WrappedManyRelationshipRepository.
+        There are no dedicated decoration repository interfaces anymore, just the regular interfaces.
+    </li>
+    <li>
+        Decorators have been removed form the JpaRepositoryConfig. The regular RepositoryDecoratorFactory can be
+        used instead.
+    </li>
 </ul>
 
+<h4>Go Faster with Graal Native</h4>
 
-<h4>Experimental Annotation Processor for type-safe QuerySpec construction</h4>
+<p>
+    <i>This feature will be available in a subsequent BETA release</i>
+</p>
 
-An annotation processor is introduced that generates type-safe QuerySpec and PathSpec subtypes for their
-type-safe construction:
+Sub-100ms startup times and reduced memory requirements to reduce cost and open up new application fields
+like serverless computing.
+
+
+<h4>Type-safe QuerySpec construction with a Crnk Annotation Processor</h4>
+
+<p>
+    <i>Available as a preview in the first BETA</i>
+</p>
+
+An annotation processor is introduced that allows the type-safe construction of QuerySpec and PathSpec.
+
 
 <pre class="prettyprint">
 UserQuerySpec querySpec = new UserQuerySpec();
@@ -56,11 +79,9 @@ UserQuerySpec querySpec = new UserQuerySpec();
 More information can be found <a href="www.crnk.io/releases/latest/documentation/#_generation_java">here</a>.
 
 
-<h4>Refactored Gradle generator plugin</h4>
+<h4>More flexible Gradle generator plugin</h4>
 
-The Gradle Typescript generator has been refactored to support the generator of artifacts other than Typescript.
-For this purpose the project has been split into `crnk-gen-gradle`, `crnk-gen-typescript` and a number of
-helper projects. The new setup looks like:
+The Gradle Typescript generator adds support for the generation of artifacts other than Typescript.
 
 <pre class="prettyprint">
 buildscript {
@@ -86,15 +107,23 @@ crnkGen {
 }
 </pre>
 
-More information about Typescript generation is available
+For this purpose the project has been split into `crnk-gen-gradle`, `crnk-gen-typescript` and a number of
+helper projects.  More information about Typescript generation is available
 <a href="documentation/#_typescript">here</a>.
 
-<h4>More flexible EntityManager setup with JPA module</h4>
 
-JpaModule.createServerModule(...) comes with a new flavor that allows to pass the EntityManager
-as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
-return an instance. The supplier together with the existing TransactionRunner
-allows for custom JPA setups and transaction handling.
+<h4>Documentation generation with AsciiDoc</h4>
+
+The new <i>crnk-gen-asciidoc</i> project helps automating REST documentation. It makes use of two kinds of sources:
+resource classes and test cases. The resource classes give an overview of a REST endpoint with a list of available
+resources, attributes and relationships. Whereas test cases can serve as examples for developers. This mix
+of model-driven and test-driven documentation together with the standardization provided by JSON:API
+can greatly help in writing consistent, documented REST endpoints.
+
+
+For more information have a look at the <a href="documentation/#_documentation_with_asciidoc">documentation</a> and
+<a href="https://github.com/crnk-project/crnk-example">crnk-example</a>.
+
 
 <h4>Allow QuerySpec conversion to Criteria query</h4>
 
@@ -202,3 +231,11 @@ More information can be found <a href="documentation/#_nested_resources">here</a
 
 crnk-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
 treats the enum like a java.lang.Object by storing it is as serialized blob and not supporting filtering.
+
+
+<h4>More flexible EntityManager setup with JPA module</h4>
+
+JpaModule.createServerModule(...) comes with a new flavor that allows to pass the EntityManager
+as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
+return an instance. The supplier together with the existing TransactionRunner
+allows for custom JPA setups and transaction handling.

@@ -14,11 +14,7 @@ import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.module.ModuleExtension;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
-import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.meta.DefaultHasMoreResourcesMetaInformation;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -317,10 +313,6 @@ public class JpaModule implements InitializingModule {
 
         addHibernateConstraintViolationExceptionMapper();
         addTransactionRollbackExceptionMapper();
-
-        if (config != null) {
-            context.addRepositoryDecoratorFactory(new JpaRepositoryDecoratorFactory());
-        }
 
         if (emSupplier != null) {
             metaEnricher = new JpaMetaEnricher();
@@ -633,24 +625,6 @@ public class JpaModule implements InitializingModule {
                 QuerySpec querySpec = requestContext.getQuerySpec();
                 ((QuerydslRepositoryFilter) filter).filterQueryTranslation(repository, querySpec, translationContext);
             }
-        }
-    }
-
-    class JpaRepositoryDecoratorFactory implements RepositoryDecoratorFactory {
-
-        @Override
-        public <T, I> ResourceRepositoryDecorator<T, I> decorateRepository(
-                ResourceRepository<T, I> repository) {
-            JpaRepositoryConfig<T> config = getRepositoryConfig(repository.getResourceClass());
-            if (config != null) {
-                return config.getRepositoryDecorator();
-            }
-            return null;
-        }
-
-        @Override
-        public <T, I, D, J> RelationshipRepositoryDecorator<T, I, D, J> decorateRepository(RelationshipRepository<T, I, D, J> repository) {
-            return null;
         }
     }
 }

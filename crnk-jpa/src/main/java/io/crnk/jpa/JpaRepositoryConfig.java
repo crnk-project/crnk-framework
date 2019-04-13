@@ -1,18 +1,9 @@
 package io.crnk.jpa;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
@@ -25,6 +16,11 @@ import io.crnk.jpa.mapping.IdentityMapper;
 import io.crnk.jpa.mapping.JpaMapper;
 import io.crnk.jpa.query.JpaQueryFactory;
 import net.jodah.typetools.TypeResolver;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @param <T> document type (entity or mapped dto)
@@ -42,10 +38,6 @@ public class JpaRepositoryConfig<T> {
     private Class<? extends MetaInformation> listMetaClass;
 
     private Class<? extends LinksInformation> listLinksClass;
-
-    private ResourceRepositoryDecorator<T, ?> resourceRepositoryDecorator;
-
-    private Map<Class<?>, RelationshipRepositoryDecorator<T, ?, ?, ?>> relationshipRepositoriesDecorators;
 
     private Boolean totalAvailable;
 
@@ -228,17 +220,6 @@ public class JpaRepositoryConfig<T> {
     }
 
 
-    @SuppressWarnings("unchecked")
-    public <I > ResourceRepositoryDecorator<T, I> getRepositoryDecorator() {
-        return (ResourceRepositoryDecorator<T, I>) resourceRepositoryDecorator;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <D, I , J > RelationshipRepositoryDecorator<T, I, D, J> getRepositoryDecorator(
-            Class<D> targetResourceType) {
-        return (RelationshipRepositoryDecorator<T, I, D, J>) relationshipRepositoriesDecorators.get(targetResourceType);
-    }
-
     protected void setListMetaClass(Class<? extends MetaInformation> listMetaClass) {
         this.listMetaClass = listMetaClass;
     }
@@ -258,7 +239,6 @@ public class JpaRepositoryConfig<T> {
 
         private Class<? extends LinksInformation> listLinksClass = DefaultPagedLinksInformation.class;
 
-        private ResourceRepositoryDecorator<T, ?> resourceRepositoryDecorator;
 
         public JpaRepositoryConfig<T> build() {
             JpaRepositoryConfig<T> config = new JpaRepositoryConfig<>();
@@ -268,7 +248,6 @@ public class JpaRepositoryConfig<T> {
             config.listClass = listClass;
             config.listMetaClass = listMetaClass;
             config.listLinksClass = listLinksClass;
-            config.resourceRepositoryDecorator = resourceRepositoryDecorator;
             return config;
         }
 
@@ -323,17 +302,6 @@ public class JpaRepositoryConfig<T> {
          */
         public Builder<T> setListLinksClass(Class<? extends LinksInformation> listLinksClass) {
             this.listLinksClass = listLinksClass;
-            return this;
-        }
-
-        /**
-         * Sets a decorator that allows to intercept all requests to the actual document.
-         *
-         * @param decoratorResourceRepository that decorates the jpa document.
-         * @return this builder
-         */
-        public Builder<T> setRepositoryDecorator(ResourceRepositoryDecorator<T, ?> decoratorResourceRepository) {
-            this.resourceRepositoryDecorator = decoratorResourceRepository;
             return this;
         }
     }

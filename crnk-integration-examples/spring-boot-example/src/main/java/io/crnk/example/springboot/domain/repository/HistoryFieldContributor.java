@@ -22,7 +22,7 @@ public class HistoryFieldContributor implements ResourceFieldContributor {
 	public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
 		// this method could be omitted if the history field is added regularly to Project and Task resource. This would be
 		// simpler and recommended, but may not always be possible. Here we demonstrate doing it dynamically.
-		InformationBuilder.Field fieldBuilder = context.getInformationBuilder().createResourceField();
+		InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
 		fieldBuilder.name("history");
 		fieldBuilder.genericType(new TypeToken<List<History>>() {
 		}.getType());

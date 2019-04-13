@@ -73,7 +73,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             BeanAttributeInformation attributeDesc = beanDesc.getAttribute(attributeName);
             if (!isIgnored(attributeDesc)) {
                 InformationBuilder informationBuilder = context.getInformationBuilder();
-                InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
+                InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
                 buildResourceField(beanDesc, attributeDesc, fieldBuilder);
                 fields.add(fieldBuilder.build());
             } else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
@@ -97,7 +97,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
     }
 
-    protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.Field
+    protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.FieldInformationBuilder
             fieldBuilder) {
         fieldBuilder.underlyingName(attributeDesc.getName());
         ResourceFieldType fieldType = getFieldType(attributeDesc);
