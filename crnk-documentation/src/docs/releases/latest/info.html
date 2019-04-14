@@ -1,6 +1,6 @@
 With this release the first version of Crnk 3.x is released. The major change brings two different things.
 There are a variety of new features and usability improvements by cleaning up historic issues.
-While being a major release, changes required are minimal (see below).
+While being a major release, changes required should be minimal (see below).
 <p>
     A first BETA is available. Further BETA releases are going to finalize the new features
     and providing more documentation and examples.
@@ -52,11 +52,18 @@ While being a major release, changes required are minimal (see below).
         See below for more information. Be aware of the changed semantics. The property must only be
         set on one side.
     </li>
+    <li>New defaults for @JsonApiRelation.lookup and @JsonApiRelation.repositoryBehavior should
+        allow to eliminate a large part of the custom configuration. For more information see below.
+    </li>
     <li>
         crnk-jpa has been renamed to crnk-data-jpa and the Java package updated accordingly.
     </li>
     <li>
         crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
+    </li>
+    <li>
+        QueryParams: let us know if you are still attached to it. Otherwise it is going to get dropped
+        in a subsequent Beta release.
     </li>
 </ul>
 
