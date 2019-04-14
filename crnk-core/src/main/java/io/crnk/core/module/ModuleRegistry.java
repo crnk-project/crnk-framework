@@ -17,6 +17,7 @@ import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
@@ -25,6 +26,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -470,7 +472,7 @@ public class ModuleRegistry {
         resourceClasses.addAll(getResourceLookup().getResourceClasses());
         if (resourceRegistry != null) {
             resourceClasses
-                    .addAll(resourceRegistry.getResources().stream().map(it -> it.getResourceInformation().getResourceClass())
+                    .addAll(resourceRegistry.getEntries().stream().map(it -> it.getResourceInformation().getResourceClass())
                             .collect(Collectors.toList()));
         }
         for (Class resourceClass : new ArrayList<>(resourceClasses)) {
@@ -485,6 +487,28 @@ public class ModuleRegistry {
         for (Class<?> resourceClass : resourceClasses) {
             if (resourceRegistry.getEntry(resourceClass) == null) {
                 applyResourceRegistration(resourceClass, addtionalEntryMap);
+            }
+        }
+
+        Collection<RegistryEntry> entries = resourceRegistry.getEntries();
+        for (RegistryEntry entry : entries) {
+            ResourceInformation resourceInformation = entry.getResourceInformation();
+            for (ResourceField field : resourceInformation.getRelationshipFields()) {
+                String oppositeName = field.getOppositeName();
+                if (oppositeName != null) {
+                    RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
+                    PreconditionUtil.verify(oppositeEntry != null, "unable to find opposite resource '%s' for field %s", field.getOppositeResourceType(), field);
+
+                    ResourceField oppositeField = oppositeEntry.getResourceInformation().findFieldByUnderlyingName(oppositeName);
+                    PreconditionUtil.verify(oppositeField != null, "unable to find opposite field '%s' for field %s", oppositeName, field);
+
+                    String oppositeOppositeName = oppositeField.getOppositeName();
+                    if (oppositeOppositeName != null) {
+                        PreconditionUtil.verifyEquals(field.getUnderlyingName(), oppositeOppositeName, "opposite references do not match for %s and %s", field, oppositeField);
+                    } else {
+                        ((ResourceFieldImpl) oppositeField).setOppositeName(field.getUnderlyingName());
+                    }
+                }
             }
         }
     }
