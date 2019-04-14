@@ -83,7 +83,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
         writeTypeListing(types);
 
         indexBuilder.startSection("Types");
-        indexBuilder.writeInclude("types_listing");
+        indexBuilder.writeInclude("type_listing");
 
         for (MetaType type : types) {
             String name = type.getName();
