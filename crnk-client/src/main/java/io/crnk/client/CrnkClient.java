@@ -268,6 +268,8 @@ public class CrnkClient {
             Module module = factory.create();
             addModule(module);
         }
+
+        objectMapper.findAndRegisterModules();
     }
 
     public void setProxyFactory(ClientProxyFactory proxyFactory) {

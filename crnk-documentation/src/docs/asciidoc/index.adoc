@@ -2,7 +2,7 @@
 
 # Crnk Documentation
 :toc: left
-:toclevels: 3
+:toclevels: 2
 
 
 Crnk is a native resource-oriented rest library where resources, their relationships and repositories are the main building

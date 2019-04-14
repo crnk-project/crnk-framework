@@ -133,7 +133,29 @@ public class RuntimeClassLoaderFactory {
         URLClassLoader classLoader = (URLClassLoader) getClass().getClassLoader();
         for (URL gradleClassUrl : classLoader.getURLs()) {
             String file = gradleClassUrl.getFile();
-            if (file.contains("crnk-gen-") || file.contains("reflections") || file.contains("crnk-meta-")
+
+            /*
+            |         +--- org.webjars.npm:viz.js:2.1.2
+            |         +--- org.apache.xmlgraphics:xmlgraphics-commons:2.3
+            |         |    \--- commons-io:commons-io:1.3.1 -> 1.3.2
+            |         +--- commons-io:commons-io:2.6 -> 1.3.2
+            |         +--- guru.nidi.com.kitfox:svgSalamander:1.1.2
+            |         +--- net.arnx:nashorn-promise:0.1.1
+            |         +--- com.eclipsesource.j2v8:j2v8_macosx_x86_64:4.6.0
+            |         +--- com.eclipsesource.j2v8:j2v8_linux_x86_64:4.6.0
+            |         +--- com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0
+            |         +--- com.eclipsesource.j2v8:j2v8_win32_x86:4.6.0
+            |         +--- org.apache.commons:commons-exec:1.3
+            |         +--- com.google.code.findbugs:jsr305:3.0.2
+            |         +--- org.slf4j:jcl-over-slf4j:1.7.25
+            |         |    \--- org.slf4j:slf4j-api:1.7.25
+            |         +--- org.slf4j:jul-to-slf4j:1.7.25 (*)
+            |         \--- org.slf4j:slf4j-api:1.7.25
+            */
+            if (file.contains("v8") || file.contains("webjars") || file.contains("xmlgraphics")
+                    || file.contains("nashorn") || file.contains("svg") || file.contains("305")
+                    || file.contains("commons") || file.contains("graphviz") || file.contains("crnk-gen-")
+                    || file.contains("reflections") || file.contains("crnk-meta-")
                     || file.contains("crnk-data-jpa-")) {
                 urls.add(gradleClassUrl);
             }

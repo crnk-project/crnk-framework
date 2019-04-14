@@ -185,16 +185,14 @@ ResourceList<Task> list = taskRepo.findAll(querySpec);
 More information available http://www.crnk.io/releases/stable/documentation/#_jsonapirelation[here]
 
 The subsequent example establishes a relationship to `Project` with the `project` field. It is backed by a primitive
-relationship identifier `projectId`. `projectId` is always written to the response (`SerializeType.ONLY_ID`). The `project` relationship
-is looked up in the project repository with `projectId` if an inclusion has been requested and the task repository did not initialize `project`
-(`LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`):
+relationship identifier `projectId`. `projectId` is always written to the response (`SerializeType.ONLY_ID`):
 
 [source,java]
 ----
 @JsonApiRelationId
 private Long projectId;
 
-@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, serialize = SerializeType.ONLY_ID)
+@JsonApiRelation(serialize = SerializeType.ONLY_ID)
 private Project project;
 ----
 
@@ -211,15 +209,10 @@ To setup a relationship that is served by querying the opposite side (to get all
 [source,java]
 ----
 public class Project{
-	@JsonApiRelation(
-		lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "project",
-		repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
+	@JsonApiRelation(mappedBy = "project")
 	private List<Tasks> tasks;
 }
 ----
-
-If neither a `RelationshipRepositoryBehavior` nor `@JsonApiRelationId` is applicable, `RelationshipRepositoryV2` or rather  `BulkRelationshipRepositoryV2`
-can implement arbitrary custom logic to lookup relationships.
 
 # Information
 

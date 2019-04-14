@@ -12,8 +12,7 @@ While being a major release, changes required should be minimal (see below).
 <ul>
     <li>
         The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
-        to follow the former QueryParams-based repositories. QueryParams continue to be supported, but the repository
-        now carry a &quot;Legacy&quot; prefix.
+        to replace QueryParams-based repositories. QueryParams carry new &quot;Legacy&quot; prefix.
     </li>
     <li>
         Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to
@@ -62,21 +61,23 @@ While being a major release, changes required should be minimal (see below).
         crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
     </li>
     <li>
-        QueryParams: let us know if you are still attached to it. Otherwise it is going to get dropped
+        Let us know if you still continue to make use of QueryParams. Otherwise it is going to get dropped
         in a subsequent Beta release.
     </li>
 </ul>
 
+<h4>Update Examples application</h4>
+
+Still work in progress, but <a href="https://github.com/crnk-project/crnk-example">crnk-example</a> has been
+updated to use the various 3.0 features.
+
+
 <h4>Simplified Relationship Setup with @JsonApiRelation.mappedBy</h4>
 
-<ul>
-    <li>
-        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy. MappedBy works
-        in exactly the same fashion as known from JPA-related annotations. It must be set on one side of
-        a bidirectional relationship to point to the opposite owning side. By default requests are then served
-        from the resource repository of the owning side.
+@JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy. It must be set
+for bi-directional relationships to point from the non-owning to the owning side:
 
-        <pre class="prettyprint">
+<pre class="prettyprint">
 @JsonApiResource(type = "tasks")
 public class Task {
 
@@ -96,30 +97,72 @@ public class Task {
 }
 </pre>
 
-        <p>
-            For example, for a one-to-many relationship, the owning side is typically the single-valued field, whereas
-            the
-            multi-valued
-            field declares the mappedBy to point to the single-valued field. This is because the single-valued field
-            is typically something like a column in a database table that can be accessed and updated. In contrast,
-            the multi-valued field can only be obtained by specifying issuing a query against the single-valued field.
-        </p>
+<p>
+    The owning side is typically the single-valued field. This is because the single-valued field
+    is something like a column in a database table that can be accessed and updated. In contrast,
+    the multi-valued field can only be obtained by specifying issuing a query against the single-valued field
+    and as such not suitable to be the owner. The behavior matches with similar JPA-related annotations.
+</p>
+<p>
+    Under the hood the mappedBy property will trigger a suitable default for @JsonApiRelation.repositoryBehavior
+    and @JsonApiRelation.lookup on both sides, simplifying the relationship setup for most use cases.
+    If no relationship repository can be setup, Crnk will no fail directly upon startup.
+</p>
 
-        Under the hood the mappedBy property will trigger a suitable default for @JsonApiRelation.repositoryBehavior
-        and @JsonApiRelation.lookup on both sides, simplifying the relationship setup for most use cases.
-        If no relationship repository can be setup, Crnk will no fail directly upon startup.
-    </li>
-    <li>
-        @JsonApiRelation.lookUp and @JsonApiRelation.repositoryBehavior are setup automatically by default based
-        the resource and relationship declaration and the presence of relationship repository implementation.
-        In many cases it should no longer be necessary those properties. Have a look at
-        the updated documentation and the new example in the
-        <a href="http://www.crnk.io/releases/latest/documentation/#_jsonapirelation">documentation</a>.
-    </li>
-    <li>
-        An exception rather a warning is thrown when a relationship cannot be setup.
-    </li>
-</ul>
+<h4>Improved default values for @JsonApiRelation</h4>
+
+Relationship implementation can greatly vary. For this reason the various attributes of @JsonApiRelation historically
+had most features disabled by default (forwarding, serialization, etc.) to let developers configure what is needed.
+Over the past year a variety of tooling has been added to simplify the relationship setup, which in turn
+made the conservative defaults less suited than in the past. With this release new defaults have been introduced
+that inspect the resources and repositories more closely to decide for a particular default value for
+@JsonApiRelation.lookUp and @JsonApiRelation.repositoryBehavior.
+<p>
+    In many cases it should no longer be necessary to specify those properties, for example:
+
+<pre class="prettyprint">
+@JsonApiResource(type = "task")
+public class Task {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation // not backed by repository
+    public Project project;
+
+    @JsonApiRelation // backed by repository
+    public List<Task> subTasks;
+}
+
+@JsonApiResource(type = "project")
+public class Project {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation(mappedBy = "project")
+    public Set<Task> tasks;
+
+    @JsonApiRelationId
+    public Project parentId;
+
+    @JsonApiRelation
+    public Project parent;
+}
+
+class SubTaskRepository extends OneRelationshipRepositoryBase {
+    @Override
+    public RelationshipMatcher getMatcher() {
+        RelationshipMatcher matcher = new RelationshipMatcher();
+        matcher.rule().field("subTasks").add();
+        return matcher;
+    }
+    ...
+}
+</pre>
+
+Have a look at
+the updated documentation and the new example in the
+<a href="documentation/#_jsonapirelation">documentation</a>.
+</li>
 
 More information is available in the documentation. Please provide feedback in this area!
 
@@ -151,7 +194,7 @@ UserQuerySpec querySpec = new UserQuerySpec();
         querySpec.include().projects();
 </pre>
 
-More information can be found <a href="www.crnk.io/releases/latest/documentation/#_generation_java">here</a>.
+More information can be found <a href="documentation/#_java_annotation_processor">here</a>.
 
 
 <h4>More flexible Gradle generator plugin</h4>
@@ -195,6 +238,15 @@ resources, attributes and relationships. Whereas test cases can serve as example
 of model-driven and test-driven documentation together with the standardization provided by JSON:API
 can greatly help in writing consistent, documented REST endpoints.
 
+<p>
+<table>
+    <tr>
+        <td>
+            <img src="asciidoc_example.png" width="70%">
+        </td>
+    </tr>
+</table>
+</p>
 
 For more information have a look at the <a href="documentation/#_documentation_with_asciidoc">documentation</a> and
 <a href="https://github.com/crnk-project/crnk-example">crnk-example</a>.
@@ -267,6 +319,10 @@ rather than
 OpenTracing is a vendor-neutral API to write trace information. crnk-monitor-opentracing introduces a new module OpenTracingServerModule
 that brings support for OpenTracing to Crnk. It can be used properly set the names of spans. More information is available
 in the documentation.
+
+<p>
+    <img src="tracing.png" width="70%">
+</p>
 
 
 <h4>Singular Nested Resources</h4>

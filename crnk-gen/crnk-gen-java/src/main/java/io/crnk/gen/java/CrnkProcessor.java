@@ -30,6 +30,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -224,6 +225,10 @@ public class CrnkProcessor extends AbstractProcessor {
                 boolean embeddable = isEmbeddable(member);
                 boolean isRelationship = relationships.contains(memberName);
 
+                if (memberType instanceof PrimitiveType) {
+                    memberType = processingEnv.getTypeUtils().boxedClass((PrimitiveType) memberType).asType();
+                }
+
                 TypeName pathImpl = ParameterizedTypeName.get(
                         ClassName.get(PrimitivePathSpec.class),
                         TypeName.get(memberType)
@@ -267,7 +272,7 @@ public class CrnkProcessor extends AbstractProcessor {
 
         TypeElement propertyType = processingEnv.getElementUtils().getTypeElement(propertyTypeName);
         if (propertyType == null) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "property type not found: " + propertyTypeName);
+            //  processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "property type not found: " + propertyTypeName);
             return false;
         } else {
             JsonApiEmbeddable annotation = propertyType.getAnnotation(JsonApiEmbeddable.class);

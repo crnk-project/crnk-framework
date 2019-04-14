@@ -490,6 +490,12 @@ public class ModuleRegistry {
             }
         }
 
+        initOpposites();
+        initNesting();
+    }
+
+    private void initOpposites() {
+
         Collection<RegistryEntry> entries = resourceRegistry.getEntries();
         for (RegistryEntry entry : entries) {
             ResourceInformation resourceInformation = entry.getResourceInformation();
@@ -509,6 +515,16 @@ public class ModuleRegistry {
                         ((ResourceFieldImpl) oppositeField).setOppositeName(field.getUnderlyingName());
                     }
                 }
+            }
+        }
+    }
+
+    private void initNesting() {
+        Collection<RegistryEntry> entries = resourceRegistry.getEntries();
+        for (RegistryEntry entry : entries) {
+            ResourceInformation resourceInformation = entry.getResourceInformation();
+            if (resourceInformation.getIdField() != null) {
+                resourceInformation.initNesting();
             }
         }
     }

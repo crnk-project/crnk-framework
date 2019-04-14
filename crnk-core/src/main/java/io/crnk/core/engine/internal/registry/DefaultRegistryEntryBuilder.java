@@ -196,7 +196,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
                 map.put(relationshipField, relationshipEntry.getAdapter());
             } else {
                 // does only happen if checking is disabled in general (currently just crnk-core tests)
-                LOGGER.warn("{}.{}: no relationship repository found for {}", toShortName(resourceInformation), relationshipField.getUnderlyingName());
+                LOGGER.warn("{}.{}: no relationship repository found", toShortName(resourceInformation), relationshipField.getUnderlyingName());
             }
         }
         return map;

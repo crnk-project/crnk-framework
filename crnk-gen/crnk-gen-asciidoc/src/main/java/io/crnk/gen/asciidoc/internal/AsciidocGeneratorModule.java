@@ -75,6 +75,9 @@ public class AsciidocGeneratorModule implements GeneratorModule {
         }
 
         List<MetaType> types = typeSet.stream().sorted(Comparator.comparing(MetaType::getName)).collect(Collectors.toList());
+        if (types.isEmpty()) {
+            return null;
+        }
 
         AsciidocBuilder indexBuilder = newBuilder(Collections.emptyList());
         writeTypeListing(types);
@@ -101,7 +104,6 @@ public class AsciidocGeneratorModule implements GeneratorModule {
             }
 
             AsciidocBuilder descriptionBuilder = newBuilder(resourceAnchor);
-            descriptionBuilder.appendDescription(type);
             descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
 
             AsciidocBuilder resourceIndexBuilder = newBuilder(Arrays.asList("types"));
@@ -135,11 +137,11 @@ public class AsciidocGeneratorModule implements GeneratorModule {
         indexBuilder.appendLine("# " + config.getTitle());
         indexBuilder.appendLine(":leveloffset: 1");
 
-        if (resourcesFile.exists()) {
+        if (resourcesFile != null && resourcesFile.exists()) {
             indexBuilder.writeInclude(resourcesFile.getName());
         }
 
-        if (typesFile.exists()) {
+        if (typesFile != null && typesFile.exists()) {
             indexBuilder.writeInclude(typesFile.getName());
         }
 
