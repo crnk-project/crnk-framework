@@ -1,5 +1,17 @@
 package io.crnk.core.queryspec.mapper;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,18 +38,6 @@ import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DefaultQuerySpecUrlMapper
         implements QuerySpecUrlMapper, UnkonwnMappingAware {
@@ -302,7 +302,9 @@ public class DefaultQuerySpecUrlMapper
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException(e);
             }
-            put(map, "filter", json);
+
+			String key = addResourceType(QueryParameterType.FILTER, null, resourceInformation, isRoot);
+            put(map, key, json);
         } else {
 
             for (FilterSpec filterSpec : querySpec.getFilters()) {
@@ -536,9 +538,11 @@ public class DefaultQuerySpecUrlMapper
             paramType = QueryParameterType.UNKNOWN;
         }
 
+        boolean jsonFilter = false;
         if (allowCommaSeparatedValue && paramType == QueryParameterType.FILTER && values.size() == 1) {
             String value = values.iterator().next();
-            if (!(jsonParser.isJson(value))) {
+            jsonFilter = jsonParser.isJson(value);
+            if (!jsonFilter) {
                 String[] valueArray = value.split("\\,");
                 values = new HashSet<>(Arrays.asList(valueArray));
             }
@@ -553,7 +557,7 @@ public class DefaultQuerySpecUrlMapper
 
 
         if (paramType == QueryParameterType.FILTER && elements.size() >= 1) {
-            parseFilterParameterName(param, elements, rootResourceInformation);
+            parseFilterParameterName(param, elements, rootResourceInformation, !jsonFilter);
         } else if (paramType == QueryParameterType.PAGE && elements.size() == 1) {
             param.setResourceInformation(rootResourceInformation);
             param.setPagingType(elements.get(0));
@@ -587,7 +591,7 @@ public class DefaultQuerySpecUrlMapper
     }
 
     protected void parseFilterParameterName(QueryParameter param, List<String> elements,
-                                            ResourceInformation rootResourceInformation) {
+                                            ResourceInformation rootResourceInformation, boolean canHaveAttributes) {
         // check whether last element is an operator
         parseFilterOperator(param, elements);
 
@@ -602,6 +606,8 @@ public class DefaultQuerySpecUrlMapper
         if (enforceDotPathSeparator && elements.size() == 2) {
             param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
             param.setAttributePath(Arrays.asList(elements.get(1).split("\\.")));
+        } else if (enforceDotPathSeparator && elements.size() == 1 && !canHaveAttributes) {
+			param.setResourceInformation(getResourceInformation(elements.get(0), param.getName()));
         } else if (enforceDotPathSeparator && elements.size() == 1) {
             param.setResourceInformation(rootResourceInformation);
             param.setAttributePath(Arrays.asList(elements.get(0).split("\\.")));

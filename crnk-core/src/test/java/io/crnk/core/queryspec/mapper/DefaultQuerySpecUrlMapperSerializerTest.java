@@ -2,6 +2,9 @@ package io.crnk.core.queryspec.mapper;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import io.crnk.core.CoreTestContainer;
@@ -49,7 +52,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
-	public void dotSeparatorEnabledByDefault(){
+	public void dotSeparatorEnabledByDefault() {
 		Assert.assertTrue(urlMapper.getEnforceDotPathSeparator());
 	}
 
@@ -197,6 +200,23 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 1));
 		check("http://127.0.0.1/tasks?filter[id]=1", null, querySpec);
+	}
+
+	@Test
+	public void testFilterWithJson() throws UnsupportedEncodingException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec("{id: 1}"));
+		check("http://127.0.0.1/tasks?filter=" + URLEncoder.encode("{id: 1}", StandardCharsets.UTF_8.toString()), null, querySpec);
+	}
+
+	@Test
+	public void testFilterOnRelatedWithJson() throws UnsupportedEncodingException {
+		QuerySpec relatedSpec = new QuerySpec(Project.class);
+		relatedSpec.addFilter(new FilterSpec("{id: 1}"));
+
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.putRelatedSpec(Project.class, relatedSpec);
+		check("http://127.0.0.1/tasks?filter[project]=" + URLEncoder.encode("{id: 1}", StandardCharsets.UTF_8.toString()), null, querySpec);
 	}
 
 	@Test
