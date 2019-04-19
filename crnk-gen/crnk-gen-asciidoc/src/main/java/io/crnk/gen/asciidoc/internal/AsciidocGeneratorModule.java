@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -177,7 +178,9 @@ public class AsciidocGeneratorModule implements GeneratorModule {
             descriptionBuilder.appendDescription(resource);
             descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
 
-            AsciidocBuilder exampleBuilder = newBuilder(resourceAnchor);
+            List<String> exampleAnchor = new ArrayList<>(resourceAnchor);
+            exampleAnchor.add("examples");
+            AsciidocBuilder exampleBuilder = newBuilder(exampleAnchor);
             exampleBuilder.appendExamples(outputDir);
             exampleBuilder.write(new File(outputDir, EXAMPLES_FILE));
 
