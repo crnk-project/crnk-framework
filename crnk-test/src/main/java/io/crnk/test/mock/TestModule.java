@@ -32,6 +32,10 @@ public class TestModule implements Module {
 
     private static NestedOneRelationshipRepository nestedOneRelationshipRepository = new NestedOneRelationshipRepository();
 
+    private ProjectRepository projects = new ProjectRepository();
+
+    private TaskRepository tasks = new TaskRepository();
+
     @Override
     public String getModuleName() {
         return "test";
@@ -39,8 +43,8 @@ public class TestModule implements Module {
 
     @Override
     public void setupModule(ModuleContext context) {
-        context.addRepository(new TaskRepository());
-        context.addRepository(new ProjectRepository());
+        context.addRepository(tasks);
+        context.addRepository(projects);
         context.addRepository(new ScheduleRepositoryImpl());
         context.addRepository(new TaskSubtypeRepository());
         context.addRepository(new ProjectToTaskRepository());
@@ -58,6 +62,14 @@ public class TestModule implements Module {
         context.addRepository(nestedOneRelationshipRepository);
 
         context.addExceptionMapper(new TestExceptionMapper());
+    }
+
+    public ProjectRepository getProjects() {
+        return projects;
+    }
+
+    public TaskRepository getTasks() {
+        return tasks;
     }
 
     public static void clear() {

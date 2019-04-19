@@ -9,78 +9,118 @@ import java.util.List;
  */
 public class SecurityConfig {
 
-	private List<SecurityRule> rules;
+    private List<SecurityRule> rules;
 
-	private SecurityConfig(List<SecurityRule> rules) {
-		this.rules = Collections.unmodifiableList(rules);
-	}
+    private DataRoomFilter dataRoomFilter;
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    private boolean performDataRoomChecks = true;
 
-	public List<SecurityRule> getRules() {
-		return rules;
-	}
+    private SecurityConfig(List<SecurityRule> rules, DataRoomFilter dataRoomFilter) {
+        this.rules = Collections.unmodifiableList(rules);
+        this.dataRoomFilter = dataRoomFilter;
+    }
 
-	public static class Builder {
+    /**
+     * @return see {@link #setPerformDataRoomChecks(boolean)}
+     */
+    public boolean getPerformDataRoomChecks() {
+        return performDataRoomChecks;
+    }
 
-		private List<SecurityRule> rules = new ArrayList<>();
+    /**
+     * @param performDataRoomChecks to add an interceptor to check all incoming requests.
+     *                              application may disable this and perform security checks
+     *                              manually by using {@link SecurityModule#getDataRoomMatcher()}.
+     *                              Enabled by default.
+     */
+    public void setPerformDataRoomChecks(boolean performDataRoomChecks) {
+        this.performDataRoomChecks = performDataRoomChecks;
+    }
 
-		private Builder() {
-		}
+    public void setRules(List<SecurityRule> rules) {
+        this.rules = rules;
+    }
 
-		public Builder permitAll(ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
-			}
+    public DataRoomFilter getDataRoomFilter() {
+        return dataRoomFilter;
+    }
 
-			return this;
-		}
+    public void setDataRoomFilter(DataRoomFilter filter) {
+        this.dataRoomFilter = filter;
+    }
 
-		public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
-			}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-			return this;
-		}
+    public List<SecurityRule> getRules() {
+        return rules;
+    }
 
-		public Builder permitAll(String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
-			}
+    public static class Builder {
 
-			return this;
-		}
+        private List<SecurityRule> rules = new ArrayList<>();
 
-		public Builder permitRole(String role, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(role, permission));
-			}
+        private DataRoomFilter dataRoomFilter;
 
-			return this;
-		}
+        private Builder() {
+        }
 
-		public <T> Builder permitRole(String role, Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceClass, role, permission));
-			}
+        public Builder permitAll(ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		public Builder permitRole(String role, String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceType, role, permission));
-			}
+        public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		public SecurityConfig build() {
-			return new SecurityConfig(rules);
-		}
-	}
+        public Builder permitAll(String resourceType, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
+            }
+
+            return this;
+        }
+
+        public Builder permitRole(String role, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(role, permission));
+            }
+
+            return this;
+        }
+
+        public <T> Builder permitRole(String role, Class<T> resourceClass, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceClass, role, permission));
+            }
+
+            return this;
+        }
+
+        public Builder permitRole(String role, String resourceType, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceType, role, permission));
+            }
+
+            return this;
+        }
+
+        public SecurityConfig build() {
+            return new SecurityConfig(rules, dataRoomFilter);
+        }
+
+        public void setDataRoomFilter(DataRoomFilter dataRoomFilter) {
+            this.dataRoomFilter = dataRoomFilter;
+        }
+    }
 
 }

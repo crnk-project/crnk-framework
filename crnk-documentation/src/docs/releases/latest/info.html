@@ -12,7 +12,6 @@ While being a major release, changes required should be minimal (see below).
 </p>
 
 
-
 <h4>Cleanup &amp; Migration</h4>
 
 <ul>
@@ -293,6 +292,40 @@ and faster setup:
     CrnkClient client = new CnrkClient(url).
     client.setHttpAdapter(new InMemoryHttpAdapter(crnkBoot, url));
 </pre>
+
+
+<h4>DataRoom Filtering</h4>
+
+<p>
+    Available with Beta 2.
+</p>
+
+The SecurityModule of crnk-security has been enhanced to allow dataroom
+access control. A DataRoomFilter can specify what a caller is allowed to
+see in the form of a QuerySpec. This QuerySpec is added to any repository
+call complementing the parameters provided by the caller. In the
+example here all callers are just allowed to see tasks with name
+&quot;foo&quot;:
+
+<pre class="prettyprint">
+Builder builder = SecurityConfig.builder();
+builder.permitAll(ResourcePermission.ALL);
+builder.setDataRoomFilter((querySpec, method) -> {
+    if (querySpec.getResourceClass() == Task.class) {
+        QuerySpec clone = querySpec.clone();
+        clone.addFilter(PathSpec.of("name").filter(FilterOperator.EQ, "foo"));
+        return clone;
+    }
+    return querySpec;
+});
+SecurityConfig config = builder.build();
+securityModule = SecurityModule.newServerModule(config);
+</pre>
+
+Real-world example would here access the user principal/roles to make up a decision.
+The provided QuerySpec not checks access for GET, but also PATCH, POST and DELETE
+by fetching the existing entry and verify access. More information is available
+in the documentation.
 
 
 <h4>HttpAdapterListener for a vendor-neutral HTTP request/response interception</h4>
