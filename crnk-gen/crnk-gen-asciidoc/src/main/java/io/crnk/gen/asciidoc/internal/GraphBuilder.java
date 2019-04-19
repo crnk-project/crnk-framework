@@ -57,11 +57,10 @@ public class GraphBuilder {
     }
 
     private String getKey(MetaAttribute attribute) {
-        // TODO move to ownership
         MetaType oppositeType = attribute.getType().getElementType();
         String id = attribute.getParent().getId();
         String oppositeId = oppositeType.getId();
-        return id.compareTo(oppositeId) < 0 ? id + "->" + oppositeId : oppositeId + "->" + id;
+        return attribute.isOwner() ? id + "->" + oppositeId : oppositeId + "->" + id;
     }
 
 }

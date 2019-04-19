@@ -76,7 +76,6 @@ public class DataroomFilterTest {
         });
         SecurityConfig config = builder.build();
         securityModule = SecurityModule.newServerModule(config);
-
         // end::docs[]
         Assert.assertSame(config, securityModule.getConfig());
 

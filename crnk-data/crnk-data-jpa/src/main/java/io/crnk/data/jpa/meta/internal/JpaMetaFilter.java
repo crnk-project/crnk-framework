@@ -19,70 +19,73 @@ import java.util.Optional;
 
 public class JpaMetaFilter extends MetaFilterBase {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JpaMetaFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaMetaFilter.class);
 
-	private final MetaProviderContext context;
-	private final JpaMetaPartition partition;
-
-
-	public JpaMetaFilter(JpaMetaPartition partition, MetaProviderContext context) {
-		this.context = context;
-		this.partition = partition;
-	}
-
-	@Override
-	public void onInitialized(MetaElement element) {
-		if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute) {
-			MetaAttribute attr = (MetaAttribute) element;
-			MetaDataObject parent = attr.getParent();
-			BeanInformation beanInformation = BeanInformation.get(parent.getImplementationClass());
-			Type implementationType = beanInformation.getAttribute(attr.getName()).getType();
-			Optional<MetaElement> optMetaType = partition.allocateMetaElement(implementationType);
-			if (!optMetaType.isPresent()) {
-				LOGGER.warn("unknown type {} for {}, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or @Embeddable",
-						implementationType, attr.getId());
-				optMetaType = partition.allocateMetaElement(Object.class);
-			}
-			MetaType metaType = (MetaType) optMetaType.get();
-			attr.setType(metaType);
-		}
-
-		if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute
-				&& ((MetaAttribute) element).getOppositeAttribute() == null) {
-			MetaAttribute attr = (MetaAttribute) element;
-			String mappedBy = getMappedBy(attr);
-			if (mappedBy != null) {
-				MetaType attrType = attr.getType();
-				MetaDataObject oppositeType = attrType.getElementType().asDataObject();
-				if (!mappedBy.contains(".")) {
-					MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
-					attr.setOppositeAttribute(oppositeAttr);
-				} else {
-					// references within embeddables not yet supported
-				}
-			}
-		}
-	}
+    private final MetaProviderContext context;
+    private final JpaMetaPartition partition;
 
 
-	private String getMappedBy(MetaAttribute attr) {
-		ManyToMany manyManyAnnotation = attr.getAnnotation(ManyToMany.class);
-		OneToMany oneManyAnnotation = attr.getAnnotation(OneToMany.class);
-		OneToOne oneOneAnnotation = attr.getAnnotation(OneToOne.class);
-		String mappedBy = null;
-		if (manyManyAnnotation != null) {
-			mappedBy = manyManyAnnotation.mappedBy();
-		}
-		if (oneManyAnnotation != null) {
-			mappedBy = oneManyAnnotation.mappedBy();
-		}
-		if (oneOneAnnotation != null) {
-			mappedBy = oneOneAnnotation.mappedBy();
-		}
+    public JpaMetaFilter(JpaMetaPartition partition, MetaProviderContext context) {
+        this.context = context;
+        this.partition = partition;
+    }
 
-		if (mappedBy != null && mappedBy.length() == 0) {
-			mappedBy = null;
-		}
-		return mappedBy;
-	}
+    @Override
+    public void onInitialized(MetaElement element) {
+        if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute) {
+            MetaAttribute attr = (MetaAttribute) element;
+            MetaDataObject parent = attr.getParent();
+            BeanInformation beanInformation = BeanInformation.get(parent.getImplementationClass());
+            Type implementationType = beanInformation.getAttribute(attr.getName()).getType();
+            Optional<MetaElement> optMetaType = partition.allocateMetaElement(implementationType);
+            if (!optMetaType.isPresent()) {
+                LOGGER.warn("unknown type {} for {}, make sure it is a properly annotated with JPA annotations like @Entity, @MappedSuperclass or @Embeddable",
+                        implementationType, attr.getId());
+                optMetaType = partition.allocateMetaElement(Object.class);
+            }
+            MetaType metaType = (MetaType) optMetaType.get();
+            attr.setType(metaType);
+        }
+
+        if (element.getParent() instanceof MetaJpaDataObject && element instanceof MetaAttribute
+                && ((MetaAttribute) element).getOppositeAttribute() == null) {
+            MetaAttribute attr = (MetaAttribute) element;
+            String mappedBy = getMappedBy(attr);
+            if (mappedBy != null) {
+                MetaType attrType = attr.getType();
+                MetaDataObject oppositeType = attrType.getElementType().asDataObject();
+                if (!mappedBy.contains(".")) {
+                    MetaAttribute oppositeAttr = oppositeType.getAttribute(mappedBy);
+                    attr.setOppositeAttribute(oppositeAttr);
+                    oppositeAttr.setOwner(true);
+                } else {
+                    // references within embeddables not yet supported
+                }
+            } else {
+                attr.setOwner(true);
+            }
+        }
+    }
+
+
+    private String getMappedBy(MetaAttribute attr) {
+        ManyToMany manyManyAnnotation = attr.getAnnotation(ManyToMany.class);
+        OneToMany oneManyAnnotation = attr.getAnnotation(OneToMany.class);
+        OneToOne oneOneAnnotation = attr.getAnnotation(OneToOne.class);
+        String mappedBy = null;
+        if (manyManyAnnotation != null) {
+            mappedBy = manyManyAnnotation.mappedBy();
+        }
+        if (oneManyAnnotation != null) {
+            mappedBy = oneManyAnnotation.mappedBy();
+        }
+        if (oneOneAnnotation != null) {
+            mappedBy = oneOneAnnotation.mappedBy();
+        }
+
+        if (mappedBy != null && mappedBy.length() == 0) {
+            mappedBy = null;
+        }
+        return mappedBy;
+    }
 }

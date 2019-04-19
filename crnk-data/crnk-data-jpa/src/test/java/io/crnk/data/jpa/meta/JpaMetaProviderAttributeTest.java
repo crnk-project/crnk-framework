@@ -117,6 +117,8 @@ public class JpaMetaProviderAttributeTest {
 		Assert.assertFalse(attr.isVersion());
 		Assert.assertTrue(attr.isLazy());
 		Assert.assertNotNull(attr.getOppositeAttribute());
+		Assert.assertFalse(attr.isOwner());
+		Assert.assertTrue(attr.getOppositeAttribute().isOwner());
 
 		MetaCollectionType colType = attr.getType().asCollection();
 		Assert.assertTrue(colType.isCollection());
