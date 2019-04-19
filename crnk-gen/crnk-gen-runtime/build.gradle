@@ -6,7 +6,6 @@ dependencies {
     compile 'org.reflections:reflections'
     compile project(':crnk-gen:crnk-gen-base')
     compile project(':crnk-meta')
-    compile project(':crnk-data:crnk-data-jpa')
     compile 'com.fasterxml.jackson.core:jackson-databind'
 
     compileOnly 'junit:junit:4.12'

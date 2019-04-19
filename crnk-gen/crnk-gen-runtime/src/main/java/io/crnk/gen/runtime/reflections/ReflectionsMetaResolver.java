@@ -1,8 +1,8 @@
 package io.crnk.gen.runtime.reflections;
 
 import io.crnk.core.boot.CrnkBoot;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
-import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.EmptyServiceDiscovery;
 import io.crnk.core.repository.InMemoryResourceRepository;
@@ -10,7 +10,6 @@ import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.gen.runtime.RuntimeContext;
 import io.crnk.gen.runtime.RuntimeMetaResolver;
-import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
@@ -28,6 +27,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,12 +110,13 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
             metaConfig.addMetaProvider(new ResourceMetaProvider());
             MetaModule metaModule = MetaModule.createServerModule(metaConfig);
 
-            SimpleModule jpaInfoModule = new SimpleModule("jpa.info");
-            jpaInfoModule.addResourceInformationProvider(new JpaResourceInformationProvider(new NullPropertiesProvider()));
+            SimpleModule informationModule = new SimpleModule("informationProviders");
+            ServiceLoader<ResourceInformationProvider> informationProviders = ServiceLoader.load(ResourceInformationProvider.class);
+            informationProviders.forEach(it -> informationModule.addResourceInformationProvider(it));
 
             CrnkBoot boot = new CrnkBoot();
             boot.setDefaultPageLimit(10L);
-            boot.addModule(jpaInfoModule);
+            boot.addModule(informationModule);
             boot.addModule(reflectionsModule);
             boot.addModule(metaModule);
             boot.setServiceDiscovery(new EmptyServiceDiscovery());

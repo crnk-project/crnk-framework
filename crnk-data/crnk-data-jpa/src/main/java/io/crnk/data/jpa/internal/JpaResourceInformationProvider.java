@@ -19,6 +19,7 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingSpec;
 import io.crnk.core.resource.annotations.JsonApiId;
@@ -60,6 +61,9 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
     private final JpaMetaProvider metaProvider;
 
+    public JpaResourceInformationProvider() {
+        this(new NullPropertiesProvider());
+    }
 
     public JpaResourceInformationProvider(PropertiesProvider propertiesProvider) {
         super(
