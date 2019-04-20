@@ -399,6 +399,28 @@ public class PostHeader {
 
 More information can be found <a href="documentation/#_nested_resources">here</a>.
 
+<h4>Specify access mode with @JsonApiResource</h4>
+
+<p>Available in Beta 2</p>
+
+@JsonApiResource has new properties to configure the allowed access modes to a resource:
+sortable, filterable, postable, readable, patchable and deletable. An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(
+    type = "tasks", sortable = false, filterable = true,
+    postable = false, readable = false, patchable = false, deletable = false
+)
+public class AccessDeniedTestResource {
+
+    ...
+
+}
+</pre>
+
+The new properties match the ones from @JsonApiField and provide the base line for it.
+For example, if a resource does not allow filtering, none of its fields will.
+
 
 <h4>Enum support for Activiti</h4>
 

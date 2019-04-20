@@ -46,7 +46,7 @@ public class ResourceFieldImpl implements ResourceField {
 
     private ResourceFieldAccessor accessor;
 
-    private final ResourceFieldAccess access;
+    private ResourceFieldAccess access;
 
     private String idName;
 
@@ -280,6 +280,10 @@ public class ResourceFieldImpl implements ResourceField {
 
     public void setOppositeName(String oppositeName) {
         this.oppositeName = oppositeName;
+    }
+
+    public void setAccess(ResourceFieldAccess access) {
+        this.access = access;
     }
 
     static class ResourceFieldAccessorWrapper implements ResourceFieldAccessor {

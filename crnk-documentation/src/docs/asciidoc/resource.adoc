@@ -8,6 +8,7 @@ actually implemented (see the <<architecture>> and <<modules>> chapters). This c
 way Java Beans and annotations. See <<runtimerepository,here>> for more information how setup resources and repositories
 programmatically at runtime.
 
+anchor:jsonApiResource[]
 
 ## JsonApiResource
 
@@ -46,7 +47,7 @@ By default the type of a resource in a JSON:API document and its name within URL
 The optional `resourcePath` allows to define separate values, typically with `resourcePath` being plural and
 `type` being singular:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "task", resourcePath = "tasks")
   public class Task {
@@ -76,7 +77,7 @@ anchor:jsonApiResourcePagingBehavior[]
 
 The optional `pagingSpec` parameter allows to set the desired paging specification:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
   public class Task {
@@ -90,7 +91,7 @@ found at <<pagination,Pagination>> section.
 
 The optional `subTypes` parameter allows to specify an inheritance relationship to other resources:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "task", subTypes = SpecialTask.class)
   public class Task {
@@ -107,6 +108,17 @@ In this case the `SpecialTask` extends `Task` but shares the same `resourcePath`
 a repository implementation (see next chapter), but is served by the task repository. For a more information have a look at the
 <<inheritance>> section.
 
+@JsonApiResource has properties to configure the allowed access modes to a resource:
+sortable, filterable, postable, readable, patchable and deletable. An example looks like:
+
+[source,java]
+----
+include::../../../../crnk-core/src/test/java/io/crnk/core/resource/DefaultResourceInformationProviderTest.java[tags=access]
+----
+
+The properties match the ones from @JsonApiField and provide the base line for it.
+For example, if a resource does not allow filtering, none of its fields will either.
+If one of those properties is attempted to be violated, an error is thrown.
 
 
 ## JsonApiId
@@ -116,7 +128,7 @@ Each resource requires this annotation to be present on a field which type imple
 
 The example below shows a sample class which contains a definition of a field which contains an identifier.
 
-[source]
+[source,java]
 ----
 @JsonApiResource(type = "tasks")
 public class Task {
@@ -134,7 +146,7 @@ anchor:jsonApiRelation[]
 Indicates a relationship to either a single value or collection of resources. The type of such fields
 must be a valid resource. The next example showcases a bi-directional relationship between `Task` and `Project`:
 
-[source]
+[source,java]
 ----
 @JsonApiResource(type = "tasks")
 public class Task {
@@ -165,7 +177,7 @@ multi-valued fields like `tasks` can only be obtained by issuing a query against
 @JsonApiRelation comes with a number of attributes to customize its behavior.
 <<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
 
-[source]
+[source,java]
 ----
 @JsonApiRelation(serialize = SerializeType.ONLY_ID)
 private Project project;
@@ -180,7 +192,7 @@ in the corresponding `relationships.[name].data` section. Either `LAZY`, `ONLY_I
 - `ONLY_ID` always serializes the ID, but does only to an inclusion  if explicitly requested by the `include` URL parameter.
 - `EAGER` always both serializes the ID and does an inclusion. Be aware of performance implication when enabling this.
 
-[source]
+[source,java]
 ----
 @JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 private Project project;
@@ -227,7 +239,7 @@ The forwarding behaviors are implemented by `ForwardingRelationshipRepository`.
 
 The subsequent two resources show case a number of scenarios:
 
-[source]
+[source,java]
 ----
 @JsonApiResource(type = "task")
 public class Task {
@@ -312,7 +324,7 @@ fetching the entire related resource. In this case resources can make use of fie
 `@JsonApiRelationId`. The complement `@JsonApiRelation` fields by holding there ID only.
 An example looks like:
 
-[source]
+[source,java]
 ----
 @JsonApiResource(type = "schedules")
 public class Schedule {
@@ -354,7 +366,7 @@ By default, the naming convention for `@JsonApiRelationId` field is to end with 
 the pair those two objects automatically. Trailing `s` are ignored for multi-valued fields, meaning that `projectIds` matches with
  `projects`. But it is also possible to specify a custom name, for example:
 
-[source]
+[source,java]
 ----
 @JsonApiRelationId
 private Long projectFk;
@@ -382,7 +394,7 @@ See <<relationshipRepository,RelationshipRepository>> for more information.
 Field or getter annotated with `JsonApiMetaInformation` are marked to carry a `MetaInformation` implementation.
 See http://jsonapi.org/format/#document-meta for more information about meta data. Example:
 
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -415,7 +427,7 @@ Field or getter annotated with `JsonApiLinksInformation` are marked to carry a `
 See http://jsonapi.org/format/#document-links for more information about linking. Example:
 
 
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -464,10 +476,9 @@ anchor:jsonApiField[]
 
 ## JsonApiField
 
-Field or getter annotated with `JsonApiField` allows to define  the behavior of an individual attribute. Example:
+Field or getter annotated with `@JsonApiField` allows to define  the behavior of an individual attribute. Example:
 
-
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -491,6 +502,8 @@ Following options are supported:
 - `readable` defines whether a field can be read with a GET request.
 - `patchStrategy` defines the behavior of value with PATCH request. It can be either `MERGE` if you want the value be merged with an original one or `SET` if you want the value be totaly replaced with a new one.
 
+The same fields are available from <<jsonApiResource,@JsonApiResource>> to configure a default for all fields of that
+resource.
 
 anchor:jackson_annotations[]
 

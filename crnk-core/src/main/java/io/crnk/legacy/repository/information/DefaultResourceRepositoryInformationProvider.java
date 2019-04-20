@@ -63,7 +63,6 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 				getAccess(repository), exposed);
 	}
 
-	// FIXME
 	protected RepositoryMethodAccess getAccess(Object repository) {
 		return new RepositoryMethodAccess(true, true, true, true);
 	}

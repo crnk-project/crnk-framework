@@ -49,6 +49,8 @@ public interface InformationBuilder {
 
         void from(ResourceInformation information);
 
+        void setAccess(ResourceFieldAccess access);
+
         FieldInformationBuilder addField();
 
         FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);

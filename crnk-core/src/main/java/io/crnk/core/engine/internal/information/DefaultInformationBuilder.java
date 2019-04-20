@@ -151,6 +151,8 @@ public class DefaultInformationBuilder implements InformationBuilder {
 
         private Class<? extends PagingSpec> pagingSpecType;
 
+        private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true, true);
+
         @Override
         public void from(ResourceInformation information) {
             implementationType = information.getImplementationType();
@@ -159,12 +161,18 @@ public class DefaultInformationBuilder implements InformationBuilder {
             superResourceType = information.getSuperResourceType();
             idStringMapper = information.getIdStringMapper();
             validator = information.getValidator();
+            access = information.getAccess();
             for (ResourceField fromField : information.getFields()) {
                 DefaultField field = new DefaultField();
                 field.from(fromField);
                 fields.add(field);
             }
             pagingSpecType = information.getPagingSpecType();
+        }
+
+        @Override
+        public void setAccess(ResourceFieldAccess access) {
+            this.access = access;
         }
 
         @Override
@@ -237,6 +245,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
             ResourceInformation information =
                     new ResourceInformation(typeParser, implementationType, resourceType, resourcePath, superResourceType,
                             fieldImpls, pagingSpecType);
+            information.setAccess(access);
             if (validator != null) {
                 information.setValidator(validator);
             }

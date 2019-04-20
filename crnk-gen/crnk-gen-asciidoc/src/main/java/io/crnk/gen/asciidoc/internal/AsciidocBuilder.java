@@ -240,8 +240,8 @@ public class AsciidocBuilder {
             } else {
                 appendCell("Type");
             }
-            appendCell("POST");
-            appendCell("PATCH");
+            appendCell("Post");
+            appendCell("Patch");
             appendCell("Sort");
             appendCell("Filter");
             for (MetaResourceField attribute : attributes) {

@@ -118,6 +118,8 @@ public class ResourceInformation {
 
     private Class<? extends PagingSpec> pagingSpecType;
 
+    private ResourceFieldAccess access = new ResourceFieldAccess(true, true, true, true, true, true);
+
     private StringMapper idStringMapper = new StringMapper() {
         @Override
         public String toString(Object input) {
@@ -173,6 +175,14 @@ public class ResourceInformation {
         }
 
         initAny();
+    }
+
+    public ResourceFieldAccess getAccess() {
+        return access;
+    }
+
+    public void setAccess(ResourceFieldAccess access) {
+        this.access = access;
     }
 
     private boolean shouldBeNested() {
