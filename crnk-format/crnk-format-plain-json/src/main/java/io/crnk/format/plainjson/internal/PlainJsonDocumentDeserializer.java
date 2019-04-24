@@ -1,5 +1,12 @@
 package io.crnk.format.plainjson.internal;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -15,13 +22,6 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
 import io.crnk.core.utils.Nullable;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Serializes top-level Errors object.
@@ -97,20 +97,23 @@ public class PlainJsonDocumentDeserializer extends JsonDeserializer<PlainJsonDoc
 
     private void deserializeRelationship(String fieldName, JsonNode fieldValue, Resource resource) {
         // simple heuristic to detect relationships, should be good enough
-        boolean isRelationship = fieldValue instanceof ObjectNode && fieldValue.get("data") != null;
+        boolean hasLinks = fieldValue instanceof ObjectNode && fieldValue.get("links") != null;
+        boolean hasData = fieldValue instanceof ObjectNode && fieldValue.get("data") != null;
+        boolean isRelationship = hasLinks || hasData;
         if (isRelationship) {
             Relationship relationship = new Relationship();
             relationship.setMeta((ObjectNode) fieldValue.get("meta"));
             relationship.setLinks((ObjectNode) fieldValue.get("links"));
 
             JsonNode relationshipData = fieldValue.get("data");
+
             if (relationshipData instanceof ArrayNode) {
                 List<ResourceIdentifier> relationIds = new ArrayList<>();
                 for (JsonNode elementNode : relationshipData) {
                     relationIds.add(toResourceIdentifier(elementNode));
                 }
                 relationship.setData(Nullable.of(relationIds));
-            } else {
+            } else if(relationshipData != null) {
                 relationship.setData(Nullable.of(toResourceIdentifier(relationshipData)));
             }
             resource.getRelationships().put(fieldName, relationship);
