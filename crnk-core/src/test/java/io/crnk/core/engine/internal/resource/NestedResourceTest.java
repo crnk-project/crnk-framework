@@ -50,6 +50,8 @@ public class NestedResourceTest extends ControllerTestBase {
 
 	private OneNestedRepository oneNestedRepository = new OneNestedRepository();
 
+	private OneGrandchildRepository oneGrandchildRepository = new OneGrandchildRepository();
+
 	private RelatedRepository relatedRepository = new RelatedRepository();
 
 	private RelationshipRepository relationshipRepository = new RelationshipRepository();
@@ -78,6 +80,7 @@ public class NestedResourceTest extends ControllerTestBase {
 		module.addRepository(relationshipRepository);
 		module.addRepository(oneNestedRepository);
 		module.addRepository(manyNestedRepository);
+		module.addRepository(oneGrandchildRepository);
 		boot.addModule(module);
 	}
 
@@ -284,6 +287,86 @@ public class NestedResourceTest extends ControllerTestBase {
 	}
 
 	@Test
+	public void checkOneGrandchildCrudWithController() {
+		// CREATE nested child resource
+		Relationship relationship = new Relationship();
+		relationship.setData(Nullable.of(new ResourceIdentifier("related0", "related")));
+		Resource child = new Resource();
+		child.setType("oneNested");
+		child.setId("b");
+		child.getRelationships().put("related", relationship);
+		Document document = new Document();
+		document.setData(Nullable.of(child));
+		JsonPath childPath = pathBuilder.build("test/b/oneNested");
+
+		QuerySpecAdapter queryAdapter = container.toQueryAdapter(new QuerySpec(ManyNestedResource.class));
+		Controller postController = boot.getControllerRegistry().getController(childPath, HttpMethod.POST.toString());
+		Response response = postController.handleAsync(childPath, queryAdapter, document).get();
+		Assert.assertEquals(HttpStatus.CREATED_201, response.getHttpStatus().intValue());
+
+		Resource createdChild = response.getDocument().getSingleData().get();
+		Assert.assertEquals("http://127.0.0.1/test/b/oneNested", createdChild.getLinks().get("self").asText());
+
+		// CREATE nested grandchild resource under child
+		Resource grandchild = new Resource();
+		grandchild.setType("oneGrandchild");
+		grandchild.setId("b");
+		document.setData(Nullable.of(grandchild));
+		response = postController.handleAsync(pathBuilder.build("test/b/oneNested/oneGrandchild"),
+								   queryAdapter, document).get();
+		Resource createdGrandchild = response.getDocument().getSingleData().get();
+		Assert.assertEquals("http://127.0.0.1/test/b/oneNested/oneGrandchild", createdGrandchild.getLinks().get("self").asText());
+
+
+		// PATCH resource
+		document.setData(Nullable.of(createdGrandchild));
+		JsonPath path = pathBuilder.build("test/b/oneNested/oneGrandchild");
+		Assert.assertNotNull(path);
+		createdGrandchild.setAttribute("value", toJson("valueB"));
+		Controller patchController = boot.getControllerRegistry().getController(path, HttpMethod.PATCH.toString());
+		response = patchController.handleAsync(path, queryAdapter, document).get();
+		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
+
+		// GET resource
+		createdGrandchild.setAttribute("value", toJson("valueB"));
+		Controller getController = boot.getControllerRegistry().getController(path, HttpMethod.GET.toString());
+		response = getController.handleAsync(path, queryAdapter, null).get();
+		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
+		Resource getResource = response.getDocument().getSingleData().get();
+		Assert.assertEquals("http://127.0.0.1/test/b/oneNested/oneGrandchild", getResource.getLinks().get("self").asText());
+
+		// GET with inclusion with id
+		QuerySpec includedQuerySpec = new QuerySpec(ManyNestedResource.class);
+		includedQuerySpec.includeRelation(Arrays.asList("parent"));
+		QuerySpecAdapter includedQueryAdapter = container.toQueryAdapter(includedQuerySpec);
+		response = getController.handleAsync(path, includedQueryAdapter, null).get();
+		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
+		getResource = response.getDocument().getSingleData().get();
+		Assert.assertEquals("http://127.0.0.1/test/b/oneNested/oneGrandchild", getResource.getLinks().get("self").asText());
+		List<Resource> included = response.getDocument().getIncluded();
+		Assert.assertEquals(1, included.size());
+		Resource includedResource = included.get(0);
+		Assert.assertEquals("b", includedResource.getId());
+		Assert.assertEquals("oneNested", includedResource.getType());
+
+		// DELETE resource
+		String id = "b";
+		Assert.assertNotNull(oneGrandchildRepository.findOne(id, new QuerySpec(ManyNestedResource.class)));
+		createdGrandchild.setAttribute("value", toJson("valueB"));
+		Controller deleteController = boot.getControllerRegistry().getController(path, HttpMethod.DELETE.toString());
+		response = deleteController.handleAsync(path, queryAdapter, null).get();
+		Assert.assertEquals(HttpStatus.NO_CONTENT_204, response.getHttpStatus().intValue());
+		try {
+			oneGrandchildRepository.findOne(id, new QuerySpec(ManyNestedResource.class));
+			Assert.fail("resource found when should be deleted.");
+		}
+		catch (ResourceNotFoundException e) {
+			// ok
+		}
+
+	}
+
+	@Test
 	public void checkManyCrudWithController() {
 		// CREATE resource
 		Relationship relationship = new Relationship();
@@ -467,6 +550,10 @@ public class NestedResourceTest extends ControllerTestBase {
 			this.parent = parent;
 		}
 
+		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL, opposite = "parent",
+				repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OPPOSITE)
+		private OneGrandchildResource oneGrandchild;
+
 		public String getValue() {
 			return value;
 		}
@@ -489,6 +576,53 @@ public class NestedResourceTest extends ControllerTestBase {
 
 		public void setRelated(RelatedResource related) {
 			this.related = related;
+		}
+
+		public OneGrandchildResource getOneGrandchild() {
+			return oneGrandchild;
+		}
+
+		public void setOneGrandchild(OneGrandchildResource oneGrandchild) {
+			this.oneGrandchild = oneGrandchild;
+		}
+
+	}
+
+	@JsonApiResource(type = "oneGrandchild", nested = true)
+	public static class OneGrandchildResource {
+
+		@JsonApiId
+		@JsonApiRelationId
+		private String parentId;
+
+		private String value;
+
+		@JsonApiRelation(opposite = "oneGrandchild", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+				repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER, idField = "parentId")
+		private OneNestedResource parent;
+
+		public OneNestedResource getParent() {
+			return parent;
+		}
+
+		public void setParent(OneNestedResource parent) {
+			this.parent = parent;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+		public String getParentId() {
+			return parentId;
+		}
+
+		public void setParentId(String parentId) {
+			this.parentId = parentId;
 		}
 	}
 
@@ -589,6 +723,12 @@ public class NestedResourceTest extends ControllerTestBase {
 		}
 	}
 
+	public static class OneGrandchildRepository extends InMemoryResourceRepository<OneGrandchildResource, String> {
+
+		protected OneGrandchildRepository() {
+			super(OneGrandchildResource.class);
+		}
+	}
 
 	public static class RelatedRepository extends InMemoryResourceRepository<RelatedResource, String> {
 
