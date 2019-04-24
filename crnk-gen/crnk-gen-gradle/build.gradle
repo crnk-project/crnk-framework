@@ -8,6 +8,10 @@ gradlePlugin {
             id = "crnk-gen"
             implementationClass = "io.crnk.gen.gradle.GeneratorPlugin"
         }
+		'crnk-xml-doclet' {
+			id = "crnk-xml-doclet"
+			implementationClass = "io.crnk.gen.gradle.DocletPlugin"
+		}
     }
 }
 

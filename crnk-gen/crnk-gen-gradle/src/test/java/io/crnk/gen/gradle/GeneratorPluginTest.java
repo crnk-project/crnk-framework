@@ -1,5 +1,9 @@
 package io.crnk.gen.gradle;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+
 import io.crnk.gen.gradle.task.InMemoryGeneratorTask;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
@@ -9,10 +13,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 public class GeneratorPluginTest {
 
@@ -26,6 +26,8 @@ public class GeneratorPluginTest {
 
     @Before
     public void setup() throws IOException {
+    	GeneratorPlugin.APPLY_DOCLET_BY_DEFAULT = false;
+
         testProjectDir.newFolder("src", "main", "java");
 
         File outputDir = testProjectDir.getRoot();
