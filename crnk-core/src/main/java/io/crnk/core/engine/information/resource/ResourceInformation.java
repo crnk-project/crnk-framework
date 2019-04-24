@@ -1,5 +1,18 @@
 package io.crnk.core.engine.information.resource;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.crnk.core.engine.document.Document;
@@ -24,19 +37,6 @@ import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Holds information about the type of the resource.
@@ -308,7 +308,7 @@ public class ResourceInformation {
         }
         if (isNested()) {
             PreconditionUtil.verify(parentField.getOppositeName() != null,
-                    "relationship between parent pointing to a nested resoruce must specify @JsonApiRelation.mappedBy or @JsonApiRelation.opposite, not "
+                    "relationship between parent pointing to a nested resource must specify @JsonApiRelation.mappedBy or @JsonApiRelation.opposite, not "
                             + "found for '%s' of %s",
                     parentField.getUnderlyingName(), implementationClass);
         }
