@@ -162,7 +162,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
 
 			if(resourceInformation.isSingularNesting()){
-				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(id);
+				String parentUrl = getResourceUrl(queryContext, parentInformation, id);
 				return parentUrl + "/" + childrenField.getJsonName();
 			}else{
 				Object parentId = resourceInformation.getParentIdAccessor().getValue(id);
