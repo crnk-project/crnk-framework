@@ -4,13 +4,13 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -93,7 +93,7 @@ public abstract class ResourceRepositoryBase<T, I > implements ResourceRepositor
 	 */
 	@Override
 	public <S extends T> S save(S resource) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public abstract class ResourceRepositoryBase<T, I > implements ResourceRepositor
 	 */
 	@Override
 	public void delete(I id) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override
