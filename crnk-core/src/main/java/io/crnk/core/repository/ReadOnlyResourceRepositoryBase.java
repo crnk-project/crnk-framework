@@ -1,6 +1,6 @@
 package io.crnk.core.repository;
 
-import java.io.Serializable;
+import io.crnk.core.exception.MethodNotAllowedException;
 
 public abstract class ReadOnlyResourceRepositoryBase<T, I > extends ResourceRepositoryBase<T, I> {
 
@@ -10,16 +10,16 @@ public abstract class ReadOnlyResourceRepositoryBase<T, I > extends ResourceRepo
 
 	@Override
 	public final <S extends T> S save(S resource) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override
 	public final <S extends T> S create(S resource) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override
 	public final void delete(I id) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 }

@@ -1,5 +1,6 @@
 package io.crnk.core.repository;
 
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
@@ -25,31 +26,31 @@ public abstract class ReadOnlyRelationshipRepositoryBase<S, I, T, J>
 
     @Override
     public T findOneTarget(I sourceId, String fieldName, QuerySpec querySpec) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 
     @Override
     public ResourceList<T> findManyTargets(I sourceId, String fieldName, QuerySpec querySpec) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 
     @Override
     public void setRelation(S source, J targetId, String fieldName) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 
     @Override
     public void setRelations(S source, Collection<J> targetIds, String fieldName) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 
     @Override
     public void addRelations(S source, Collection<J> targetIds, String fieldName) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 
     @Override
     public void removeRelations(S source, Collection<J> targetIds, String fieldName) {
-        throw new UnsupportedOperationException();
+        throw new MethodNotAllowedException("method not allowed");
     }
 }
