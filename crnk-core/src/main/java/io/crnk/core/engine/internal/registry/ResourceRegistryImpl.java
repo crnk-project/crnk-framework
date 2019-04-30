@@ -169,7 +169,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 				Object nestedId = resourceInformation.getChildIdAccessor().getValue(id);
 				PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
 				PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
-				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
+				String parentUrl = getResourceUrl(queryContext, parentInformation, parentId);
 
 				TypeParser typeParser = moduleRegistry.getTypeParser();
 				return parentUrl + "/" + childrenField.getJsonName() + "/" + typeParser.toString(nestedId);
