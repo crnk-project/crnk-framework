@@ -20,6 +20,8 @@ public class AsciidocGeneratorConfig extends GeneratorModuleConfigBase {
 
 	private Set<File> docletPaths = new HashSet<>();
 
+	private boolean graphEnabled = true;
+
 	/**
 	 * @return base depth of sections, e.g. baseDepth=0 will lead to new chapters with "# title", whereas baseDepth=2 will lead to "### title"
 	 */
@@ -31,6 +33,13 @@ public class AsciidocGeneratorConfig extends GeneratorModuleConfigBase {
 		this.baseDepth = baseDepth;
 	}
 
+	public boolean isGraphEnabled() {
+		return graphEnabled;
+	}
+
+	public void setGraphEnabled(boolean graphEnabled) {
+		this.graphEnabled = graphEnabled;
+	}
 
 	/**
 	 * @return location where the generated sources are placed.

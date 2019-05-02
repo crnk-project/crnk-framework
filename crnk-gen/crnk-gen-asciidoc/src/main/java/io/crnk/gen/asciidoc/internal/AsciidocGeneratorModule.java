@@ -24,9 +24,13 @@ import io.crnk.meta.model.MetaEnumType;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class AsciidocGeneratorModule implements GeneratorModule {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AsciidocGeneratorModule.class);
 
 	public static final String NAME = "asciidoc";
 
@@ -56,6 +60,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 
 	@Override
 	public void generate(Object meta) throws IOException {
+		LOGGER.debug("performing asciidoc generation");
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> resources = getResources(metaLookup);
 
@@ -65,6 +70,8 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 	}
 
 	private File writeTypes(List<MetaResource> resources) throws IOException {
+		LOGGER.debug("writeTypes");
+
 		Set<MetaType> typeSet = new HashSet<>();
 		for (MetaResource resource : resources) {
 			for (MetaResourceField attribute : resource.getDeclaredAttributes()) {
@@ -74,6 +81,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 				}
 			}
 		}
+		LOGGER.debug("collected {} types", typeSet);
 
 		List<MetaType> types = typeSet.stream().sorted(Comparator.comparing(MetaType::getName)).collect(Collectors.toList());
 		if (types.isEmpty()) {
@@ -136,7 +144,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 
 		indexBuilder.appendLine(":sectnums:");
 		indexBuilder.appendLine(":toc: left");
-		indexBuilder.appendLine(":toclevels: 2");
+		indexBuilder.appendLine(":toclevels: 3");
 		indexBuilder.appendLine("# " + config.getTitle());
 		indexBuilder.appendLine(":leveloffset: 1");
 
@@ -152,49 +160,73 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 	}
 
 	private File writeResources(List<MetaResource> resources) throws IOException {
-		AsciidocBuilder indexBuilder = newBuilder(Collections.emptyList());
-		writeGraph(resources);
+		LOGGER.debug("write resources");
 		writeResourceListing(resources);
 
+		AsciidocBuilder indexBuilder = newBuilder(Collections.emptyList());
 		indexBuilder.startSection("Resources");
-		indexBuilder.writeInclude("graph");
+
+		if(config.isGraphEnabled()) {
+			writeGraph(resources);
+			indexBuilder.writeInclude("graph");
+		}
+
 		indexBuilder.writeInclude("resource_listing");
 
 		for (MetaResource resource : resources) {
-			String resourceType = resource.getResourceType();
-			indexBuilder.writeInclude(resourceType + "/index");
-
-			File outputDir = getOutputDir(resource);
-
-			List<String> resourceAnchor = Arrays.asList("resources", AsciidocUtils.toAnchor(resourceType));
-
-			AsciidocBuilder attrBuilder = newBuilder(resourceAnchor);
-			attrBuilder.appendFields(resource, false);
-			attrBuilder.write(new File(outputDir, ATTRIBUTES_FILE));
-
-			AsciidocBuilder relBuilder = newBuilder(resourceAnchor);
-			relBuilder.appendFields(resource, true);
-			relBuilder.write(new File(outputDir, RELATIONSHIP_FILE));
-
-			AsciidocBuilder descriptionBuilder = newBuilder(resourceAnchor);
-			descriptionBuilder.appendDescription(resource);
-			descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
-
-			List<String> exampleAnchor = new ArrayList<>(resourceAnchor);
-			exampleAnchor.add("examples");
-			AsciidocBuilder exampleBuilder = newBuilder(exampleAnchor);
-			exampleBuilder.appendExamples(outputDir);
-			exampleBuilder.write(new File(outputDir, EXAMPLES_FILE));
-
-			AsciidocBuilder resourceIndexBuilder = newBuilder(Arrays.asList("resources"));
-			resourceIndexBuilder.appendOverview(resource, outputDir);
-			resourceIndexBuilder.write(new File(outputDir, INDEX_FILE));
+			if (resource.getSuperType() == null) {
+				writeResource(indexBuilder, resource, 0);
+			}
 		}
 		indexBuilder.endSection();
 		return write("resources", indexBuilder.toString());
 	}
 
+
+	private void writeResource(AsciidocBuilder indexBuilder, MetaResource resource, int depth) throws IOException {
+		String resourceType = resource.getResourceType();
+		indexBuilder.writeInclude(resourceType + "/index");
+
+		File outputDir = getOutputDir(resource);
+
+		LOGGER.debug("write resource {}", resourceType);
+
+		List<String> resourceAnchor = Arrays.asList("resources", AsciidocUtils.toAnchor(resourceType));
+
+		AsciidocBuilder attrBuilder = newBuilder(resourceAnchor, depth);
+		attrBuilder.appendFields(resource, false);
+		attrBuilder.write(new File(outputDir, ATTRIBUTES_FILE));
+
+		AsciidocBuilder relBuilder = newBuilder(resourceAnchor, depth);
+		relBuilder.appendFields(resource, true);
+		relBuilder.write(new File(outputDir, RELATIONSHIP_FILE));
+
+		AsciidocBuilder descriptionBuilder = newBuilder(resourceAnchor, depth);
+		descriptionBuilder.appendDescription(resource);
+		descriptionBuilder.write(new File(outputDir, DESCRIPTION_FILE));
+
+		List<String> exampleAnchor = new ArrayList<>(resourceAnchor);
+		exampleAnchor.add("examples");
+		AsciidocBuilder exampleBuilder = newBuilder(exampleAnchor);
+		exampleBuilder.appendExamples(outputDir);
+		exampleBuilder.write(new File(outputDir, EXAMPLES_FILE));
+
+		AsciidocBuilder resourceIndexBuilder = newBuilder(Arrays.asList("resources"), depth);
+		resourceIndexBuilder.appendOverview(resource, outputDir);
+		resourceIndexBuilder.write(new File(outputDir, INDEX_FILE));
+
+		// write subtypes as nexted entries
+		List<MetaResource> subTypes = resource.getSubTypes().stream()
+				.filter(it -> it instanceof MetaResource)
+				.map(it -> (MetaResource) it)
+				.sorted(Comparator.comparing(MetaResource::getResourceType)).collect(Collectors.toList());
+		for (MetaResource subType : subTypes) {
+			writeResource(indexBuilder, subType, depth + 1);
+		}
+	}
+
 	private List<MetaResource> getResources(MetaLookup metaLookup) {
+		LOGGER.debug("find resources");
 		return metaLookup.findElements(MetaResource.class).stream()
 				.sorted(Comparator.comparing(MetaResource::getResourceType))
 				.filter(it -> isIncluded(it)).collect(Collectors.toList());
@@ -234,6 +266,7 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 	}
 
 	private void writeGraph(List<MetaResource> resources) throws IOException {
+		LOGGER.debug("write graph");
 		String fileName = "images/graph.svg";
 		File graphFile = new File(config.getGenDir(), fileName);
 		GraphBuilder graphBuilder = new GraphBuilder();
@@ -245,12 +278,17 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 	}
 
 	private AsciidocBuilder newBuilder(List<String> anchors) throws IOException {
-		AsciidocBuilder builder = new AsciidocBuilder(getJavaDoc(), config.getBaseDepth() + anchors.size());
+		return newBuilder(anchors, 0);
+	}
+
+	private AsciidocBuilder newBuilder(List<String> anchors, int depth) throws IOException {
+		AsciidocBuilder builder = new AsciidocBuilder(getJavaDoc(), config.getBaseDepth() + depth + anchors.size());
 		builder.getAnchors().addAll(anchors);
 		return builder;
 	}
 
 	private void writeResourceListing(List<MetaResource> resources) throws IOException {
+		LOGGER.debug("write resource listing");
 		AsciidocBuilder builder = newBuilder(Arrays.asList("resources"));
 		builder.startTable("1,5", "header");
 		builder.appendCell("Resource");
@@ -283,7 +321,9 @@ public class AsciidocGeneratorModule implements GeneratorModule {
 	}
 
 	private boolean isIncluded(MetaResource resource) {
-		return !config.getExcludes().stream().filter(it -> resource.getResourceType().startsWith(it)).findFirst().isPresent();
+		return !config.getExcludes().stream()
+				.filter(it -> resource.getImplementationClass().getName().startsWith(it) || resource.getResourceType().startsWith(it))
+				.findFirst().isPresent();
 	}
 
 	private File write(String fileName, String source) throws IOException {

@@ -1,5 +1,15 @@
 package io.crnk.gen.asciidoc.internal;
 
+import static guru.nidi.graphviz.model.Factory.graph;
+import static guru.nidi.graphviz.model.Factory.node;
+import static guru.nidi.graphviz.model.Factory.to;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import guru.nidi.graphviz.attribute.RankDir;
 import guru.nidi.graphviz.attribute.Records;
 import guru.nidi.graphviz.engine.Format;
@@ -10,16 +20,6 @@ import guru.nidi.graphviz.model.Node;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import static guru.nidi.graphviz.model.Factory.graph;
-import static guru.nidi.graphviz.model.Factory.node;
-import static guru.nidi.graphviz.model.Factory.to;
 
 public class GraphBuilder {
 

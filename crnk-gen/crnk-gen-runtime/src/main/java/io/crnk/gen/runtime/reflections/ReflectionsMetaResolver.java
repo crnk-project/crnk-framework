@@ -31,12 +31,17 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReflectionsMetaResolver implements RuntimeMetaResolver {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReflectionsMetaResolver.class);
 
 	@Override
 	public void run(RuntimeContext context, ClassLoader classLoader) {
 		try {
+			LOGGER.debug("start discovery");
 			DefaultRegistryEntryBuilder.WARN_MISSING_RELATIONSHIP_REPOSITORIES = false;
 
 			List<String> resourcePackages = context.getConfig().getResourcePackages();
@@ -63,6 +68,7 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 			}
 
 			Set<Class<? extends ResourceRepository>> repositoryClasses = reflections.getSubTypesOf(ResourceRepository.class);
+			LOGGER.debug("finished discovery");
 
 			Map<Class, Class> resourceRepositoryMap = new HashMap<>();
 			for (Class repositoryClass : repositoryClasses) {
@@ -125,6 +131,7 @@ public class ReflectionsMetaResolver implements RuntimeMetaResolver {
 			boot.addModule(metaModule);
 			boot.setServiceDiscovery(new EmptyServiceDiscovery());
 			boot.boot();
+			LOGGER.debug("meta model created, triggering generation");
 
 			MetaLookup lookup = metaModule.getLookup();
 			context.generate(lookup);

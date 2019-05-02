@@ -144,7 +144,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 		private void writeUrlFile(File resourceDir, RequestCaptor captor) {
 			HttpAdapterRequest request = captor.getRequest();
 			AsciidocBuilder builder = newBuilder();
-			builder.startSource();
+			builder.startSource("bash");
 			builder.append(request.getHttpMethod().toString());
 			builder.append(" ");
 			builder.append(request.getUrl());
@@ -166,7 +166,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 	private void writeRequestFile(File resourceDir, RequestCaptor captor) {
 		HttpAdapterRequest request = captor.getRequest();
 		AsciidocBuilder builder = new AsciidocBuilder(null, config.getBaseDepth());
-		builder.startSource();
+		builder.startSource("json");
 		builder.append(request.getHttpMethod().toString());
 		builder.append(" ");
 		builder.append(request.getUrl());
@@ -190,7 +190,7 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 	private void writeResponseFile(File resourceDir, RequestCaptor captor) {
 		HttpAdapterResponse response = captor.getResponse();
 		AsciidocBuilder builder = new AsciidocBuilder(null, config.getBaseDepth());
-		builder.startSource();
+		builder.startSource("json");
 
 		builder.append("HTTP/1.1 ");
 		builder.append(Integer.toString(response.code()));
