@@ -36,7 +36,7 @@ if (ext.timestampedVersion) {
     def gitCommitTimestamp = grgit.head().date.format("yyyyMMddHHmmss", TimeZone.getTimeZone('GMT'))
     version = BUILD_VERSION_PREFIX + "." + gitCommitTimestamp + "-BETA"
 } else {
-    version = '0.0.0-SNAPSHOT'
+    version = '10.0.0-SNAPSHOT'
 }
 group = GROUP_ID
 
