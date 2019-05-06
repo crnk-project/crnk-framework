@@ -1,7 +1,12 @@
 package io.crnk.operations.server;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.Response;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpResponse;
@@ -12,10 +17,6 @@ import io.crnk.operations.Operation;
 import io.crnk.operations.OperationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public class OperationsRequestProcessor implements HttpRequestProcessor {
 
@@ -50,7 +51,7 @@ public class OperationsRequestProcessor implements HttpRequestProcessor {
                 context.setResponse(response);
             } catch (Exception e) {
                 Response response = toErrorResponse(e);
-                HttpResponse httpResponse = response.toHttpResponse(mapper);
+                HttpResponse httpResponse = response.toHttpResponse(mapper, HttpHeaders.JSONAPI_CONTENT_TYPE);
                 context.setResponse(httpResponse);
             }
         }

@@ -3,6 +3,7 @@ package io.crnk.format.plainjson.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,107 +29,142 @@ import io.crnk.core.utils.Nullable;
  */
 public class PlainJsonDocumentDeserializer extends JsonDeserializer<PlainJsonDocument> {
 
-    private ObjectMapper objectMapper;
+	private static final List<String> SYSTEM_FIELDS = Arrays.asList("id", "type", "meta", "links");
 
-    public PlainJsonDocumentDeserializer(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+	private ObjectMapper objectMapper;
 
-    @Override
-    public PlainJsonDocument deserialize(JsonParser jp, DeserializationContext context) throws IOException {
-        JsonNode documentNode = jp.readValueAsTree();
+	public PlainJsonDocumentDeserializer(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
-        PlainJsonDocument document = new PlainJsonDocument();
-        document.setMeta((ObjectNode) documentNode.get("meta"));
-        document.setLinks((ObjectNode) documentNode.get("links"));
-        document.setJsonapi((ObjectNode) documentNode.get("jsonapi"));
+	@Override
+	public PlainJsonDocument deserialize(JsonParser jp, DeserializationContext context) throws IOException {
+		JsonNode documentNode = jp.readValueAsTree();
 
-        ArrayNode errors = (ArrayNode) documentNode.get("errors");
-        if (errors != null) {
-            ObjectReader errorReader = objectMapper.readerFor(ErrorData.class);
-            List<ErrorData> errorDataList = new ArrayList<>();
-            for (JsonNode error : errors) {
-                ErrorData errorData = errorReader.readValue(error);
-                errorDataList.add(errorData);
-            }
-            document.setErrors(errorDataList);
-        }
+		PlainJsonDocument document = new PlainJsonDocument();
+		document.setMeta((ObjectNode) documentNode.get("meta"));
+		document.setLinks((ObjectNode) documentNode.get("links"));
+		document.setJsonapi((ObjectNode) documentNode.get("jsonapi"));
 
-        JsonNode data = documentNode.get("data");
-        if (data instanceof ArrayNode) {
-            ArrayNode arrayNode = (ArrayNode) data;
-            List<Resource> resources = new ArrayList<>();
-            for (JsonNode element : arrayNode) {
-                resources.add(deserializeResource(element));
-            }
-            document.setData(Nullable.of(resources));
-        } else if (data instanceof NullNode) {
-            document.setData(Nullable.nullValue());
-        } else if (data != null) {
-            Resource resource = deserializeResource(data);
-            document.setData(Nullable.of(resource));
-        } else {
-            document.setData(Nullable.empty());
-        }
+		ArrayNode errors = (ArrayNode) documentNode.get("errors");
+		if (errors != null) {
+			ObjectReader errorReader = objectMapper.readerFor(ErrorData.class);
+			List<ErrorData> errorDataList = new ArrayList<>();
+			for (JsonNode error : errors) {
+				ErrorData errorData = errorReader.readValue(error);
+				errorDataList.add(errorData);
+			}
+			document.setErrors(errorDataList);
+		}
 
-        return document;
-    }
+ 		Map<ResourceIdentifier, Resource> included = new HashMap<>();
 
-    private Resource deserializeResource(JsonNode data) {
-        Resource resource = new Resource();
+		JsonNode data = documentNode.get("data");
+		if (data instanceof ArrayNode) {
+			ArrayNode arrayNode = (ArrayNode) data;
+			List<Resource> resources = new ArrayList<>();
+			for (JsonNode element : arrayNode) {
+				resources.add(deserializeResource(element, included));
+			}
+			document.setData(Nullable.of(resources));
+		}
+		else if (data instanceof NullNode) {
+			document.setData(Nullable.nullValue());
+		}
+		else if (data != null) {
+			Resource resource = deserializeResource(data, included);
+			document.setData(Nullable.of(resource));
+		}
+		else {
+			document.setData(Nullable.empty());
+		}
 
-        resource.setId(SerializerUtil.readStringIfExists("id", data));
-        resource.setType(SerializerUtil.readStringIfExists("type", data));
-        resource.setMeta((ObjectNode) data.get("meta"));
-        resource.setLinks((ObjectNode) data.get("links"));
+		if (!included.isEmpty()) {
+			document.setIncluded(new ArrayList<>(included.values()));
+		}
 
-        List<String> systemFields = Arrays.asList("id", "type", "meta", "links");
-        Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
-            String fieldName = entry.getKey();
-            if (!systemFields.contains(fieldName)) {
-                JsonNode fieldValue = entry.getValue();
-                deserializeRelationship(fieldName, fieldValue, resource);
-            }
-        }
-        return resource;
-    }
+		return document;
+	}
 
-    private void deserializeRelationship(String fieldName, JsonNode fieldValue, Resource resource) {
-        // simple heuristic to detect relationships, should be good enough
-        boolean hasLinks = fieldValue instanceof ObjectNode && fieldValue.get("links") != null;
-        boolean hasData = fieldValue instanceof ObjectNode && fieldValue.get("data") != null;
-        boolean isRelationship = hasLinks || hasData;
-        if (isRelationship) {
-            Relationship relationship = new Relationship();
-            relationship.setMeta((ObjectNode) fieldValue.get("meta"));
-            relationship.setLinks((ObjectNode) fieldValue.get("links"));
+	private Resource deserializeResource(JsonNode data, Map<ResourceIdentifier, Resource> included) {
+		Resource resource = new Resource();
 
-            JsonNode relationshipData = fieldValue.get("data");
+		resource.setId(SerializerUtil.readStringIfExists("id", data));
+		resource.setType(SerializerUtil.readStringIfExists("type", data));
+		resource.setMeta((ObjectNode) data.get("meta"));
+		resource.setLinks((ObjectNode) data.get("links"));
 
-            if (relationshipData instanceof ArrayNode) {
-                List<ResourceIdentifier> relationIds = new ArrayList<>();
-                for (JsonNode elementNode : relationshipData) {
-                    relationIds.add(toResourceIdentifier(elementNode));
-                }
-                relationship.setData(Nullable.of(relationIds));
-            } else if(relationshipData != null) {
-                relationship.setData(Nullable.of(toResourceIdentifier(relationshipData)));
-            }
-            resource.getRelationships().put(fieldName, relationship);
-        } else {
-            resource.getAttributes().put(fieldName, fieldValue);
-        }
-    }
+		Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+		while (fields.hasNext()) {
+			Map.Entry<String, JsonNode> entry = fields.next();
+			String fieldName = entry.getKey();
+			if (!SYSTEM_FIELDS.contains(fieldName)) {
+				JsonNode fieldValue = entry.getValue();
+				deserializeField(fieldName, fieldValue, resource, included);
+			}
+		}
+		return resource;
+	}
 
-    private ResourceIdentifier toResourceIdentifier(JsonNode elementNode) {
-        if (elementNode.isNull()) {
-            return null;
-        }
-        String elementId = SerializerUtil.readStringIfExists("id", elementNode);
-        String elementType = SerializerUtil.readStringIfExists("type", elementNode);
-        return new ResourceIdentifier(elementId, elementType);
-    }
+	private void deserializeField(String fieldName, JsonNode fieldValue, Resource resource,
+			Map<ResourceIdentifier, Resource> included) {
+		// simple heuristic to detect relationships, should be good enough
+		boolean hasLinks = fieldValue instanceof ObjectNode && fieldValue.get("links") != null;
+		boolean hasData = fieldValue instanceof ObjectNode && fieldValue.get("data") != null;
+		boolean isRelationship = hasLinks || hasData;
+		if (isRelationship) {
+			Relationship relationship = new Relationship();
+			relationship.setMeta((ObjectNode) fieldValue.get("meta"));
+			relationship.setLinks((ObjectNode) fieldValue.get("links"));
+
+			JsonNode relationshipData = fieldValue.get("data");
+
+			if (relationshipData instanceof ArrayNode) {
+				List<ResourceIdentifier> relationIds = new ArrayList<>();
+				for (JsonNode elementNode : relationshipData) {
+					ResourceIdentifier relationId = deserializeRelationship(elementNode, included);
+					relationIds.add(relationId);
+				}
+				relationship.setData(Nullable.of(relationIds));
+			}
+			else if (relationshipData != null) {
+				ResourceIdentifier relationId = deserializeRelationship(relationshipData, included);
+				relationship.setData(Nullable.of(relationId));
+			}
+			resource.getRelationships().put(fieldName, relationship);
+		}
+		else {
+			resource.getAttributes().put(fieldName, fieldValue);
+		}
+	}
+
+	private ResourceIdentifier deserializeRelationship(JsonNode relatedDataNode, Map<ResourceIdentifier, Resource> included) {
+		ResourceIdentifier relatedId = toResourceIdentifier(relatedDataNode);
+		if (relatedId != null && isResource(relatedDataNode) && !included.containsKey(relatedId)) {
+			Resource relatedResource = deserializeResource(relatedDataNode, included);
+			included.put(relatedId, relatedResource);
+		}
+		return relatedId;
+	}
+
+	private boolean isResource(JsonNode elementNode) {
+		Iterator<String> iterator = elementNode.fieldNames();
+		while (iterator.hasNext()) {
+			String fieldName = iterator.next();
+			if (!SYSTEM_FIELDS.contains(fieldName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private ResourceIdentifier toResourceIdentifier(JsonNode elementNode) {
+		if (elementNode.isNull()) {
+			return null;
+		}
+		String elementId = SerializerUtil.readStringIfExists("id", elementNode);
+		String elementType = SerializerUtil.readStringIfExists("type", elementNode);
+		return new ResourceIdentifier(elementId, elementType);
+	}
 
 }
