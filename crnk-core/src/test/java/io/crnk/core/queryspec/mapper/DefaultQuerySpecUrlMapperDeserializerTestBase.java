@@ -1,5 +1,11 @@
 package io.crnk.core.queryspec.mapper;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.CoreTestModule;
@@ -35,12 +41,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends AbstractQuerySpecTest {
 
@@ -307,7 +307,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
         jsonSpec.addFilter(new FilterSpec(expectedJson));
 
         Map<String, Set<String>> expectedParams = new HashMap<>();
-        add(expectedParams, "filter", "{\"OR\":[{\"id\":[12,13,14]},{\"completed\":true}]}");
+        add(expectedParams, "filter[tasks]", "{\"OR\":[{\"id\":[12,13,14]},{\"completed\":true}]}");
 
         QuerySpec actualSpec = urlMapper.deserialize(taskInformation, expectedParams);
 

@@ -38,6 +38,10 @@ public class ResourceRepositoryStubImpl<T, I extends Serializable> extends Clien
 
 		ClientDocumentMapper documentMapper = client.getDocumentMapper();
 		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+
+		// do not write empty values like 0 and false => not necessary
+		mappingConfig.getResourceMapping().setIgnoreDefaults(create);
+
 		QueryAdapter queryAdapter = new QuerySpecAdapter(null, client.getRegistry(), client.getQueryContext());
 		final Document requestDocument = documentMapper.toDocument(response, queryAdapter, mappingConfig).get();
 

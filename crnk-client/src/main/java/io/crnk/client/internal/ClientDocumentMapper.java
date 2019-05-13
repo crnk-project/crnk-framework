@@ -1,5 +1,9 @@
 package io.crnk.client.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.internal.proxy.ClientProxyFactory;
 import io.crnk.client.internal.proxy.ObjectProxy;
@@ -25,10 +29,6 @@ import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class ClientDocumentMapper extends DocumentMapper {
 
@@ -57,11 +57,11 @@ public class ClientDocumentMapper extends DocumentMapper {
 
 			@Override
 			protected void setRelationship(Resource resource, ResourceField field, Object entity,
-										   ResourceInformation resourceInformation, QueryAdapter queryAdapter,
-										   ResourceMappingConfig mappingConfig) {
+					ResourceInformation resourceInformation, QueryAdapter queryAdapter,
+					ResourceMappingConfig mappingConfig) {
 				// we also include relationship data if it is not null and not a
 				// unloaded proxy
-				boolean includeRelation = true;
+				boolean includeRelation;
 
 				Object relationshipId = null;
 
@@ -102,14 +102,17 @@ public class ClientDocumentMapper extends DocumentMapper {
 					}
 				}
 
-
-				if (includeRelation) {
+				if (includeRelation && (!mappingConfig.isIgnoreDefaults() || !isDefault(relationshipId))) {
 					Relationship relationship = new Relationship();
 					relationship.setData(Nullable.of(relationshipId));
 					resource.getRelationships().put(field.getJsonName(), relationship);
 				}
 			}
 		};
+	}
+
+	private boolean isDefault(Object relationshipId) {
+		return relationshipId == null || (relationshipId instanceof Collection) && ((Collection) relationshipId).isEmpty();
 	}
 
 	public void setProxyFactory(ClientProxyFactory proxyFactory) {
