@@ -43,7 +43,7 @@ public class OperationsCall {
 	public void add(HttpMethod method, Object object) {
 		Operation operation = new Operation();
 
-		Resource resource = toResource(object);
+		Resource resource = toResource(object, method);
 
 		operation.setOp(method.toString());
 		operation.setPath(computePath(method, resource));
@@ -63,7 +63,7 @@ public class OperationsCall {
 		return resource.getType() + "/" + resource.getId() + "/";
 	}
 
-	protected Resource toResource(Object object) {
+	protected Resource toResource(Object object, HttpMethod method) {
 		JsonApiResponse response = new JsonApiResponse();
 		response.setEntity(object);
 
@@ -76,6 +76,10 @@ public class OperationsCall {
 
 		DocumentMapper documentMapper = crnk.getDocumentMapper();
 		DocumentMappingConfig mappingConfig = new DocumentMappingConfig();
+
+		// do not write empty values like 0 and false => not necessary
+		mappingConfig.getResourceMapping().setIgnoreDefaults(method == HttpMethod.POST);
+
 		Document document = documentMapper.toDocument(response, queryAdapter, mappingConfig).get();
 		return document.getSingleData().get();
 	}
