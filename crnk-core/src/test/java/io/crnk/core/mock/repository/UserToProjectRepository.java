@@ -4,15 +4,16 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.User;
 import io.crnk.core.mock.repository.util.Relation;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class UserToProjectRepository implements RelationshipRepositoryV2<User, Long, Project, Long> {
+public class UserToProjectRepository implements RelationshipRepository<User, Long, Project, Long> {
 
 	private static final ConcurrentMap<Relation<User>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -39,7 +40,7 @@ public class UserToProjectRepository implements RelationshipRepositoryV2<User, L
 	}
 
 	@Override
-	public void setRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void setRelations(User source, Collection<Long> targetIds, String fieldName) {
 		removeRelations(fieldName);
 		if (targetIds != null) {
 			for (Long targetId : targetIds) {
@@ -49,14 +50,14 @@ public class UserToProjectRepository implements RelationshipRepositoryV2<User, L
 	}
 
 	@Override
-	public void addRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void addRelations(User source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			THREAD_LOCAL_REPOSITORY.put(new Relation<>(source, targetId, fieldName), 0);
 		}
 	}
 
 	@Override
-	public void removeRelations(User source, Iterable<Long> targetIds, String fieldName) {
+	public void removeRelations(User source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			Iterator<Relation<User>> iterator = THREAD_LOCAL_REPOSITORY.keySet().iterator();
 			while (iterator.hasNext()) {

@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GetFromOwnerStrategy<T, I extends Serializable, D, J extends Serializable> extends ForwardingStrategyBase
+public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		implements ForwardingGetStrategy<T, I, D, J> {
 
 
 	@SuppressWarnings("unchecked")
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
+	public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec, QueryContext queryContext) {
 		RegistryEntry sourceEntry = context.getSourceEntry();
 		ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
 		ResourceField field = sourceInformation.findFieldByUnderlyingName(fieldName);

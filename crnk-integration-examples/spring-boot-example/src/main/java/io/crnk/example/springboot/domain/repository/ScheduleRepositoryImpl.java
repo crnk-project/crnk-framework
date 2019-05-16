@@ -1,7 +1,7 @@
 package io.crnk.example.springboot.domain.repository;
 
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
-import io.crnk.jpa.JpaEntityRepositoryBase;
+import io.crnk.data.jpa.JpaEntityRepositoryBase;
 import org.springframework.stereotype.Component;
 
 @Component

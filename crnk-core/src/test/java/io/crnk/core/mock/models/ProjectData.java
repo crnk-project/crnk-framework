@@ -1,27 +1,41 @@
 package io.crnk.core.mock.models;
 
+import io.crnk.core.resource.annotations.JsonApiEmbeddable;
+
 import java.util.HashMap;
 import java.util.Map;
 
+
+@JsonApiEmbeddable
 public class ProjectData {
-	private String data;
+    private String data;
 
-	private Map<String, Integer> priorities = new HashMap<>();
+    private Map<String, Integer> priorities = new HashMap<>();
 
-	public String getData() {
-		return data;
-	}
+    private ProjectStatus status = new ProjectStatus();
 
-	public ProjectData setData(@SuppressWarnings("SameParameterValue") String data) {
-		this.data = data;
-		return this;
-	}
+    public ProjectStatus getStatus() {
+        return status;
+    }
 
-	public Map<String, Integer> getPriorities() {
-		return priorities;
-	}
+    public void setStatus(ProjectStatus status) {
+        this.status = status;
+    }
 
-	public void setPriorities(Map<String, Integer> priorities) {
-		this.priorities = priorities;
-	}
+    public String getData() {
+        return data;
+    }
+
+    public ProjectData setData(@SuppressWarnings("SameParameterValue") String data) {
+        this.data = data;
+        return this;
+    }
+
+    public Map<String, Integer> getPriorities() {
+        return priorities;
+    }
+
+    public void setPriorities(Map<String, Integer> priorities) {
+        this.priorities = priorities;
+    }
 }

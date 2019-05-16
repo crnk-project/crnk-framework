@@ -181,7 +181,7 @@ public abstract class ControllerTestBase {
 
 		try {
 			data.setAttribute("name", objectMapper.readTree("\"sample project\""));
-			data.setAttribute("data", objectMapper.readTree("{\"data\" : \"asd\"}"));
+			data.setAttribute("data", objectMapper.readTree("{\"data\" : \"asd\", \"status\": { \"qualityStatus\" : \"ok\", \"timelineStatus\" : \"ok\" }}"));
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

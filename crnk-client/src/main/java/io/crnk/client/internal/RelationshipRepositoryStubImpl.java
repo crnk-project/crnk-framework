@@ -11,16 +11,16 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
 import io.crnk.core.engine.internal.utils.JsonApiUrlBuilder;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.utils.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.Collection;
 
-public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J extends Serializable> extends ClientStubBase
-		implements RelationshipRepositoryV2<T, I, D, J> {
+public class RelationshipRepositoryStubImpl<T, I , D, J > extends ClientStubBase
+		implements RelationshipRepository<T, I, D, J> {
 
 	private Class<T> sourceClass;
 
@@ -44,21 +44,21 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 	}
 
 	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void setRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.PATCH, targetIds);
 	}
 
 	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void addRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.POST, targetIds);
 	}
 
 	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
+	public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
 		Serializable sourceId = getSourceId(source);
 		String url = urlBuilder.buildUrl(sourceResourceInformation, sourceId, (QuerySpec) null, fieldName);
 		executeWithIds(url, HttpMethod.DELETE, targetIds);
@@ -85,21 +85,23 @@ public class RelationshipRepositoryStubImpl<T, I extends Serializable, D, J exte
 		return (DefaultResourceList<D>) executeGet(url, ResponseType.RESOURCES);
 	}
 
-	private void executeWithIds(String requestUrl, HttpMethod method, Iterable<?> targetIds) {
+	private void executeWithIds(String requestUrl, HttpMethod method, Collection<?> targetIds) {
 		Document document = new Document();
 		ArrayList<ResourceIdentifier> resourceIdentifiers = new ArrayList<>();
 		for (Object targetId : targetIds) {
 			resourceIdentifiers.add(sourceResourceInformation.toResourceIdentifier(targetId));
 		}
 		document.setData(Nullable.of(resourceIdentifiers));
-		doExecute(requestUrl, method, document);
+		Document transportDocument = client.getFormat().toTransportDocument(document);
+		doExecute(requestUrl, method, transportDocument);
 	}
 
 	private void executeWithId(String requestUrl, HttpMethod method, Object targetId) {
 		Document document = new Document();
 		ResourceIdentifier resourceIdentifier = sourceResourceInformation.toResourceIdentifier(targetId);
 		document.setData(Nullable.of(resourceIdentifier));
-		doExecute(requestUrl, method, document);
+		Document transportDocument = client.getFormat().toTransportDocument(document);
+		doExecute(requestUrl, method, transportDocument);
 	}
 
 	private void doExecute(String requestUrl, HttpMethod method, final Document document) {

@@ -4,6 +4,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -36,7 +37,7 @@ public interface RepositoryFilter {
 	 * @param chain   to proceed to the next filter resp. actual repository.
 	 * @return filtered result to be returned to next filter resp. caller
 	 */
-	<T> Iterable<T> filterResult(RepositoryFilterContext context, RepositoryResultFilterChain<T> chain);
+	<T> Collection<T> filterResult(RepositoryFilterContext context, RepositoryResultFilterChain<T> chain);
 
 	/**
 	 * Filters the meta information.
@@ -45,7 +46,7 @@ public interface RepositoryFilter {
 	 * @param chain   to proceed to the next filter resp. actual repository.
 	 * @return filtered metaInformation to be returned to next filter resp. caller
 	 */
-	<T> MetaInformation filterMeta(RepositoryFilterContext context, Iterable<T> resources, RepositoryMetaFilterChain chain);
+	<T> MetaInformation filterMeta(RepositoryFilterContext context, Collection<T> resources, RepositoryMetaFilterChain chain);
 
 	/**
 	 * Filters the links information.
@@ -54,6 +55,6 @@ public interface RepositoryFilter {
 	 * @param chain   to proceed to the next filter resp. actual repository.
 	 * @return filtered linksInformation to be returned to next filter resp. caller
 	 */
-	<T> LinksInformation filterLinks(RepositoryFilterContext context, Iterable<T> resources, RepositoryLinksFilterChain chain);
+	<T> LinksInformation filterLinks(RepositoryFilterContext context, Collection<T> resources, RepositoryLinksFilterChain chain);
 
 }

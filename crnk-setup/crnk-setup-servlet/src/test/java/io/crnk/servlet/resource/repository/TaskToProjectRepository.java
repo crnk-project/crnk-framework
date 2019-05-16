@@ -1,11 +1,11 @@
 package io.crnk.servlet.resource.repository;
 
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.servlet.resource.model.Project;
 import io.crnk.servlet.resource.model.Task;
 
-public class TaskToProjectRepository implements RelationshipRepository<Task, Long, Project, Long> {
+public class TaskToProjectRepository implements LegacyRelationshipRepository<Task, Long, Project, Long> {
 
 	@Override
 	public void setRelation(Task task, Long projectId, String fieldName) {

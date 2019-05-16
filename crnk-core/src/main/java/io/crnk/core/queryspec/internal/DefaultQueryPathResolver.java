@@ -114,7 +114,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 				ErrorData errorData = ErrorData.builder()
 						.setCode("UNKNOWN_PARAMETER")
 						.setTitle("unknown parameter")
-						.setDetail("Failed to resolve path to field '" + StringUtils.join(".", attributePath) + "'")
+						.setDetail("Failed to resolve path to field '" + StringUtils.join(".", attributePath) + "' from " + resourceInformation.getResourceClass())
 						.setSourceParameter(sourceParameter)
 						.setStatus(String.valueOf(HttpStatus.BAD_REQUEST_400)).build();
 				throw new BadRequestException(HttpStatus.BAD_REQUEST_400, errorData);
@@ -150,7 +150,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 
 		public SubTypeMap(ResourceRegistry resourceRegistry) {
 
-			Collection<RegistryEntry> entries = resourceRegistry.getResources();
+			Collection<RegistryEntry> entries = resourceRegistry.getEntries();
 			for (RegistryEntry entry : entries) {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				String superResourceType = resourceInformation.getSuperResourceType();

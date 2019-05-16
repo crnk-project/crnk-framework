@@ -7,6 +7,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.domain.model.History;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -28,7 +29,7 @@ public class HistoryResourceRepository extends ResourceRepositoryBase<History, U
 	}
 
 	@Override
-	public ResourceList<History> findAll(Iterable<UUID> ids, QuerySpec querySpec) {
+	public ResourceList<History> findAll(Collection<UUID> ids, QuerySpec querySpec) {
 		DefaultResourceList list = new DefaultResourceList();
 		for (UUID id : ids) {
 			History history = new History();

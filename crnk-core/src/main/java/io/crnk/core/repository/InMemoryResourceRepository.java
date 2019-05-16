@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Simple repository implementation backed by a ConcurrentHashMap. Ideally suited for testing and mocking where the real implementation may not (yet) be available.
  */
-public class InMemoryResourceRepository<T, I extends Serializable> extends ResourceRepositoryBase<T, I> {
+public class InMemoryResourceRepository<T, I > extends ResourceRepositoryBase<T, I> {
 
 	private Map<I, T> resources = new ConcurrentHashMap<>();
 

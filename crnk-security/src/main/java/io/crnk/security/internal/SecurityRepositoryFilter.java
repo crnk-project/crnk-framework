@@ -8,6 +8,8 @@ import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.security.ResourcePermissionInformation;
 import io.crnk.security.SecurityModule;
 
+import java.util.Collection;
+
 public class SecurityRepositoryFilter extends RepositoryFilterBase {
 
 	private SecurityModule module;
@@ -17,7 +19,7 @@ public class SecurityRepositoryFilter extends RepositoryFilterBase {
 	}
 
 	@Override
-	public <T> MetaInformation filterMeta(RepositoryFilterContext context, Iterable<T> resources,
+	public <T> MetaInformation filterMeta(RepositoryFilterContext context, Collection<T> resources,
 										  RepositoryMetaFilterChain chain) {
 		MetaInformation metaInformation = chain.doFilter(context, resources);
 		if (metaInformation instanceof ResourcePermissionInformation) {

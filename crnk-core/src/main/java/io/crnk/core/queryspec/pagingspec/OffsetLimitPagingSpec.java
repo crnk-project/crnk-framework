@@ -71,6 +71,9 @@ public class OffsetLimitPagingSpec implements PagingSpec {
 	}
 
 	public <T extends PagingSpec> T convert(Class<T> pagingSpecType) {
+		if(pagingSpecType.isInstance(this)){
+			return (T)this;
+		}
 		if (pagingSpecType.equals(NumberSizePagingSpec.class)) {
 			if (offset == 0 && limit == null) {
 				return (T) new NumberSizePagingSpec(1, null);

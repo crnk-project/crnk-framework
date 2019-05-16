@@ -1,10 +1,16 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.information.bean.BeanInformation;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
@@ -16,13 +22,6 @@ import io.crnk.core.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Builder responsible for parsing URL path.
  */
@@ -31,9 +30,11 @@ public class PathBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PathBuilder.class);
 
 	public static final String SEPARATOR = "/";
+
 	public static final String RELATIONSHIP_MARK = "relationships";
 
 	private final ResourceRegistry resourceRegistry;
+
 	private final TypeParser parser;
 
 	public PathBuilder(ResourceRegistry resourceRegistry, TypeParser parser) {
@@ -55,17 +56,18 @@ public class PathBuilder {
 	private List<Serializable> parseNestedIds(String idsString, Serializable parentId, ResourceField parentField) {
 		String[] strPathIds = idsString.split(JsonPath.ID_SEPARATOR_PATTERN);
 
-		ResourceInformation resourceInformation = parentField.getParentResourceInformation();
+		ResourceInformation resourceInformation = parentField.getResourceInformation();
+		Class<?> idType = resourceInformation.getIdField().getType();
 
-		BeanInformation beanInformation = BeanInformation.get(resourceInformation.getIdField().getType());
-		BeanAttributeInformation idAttr = beanInformation.getAttribute("id");
-		BeanAttributeInformation parentAttr = beanInformation.getAttribute(parentField.getIdName());
+		ResourceFieldAccessor nestedIdAccessor = resourceInformation.getChildIdAccessor();
+		ResourceFieldAccessor parentIdAccessor = resourceInformation.getParentIdAccessor();
 
 		List<Serializable> pathIds = new ArrayList<>();
 		for (String strPathId : strPathIds) {
-			Serializable nestedId = (Serializable) ClassUtils.newInstance(beanInformation.getImplementationClass());
-			parentAttr.setValue(nestedId, parentId);
-			idAttr.setValue(nestedId, parser.parse(strPathId, idAttr.getImplementationClass()));
+			Serializable nestedId = (Serializable) ClassUtils.newInstance(idType);
+			Object childId = parser.parse(strPathId, nestedIdAccessor.getImplementationClass());
+			parentIdAccessor.setValue(nestedId, parentId);
+			nestedIdAccessor.setValue(nestedId, childId);
 			pathIds.add(nestedId);
 		}
 
@@ -92,6 +94,7 @@ public class PathBuilder {
 	public JsonPath build(String path) {
 		String[] pathElements = splitPath(path);
 		if (pathElements.length == 0 || (pathElements.length == 1 && "".equals(pathElements[0]))) {
+			LOGGER.debug("requested root path: {}", path);
 			return null;
 		}
 		return parseResourcePath(new LinkedList<>(Arrays.asList(pathElements)));
@@ -103,6 +106,7 @@ public class PathBuilder {
 			return null;
 		}
 		if (pathElements.isEmpty()) {
+			LOGGER.debug("resource path to root entry found: {}", rootEntry);
 			return new ResourcePath(rootEntry, null);
 		}
 		Map<String, RepositoryAction> actions = rootEntry.getRepositoryInformation().getActions();
@@ -121,12 +125,14 @@ public class PathBuilder {
 
 	private JsonPath parseFieldPath(RegistryEntry entry, List<Serializable> ids, LinkedList<String> pathElements) {
 		if (pathElements.isEmpty()) {
+			LOGGER.debug("resource path for {} with ids {} found", entry, ids);
 			return new ResourcePath(entry, ids);
 		}
 
 		Map<String, RepositoryAction> actions = entry.getRepositoryInformation().getActions();
 		if (actions.containsKey(pathElements.peek())) {
 			String pathElement = pathElements.pop();
+			LOGGER.debug("action path {} for {} with ids {} found", pathElement, entry, ids);
 			return new ActionPath(entry, ids, pathElement);
 		}
 
@@ -138,6 +144,7 @@ public class PathBuilder {
 			}
 			fieldName = pathElements.poll();
 
+			entry = findSelfOrSubtypeByField(entry, fieldName);
 			ResourceField field = entry.getResourceInformation().findRelationshipFieldByName(fieldName);
 			if (field == null) {
 				throw new BadRequestException("invalid url, requested field not found: " + fieldName);
@@ -146,20 +153,28 @@ public class PathBuilder {
 			if (!pathElements.isEmpty()) {
 				throw new BadRequestException("invalid url, cannot add further url fragments after relationship name");
 			}
-
+			LOGGER.debug("relationship path {} for {} with ids {} found", field, entry, ids);
 			return new RelationshipsPath(entry, ids, field);
 		}
+
+		entry = findSelfOrSubtypeByField(entry, fieldName);
 		ResourceField field = entry.getResourceInformation().findFieldByName(fieldName);
 		if (field == null) {
 			throw new BadRequestException("field not found: " + fieldName);
 		}
 		if (pathElements.isEmpty()) {
+			if (isNestedField(field) && !field.isCollection()) {
+				RegistryEntry nestedEntry = getNestedEntry(field);
+				ResourcePath path = new ResourcePath(nestedEntry, ids);
+				path.addParentField(field);
+				return path;
+			}
+			LOGGER.debug("field path {} for {} with ids {} found", field, entry, ids);
 			return new FieldPath(entry, ids, field);
 		}
 
-		String strNestedId = pathElements.poll();
 		if (field.getResourceFieldType() != ResourceFieldType.RELATIONSHIP || field.getOppositeName() == null) {
-			LOGGER.debug("cannot process nestedId={} because field={} is not a relationship with an opposite field", strNestedId, field);
+			LOGGER.debug("cannot process field={} is not a relationship with an opposite field", field);
 			throw new BadRequestException("invalid url, cannot add further url fragements after field");
 		}
 
@@ -167,16 +182,65 @@ public class PathBuilder {
 		ResourceInformation oppositeInformation = oppositeEntry.getResourceInformation();
 		ResourceField oppositeField = oppositeInformation.findRelationshipFieldByName(field.getOppositeName());
 		if (!oppositeInformation.isNested()) {
-			LOGGER.debug("cannot process nestedId={} because opposite={} is not an nested resource", strNestedId, oppositeInformation);
+			LOGGER.debug("cannot process field={} because opposite={} is not an nested resource", field, oppositeInformation);
 			throw new BadRequestException("invalid url, cannot specify ID of related resource");
 		}
-		PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+
 		PreconditionUtil.verify(oppositeField != null, "nested resource must specify opposite on relationship from parent to child, got null for %s", field);
 
-		Serializable parentId = ids.get(0);
-		List<Serializable> nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
+		List<Serializable> nestedIds;
+		if (field.isCollection()) {
+			PreconditionUtil.verify(ids.size() == 1, "cannot follow multiple ids along nested path");
+			Serializable parentId = ids.get(0);
 
-		return parseFieldPath(oppositeEntry, nestedIds, pathElements);
+			// nested many-relationship must specify a nested id
+			String strNestedId = pathElements.poll();
+			nestedIds = parseNestedIds(strNestedId, parentId, oppositeField);
+		}
+		else {
+			nestedIds = ids;
+		}
+
+		JsonPath jsonPath = parseFieldPath(oppositeEntry, nestedIds, pathElements);
+		if (jsonPath != null) {
+			jsonPath.addParentField(field);
+		}
+		return jsonPath;
+	}
+
+	private RegistryEntry findSelfOrSubtypeByField(RegistryEntry entry, String fieldName) {
+		if(entry.getResourceInformation().findFieldByName(fieldName) == null) {
+			// consider introducing RegistyEntry.getSubTypes in the future
+			for (RegistryEntry someEntry : resourceRegistry.getEntries()) {
+				ResourceInformation resourceInformation = someEntry.getResourceInformation();
+				ResourceField field = resourceInformation.findFieldByName(fieldName);
+				if (field != null && someEntry.isParent(entry)) {
+					RegistryEntry parentEntry = someEntry.getParentRegistryEntry();
+					while (parentEntry != null && parentEntry.getResourceInformation().findFieldByName(fieldName) != null) {
+						someEntry = parentEntry;
+					}
+					return someEntry;
+				}
+			}
+		}
+		return entry; // may not contain the field in case of errorous request
+	}
+
+	private boolean isNestedField(ResourceField field) {
+		if (field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP) {
+			RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+			PreconditionUtil.verify(oppositeType != null, "opposite type %s not found for %s", field.getOppositeResourceType(), field.getUnderlyingName());
+			return oppositeType.getResourceInformation().isNested();
+		}
+		return false;
+	}
+
+	private RegistryEntry getNestedEntry(ResourceField field) {
+		PreconditionUtil.verify(field.getResourceFieldType() == ResourceFieldType.RELATIONSHIP, "not a relationship");
+		RegistryEntry oppositeType = resourceRegistry.getEntry(field.getOppositeResourceType());
+		ResourceInformation resourceInformation = oppositeType.getResourceInformation();
+		PreconditionUtil.verify(resourceInformation.isNested(), "not a nested relationship");
+		return oppositeType;
 	}
 
 	private RegistryEntry getRootEntry(LinkedList<String> pathElements) {
@@ -184,8 +248,11 @@ public class PathBuilder {
 		while (true) {
 			RegistryEntry entry = getEntryByPath(potentialResourcePath.toString());
 			if (entry != null) {
+				LOGGER.debug("registry entry found for: {}", potentialResourcePath);
 				return entry;
 			}
+
+			LOGGER.debug("no registry entry found for: {}", potentialResourcePath);
 
 			if (pathElements.isEmpty() || pathElements.peek().equals(RELATIONSHIP_MARK)) {
 				break;

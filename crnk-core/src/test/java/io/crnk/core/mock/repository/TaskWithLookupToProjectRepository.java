@@ -3,10 +3,12 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-public class TaskWithLookupToProjectRepository implements RelationshipRepositoryV2<TaskWithLookup, String, Project, Long> {
+import java.util.Collection;
+
+public class TaskWithLookupToProjectRepository implements RelationshipRepository<TaskWithLookup, String, Project, Long> {
 
 
 	@Override
@@ -25,17 +27,17 @@ public class TaskWithLookupToProjectRepository implements RelationshipRepository
 	}
 
 	@Override
-	public void setRelations(TaskWithLookup source, Iterable<Long> targetIds, String fieldName) {
+	public void setRelations(TaskWithLookup source, Collection<Long> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void addRelations(TaskWithLookup source, Iterable<Long> targetIds, String fieldName) {
+	public void addRelations(TaskWithLookup source, Collection<Long> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeRelations(TaskWithLookup source, Iterable<Long> targetIds, String fieldName) {
+	public void removeRelations(TaskWithLookup source, Collection<Long> targetIds, String fieldName) {
 		throw new UnsupportedOperationException();
 	}
 

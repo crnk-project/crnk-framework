@@ -9,6 +9,7 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
+import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContext;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
@@ -63,9 +64,14 @@ public class JsonApiRequestProcessorBase {
 
 	protected HttpResponse toHttpResponse(Response response) {
 		ObjectMapper objectMapper = moduleContext.getObjectMapper();
-		HttpResponse httpResponse = response.toHttpResponse(objectMapper);
+		HttpResponse httpResponse = response.toHttpResponse(objectMapper, getContentType());
+
 		logger.debug("setup http resposne {}", httpResponse);
 		return httpResponse;
+	}
+
+	protected String getContentType() {
+		return HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET;
 	}
 
 	protected Document getRequestDocument(HttpRequestContext requestContext) throws JsonProcessingException {

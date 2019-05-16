@@ -184,7 +184,7 @@ as Strings in urls. Thereby, the extensibility of the TypeParser allows to custo
 
 
 
-<h4>Simplified customizations of Criteria-based crnk-jpa repositories</h4>
+<h4>Simplified customizations of Criteria-based crnk-data-jpa repositories</h4>
 
 There is a new interface JpaCriteriaRepositoryFilter and base class JpaCriteriaRepositoryFilterBase that allow
 easy customization of CriteriaQuery objects. The interfaces are a specialization of JpaRepositoryFilter
@@ -213,7 +213,7 @@ The BulkRelationshipRepositoryV2 interface implements two default methods that a
 A future V3 version of the interface will likely move this into crnk-core to keep the interface this simple without having to rely
 on default methods.
 
-<h4>simplified crnk-jpa setup in Spring Boot</h4>
+<h4>simplified crnk-data-jpa setup in Spring Boot</h4>
 
 The exposeAll behavior automatically backs-off if a repository is registered manually. Setting the properly to false is no longer necessary.
 

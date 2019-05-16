@@ -44,13 +44,13 @@ public class WorkerRelationshipRepositoryAdapter implements RelationshipReposito
 	}
 
 	@Override
-	public Result<JsonApiResponse> findOneTarget(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
-		return worker.work(() -> adapter.findOneTarget(sourceId, field, queryAdapter));
+	public Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+		return worker.work(() -> adapter.findOneRelations(sourceId, field, queryAdapter));
 	}
 
 	@Override
-	public Result<JsonApiResponse> findManyTargets(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
-		return worker.work(() -> adapter.findManyTargets(sourceId, field, queryAdapter));
+	public Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+		return worker.work(() -> adapter.findManyRelations(sourceId, field, queryAdapter));
 	}
 
 	@Override

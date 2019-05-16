@@ -1,18 +1,19 @@
 package io.crnk.test.mock.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 import junit.framework.Assert;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ProjectToTaskRepository implements RelationshipRepositoryV2<Project, Long, Task, Long> {
+public class ProjectToTaskRepository implements RelationshipRepository<Project, Long, Task, Long> {
 
 	private static final ConcurrentMap<Relation<Project>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
@@ -31,7 +32,7 @@ public class ProjectToTaskRepository implements RelationshipRepositoryV2<Project
 	}
 
 	@Override
-	public void setRelations(Project source, Iterable<Long> targetIds, String fieldName) {
+	public void setRelations(Project source, Collection<Long> targetIds, String fieldName) {
 		removeRelations(fieldName);
 		if (targetIds != null) {
 			for (Long targetId : targetIds) {
@@ -41,14 +42,14 @@ public class ProjectToTaskRepository implements RelationshipRepositoryV2<Project
 	}
 
 	@Override
-	public void addRelations(Project source, Iterable<Long> targetIds, String fieldName) {
+	public void addRelations(Project source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			THREAD_LOCAL_REPOSITORY.put(new Relation<>(source, targetId, fieldName), 0);
 		}
 	}
 
 	@Override
-	public void removeRelations(Project source, Iterable<Long> targetIds, String fieldName) {
+	public void removeRelations(Project source, Collection<Long> targetIds, String fieldName) {
 		for (Long targetId : targetIds) {
 			Iterator<Relation<Project>> iterator = THREAD_LOCAL_REPOSITORY.keySet().iterator();
 			while (iterator.hasNext()) {

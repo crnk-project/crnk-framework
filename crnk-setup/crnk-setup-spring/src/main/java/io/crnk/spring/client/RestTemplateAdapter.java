@@ -1,6 +1,7 @@
 package io.crnk.spring.client;
 
 import io.crnk.client.http.HttpAdapter;
+import io.crnk.client.http.HttpAdapterListener;
 import io.crnk.client.http.HttpAdapterRequest;
 import io.crnk.core.engine.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -14,86 +15,95 @@ import java.util.concurrent.TimeUnit;
 
 public class RestTemplateAdapter implements HttpAdapter {
 
-	private RestTemplate impl;
+    private RestTemplate impl;
 
-	private CopyOnWriteArrayList<RestTemplateAdapterListener> listeners = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<RestTemplateAdapterListener> nativeListeners = new CopyOnWriteArrayList<>();
 
-	private Long networkTimeout;
+    private CopyOnWriteArrayList<HttpAdapterListener> listeners = new CopyOnWriteArrayList<>();
 
-	private boolean initialized = false;
+    private Long networkTimeout;
 
-	public static RestTemplateAdapter newInstance() {
-		return new RestTemplateAdapter();
-	}
+    private boolean initialized = false;
 
-	public RestTemplateAdapter() {
-		this(null);
-	}
+    public static RestTemplateAdapter newInstance() {
+        return new RestTemplateAdapter();
+    }
 
-	public RestTemplateAdapter(RestTemplate template) {
-		this.impl = template;
-	}
+    public RestTemplateAdapter() {
+        this(null);
+    }
 
-	public void addListener(RestTemplateAdapterListener listener) {
-		checkNotInitialized();
-		listeners.add(listener);
-	}
+    public RestTemplateAdapter(RestTemplate template) {
+        this.impl = template;
+    }
 
-	private void checkNotInitialized() {
-		if (initialized) {
-			throw new IllegalStateException("already initialized");
-		}
-	}
+    @Override
+    public void addListener(HttpAdapterListener listener) {
+        checkNotInitialized();
+        listeners.add(listener);
+    }
 
-	public RestTemplate getImplementation() {
-		if (!initialized) {
-			initImpl();
-		}
-		return impl;
-	}
 
-	private synchronized void initImpl() {
-		if (!initialized) {
-			initialized = true;
-			if (impl == null) {
-				impl = new RestTemplate();
-			}
+    public void addListener(RestTemplateAdapterListener listener) {
+        checkNotInitialized();
+        nativeListeners.add(listener);
+    }
 
-			if (networkTimeout != null) {
-				ClientHttpRequestFactory requestFactory = impl.getRequestFactory();
-				if (requestFactory instanceof SimpleClientHttpRequestFactory) {
-					SimpleClientHttpRequestFactory simpleRequestFactory =
-							(SimpleClientHttpRequestFactory) impl.getRequestFactory();
-					simpleRequestFactory.setReadTimeout(networkTimeout.intValue());
-				} else if (requestFactory instanceof HttpComponentsClientHttpRequestFactory) {
-					HttpComponentsClientHttpRequestFactory apacheRequestFactory =
-							(HttpComponentsClientHttpRequestFactory) impl.getRequestFactory();
-					apacheRequestFactory.setReadTimeout(networkTimeout.intValue());
-				} else if (requestFactory instanceof OkHttp3ClientHttpRequestFactory) {
-					OkHttp3ClientHttpRequestFactory okhttpRequestFactory =
-							(OkHttp3ClientHttpRequestFactory) impl.getRequestFactory();
-					okhttpRequestFactory.setReadTimeout(networkTimeout.intValue());
-				} else {
-					throw new IllegalStateException("unknown type " + requestFactory);
-				}
+    private void checkNotInitialized() {
+        if (initialized) {
+            throw new IllegalStateException("already initialized");
+        }
+    }
 
-			}
+    public RestTemplate getImplementation() {
+        if (!initialized) {
+            initImpl();
+        }
+        return impl;
+    }
 
-			for (RestTemplateAdapterListener listener : listeners) {
-				listener.onBuild(impl);
-			}
-		}
-	}
+    private synchronized void initImpl() {
+        if (!initialized) {
+            initialized = true;
+            if (impl == null) {
+                impl = new RestTemplate();
+            }
 
-	@Override
-	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-		RestTemplate implementation = getImplementation();
-		return new RestTemplateRequest(implementation, url, method, requestBody);
-	}
+            if (networkTimeout != null) {
+                ClientHttpRequestFactory requestFactory = impl.getRequestFactory();
+                if (requestFactory instanceof SimpleClientHttpRequestFactory) {
+                    SimpleClientHttpRequestFactory simpleRequestFactory =
+                            (SimpleClientHttpRequestFactory) impl.getRequestFactory();
+                    simpleRequestFactory.setReadTimeout(networkTimeout.intValue());
+                } else if (requestFactory instanceof HttpComponentsClientHttpRequestFactory) {
+                    HttpComponentsClientHttpRequestFactory apacheRequestFactory =
+                            (HttpComponentsClientHttpRequestFactory) impl.getRequestFactory();
+                    apacheRequestFactory.setReadTimeout(networkTimeout.intValue());
+                } else if (requestFactory instanceof OkHttp3ClientHttpRequestFactory) {
+                    OkHttp3ClientHttpRequestFactory okhttpRequestFactory =
+                            (OkHttp3ClientHttpRequestFactory) impl.getRequestFactory();
+                    okhttpRequestFactory.setReadTimeout(networkTimeout.intValue());
+                } else {
+                    throw new IllegalStateException("unknown type " + requestFactory);
+                }
 
-	@Override
-	public void setReceiveTimeout(int timeout, TimeUnit unit) {
-		checkNotInitialized();
-		networkTimeout = unit.toMillis(timeout);
-	}
+            }
+
+            for (RestTemplateAdapterListener listener : nativeListeners) {
+                listener.onBuild(impl);
+            }
+        }
+    }
+
+    @Override
+    public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
+        RestTemplate implementation = getImplementation();
+        return new RestTemplateRequest(implementation, url, method, requestBody, listeners);
+    }
+
+    @Override
+    public void setReceiveTimeout(int timeout, TimeUnit unit) {
+        checkNotInitialized();
+        networkTimeout = unit.toMillis(timeout);
+    }
 }

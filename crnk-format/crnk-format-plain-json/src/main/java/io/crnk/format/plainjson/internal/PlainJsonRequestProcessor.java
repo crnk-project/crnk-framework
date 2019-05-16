@@ -76,6 +76,11 @@ public class PlainJsonRequestProcessor extends JsonApiRequestProcessor implement
 	}
 
 	@Override
+	protected String getContentType() {
+		return HttpHeaders.JSON_CONTENT_TYPE;
+	}
+
+	@Override
 	protected HttpResponse toHttpResponse(Response response) {
 		Document document = response.getDocument();
 		if (document != null) {

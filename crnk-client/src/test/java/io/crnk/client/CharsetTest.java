@@ -6,13 +6,12 @@ import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListener;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Task;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.apache.http.Header;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
@@ -86,7 +85,7 @@ public class CharsetTest extends AbstractClientTest {
 
 
 		}
-		ResourceRepositoryV2<Task, Long> testRepo = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Long> testRepo = client.getRepositoryForType(Task.class);
 
 		Task entity = new Task();
 		entity.setId(1L);

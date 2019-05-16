@@ -3,8 +3,8 @@ package io.crnk.servlet.reactive;
 
 import io.crnk.client.CrnkClient;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.servlet.resource.ReactiveServletTestApplication;
 import io.crnk.servlet.resource.ReactiveServletTestContainer;
 import io.crnk.test.mock.models.Schedule;
@@ -51,7 +51,7 @@ public class ReactiveStressTest {
 				String url = testContainer.getBaseUrl();
 				CrnkClient client = new CrnkClient(url);
 
-				ResourceRepositoryV2<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
+				ResourceRepository<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
 
 				Task task = new Task();
 				task.setId(id + 100000);
@@ -82,9 +82,9 @@ public class ReactiveStressTest {
 				String url = testContainer.getBaseUrl();
 				CrnkClient client = new CrnkClient(url);
 
-				ResourceRepositoryV2<Schedule, Serializable> scheduleRepo = client.getRepositoryForType(Schedule.class);
-				ResourceRepositoryV2<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
-				RelationshipRepositoryV2<Task, Serializable, Schedule, Serializable> relRepo = client.getRepositoryForType(Task.class, Schedule.class);
+				ResourceRepository<Schedule, Serializable> scheduleRepo = client.getRepositoryForType(Schedule.class);
+				ResourceRepository<Task, Serializable> taskRepo = client.getRepositoryForType(Task.class);
+				RelationshipRepository<Task, Serializable, Schedule, Serializable> relRepo = client.getRepositoryForType(Task.class, Schedule.class);
 
 
 				Schedule schedule = new Schedule();

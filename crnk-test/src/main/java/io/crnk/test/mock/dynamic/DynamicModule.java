@@ -30,15 +30,15 @@ public class DynamicModule implements InitializingModule {
 			RegistryEntryBuilder builder = context.newRegistryEntryBuilder();
 
 			String resourceType = "dynamic" + i;
-			RegistryEntryBuilder.ResourceRepository resourceRepository = builder.resourceRepository();
+			RegistryEntryBuilder.ResourceRepositoryEntryBuilder resourceRepository = builder.resourceRepository();
 			resourceRepository.instance(new DynamicResourceRepository(resourceType));
 
-			RegistryEntryBuilder.RelationshipRepository parentRepository = builder.relationshipRepositoryForField("parent");
+			RegistryEntryBuilder.RelationshipRepositoryEntryBuilder parentRepository = builder.relationshipRepositoryForField("parent");
 			parentRepository.instance(new DynamicRelationshipRepository(resourceType));
-			RegistryEntryBuilder.RelationshipRepository childrenRepository = builder.relationshipRepositoryForField("children");
+			RegistryEntryBuilder.RelationshipRepositoryEntryBuilder childrenRepository = builder.relationshipRepositoryForField("children");
 			childrenRepository.instance(new DynamicRelationshipRepository(resourceType));
 
-			InformationBuilder.Resource resource = builder.resource();
+			InformationBuilder.ResourceInformationBuilder resource = builder.resource();
 			resource.resourceType(resourceType);
 			resource.resourceClass(Resource.class);
 			resource.addField("id", ResourceFieldType.ID, String.class);

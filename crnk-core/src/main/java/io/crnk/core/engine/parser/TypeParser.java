@@ -57,7 +57,6 @@ public class TypeParser {
 		parsers = new ConcurrentHashMap<>();
 		mappers = new ConcurrentHashMap<>();
 
-
 		mappers.putAll(DefaultStringParsers.get());
 		parsers.putAll(mappers);
 	}
@@ -106,7 +105,7 @@ public class TypeParser {
 	 * @param <T> type of class
 	 * @return {@link Iterable} of parsed values
 	 */
-	public <T extends Serializable> Iterable<T> parse(Iterable<String> inputs, Class<T> clazz) {
+	public <T > Iterable<T> parse(Iterable<String> inputs, Class<T> clazz) {
 		List<T> parsedValues = new LinkedList<>();
 		for (String input : inputs) {
 			parsedValues.add(parse(input, clazz));

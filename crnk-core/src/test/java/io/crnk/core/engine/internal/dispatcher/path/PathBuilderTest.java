@@ -1,5 +1,9 @@
 package io.crnk.core.engine.internal.dispatcher.path;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
@@ -17,10 +21,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathBuilderTest {
 
@@ -93,6 +93,7 @@ public class PathBuilderTest {
 		// THEN
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		assertThat(jsonPath.isCollection()).isTrue();
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks");
 	}
 
 	@Test
@@ -107,6 +108,7 @@ public class PathBuilderTest {
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		assertThat(jsonPath.getId()).isEqualTo(1L);
 		assertThat(jsonPath.isCollection()).isFalse();
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
 	}
 
 	@Test
@@ -121,6 +123,7 @@ public class PathBuilderTest {
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		Assert.assertEquals("someRepositoryAction", jsonPath.getActionName());
 		Assert.assertNull(jsonPath.getIds());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/someRepositoryAction");
 	}
 
 	@Test
@@ -135,6 +138,7 @@ public class PathBuilderTest {
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		Assert.assertEquals("someResourceAction", jsonPath.getActionName());
 		Assert.assertEquals(123L, jsonPath.getId());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/someResourceAction");
 	}
 
 
@@ -150,6 +154,7 @@ public class PathBuilderTest {
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		Assert.assertEquals(1L, jsonPath.getId());
 		Assert.assertEquals("project", jsonPath.getField().getJsonName());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/project");
 	}
 
 	@Test
@@ -176,6 +181,7 @@ public class PathBuilderTest {
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		Assert.assertEquals(1L, jsonPath.getId());
 		Assert.assertEquals("project", jsonPath.getRelationship().getJsonName());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}/relationships/project");
 	}
 
 	@Test
@@ -263,6 +269,7 @@ public class PathBuilderTest {
 		// THEN
 		assertThat(jsonPath.getRootEntry().getResourceInformation().getResourceType()).isEqualTo("tasks");
 		Assert.assertEquals(Arrays.asList(1L, 2L), jsonPath.getIds());
+		assertThat(jsonPath.toGroupPath()).isEqualTo("tasks/{id}");
 	}
 
 	@Test

@@ -1,5 +1,8 @@
 package io.crnk.core.engine.internal.registry;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -13,12 +16,9 @@ import io.crnk.core.exception.ResourceFieldNotFoundException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Holds information about a resource of type <i>T</i> and its repositories. It
@@ -47,8 +47,8 @@ public class RegistryEntryImpl implements RegistryEntry {
 	 * Used for resources with repositories (default).
 	 */
 	public RegistryEntryImpl(ResourceInformation resourceInformation, ResourceRepositoryAdapter resourceRepositoryAdapter,
-							 Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
-							 ModuleRegistry moduleRegistry) {
+			Map<ResourceField, RelationshipRepositoryAdapter> relationshipRepositoryAdapters,
+			ModuleRegistry moduleRegistry) {
 		this.resourceRepositoryAdapter = resourceRepositoryAdapter;
 		this.relationshipRepositoryAdapter = relationshipRepositoryAdapters;
 		this.moduleRegistry = moduleRegistry;
@@ -90,8 +90,7 @@ public class RegistryEntryImpl implements RegistryEntry {
 			return parentRegistryEntry.getRelationshipRepository(field);
 		}
 		if (adapter == null) {
-			throw new RelationshipRepositoryNotFoundException(getResourceInformation().getResourceType(),
-					field.getUnderlyingName());
+			throw new RelationshipRepositoryNotFoundException(field);
 		}
 		return adapter;
 	}
@@ -147,16 +146,16 @@ public class RegistryEntryImpl implements RegistryEntry {
 	}
 
 	/**
-	 * @return {@link ResourceRepositoryV2} facade to access the repository. Note that this is not the original
-	 * {@link ResourceRepositoryV2}
+	 * @return {@link ResourceRepository} facade to access the repository. Note that this is not the original
+	 * {@link ResourceRepository}
 	 * implementation backing the repository, but a facade that will also invoke all filters, decorators, etc. The actual
-	 * repository may or may not be implemented with {@link ResourceRepositoryV2}.
+	 * repository may or may not be implemented with {@link ResourceRepository}.
 	 * <p>
 	 * Note that currently there is not (yet) any inclusion mechanism supported. This is currently done on a
 	 * resource/document level only. But there might be some benefit to also be able to do it here on some occasions.
 	 */
-	public <T, I extends Serializable> ResourceRepositoryV2<T, I> getResourceRepositoryFacade() {
-		return (ResourceRepositoryV2<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
+	public <T, I > ResourceRepository<T, I> getResourceRepositoryFacade() {
+		return (ResourceRepository<T, I>) new ResourceRepositoryFacade(this, moduleRegistry);
 	}
 
 	@Override

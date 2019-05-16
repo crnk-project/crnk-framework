@@ -5,16 +5,17 @@ import io.crnk.core.engine.filter.RepositoryFilterContext;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,273 +31,282 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter implements RelationshipRepositoryAdapter {
 
-	private final Object relationshipRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipRepositoryAdapterImpl.class);
 
-	private final ResourceField field;
+    private final Object relationshipRepository;
 
-	public RelationshipRepositoryAdapterImpl(ResourceField field, ModuleRegistry moduleRegistry,
-											 Object relationshipRepository) {
-		super(moduleRegistry);
-		this.field = field;
-		this.relationshipRepository = relationshipRepository;
-	}
+    private final ResourceField field;
 
-	@SuppressWarnings("rawtypes")
-	public Result<JsonApiResponse> setRelation(Object source, Object targetId, ResourceField field, QueryAdapter queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+    public RelationshipRepositoryAdapterImpl(ResourceField field, ModuleRegistry moduleRegistry,
+                                             Object relationshipRepository) {
+        super(moduleRegistry);
+        this.field = field;
+        this.relationshipRepository = relationshipRepository;
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Object source = request.getEntity();
-				Serializable targetId = request.getId();
-				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
-				} else {
-					((RelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
-				}
-				return new JsonApiResponse();
-			}
-		};
-		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
-				.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, Arrays.asList(targetId), field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+    @SuppressWarnings("rawtypes")
+    public Result<JsonApiResponse> setRelation(Object source, Object targetId, ResourceField field, QueryAdapter queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-	@SuppressWarnings("rawtypes")
-	public Result<JsonApiResponse> setRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter
-			queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Object source = request.getEntity();
+                Serializable targetId = request.getId();
+                ResourceField field = request.getRelationshipField();
+                LOGGER.debug("setRelation {} on {} with {}", targetId, field, relationshipRepository);
+                if (relationshipRepository instanceof OneRelationshipRepository) {
+                    ((OneRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
+                } else {
+                    ((LegacyRelationshipRepository) relationshipRepository).setRelation(source, targetId, field.getUnderlyingName());
+                }
+                return new JsonApiResponse();
+            }
+        };
+        RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
+                .forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, Arrays.asList(targetId), field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
-				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
-							.setRelations(source, targetIds, field.getUnderlyingName());
-				} else {
-					((RelationshipRepository) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
-				}
-				return new JsonApiResponse();
-			}
-		};
-		RepositoryRequestSpec requestSpec =
-				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, targetIds, field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+    @SuppressWarnings("rawtypes")
+    public Result<JsonApiResponse> setRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter
+            queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-	@SuppressWarnings("rawtypes")
-	public Result<JsonApiResponse> addRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter
-			queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Object source = request.getEntity();
+                Collection<?> targetIds = request.getIds();
+                ResourceField field = request.getRelationshipField();
+                LOGGER.debug("setRelations {} on {} with {}", targetIds, field, relationshipRepository);
+                if (relationshipRepository instanceof ManyRelationshipRepository) {
+                    ((ManyRelationshipRepository) relationshipRepository)
+                            .setRelations(source, targetIds, field.getUnderlyingName());
+                } else {
+                    ((LegacyRelationshipRepository) relationshipRepository).setRelations(source, targetIds, field.getUnderlyingName());
+                }
+                return new JsonApiResponse();
+            }
+        };
+        RepositoryRequestSpec requestSpec =
+                RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.PATCH, source, queryAdapter, targetIds, field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
-				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
-							.addRelations(source, targetIds, field.getUnderlyingName());
-				} else {
-					((RelationshipRepository) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
-				}
-				return new JsonApiResponse();
-			}
-		};
-		RepositoryRequestSpec requestSpec =
-				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.POST, source, queryAdapter, targetIds, field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+    @SuppressWarnings("rawtypes")
+    public Result<JsonApiResponse> addRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter
+            queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-	@SuppressWarnings("rawtypes")
-	public Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field,
-												   QueryAdapter queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Object source = request.getEntity();
+                Collection<?> targetIds = request.getIds();
+                ResourceField field = request.getRelationshipField();
+                LOGGER.debug("addRelation {} on {} with {}", targetIds, field, relationshipRepository);
+                if (relationshipRepository instanceof ManyRelationshipRepository) {
+                    ((ManyRelationshipRepository) relationshipRepository)
+                            .addRelations(source, targetIds, field.getUnderlyingName());
+                } else {
+                    ((LegacyRelationshipRepository) relationshipRepository).addRelations(source, targetIds, field.getUnderlyingName());
+                }
+                return new JsonApiResponse();
+            }
+        };
+        RepositoryRequestSpec requestSpec =
+                RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.POST, source, queryAdapter, targetIds, field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Object source = request.getEntity();
-				Iterable<?> targetIds = request.getIds();
-				ResourceField field = request.getRelationshipField();
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					((RelationshipRepositoryV2) relationshipRepository)
-							.removeRelations(source, targetIds, field.getUnderlyingName());
-				} else {
-					((RelationshipRepository) relationshipRepository)
-							.removeRelations(source, targetIds, field.getUnderlyingName());
-				}
-				return new JsonApiResponse();
-			}
-		};
-		RepositoryRequestSpec requestSpec =
-				RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.DELETE, source, queryAdapter, targetIds, field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+    @SuppressWarnings("rawtypes")
+    public Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field,
+                                                   QueryAdapter queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-	@SuppressWarnings("rawtypes")
-	public Result<JsonApiResponse> findOneTarget(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Object source = request.getEntity();
+                Collection<?> targetIds = request.getIds();
+                ResourceField field = request.getRelationshipField();
+                LOGGER.debug("removeRelations {} on {} with {}", targetIds, field, relationshipRepository);
+                if (relationshipRepository instanceof ManyRelationshipRepository) {
+                    ((ManyRelationshipRepository) relationshipRepository)
+                            .removeRelations(source, targetIds, field.getUnderlyingName());
+                } else {
+                    ((LegacyRelationshipRepository) relationshipRepository)
+                            .removeRelations(source, targetIds, field.getUnderlyingName());
+                }
+                return new JsonApiResponse();
+            }
+        };
+        RepositoryRequestSpec requestSpec =
+                RepositoryRequestSpecImpl.forRelation(moduleRegistry, HttpMethod.DELETE, source, queryAdapter, targetIds, field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Serializable sourceId = request.getId();
-				ResourceField field = request.getRelationshipField();
+    @SuppressWarnings("rawtypes")
+    public Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-				Object resource;
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
-					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-									.getResourceInformation();
-					resource = querySpecRepository
-							.findOneTarget(sourceId, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
-				} else {
-					resource = ((RelationshipRepository) relationshipRepository)
-							.findOneTarget(sourceId, field.getUnderlyingName(), request.getQueryParams());
-				}
-				return getResponse(relationshipRepository, resource, request);
-			}
-		};
-		RepositoryRequestSpec requestSpec =
-				RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Serializable sourceId = request.getId();
+                ResourceField field = request.getRelationshipField();
 
-	public Result<JsonApiResponse> findManyTargets(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
-		RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
+                LOGGER.debug("findOneRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
+                Object resource;
+                if (relationshipRepository instanceof OneRelationshipRepository) {
+                    OneRelationshipRepository querySpecRepository = (OneRelationshipRepository) relationshipRepository;
+                    ResourceInformation targetResourceInformation =
+                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+                                    .getResourceInformation();
+                    Map map = querySpecRepository
+                            .findOneRelations(Arrays.asList(sourceId), field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
+                    resource = map.get(sourceId);
+                } else {
+                    resource = ((LegacyRelationshipRepository) relationshipRepository)
+                            .findOneTarget(sourceId, field.getUnderlyingName(), request.getQueryParams());
+                }
+                return getResponse(relationshipRepository, resource, request);
+            }
+        };
+        RepositoryRequestSpec requestSpec =
+                RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-			@Override
-			protected JsonApiResponse invoke(RepositoryFilterContext context) {
-				RepositoryRequestSpec request = context.getRequest();
-				Serializable sourceId = request.getId();
-				ResourceField field = request.getRelationshipField();
+    public Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter) {
+        RepositoryRequestFilterChainImpl chain = new RepositoryRequestFilterChainImpl() {
 
-				Object resources;
-				if (relationshipRepository instanceof RelationshipRepositoryV2) {
-					RelationshipRepositoryV2 querySpecRepository = (RelationshipRepositoryV2) relationshipRepository;
-					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-									.getResourceInformation();
-					resources = querySpecRepository.findManyTargets(sourceId, field.getUnderlyingName(),
-							request.getQuerySpec(targetResourceInformation));
-				} else {
-					resources = ((RelationshipRepository) relationshipRepository)
-							.findManyTargets(sourceId, field.getUnderlyingName(), request.getQueryParams());
-				}
-				return getResponse(relationshipRepository, resources, request);
-			}
-		};
-		RepositoryRequestSpec requestSpec =
-				RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
-		return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-	}
+            @Override
+            protected JsonApiResponse invoke(RepositoryFilterContext context) {
+                RepositoryRequestSpec request = context.getRequest();
+                Serializable sourceId = request.getId();
+                ResourceField field = request.getRelationshipField();
 
-	@SuppressWarnings("rawtypes")
-	public Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field,
-																	QueryAdapter queryAdapter) {
-		if (relationshipRepository instanceof BulkRelationshipRepositoryV2) {
-			RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
+                LOGGER.debug("findManyRelations for sourceId={} on {} with {}", sourceId, field, relationshipRepository);
+                Object resources;
+                if (relationshipRepository instanceof ManyRelationshipRepository) {
+                    ManyRelationshipRepository querySpecRepository = (ManyRelationshipRepository) relationshipRepository;
+                    ResourceInformation targetResourceInformation =
+                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+                                    .getResourceInformation();
+                    Map map = querySpecRepository.findManyRelations(Arrays.asList(sourceId), field.getUnderlyingName(),
+                            request.getQuerySpec(targetResourceInformation));
+                    resources = map.get(sourceId);
+                } else {
+                    resources = ((LegacyRelationshipRepository) relationshipRepository)
+                            .findManyTargets(sourceId, field.getUnderlyingName(), request.getQueryParams());
+                }
+                return getResponse(relationshipRepository, resources, request);
+            }
+        };
+        RepositoryRequestSpec requestSpec =
+                RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, Arrays.asList(sourceId), field);
+        return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+    }
 
-				@Override
-				protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
-					RepositoryRequestSpec request = context.getRequest();
-					Iterable sourceIds = request.getIds();
-					ResourceField field = request.getRelationshipField();
-					QueryAdapter queryAdapter = request.getQueryAdapter();
+    @SuppressWarnings("rawtypes")
+    public Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field,
+                                                                    QueryAdapter queryAdapter) {
+        if (relationshipRepository instanceof ManyRelationshipRepository) {
+            RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
 
-					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
-					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
-					QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
-					MultivaluedMap targetsMap = bulkRepository.findTargets(sourceIds, field.getUnderlyingName(), querySpec);
-					return toResponses(targetsMap, true, queryAdapter, field, HttpMethod.GET);
-				}
-			};
-			RepositoryRequestSpec requestSpec =
-					RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, new ArrayList<>(sourceIds), field);
-			return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-		} else {
-			// fallback to non-bulk operation
-			Map<Object, JsonApiResponse> responseMap = new HashMap<>();
-			for (Object sourceId : sourceIds) {
-				JsonApiResponse response = findManyTargets(sourceId, field, queryAdapter).get();
-				responseMap.put(sourceId, response);
-			}
-			return new ImmediateResult<>(responseMap);
-		}
-	}
+                @Override
+                protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
+                    RepositoryRequestSpec request = context.getRequest();
+                    Collection sourceIds = request.getIds();
+                    ResourceField field = request.getRelationshipField();
+                    QueryAdapter queryAdapter = request.getQueryAdapter();
 
-	@SuppressWarnings("rawtypes")
-	public Result<Map<Object, JsonApiResponse>> findBulkOneTargets(Collection sourceIds, ResourceField field, QueryAdapter
-			queryAdapter) {
+                    LOGGER.debug("findManyTargets for sourceIds={} on {} with {}", sourceIds, field, relationshipRepository);
+                    ManyRelationshipRepository bulkRepository = (ManyRelationshipRepository) relationshipRepository;
+                    ResourceInformation targetResourceInformation =
+                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType()).getResourceInformation();
+                    QuerySpec querySpec = request.getQuerySpec(targetResourceInformation);
+                    Map targetsMap = bulkRepository.findManyRelations(sourceIds, field.getUnderlyingName(), querySpec);
+                    return toResponses(targetsMap, true, queryAdapter, field, HttpMethod.GET);
+                }
+            };
+            RepositoryRequestSpec requestSpec =
+                    RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, new ArrayList<>(sourceIds), field);
+            return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+        } else {
+            // fallback to non-bulk operation
+            Map<Object, JsonApiResponse> responseMap = new HashMap<>();
+            for (Object sourceId : sourceIds) {
+                JsonApiResponse response = findManyRelations(sourceId, field, queryAdapter).get();
+                responseMap.put(sourceId, response);
+            }
+            return new ImmediateResult<>(responseMap);
+        }
+    }
 
-		if (relationshipRepository instanceof BulkRelationshipRepositoryV2) {
+    @SuppressWarnings("rawtypes")
+    public Result<Map<Object, JsonApiResponse>> findBulkOneTargets(Collection sourceIds, ResourceField field, QueryAdapter
+            queryAdapter) {
 
-			RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
+        if (relationshipRepository instanceof OneRelationshipRepository) {
 
-				@Override
-				protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
-					RepositoryRequestSpec request = context.getRequest();
-					Iterable<?> sourceIds = request.getIds();
-					ResourceField field = request.getRelationshipField();
-					QueryAdapter queryAdapter = request.getQueryAdapter();
+            RepositoryBulkRequestFilterChainImpl chain = new RepositoryBulkRequestFilterChainImpl() {
 
-					BulkRelationshipRepositoryV2 bulkRepository = (BulkRelationshipRepositoryV2) relationshipRepository;
-					ResourceInformation targetResourceInformation =
-							moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
-									.getResourceInformation();
-					MultivaluedMap targetsMap = bulkRepository
-							.findTargets(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
-					return toResponses(targetsMap, false, queryAdapter, field, HttpMethod.GET);
-				}
-			};
-			RepositoryRequestSpec requestSpec =
-					RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, new ArrayList<>(sourceIds), field);
-			return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
-		} else {
-			// fallback to non-bulk operation
-			Map<Object, JsonApiResponse> responseMap = new HashMap<>();
-			for (Object sourceId : sourceIds) {
-				JsonApiResponse response = findOneTarget(sourceId, field, queryAdapter).get();
-				responseMap.put(sourceId, response);
-			}
-			return new ImmediateResult<>(responseMap);
-		}
-	}
+                @Override
+                protected Map<Object, JsonApiResponse> invoke(RepositoryFilterContext context) {
+                    RepositoryRequestSpec request = context.getRequest();
+                    Collection<?> sourceIds = request.getIds();
+                    ResourceField field = request.getRelationshipField();
+                    QueryAdapter queryAdapter = request.getQueryAdapter();
+
+                    OneRelationshipRepository bulkRepository = (OneRelationshipRepository) relationshipRepository;
+                    ResourceInformation targetResourceInformation =
+                            moduleRegistry.getResourceRegistry().getEntry(field.getOppositeResourceType())
+                                    .getResourceInformation();
+
+                    LOGGER.debug("findOneRelations for sourceId={} on {} with {}", sourceIds, field, relationshipRepository);
+
+                    Map targetsMap = bulkRepository
+                            .findOneRelations(sourceIds, field.getUnderlyingName(), request.getQuerySpec(targetResourceInformation));
+                    return toResponses(targetsMap, false, queryAdapter, field, HttpMethod.GET);
+                }
+            };
+            RepositoryRequestSpec requestSpec =
+                    RepositoryRequestSpecImpl.forFindTarget(moduleRegistry, queryAdapter, new ArrayList<>(sourceIds), field);
+            return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
+        } else {
+            // fallback to non-bulk operation
+            Map<Object, JsonApiResponse> responseMap = new HashMap<>();
+            for (Object sourceId : sourceIds) {
+                JsonApiResponse response = findOneRelations(sourceId, field, queryAdapter).get();
+                responseMap.put(sourceId, response);
+            }
+            return new ImmediateResult<>(responseMap);
+        }
+    }
 
 
-	private Map<Object, JsonApiResponse> toResponses(MultivaluedMap targetsMap, boolean isMany, QueryAdapter queryAdapter,
-													 ResourceField field, HttpMethod method) {
-		Map<Object, JsonApiResponse> responseMap = new HashMap<>();
-		for (Object sourceId : targetsMap.keySet()) {
-			Object targets;
-			if (isMany) {
-				targets = targetsMap.getList(sourceId);
-			} else {
-				targets = targetsMap.getUnique(sourceId, true);
-			}
-			RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
-					.forRelation(moduleRegistry, method, null, queryAdapter, Collections.singleton(sourceId), field);
-			JsonApiResponse response = getResponse(relationshipRepository, targets, requestSpec);
-			responseMap.put(sourceId, response);
-		}
-		return responseMap;
-	}
+    private Map<Object, JsonApiResponse> toResponses(Map targetsMap, boolean isMany, QueryAdapter queryAdapter,
+                                                     ResourceField field, HttpMethod method) {
+        Map<Object, JsonApiResponse> responseMap = new HashMap<>();
+        for (Object sourceId : targetsMap.keySet()) {
+            Object targets = targetsMap.get(sourceId);
+            RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl
+                    .forRelation(moduleRegistry, method, null, queryAdapter, Collections.singleton(sourceId), field);
+            JsonApiResponse response = getResponse(relationshipRepository, targets, requestSpec);
+            responseMap.put(sourceId, response);
+        }
+        return responseMap;
+    }
 
-	public Object getRelationshipRepository() {
-		return relationshipRepository;
-	}
+    public Object getRelationshipRepository() {
+        return relationshipRepository;
+    }
 
-	@Override
-	public ResourceField getResourceField() {
-		return field;
-	}
+    @Override
+    public ResourceField getResourceField() {
+        return field;
+    }
 }

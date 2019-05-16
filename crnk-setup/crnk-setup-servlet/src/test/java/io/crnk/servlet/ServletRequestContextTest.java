@@ -1,6 +1,7 @@
 package io.crnk.servlet;
 
 import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.servlet.internal.ServletRequestContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,7 +40,6 @@ public class ServletRequestContextTest {
 	public void testGetters() {
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
 		Assert.assertEquals(request, context.getServletRequest());
-		Assert.assertEquals(request, context.getRequest());
 		Assert.assertEquals(response, context.getServletResponse());
 		Assert.assertEquals(servletContext, context.getServletContext());
 	}
@@ -48,8 +48,11 @@ public class ServletRequestContextTest {
 	public void testResponseHeaders() {
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, "/api");
 
-		context.setResponseHeader("test", "13");
-		Assert.assertEquals("13", context.getResponseHeader("test"));
+		HttpResponse response = new HttpResponse();
+		response.setHeader("test", "13");
+		context.setResponse(response);
+
+		Assert.assertEquals("13", context.getResponse().getHeader("test"));
 	}
 
 	@Test

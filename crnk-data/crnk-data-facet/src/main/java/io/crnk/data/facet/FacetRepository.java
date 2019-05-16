@@ -1,7 +1,7 @@
 package io.crnk.data.facet;
 
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 
-public interface FacetRepository extends ResourceRepositoryV2<FacetResource, String> {
+public interface FacetRepository extends ResourceRepository<FacetResource, String> {
 
 }

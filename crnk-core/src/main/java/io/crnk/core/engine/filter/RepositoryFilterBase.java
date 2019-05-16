@@ -4,6 +4,7 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -22,18 +23,18 @@ public class RepositoryFilterBase implements RepositoryFilter {
 	}
 
 	@Override
-	public <T> Iterable<T> filterResult(RepositoryFilterContext context, RepositoryResultFilterChain<T> chain) {
+	public <T> Collection<T> filterResult(RepositoryFilterContext context, RepositoryResultFilterChain<T> chain) {
 		return chain.doFilter(context);
 	}
 
 	@Override
-	public <T> MetaInformation filterMeta(RepositoryFilterContext context, Iterable<T> resources,
+	public <T> MetaInformation filterMeta(RepositoryFilterContext context, Collection<T> resources,
 										  RepositoryMetaFilterChain chain) {
 		return chain.doFilter(context, resources);
 	}
 
 	@Override
-	public <T> LinksInformation filterLinks(RepositoryFilterContext context, Iterable<T> resources,
+	public <T> LinksInformation filterLinks(RepositoryFilterContext context, Collection<T> resources,
 											RepositoryLinksFilterChain chain) {
 		return chain.doFilter(context, resources);
 	}

@@ -1,13 +1,13 @@
 package io.crnk.example.jersey.domain.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.links.PagedLinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
 import io.crnk.core.resource.meta.PagedMetaInformation;
 import io.crnk.example.jersey.domain.model.Project;
 
-public interface ProjectRepository extends ResourceRepositoryV2<Project, Long> {
+public interface ProjectRepository extends ResourceRepository<Project, Long> {
 
 	@Override
 	ProjectList findAll(QuerySpec querySpec);

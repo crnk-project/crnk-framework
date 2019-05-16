@@ -17,16 +17,17 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.LinksRepositoryV2;
-import io.crnk.core.repository.MetaRepositoryV2;
+import io.crnk.core.repository.LinksRepository;
+import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
-import io.crnk.legacy.repository.LinksRepository;
-import io.crnk.legacy.repository.MetaRepository;
+import io.crnk.legacy.repository.LegacyLinksRepository;
+import io.crnk.legacy.repository.LegacyMetaRepository;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -53,8 +54,8 @@ public abstract class ResponseRepositoryAdapter {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	protected <T> Iterable<T> filterResult(Iterable<?> resources, RepositoryRequestSpec requestSpec) {
-		RepositoryResultFilterChainImpl<T> chain = new RepositoryResultFilterChainImpl<>((Iterable) resources);
+	protected <T> Collection<T> filterResult(Collection<?> resources, RepositoryRequestSpec requestSpec) {
+		RepositoryResultFilterChainImpl<T> chain = new RepositoryResultFilterChainImpl<>((Collection) resources);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec));
 	}
 
@@ -63,14 +64,14 @@ public abstract class ResponseRepositoryAdapter {
 			return (JsonApiResponse) result;
 		}
 
-		Iterable<?> resources;
-		boolean isCollection = result instanceof Iterable;
+		Collection<?> resources;
+		boolean isCollection = result instanceof Collection;
 		if (isCollection) {
-			resources = (Iterable<?>) result;
+			resources = (Collection<?>) result;
 		} else {
 			resources = Collections.singletonList(result);
 		}
-		Iterable<?> filteredResult = filterResult(resources, requestSpec);
+		Collection<?> filteredResult = filterResult(resources, requestSpec);
 		MetaInformation metaInformation = getMetaInformation(repository, resources, requestSpec);
 		LinksInformation linksInformation = getLinksInformation(repository, resources, requestSpec);
 
@@ -91,27 +92,27 @@ public abstract class ResponseRepositoryAdapter {
 				.setMetaInformation(metaInformation);
 	}
 
-	private MetaInformation getMetaInformation(Object repository, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
+	private MetaInformation getMetaInformation(Object repository, Collection<?> resources, RepositoryRequestSpec requestSpec) {
 		RepositoryMetaFilterChainImpl chain = new RepositoryMetaFilterChainImpl(repository);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec), resources);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private MetaInformation doGetMetaInformation(Object repository, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
+	private MetaInformation doGetMetaInformation(Object repository, Collection<?> resources, RepositoryRequestSpec requestSpec) {
 		if (resources instanceof ResourceList) {
 			ResourceList<?> resourceList = (ResourceList<?>) resources;
 			return resourceList.getMeta();
 		}
 		QueryAdapter queryAdapter = requestSpec.getQueryAdapter();
-		if (repository instanceof MetaRepositoryV2) {
-			return ((MetaRepositoryV2) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
-		} else if (repository instanceof MetaRepository) {
-			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
+		if (repository instanceof MetaRepository) {
+			return ((MetaRepository) repository).getMetaInformation(resources, requestSpec.getResponseQuerySpec());
+		} else if (repository instanceof LegacyMetaRepository) {
+			return ((LegacyMetaRepository) repository).getMetaInformation(resources, requestSpec.getQueryParams());
 		}
 		return null;
 	}
 
-	private LinksInformation getLinksInformation(Object repository, Iterable<?> resources, RepositoryRequestSpec requestSpec) {
+	private LinksInformation getLinksInformation(Object repository, Collection<?> resources, RepositoryRequestSpec requestSpec) {
 		RepositoryLinksFilterChainImpl chain = new RepositoryLinksFilterChainImpl(repository);
 		return chain.doFilter(newRepositoryFilterContext(requestSpec), resources);
 	}
@@ -127,7 +128,7 @@ public abstract class ResponseRepositoryAdapter {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private LinksInformation doGetLinksInformation(Object repository, Iterable<?>
+	private LinksInformation doGetLinksInformation(Object repository, Collection<?>
 			resources, RepositoryRequestSpec requestSpec) {
 		if (resources instanceof ResourceList) {
 			ResourceList<?> resourceList = (ResourceList<?>) resources;
@@ -140,11 +141,11 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		LinksInformation linksInformation = null;
-		if (repository instanceof LinksRepositoryV2) {
+		if (repository instanceof LinksRepository) {
 			linksInformation =
-					((LinksRepositoryV2) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
-		} else if (repository instanceof LinksRepository) {
-			linksInformation = ((LinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
+					((LinksRepository) repository).getLinksInformation(resources, requestSpec.getResponseQuerySpec());
+		} else if (repository instanceof LegacyLinksRepository) {
+			linksInformation = ((LegacyLinksRepository) repository).getLinksInformation(resources, requestSpec.getQueryParams());
 		}
 		// everything deprecated anyway
 		return RepositoryAdapterUtils.enrichLinksInformation(moduleRegistry, linksInformation, resources, requestSpec);
@@ -161,7 +162,7 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		@Override
-		public <T> MetaInformation doFilter(RepositoryFilterContext context, Iterable<T> resources) { // NOSONAR
+		public <T> MetaInformation doFilter(RepositoryFilterContext context, Collection<T> resources) { // NOSONAR
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetMetaInformation(repository, resources, context.getRequest());
@@ -184,7 +185,7 @@ public abstract class ResponseRepositoryAdapter {
 		}
 
 		@Override
-		public <T> LinksInformation doFilter(RepositoryFilterContext context, Iterable<T> resources) { // NOSONAR
+		public <T> LinksInformation doFilter(RepositoryFilterContext context, Collection<T> resources) { // NOSONAR
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return doGetLinksInformation(repository, resources, context.getRequest());
@@ -200,14 +201,14 @@ public abstract class ResponseRepositoryAdapter {
 
 		protected int filterIndex = 0;
 
-		private Iterable<T> result;
+		private Collection<T> result;
 
-		public RepositoryResultFilterChainImpl(Iterable<T> result) {
+		public RepositoryResultFilterChainImpl(Collection<T> result) {
 			this.result = result;
 		}
 
 		@Override
-		public Iterable<T> doFilter(RepositoryFilterContext context) { // NOSONAR
+		public Collection<T> doFilter(RepositoryFilterContext context) { // NOSONAR
 			List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
 			if (filterIndex == filters.size()) {
 				return result;

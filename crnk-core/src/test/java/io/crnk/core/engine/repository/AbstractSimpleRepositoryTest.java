@@ -1,12 +1,12 @@
 package io.crnk.core.engine.repository;
 
 import io.crnk.core.mock.models.Task;
-import io.crnk.legacy.repository.AbstractSimpleRepository;
+import io.crnk.legacy.repository.AbstractSimpleLegacyRepository;
 import org.junit.Test;
 
 public class AbstractSimpleRepositoryTest {
 
-	private AbstractSimpleRepository<Task, Long> repo = new AbstractSimpleRepository<Task, Long>() {
+	private AbstractSimpleLegacyRepository<Task, Long> repo = new AbstractSimpleLegacyRepository<Task, Long>() {
 	};
 
 	@Test(expected = UnsupportedOperationException.class)

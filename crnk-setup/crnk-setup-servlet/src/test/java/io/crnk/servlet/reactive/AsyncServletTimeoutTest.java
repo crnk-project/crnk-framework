@@ -3,7 +3,7 @@ package io.crnk.servlet.reactive;
 
 import io.crnk.client.ClientException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.servlet.AsyncCrnkServlet;
 import io.crnk.servlet.reactive.model.SlowResourceRepository;
@@ -42,7 +42,7 @@ public class AsyncServletTimeoutTest {
 		servlet.setTimeout(Duration.ofMillis(2000));
 		slowResourceRepository.setDelay(100);
 
-		ResourceRepositoryV2<SlowTask, Serializable> repository = testContainer.getRepositoryForType(SlowTask.class);
+		ResourceRepository<SlowTask, Serializable> repository = testContainer.getRepositoryForType(SlowTask.class);
 		QuerySpec querySpec = new QuerySpec(SlowTask.class);
 		ResourceList<SlowTask> list = repository.findAll(querySpec);
 		Assert.assertEquals(1, list.size());
@@ -53,7 +53,7 @@ public class AsyncServletTimeoutTest {
 		servlet.setTimeout(Duration.ofMillis(2000));
 		slowResourceRepository.setDelay(4000);
 
-		ResourceRepositoryV2<SlowTask, Serializable> repository = testContainer.getRepositoryForType(SlowTask.class);
+		ResourceRepository<SlowTask, Serializable> repository = testContainer.getRepositoryForType(SlowTask.class);
 		QuerySpec querySpec = new QuerySpec(SlowTask.class);
 		try {
 			repository.findAll(querySpec);

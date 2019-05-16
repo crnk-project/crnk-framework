@@ -2,14 +2,14 @@ package io.crnk.validation.mock.repository;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import io.crnk.validation.mock.models.Task;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TaskRepository implements ResourceRepository<Task, Long> {
+public class TaskRepository implements LegacyResourceRepository<Task, Long> {
 
 	public static final ConcurrentHashMap<Long, Task> map = new ConcurrentHashMap<>();
 

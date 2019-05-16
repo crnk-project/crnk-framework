@@ -4,14 +4,15 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 
-import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Iterator;
  * QuerySpec and ResourceList. Note that the former
  * {@link ResourceRepositoryBase} will be removed in the near future.
  * <p>
- * Base implements for {@link ResourceRepositoryV2} implementing most of the
+ * Base implements for {@link ResourceRepository} implementing most of the
  * methods. Unless {@link #save(T)} and {@link #delete(I)} get
  * overridden, this repository is read-only. Only {@link #findAll(QuerySpec)}
  * needs to be implemented to have a working repository.
@@ -27,7 +28,7 @@ import java.util.Iterator;
  * @param <T> resource type
  * @param <I> identity type
  */
-public abstract class ResourceRepositoryBase<T, I extends Serializable> implements ResourceRepositoryV2<T, I>, ResourceRegistryAware {
+public abstract class ResourceRepositoryBase<T, I > implements ResourceRepository<T, I>, ResourceRegistryAware {
 
 	private Class<T> resourceClass;
 
@@ -56,8 +57,8 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 
 		QuerySpec idQuerySpec = querySpec.duplicate();
 		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idName), FilterOperator.EQ, id));
-		Iterable<T> iterable = findAll(idQuerySpec);
-		Iterator<T> iterator = iterable.iterator();
+		Collection<T> Collection = findAll(idQuerySpec);
+		Iterator<T> iterator = Collection.iterator();
 		if (iterator.hasNext()) {
 			T resource = iterator.next();
 			PreconditionUtil.verify(!iterator.hasNext(), "expected unique result for id=%s, querySpec=%s", id, querySpec);
@@ -75,7 +76,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 	 * @return resources
 	 */
 	@Override
-	public ResourceList<T> findAll(Iterable<I> ids, QuerySpec querySpec) {
+	public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
 		RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
 		String idName = entry.getResourceInformation().getIdField().getUnderlyingName();
 
@@ -92,7 +93,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 	 */
 	@Override
 	public <S extends T> S save(S resource) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public abstract class ResourceRepositoryBase<T, I extends Serializable> implemen
 	 */
 	@Override
 	public void delete(I id) {
-		throw new UnsupportedOperationException();
+		throw new MethodNotAllowedException("method not allowed");
 	}
 
 	@Override

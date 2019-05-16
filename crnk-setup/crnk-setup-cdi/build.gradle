@@ -4,6 +4,11 @@ dependencies {
 	compile project(':crnk-core')
 	compileOnly(group: 'javax', name: 'javaee-api', version: '7.0')
 
+	testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+
 	testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-api', version: '1.7.1'
 	testCompile group: 'org.apache.deltaspike.modules', name: 'deltaspike-test-control-module-impl', version: '1.7.1'
 	testCompile group: 'org.apache.deltaspike.cdictrl', name: 'deltaspike-cdictrl-weld', version: '1.7.1'

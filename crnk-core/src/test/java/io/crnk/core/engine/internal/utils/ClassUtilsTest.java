@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class ClassUtilsTest {
 		Class<?> result = ClassUtils.getRawType(ProjectRepository.class.getGenericInterfaces()[0]);
 
 		// THEN
-		assertThat(result).isEqualTo(ResourceRepository.class);
+		assertThat(result).isEqualTo(LegacyResourceRepository.class);
 	}
 
 	@Test

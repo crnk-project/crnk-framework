@@ -2,6 +2,9 @@ package io.crnk.core.queryspec.mapper;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import io.crnk.core.CoreTestContainer;
@@ -49,7 +52,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	}
 
 	@Test
-	public void dotSeparatorEnabledByDefault(){
+	public void dotSeparatorEnabledByDefault() {
 		Assert.assertTrue(urlMapper.getEnforceDotPathSeparator());
 	}
 
@@ -95,7 +98,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		projectQuerySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "test"));
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.putRelatedSpec(Project.class, projectQuerySpec);
-		check("http://127.0.0.1/tasks?filter[projects][name][EQ]=test", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[projects][name]=test", null, querySpec);
 	}
 
 	@Test
@@ -112,7 +115,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void testFindAllOrderByAsc() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
-		check("http://127.0.0.1/tasks?sort[tasks]=name", null, querySpec);
+		check("http://127.0.0.1/tasks?sort=name", null, querySpec);
 	}
 
 	@Test
@@ -120,7 +123,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.ASC));
 		querySpec.addSort(new SortSpec(Arrays.asList("id"), Direction.DESC));
-		check("http://127.0.0.1/tasks?sort[tasks]=name%2C-id", null, querySpec);
+		check("http://127.0.0.1/tasks?sort=name%2C-id", null, querySpec);
 	}
 
 	@Test
@@ -128,7 +131,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeField(Arrays.asList("name"));
 		querySpec.includeField(Arrays.asList("id"));
-		check("http://127.0.0.1/tasks?fields[tasks]=name%2Cid", null, querySpec);
+		check("http://127.0.0.1/tasks?fields=name%2Cid", null, querySpec);
 	}
 
 	@Test
@@ -136,28 +139,28 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
 		querySpec.includeRelation(Arrays.asList("projects"));
-		check("http://127.0.0.1/tasks?include[tasks]=project%2Cprojects", null, querySpec);
+		check("http://127.0.0.1/tasks?include=project%2Cprojects", null, querySpec);
 	}
 
 	@Test
 	public void testFindAllOrderByDesc() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addSort(new SortSpec(Arrays.asList("name"), Direction.DESC));
-		check("http://127.0.0.1/tasks?sort[tasks]=-name", null, querySpec);
+		check("http://127.0.0.1/tasks?sort=-name", null, querySpec);
 	}
 
 	@Test
 	public void testFilterByOne() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, "value"));
-		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=value", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[name]=value", null, querySpec);
 	}
 
 	@Test
 	public void testFilterWithLikeUsesStrings() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("deleted"), FilterOperator.LIKE, "value"));
-		check("http://127.0.0.1/tasks?filter[tasks][deleted][LIKE]=value", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[deleted][LIKE]=value", null, querySpec);
 	}
 
 	@Test
@@ -166,7 +169,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.LIKE, Arrays.asList("john", "jane")));
-		check("http://127.0.0.1/tasks?filter[tasks][name][LIKE]=jane%2Cjohn", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[name][LIKE]=jane%2Cjohn", null, querySpec);
 	}
 
 	@Test
@@ -175,35 +178,42 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, Arrays.asList("john", "jane")));
-		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=john&filter[tasks][name][EQ]=jane", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[name]=john&filter[name]=jane", null, querySpec);
 	}
 
 	@Test
 	public void testFilterByPath() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("project", "name"), FilterOperator.EQ, "value"));
-		check("http://127.0.0.1/tasks?filter[tasks][project.name][EQ]=value", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[project.name]=value", null, querySpec);
 	}
 
 	@Test
 	public void testFilterByNull() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("name"), FilterOperator.EQ, null));
-		check("http://127.0.0.1/tasks?filter[tasks][name][EQ]=null", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[name]=null", null, querySpec);
 	}
 
 	@Test
 	public void testFilterEquals() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.EQ, 1));
-		check("http://127.0.0.1/tasks?filter[tasks][id][EQ]=1", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[id]=1", null, querySpec);
+	}
+
+	@Test
+	public void testFilterWithJson() throws UnsupportedEncodingException {
+		QuerySpec querySpec = new QuerySpec(Task.class);
+		querySpec.addFilter(new FilterSpec("{id: 1}"));
+		check("http://127.0.0.1/tasks?filter=" + URLEncoder.encode("{id: 1}", StandardCharsets.UTF_8.toString()), null, querySpec);
 	}
 
 	@Test
 	public void testFilterGreater() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.addFilter(new FilterSpec(Arrays.asList("id"), FilterOperator.LE, 1));
-		check("http://127.0.0.1/tasks?filter[tasks][id][LE]=1", null, querySpec);
+		check("http://127.0.0.1/tasks?filter[id][LE]=1", null, querySpec);
 	}
 
 	//
@@ -230,7 +240,14 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void testIncludeRelations() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeRelation(Arrays.asList("project"));
-		check("http://127.0.0.1/tasks?include[tasks]=project", null, querySpec);
+		check("http://127.0.0.1/tasks?include=project", null, querySpec);
+	}
+
+	@Test
+	public void testIncludeRelationsOfDifferentTypes() {
+		QuerySpec querySpec = new QuerySpec(CustomPagingPojo.class);
+		querySpec.includeRelation(Arrays.asList("task"));
+		check("http://127.0.0.1/custom-paging?include=task", null, querySpec);
 	}
 
 	@Test
@@ -244,7 +261,7 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 	public void testIncludeAttributes() {
 		QuerySpec querySpec = new QuerySpec(Task.class);
 		querySpec.includeField(Arrays.asList("name"));
-		check("http://127.0.0.1/tasks?fields[tasks]=name", null, querySpec);
+		check("http://127.0.0.1/tasks?fields=name", null, querySpec);
 	}
 
 	@Test
@@ -254,8 +271,8 @@ public class DefaultQuerySpecUrlMapperSerializerTest {
 		querySpec.includeRelation(Arrays.asList("followupProject"));
 		querySpec.addSort(new SortSpec(Arrays.asList("desc"), Direction.ASC));
 		querySpec.addFilter(new FilterSpec(Arrays.asList("desc"), FilterOperator.EQ, "test"));
-		check("http://127.0.0.1/schedules?include[schedules]=followup&filter[schedules][description][EQ]=test&sort[schedules"
-						+ "]=description&fields[schedules]=description",
+		check("http://127.0.0.1/schedules?include=followup&filter[description]=test&sort"
+						+ "=description&fields=description",
 				null, querySpec);
 	}
 

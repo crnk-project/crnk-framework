@@ -2,6 +2,7 @@ package io.crnk.data;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -124,5 +125,62 @@ public class PlainTextSerializerTest {
 		Assert.assertEquals(resource.getLinks(), resourceCopy.getLinks());
 		Assert.assertEquals(resource.getAttributes(), resourceCopy.getAttributes());
 		Assert.assertEquals(resource.getRelationships(), resourceCopy.getRelationships());
+	}
+
+	@Test
+	public void included() throws IOException {
+		ObjectNode attrValue = (ObjectNode) objectMapper.readTree("{\"a\": \"b\"}");
+		ObjectNode someMeta = (ObjectNode) objectMapper.readTree("{\"someMeta\": \"1\"}");
+		ObjectNode someLinks = (ObjectNode) objectMapper.readTree("{\"someLink\": \"2\"}");
+
+		Relationship relationship = new Relationship();
+		relationship.setData(Nullable.of(new ResourceIdentifier("a", "b")));
+		relationship.setLinks(someLinks);
+		relationship.setMeta(someMeta);
+
+		Resource resource = new Resource();
+		resource.setId("someId");
+		resource.setType("someType");
+		resource.setMeta(someMeta);
+		resource.setLinks(someLinks);
+		resource.getAttributes().put("someAttr", attrValue);
+		resource.getRelationships().put("someRelation", relationship);
+
+		// resource matching the relationship
+		Resource related = new Resource();
+		related.setId("a");
+		related.setType("b");
+		related.setMeta(someMeta);
+		related.setLinks(someLinks);
+		related.getAttributes().put("someAttr", attrValue);
+		related.getRelationships().put("someRelation", relationship);
+
+		ErrorDataBuilder builder = new ErrorDataBuilder();
+		builder.setStatus("test");
+
+		PlainJsonDocument document = new PlainJsonDocument();
+		document.setData(Nullable.of(resource));
+		document.setIncluded(Arrays.asList(related));
+
+		String json = objectMapper.writeValueAsString(document);
+		PlainJsonDocument copy = objectMapper.readValue(json, PlainJsonDocument.class);
+
+		Resource resourceCopy = copy.getSingleData().get();
+		Assert.assertEquals(resource.getId(), resourceCopy.getId());
+		Assert.assertEquals(resource.getType(), resourceCopy.getType());
+		Assert.assertEquals(resource.getMeta(), resourceCopy.getMeta());
+		Assert.assertEquals(resource.getLinks(), resourceCopy.getLinks());
+		Assert.assertEquals(resource.getAttributes(), resourceCopy.getAttributes());
+		Assert.assertEquals(resource.getRelationships(), resourceCopy.getRelationships());
+
+		List<Resource> includedCopy = copy.getIncluded();
+		Assert.assertEquals(1, includedCopy.size());
+		Resource relatedCopy = includedCopy.get(0);
+		Assert.assertEquals(related.getId(), relatedCopy.getId());
+		Assert.assertEquals(related.getType(), relatedCopy.getType());
+		Assert.assertEquals(related.getMeta(), relatedCopy.getMeta());
+		Assert.assertEquals(related.getLinks(), relatedCopy.getLinks());
+		Assert.assertEquals(related.getAttributes(), relatedCopy.getAttributes());
+		Assert.assertEquals(related.getRelationships(), relatedCopy.getRelationships());
 	}
 }

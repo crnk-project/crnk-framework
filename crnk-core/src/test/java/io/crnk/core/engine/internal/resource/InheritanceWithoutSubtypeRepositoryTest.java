@@ -19,7 +19,6 @@ import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.core.repository.RelationshipRepositoryV2;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
@@ -34,6 +33,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase {
@@ -311,7 +311,7 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		}
 	}
 
-	public static class RelationshipRepository implements RelationshipRepositoryV2 {
+	public static class RelationshipRepository implements io.crnk.core.repository.RelationshipRepository {
 
 		@Override
 		public Class getSourceResourceClass() {
@@ -324,34 +324,34 @@ public class InheritanceWithoutSubtypeRepositoryTest extends ControllerTestBase 
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			RelatedResource related = new RelatedResource();
 			related.setId("related1");
 			return related;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 	}

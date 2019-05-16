@@ -6,6 +6,7 @@ import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.example.springboot.domain.model.Project;
 import io.crnk.example.springboot.domain.model.ScheduleEntity;
 import io.crnk.example.springboot.domain.model.Task;
+import io.crnk.example.springboot.domain.model.UserAddress;
 import io.crnk.example.springboot.domain.model.UserEntity;
 import io.crnk.example.springboot.domain.repository.ProjectRepository;
 import io.crnk.example.springboot.domain.repository.TaskRepository;
@@ -64,14 +65,20 @@ public class TestDataLoader {
 			@Override
 			public Object call() {
 				for (int i = 0; i < 10; i++) {
+					UserAddress address = new UserAddress();
+					address.setCity("Zurich");
+					address.setStreet("Bahnhofstrasse");
+
 					UserEntity john = new UserEntity();
 					john.setLoginId("john" + i);
 					john.setName("John Doe");
+					john.setAddress(address);
 					em.persist(john);
 
 					UserEntity jane = new UserEntity();
 					jane.setLoginId("jane" + i);
 					jane.setName("Jane Doe");
+					jane.setAddress(address);
 					em.persist(jane);
 
 					ScheduleEntity scheduleEntity = new ScheduleEntity();

@@ -17,6 +17,7 @@ import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.repository.RepositoryInformationProviderContext;
+import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
@@ -25,6 +26,7 @@ import io.crnk.core.engine.internal.exception.ExceptionMapperLookup;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistry;
 import io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder;
 import io.crnk.core.engine.internal.information.DefaultInformationBuilder;
+import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.registry.DefaultRegistryEntryBuilder;
 import io.crnk.core.engine.internal.repository.RepositoryAdapterFactory;
 import io.crnk.core.engine.internal.utils.MultivaluedMap;
@@ -44,14 +46,13 @@ import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
 import io.crnk.core.module.discovery.ServiceDiscovery;
+import io.crnk.core.module.internal.DefaultRepositoryInformationProviderContext;
 import io.crnk.core.module.internal.ResourceFilterDirectoryImpl;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.repository.decorate.RelationshipRepositoryDecorator;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.decorate.ResourceRepositoryDecorator;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Prioritizable;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +121,9 @@ public class ModuleRegistry {
     private ControllerRegistry controllerRegistry;
 
     private QueryAdapterBuilder queryAdapterBuilder;
+
+    private Map<Object, RepositoryInformation> repositoryInformations = new ConcurrentHashMap<>();
+
 
     public ModuleRegistry() {
         this(true);
@@ -456,7 +461,7 @@ public class ModuleRegistry {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void applyRepositoryRegistrations() {
-        Collection<Object> repositories = filterDecorators(aggregatedModule.getRepositories());
+        Collection<Object> repositories = aggregatedModule.getRepositories();
         for (Object repository : repositories) {
             applyRepositoryRegistration(repository);
         }
@@ -467,7 +472,7 @@ public class ModuleRegistry {
         resourceClasses.addAll(getResourceLookup().getResourceClasses());
         if (resourceRegistry != null) {
             resourceClasses
-                    .addAll(resourceRegistry.getResources().stream().map(it -> it.getResourceInformation().getResourceClass())
+                    .addAll(resourceRegistry.getEntries().stream().map(it -> it.getResourceInformation().getResourceClass())
                             .collect(Collectors.toList()));
         }
         for (Class resourceClass : new ArrayList<>(resourceClasses)) {
@@ -482,6 +487,44 @@ public class ModuleRegistry {
         for (Class<?> resourceClass : resourceClasses) {
             if (resourceRegistry.getEntry(resourceClass) == null) {
                 applyResourceRegistration(resourceClass, addtionalEntryMap);
+            }
+        }
+
+        initOpposites();
+        initNesting();
+    }
+
+    private void initOpposites() {
+
+        Collection<RegistryEntry> entries = resourceRegistry.getEntries();
+        for (RegistryEntry entry : entries) {
+            ResourceInformation resourceInformation = entry.getResourceInformation();
+            for (ResourceField field : resourceInformation.getRelationshipFields()) {
+                String oppositeName = field.getOppositeName();
+                if (oppositeName != null) {
+                    RegistryEntry oppositeEntry = resourceRegistry.getEntry(field.getOppositeResourceType());
+                    PreconditionUtil.verify(oppositeEntry != null, "unable to find opposite resource '%s' for field %s", field.getOppositeResourceType(), field);
+
+                    ResourceField oppositeField = oppositeEntry.getResourceInformation().findFieldByUnderlyingName(oppositeName);
+                    PreconditionUtil.verify(oppositeField != null, "unable to find opposite field '%s' for field %s", oppositeName, field);
+
+                    String oppositeOppositeName = oppositeField.getOppositeName();
+                    if (oppositeOppositeName != null) {
+                        PreconditionUtil.verifyEquals(field.getUnderlyingName(), oppositeOppositeName, "opposite references do not match for %s and %s", field, oppositeField);
+                    } else {
+                        ((ResourceFieldImpl) oppositeField).setOppositeName(field.getUnderlyingName());
+                    }
+                }
+            }
+        }
+    }
+
+    private void initNesting() {
+        Collection<RegistryEntry> entries = resourceRegistry.getEntries();
+        for (RegistryEntry entry : entries) {
+            ResourceInformation resourceInformation = entry.getResourceInformation();
+            if (resourceInformation.getIdField() != null) {
+                resourceInformation.initNesting();
             }
         }
     }
@@ -541,12 +584,6 @@ public class ModuleRegistry {
         return entry;
     }
 
-    private List<Object> filterDecorators(List<Object> repositories) {
-        return repositories.stream()
-                .filter(it -> !(it instanceof ResourceRepositoryDecorator || it instanceof RelationshipRepositoryDecorator))
-                .collect(Collectors.toList());
-    }
-
     private void applyRepositoryRegistration(Object repository) {
         if (repository instanceof HttpRequestContextAware) {
             ((HttpRequestContextAware) repository).setHttpRequestContextProvider(getHttpRequestContextProvider());
@@ -604,6 +641,17 @@ public class ModuleRegistry {
 
     public TypeParser getTypeParser() {
         return typeParser;
+    }
+
+    public RepositoryInformation getRepositoryInformation(Object repository) {
+        RepositoryInformation repositoryInformation = repositoryInformations.get(repository);
+        if (repositoryInformation == null) {
+            RepositoryInformationProvider repositoryInformationBuilder = getRepositoryInformationBuilder();
+            repositoryInformation = repositoryInformationBuilder.build(repository, new
+                    DefaultRepositoryInformationProviderContext(this));
+            repositoryInformations.put(repository, repositoryInformation);
+        }
+        return repositoryInformation;
     }
 
     public ModuleContext getContext() {

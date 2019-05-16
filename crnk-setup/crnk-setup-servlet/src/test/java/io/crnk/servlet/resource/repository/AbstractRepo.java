@@ -2,7 +2,7 @@ package io.crnk.servlet.resource.repository;
 
 
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import io.crnk.servlet.resource.model.AbstractResource;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class AbstractRepo<T extends AbstractResource, ID extends Long> implements ResourceRepository<T, ID> {
+public abstract class AbstractRepo<T extends AbstractResource, ID extends Long> implements LegacyResourceRepository<T, ID> {
 	@Override
 	public T findOne(ID id, QueryParams queryParams) {
 		return getRepo().get(id);

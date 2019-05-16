@@ -1,5 +1,8 @@
 package io.crnk.example.springboot.domain.repository;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.common.reflect.TypeToken;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
@@ -11,9 +14,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.example.springboot.domain.model.History;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-
 // tag::docs[]
 @Component
 public class HistoryFieldContributor implements ResourceFieldContributor {
@@ -22,7 +22,7 @@ public class HistoryFieldContributor implements ResourceFieldContributor {
 	public List<ResourceField> getResourceFields(ResourceFieldContributorContext context) {
 		// this method could be omitted if the history field is added regularly to Project and Task resource. This would be
 		// simpler and recommended, but may not always be possible. Here we demonstrate doing it dynamically.
-		InformationBuilder.Field fieldBuilder = context.getInformationBuilder().createResourceField();
+		InformationBuilder.FieldInformationBuilder fieldBuilder = context.getInformationBuilder().createResourceField();
 		fieldBuilder.name("history");
 		fieldBuilder.genericType(new TypeToken<List<History>>() {
 		}.getType());
@@ -40,6 +40,11 @@ public class HistoryFieldContributor implements ResourceFieldContributor {
 
 			@Override
 			public void setValue(Object resource, Object fieldValue) {
+			}
+
+			@Override
+			public Class getImplementationClass() {
+				return List.class;
 			}
 		});
 		return Arrays.asList(fieldBuilder.build());

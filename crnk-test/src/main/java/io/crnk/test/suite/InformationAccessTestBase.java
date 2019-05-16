@@ -1,7 +1,7 @@
 package io.crnk.test.suite;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Project.ProjectLinks;
@@ -18,9 +18,9 @@ public abstract class InformationAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
 	@Before
 	public void setup() {

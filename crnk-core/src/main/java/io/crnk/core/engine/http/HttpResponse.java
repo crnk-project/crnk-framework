@@ -6,59 +6,72 @@ import java.util.Map;
 
 public class HttpResponse {
 
-	private Map<String, String> headers = new HashMap();
+    private Map<String, String> headers = new HashMap();
 
-	private int statusCode;
+    private int statusCode;
 
-	private byte[] body;
+    private byte[] body;
+
+    private String statusMessage;
 
 
-	public void setHeader(String name, String value) {
-		headers.put(name, value);
-	}
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
 
-	public Map<String, String> getHeaders() {
-		return headers;
-	}
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 
-	public void setHeaders(Map<String, String> headers) {
-		this.headers = headers;
-	}
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
 
-	public int getStatusCode() {
-		return statusCode;
-	}
+    public int getStatusCode() {
+        return statusCode;
+    }
 
-	public void setStatusCode(int statusCode) {
-		this.statusCode = statusCode;
-	}
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
 
-	public byte[] getBody() {
-		return body;
-	}
+    public String getStatusMessage() {
+        if(statusMessage == null){
+            return HttpStatus.toMessage(statusCode);
+        }
+        return statusMessage;
+    }
 
-	public void setBody(byte[] body) {
-		this.body = body;
-	}
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
 
-	public void setBody(String body) {
-		this.body = body.getBytes(Charset.forName("utf8"));
-	}
+    public byte[] getBody() {
+        return body;
+    }
 
-	public String getHeader(String name) {
-		return headers.get(name);
-	}
+    public void setBody(byte[] body) {
+        this.body = body;
+    }
 
-	public void setContentType(String contentType) {
-		setHeader(HttpHeaders.HTTP_CONTENT_TYPE, contentType);
-	}
+    public void setBody(String body) {
+        this.body = body.getBytes(Charset.forName("utf8"));
+    }
 
-	public String getContentType() {
-		return getHeader(HttpHeaders.HTTP_CONTENT_TYPE);
-	}
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[status=" + statusCode + ",bodyLength=" + (body != null ? body.length : 0) + ",headers=" + headers + "]";
-	}
+    public void setContentType(String contentType) {
+        setHeader(HttpHeaders.HTTP_CONTENT_TYPE, contentType);
+    }
+
+    public String getContentType() {
+        return getHeader(HttpHeaders.HTTP_CONTENT_TYPE);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[status=" + statusCode + ",bodyLength=" + (body != null ? body.length : 0) + ",headers=" + headers + "]";
+    }
 }

@@ -59,7 +59,7 @@ export class QTypedManyResourceRelationship<Q extends BeanPath<T>, T extends Sto
 
 	public get reference(): Q {
 		if (this._reference == null) {
-			this._reference = new this._referenceType(null, 'data');
+			this._reference = new this._referenceType(null, 'reference');
 			this._reference.parentPath = this;
 		}
 		return this._reference;

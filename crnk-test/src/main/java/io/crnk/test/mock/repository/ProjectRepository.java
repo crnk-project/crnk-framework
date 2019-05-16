@@ -4,9 +4,9 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LinksRepository;
-import io.crnk.legacy.repository.MetaRepository;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyLinksRepository;
+import io.crnk.legacy.repository.LegacyMetaRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Project.ProjectLinks;
 import io.crnk.test.mock.models.Project.ProjectMeta;
@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectRepository implements ResourceRepository<Project, Long>, MetaRepository<Project>, LinksRepository<Project> {
+public class ProjectRepository implements LegacyResourceRepository<Project, Long>, LegacyMetaRepository<Project>, LegacyLinksRepository<Project> {
 
 	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

@@ -11,7 +11,7 @@ dependencies {
 
 	compile project(':crnk-setup:crnk-setup-servlet')
 	compile project(':crnk-setup:crnk-setup-spring')
-	compileOnly project(':crnk-jpa')
+	compileOnly project(':crnk-data:crnk-data-jpa')
 	compileOnly project(':crnk-validation')
 	compileOnly project(':crnk-home')
 	compileOnly project(':crnk-meta')
@@ -21,6 +21,9 @@ dependencies {
 	compileOnly project(':crnk-client')
 	compileOnly project(':crnk-data:crnk-data-facet')
 	compileOnly project(':crnk-format:crnk-format-plain-json')
+	compileOnly project(':crnk-monitor:crnk-monitor-opentracing')
+
+	compileOnly 'io.opentracing:opentracing-api:0.31.0'
 
 	compileOnly 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
 	compileOnly 'org.springframework.boot:spring-boot-starter-web'
@@ -30,8 +33,7 @@ dependencies {
 
 	compileOnly 'org.springframework:spring-orm'
 
-	testCompile project(':crnk-jpa')
-	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-data:crnk-data-jpa')
 	testCompile project(':crnk-validation')
 	testCompile project(':crnk-home')
 	testCompile project(':crnk-meta')
@@ -57,6 +59,7 @@ dependencies {
 	testCompile 'org.springframework.security:spring-security-core'
 	testCompile 'net.javacrumbs.json-unit:json-unit-fluent:1.5.3'
 	testCompile 'org.mockito:mockito-core:2.18.3'
+	testCompile 'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 

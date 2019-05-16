@@ -16,7 +16,7 @@ public interface ResourceRegistryPart {
 
 	RegistryEntry getEntry(String resourceType);
 
-	Collection<RegistryEntry> getResources();
+	Collection<RegistryEntry> getEntries();
 
 	RegistryEntry getEntry(Class<?> clazz);
 

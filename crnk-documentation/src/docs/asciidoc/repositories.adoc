@@ -5,8 +5,8 @@ The modelled resources and relationships must be complemented by a corresponding
 repository implementation. This is achieved by implementing
 one of those two repository interfaces:
 
-  * ResourceRepositoryV2 for resources.
-  * RelationshipRepositoryV2 resp. BulkRelationshipRepositoryV2 for relationships.
+  * ResourceRepository for resources.
+  * RelationshipRepository resp. BulkRelationshipRepository for relationships.
 
 The repositories are used to serve `POST`, `GET`, `PATCH` and `DELETE` requests as specified by
 JSON:API specification. The repository contract closely resembles the JSON:API specification. Subsequent
@@ -19,9 +19,9 @@ IMPORTANT: When accessing repositories, do not forget to use the `application/vn
 
 anchor:resource_repository[]
 
-## ResourceRepositoryV2
+## ResourceRepository
 
-`ResourceRepositoryV2` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
+`ResourceRepository` is the main interface used to operate on resources with `POST`, `GET`, `PATCH` and `DELETE` requests.
 The interface takes two generic arguments:
 
 1. The type of a resource. Typically this is a plain Java Bean making use of the JSON:API annotations. But may also be something
@@ -30,7 +30,7 @@ The interface takes two generic arguments:
 2. The type of the resource’s identifier. Typically a primitive type like `String`, `long` or `UUID`. But if necessary
   can also be a more complex type that serializes to a URL-friendly String.
 
-The methods of `ResourceRepositoryV2` look as follows:
+The methods of `ResourceRepository` look as follows:
 
 * `findOne(ID id, QuerySpec querySpec)`
   Search one resource with a given ID. If a resource cannot be found, a ResourceNotFoundException exception should be thrown
@@ -150,7 +150,7 @@ implementations. For this reason the engine part in `crnk-core` makes use of `Qu
 QuerySpec (like the legacy `QueryParams`). The mapping of HTTP request parameters to QuerySpec and back
 is implemented by <<urlmapper,`QuerySpecUrlMapper`>> that may can also be extended, customized or replaced.
 
-For example showing its use URLs also have a look at the <<resource_repository,ResourceRepositoryV2>> section.
+For example showing its use URLs also have a look at the <<resource_repository,ResourceRepository>> section.
 
 
 ### API
@@ -333,7 +333,7 @@ Some further examples:
 
   { "OR": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
 
-4. To filter by multiple attributes with the `AMD` operator:
+4. To filter by multiple attributes with the `AND` operator:
 
   { "AND": [ {"id": [12, 13, 14]}, {"completed": "true"} ] }
 +
@@ -345,7 +345,9 @@ or more simply:
 
   {"name": "Great Task", "OR": {"id": 122, "name": "Other Task"}}
 
+6. To filter an attribute `name` on relationship `assignee`:
 
+  {"assignee": {"name": "test"}}
 
 
 
@@ -542,16 +544,17 @@ Some of those methods are also available from some of the integrations like `Crn
 
 anchor:relationshipRepository[]
 
-## RelationshipRepositoryV2
+## Relationship Repositories
 
 IMPORTANT: Before getting started with the development of relationship repositories, familiarize yourself
-with <<jsonApiRelation,@JsonApiRelation.repositoryBehavior>>. In various scenarios, a custom implementation is unnecessary!
-
+with <<jsonApiRelation,@JsonApiRelation>>. In various scenarios, a custom implementation is unnecessary!
+In many cases `@JsonApiRelationId` provides the simplest solution to a relationship. Any opposite
+relationship can then make use of `@JsonApiRelation.mappedBy`.
 
 Each relationship defined in Crnk (annotation @JsonApiRelation) must have a relationship repository
-defined implementing `RelationshipRepositoryV2`. `RelationshipRepositoryV2` implements the methods
-necessary to work with a relationship. It provides methods for both single-valued and multi-valued
-relationships:
+defined implementing `OneRelationshipRepository` or `ManyRelationshipRepository`. The
+repository implements the methods necessary to work with a relationship. They provide the methods to work
+with single-valued and multi-valued relationships:
 
 
 * `getMatcher()`
@@ -572,14 +575,15 @@ relationships:
 * `removeRelations(T source, Iterable<D_ID> targetIds, String fieldName)`
   Removes relationships from a list of relationships.
 
-* `findOneTarget(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds one field's value defined by fieldName in a source defined by sourceId.
+* `findOneRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the single-valued relationship for sources with the ids `sourceIds`.
 
-* `findManyTargets(T_ID sourceId, String fieldName, QuerySpec querySpec)`
-  Finds an Iterable of field's values defined by fieldName in a source defined by sourceId .
+* `findManyRelations(Collection<T_ID> sourceIds, String fieldName, QuerySpec querySpec)`
+  Finds the multi-valued relationship for sources with the ids `sourceIds`.
 
-All of the methods in this interface have fieldName field as their last parameter in case there
-are multiple relationships between two resources.
+All of the methods in this interface have a `fieldName` as last parameter in case multiple fields are served
+by the same repository. The `findOneRelations` and `findManyRelations` methods gain access to the source
+class through `querySpec.getResourceClass`, whereas the other methods directly obtain a `source` instance.
 
 
 ### Example
@@ -594,7 +598,7 @@ include::../../../../crnk-integration-examples/spring-boot-example/src/main/java
 
 ### RelationshipMatcher
 
-With `RelationshipRepositoryV2.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
+With `RelationshipRepository.getMatcher()` one has a lot of flexibility about which kind of relationships a repository is
 serving. Rules can look like:
 
 [source]
@@ -684,22 +688,10 @@ Note that to access the opposite side for `GET` operations, relations must be se
 	}
 ----
 
-### BulkRelationshipRepositoryV2
-
-BulkRelationshipRepositoryV2 extends RelationshipRepositoryV2 and provides an additional
-`findTargets` method. It allows to fetch a relation for multiple resources at once.
-It is recommended to make use of this implementation if a relationship is loaded frequently
-(either by a eager declaration or trough the `include` parameter) and it is costly to
-fetch that relation. RelationshipRepositoryBase provides a default implementation where
-`findOneTarget` and `findManyTargets` forward calls to the bulk `findTargets`.
-
-Note that in contrast to `ResourceRepositoryV2` and `RelationshipRepositoryV2` that are symmetric
-and applicable to Crnk servers and client, `BulkRelationshipRepositoryV2` is applicable on the server-side only.
-
 
 ## ResourceList
 
-ResourceRepositoryV2 and RelationshipRepositoryV2 return lists of type ResourceList. The ResourceList can carry, next
+ResourceRepository and RelationshipRepository return lists of type ResourceList. The ResourceList can carry, next
 to the actual resources, also meta and links information:
 
 * `getLinks()`
@@ -743,7 +735,7 @@ and used by both servers and clients:
 
 [source]
 ----
-	public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+	public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 
 		@Override
 		public ScheduleList findAll(QuerySpec querySpec);
@@ -920,7 +912,7 @@ An example can look like:
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_decorator]
 ----
 
 The particular example, for example, intercepts the `save` operation and may trigger an approval workflow:
@@ -928,7 +920,7 @@ The particular example, for example, intercepts the `save` operation and may tri
 [source]
 .ApprovalRepositoryDecorator.java
 ----
-include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
+include::../../../../crnk-data/crnk-data-activiti/src/test/java/io/crnk/data/activiti/example/approval/ApprovalRepositoryDecorator.java[tags=docs_save]
 ----
 
 
@@ -936,7 +928,7 @@ include::../../../../crnk-activiti/src/test/java/io/crnk/activiti/example/approv
 ## ResourceFieldContributor
 
 The `ResourceFieldContributor` interface allows to dynamically introduce new fields to resources without actually
-touching them. This is useful, for example, if you have a JPA entity exposed with crnk-jpa and
+touching them. This is useful, for example, if you have a JPA entity exposed with crnk-data-jpa and
 want to add further fields like that mentioned history relationship from the earlier relationship example.
 `ResourceFieldContributor` can
 be implemented by a repository or obtained from the regular service discovery mechanism.

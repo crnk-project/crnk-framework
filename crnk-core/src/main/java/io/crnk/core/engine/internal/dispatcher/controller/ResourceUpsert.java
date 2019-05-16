@@ -146,7 +146,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
         ResourceFilterDirectory filterDirectory = context.getResourceFilterDirectory();
         if (!checkAccess() || filterDirectory.canAccess(field, getHttpMethod(), queryContext, ignoreImmutableFields())) {
-            logger.debug("set field {}={}", attributeName, valueNode);
+            logger.debug("set attribute {}={}", attributeName, valueNode);
             ObjectMapper objectMapper = context.getObjectMapper();
             List<ResourceModificationFilter> modificationFilters = context.getModificationFilters();
             try {
@@ -222,7 +222,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
                     }
 
                     ResourceFilterDirectory filterDirectory = context.getResourceFilterDirectory();
-                    if (!checkAccess() || filterDirectory.canAccess(field, getHttpMethod(),  queryAdapter.getQueryContext(), ignoreImmutableFields())) {
+                    if (!checkAccess() || filterDirectory.canAccess(field, getHttpMethod(), queryAdapter.getQueryContext(), ignoreImmutableFields())) {
                         Optional<Result> result;
                         if (field.isCollection()) {
                             //noinspection unchecked
@@ -276,6 +276,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
             }
 
             if (relationshipField.hasIdField()) {
+                logger.debug("set relationshipIds {}={}", propertyName, relationshipTypedIds);
                 relationshipField.getIdAccessor().setValue(newResource, relationshipTypedIds);
             }
 
@@ -291,14 +292,19 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
 
                 if (relatedResults.isEmpty()) {
                     List relatedList = new LinkedList<>();
+                    logger.debug("set relationships {}={}", propertyName, relatedList);
                     relationshipField.getAccessor().setValue(newResource, relatedList);
                 } else {
                     return Optional.of(context.getResultFactory().zip(relatedResults).doWork(relatedObjects -> {
                         List relatedList = new LinkedList<>();
                         relatedList.addAll(relatedObjects);
+
+                        logger.debug("set relationships {}={}", propertyName, relatedList);
                         relationshipField.getAccessor().setValue(newResource, relatedList);
                     }));
                 }
+            }else{
+                logger.debug("decideSetRelationObjectsField skipped {}", propertyName, relationshipTypedIds);
             }
         }
         return Optional.empty();
@@ -328,6 +334,7 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
             }
 
             if (relationshipId == null) {
+                logger.debug("set relationship {}=null", relationshipName);
                 field.getAccessor().setValue(newResource, null);
             } else {
                 RegistryEntry entry = getRegistryEntry(relationshipId.getType());
@@ -337,12 +344,18 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
                 Serializable typedRelationshipId = parseId(relationshipId, idFieldType);
 
                 if (field.hasIdField() && (!resourceInformation.isNested() || resourceInformation.getParentField() != field)) {
+                    logger.debug("set relationshipId {}={}", relationshipName, typedRelationshipId);
                     field.getIdAccessor().setValue(newResource, typedRelationshipId);
                 }
                 if (decideSetRelationObjectField(entry, typedRelationshipId, field)) {
                     Result<Object> result = fetchRelated(entry, typedRelationshipId, queryAdapter)
-                            .doWork(relatedObject -> field.getAccessor().setValue(newResource, relatedObject));
+                            .doWork(relatedObject -> {
+                                logger.debug("set relationship {}={}", relationshipName, relatedObject);
+                                field.getAccessor().setValue(newResource, relatedObject);
+                            });
                     return Optional.of(result);
+                } else {
+                    logger.debug("decideSetRelationObjectField skipped {}", relationshipName);
                 }
             }
         }

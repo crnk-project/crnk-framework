@@ -8,46 +8,54 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HttpClientResponse implements HttpAdapterResponse {
 
-	private CloseableHttpResponse response;
+    private CloseableHttpResponse response;
 
-	private String body;
+    private String body;
 
-	public HttpClientResponse(CloseableHttpResponse response) throws ParseException, IOException {
-		this.response = response;
+    public HttpClientResponse(CloseableHttpResponse response) throws ParseException, IOException {
+        this.response = response;
 
-		HttpEntity entity = response.getEntity();
-		if (entity != null) {
-			body = EntityUtils.toString(entity);
-		}
-	}
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            body = EntityUtils.toString(entity);
+        }
+    }
 
-	@Override
-	public boolean isSuccessful() {
-		return response.getStatusLine().getStatusCode() < 400;
-	}
+    @Override
+    public boolean isSuccessful() {
+        return response.getStatusLine().getStatusCode() < 400;
+    }
 
-	@Override
-	public String body() {
-		return body;
-	}
+    @Override
+    public String body() {
+        return body;
+    }
 
-	@Override
-	public int code() {
-		return response.getStatusLine().getStatusCode();
-	}
+    @Override
+    public int code() {
+        return response.getStatusLine().getStatusCode();
+    }
 
-	@Override
-	public String message() {
-		return response.getStatusLine().getReasonPhrase();
-	}
+    @Override
+    public String message() {
+        return response.getStatusLine().getReasonPhrase();
+    }
 
-	@Override
-	public String getResponseHeader(String name) {
-		Header header = response.getFirstHeader(name);
-		return header != null ? header.getValue() : null;
-	}
+    @Override
+    public String getResponseHeader(String name) {
+        Header header = response.getFirstHeader(name);
+        return header != null ? header.getValue() : null;
+    }
+
+    @Override
+    public Set<String> getHeaderNames() {
+        return Arrays.asList(response.getAllHeaders()).stream().map(it -> it.getName()).collect(Collectors.toSet());
+    }
 
 }

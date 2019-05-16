@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':crnk-meta')
+    compile project(':crnk-gen:crnk-gen-base')
+
+
+    testCompile 'commons-io:commons-io:2.5'
+    testCompile project(':crnk-meta')
+    testCompile project(':crnk-test')
+}
+
+
+

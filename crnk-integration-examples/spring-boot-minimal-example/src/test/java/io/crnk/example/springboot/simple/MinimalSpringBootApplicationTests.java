@@ -3,7 +3,7 @@ package io.crnk.example.springboot.simple;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.example.springboot.microservice.Project;
 import org.junit.Assert;
@@ -18,7 +18,7 @@ public class MinimalSpringBootApplicationTests extends BaseTest {
 
 	@Test
 	public void testClient() {
-		ResourceRepositoryV2<Project, Serializable> projectRepo =
+		ResourceRepository<Project, Serializable> projectRepo =
 				client.getRepositoryForType(Project.class);
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		querySpec.setLimit(10L);
