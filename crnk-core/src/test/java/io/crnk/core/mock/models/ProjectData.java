@@ -3,6 +3,7 @@ package io.crnk.core.mock.models;
 import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -13,6 +14,16 @@ public class ProjectData {
     private Map<String, Integer> priorities = new HashMap<>();
 
     private ProjectStatus status = new ProjectStatus();
+
+    private List<String> keywords;
+
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
 
     public ProjectStatus getStatus() {
         return status;

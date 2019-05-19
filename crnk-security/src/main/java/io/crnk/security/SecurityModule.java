@@ -16,6 +16,8 @@ import io.crnk.security.internal.DataRoomRelationshipFilter;
 import io.crnk.security.internal.DataRoomResourceFilter;
 import io.crnk.security.internal.SecurityRepositoryFilter;
 import io.crnk.security.internal.SecurityResourceFilter;
+import io.crnk.security.repository.CallerPermissionRepository;
+import io.crnk.security.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,23 +188,32 @@ public class SecurityModule implements Module {
         context.addRepositoryFilter(new SecurityRepositoryFilter(this));
         context.addResourceFilter(new SecurityResourceFilter(this));
 
-        if (config != null && config.getDataRoomFilter() != null && config.getPerformDataRoomChecks()) {
-            matcher = new DataRoomMatcher(() -> config.getDataRoomFilter());
-            LOGGER.debug("registering dataroom filter {}", config.getDataRoomFilter());
-            context.addRepositoryDecoratorFactory(repository -> {
-                if (repository instanceof ResourceRepository) {
-                    return new DataRoomResourceFilter((ResourceRepository) repository, matcher);
-                }
-                if (repository instanceof ForwardingRelationshipRepository) {
-                    return repository; // no need to filter forwarding ones twice
-                }
-                if (repository instanceof OneRelationshipRepository || repository instanceof ManyRelationshipRepository) {
-                    return new DataRoomRelationshipFilter(repository, matcher);
-                }
-                // no support for legacy repositories and custom onces
-                LOGGER.warn("no dataroom support for unknown repository {}", repository);
-                return repository;
-            });
+        if (config != null) {
+            if (config.isExposeRepositories()) {
+                context.addRepository(new CallerPermissionRepository(this));
+                context.addRepository(new RoleRepository(this));
+            }
+
+            if (config.getDataRoomFilter() != null && config.getPerformDataRoomChecks()) {
+                matcher = new DataRoomMatcher(() -> config.getDataRoomFilter());
+                LOGGER.debug("registering dataroom filter {}", config.getDataRoomFilter());
+                context.addRepositoryDecoratorFactory(repository -> {
+                    if (repository instanceof ResourceRepository) {
+                        return new DataRoomResourceFilter((ResourceRepository) repository, matcher);
+                    }
+                    if (repository instanceof ForwardingRelationshipRepository) {
+                        return repository; // no need to filter forwarding ones twice
+                    }
+                    if (repository instanceof OneRelationshipRepository || repository instanceof ManyRelationshipRepository) {
+                        return new DataRoomRelationshipFilter(repository, matcher);
+                    }
+                    // no support for legacy repositories and custom onces
+                    LOGGER.warn("no dataroom support for unknown repository {}", repository);
+                    return repository;
+                });
+            } else {
+                matcher = new DataRoomMatcher(() -> (querySpec, method) -> querySpec);
+            }
         }
     }
 
@@ -222,16 +233,35 @@ public class SecurityModule implements Module {
      * @return true if the requested permissions are satisfied for the given resourceType.
      */
     public boolean isAllowed(String resourceType, ResourcePermission permission) {
+        ResourcePermission missingPermissions = getMissingPermissions(resourceType, permission);
+        boolean allowed = missingPermissions.isEmpty();
+        if (allowed) {
+            LOGGER.debug("isAllowed returns {} for permission {}", allowed, permission);
+        } else {
+            LOGGER.debug("isAllowed returns {} for permission {} due to missing permission {}", allowed, permission, missingPermissions);
+        }
+        return allowed;
+    }
+
+    /**
+     * @return permissions the caller is authorized to for the passed resourceType.
+     */
+    public ResourcePermission getCallerPermissions(String resourceType) {
+        ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL);
+        return missingPermissions.xor(ResourcePermission.ALL);
+    }
+
+    private ResourcePermission getMissingPermissions(String resourceType, ResourcePermission requiredPermissions) {
         if (!isEnabled()) {
-            return true;
+            return ResourcePermission.EMPTY;
         }
         checkInit();
         Map<String, ResourcePermission> map = permissions.get(resourceType);
-        ResourcePermission missingPermission = permission;
+        ResourcePermission missingPermission = requiredPermissions;
         if (map != null) {
             for (Entry<String, ResourcePermission> entry : map.entrySet()) {
                 String role = entry.getKey();
-                ResourcePermission intersection = entry.getValue().and(permission);
+                ResourcePermission intersection = entry.getValue().and(requiredPermissions);
                 boolean hasMorePermissions = !intersection.isEmpty();
                 if (hasMorePermissions && isUserInRole(role)) {
                     missingPermission = updateMissingPermissions(missingPermission, intersection);
@@ -241,14 +271,7 @@ public class SecurityModule implements Module {
                 }
             }
         }
-
-        boolean allowed = missingPermission.isEmpty();
-        if (allowed) {
-            LOGGER.debug("isAllowed returns {} for permission", allowed, permission);
-        } else {
-            LOGGER.debug("isAllowed returns {} for permission {} due to missing permission {}", allowed, permission, missingPermission);
-        }
-        return allowed;
+        return missingPermission;
     }
 
     /**

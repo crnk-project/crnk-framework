@@ -178,6 +178,15 @@ or a single resource. If either of the two carries a `MetaInformation` implement
 will fill-in the `ResourcePermission` for the current request.
 
 
+### API
+
+`SecurityModule.setExposeRepositories(true)` sets up repositories accessible through the
+`<contextPath>/security/` path. Currently supported are:
+
+- `<contextPath>/security/role` to gain access to all configure roles.
+- `<contextPath>/security/callerPermission` to gain access to all permissions of the current caller.
+
+
 ### Home and Meta Module
 
 - `HomeModule` and `MetaModule` hide resources the user is not authorized to see.

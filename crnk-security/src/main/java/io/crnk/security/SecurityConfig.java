@@ -15,9 +15,22 @@ public class SecurityConfig {
 
     private boolean performDataRoomChecks = true;
 
+    private boolean exposeRepositories = false;
+
     private SecurityConfig(List<SecurityRule> rules, DataRoomFilter dataRoomFilter) {
         this.rules = Collections.unmodifiableList(rules);
         this.dataRoomFilter = dataRoomFilter;
+    }
+
+    public boolean isExposeRepositories() {
+        return exposeRepositories;
+    }
+
+    /**
+     * @param exposeRepositories whether to create repositories to access the configured security rules.
+     */
+    public void setExposeRepositories(boolean exposeRepositories) {
+        this.exposeRepositories = exposeRepositories;
     }
 
     /**
@@ -62,6 +75,8 @@ public class SecurityConfig {
         private List<SecurityRule> rules = new ArrayList<>();
 
         private DataRoomFilter dataRoomFilter;
+
+        private boolean exposeRepositories;
 
         private Builder() {
         }
@@ -115,11 +130,18 @@ public class SecurityConfig {
         }
 
         public SecurityConfig build() {
-            return new SecurityConfig(rules, dataRoomFilter);
+            SecurityConfig config = new SecurityConfig(rules, dataRoomFilter);
+            config.setExposeRepositories(exposeRepositories);
+            return config;
         }
 
         public void setDataRoomFilter(DataRoomFilter dataRoomFilter) {
             this.dataRoomFilter = dataRoomFilter;
+        }
+
+        public Builder exposeRepositories(boolean exposeRepositories) {
+            this.exposeRepositories = exposeRepositories;
+            return this;
         }
     }
 

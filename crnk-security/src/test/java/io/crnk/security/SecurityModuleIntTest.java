@@ -187,6 +187,8 @@ public class SecurityModuleIntTest extends JerseyTestBase {
     public void disableSecurityModule() {
         module.setEnabled(false);
 
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("projects"));
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("tasks"));
         Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
         Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
         Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));

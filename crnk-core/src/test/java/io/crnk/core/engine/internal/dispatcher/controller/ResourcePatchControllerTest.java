@@ -9,10 +9,6 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
@@ -462,6 +458,74 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
                 .get())
                 .hasSize(0);
 
+    }
+
+    @Test
+    public void mergeEmptyListShouldSaveIt() throws Exception {
+        // GIVEN
+        Document newProjectBody = new Document();
+        Resource data = createProject();
+        newProjectBody.setData(Nullable.of(data));
+        JsonPath taskPath = pathBuilder.build("/projects");
+
+        // WHEN
+        ResourcePostController resourcePost = new ResourcePostController();
+        resourcePost.init(controllerContext);
+        Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, newProjectBody);
+        Resource savedProject = projectResponse.getDocument().getSingleData().get();
+
+        // GIVEN
+        data = new Resource();
+        data.setType("projects");
+        data.setId(savedProject.getId());
+        data.setAttribute("data", objectMapper.readTree("{\"keywords\" : []}"));
+
+        Document projectPatch = new Document();
+        projectPatch.setData(Nullable.of(data));
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+
+        // WHEN
+        Response response = sut.handle(jsonPath, emptyProjectQuery, projectPatch);
+
+        // THEN
+        Map<String, JsonNode> patchedAttributes = response.getDocument().getSingleData().get().getAttributes();
+        assertThat(patchedAttributes.get("data").get("keywords").size()).isEqualTo(0);
+    }
+
+    @Test
+    public void mergeNonEmptyListShouldSaveIt() throws Exception {
+        // GIVEN
+        Document newProjectBody = new Document();
+        Resource data = createProject();
+        newProjectBody.setData(Nullable.of(data));
+        JsonPath taskPath = pathBuilder.build("/projects");
+
+        // WHEN
+        ResourcePostController resourcePost = new ResourcePostController();
+        resourcePost.init(controllerContext);
+        Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, newProjectBody);
+        Resource savedProject = projectResponse.getDocument().getSingleData().get();
+
+        // GIVEN
+        data = new Resource();
+        data.setType("projects");
+        data.setId(savedProject.getId());
+        data.setAttribute("data", objectMapper.readTree("{\"keywords\" : [\"test\"]}"));
+
+        Document projectPatch = new Document();
+        projectPatch.setData(Nullable.of(data));
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+
+        // WHEN
+        Response response = sut.handle(jsonPath, emptyProjectQuery, projectPatch);
+
+        // THEN
+        Map<String, JsonNode> patchedAttributes = response.getDocument().getSingleData().get().getAttributes();
+        assertThat(patchedAttributes.get("data").get("keywords").size()).isEqualTo(1);
     }
 
     @Test

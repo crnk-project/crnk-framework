@@ -438,3 +438,19 @@ JpaModule.createServerModule(...) comes with a new flavor that allows to pass th
 as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
 return an instance. The supplier together with the existing TransactionRunner
 allows for custom JPA setups and transaction handling.
+
+
+<h4>New Security-related repositories</h4>
+
+With
+
+<pre class="prettyprint">
+SecurityConfig.setExposeRepositories(true)
+<pre class="prettyprint">
+
+the SecurityModule sets up repositories to make its internal rules available from the REST API:
+
+<ul>
+  <li>&lt;contextPath&gt;/security/callerPermission</li>
+    <li>&lt;contextPath&gt;/security/role</li>
+</ul>

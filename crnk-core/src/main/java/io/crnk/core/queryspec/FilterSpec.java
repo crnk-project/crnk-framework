@@ -71,6 +71,9 @@ public class FilterSpec extends AbstractPathSpec implements Comparable<FilterSpe
     }
 
     public static FilterSpec and(FilterSpec... conditions) {
+        if (conditions.length == 0) {
+            return null;
+        }
         if (conditions.length == 1) {
             return conditions[0];
         }
