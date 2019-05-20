@@ -446,7 +446,7 @@ With
 
 <pre class="prettyprint">
 SecurityConfig.setExposeRepositories(true)
-<pre class="prettyprint">
+</pre>
 
 the SecurityModule sets up repositories to make its internal rules available from the REST API:
 
@@ -454,3 +454,16 @@ the SecurityModule sets up repositories to make its internal rules available fro
   <li>&lt;contextPath&gt;/security/callerPermission</li>
     <li>&lt;contextPath&gt;/security/role</li>
 </ul>
+
+
+
+<h4>Support for GROUP operator by facets</h4>
+
+The FacetModule gained support for the GROUP operator:
+
+<pre class="prettyprint">
+http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
+</pre>
+
+It works equivalent to SQL GROUP BY queries. In the example a facet count is computed for
+every pair of priority and name attribute.

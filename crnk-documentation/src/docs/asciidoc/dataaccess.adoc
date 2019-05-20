@@ -709,6 +709,20 @@ Facets are then ordered as specified by `filter[name]`.
 
 For more examples, see `InMemoryFacetProviderTest`.
 
+### Grouping
+
+To compute facets separately for each label of a particular facet, use the `GROUP` operator:
+
+----
+http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
+----
+
+It works equivalent to SQL `GROUP BY` queries. In the example a count is computed for every pair of `priority` and `name`
+and returned as facet resource.
+
+WARNING: the GROUP operator needs for further performance tuning.
+
+
 
 ### Roadmap
 
