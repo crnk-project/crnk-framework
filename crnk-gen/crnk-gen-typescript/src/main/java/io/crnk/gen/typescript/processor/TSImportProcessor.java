@@ -71,8 +71,10 @@ public class TSImportProcessor implements TSSourceProcessor {
 			type = ((TSArrayType) type).getElementType();
 		}
 		if (type instanceof TSIndexSignatureType) {
-			addImport(refSource, source, ((TSIndexSignatureType) type).getKeyType());
-			addImport(refSource, source, ((TSIndexSignatureType) type).getValueType());
+			TSType keyType = ((TSIndexSignatureType) type).getKeyType();
+			TSType valueType = ((TSIndexSignatureType) type).getValueType();
+			addImport(getSource(keyType), source, keyType);
+			addImport(getSource(valueType), source, valueType);
 			return;
 		}
 		if (type instanceof TSAny || type instanceof TSPrimitiveType) {

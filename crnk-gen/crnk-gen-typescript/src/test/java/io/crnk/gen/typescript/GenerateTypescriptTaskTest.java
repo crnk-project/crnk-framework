@@ -3,6 +3,8 @@ package io.crnk.gen.typescript;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
+import io.crnk.data.facet.FacetModule;
+import io.crnk.data.facet.FacetModuleConfig;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
@@ -75,6 +77,8 @@ public class GenerateTypescriptTaskTest {
         assertExists("types/project.data.ts");
         assertExists("schedule.ts");
         assertExists("tasks.ts");
+        assertExists("facet.ts");
+        assertExists("facet.value.ts");
         if (resourceFormat == TSResourceFormat.PLAINJSON) {
             assertExists("crnk.ts");
         }
@@ -105,6 +109,7 @@ public class GenerateTypescriptTaskTest {
         CrnkBoot boot = new CrnkBoot();
         boot.addModule(metaModule);
         boot.addModule(createRepositoryModule());
+        boot.addModule(new FacetModule(new FacetModuleConfig()));
         boot.boot();
         return metaModule.getLookup();
     }

@@ -8,6 +8,7 @@ dependencies {
     testCompile 'commons-io:commons-io:2.5'
     testCompile project(':crnk-meta')
     testCompile project(':crnk-test')
+    testCompile project(':crnk-data:crnk-data-facet')
 }
 
 

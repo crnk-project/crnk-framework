@@ -1,7 +1,9 @@
 package io.crnk.data.facet;
 
 import io.crnk.core.queryspec.FilterSpec;
+import io.crnk.core.resource.annotations.JsonApiEmbeddable;
 
+@JsonApiEmbeddable
 public class FacetValue implements Comparable<FacetValue> {
 
     public static final String ATTR_LABEL = "label";
