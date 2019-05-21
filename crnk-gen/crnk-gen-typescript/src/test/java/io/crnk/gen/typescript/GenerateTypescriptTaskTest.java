@@ -1,5 +1,12 @@
 package io.crnk.gen.typescript;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.SimpleModule;
@@ -23,13 +30,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
 public class GenerateTypescriptTaskTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
@@ -51,7 +51,6 @@ public class GenerateTypescriptTaskTest {
     public void testPlainJson() throws IOException {
         test(false, TSResourceFormat.PLAINJSON);
     }
-
 
     private void test(boolean expressions, TSResourceFormat resourceFormat) throws IOException {
         outputDir = new File("build/tmp/gen");

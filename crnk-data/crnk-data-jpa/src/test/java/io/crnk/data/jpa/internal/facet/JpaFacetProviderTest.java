@@ -1,5 +1,9 @@
 package io.crnk.data.jpa.internal.facet;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Map;
+
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -16,10 +20,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Map;
 
 public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
@@ -57,7 +57,7 @@ public class JpaFacetProviderTest extends AbstractJpaJerseyTest {
 
 		FacetResource nameFacets = list.get(0);
 		Assert.assertEquals("test_longValue", nameFacets.getId());
-		Assert.assertEquals("test", nameFacets.getType());
+		Assert.assertEquals("test", nameFacets.getResourceType());
 		Assert.assertEquals("longValue", nameFacets.getName());
 		Assert.assertEquals(Arrays.asList("3", "2", "1", "0"), nameFacets.getLabels());
 		Map<String, FacetValue> values = nameFacets.getValues();

@@ -1,11 +1,11 @@
 package io.crnk.data.facet;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "facet")
 public class FacetResource {
@@ -19,7 +19,7 @@ public class FacetResource {
     @JsonApiId
     private String id;
 
-    private String type;
+    private String resourceType;
 
     private String name;
 
@@ -43,12 +43,12 @@ public class FacetResource {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getResourceType() {
+        return resourceType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
     }
 
     public String getName() {

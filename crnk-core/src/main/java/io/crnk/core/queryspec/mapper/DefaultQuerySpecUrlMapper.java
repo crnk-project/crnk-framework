@@ -79,6 +79,7 @@ public class DefaultQuerySpecUrlMapper
         supportedOperators.add(FilterOperator.LT);
         supportedOperators.add(FilterOperator.LE);
         supportedOperators.add(FilterOperator.SELECT);
+        supportedOperators.add(FilterOperator.GROUP);
     }
 
     @Override
@@ -446,7 +447,11 @@ public class DefaultQuerySpecUrlMapper
             // regular basic filter parameter
             Set<Object> typedValues = new HashSet<>();
             for (String stringValue : parameter.getValues()) {
-                typedValues.add(toObjectValue(stringValue, parameter, filterType));
+            	if(operator != FilterOperator.GROUP) {
+					typedValues.add(toObjectValue(stringValue, parameter, filterType));
+				}else {
+            		typedValues.add(stringValue);
+				}
             }
             Object value = typedValues.size() == 1 ? typedValues.iterator().next() : typedValues;
             FilterSpec filterSpec = new FilterSpec(resolvedPath.getAttributePath(), operator, value);
