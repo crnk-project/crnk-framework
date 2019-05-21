@@ -1,5 +1,9 @@
 package io.crnk.data.facet.provider;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -14,10 +18,6 @@ import io.crnk.core.utils.Prioritizable;
 import io.crnk.data.facet.FacetValue;
 import io.crnk.data.facet.config.BasicFacetInformation;
 import io.crnk.data.facet.config.FacetInformation;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class InMemoryFacetProvider extends FacetProviderBase implements Prioritizable {
 
@@ -43,7 +43,6 @@ public class InMemoryFacetProvider extends FacetProviderBase implements Prioriti
 			ResourceField field = resourceInformation.findFieldByUnderlyingName(pathElement);
 			ResourceFieldAccessor accessor = field.getAccessor();
 
-			TypeParser typeParser = context.getTypeParser();
 			Map<Object, FacetValue> facetValueMap = new HashMap<>();
 
 			ResourceList list = repository.findAll(querySpec);
@@ -52,7 +51,7 @@ public class InMemoryFacetProvider extends FacetProviderBase implements Prioriti
 
 				FacetValue facetValue = facetValueMap.get(value);
 				if (facetValue == null) {
-					String label = typeParser.toString(value);
+					String label = toLabel(value);
 
 					facetValue = new FacetValue();
 					facetValue.setValue(value);
@@ -64,9 +63,19 @@ public class InMemoryFacetProvider extends FacetProviderBase implements Prioriti
 				facetValue.setCount(facetValue.getCount() + 1);
 			}
 			return toList(facetValueMap);
-		} else {
+		}
+		else {
 			throw new UnsupportedOperationException("unknown facet type: " + facetInformation);
 		}
+	}
+
+	private String toLabel(Object value) {
+		TypeParser typeParser = context.getTypeParser();
+		String label = typeParser.toString(value);
+		if (label == null) {
+			return "null";
+		}
+		return label;
 	}
 
 	@Override
