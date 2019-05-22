@@ -25,16 +25,16 @@ public class OpenTracingServerModuleTest {
 
 	private MockHttpServletRequest request;
 
+	private boolean simpleTransactionNames = false;
+
 	@Before
 	public void setup() throws ServletException {
+		simpleTransactionNames = false;
+
 		tracer = Mockito.mock(Tracer.class);
 		MockServletContext servletContext = new MockServletContext();
-		servlet = new CrnkServlet();
 
-		CrnkBoot boot = servlet.getBoot();
-		boot.addModule(new TestModule());
-		boot.addModule(new OpenTracingServerModule(tracer));
-		servlet.init(new MockServletConfig());
+		initModule();
 
 		request = new MockHttpServletRequest(servletContext);
 		request.setMethod("GET");
@@ -46,6 +46,17 @@ public class OpenTracingServerModuleTest {
 		request.addHeader("Accept", "*/*");
 	}
 
+	private void initModule() throws ServletException {
+		OpenTracingServerModule module = new OpenTracingServerModule(tracer);
+		module.setUseSimpleTransactionNames(simpleTransactionNames);
+
+		servlet = new CrnkServlet();
+		CrnkBoot boot = servlet.getBoot();
+		boot.addModule(new TestModule());
+		boot.addModule(module);
+		servlet.init(new MockServletConfig());
+	}
+
 	@Test
 	public void testWithSpan() throws ServletException, IOException {
 		Span span = Mockito.mock(Span.class);
@@ -55,6 +66,20 @@ public class OpenTracingServerModuleTest {
 		servlet.service(request, response);
 
 		Mockito.verify(span, Mockito.times(1)).setOperationName(Mockito.eq("GET /api/tasks"));
+	}
+
+	@Test
+	public void testWithSimpleTransactionNames() throws ServletException, IOException {
+		simpleTransactionNames = true;
+		initModule();
+
+		Span span = Mockito.mock(Span.class);
+		Mockito.when(tracer.activeSpan()).thenReturn(span);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		Mockito.verify(span, Mockito.times(1)).setOperationName(Mockito.eq("GET_apiTasks"));
 	}
 
 	@Test

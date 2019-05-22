@@ -23,26 +23,20 @@ public class OpenTracingFilter implements DocumentFilter {
 
 	private final Tracer tracer;
 
-	public OpenTracingFilter(HttpRequestContextProvider requestContextProvider, Tracer tracer) {
+	private final boolean simpleTransactionNames;
+
+	public OpenTracingFilter(HttpRequestContextProvider requestContextProvider, Tracer tracer, boolean simpleTransactionNames) {
 		this.requestContextProvider = requestContextProvider;
 		this.tracer = tracer;
+		this.simpleTransactionNames = simpleTransactionNames;
 	}
 
 	@Override
 	public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
-		JsonPath jsonPath = filterRequestContext.getJsonPath();
 		Span span = tracer.activeSpan();
 
 		if (span != null) {
-			HttpRequestContext requestContext = requestContextProvider.getRequestContext();
-			URL baseUrl;
-			try {
-				baseUrl = new URL(requestContext.getBaseUrl());
-			}
-			catch (MalformedURLException e) {
-				throw new IllegalStateException("cannot parse base url", e);
-			}
-			String spanName = filterRequestContext.getMethod() + " " + baseUrl.getPath() + "/" + jsonPath.toGroupPath();
+			String spanName = toSpanName(filterRequestContext);
 
 			LOGGER.debug("setting span name {} on {}", spanName, span);
 			span.setOperationName(spanName);
@@ -52,5 +46,43 @@ public class OpenTracingFilter implements DocumentFilter {
 		}
 
 		return chain.doFilter(filterRequestContext);
+	}
+
+	private String toSpanName(DocumentFilterContext filterRequestContext) {
+		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+
+		JsonPath jsonPath = filterRequestContext.getJsonPath();
+		URL baseUrl;
+		try {
+			baseUrl = new URL(requestContext.getBaseUrl());
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalStateException("cannot parse base url", e);
+		}
+		String name = filterRequestContext.getMethod() + " " + baseUrl.getPath() + "/" + jsonPath.toGroupPath();
+		if (simpleTransactionNames) {
+			return toSimpleName(name);
+		}
+		return name;
+	}
+
+	private String toSimpleName(String name) {
+		StringBuilder builder = new StringBuilder();
+		int i = 0;
+		while (i < name.length()) {
+			char c = name.charAt(i);
+			if (c == ' ') {
+				builder.append('_');
+			}
+			else if (c == '/' && i < name.length() - 1 && (i == 0 || name.charAt(i - 1) != ' ')) {
+				builder.append(Character.toUpperCase(name.charAt(i + 1)));
+				i++;
+			}
+			else if (c != '{' && c != '}' && c != '/') {
+				builder.append(c);
+			}
+			i++;
+		}
+		return builder.toString();
 	}
 }
