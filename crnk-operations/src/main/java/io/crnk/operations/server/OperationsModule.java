@@ -27,6 +27,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RepositoryNotFoundException;
+import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.module.Module;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.utils.Nullable;
@@ -136,6 +137,9 @@ public class OperationsModule implements Module {
 		FilterBehavior filterBehavior = filterDirectory.get(resourceInformation, httpMethod, queryContext);
 		if (filterBehavior == FilterBehavior.FORBIDDEN) {
 			throw new ForbiddenException(resourceInformation, httpMethod);
+		}
+		if (filterBehavior == FilterBehavior.UNAUTHORIZED) {
+			throw new UnauthorizedException(resourceInformation, httpMethod);
 		}
 	}
 

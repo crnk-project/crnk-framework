@@ -1,5 +1,10 @@
 package io.crnk.security;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
@@ -20,11 +25,6 @@ import io.crnk.security.repository.CallerPermissionRepository;
 import io.crnk.security.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class SecurityModule implements Module {
 
@@ -186,7 +186,7 @@ public class SecurityModule implements Module {
     public void setupModule(ModuleContext context) {
         this.context = context;
         context.addRepositoryFilter(new SecurityRepositoryFilter(this));
-        context.addResourceFilter(new SecurityResourceFilter(this));
+        context.addResourceFilter(new SecurityResourceFilter(this, context));
 
         if (config != null) {
             if (config.isExposeRepositories()) {
@@ -242,6 +242,7 @@ public class SecurityModule implements Module {
         }
         return allowed;
     }
+
 
     /**
      * @return permissions the caller is authorized to for the passed resourceType.

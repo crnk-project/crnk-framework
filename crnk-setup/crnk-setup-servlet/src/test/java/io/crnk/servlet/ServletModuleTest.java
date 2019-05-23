@@ -1,5 +1,7 @@
 package io.crnk.servlet;
 
+import javax.servlet.ServletContext;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
@@ -13,8 +15,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-
-import javax.servlet.ServletContext;
 
 public class ServletModuleTest {
 
@@ -41,14 +41,13 @@ public class ServletModuleTest {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
 		request.setRequestURI("/api/tasks");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		request.addUserRole("guest");
 		request.addUserRole("admin");
 
 		provider.onRequestStarted(new HttpRequestContextBaseAdapter(new ServletRequestContext(servletContext, request,
 				response, "api", HttpHeaders.DEFAULT_CHARSET)));
 
-
+		Assert.assertFalse(securityProvider.isAuthenticated());
 		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist"));
 		Assert.assertTrue(securityProvider.isUserInRole("guest"));
 		Assert.assertTrue(securityProvider.isUserInRole("admin"));

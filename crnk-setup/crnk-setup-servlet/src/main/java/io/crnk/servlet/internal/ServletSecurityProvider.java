@@ -18,4 +18,11 @@ public class ServletSecurityProvider implements SecurityProvider {
         return request.getServletRequest().isUserInRole(role);
     }
 
+	@Override
+	public boolean isAuthenticated() {
+		ServletRequestContext request = contextProvider.getRequestContext().unwrap
+				(ServletRequestContext.class);
+		return request.getServletRequest().getUserPrincipal() != null;
+	}
+
 }

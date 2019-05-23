@@ -1,5 +1,8 @@
 package io.crnk.security;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.security.SecurityProvider;
@@ -24,9 +27,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class SecurityModuleTest {
 
     private SecurityModule securityModule;
@@ -34,6 +34,8 @@ public class SecurityModuleTest {
     private String allowedRule;
 
     private CrnkBoot boot;
+
+    private boolean authenticated;
 
     @Before
     public void setup() {
@@ -50,7 +52,12 @@ public class SecurityModuleTest {
                     public boolean isUserInRole(String role) {
                         return role.equals(allowedRule);
                     }
-                });
+
+					@Override
+					public boolean isAuthenticated() {
+						return authenticated;
+					}
+				});
             }
         };
         appModule.addRepository(new TaskRepository());

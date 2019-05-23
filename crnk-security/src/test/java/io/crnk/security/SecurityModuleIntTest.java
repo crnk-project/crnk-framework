@@ -1,5 +1,11 @@
 package io.crnk.security;
 
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
@@ -36,264 +42,274 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-
 public class SecurityModuleIntTest extends JerseyTestBase {
 
-    private final InMemoryIdentityManager identityManager = new InMemoryIdentityManager();
+	private final InMemoryIdentityManager identityManager = new InMemoryIdentityManager();
 
-    protected CrnkClient client;
+	protected CrnkClient client;
 
-    protected ResourceRepository<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-    protected ResourceRepository<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-    protected RelationshipRepository<Task, Long, Project, Long> relRepo;
+	protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
-    private SecurityModule module;
+	private SecurityModule module;
 
-    private static void setBasicAuthentication(CrnkClient client, final String userName, final String password) {
-        OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
-        httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+	private String userName;
 
-            @Override
-            public void onBuild(OkHttpClient.Builder builder) {
-                builder.authenticator(new TestAuthenticator(userName, password));
-            }
+	private String password;
 
-        });
+	private static int responseCount(Response response) {
+		Response priorResponse = response;
+		int result = 1;
+		while ((priorResponse = priorResponse.priorResponse()) != null) {
+			result++;
+		}
+		return result;
+	}
 
-    }
+	@Override
+	protected Application configure() {
+		return new TestApplication();
 
-    private static int responseCount(Response response) {
-        Response priorResponse = response;
-        int result = 1;
-        while ((priorResponse = priorResponse.priorResponse()) != null) {
-            result++;
-        }
-        return result;
-    }
+	}
 
-    @Override
-    protected Application configure() {
-        return new TestApplication();
+	protected TestContainerFactory getTestContainerFactory() throws TestContainerException {
+		final TestContainerFactory testContainerFactory = super.getTestContainerFactory();
 
-    }
+		return new TestContainerFactory() {
 
-    protected TestContainerFactory getTestContainerFactory() throws TestContainerException {
-        final TestContainerFactory testContainerFactory = super.getTestContainerFactory();
+			@Override
+			public TestContainer create(URI baseUri, DeploymentContext deploymentContext) {
+				TestContainer container = testContainerFactory.create(baseUri, deploymentContext);
+				try {
+					Field field = container.getClass().getDeclaredField("server");
+					field.setAccessible(true);
+					Server server = (Server) field.get(container);
 
-        return new TestContainerFactory() {
+					Handler handler = server.getHandler();
+					SecurityHandler securityHandler = identityManager.getSecurityHandler();
+					if (securityHandler.getHandler() == null) {
+						securityHandler.setHandler(handler);
+					}
+					server.setHandler(securityHandler);
+				}
+				catch (Exception e) {
+					throw new IllegalStateException(e);
+				}
+				return container;
+			}
+		};
+	}
 
-            @Override
-            public TestContainer create(URI baseUri, DeploymentContext deploymentContext) {
-                TestContainer container = testContainerFactory.create(baseUri, deploymentContext);
-                try {
-                    Field field = container.getClass().getDeclaredField("server");
-                    field.setAccessible(true);
-                    Server server = (Server) field.get(container);
+	@After
+	@Before
+	public void cleanup() {
+		module.setEnabled(true);
+	}
 
-                    Handler handler = server.getHandler();
-                    SecurityHandler securityHandler = identityManager.getSecurityHandler();
-                    if (securityHandler.getHandler() == null) {
-                        securityHandler.setHandler(handler);
-                    }
-                    server.setHandler(securityHandler);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-                return container;
-            }
-        };
-    }
+	@Before
+	public void setup() {
+		identityManager.clear();
 
-    @After
-    @Before
-    public void cleanup() {
-        module.setEnabled(true);
-    }
+		client = new CrnkClient(getBaseUri().toString());
+		client.addModule(SecurityModule.newClientModule());
+		client.getHttpAdapter().setReceiveTimeout(1000000, TimeUnit.MILLISECONDS);
 
-    @Before
-    public void setup() {
-        identityManager.clear();
+		taskRepo = client.getRepositoryForType(Task.class);
+		projectRepo = client.getRepositoryForType(Project.class);
+		relRepo = client.getRepositoryForType(Task.class, Project.class);
 
-        client = new CrnkClient(getBaseUri().toString());
-        client.addModule(SecurityModule.newClientModule());
-        client.getHttpAdapter().setReceiveTimeout(1000000, TimeUnit.MILLISECONDS);
+		userName = "doe";
+		password = "doePass";
 
-        taskRepo = client.getRepositoryForType(Task.class);
-        projectRepo = client.getRepositoryForType(Project.class);
-        relRepo = client.getRepositoryForType(Task.class, Project.class);
+		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
+		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
 
-        setBasicAuthentication(client, "doe", "doePass");
+			@Override
+			public void onBuild(OkHttpClient.Builder builder) {
+				if (userName != null) {
+					builder.authenticator(new TestAuthenticator(userName, password));
+				}
+			}
 
-        TaskRepository.clear();
-        ProjectRepository.clear();
-    }
+		});
 
-    @Test
-    public void metaAllPermissions() {
-        identityManager.addUser("doe", "doePass", "allRole");
+		TaskRepository.clear();
+		ProjectRepository.clear();
+	}
 
-        ResourceList<Project> list = projectRepo.findAll(new QuerySpec(Project.class));
-        ResourcePermissionInformation metaInformation = list.getMeta(ResourcePermissionInformationImpl.class);
-        ResourcePermission resourcePermission = metaInformation.getResourcePermission();
-        Assert.assertEquals(ResourcePermission.ALL, resourcePermission);
-    }
+	@Test
+	public void metaAllPermissions() {
+		identityManager.addUser("doe", "doePass", "allRole");
 
-    @Test
-    public void metaGetPatchPermissions() {
-        identityManager.addUser("doe", "doePass");
+		ResourceList<Project> list = projectRepo.findAll(new QuerySpec(Project.class));
+		ResourcePermissionInformation metaInformation = list.getMeta(ResourcePermissionInformationImpl.class);
+		ResourcePermission resourcePermission = metaInformation.getResourcePermission();
+		Assert.assertEquals(ResourcePermission.ALL, resourcePermission);
+	}
 
-        ResourceList<Project> list = projectRepo.findAll(new QuerySpec(Project.class));
-        ResourcePermissionInformation metaInformation = list.getMeta(ResourcePermissionInformationImpl.class);
-        ResourcePermission resourcePermission = metaInformation.getResourcePermission();
-        Assert.assertEquals(ResourcePermission.GET.or(ResourcePermission.POST), resourcePermission);
-    }
+	@Test
+	public void metaGetPatchPermissions() {
+		identityManager.addUser("doe", "doePass");
 
-    @Test
-    public void rootAll() {
-        identityManager.addUser("doe", "doePass", "allRole");
+		ResourceList<Project> list = projectRepo.findAll(new QuerySpec(Project.class));
+		ResourcePermissionInformation metaInformation = list.getMeta(ResourcePermissionInformationImpl.class);
+		ResourcePermission resourcePermission = metaInformation.getResourcePermission();
+		Assert.assertEquals(ResourcePermission.GET.or(ResourcePermission.POST), resourcePermission);
+	}
 
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("test");
-        projectRepo.create(project);
+	@Test
+	public void rootAll() {
+		identityManager.addUser("doe", "doePass", "allRole");
 
-        project.setName("updated");
-        projectRepo.save(project);
+		Project project = new Project();
+		project.setId(1L);
+		project.setName("test");
+		projectRepo.create(project);
 
-        project = projectRepo.findOne(project.getId(), new QuerySpec(Project.class));
-        Assert.assertNotNull(project);
+		project.setName("updated");
+		projectRepo.save(project);
 
-        projectRepo.delete(project.getId());
-    }
+		project = projectRepo.findOne(project.getId(), new QuerySpec(Project.class));
+		Assert.assertNotNull(project);
 
-    @Test(expected = ForbiddenException.class)
-    public void forbiddenPost() {
-        identityManager.addUser("doe", "doePass", "getRole");
+		projectRepo.delete(project.getId());
+	}
 
-        Task task = new Task();
-        task.setId(1L);
-        task.setName("test");
-        taskRepo.create(task);
-    }
+	@Test(expected = ForbiddenException.class)
+	public void forbiddenPost() {
+		identityManager.addUser("doe", "doePass", "getRole");
 
-    @Test
-    public void disableSecurityModule() {
-        module.setEnabled(false);
+		Task task = new Task();
+		task.setId(1L);
+		task.setName("test");
+		taskRepo.create(task);
+	}
 
-        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("projects"));
-        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("tasks"));
-        Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
-        Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
-        Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));
-    }
 
-    @Test(expected = IllegalStateException.class)
-    public void noIsRolesAllowedWhenDisabled() {
-        module.setEnabled(false);
+	@Test(expected = UnauthorizedException.class)
+	public void unauthorizedPost() {
+		userName = null; // do not authenticate
 
-        module.isUserInRole("whatever");
-    }
+		Task task = new Task();
+		task.setId(1L);
+		task.setName("test");
+		taskRepo.create(task);
+	}
 
-    @Test
-    public void getPostOnly() {
-        identityManager.addUser("doe", "doePass", "getRole", "postRole");
+	@Test
+	public void disableSecurityModule() {
+		module.setEnabled(false);
 
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("test");
-        projectRepo.create(project);
+		Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("projects"));
+		Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("tasks"));
+		Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
+		Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
+		Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));
+	}
 
-        project = projectRepo.findOne(project.getId(), new QuerySpec(Project.class));
-        Assert.assertNotNull(project);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void noIsRolesAllowedWhenDisabled() {
+		module.setEnabled(false);
 
-    @Test(expected = UnauthorizedException.class)
-    public void unauthorizedException() {
-        identityManager.addUser("otherUser", "doePass", "allRole");
+		module.isUserInRole("whatever");
+	}
 
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("test");
-        projectRepo.create(project);
-    }
+	@Test
+	public void getPostOnly() {
+		identityManager.addUser("doe", "doePass", "getRole", "postRole");
 
-    @Test
-    public void permitAllMatchAnyType() {
-        identityManager.addUser("doe", "doePass");
-        projectRepo.findAll(new QuerySpec(Project.class));
-    }
+		Project project = new Project();
+		project.setId(1L);
+		project.setName("test");
+		projectRepo.create(project);
 
-    @Test
-    public void permitAllMatchProjectType() {
-        identityManager.addUser("doe", "doePass");
-        Project project = new Project();
-        project.setId(1L);
-        project.setName("test");
-        projectRepo.create(project);
-    }
+		project = projectRepo.findOne(project.getId(), new QuerySpec(Project.class));
+		Assert.assertNotNull(project);
+	}
 
-    @Test(expected = ForbiddenException.class)
-    public void permitAllNoMatch() {
-        identityManager.addUser("doe", "doePass");
-        Task task = new Task();
-        task.setId(1L);
-        task.setName("test");
-        taskRepo.create(task);
-    }
+	@Test(expected = UnauthorizedException.class)
+	public void unauthorizedException() {
+		identityManager.addUser("otherUser", "doePass", "allRole");
 
-    private static class TestAuthenticator implements Authenticator {
+		Project project = new Project();
+		project.setId(1L);
+		project.setName("test");
+		projectRepo.create(project);
+	}
 
-        private String userName;
+	@Test
+	public void permitAllMatchAnyType() {
+		identityManager.addUser("doe", "doePass");
+		projectRepo.findAll(new QuerySpec(Project.class));
+	}
 
-        private String password;
+	@Test
+	public void permitAllMatchProjectType() {
+		identityManager.addUser("doe", "doePass");
+		Project project = new Project();
+		project.setId(1L);
+		project.setName("test");
+		projectRepo.create(project);
+	}
 
-        public TestAuthenticator(String userName, String password) {
-            this.userName = userName;
-            this.password = password;
-        }
+	@Test(expected = ForbiddenException.class)
+	public void permitAllNoMatch() {
+		identityManager.addUser("doe", "doePass");
+		Task task = new Task();
+		task.setId(1L);
+		task.setName("test");
+		taskRepo.create(task);
+	}
 
-        @Override
-        public Request authenticate(Route route, Response response) { // NOSONAR this is a lambda, legacy cannot be removed!
-            if (responseCount(response) >= 3) {
-                return null; // If we've failed 3 times, give up.
-            }
-            String credential = Credentials.basic(userName, password);
-            return response.request().newBuilder().header("Authorization", credential).build();
-        }
-    }
+	private static class TestAuthenticator implements Authenticator {
 
-    @ApplicationPath("/")
-    private class TestApplication extends ResourceConfig {
+		private String userName;
 
-        public TestApplication() {
-            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, Project.class.getPackage().getName());
+		private String password;
 
-            // tag::setup[]
-            Builder builder = SecurityConfig.builder();
-            builder.permitRole("allRole", ResourcePermission.ALL);
-            builder.permitRole("getRole", ResourcePermission.GET);
-            builder.permitRole("patchRole", ResourcePermission.PATCH);
-            builder.permitRole("postRole", ResourcePermission.POST);
-            builder.permitRole("deleteRole", ResourcePermission.DELETE);
-            builder.permitRole("taskRole", Task.class, ResourcePermission.ALL);
-            builder.permitRole("taskReadRole", Task.class, ResourcePermission.GET);
-            builder.permitRole("projectRole", Project.class, ResourcePermission.ALL);
-            builder.permitAll(ResourcePermission.GET);
-            builder.permitAll(Project.class, ResourcePermission.POST);
-            module = SecurityModule.newServerModule(builder.build());
+		public TestAuthenticator(String userName, String password) {
+			this.userName = userName;
+			this.password = password;
+		}
 
-            CrnkFeature feature = new CrnkFeature();
-            feature.addModule(module);
-            // end::setup[]
-            register(feature);
-        }
-    }
+		@Override
+		public Request authenticate(Route route, Response response) { // NOSONAR this is a lambda, legacy cannot be removed!
+			if (responseCount(response) >= 3) {
+				return null; // If we've failed 3 times, give up.
+			}
+			String credential = Credentials.basic(userName, password);
+			return response.request().newBuilder().header("Authorization", credential).build();
+		}
+	}
+
+	@ApplicationPath("/")
+	private class TestApplication extends ResourceConfig {
+
+		public TestApplication() {
+			property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, Project.class.getPackage().getName());
+
+			// tag::setup[]
+			Builder builder = SecurityConfig.builder();
+			builder.permitRole("allRole", ResourcePermission.ALL);
+			builder.permitRole("getRole", ResourcePermission.GET);
+			builder.permitRole("patchRole", ResourcePermission.PATCH);
+			builder.permitRole("postRole", ResourcePermission.POST);
+			builder.permitRole("deleteRole", ResourcePermission.DELETE);
+			builder.permitRole("taskRole", Task.class, ResourcePermission.ALL);
+			builder.permitRole("taskReadRole", Task.class, ResourcePermission.GET);
+			builder.permitRole("projectRole", Project.class, ResourcePermission.ALL);
+			builder.permitAll(ResourcePermission.GET);
+			builder.permitAll(Project.class, ResourcePermission.POST);
+			module = SecurityModule.newServerModule(builder.build());
+
+			CrnkFeature feature = new CrnkFeature();
+			feature.addModule(module);
+			// end::setup[]
+			register(feature);
+		}
+	}
 
 }

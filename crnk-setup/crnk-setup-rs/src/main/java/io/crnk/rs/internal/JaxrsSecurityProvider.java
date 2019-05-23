@@ -1,8 +1,8 @@
 package io.crnk.rs.internal;
 
-import io.crnk.core.engine.security.SecurityProvider;
-
 import javax.ws.rs.core.SecurityContext;
+
+import io.crnk.core.engine.security.SecurityProvider;
 
 public class JaxrsSecurityProvider implements SecurityProvider {
 
@@ -15,5 +15,10 @@ public class JaxrsSecurityProvider implements SecurityProvider {
 	@Override
 	public boolean isUserInRole(String role) {
 		return context.isUserInRole(role);
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		return context.getUserPrincipal() != null;
 	}
 }
