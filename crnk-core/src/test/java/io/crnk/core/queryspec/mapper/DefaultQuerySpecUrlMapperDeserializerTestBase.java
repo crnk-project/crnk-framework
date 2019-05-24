@@ -300,8 +300,30 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	}
 
 	@Test
-	public void testFilterWithJson() {
+	public void testFilterWithPrettyJson() {
 		String expectedJson = "{ \"OR\": [ {\"id\": [12, 13, 14]}, {\"completed\": true} ] }";
+		QuerySpec jsonSpec = new QuerySpec(Task.class);
+		jsonSpec.addFilter(new FilterSpec(expectedJson));
+
+		Map<String, Set<String>> expectedParams = new HashMap<>();
+		add(expectedParams, "filter", "{\"OR\":[{\"id\":[12,13,14]},{\"completed\":true}]}");
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, expectedParams);
+
+		FilterSpec idFilterSpec = PathSpec.of("id").filter(FilterOperator.EQ, Arrays.asList(12L, 13L, 14L));
+		FilterSpec completedFilterSpec = PathSpec.of("completed").filter(FilterOperator.EQ, true);
+		QuerySpec expectedQuerySpec = new QuerySpec(Task.class);
+		expectedQuerySpec.addFilter(FilterSpec.or(idFilterSpec, completedFilterSpec));
+		Assert.assertEquals(expectedQuerySpec.getFilters(), actualSpec.getFilters());
+		Assert.assertEquals(expectedQuerySpec, actualSpec);
+
+		Map<String, Set<String>> actualParams = urlMapper.serialize(actualSpec);
+		Assert.assertEquals(expectedParams, actualParams);
+	}
+
+	@Test
+	public void testFilterWithFilterSpecJson() {
+		String expectedJson = "{ \"path\": \"completed\", \"value\": true }";
 		QuerySpec jsonSpec = new QuerySpec(Task.class);
 		jsonSpec.addFilter(new FilterSpec(expectedJson));
 
