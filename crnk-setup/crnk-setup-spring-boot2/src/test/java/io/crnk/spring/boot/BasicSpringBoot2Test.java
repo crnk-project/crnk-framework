@@ -219,7 +219,7 @@ public class BasicSpringBoot2Test {
         QuerySpec querySpec = new QuerySpec(FacetResource.class);
         querySpec.addFilter(PathSpec.of(FacetResource.ATTR_VALUES, "name").filter(FilterOperator.SELECT, "doe"));
         ResourceList<FacetResource> facets = repository.findAll(querySpec);
-        Assert.assertEquals(2, facets.size());
+        Assert.assertEquals(3, facets.size());
     }
 
     @Test

@@ -1,10 +1,6 @@
 package io.crnk.meta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.dispatcher.Response;
-import io.crnk.core.engine.filter.DocumentFilter;
-import io.crnk.core.engine.filter.DocumentFilterChain;
-import io.crnk.core.engine.filter.DocumentFilterContext;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -116,14 +112,11 @@ public class MetaModule implements ModuleExtensionAware<MetaModuleExtension> {
         informationBuilder = registerInformationBuilder(context.getPropertiesProvider());
 
         if (context.isServer()) {
-            context.addFilter(new DocumentFilter() {
-                @Override
-                public Response filter(DocumentFilterContext filterRequestContext, DocumentFilterChain chain) {
-                    try {
-                        return chain.doFilter(filterRequestContext);
-                    } finally {
-                        lookupRequestLocal.remove();
-                    }
+            context.addFilter((filterRequestContext, chain) -> {
+                try {
+                    return chain.doFilter(filterRequestContext);
+                } finally {
+                    lookupRequestLocal.remove();
                 }
             });
         } else {
