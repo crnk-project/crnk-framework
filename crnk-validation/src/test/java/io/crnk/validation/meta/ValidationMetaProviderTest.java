@@ -4,7 +4,7 @@ import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.module.discovery.ReflectionsServiceDiscovery;
 import io.crnk.legacy.locator.SampleJsonServiceLocator;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class ValidationMetaProviderTest {
 
-	private MetaLookup lookup;
+	private MetaLookupImpl lookup;
 
 	private ResourceMetaProvider resourceMetaProvider;
 
@@ -28,7 +28,7 @@ public class ValidationMetaProviderTest {
 		boot.boot();
 
 		resourceMetaProvider = new ResourceMetaProvider();
-		lookup = new MetaLookup();
+		lookup = new MetaLookupImpl();
 		lookup.setModuleContext(boot.getModuleRegistry().getContext());
 		lookup.addProvider(resourceMetaProvider);
 		if (addValidationProvider) {

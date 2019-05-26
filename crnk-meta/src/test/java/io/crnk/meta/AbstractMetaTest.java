@@ -8,7 +8,7 @@ import org.junit.Before;
 public abstract class AbstractMetaTest {
 
 
-	protected MetaLookup lookup;
+	protected MetaLookupImpl lookup;
 
 	protected ResourceMetaProvider resourceProvider;
 
@@ -27,7 +27,7 @@ public abstract class AbstractMetaTest {
 
 		resourceProvider = new ResourceMetaProvider();
 
-		lookup = new MetaLookup();
+		lookup = new MetaLookupImpl();
 		lookup.addProvider(resourceProvider);
 		lookup.setModuleContext(container.getModuleRegistry().getContext());
 		lookup.initialize();

@@ -37,6 +37,7 @@ import io.crnk.data.jpa.meta.MetaEntity;
 import io.crnk.data.jpa.meta.internal.JpaMetaEnricher;
 import io.crnk.data.jpa.meta.internal.JpaMetaPartition;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.MetaModuleExtension;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.provider.MetaPartition;
@@ -106,7 +107,7 @@ public class JpaModule implements InitializingModule {
 
     private JpaMetaEnricher metaEnricher;
 
-    private MetaLookup jpaMetaLookup;
+    private MetaLookupImpl jpaMetaLookup;
 
     private JpaMetaProvider jpaMetaProvider;
 
@@ -296,7 +297,7 @@ public class JpaModule implements InitializingModule {
             }
         }
         jpaMetaProvider = new JpaMetaProvider(jpaTypes);
-        jpaMetaLookup = new MetaLookup();
+        jpaMetaLookup = new MetaLookupImpl();
         jpaMetaLookup.addProvider(jpaMetaProvider);
         jpaMetaLookup.setModuleContext(context);
         jpaMetaLookup.initialize();

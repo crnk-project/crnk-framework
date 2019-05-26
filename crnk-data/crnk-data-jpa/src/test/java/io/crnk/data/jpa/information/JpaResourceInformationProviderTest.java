@@ -26,7 +26,7 @@ import io.crnk.data.jpa.model.TestEmbeddable;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.model.VersionedEntity;
 import io.crnk.legacy.registry.DefaultResourceInformationProviderContext;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import org.junit.Assert;
@@ -49,7 +49,7 @@ public class JpaResourceInformationProviderTest {
     @Before
     public void setup() {
         jpaMetaProvider = new JpaMetaProvider(Collections.emptySet());
-        MetaLookup lookup = new MetaLookup();
+        MetaLookupImpl lookup = new MetaLookupImpl();
         lookup.addProvider(jpaMetaProvider);
         builder = new JpaResourceInformationProvider(new NullPropertiesProvider());
         builder.init(new DefaultResourceInformationProviderContext(builder, new DefaultInformationBuilder(new TypeParser()),

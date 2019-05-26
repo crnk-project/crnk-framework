@@ -3,7 +3,7 @@ package io.crnk.gen.runtime.spring;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.gen.base.SpringRuntimeConfig;
 import io.crnk.gen.runtime.RuntimeContext;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -54,12 +54,12 @@ public class SpringRunner {
 
             CrnkBoot boot = applicationContext.getBean(CrnkBoot.class);
 
-            MetaLookup lookup;
+            MetaLookupImpl lookup;
             try {
-                lookup = applicationContext.getBean(MetaModule.class).getLookup();
+                lookup = (MetaLookupImpl) applicationContext.getBean(MetaModule.class).getLookup();
             } catch (NoSuchBeanDefinitionException e) {
                 MetaModuleConfig lookupConfig = new MetaModuleConfig();
-                lookup = new MetaLookup();
+                lookup = new MetaLookupImpl();
                 lookup.addProvider(new ResourceMetaProvider());
                 lookupConfig.apply(lookup);
                 lookup.setModuleContext(boot.getModuleRegistry().getContext());

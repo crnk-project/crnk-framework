@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.meta;
 
 import io.crnk.data.jpa.model.TestMappedSuperclassWithGenerics;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,7 +16,7 @@ public class MetaMappedSuperWithGenericsTypeTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 	}
 

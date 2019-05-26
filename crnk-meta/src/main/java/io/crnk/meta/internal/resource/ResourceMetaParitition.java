@@ -175,6 +175,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		resource.setImplementationType(information.getResourceClass());
 		resource.setName(getName(information));
 		resource.setResourceType(resourceType);
+		resource.setResourcePath(information.getResourcePath());
 		if (superMeta != null) {
 			resource.setSuperType(superMeta);
 			if (superMeta != null) {

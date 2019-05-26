@@ -42,7 +42,7 @@ import java.util.Set;
 
 public class ResourceMetaProviderTest extends AbstractMetaTest {
 
-    private MetaLookup lookup;
+    private MetaLookupImpl lookup;
 
     private ResourceMetaProvider resourceProvider;
 
@@ -52,7 +52,7 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 
         resourceProvider = new ResourceMetaProvider();
 
-        lookup = new MetaLookup();
+        lookup = new MetaLookupImpl();
         lookup.setModuleContext(container.getModuleRegistry().getContext());
         lookup.addProvider(resourceProvider);
         lookup.initialize();

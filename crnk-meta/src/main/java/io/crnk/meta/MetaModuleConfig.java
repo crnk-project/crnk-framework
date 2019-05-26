@@ -18,7 +18,7 @@ public class MetaModuleConfig {
 		providers.add(provider);
 	}
 
-	public void apply(MetaLookup metaLookup) {
+	public void apply(MetaLookupImpl metaLookup) {
 		for (MetaProvider provider : providers) {
 			metaLookup.addProvider(provider);
 		}

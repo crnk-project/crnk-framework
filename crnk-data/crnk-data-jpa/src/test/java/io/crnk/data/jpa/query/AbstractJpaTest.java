@@ -36,7 +36,7 @@ import io.crnk.data.jpa.model.TestIdEmbeddable;
 import io.crnk.data.jpa.model.TestNestedEmbeddable;
 import io.crnk.data.jpa.model.UuidTestEntity;
 import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.provider.MetaPartition;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -85,7 +85,7 @@ public abstract class AbstractJpaTest {
 			@Override
 			public MetaPartition getMetaPartition() {
 				JpaMetaProvider jpaMetaProvider = new JpaMetaProvider(em.getEntityManagerFactory());
-				MetaLookup metaLookup = new MetaLookup();
+				MetaLookupImpl metaLookup = new MetaLookupImpl();
 				metaLookup.addProvider(jpaMetaProvider);
 				metaLookup.initialize();
 				return jpaMetaProvider.getPartition();

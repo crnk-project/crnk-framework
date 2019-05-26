@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.meta;
 
 import io.crnk.data.jpa.model.TestEntity;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaType;
@@ -18,7 +18,7 @@ public class MetaLookupTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 	}
 

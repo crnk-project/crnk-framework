@@ -3,7 +3,7 @@ package io.crnk.data.jpa.util;
 import io.crnk.data.jpa.internal.query.AnyUtils;
 import io.crnk.data.jpa.meta.JpaMetaProvider;
 import io.crnk.data.jpa.model.TestAnyType;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class AnyTypeUtilsTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 		metaProvider.discoverMeta(TestAnyType.class);
 	}

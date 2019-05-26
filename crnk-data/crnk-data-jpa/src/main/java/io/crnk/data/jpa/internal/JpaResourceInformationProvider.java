@@ -31,7 +31,7 @@ import io.crnk.data.jpa.annotations.JpaResource;
 import io.crnk.data.jpa.meta.JpaMetaProvider;
 import io.crnk.data.jpa.meta.MetaEntity;
 import io.crnk.data.jpa.meta.internal.JpaMetaUtils;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
@@ -72,7 +72,7 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
                         new JacksonResourceFieldInformationProvider()));
 
         metaProvider = new JpaMetaProvider(Collections.emptySet());
-        MetaLookup lookup = new MetaLookup();
+        MetaLookupImpl lookup = new MetaLookupImpl();
         lookup.addProvider(metaProvider);
         lookup.initialize();
     }

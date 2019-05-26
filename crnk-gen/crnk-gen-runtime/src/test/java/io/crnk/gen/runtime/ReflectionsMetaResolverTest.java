@@ -3,6 +3,7 @@ package io.crnk.gen.runtime;
 import io.crnk.gen.base.GeneratorConfig;
 import io.crnk.gen.runtime.reflections.ReflectionsMetaResolver;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.resource.MetaResource;
 import org.junit.Assert;
 import org.junit.Test;
