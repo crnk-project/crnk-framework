@@ -1,7 +1,7 @@
 package io.crnk.meta.internal;
 
 import io.crnk.core.engine.query.QueryContext;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaFilter;
 
@@ -21,7 +21,7 @@ public class MetaUtils {
 	}
 
 
-	public static MetaElement adjustForRequest(MetaLookup lookup, MetaElement element, QueryContext queryContext) {
+	public static MetaElement adjustForRequest(MetaLookupImpl lookup, MetaElement element, QueryContext queryContext) {
 		List<MetaFilter> filters = lookup.getFilters();
 		for (MetaFilter filter : filters) {
 			element = filter.adjustForRequest(element, queryContext);

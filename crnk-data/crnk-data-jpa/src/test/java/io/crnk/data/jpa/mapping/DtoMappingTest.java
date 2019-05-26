@@ -21,7 +21,7 @@ import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.model.dto.RelatedDTO;
 import io.crnk.data.jpa.model.dto.SequenceDTO;
 import io.crnk.data.jpa.model.dto.TestDTO;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaKey;
 import io.crnk.meta.model.resource.MetaResource;
@@ -93,7 +93,7 @@ public class DtoMappingTest extends AbstractJpaJerseyTest {
 
 	@Test
 	public void testDtoMeta() {
-		MetaLookup lookup = metaModule.getLookup();
+		MetaLookupImpl lookup = (MetaLookupImpl) metaModule.getLookup();
 		MetaResource meta = (MetaResource) lookup.getMetaById().get("resources.testDTO");
 		MetaKey primaryKey = meta.getPrimaryKey();
 		Assert.assertNotNull(primaryKey);

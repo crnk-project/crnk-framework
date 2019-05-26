@@ -4,7 +4,7 @@ import io.crnk.data.jpa.model.NamingTestEntity;
 import io.crnk.data.jpa.model.RelatedEntity;
 import io.crnk.data.jpa.model.TestEntity;
 import io.crnk.data.jpa.model.WriteOnlyAttributeTestEntity;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaCollectionType;
 import io.crnk.meta.model.MetaMapType;
@@ -22,7 +22,7 @@ public class JpaMetaProviderAttributeTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 	}
 

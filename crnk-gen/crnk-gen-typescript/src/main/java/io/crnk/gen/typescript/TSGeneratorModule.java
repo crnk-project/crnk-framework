@@ -6,7 +6,7 @@ import io.crnk.gen.typescript.internal.TSGenerator;
 import io.crnk.gen.typescript.internal.TSGeneratorRuntimeContext;
 import io.crnk.gen.typescript.model.writer.TSCodeStyle;
 import io.crnk.gen.typescript.processor.TSSourceProcessor;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class TSGeneratorModule implements GeneratorModule, TSGeneratorRuntimeCon
 
     @Override
     public void generate(Object meta) throws IOException {
-        MetaLookup metaLookup = (MetaLookup) meta;
+        MetaLookupImpl metaLookup = (MetaLookupImpl) meta;
 
         TSGenerator gen = new TSGenerator(config.getGenDir(), metaLookup, config);
         gen.run();

@@ -14,8 +14,8 @@ import io.crnk.gen.typescript.transform.TSMetaTransformation;
 import io.crnk.gen.typescript.transform.TSMetaTransformationContext;
 import io.crnk.gen.typescript.transform.TSMetaTransformationOptions;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.internal.resource.ResourceMetaParitition;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +37,6 @@ public class TSGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TSGenerator.class);
 
-    private ResourceMetaParitition resourveMetaPartition;
-
     private File outputDir;
 
     private MetaLookup lookup;
@@ -57,8 +55,6 @@ public class TSGenerator {
         this.outputDir = outputDir;
         this.lookup = lookup;
         this.config = config;
-
-        this.resourveMetaPartition = lookup.getPartition(ResourceMetaParitition.class);
 
         transformations = new ArrayList<>();
         for (final String className : config.getMetaTransformationClassNames()) {
@@ -123,7 +119,7 @@ public class TSGenerator {
     private boolean postProcessing = false;
 
     public void transformMetaToTypescript() {
-        Collection<MetaElement> elements = lookup.getMetaById().values();
+        Collection<MetaElement> elements = lookup.findElements(MetaElement.class);
         LOGGER.debug("transforming {} elements", elements.size());
         for (MetaElement element : elements) {
             boolean isRoot = isRoot(element);
@@ -291,12 +287,12 @@ public class TSGenerator {
 
         @Override
         public MetaElement getMeta(Class<?> implClass) {
-            return resourveMetaPartition.getMeta(implClass);
+            return lookup.findElement(MetaResource.class, implClass);
         }
 
         @Override
         public MetaElement getMeta(String metaId) {
-            return lookup.getMetaById().get(metaId);
+            return lookup.findElement(MetaElement.class, metaId);
         }
 
         @Override

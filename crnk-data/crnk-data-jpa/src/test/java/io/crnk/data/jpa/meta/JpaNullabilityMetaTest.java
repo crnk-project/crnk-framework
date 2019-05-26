@@ -2,7 +2,7 @@ package io.crnk.data.jpa.meta;
 
 import io.crnk.data.jpa.model.AnnotationTestEntity;
 import io.crnk.data.jpa.model.TestEntity;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaKey;
 import org.junit.Assert;
@@ -18,7 +18,7 @@ public class JpaNullabilityMetaTest {
 	@Before
 	public void setup() {
 		metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 	}
 

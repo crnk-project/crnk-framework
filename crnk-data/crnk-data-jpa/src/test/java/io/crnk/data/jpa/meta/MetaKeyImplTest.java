@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.meta;
 
 import io.crnk.data.jpa.model.TestEntity;
-import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaKey;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,7 +13,7 @@ public class MetaKeyImplTest {
 	@Test
 	public void test() {
 		JpaMetaProvider metaProvider = new JpaMetaProvider(Collections.emptySet());
-		MetaLookup lookup = new MetaLookup();
+		MetaLookupImpl lookup = new MetaLookupImpl();
 		lookup.addProvider(metaProvider);
 		MetaEntity meta = metaProvider.discoverMeta(TestEntity.class);
 		MetaKey primaryKey = meta.getPrimaryKey();

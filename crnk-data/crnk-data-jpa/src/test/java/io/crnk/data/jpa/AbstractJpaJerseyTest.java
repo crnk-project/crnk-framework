@@ -5,12 +5,13 @@ import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.data.facet.FacetModule;
-import io.crnk.data.jpa.util.EntityManagerProducer;
-import io.crnk.data.jpa.util.JpaTestConfig;
-import io.crnk.data.jpa.util.SpringTransactionRunner;
 import io.crnk.data.jpa.meta.JpaMetaProvider;
 import io.crnk.data.jpa.model.CountryTranslationEntity;
 import io.crnk.data.jpa.query.AbstractJpaTest;
+import io.crnk.data.jpa.util.EntityManagerProducer;
+import io.crnk.data.jpa.util.JpaTestConfig;
+import io.crnk.data.jpa.util.SpringTransactionRunner;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -70,7 +71,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
         clientMetaModule.addMetaProvider(new ResourceMetaProvider());
         client.addModule(clientMetaModule);
 
-        metaModule.getLookup().initialize();
+        ((MetaLookupImpl) metaModule.getLookup()).initialize();
 
         setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
     }
