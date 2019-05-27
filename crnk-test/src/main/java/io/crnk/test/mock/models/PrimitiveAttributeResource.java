@@ -1,13 +1,15 @@
 package io.crnk.test.mock.models;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-
-import java.util.Date;
-import java.util.UUID;
 
 @JsonApiResource(type = "primitiveAttribute")
 public class PrimitiveAttributeResource {
@@ -55,6 +57,9 @@ public class PrimitiveAttributeResource {
 
 	private Object objectValue;
 
+	private Map<ScheduleStatus, String> mapValueWithEnumKey;
+
+	private Map<String, List<String>> mapValueWithListValue;
 
 	public Long getId() {
 		return id;
@@ -62,6 +67,22 @@ public class PrimitiveAttributeResource {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Map<ScheduleStatus, String> getMapValueWithEnumKey() {
+		return mapValueWithEnumKey;
+	}
+
+	public void setMapValueWithEnumKey(Map<ScheduleStatus, String> mapValueWithEnumKey) {
+		this.mapValueWithEnumKey = mapValueWithEnumKey;
+	}
+
+	public Map<String, List<String>> getMapValueWithListValue() {
+		return mapValueWithListValue;
+	}
+
+	public void setMapValueWithListValue(Map<String, List<String>> mapValueWithListValue) {
+		this.mapValueWithListValue = mapValueWithListValue;
 	}
 
 	public UUID getUuidValue() {

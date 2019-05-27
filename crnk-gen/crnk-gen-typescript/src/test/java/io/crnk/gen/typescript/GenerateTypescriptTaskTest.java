@@ -16,6 +16,7 @@ import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
+import io.crnk.test.mock.repository.PrimitiveAttributeRepository;
 import io.crnk.test.mock.repository.ProjectRepository;
 import io.crnk.test.mock.repository.ProjectToTaskRepository;
 import io.crnk.test.mock.repository.ScheduleRepositoryImpl;
@@ -32,169 +33,182 @@ import org.slf4j.LoggerFactory;
 
 public class GenerateTypescriptTaskTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GenerateTypescriptTaskTest.class);
 
 
-    private File outputDir;
+	private File outputDir;
 
-    @Test
-    public void testWithExpressions() throws IOException {
-        test(true, TSResourceFormat.JSONAPI);
-    }
+	@Test
+	public void testWithExpressions() throws IOException {
+		test(true, TSResourceFormat.JSONAPI);
+	}
 
-    @Test
-    public void testWithoutExpressions() throws IOException {
-        test(false, TSResourceFormat.JSONAPI);
-    }
+	@Test
+	public void testWithoutExpressions() throws IOException {
+		test(false, TSResourceFormat.JSONAPI);
+	}
 
-    @Test
-    public void testPlainJson() throws IOException {
-        test(false, TSResourceFormat.PLAINJSON);
-    }
+	@Test
+	public void testPlainJson() throws IOException {
+		test(false, TSResourceFormat.PLAINJSON);
+	}
 
-    private void test(boolean expressions, TSResourceFormat resourceFormat) throws IOException {
-        outputDir = new File("build/tmp/gen");
-        FileUtils.deleteDirectory(outputDir);
-        outputDir.mkdirs();
+	private void test(boolean expressions, TSResourceFormat resourceFormat) throws IOException {
+		outputDir = new File("build/tmp/gen");
+		FileUtils.deleteDirectory(outputDir);
+		outputDir.mkdirs();
 
-        File npmrcFile = new File(outputDir, ".npmrc");
-        FileWriter npmrcWriter = new FileWriter(npmrcFile);
-        npmrcWriter.write("");
-        npmrcWriter.close();
+		File npmrcFile = new File(outputDir, ".npmrc");
+		FileWriter npmrcWriter = new FileWriter(npmrcFile);
+		npmrcWriter.write("");
+		npmrcWriter.close();
 
 
-        MetaLookup lookup = createLookup();
+		MetaLookup lookup = createLookup();
 
-        TSGeneratorModule module = new TSGeneratorModule();
-        createConfig(module.getConfig(), resourceFormat, expressions);
-        module.getConfig().setGenDir(outputDir);
-        module.initDefaults(outputDir);
-        module.generate(lookup);
+		TSGeneratorModule module = new TSGeneratorModule();
+		createConfig(module.getConfig(), resourceFormat, expressions);
+		module.getConfig().setGenDir(outputDir);
+		module.initDefaults(outputDir);
+		module.generate(lookup);
 
-        assertExists("index.ts");
-        assertExists("projects.ts");
-        assertExists("types/project.data.ts");
-        assertExists("schedule.ts");
-        assertExists("tasks.ts");
-        assertExists("facet.ts");
-        assertExists("facet.value.ts");
-        if (resourceFormat == TSResourceFormat.PLAINJSON) {
-            assertExists("crnk.ts");
-        }
-        assertNotExists("tasks.links.ts");
-        assertNotExists("tasks.meta.ts");
+		assertExists("index.ts");
+		assertExists("index.ts");
+		assertExists("projects.ts");
+		assertExists("primitive.attribute.ts");
+		assertExists("types/project.data.ts");
+		assertExists("schedule.ts");
+		assertExists("tasks.ts");
+		assertExists("facet.ts");
+		assertExists("facet.value.ts");
+		if (resourceFormat == TSResourceFormat.PLAINJSON) {
+			assertExists("crnk.ts");
 
-        checkSchedule(expressions, resourceFormat);
-        checkProject();
-        if (expressions) {
-            checkProjectData();
-        }
-    }
+			checkPrimitiveAttributes();
+		}
+		assertNotExists("tasks.links.ts");
+		assertNotExists("tasks.meta.ts");
 
-    private TSGeneratorConfig createConfig(TSGeneratorConfig tsConfig, TSResourceFormat resourceFormat, boolean expressions) {
-        String testPackage = "@crnk/gen-typescript-test";
-        tsConfig.getNpm().setPackageName(testPackage);
-        tsConfig.getNpm().setGitRepository("someThing");
-        tsConfig.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
-        tsConfig.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
-        tsConfig.getNpm().setPackageVersion("0.0.1");
-        tsConfig.setExpressions(expressions);
-        tsConfig.setFormat(resourceFormat);
-        return tsConfig;
-    }
+		checkSchedule(expressions, resourceFormat);
+		checkProject();
+		if (expressions) {
+			checkProjectData();
+		}
+	}
 
-    private MetaLookup createLookup() {
-        MetaModule metaModule = createMetaModule();
-        CrnkBoot boot = new CrnkBoot();
-        boot.addModule(metaModule);
-        boot.addModule(createRepositoryModule());
-        boot.addModule(new FacetModule(new FacetModuleConfig()));
-        boot.boot();
-        return metaModule.getLookup();
-    }
+	private void checkPrimitiveAttributes() throws IOException {
+		String expectedSourceFileName = "expected_primitive_plain_json.ts";
+		String actualSourcePath = "primitive.attribute.ts";
+		compare(expectedSourceFileName, actualSourcePath);
+	}
 
-    public MetaModule createMetaModule() {
-        MetaModuleConfig metaConfig = new MetaModuleConfig();
-        metaConfig.addMetaProvider(new ResourceMetaProvider());
-        MetaModule metaModule = MetaModule.createServerModule(metaConfig);
-        return metaModule;
-    }
+	private TSGeneratorConfig createConfig(TSGeneratorConfig tsConfig, TSResourceFormat resourceFormat, boolean expressions) {
+		String testPackage = "@crnk/gen-typescript-test";
+		tsConfig.getNpm().setPackageName(testPackage);
+		tsConfig.getNpm().setGitRepository("someThing");
+		tsConfig.getNpm().getPackageMapping().put("io.crnk.test.mock.models", testPackage);
+		tsConfig.getNpm().getPackageMapping().put("io.crnk.meta", testPackage);
+		tsConfig.getNpm().setPackageVersion("0.0.1");
+		tsConfig.setExpressions(expressions);
+		tsConfig.setFormat(resourceFormat);
+		return tsConfig;
+	}
 
-    public Module createRepositoryModule() {
-        SimpleModule module = new SimpleModule("mock");
-        module.addRepository(new ScheduleRepositoryImpl());
-        module.addRepository(new ProjectRepository());
-        module.addRepository(new TaskRepository());
-        module.addRepository(new ProjectToTaskRepository());
-        module.addRepository(new TaskSubtypeRepository());
-        module.addRepository(new TaskToProjectRepository());
-        module.addRepository(new ScheduleStatusRepositoryImpl());
-        return module;
-    }
+	private MetaLookup createLookup() {
+		MetaModule metaModule = createMetaModule();
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(metaModule);
+		boot.addModule(createRepositoryModule());
+		boot.addModule(new FacetModule(new FacetModuleConfig()));
+		boot.boot();
+		return metaModule.getLookup();
+	}
 
-    private void checkProjectData() throws IOException {
-        String expectedSourceFileName = "expected_project_data.ts";
-        String actualSourcePath = "types/project.data.ts";
-        compare(expectedSourceFileName, actualSourcePath);
-    }
+	public MetaModule createMetaModule() {
+		MetaModuleConfig metaConfig = new MetaModuleConfig();
+		metaConfig.addMetaProvider(new ResourceMetaProvider());
+		MetaModule metaModule = MetaModule.createServerModule(metaConfig);
+		return metaModule;
+	}
 
-    private void checkProject() throws IOException {
-        Charset utf8 = Charset.forName("UTF8");
-        try (InputStream in = new FileInputStream(new File(outputDir, "projects.ts"))) {
-            String actualSource = IOUtils
-                    .toString(in, utf8);
-            Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
-        }
-    }
+	public Module createRepositoryModule() {
+		SimpleModule module = new SimpleModule("mock");
+		module.addRepository(new ScheduleRepositoryImpl());
+		module.addRepository(new ProjectRepository());
+		module.addRepository(new TaskRepository());
+		module.addRepository(new ProjectToTaskRepository());
+		module.addRepository(new TaskSubtypeRepository());
+		module.addRepository(new TaskToProjectRepository());
+		module.addRepository(new ScheduleStatusRepositoryImpl());
+		module.addRepository(new PrimitiveAttributeRepository());
+		return module;
+	}
 
-    private void checkSchedule(boolean expressions, TSResourceFormat format) throws IOException {
-        String expectedSourceFileName;
-        if (format == TSResourceFormat.PLAINJSON) {
-            expectedSourceFileName = "expected_schedule_plain_json.ts";
-        } else if (expressions) {
-            expectedSourceFileName = "expected_schedule_with_expressions.ts";
-        } else {
-            expectedSourceFileName = "expected_schedule_without_expressions.ts";
-        }
+	private void checkProjectData() throws IOException {
+		String expectedSourceFileName = "expected_project_data.ts";
+		String actualSourcePath = "types/project.data.ts";
+		compare(expectedSourceFileName, actualSourcePath);
+	}
 
-        String actualSourcePath = "schedule.ts";
-        compare(expectedSourceFileName, actualSourcePath);
-    }
+	private void checkProject() throws IOException {
+		Charset utf8 = Charset.forName("UTF8");
+		try (InputStream in = new FileInputStream(new File(outputDir, "projects.ts"))) {
+			String actualSource = IOUtils
+					.toString(in, utf8);
+			Assert.assertTrue(actualSource.contains(" from './types/project.data'"));
+		}
+	}
 
-    private void compare(String expectedSourceFileName, String actualSourcePath) throws IOException {
-        Charset utf8 = Charset.forName("UTF8");
+	private void checkSchedule(boolean expressions, TSResourceFormat format) throws IOException {
+		String expectedSourceFileName;
+		if (format == TSResourceFormat.PLAINJSON) {
+			expectedSourceFileName = "expected_schedule_plain_json.ts";
+		}
+		else if (expressions) {
+			expectedSourceFileName = "expected_schedule_with_expressions.ts";
+		}
+		else {
+			expectedSourceFileName = "expected_schedule_without_expressions.ts";
+		}
 
-        String expectedSource;
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream(expectedSourceFileName)) {
-            expectedSource = IOUtils.toString(in, utf8);
-        }
+		String actualSourcePath = "schedule.ts";
+		compare(expectedSourceFileName, actualSourcePath);
+	}
 
-        String actualSource;
-        try (FileInputStream in = new FileInputStream(new File(outputDir, actualSourcePath))) {
-            actualSource = IOUtils.toString(in, utf8);
-        }
+	private void compare(String expectedSourceFileName, String actualSourcePath) throws IOException {
+		Charset utf8 = Charset.forName("UTF8");
 
-        expectedSource = expectedSource.replace("\r\n", "\n");
+		String expectedSource;
+		try (InputStream in = getClass().getClassLoader().getResourceAsStream(expectedSourceFileName)) {
+			expectedSource = IOUtils.toString(in, utf8);
+		}
 
-        LoggerFactory.getLogger(getClass()).info(actualSource);
-        LOGGER.info(actualSource);
-        System.err.println(actualSource);
+		String actualSource;
+		try (FileInputStream in = new FileInputStream(new File(outputDir, actualSourcePath))) {
+			actualSource = IOUtils.toString(in, utf8);
+		}
 
-        String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
-        String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
-        for (int i = 0; i < expectedLines.length; i++) {
-            Assert.assertEquals("line: " + i + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
-        }
-        Assert.assertEquals(expectedLines.length, actualLines.length);
-    }
+		expectedSource = expectedSource.replace("\r\n", "\n");
 
-    private void assertExists(String path) {
-        File file = new File(outputDir, path);
-        Assert.assertTrue(file.getAbsolutePath(), file.exists());
-    }
+		LoggerFactory.getLogger(getClass()).info(actualSource);
+		LOGGER.info(actualSource);
+		System.err.println(actualSource);
 
-    private void assertNotExists(String path) {
-        File file = new File(outputDir, path);
-        Assert.assertFalse(file.getAbsolutePath(), file.exists());
-    }
+		String[] expectedLines = org.apache.commons.lang3.StringUtils.split(expectedSource, '\n');
+		String[] actualLines = org.apache.commons.lang3.StringUtils.split(actualSource, '\n');
+		for (int i = 0; i < expectedLines.length; i++) {
+			Assert.assertEquals("line: " + i + ", " + expectedLines[i], expectedLines[i], actualLines[i]);
+		}
+		Assert.assertEquals(expectedLines.length, actualLines.length);
+	}
+
+	private void assertExists(String path) {
+		File file = new File(outputDir, path);
+		Assert.assertTrue(file.getAbsolutePath(), file.exists());
+	}
+
+	private void assertNotExists(String path) {
+		File file = new File(outputDir, path);
+		Assert.assertFalse(file.getAbsolutePath(), file.exists());
+	}
 }

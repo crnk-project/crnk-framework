@@ -318,9 +318,14 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 		}
 	}
 
-	private static TSType transformType(TSMetaTransformationContext context, MetaAttribute attr) {
-		MetaType type = attr.getType();
-		TSType tsElementType = (TSType) context.transform(type.getElementType(), TSMetaTransformationOptions.EMPTY);
+	private static TSType transformType(TSMetaTransformationContext context, MetaType type) {
+		TSType tsElementType;
+		if (type != type.getElementType()) {
+			tsElementType = transformType(context, type.getElementType());
+		}
+		else {
+			tsElementType = (TSType) context.transform(type.getElementType(), TSMetaTransformationOptions.EMPTY);
+		}
 		if (type instanceof MetaMapType) {
 			MetaMapType mapType = (MetaMapType) type;
 			TSType tsKeyType = (TSType) context.transform(mapType.getKeyType(), TSMetaTransformationOptions.EMPTY);
@@ -333,6 +338,11 @@ public class TSMetaDataObjectTransformation implements TSMetaTransformation {
 			return new TSArrayType(tsElementType);
 		}
 		return tsElementType;
+	}
+
+	private static TSType transformType(TSMetaTransformationContext context, MetaAttribute attr) {
+		MetaType type = attr.getType();
+		return transformType(context, type);
 	}
 
 	private static void setupParent(TSMetaTransformationContext context, TSInterfaceType interfaceType,
