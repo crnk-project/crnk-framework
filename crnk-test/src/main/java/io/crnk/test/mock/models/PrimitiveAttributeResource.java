@@ -3,6 +3,7 @@ package io.crnk.test.mock.models;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,12 +62,22 @@ public class PrimitiveAttributeResource {
 
 	private Map<String, List<String>> mapValueWithListValue;
 
+	private Map<String, Set<String>> mapValueWithSetValue;
+
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Map<String, Set<String>> getMapValueWithSetValue() {
+		return mapValueWithSetValue;
+	}
+
+	public void setMapValueWithSetValue(Map<String, Set<String>> mapValueWithSetValue) {
+		this.mapValueWithSetValue = mapValueWithSetValue;
 	}
 
 	public Map<ScheduleStatus, String> getMapValueWithEnumKey() {

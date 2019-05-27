@@ -28,6 +28,7 @@ export interface PrimitiveAttribute extends Resource {
 	objectValue?: any;
 	mapValueWithEnumKey?: { [key: ScheduleStatus]: string };
 	mapValueWithListValue?: { [key: string]: Array<string> };
+	mapValueWithSetValue?: { [key: string]: Array<string> };
 }
 export interface PrimitiveAttributeResult extends OneResult {
 	data?: PrimitiveAttribute;
