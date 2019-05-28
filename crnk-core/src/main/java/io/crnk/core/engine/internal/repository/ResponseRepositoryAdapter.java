@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.repository;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import io.crnk.core.engine.dispatcher.RepositoryRequestSpec;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.RepositoryBulkRequestFilterChain;
@@ -16,6 +22,7 @@ import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
+import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.repository.LinksRepository;
 import io.crnk.core.repository.MetaRepository;
@@ -26,12 +33,6 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.legacy.repository.LegacyLinksRepository;
 import io.crnk.legacy.repository.LegacyMetaRepository;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The adapter is used to create a common layer between controllers and
@@ -247,6 +248,9 @@ public abstract class ResponseRepositoryAdapter {
 			QueryContext queryContext = queryAdapter.getQueryContext();
 			FilterBehavior filterBehavior = resourceFilterDirectory.get(resourceInformation, request.getMethod(), queryContext);
 			if (filterBehavior != FilterBehavior.NONE) {
+				if(filterBehavior == FilterBehavior.UNAUTHORIZED){
+					throw new UnauthorizedException(resourceInformation, request.getMethod());
+				}
 				throw new ForbiddenException(resourceInformation, request.getMethod());
 			}
 
