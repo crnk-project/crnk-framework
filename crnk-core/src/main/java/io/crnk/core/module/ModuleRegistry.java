@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
@@ -825,8 +824,8 @@ public class ModuleRegistry {
 
 		@SuppressWarnings("rawtypes")
 		@Override
-		public Set<JsonApiExceptionMapper> getExceptionMappers() {
-			Set<JsonApiExceptionMapper> set = new HashSet<JsonApiExceptionMapper>();
+		public Set<ExceptionMapper> getExceptionMappers() {
+			Set<ExceptionMapper> set = new HashSet<ExceptionMapper>();
 			for (ExceptionMapperLookup lookup : lookups) {
 				set.addAll(lookup.getExceptionMappers());
 			}

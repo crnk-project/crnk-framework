@@ -5,7 +5,6 @@ import java.util.Optional;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.module.Module;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public class BeanExceptionMapper implements ExceptionMapper<BeanCreationExceptio
 			cause = cause.getCause();
 		}
 		if (cause != null) {
-			Optional<JsonApiExceptionMapper> mapper = context.getExceptionMapperRegistry().findMapperFor(cause.getClass());
+			Optional<ExceptionMapper> mapper = context.getExceptionMapperRegistry().findMapperFor(cause.getClass());
 			if (mapper.isPresent()) {
 				return mapper.get().toErrorResponse(cause);
 			}

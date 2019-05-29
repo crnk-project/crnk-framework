@@ -6,7 +6,6 @@ import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
@@ -142,7 +141,7 @@ public class CrnkBootTest {
         ResourceFieldContributor resourceFieldContributor = mock(ResourceFieldContributor.class);
         DocumentFilter filter = mock(DocumentFilter.class);
         SecurityProvider securityProvider = mock(SecurityProvider.class);
-        JsonApiExceptionMapper exceptionMapper = new TestExceptionMapper();
+        ExceptionMapper exceptionMapper = new TestExceptionMapper();
         Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(RepositoryDecoratorFactory.class)))
                 .thenReturn(Arrays.asList(decoratorFactory));
@@ -150,7 +149,7 @@ public class CrnkBootTest {
                 .thenReturn(Arrays.asList(resourceFieldContributor));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(Module.class))).thenReturn(Arrays.asList(module));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(SecurityProvider.class))).thenReturn(Arrays.asList(securityProvider));
-        Mockito.when(serviceDiscovery.getInstancesByType(eq(JsonApiExceptionMapper.class)))
+        Mockito.when(serviceDiscovery.getInstancesByType(eq(ExceptionMapper.class)))
                 .thenReturn(Arrays.asList(exceptionMapper));
         boot.boot();
 

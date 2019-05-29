@@ -1,15 +1,15 @@
 package io.crnk.core.engine.internal.exception;
 
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 
 import java.util.Objects;
 
 final class ExceptionMapperType {
-	private final JsonApiExceptionMapper exceptionMapper;
+	private final ExceptionMapper exceptionMapper;
 	private final Class<? extends Throwable> exceptionClass;
 
-	public ExceptionMapperType(Class<? extends Throwable> exceptionClass, JsonApiExceptionMapper exceptionMapper) {
+	public ExceptionMapperType(Class<? extends Throwable> exceptionClass, ExceptionMapper exceptionMapper) {
 		this.exceptionMapper = exceptionMapper;
 		this.exceptionClass = exceptionClass;
 		PreconditionUtil.verify(exceptionClass != null, "exceptionClass must not be null for mapper=%s", exceptionMapper);
@@ -19,7 +19,7 @@ final class ExceptionMapperType {
 		return exceptionClass;
 	}
 
-	public JsonApiExceptionMapper getExceptionMapper() {
+	public ExceptionMapper getExceptionMapper() {
 		return exceptionMapper;
 	}
 

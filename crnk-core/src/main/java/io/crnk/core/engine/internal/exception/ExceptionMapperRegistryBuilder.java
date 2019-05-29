@@ -1,6 +1,6 @@
 package io.crnk.core.engine.internal.exception;
 
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 
 import java.lang.reflect.MalformedParameterizedTypeException;
@@ -14,7 +14,7 @@ public final class ExceptionMapperRegistryBuilder {
 
 	public ExceptionMapperRegistry build(ExceptionMapperLookup exceptionMapperLookup) {
 		addDefaultMappers();
-		for (JsonApiExceptionMapper<?> exceptionMapper : exceptionMapperLookup.getExceptionMappers()) {
+		for (ExceptionMapper<?> exceptionMapper : exceptionMapperLookup.getExceptionMappers()) {
 			registerExceptionMapper(exceptionMapper);
 		}
 		return new ExceptionMapperRegistry(exceptionMappers);
@@ -25,24 +25,24 @@ public final class ExceptionMapperRegistryBuilder {
 		registerExceptionMapper(new TimeoutExceptionMapper());
 	}
 
-	private void registerExceptionMapper(JsonApiExceptionMapper<? extends Throwable> exceptionMapper) {
-		Class<? extends JsonApiExceptionMapper> mapperClass = exceptionMapper.getClass();
+	private void registerExceptionMapper(ExceptionMapper<? extends Throwable> exceptionMapper) {
+		Class<? extends ExceptionMapper> mapperClass = exceptionMapper.getClass();
 		Class<? extends Throwable> exceptionClass = getGenericType(mapperClass);
 		if (exceptionClass == null && isProxy(mapperClass)) {
 			// deal if dynamic proxies, like in CDI
-			mapperClass = (Class<? extends JsonApiExceptionMapper>) mapperClass.getSuperclass();
+			mapperClass = (Class<? extends ExceptionMapper>) mapperClass.getSuperclass();
 			exceptionClass = getGenericType(mapperClass);
 		}
 
 		exceptionMappers.add(new ExceptionMapperType(exceptionClass, exceptionMapper));
 	}
 
-	private boolean isProxy(Class<? extends JsonApiExceptionMapper> mapperClass) {
+	private boolean isProxy(Class<? extends ExceptionMapper> mapperClass) {
 		return mapperClass.getName().contains("$$")
-				&& JsonApiExceptionMapper.class.isAssignableFrom(mapperClass.getSuperclass());
+				&& ExceptionMapper.class.isAssignableFrom(mapperClass.getSuperclass());
 	}
 
-	private Class<? extends Throwable> getGenericType(Class<? extends JsonApiExceptionMapper> mapper) {
+	private Class<? extends Throwable> getGenericType(Class<? extends ExceptionMapper> mapper) {
 		try {
 			Type[] types = mapper.getGenericInterfaces();
 			if (null == types || 0 == types.length) {
@@ -51,14 +51,14 @@ public final class ExceptionMapperRegistryBuilder {
 
 			for (Type type : types) {
 				Class<?> rawType = ClassUtils.getRawType(type);
-				if (type instanceof ParameterizedType && JsonApiExceptionMapper.class.isAssignableFrom(rawType)) {
+				if (type instanceof ParameterizedType && ExceptionMapper.class.isAssignableFrom(rawType)) {
 					//noinspection unchecked
 					return (Class<? extends Throwable>) ((ParameterizedType) type).getActualTypeArguments()[0];
 				}
 			}
 
 			if (isProxy(mapper)) {
-				return getGenericType((Class<? extends JsonApiExceptionMapper>) mapper.getSuperclass());
+				return getGenericType((Class<? extends ExceptionMapper>) mapper.getSuperclass());
 			}
 
 			//Won't get in here

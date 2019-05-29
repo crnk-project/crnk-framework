@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.repository.Repository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
 import io.crnk.guice.GuiceServiceDiscovery;
@@ -56,7 +56,7 @@ public class GuiceServiceDiscoveryTest {
 		boot.setServiceDiscovery(discovery);
 		boot.boot();
 
-		Optional<JsonApiExceptionMapper> mapper = boot.getExceptionMapperRegistry().findMapperFor(TestException.class);
+		Optional<ExceptionMapper> mapper = boot.getExceptionMapperRegistry().findMapperFor(TestException.class);
 		Assert.assertTrue(mapper.isPresent());
 		Assert.assertTrue(mapper.get() instanceof TestExceptionMapper);
 	}

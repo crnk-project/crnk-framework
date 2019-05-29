@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
@@ -170,7 +170,7 @@ public class SimpleModule implements Module {
 		exceptionMapperLookups.add(exceptionMapperLookup);
 	}
 
-	public void addExceptionMapper(@SuppressWarnings("rawtypes") JsonApiExceptionMapper exceptionMapper) {
+	public void addExceptionMapper(@SuppressWarnings("rawtypes") ExceptionMapper exceptionMapper) {
 		checkInitialized();
 		ExceptionMapperLookup exceptionMapperLookup = new CollectionExceptionMapperLookup(exceptionMapper);
 		exceptionMapperLookups.add(exceptionMapperLookup);
@@ -387,18 +387,18 @@ public class SimpleModule implements Module {
 	@SuppressWarnings("rawtypes")
 	private static class CollectionExceptionMapperLookup implements ExceptionMapperLookup {
 
-		private Set<JsonApiExceptionMapper> set;
+		private Set<ExceptionMapper> set;
 
-		private CollectionExceptionMapperLookup(Set<JsonApiExceptionMapper> set) {
+		private CollectionExceptionMapperLookup(Set<ExceptionMapper> set) {
 			this.set = set;
 		}
 
-		public CollectionExceptionMapperLookup(JsonApiExceptionMapper exceptionMapper) {
-			this(new HashSet<JsonApiExceptionMapper>(Arrays.asList(exceptionMapper)));
+		public CollectionExceptionMapperLookup(ExceptionMapper exceptionMapper) {
+			this(new HashSet<ExceptionMapper>(Arrays.asList(exceptionMapper)));
 		}
 
 		@Override
-		public Set<JsonApiExceptionMapper> getExceptionMappers() {
+		public Set<ExceptionMapper> getExceptionMappers() {
 			return set;
 		}
 	}

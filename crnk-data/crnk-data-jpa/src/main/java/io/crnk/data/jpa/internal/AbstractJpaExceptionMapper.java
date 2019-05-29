@@ -3,7 +3,6 @@ package io.crnk.data.jpa.internal;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.module.Module.ModuleContext;
 import org.slf4j.Logger;
@@ -25,7 +24,7 @@ abstract class AbstractJpaExceptionMapper<E extends Throwable> implements Except
 	public ErrorResponse toErrorResponse(E exception) {
 		Throwable cause = exception.getCause();
 		if (cause != null) {
-			Optional<JsonApiExceptionMapper> mapper = context.getExceptionMapperRegistry().findMapperFor(cause.getClass());
+			Optional<ExceptionMapper> mapper = context.getExceptionMapperRegistry().findMapperFor(cause.getClass());
 			if (mapper.isPresent()) {
 				return mapper.get().toErrorResponse(cause);
 			}

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
@@ -296,9 +296,9 @@ public class ModuleRegistryTest {
 	@Test
 	public void testExceptionMappers() {
 		ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
-		Set<JsonApiExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
+		Set<ExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
 		Set<Class<?>> classes = new HashSet<>();
-		for (JsonApiExceptionMapper exceptionMapper : exceptionMappers) {
+		for (ExceptionMapper exceptionMapper : exceptionMappers) {
 			classes.add(exceptionMapper.getClass());
 		}
 		Assert.assertTrue(classes.contains(IllegalStateExceptionMapper.class));
@@ -525,7 +525,7 @@ public class ModuleRegistryTest {
 
 			context.addExceptionMapper(new IllegalStateExceptionMapper());
 			context.addExceptionMapperLookup(() -> {
-				Set<JsonApiExceptionMapper> set = new HashSet<>();
+				Set<ExceptionMapper> set = new HashSet<>();
 				set.add(new SomeIllegalStateExceptionMapper());
 				return set;
 			});
