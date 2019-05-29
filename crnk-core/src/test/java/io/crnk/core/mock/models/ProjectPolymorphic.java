@@ -1,11 +1,10 @@
 package io.crnk.core.mock.models;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
-
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 
 @JsonApiResource(type = "projects-polymorphic")
@@ -13,9 +12,9 @@ public class ProjectPolymorphic {
 
 	@JsonApiId
 	private Long id;
-	@JsonApiToOne
+	@JsonApiRelation
 	private Object task;
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Object> tasks;
 
 	public Long getId() {

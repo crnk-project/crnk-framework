@@ -1,5 +1,12 @@
 package io.crnk.core.repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.information.resource.ResourceField;
@@ -20,17 +27,8 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.repository.foward.ForwardingRelationshipRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Recommended base class to implement a relationship repository making use of
@@ -44,8 +42,8 @@ import java.util.Set;
  * implemented by fetching the target resources, adding them the the source
  * repository with reflection and then saving the source repository. Lookup is
  * implemented by querying the target resource repository and filtering in the
- * opposite relationship direction. Not that {@link JsonApiToMany} resp.
- * {@link JsonApiToOne} need to declare the opposite name for the relations.
+ * opposite relationship direction. Not that {@link io.crnk.core.resource.annotations.JsonApiRelation}
+ * need to declare the opposite name for the relations.
  * <p>
  * Warning: this implementation does not take care of bidirectionality. This is
  * usuefally very implementation-specific and cannot be handled in a generic

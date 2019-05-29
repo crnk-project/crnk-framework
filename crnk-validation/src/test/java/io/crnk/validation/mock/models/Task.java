@@ -1,20 +1,19 @@
 package io.crnk.validation.mock.models;
 
+import java.util.Collections;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
-import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.validation.mock.ComplexValid;
-
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
 
 @JsonApiResource(type = "tasks")
 @ComplexValid
@@ -26,19 +25,16 @@ public class Task {
 	@NotNull
 	private String name;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
-	@JsonApiToMany(lazy = false)
+	@JsonApiRelation(serialize = SerializeType.EAGER)
 	private List<Project> projects = Collections.emptyList();
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project includedProject;
 
-	@JsonApiToMany
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<Project> includedProjects;
 
 	@JsonApiMetaInformation

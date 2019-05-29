@@ -1,18 +1,18 @@
 package io.crnk.meta.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
-import java.util.List;
 
 @JsonApiResource(type = "meta/key")
 public class MetaKey extends MetaElement {
 
 	public static final String ID_ELEMENT_SEPARATOR = "-";
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<MetaAttribute> elements;
 
 	private boolean unique;

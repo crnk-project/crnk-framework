@@ -1,11 +1,11 @@
 package io.crnk.monitor.brave.mock.models;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
+import javax.validation.constraints.NotNull;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "projects")
 public class Project {
@@ -16,7 +16,7 @@ public class Project {
 	@NotNull
 	private String name;
 
-	@JsonApiToMany(opposite = "project")
+	@JsonApiRelation(opposite = "project")
 	private List<Task> tasks;
 
 	public Project() {

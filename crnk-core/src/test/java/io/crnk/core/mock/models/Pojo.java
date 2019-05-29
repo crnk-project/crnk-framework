@@ -1,11 +1,10 @@
 package io.crnk.core.mock.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "pojo")
 public class Pojo extends Thing {
@@ -14,11 +13,11 @@ public class Pojo extends Thing {
 	private OtherPojo otherPojo;
 
 	@JsonProperty("some-project")
-	@JsonApiToOne
+	@JsonApiRelation
 	private Project project;
 
 	@JsonProperty("some-projects")
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Project> projects;
 
 	public OtherPojo getOtherPojo() {

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.queryspec.pagingspec.CustomOffsetLimitPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 @JsonApiResource(type = "task-with-paging", pagingBehavior = CustomOffsetLimitPagingBehavior.class)
 @JsonPropertyOrder(alphabetic = true)
@@ -17,8 +17,7 @@ public class TaskWithPagingBehavior {
 
 	private String name;
 
-	@JsonApiToOne(opposite = "tasks")
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(opposite = "tasks", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
 	public String getId() {

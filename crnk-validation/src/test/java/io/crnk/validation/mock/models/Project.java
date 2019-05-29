@@ -1,21 +1,20 @@
 package io.crnk.validation.mock.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.validation.mock.ComplexValid;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.validation.mock.ComplexValid;
 
 @JsonApiResource(type = "projects")
 @ComplexValid
@@ -51,11 +50,11 @@ public class Project {
 	@NotNull
 	private Map<String, String> attributes = new HashMap<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	@Valid
 	private List<Task> tasks = new ArrayList<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	@Valid
 	private Task task;
 

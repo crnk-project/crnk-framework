@@ -1,22 +1,21 @@
 package io.crnk.servlet.resource.model;
 
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
-
 import java.util.Set;
+
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 
 @JsonApiResource(type = "nodes")
 public class Node extends AbstractResource {
 
-	@JsonApiToOne
+	@JsonApiRelation
 	private Node parent;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private Set<Node> children;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private Set<NodeComment> nodeComments;
 
 	public Node(Long id, Node parent, Set<Node> children) {

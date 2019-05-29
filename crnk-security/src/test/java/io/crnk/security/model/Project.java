@@ -1,13 +1,13 @@
 package io.crnk.security.model;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "projects")
 public class Project {
@@ -23,7 +23,7 @@ public class Project {
 	@Valid
 	private ProjectData data;
 
-	@JsonApiToMany(opposite = "project")
+	@JsonApiRelation(opposite = "project")
 	@Valid
 	private List<Task> tasks = new ArrayList<>();
 

@@ -1,8 +1,8 @@
 package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
 
 @JsonApiResource(type = "resourceWithoutRepository")
 public class ResourceWithoutRepository {
@@ -10,7 +10,7 @@ public class ResourceWithoutRepository {
 	@JsonApiId
 	public String id;
 
-	@JsonApiToOne
+	@JsonApiRelation
 	private Project project;
 
 	public Project getProject() {

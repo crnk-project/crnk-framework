@@ -1,11 +1,11 @@
 package io.crnk.internal.boot.cdi.model;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
 
 @JsonApiResource(type = "projects")
 public class Project {
@@ -19,10 +19,10 @@ public class Project {
 
 	private ProjectData data;
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private List<Task> tasks = new ArrayList<>();
 
-	@JsonApiToMany
+	@JsonApiRelation
 	private Task task;
 
 	public Long getId() {
