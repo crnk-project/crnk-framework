@@ -4,5 +4,7 @@ public enum JsonIncludeStrategy {
 
 	DEFAULT,
 
-	NOT_NULL
+	NOT_NULL,
+
+	NON_EMPTY
 }

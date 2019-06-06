@@ -1,6 +1,11 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
@@ -19,9 +24,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class DocumentMapperTest extends AbstractDocumentMapperTest {
 
@@ -110,6 +112,28 @@ public class DocumentMapperTest extends AbstractDocumentMapperTest {
 		Assert.assertEquals(1, document.getIncluded().size());
 		Resource projectResource = document.getIncluded().get(0);
 		Assert.assertNull(projectResource.getRelationships().get("tasks"));
+	}
+
+	@Test
+	public void testJsonIncludeNonEmptyOnId() throws JsonProcessingException {
+		Project project = new Project();
+		project.setName("someProject");
+
+		// not that id makes use of @JsonInclude.Include.NON_EMPTY
+		project.setId(0L);
+
+		QuerySpec querySpec = new QuerySpec(Project.class);
+		QuerySpecAdapter queryAdapter = (QuerySpecAdapter) toAdapter(querySpec);
+
+		mapper.setClient(true);
+
+		Document document = mapper.toDocument(toResponse(project), queryAdapter, mappingConfig).get();
+		Resource resource = document.getSingleData().get();
+		Assert.assertNull(resource.getId());
+
+		ObjectWriter writer = container.getObjectMapper().writerFor(Resource.class);
+		String json = writer.writeValueAsString(resource);
+		Assert.assertFalse(json.contains("\"id\""));
 	}
 
 	@Test

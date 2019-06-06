@@ -456,7 +456,6 @@ the SecurityModule sets up repositories to make its internal rules available fro
 </ul>
 
 
-
 <h4>Support for GROUP operator by facets</h4>
 
 The FacetModule gained support for the GROUP operator:
@@ -467,3 +466,14 @@ http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
 
 It works equivalent to SQL GROUP BY queries. In the example a facet count is computed for
 every pair of priority and name attribute.
+
+
+<h4>Support for JsonInclude.Include.NON_EMPTY</h4>
+
+For example in the subsequent snippet the default <i>0</i> value will be omitted:
+
+<pre class="prettyprint">
+@JsonApiId
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+private long id;
+</pre>

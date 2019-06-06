@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -14,6 +15,7 @@ import io.crnk.core.resource.annotations.SerializeType;
 public class Project {
 
 	@JsonApiId
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Long id;
 
 	private String name;
