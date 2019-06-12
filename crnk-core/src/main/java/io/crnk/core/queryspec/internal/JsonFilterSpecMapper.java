@@ -33,8 +33,11 @@ public class JsonFilterSpecMapper {
 
 	private final QueryPathResolver pathResolver;
 
-	public JsonFilterSpecMapper(QuerySpecUrlContext ctx, Map<String, FilterOperator> supportedOperators, QueryPathResolver pathResolver) {
+	private final FilterOperator defaultOperator;
+
+	public JsonFilterSpecMapper(QuerySpecUrlContext ctx, Map<String, FilterOperator> supportedOperators, FilterOperator defaultOperator, QueryPathResolver pathResolver) {
 		this.context = ctx;
+		this.defaultOperator = defaultOperator;
 		this.supportedOperators = supportedOperators;
 		this.pathResolver = pathResolver;
 	}
@@ -44,8 +47,32 @@ public class JsonFilterSpecMapper {
 		if (isSerializedFilterSpec(jsonNode)) {
 			ObjectMapper objectMapper = context.getObjectMapper();
 			try {
-				List<FilterSpec> filterSpecs = Arrays.asList(objectMapper.readerFor(FilterSpec[].class).readValue(jsonNode));
-				useRegisteredOperatorImplementation(filterSpecs);
+
+				ObjectReader pathReader = objectMapper.readerFor(PathSpec.class);
+				ArrayNode arrayNode = (ArrayNode) jsonNode;
+				List<FilterSpec> filterSpecs = new ArrayList<>();
+				for (int i = 0; i < arrayNode.size(); i++) {
+					JsonNode filterNode = arrayNode.get(i);
+
+					JsonNode pathNode = filterNode.get("path");
+					JsonNode opNode = filterNode.get("operator");
+					JsonNode valueNode = filterNode.get("value");
+					JsonNode expressionNode = filterNode.get("expression");
+
+					FilterOperator operator = null;
+					if (opNode != null && !opNode.isNull()) {
+						operator = supportedOperators.get(opNode.asText());
+						if (operator == null) {
+							throw new BadRequestException("unknown operator " + opNode.asText());
+						}
+					}else{
+						operator = defaultOperator;
+					}
+					PathSpec pathSpec = pathNode != null && !pathNode.isNull() ? pathReader.readValue(pathNode) : null;
+					Object value = valueNode != null && !valueNode.isNull() ? deserializeJsonFilterValue(resourceInformation, pathSpec, valueNode) : null;
+					List<FilterSpec> expressions = expressionNode != null && !expressionNode.isNull() ? deserialize(expressionNode, resourceInformation) : null;
+					filterSpecs.add(expressions != null ? new FilterSpec(operator, expressions) : new FilterSpec(pathSpec, operator, value));
+				}
 				return filterSpecs;
 			}
 			catch (IOException e) {
@@ -53,24 +80,6 @@ public class JsonFilterSpecMapper {
 			}
 		}
 		return deserialize(jsonNode, resourceInformation, PathSpec.empty());
-	}
-
-	/**
-	 * Move from default FilterOperator do specific implementation with custom match function. Maybe alternative solution at some point
-	 * in the future.
-	 */
-	private void useRegisteredOperatorImplementation(List<FilterSpec> filterSpecs) {
-		if (filterSpecs != null) {
-			for (FilterSpec filterSpec : filterSpecs) {
-				if (filterSpec.getOperator() != null) {
-					FilterOperator filterOperator = supportedOperators.get(filterSpec.getOperator().getName());
-					if (filterOperator != null) {
-						filterSpec.setOperator(filterOperator);
-					}
-				}
-				useRegisteredOperatorImplementation(filterSpec.getExpression());
-			}
-		}
 	}
 
 	private boolean isSerializedFilterSpec(JsonNode jsonNode) {

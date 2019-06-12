@@ -322,27 +322,56 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	}
 
 	@Test
-	public void testFilterWithFilterSpecJson() {
-		String expectedJson = "{ \"path\": \"completed\", \"value\": true }";
+	public void testFilterSpecJsonWithDefaultOperator() {
+		String expectedJson = "[{ \"path\": \"completed\", \"value\": true }]";
 		QuerySpec jsonSpec = new QuerySpec(Task.class);
 		jsonSpec.addFilter(new FilterSpec(expectedJson));
 
 		Map<String, Set<String>> expectedParams = new HashMap<>();
-		add(expectedParams, "filter", "{\"OR\":[{\"id\":[12,13,14]},{\"completed\":true}]}");
+		add(expectedParams, "filter", expectedJson);
 
 		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, expectedParams);
-
-		FilterSpec idFilterSpec = PathSpec.of("id").filter(FilterOperator.EQ, Arrays.asList(12L, 13L, 14L));
-		FilterSpec completedFilterSpec = PathSpec.of("completed").filter(FilterOperator.EQ, true);
-		QuerySpec expectedQuerySpec = new QuerySpec(Task.class);
-		expectedQuerySpec.addFilter(FilterSpec.or(idFilterSpec, completedFilterSpec));
-		Assert.assertEquals(expectedQuerySpec.getFilters(), actualSpec.getFilters());
-		Assert.assertEquals(expectedQuerySpec, actualSpec);
-
-		Map<String, Set<String>> actualParams = urlMapper.serialize(actualSpec);
-		Assert.assertEquals(expectedParams, actualParams);
+		FilterSpec actualFilter = actualSpec.getFilters().get(0);
+		Assert.assertEquals(PathSpec.of("completed"), actualFilter.getPath());
+		Assert.assertEquals(FilterOperator.EQ, actualFilter.getOperator());
+		Assert.assertEquals(Boolean.TRUE, actualFilter.getValue());
 	}
 
+	@Test
+	public void testFilterSpecJsonWithOperator() {
+		String expectedJson = "[{ \"path\": \"completed\", \"operator\": \"NEQ\", \"value\": true }]";
+		QuerySpec jsonSpec = new QuerySpec(Task.class);
+		jsonSpec.addFilter(new FilterSpec(expectedJson));
+
+		Map<String, Set<String>> expectedParams = new HashMap<>();
+		add(expectedParams, "filter", expectedJson);
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, expectedParams);
+		FilterSpec actualFilter = actualSpec.getFilters().get(0);
+		Assert.assertEquals(PathSpec.of("completed"), actualFilter.getPath());
+		Assert.assertEquals(FilterOperator.NEQ, actualFilter.getOperator());
+		Assert.assertEquals(Boolean.TRUE, actualFilter.getValue());
+	}
+
+	@Test
+	public void testFilterSpecJsonWithNestedFilters() {
+		String expectedJson = "[{ \"operator\": \"OR\", \"expression\": [{ \"path\": \"completed\", \"operator\": \"NEQ\", \"value\": true }] }]";
+		QuerySpec jsonSpec = new QuerySpec(Task.class);
+		jsonSpec.addFilter(new FilterSpec(expectedJson));
+
+		Map<String, Set<String>> expectedParams = new HashMap<>();
+		add(expectedParams, "filter", expectedJson);
+
+		QuerySpec actualSpec = urlMapper.deserialize(taskInformation, expectedParams);
+		FilterSpec actualFilter = actualSpec.getFilters().get(0);
+		Assert.assertEquals(FilterOperator.OR, actualFilter.getOperator());
+
+		Assert.assertEquals(1, actualFilter.getExpression().size());
+		FilterSpec nestedFilter = actualFilter.getExpression().get(0);
+		Assert.assertEquals(PathSpec.of("completed"), nestedFilter.getPath());
+		Assert.assertEquals(FilterOperator.NEQ, nestedFilter.getOperator());
+		Assert.assertEquals(Boolean.TRUE, nestedFilter.getValue());
+	}
 
 	@Test
 	public void testFilterOnRelatedWithJson() {
