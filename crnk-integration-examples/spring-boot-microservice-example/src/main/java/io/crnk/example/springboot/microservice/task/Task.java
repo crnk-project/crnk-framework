@@ -23,8 +23,8 @@ public class Task {
 	@JsonApiRelationId
 	private Long projectId;
 
-	@JsonApiRelation(serialize = SerializeType.ONLY_ID, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
-	private Project project;
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	private ProjectProxy project;
 
 	@JsonApiLinksInformation
 	private DefaultSelfLinksInformation links = new DefaultSelfLinksInformation();
@@ -62,11 +62,11 @@ public class Task {
 		this.projectId = projectId;
 	}
 
-	public Project getProject() {
+	public ProjectProxy getProject() {
 		return project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(ProjectProxy project) {
 		this.project = project;
 	}
 

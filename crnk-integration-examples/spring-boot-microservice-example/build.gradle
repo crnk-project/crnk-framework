@@ -9,6 +9,7 @@ dependencies {
 	compile project(':crnk-setup:crnk-setup-spring-boot2')
 	compile project(':crnk-home')
 	compile project(':crnk-client')
+	compile project(':crnk-core')
 	compile 'com.squareup.okhttp3:okhttp:3.4.1'
 
 	compile 'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'

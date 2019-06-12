@@ -9,6 +9,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
+import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -20,6 +21,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
+import io.crnk.core.resource.meta.ResourceProxy;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -100,7 +102,15 @@ class ClientResourceUpsert extends ResourceUpsert {
 
             Object object = newEntity(resourceInformation, resource);
             setId(resource, object, resourceInformation);
-            setAttributes(resource, object, resourceInformation, new QueryContext());
+
+            if (object instanceof ResourceProxy){
+	            ResourceProxy proxy = (ResourceProxy)object;
+	            proxy.setAttributes(resource.getAttributes());
+            }
+            else{
+	            setAttributes(resource, object, resourceInformation, new QueryContext());
+            }
+            
             setLinks(resource, object, resourceInformation);
             setMeta(resource, object, resourceInformation);
 
