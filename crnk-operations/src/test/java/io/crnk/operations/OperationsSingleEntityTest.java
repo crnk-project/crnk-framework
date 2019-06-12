@@ -2,7 +2,7 @@ package io.crnk.operations;
 
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.operations.client.OperationsCall;
 import io.crnk.operations.client.OperationsClient;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class OperationsSingleEntityTest extends AbstractOperationsTest {
 
-	protected ResourceRepositoryV2<MovieEntity, UUID> movieRepo;
+	protected ResourceRepository<MovieEntity, UUID> movieRepo;
 
 	private OperationsClient operationsClient;
 
@@ -64,7 +64,7 @@ public class OperationsSingleEntityTest extends AbstractOperationsTest {
 
 	@Test
 	public void testAutoIncrementCrud() {
-		ResourceRepositoryV2<VoteEntity, Long> voteRepo = client.getRepositoryForType(VoteEntity.class);
+		ResourceRepository<VoteEntity, Long> voteRepo = client.getRepositoryForType(VoteEntity.class);
 
 		VoteEntity vote = new VoteEntity();
 		vote.setNumStars(12);

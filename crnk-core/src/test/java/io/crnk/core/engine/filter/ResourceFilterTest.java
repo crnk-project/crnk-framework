@@ -1,5 +1,10 @@
 package io.crnk.core.engine.filter;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
 import io.crnk.core.engine.dispatcher.Response;
@@ -25,11 +30,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 public class ResourceFilterTest {
 
@@ -57,7 +57,7 @@ public class ResourceFilterTest {
 
 
 	@Test
-	public void testFilterResource() {
+	public void testForbidResource() {
 		ResourceInformation resourceInformation = container.getEntry(Task.class).getResourceInformation();
 
 		String path = "/tasks/";
@@ -76,6 +76,33 @@ public class ResourceFilterTest {
 		Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
 		response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
 		Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
+
+		// clear cache
+		container.getQueryContext().getAttributes().clear();
+		response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
+		Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
+	}
+
+	@Test
+	public void testUnauthorizedResource() {
+		ResourceInformation resourceInformation = container.getEntry(Task.class).getResourceInformation();
+
+		String path = "/tasks/";
+		String method = HttpMethod.GET.toString();
+		Map<String, Set<String>> parameters = Collections.emptyMap();
+
+		Document requestBody = null;
+
+		// forbid resource
+		Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.UNAUTHORIZED);
+		HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
+		Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
+		Assert.assertEquals(HttpStatus.UNAUTHORIZED_401, response.getHttpStatus().intValue());
+
+		// allow resource but cache prevents access
+		Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
+		response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
+		Assert.assertEquals(HttpStatus.UNAUTHORIZED_401, response.getHttpStatus().intValue());
 
 		// clear cache
 		container.getQueryContext().getAttributes().clear();

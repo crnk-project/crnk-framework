@@ -121,7 +121,47 @@ to add such filters:
 - by implementing a repository decorator that intercepts the request before reaching the repository.
   For more information see <<repository_decoration,Repository Decoration>>.
 
-In the future the `SecurityModule` may be enhanced to also support DAC.
+The `SecurityModule` comes with built-in support for DAC. An example looks like:
+
+[source]
+.DataRoomFilterTest.java
+----
+include::../../../../crnk-security/src/test/java/io/crnk/security/DataRoomFilterTest.java[tags=docs]
+----
+
+A `DataRoomFilter` can be passed to the `SecurityConfig`. It has to provide
+a `QuerySpec` of what the current caller is allowed to see. In the
+example here all callers are just allowed to see tasks named
+`foo`. Real-world scenarios access the user principal and roles to decide for
+a particular filter. The returned `QuerySpec` is applied to all repository operations: `GET`, `PATCH`, `POST` and
+`DELETE`:
+
+
+[cols="1,3", options="header"]
+|===
+|Method
+|Descripton
+
+|`GET`
+| Added to the caller `QuerySpec` to filter by both caller and DataRoom filters.
+
+|`POST`
+| Verifies that the created resources matches with DataRoom filter. Checks are
+  performed in memory with `QuerySpec.apply`.
+
+|`PATCH`
+| Equivalent to `POST` but further verifiers that the caller has access to the existing,
+  unchanged resource. Implementors may further those to make involved fields
+  immutable with `@JsonApiField(patchable=false)`.
+
+|`DELETE`
+| Verifies that deleted resources match DataRoom filtering by querying them before deletion.
+|===
+
+IMPORTANT: When accessing relationship repositories, only one side is checked
+  for performance reasons. It is assumed that `DataRoomFilter` applies proper filters to
+  both sides of a relationship. For `GET` it is the target side of the relationship
+  (the returned resources), for `PATCH`, `POST` and `DELETE` the modified source side.
 
 
 ## Adapt User Interfaces based on Authorizations
@@ -136,6 +176,15 @@ The `ResourcePermissionInformation` interface specializes `MetaInformation` to
 give access to the `ResourcePermission` of that particular element, either a list
 or a single resource. If either of the two carries a `MetaInformation` implementing `ResourcePermissionInformation`, then the `SecurityModule`
 will fill-in the `ResourcePermission` for the current request.
+
+
+### API
+
+`SecurityModule.setExposeRepositories(true)` sets up repositories accessible through the
+`<contextPath>/security/` path. Currently supported are:
+
+- `<contextPath>/security/role` to gain access to all configure roles.
+- `<contextPath>/security/callerPermission` to gain access to all permissions of the current caller.
 
 
 ### Home and Meta Module

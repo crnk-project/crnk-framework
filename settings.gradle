@@ -4,12 +4,12 @@ include ':crnk-home'
 include ':crnk-test'
 include ':crnk-client'
 include ':crnk-meta'
-include ':crnk-jpa'
 include ':crnk-validation'
 
-include ':crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-brave4'
+include ':crnk-monitor:crnk-monitor-opentracing'
+
 include ':crnk-security'
-include ':crnk-activiti'
 include ':crnk-ui'
 
 include ':crnk-setup:crnk-setup-spring'
@@ -22,13 +22,22 @@ include ':crnk-setup:crnk-setup-guice'
 include ':crnk-setup:crnk-setup-rs'
 
 include ':crnk-data:crnk-data-facet'
+include ':crnk-data:crnk-data-jpa'
+include ':crnk-data:crnk-data-activiti'
+
 include ':crnk-format:crnk-format-plain-json'
 
 include ':crnk-operations'
 
 include ':crnk-documentation'
 include ':crnk-bom'
-include ':crnk-gen-typescript'
+
+include ':crnk-gen:crnk-gen-typescript'
+include ':crnk-gen:crnk-gen-java'
+include ':crnk-gen:crnk-gen-base'
+include ':crnk-gen:crnk-gen-runtime'
+include ':crnk-gen:crnk-gen-gradle'
+include ':crnk-gen:crnk-gen-asciidoc'
 
 include ':crnk-integration-examples:jersey-example'
 include ':crnk-integration-examples:dropwizard-simple-example'
@@ -39,34 +48,34 @@ include ':crnk-integration-examples:spring-boot-microservice-example'
 include ':crnk-integration-examples:dagger-vertx-example'
 
 gradle.beforeProject { Project project ->
-	project.with {
+    project.with {
 
-		ext {
-			dockerHubUser = System.getenv('DOCKER_HUB_USER')
-			dockerHubPass = System.getenv('DOCKER_HUB_PASS')
-		}
+        ext {
+            dockerHubUser = System.getenv('DOCKER_HUB_USER')
+            dockerHubPass = System.getenv('DOCKER_HUB_PASS')
+        }
 
-		// get password from environment if available
-		String sonarLogin = System.env['SONAR_LOGIN']
-		if (sonarLogin) {
-			System.setProperty("sonar.login", sonarLogin)
-		}
+        // get password from environment if available
+        String sonarLogin = System.env['SONAR_LOGIN']
+        if (sonarLogin) {
+            System.setProperty("sonar.login", sonarLogin)
+        }
 
-		buildscript {
-			repositories {
-				maven {
-					url('https://plugins.gradle.org/m2')
-				}
-			}
-		}
-		repositories {
-			mavenCentral()
-			maven {
-				url('https://plugins.gradle.org/m2')
-			}
-		}
-		version = rootProject.version
-		group = rootProject.group
-	}
+        buildscript {
+            repositories {
+                maven {
+                    url('https://plugins.gradle.org/m2')
+                }
+            }
+        }
+        repositories {
+            mavenCentral()
+            maven {
+                url('https://plugins.gradle.org/m2')
+            }
+        }
+        version = rootProject.version
+        group = rootProject.group
+    }
 }
 

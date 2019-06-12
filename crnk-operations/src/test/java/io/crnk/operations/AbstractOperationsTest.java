@@ -15,13 +15,13 @@ import io.crnk.client.CrnkClient;
 import io.crnk.client.action.JerseyActionStubFactory;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
-import io.crnk.jpa.JpaModule;
-import io.crnk.jpa.JpaRepositoryConfig;
-import io.crnk.jpa.meta.JpaMetaProvider;
-import io.crnk.jpa.query.JpaQueryFactory;
-import io.crnk.jpa.query.JpaQueryFactoryContext;
-import io.crnk.jpa.query.criteria.JpaCriteriaQueryFactory;
-import io.crnk.meta.MetaLookup;
+import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaRepositoryConfig;
+import io.crnk.data.jpa.meta.JpaMetaProvider;
+import io.crnk.data.jpa.query.JpaQueryFactory;
+import io.crnk.data.jpa.query.JpaQueryFactoryContext;
+import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.MetaPartition;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
@@ -68,7 +68,7 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 		factory.initalize(new JpaQueryFactoryContext() {
 			@Override
 			public MetaPartition getMetaPartition() {
-				MetaLookup metaLookup = new MetaLookup();
+				MetaLookupImpl metaLookup = new MetaLookupImpl();
 				JpaMetaProvider metaProvider = new JpaMetaProvider(em.getEntityManagerFactory());
 				metaLookup.addProvider(metaProvider);
 				metaLookup.initialize();

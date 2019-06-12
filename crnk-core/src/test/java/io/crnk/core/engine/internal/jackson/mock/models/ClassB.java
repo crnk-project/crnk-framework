@@ -1,24 +1,26 @@
 package io.crnk.core.engine.internal.jackson.mock.models;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-import io.crnk.core.resource.annotations.JsonApiToOne;
-
 import java.util.Collections;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "classBs")
 public class ClassB {
 
-	@JsonApiToMany(lazy = false)
+	@JsonApiRelation(serialize = SerializeType.EAGER)
 	private final List<ClassC> classCs;
-	@JsonApiToOne
+
+	@JsonApiRelation
 	private final ClassC classC;
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private final ClassA classA;
+
 	@JsonApiId
 	private Long id;
 

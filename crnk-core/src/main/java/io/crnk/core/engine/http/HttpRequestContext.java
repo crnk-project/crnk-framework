@@ -4,27 +4,15 @@ import io.crnk.core.engine.query.QueryContext;
 
 public interface HttpRequestContext extends HttpRequestContextBase {
 
-	boolean accepts(String contentType);
+    boolean accepts(String contentType);
 
-	/**
-	 * @deprecated use {@link HttpResponse}
-	 */
-	@Deprecated
-	void setContentType(String contentType);
+    boolean acceptsAny();
 
-	/**
-	 * @deprecated use {@link HttpResponse}
-	 */
-	@Deprecated
-	void setResponse(int statusCode, String text);
+    <T> T unwrap(Class<T> type);
 
-	boolean acceptsAny();
+    Object getRequestAttribute(String name);
 
-	<T> T unwrap(Class<T> type);
+    void setRequestAttribute(String name, Object value);
 
-	Object getRequestAttribute(String name);
-
-	void setRequestAttribute(String name, Object value);
-
-	QueryContext getQueryContext();
+    QueryContext getQueryContext();
 }

@@ -4,13 +4,13 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.ProjectPolymorphic;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectPolymorphicRepository implements ResourceRepository<ProjectPolymorphic, Long> {
+public class ProjectPolymorphicRepository implements LegacyResourceRepository<ProjectPolymorphic, Long> {
 
 	private static final ConcurrentHashMap<Long, ProjectPolymorphic> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

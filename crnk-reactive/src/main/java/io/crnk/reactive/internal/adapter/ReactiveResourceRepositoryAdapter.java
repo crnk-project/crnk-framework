@@ -54,11 +54,11 @@ public class ReactiveResourceRepositoryAdapter extends ReactiveRepositoryAdapter
 	}
 
 	@Override
-	public Result<JsonApiResponse> findAll(Iterable ids, QueryAdapter queryAdapter) {
+	public Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter) {
 		QuerySpec querySpec = queryAdapter.toQuerySpec();
 		RepositoryRequestSpec requestSpec = RepositoryRequestSpecImpl.forFindIds(moduleRegistry, resourceInformation,
 				queryAdapter, ids);
-		Mono result = repository.findAll((Collection) ids, querySpec);
+		Mono result = repository.findAll(ids, querySpec);
 		return toResponse(result, requestSpec);
 	}
 

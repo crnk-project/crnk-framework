@@ -17,9 +17,10 @@
 package io.crnk.servlet.resource.model;
 
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "tasks")
 public class Task {
@@ -29,8 +30,7 @@ public class Task {
 
 	private String name;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
 	public Task() {

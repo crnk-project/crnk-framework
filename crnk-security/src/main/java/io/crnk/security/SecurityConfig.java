@@ -9,78 +9,140 @@ import java.util.List;
  */
 public class SecurityConfig {
 
-	private List<SecurityRule> rules;
+    private List<SecurityRule> rules;
 
-	private SecurityConfig(List<SecurityRule> rules) {
-		this.rules = Collections.unmodifiableList(rules);
-	}
+    private DataRoomFilter dataRoomFilter;
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    private boolean performDataRoomChecks = true;
 
-	public List<SecurityRule> getRules() {
-		return rules;
-	}
+    private boolean exposeRepositories = false;
 
-	public static class Builder {
+    private SecurityConfig(List<SecurityRule> rules, DataRoomFilter dataRoomFilter) {
+        this.rules = Collections.unmodifiableList(rules);
+        this.dataRoomFilter = dataRoomFilter;
+    }
 
-		private List<SecurityRule> rules = new ArrayList<>();
+    public boolean isExposeRepositories() {
+        return exposeRepositories;
+    }
 
-		private Builder() {
-		}
+    /**
+     * @param exposeRepositories whether to create repositories to access the configured security rules.
+     */
+    public void setExposeRepositories(boolean exposeRepositories) {
+        this.exposeRepositories = exposeRepositories;
+    }
 
-		public Builder permitAll(ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
-			}
+    /**
+     * @return see {@link #setPerformDataRoomChecks(boolean)}
+     */
+    public boolean getPerformDataRoomChecks() {
+        return performDataRoomChecks;
+    }
 
-			return this;
-		}
+    /**
+     * @param performDataRoomChecks to add an interceptor to check all incoming requests.
+     *                              application may disable this and perform security checks
+     *                              manually by using {@link SecurityModule#getDataRoomMatcher()}.
+     *                              Enabled by default.
+     */
+    public void setPerformDataRoomChecks(boolean performDataRoomChecks) {
+        this.performDataRoomChecks = performDataRoomChecks;
+    }
 
-		public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
-			}
+    public void setRules(List<SecurityRule> rules) {
+        this.rules = rules;
+    }
 
-			return this;
-		}
+    public DataRoomFilter getDataRoomFilter() {
+        return dataRoomFilter;
+    }
 
-		public Builder permitAll(String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
-			}
+    public void setDataRoomFilter(DataRoomFilter filter) {
+        this.dataRoomFilter = filter;
+    }
 
-			return this;
-		}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-		public Builder permitRole(String role, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(role, permission));
-			}
+    public List<SecurityRule> getRules() {
+        return rules;
+    }
 
-			return this;
-		}
+    public static class Builder {
 
-		public <T> Builder permitRole(String role, Class<T> resourceClass, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceClass, role, permission));
-			}
+        private List<SecurityRule> rules = new ArrayList<>();
 
-			return this;
-		}
+        private DataRoomFilter dataRoomFilter;
 
-		public Builder permitRole(String role, String resourceType, ResourcePermission... permissions) {
-			for (ResourcePermission permission : permissions) {
-				rules.add(new SecurityRule(resourceType, role, permission));
-			}
+        private boolean exposeRepositories;
 
-			return this;
-		}
+        private Builder() {
+        }
 
-		public SecurityConfig build() {
-			return new SecurityConfig(rules);
-		}
-	}
+        public Builder permitAll(ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
+            }
+
+            return this;
+        }
+
+        public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
+            }
+
+            return this;
+        }
+
+        public Builder permitAll(String resourceType, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
+            }
+
+            return this;
+        }
+
+        public Builder permitRole(String role, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(role, permission));
+            }
+
+            return this;
+        }
+
+        public <T> Builder permitRole(String role, Class<T> resourceClass, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceClass, role, permission));
+            }
+
+            return this;
+        }
+
+        public Builder permitRole(String role, String resourceType, ResourcePermission... permissions) {
+            for (ResourcePermission permission : permissions) {
+                rules.add(new SecurityRule(resourceType, role, permission));
+            }
+
+            return this;
+        }
+
+        public SecurityConfig build() {
+            SecurityConfig config = new SecurityConfig(rules, dataRoomFilter);
+            config.setExposeRepositories(exposeRepositories);
+            return config;
+        }
+
+        public void setDataRoomFilter(DataRoomFilter dataRoomFilter) {
+            this.dataRoomFilter = dataRoomFilter;
+        }
+
+        public Builder exposeRepositories(boolean exposeRepositories) {
+            this.exposeRepositories = exposeRepositories;
+            return this;
+        }
+    }
 
 }

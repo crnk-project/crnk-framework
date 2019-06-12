@@ -2,7 +2,7 @@ package io.crnk.test.mock.repository;
 
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
@@ -21,7 +21,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(HttpHeaders.JSONAPI_CONTENT_TYPE)
 // end::annotation[]
 // tag::doc[]
-public interface ScheduleRepository extends ResourceRepositoryV2<Schedule, Long> {
+public interface ScheduleRepository extends ResourceRepository<Schedule, Long> {
 	// end::doc[]
 
 	// tag::services[]

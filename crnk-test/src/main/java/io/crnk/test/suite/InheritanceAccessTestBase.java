@@ -3,8 +3,8 @@ package io.crnk.test.suite;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.models.TaskSubType;
@@ -20,11 +20,11 @@ public abstract class InheritanceAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected RelationshipRepositoryV2<Project, Long, Task, Long> relRepo;
+	protected RelationshipRepository<Project, Long, Task, Long> relRepo;
 
 	@Before
 	public void setup() {

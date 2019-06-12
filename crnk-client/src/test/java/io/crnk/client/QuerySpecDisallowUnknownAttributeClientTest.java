@@ -7,8 +7,8 @@ import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.SortSpec;
 import io.crnk.core.queryspec.mapper.DefaultQuerySpecUrlMapper;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Task;
 import org.junit.Assert;
@@ -19,11 +19,11 @@ import java.util.Arrays;
 
 public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientTest {
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+	protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
 	private DefaultQuerySpecUrlMapper urlMapper;
 
@@ -55,7 +55,7 @@ public class QuerySpecDisallowUnknownAttributeClientTest extends AbstractClientT
 		try {
 			taskRepo.findAll(querySpec);
 		} catch (BadRequestException e) {
-			Assert.assertEquals("Failed to resolve path to field 'unknownAttr'", e.getMessage());
+			Assert.assertEquals("Failed to resolve path to field 'unknownAttr' from class io.crnk.test.mock.models.Task", e.getMessage());
 		}
 	}
 

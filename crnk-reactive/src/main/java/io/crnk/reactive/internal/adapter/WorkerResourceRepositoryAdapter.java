@@ -8,6 +8,8 @@ import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 import reactor.core.scheduler.Scheduler;
 
+import java.util.Collection;
+
 public class WorkerResourceRepositoryAdapter implements ResourceRepositoryAdapter {
 
 	private final Worker worker;
@@ -31,7 +33,7 @@ public class WorkerResourceRepositoryAdapter implements ResourceRepositoryAdapte
 	}
 
 	@Override
-	public Result<JsonApiResponse> findAll(Iterable ids, QueryAdapter queryAdapter) {
+	public Result<JsonApiResponse> findAll(Collection ids, QueryAdapter queryAdapter) {
 		return worker.work(() -> adapter.findAll(ids, queryAdapter));
 	}
 

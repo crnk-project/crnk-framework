@@ -1,5 +1,15 @@
 package io.crnk.meta.provider;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.meta.model.MetaArrayType;
 import io.crnk.meta.model.MetaElement;
@@ -10,16 +20,6 @@ import io.crnk.meta.model.MetaMapType;
 import io.crnk.meta.model.MetaPrimitiveType;
 import io.crnk.meta.model.MetaSetType;
 import io.crnk.meta.model.MetaType;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 public abstract class MetaPartitionBase implements MetaPartition {
 
@@ -64,6 +64,10 @@ public abstract class MetaPartitionBase implements MetaPartition {
 	}
 
 	public final Optional<MetaElement> allocateMetaElement(Type type) {
+		if (typeMapping.containsKey(type)) {
+			return Optional.of(typeMapping.get(type));
+		}
+
 		return context.runDiscovery(new Callable<Optional<MetaElement>>() {
 
 			@Override
@@ -147,13 +151,19 @@ public abstract class MetaPartitionBase implements MetaPartition {
 
 		if (type instanceof ParameterizedType && ((ParameterizedType) type).getActualTypeArguments().length == 1) {
 			ParameterizedType paramType = (ParameterizedType) type;
+			boolean isSet = Set.class.isAssignableFrom((Class<?>) paramType.getRawType());
+			boolean isList = List.class.isAssignableFrom((Class<?>) paramType.getRawType());
+
+			if (!isSet && !isList) {
+				return Optional.empty();
+			}
+
+			// Only look at the type parameter if a Set or List was detected.
 			Optional<MetaType> elementType = (Optional) allocateMetaElement(paramType.getActualTypeArguments()[0]);
 			if (!elementType.isPresent()) {
 				return Optional.empty();
 			}
 
-			boolean isSet = Set.class.isAssignableFrom((Class<?>) paramType.getRawType());
-			boolean isList = List.class.isAssignableFrom((Class<?>) paramType.getRawType());
 			if (isSet) {
 				MetaSetType metaSet = new MetaSetType();
 				metaSet.setId(elementType.get().getId() + "$set");
@@ -161,8 +171,7 @@ public abstract class MetaPartitionBase implements MetaPartition {
 				metaSet.setImplementationType(paramType);
 				metaSet.setElementType(elementType.get());
 				return addElement(type, metaSet);
-			}
-			if (isList) {
+			} else {
 				PreconditionUtil.assertTrue("expected a list type", isList);
 				MetaListType metaList = new MetaListType();
 				metaList.setId(elementType.get().getId() + "list");

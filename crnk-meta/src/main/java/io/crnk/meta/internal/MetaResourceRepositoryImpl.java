@@ -10,6 +10,7 @@ import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.utils.Supplier;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.model.MetaElement;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
 		QueryContext queryContext = requestContext.getQueryContext();
 
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		MetaElement metaElement = lookup.getMetaById().get(id);
 		Class<T> resourceClass = this.getResourceClass();
 		if (metaElement != null && resourceClass.isInstance(metaElement)) {
@@ -46,7 +47,7 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 
 	@Override
 	public ResourceList<T> findAll(QuerySpec querySpec) {
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		Collection<T> values = filterByType(lookup.getMetaById().values());
 		return querySpec.apply(values);
 	}
@@ -58,7 +59,7 @@ public class MetaResourceRepositoryImpl<T> extends ReadOnlyResourceRepositoryBas
 
 		Collection<T> results = new ArrayList<>();
 		Class<T> resourceClass = this.getResourceClass();
-		MetaLookup lookup = lookupSupplier.get();
+		MetaLookupImpl lookup = (MetaLookupImpl) lookupSupplier.get();
 		for (MetaElement element : values) {
 			if (resourceClass.isInstance(element)) {
 				MetaElement wrappedElement = MetaUtils.adjustForRequest(lookup, element, queryContext);

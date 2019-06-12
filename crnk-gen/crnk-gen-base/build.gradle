@@ -1,0 +1,8 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':crnk-meta')
+
+	testCompile project(':crnk-meta')
+	testCompile project(':crnk-test')
+}

@@ -1,42 +1,23 @@
 package io.crnk.core.engine.http;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 public interface HttpRequestContextBase {
 
-	String getRequestHeader(String name);
+    String getRequestHeader(String name);
 
-	Map<String, Set<String>> getRequestParameters();
+    Map<String, Set<String>> getRequestParameters();
 
-	String getPath();
+    String getPath();
 
-	String getBaseUrl();
+    String getBaseUrl();
 
-	byte[] getRequestBody();
+    byte[] getRequestBody();
 
-	/**
-	 * @deprecated use {@link HttpResponse}
-	 */
-	@Deprecated
-	void setResponseHeader(String name, String value);
+    String getMethod();
 
-	/**
-	 * @deprecated use {@link HttpResponse}
-	 */
-	@Deprecated
-	void setResponse(int code, byte[] body) throws IOException;
+    HttpResponse getResponse();
 
-	String getMethod();
-
-	/**
-	 * @deprecated use {@link HttpResponse}
-	 */
-	@Deprecated
-	String getResponseHeader(String name);
-
-	HttpResponse getResponse();
-
-	void setResponse(HttpResponse response);
+    void setResponse(HttpResponse response);
 }

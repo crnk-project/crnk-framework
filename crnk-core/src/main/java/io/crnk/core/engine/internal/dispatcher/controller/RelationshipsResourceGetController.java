@@ -62,9 +62,9 @@ public class RelationshipsResourceGetController extends ResourceIncludeField {
 		RelationshipRepositoryAdapter relationshipRepositoryForClass = rootEntry.getRelationshipRepository(relationshipField);
 		Result<JsonApiResponse> response;
 		if (isCollection) {
-			response = relationshipRepositoryForClass.findManyTargets(id, relationshipField, queryAdapter);
+			response = relationshipRepositoryForClass.findManyRelations(id, relationshipField, queryAdapter);
 		} else {
-			response = relationshipRepositoryForClass.findOneTarget(id, relationshipField, queryAdapter);
+			response = relationshipRepositoryForClass.findOneRelations(id, relationshipField, queryAdapter);
 		}
 		return response.merge(it -> documentMapper.toDocument(it, queryAdapter, documentMapperConfig)).map(it -> toResponse(it, relatedResourceInformation));
 	}

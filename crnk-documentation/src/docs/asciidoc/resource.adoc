@@ -8,6 +8,7 @@ actually implemented (see the <<architecture>> and <<modules>> chapters). This c
 way Java Beans and annotations. See <<runtimerepository,here>> for more information how setup resources and repositories
 programmatically at runtime.
 
+anchor:jsonApiResource[]
 
 ## JsonApiResource
 
@@ -46,7 +47,7 @@ By default the type of a resource in a JSON:API document and its name within URL
 The optional `resourcePath` allows to define separate values, typically with `resourcePath` being plural and
 `type` being singular:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "task", resourcePath = "tasks")
   public class Task {
@@ -76,7 +77,7 @@ anchor:jsonApiResourcePagingBehavior[]
 
 The optional `pagingSpec` parameter allows to set the desired paging specification:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
   public class Task {
@@ -90,7 +91,7 @@ found at <<pagination,Pagination>> section.
 
 The optional `subTypes` parameter allows to specify an inheritance relationship to other resources:
 
-[source]
+[source,java]
 ----
   @JsonApiResource(type = "task", subTypes = SpecialTask.class)
   public class Task {
@@ -107,6 +108,17 @@ In this case the `SpecialTask` extends `Task` but shares the same `resourcePath`
 a repository implementation (see next chapter), but is served by the task repository. For a more information have a look at the
 <<inheritance>> section.
 
+@JsonApiResource has properties to configure the allowed access modes to a resource:
+sortable, filterable, postable, readable, patchable and deletable. An example looks like:
+
+[source,java]
+----
+include::../../../../crnk-core/src/test/java/io/crnk/core/resource/DefaultResourceInformationProviderTest.java[tags=access]
+----
+
+The properties match the ones from @JsonApiField and provide the base line for it.
+For example, if a resource does not allow filtering, none of its fields will either.
+If one of those properties is attempted to be violated, an error is thrown.
 
 
 ## JsonApiId
@@ -116,66 +128,94 @@ Each resource requires this annotation to be present on a field which type imple
 
 The example below shows a sample class which contains a definition of a field which contains an identifier.
 
-[source]
+[source,java]
 ----
-  @JsonApiResource(type = "tasks")
-  public class Task {
-    @JsonApiId
-    private Long id;
+@JsonApiResource(type = "tasks")
+public class Task {
+@JsonApiId
+private Long id;
 
-    // fields, getters and setters
-  }
+// fields, getters and setters
+}
 ----
 
 anchor:jsonApiRelation[]
 
 ## JsonApiRelation
 
-Indicates an association to either a single value or collection of resources. The type of such fields
-must be a valid resource.
+Indicates a relationship to either a single value or collection of resources. The type of such fields
+must be a valid resource. The next example showcases a bi-directional relationship between `Task` and `Project`:
 
-The example below shows a sample class which contains this kind of relationship.
-
-
-[source]
+[source,java]
 ----
-  @JsonApiResource(type = "tasks")
-  public class Task {
+@JsonApiResource(type = "tasks")
+public class Task {
 
-    // ID field
-
-    @JsonApiRelation(lookUp=LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,serialize=SerializeType.ONLY_ID)
+    @JsonApiRelation
     private Project project;
 
-    // fields, getters and setters
-  }
+    ...
+}
+
+@JsonApiResource(type = "tasks")
+public class Task {
+
+    @JsonApiRelation(mappedBy="project")
+    private Set<Task> tasks;
+
+    ...
+}
 ----
 
+The `project` and `tasks` field are linked through the `mappedBy` property by pointing from the non-owning
+to the owning field of the relationship. `project` as owning field will be used for all read and update operations.
+The semantics of `mappedBy` matches with the concepts of, for example, JPA-related annotations.
+It is typical for single-valued fields like `project` to be the owner. Such fields are usually backed by something like
+a column in a database and are simple to read and write. In contrast,
+multi-valued fields like `tasks` can only be obtained by issuing a query against the single-valued counter-part.
 
-The optional `serialize` parameter specifies how the association should be serialized when making a request.
+@JsonApiRelation comes with a number of attributes to customize its behavior.
+<<jsonApiRelationId,@JsonApiRelation>> as complementary annotation is introduced in the subsequent section.
+
+[source,java]
+----
+@JsonApiRelation(serialize = SerializeType.ONLY_ID)
+private Project project;
+----
+
+The optional `serialize` parameter specifies how an association should be serialized when making a request.
 There are two things to consider. Whether related resources should be added to the `include` section of the
 response document. And whether the id of related resources should be serialized along with the resource
 in the corresponding `relationships.[name].data` section. Either `LAZY`, `ONLY_ID` or `EAGER` can be specified:
 
 - `LAZY` only serializes the ID and does the inclusion if explicitly requested by the `include` URL parameter. This is the default.
 - `ONLY_ID` always serializes the ID, but does only to an inclusion  if explicitly requested by the `include` URL parameter.
-- `EAGER` always both serializes the ID and does an inclusion.
+- `EAGER` always both serializes the ID and does an inclusion. Be aware of performance implication when enabling this.
 
-There are two possibilities of how related resources are fetched. Either the requested repository directly
-returns related resources with the returned resources. Or Crnk can take-over that
-work by doing nested calls to the corresponding `RelationshipRepositoryV2` implementations. The behavior
-is controlled by the optional `lookUp` parameter. There are three options:
+[source,java]
+----
+@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
+private Project project;
+----
 
-- `NONE` makes the requested repository responsible for returning related resources. This is the default.
+JSON:API comes with support for inclusions based on the `include` parameter. It allows to request complex
+object graphs where also related resources can be fetched.  There are two possibilities of how this is implemented.
+Either the requested repository also directly returns related resources with the returned ones. Or Crnk can take-over that
+work by doing nested calls to adjacent `ResourceRepository`, `OneRelationshipRepository` and `ManyRelationshipRepository`
+implementations. The behavior is controlled by the optional `lookUp` parameter. There are four options:
+
+- `NONE` makes the requested repository responsible for returning related resources.
 - `AUTOMATICALLY_WHEN_NULL` will let Crnk lookup related resources if not already done by the requested repository.
 - `AUTOMATICALLY_ALWAYS` will force Crnk to always lookup related resource regardless whether it is already done by the requested repository.
+- `DEFAULT` attempts to find the optimal setting automatically. If a custom relationship repository is found,
+  `@JsonApiRelationId` is in use or `@JsonApiRelation.repositoryBehavior` fetches from the opposite side, then
+   `AUTOMATICALLY_WHEN_NULL` is chosen, otherwise it falls back to `NONE`. This default behavior should
+   be sufficient for most use cases.
 
 There are many different ways how a relationship may end-up being implemented. In the best case, no implementation is necessary
 at all and requests can be dispatches to one of the two related resource repositories. The `repositoryBehavior` allows
 to configure behavior:
 
-- `DEFAULT` makes use of `IMPLICIT_FROM_OWNER` if a relationship also makes use of `@JsonApiRelationId` (see below) or
-  `lookUp=NONE` (see above). In any other case it expects a custom implementation.
 - `CUSTOM` expects a custom implementation.
 - `FORWARD_OWNER` forward any relationship request to the owning resource repository, the repository that defines the
   requested relationship field. GET requests will fetch the owning resources and grab the related resources from there (with the
@@ -191,12 +231,87 @@ to configure behavior:
 	  single resource repository is involved with a slightly more complex filter parameter, giving performance benefits.
 	  An implementation is provided by `RelationshipRepositoryBase`.
 - `FORWARD_OPPOSITE` the opposite to `FORWARD_OWNER`. Querying works like `IMPLICIT_GET_OPPOSITE_MODIFY_OWNER`.
+- `DEFAULT` makes use of `FORWARD_OWNER` if the relationship makes use of `@JsonApiRelationId` (see below),
+   `lookUp=NONE` or `lookUp=DEFAULT`. `FORWARD_OPPOSITE` if `mappedBy` points to another field. `CUSTOM` if a
+    matching relationship repository is found. For all other scenarios it it expects a custom implementation.
 
 The forwarding behaviors are implemented by `ForwardingRelationshipRepository`.
+
+The subsequent two resources show case a number of scenarios:
+
+[source,java]
+----
+@JsonApiResource(type = "task")
+public class Task {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation // not backed by repository
+    public Project project;
+
+    @JsonApiRelation // backed by repository
+    public List<Task> subTasks;
+}
+
+@JsonApiResource(type = "project")
+public class Project {
+    @JsonApiId
+    public String id;
+
+    @JsonApiRelation(mappedBy = "project")
+    public Set<Task> tasks;
+
+    @JsonApiRelationId
+    public Project parentId;
+
+    @JsonApiRelation
+    public Project parent;
+}
+
+class SubTaskRepository extends OneRelationshipRepositoryBase {
+    @Override
+    public RelationshipMatcher getMatcher() {
+        RelationshipMatcher matcher = new RelationshipMatcher();
+        matcher.rule().field("subTasks").add();
+        return matcher;
+    }
+    ...
+}
+----
+
+- `parent` has a `@JsonApiRelationId` backed by `parentId`. This triggers the use
+  of `RelationshipRepositoryBehavior.FORWARD_OWNER` and `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`.
+  Only `parentId` must be populated by the project resource repository, `project` can
+  then be looked up on the opposite resource repository (which in this case is the same repository).
+- `project` just carries an empty `@JsonApiRelation` and has no relationship repository backing it. This
+  triggers the assumption that the resource repository can handle all requests, translating to
+  `LookupIncludeBehavior.NONE` and `RelationshipRepositoryBehavior.FORWARD_OWNER`.
+- `tasks` declares a `mappedBy` to its owner `project`. Accordingly all requests go with
+  `RelationshipRepositoryBehavior.FORWARD_OPPOSITE` to the opposite task resource repository. Inclusions
+  are resolved automatically with `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL`.
+- `subTasks` is backed by the `SubTaskRepository` relationship repository. This
+  sets `RelationshipRepositoryBehavior.CUSTOM` and performs look-ups on that repository with
+  `LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL` to compute the inclusions.
+
 
 IMPORTANT: It likely takes a moment to familiarize oneself with all configuration options of `@JsonApiRelation` and the
   subsequent `@JsonApiRelationId`. But at the same time it is one area where a native resource-oriented REST library like Crnk
   can provide significant benefit and reduce manual work compared to more classical REST libraries like Spring MVC or JAX-RS.
+
+IMPORTANT: If you run into problems in this area, set `io.crnk` to `DEBUG` in your logger. It will print information such as:
+
+[source]
+----
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: using configured LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: using configured LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: choosing default RelationshipRepositoryBehavior: mappedBy enforces FORWARD_OPPOSITE
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: setting up opposite/opposite forwarding repository
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.tasks: RelationshipRepositoryBehavior.FORWARD_OPPOSITE enforces LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL to resolve relationship from opposite side
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: choosing default RelationshipRepositoryBehavior: relationId field enforces FORWARD_OWNER
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.project: setting up owner/owner forwarding repository
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: choosing default RelationshipRepositoryBehavior: relationId field enforces FORWARD_OWNER
+20:04:50 DEBUG io.crnk.test.mock.models.Schedule.projects: setting up owner/owner forwarding repository
+----
 
 
 anchor:jsonApiRelationId[]
@@ -209,7 +324,7 @@ fetching the entire related resource. In this case resources can make use of fie
 `@JsonApiRelationId`. The complement `@JsonApiRelation` fields by holding there ID only.
 An example looks like:
 
-[source]
+[source,java]
 ----
 @JsonApiResource(type = "schedules")
 public class Schedule {
@@ -245,12 +360,13 @@ Notice that:
 - `Schedule` resource holds both a `project` and `projectId` field that point to the same related resource.
 - setters must set both properties to make sure they stay in sync. If only the ID is set, the object must be nulled.
 - `propertyId` will never show in requests and responses. It can be considered to be `transient`.
+- Bi-directional relationships can simply make use of `@JsonRelationId(mappedBy="project")` on the other side.
 
 By default, the naming convention for `@JsonApiRelationId` field is to end with a `Id` or `Ids` suffix. Crnk will
 the pair those two objects automatically. Trailing `s` are ignored for multi-valued fields, meaning that `projectIds` matches with
  `projects`. But it is also possible to specify a custom name, for example:
 
-[source]
+[source,java]
 ----
 @JsonApiRelationId
 private Long projectFk;
@@ -278,7 +394,7 @@ See <<relationshipRepository,RelationshipRepository>> for more information.
 Field or getter annotated with `JsonApiMetaInformation` are marked to carry a `MetaInformation` implementation.
 See http://jsonapi.org/format/#document-meta for more information about meta data. Example:
 
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -311,7 +427,7 @@ Field or getter annotated with `JsonApiLinksInformation` are marked to carry a `
 See http://jsonapi.org/format/#document-links for more information about linking. Example:
 
 
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -360,10 +476,9 @@ anchor:jsonApiField[]
 
 ## JsonApiField
 
-Field or getter annotated with `JsonApiField` allows to define  the behavior of an individual attribute. Example:
+Field or getter annotated with `@JsonApiField` allows to define  the behavior of an individual attribute. Example:
 
-
-[source]
+[source,java]
 ----
 	@JsonApiResource(type = "projects")
 	public class Project {
@@ -387,6 +502,8 @@ Following options are supported:
 - `readable` defines whether a field can be read with a GET request.
 - `patchStrategy` defines the behavior of value with PATCH request. It can be either `MERGE` if you want the value be merged with an original one or `SET` if you want the value be totaly replaced with a new one.
 
+The same fields are available from <<jsonApiResource,@JsonApiResource>> to configure a default for all fields of that
+resource.
 
 anchor:jackson_annotations[]
 
@@ -421,17 +538,44 @@ anchor:nested_resources[]
 
 WARNING: This feature is experimental and will be refined in subsequent releases.
 
-A resource may be nested and belong to a parent resource. In this case the nested resource is access through its parent resource.
-An URL then looks like:
+A resource may be nested and belong to a parent resource. URLs then look like:
 
-`http://example.com/posts/1/comments/2`
+- `http://example.com/posts/1/header` (single)
+- `http://example.com/posts/1/comments/2` (multiple)
 
-For a resource to become nested, it must make use of a structured identifier:
+Here a `post` resource holds two nested relationships: `header` and `comments`. Both of those relationships have resources
+that cannot exist without the `post` itself. The former case the relationship holds a single resource, while the later
+there might be multiple comments.
 
-[source]
-.NestedId.java
+Nested resources are implemented like any other resource, most notably by providing a resource repository.
+The subsequent two section go into detail how to setup such resources.
+
+### Single Nested Resources
+
+Single nested resources share the identifier with the parent resource. From the example aboce:
+
+`http://example.com/posts/1/header`
+
+Both the `post` and its `header` share the identifier `1`. A resource looks like:
+
+[source,java]
+.PostHeader.java
 ----
-include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/NestedId.java[]
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostHeader.java[tags=docs]
+----
+
+Notice the `nested = true` and that the ID also serves as `@JsonApiRelationId` to point to the parent `post`. This two
+properties introduce the singular nesting to the resource. The repository itself can then be implemented like any other
+repository.
+
+### Multiple Nested Resources
+
+To nest multiple resource below a parent, structured identifier can be used:
+
+[source,java]
+.PostCommendId.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostCommentId.java[tags=docs]
 ----
 
 The id is setup of two parts:
@@ -439,15 +583,26 @@ The id is setup of two parts:
 - the local identifier of the child resource, annotated with `@JsonApiId`. It must be unique among all nested resources having the same parent.
 - the identifier of the parent resource, annotated with a `@JsonApiRelationId`. The nested resource must have matching relationship field (in this case `parent`)`.
 
-`NestedId` further implements `parse`, `toString`, `hashCode` and `equals` to deal with String serialization and equality.
+`PostCommentId` further implements `public PostCommentId(String idString)`, `toString`, `hashCode` and `equals` and carries the
+`@JsonSerialize(using = ToStringSerializer.class)` annotation to deal with String serialization and equality.
+
+The resource itself looks like:
+
+[source,java]
+.PostComment.java
+----
+include::../../../../crnk-test/src/main/java/io/crnk/test/mock/models/nested/PostComment.java[tags=docs]
+----
+
+### Usage
 
 For an example have a look at `NestedRepositoryClientTest` and its parent class. Depending on the use of <<JsonApiExposed>> it
 is or is not be possible to also directly access `http://example.com/comments` without going
 through the parents.
 
-Current Limitations:
+When creating new resources with CrnkClient, the nested identifier must be set to let CrnkClient access the postId
+to compute URLs.
 
-- Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
-- When creating new resources with CrnkClient, the nested identifier must be setup in order to let CrnkClient access the parentId.
-- Being experimental.
+WARNING: Nesting is currently limited to a single level (and the possibility to have further relationships on the nested resource).
+
 

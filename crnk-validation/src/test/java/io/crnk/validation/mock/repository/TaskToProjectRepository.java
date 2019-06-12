@@ -1,7 +1,7 @@
 package io.crnk.validation.mock.repository;
 
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.RelationshipRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
 import io.crnk.validation.mock.models.Project;
 import io.crnk.validation.mock.models.Task;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class TaskToProjectRepository implements RelationshipRepository<Task, Long, Project, Long> {
+public class TaskToProjectRepository implements LegacyRelationshipRepository<Task, Long, Project, Long> {
 
 	private static final ConcurrentMap<Relation<Task>, Integer> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 

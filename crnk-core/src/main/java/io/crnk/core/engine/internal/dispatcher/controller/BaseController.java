@@ -1,25 +1,16 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.filter.FilterBehavior;
-import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
 import io.crnk.core.engine.query.QueryAdapter;
-import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.exception.BadRequestException;
-import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.repository.response.JsonApiResponse;
 import org.slf4j.Logger;

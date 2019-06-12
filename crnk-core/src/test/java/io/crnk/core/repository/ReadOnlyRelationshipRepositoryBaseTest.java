@@ -2,6 +2,8 @@ package io.crnk.core.repository;
 
 import org.junit.Test;
 
+import io.crnk.core.exception.MethodNotAllowedException;
+
 public class ReadOnlyRelationshipRepositoryBaseTest {
 
 
@@ -24,32 +26,32 @@ public class ReadOnlyRelationshipRepositoryBaseTest {
 		repo.getTargetResourceClass();
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void findOneTarget() {
 		repo.findOneTarget(null, null, null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void findManyTargets() {
 		repo.findManyTargets(null, null, null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void setRelation() {
 		repo.setRelation(null, null, null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void setRelations() {
 		repo.setRelations(null, null, null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void addRelations() {
-		repo.setRelations(null, null, null);
+		repo.addRelations(null, null, null);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test(expected = MethodNotAllowedException.class)
 	public void removeRelations() {
 		repo.removeRelations(null, null, null);
 	}

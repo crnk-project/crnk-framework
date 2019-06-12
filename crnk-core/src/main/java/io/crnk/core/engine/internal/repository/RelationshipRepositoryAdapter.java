@@ -21,10 +21,10 @@ public interface RelationshipRepositoryAdapter {
 
 	Result<JsonApiResponse> removeRelations(Object source, Collection targetIds, ResourceField field, QueryAdapter queryAdapter);
 
-	Result<JsonApiResponse> findOneTarget(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
+	Result<JsonApiResponse> findOneRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
 
 
-	Result<JsonApiResponse> findManyTargets(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
+	Result<JsonApiResponse> findManyRelations(Object sourceId, ResourceField field, QueryAdapter queryAdapter);
 
 	Result<Map<Object, JsonApiResponse>> findBulkManyTargets(Collection sourceIds, ResourceField field, QueryAdapter
 			queryAdapter);

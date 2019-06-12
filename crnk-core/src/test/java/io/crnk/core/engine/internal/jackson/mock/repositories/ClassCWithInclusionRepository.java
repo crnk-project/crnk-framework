@@ -2,9 +2,9 @@ package io.crnk.core.engine.internal.jackson.mock.repositories;
 
 import io.crnk.core.engine.internal.jackson.mock.models.ClassCWithInclusion;
 import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
-public class ClassCWithInclusionRepository implements ResourceRepository<ClassCWithInclusion, Long> {
+public class ClassCWithInclusionRepository implements LegacyResourceRepository<ClassCWithInclusion, Long> {
 	@Override
 	public ClassCWithInclusion findOne(Long aLong, QueryParams queryParams) {
 		return null;

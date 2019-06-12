@@ -126,7 +126,7 @@ public class IncludeLookupSetter {
 				List<Resource> resourcesWithField = util.filterByLoadedRelationship(resourcesByType, resourceField);
 
 				// lookup resources by inspecting the POJOs in entityMap
-				LookupIncludeBehavior fieldLookupIncludeBehavior = resourceField.getLookupIncludeAutomatically();
+				LookupIncludeBehavior fieldLookupIncludeBehavior = resourceField.getLookupIncludeBehavior();
 
 				Result<Set<Resource>> populatedResult;
 				if (!includeRelationship && resourceField.hasIdField()) {

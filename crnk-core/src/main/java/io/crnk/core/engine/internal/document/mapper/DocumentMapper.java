@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.document.Document;
@@ -17,11 +22,6 @@ import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class DocumentMapper {
 
@@ -65,6 +65,10 @@ public class DocumentMapper {
 		if (serverInfo != null && !serverInfo.isEmpty()) {
 			jsonapi = objectMapper.valueToTree(serverInfo);
 		}
+	}
+
+	public void setClient(boolean client){
+		this.client = client;
 	}
 
 	protected IncludeLookupSetter newIncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,

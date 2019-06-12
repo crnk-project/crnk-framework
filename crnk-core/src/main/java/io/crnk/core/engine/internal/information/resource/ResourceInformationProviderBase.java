@@ -1,26 +1,5 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import io.crnk.core.boot.CrnkProperties;
-import io.crnk.core.engine.information.InformationBuilder;
-import io.crnk.core.engine.information.bean.BeanAttributeInformation;
-import io.crnk.core.engine.information.bean.BeanInformation;
-import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.information.resource.ResourceFieldAccess;
-import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
-import io.crnk.core.engine.information.resource.ResourceFieldType;
-import io.crnk.core.engine.information.resource.ResourceInformationProvider;
-import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
-import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.properties.PropertiesProvider;
-import io.crnk.core.exception.InvalidResourceException;
-import io.crnk.core.resource.annotations.JsonApiRelation;
-import io.crnk.core.resource.annotations.JsonApiRelationId;
-import io.crnk.core.resource.annotations.LookupIncludeBehavior;
-import io.crnk.core.resource.annotations.PatchStrategy;
-import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
-import io.crnk.core.resource.annotations.SerializeType;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,8 +12,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import io.crnk.core.boot.CrnkProperties;
+import io.crnk.core.engine.information.InformationBuilder;
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
+import io.crnk.core.engine.information.resource.ResourceFieldInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceFieldType;
+import io.crnk.core.engine.information.resource.ResourceInformationProvider;
+import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
+import io.crnk.core.engine.internal.document.mapper.IncludeLookupUtil;
+import io.crnk.core.engine.internal.utils.ClassUtils;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.exception.InvalidResourceException;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiRelationId;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.PatchStrategy;
+import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class ResourceInformationProviderBase implements ResourceInformationProvider {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     protected ResourceInformationProviderContext context;
 
@@ -72,7 +78,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             BeanAttributeInformation attributeDesc = beanDesc.getAttribute(attributeName);
             if (!isIgnored(attributeDesc)) {
                 InformationBuilder informationBuilder = context.getInformationBuilder();
-                InformationBuilder.Field fieldBuilder = informationBuilder.createResourceField();
+                InformationBuilder.FieldInformationBuilder fieldBuilder = informationBuilder.createResourceField();
                 buildResourceField(beanDesc, attributeDesc, fieldBuilder);
                 fields.add(fieldBuilder.build());
             } else if (attributeDesc.getAnnotation(JsonApiRelationId.class).isPresent()) {
@@ -96,7 +102,7 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
     }
 
-    protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.Field
+    protected void buildResourceField(BeanInformation beanDesc, BeanAttributeInformation attributeDesc, InformationBuilder.FieldInformationBuilder
             fieldBuilder) {
         fieldBuilder.underlyingName(attributeDesc.getName());
         ResourceFieldType fieldType = getFieldType(attributeDesc);
@@ -105,8 +111,8 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         fieldBuilder.fieldType(fieldType);
         fieldBuilder.access(getAccess(attributeDesc, fieldType));
         fieldBuilder.patchStrategy(getPatchStrategy(attributeDesc));
+        fieldBuilder.jsonIncludeStrategy(getJsonIncludeStrategy(attributeDesc));
         fieldBuilder.serializeType(getSerializeType(attributeDesc, fieldType));
-        fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc));
         fieldBuilder.relationshipRepositoryBehavior(getRelationshipRepositoryBehavior(attributeDesc));
 
         Type genericType;
@@ -119,6 +125,12 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         }
         fieldBuilder.genericType(genericType);
         if (fieldType == ResourceFieldType.RELATIONSHIP) {
+
+            Optional<String> mappedBy = getMappedBy(attributeDesc);
+            if (mappedBy.isPresent() && !mappedBy.get().isEmpty()) {
+                fieldBuilder.setMappedBy(true);
+            }
+
             fieldBuilder.oppositeResourceType(getResourceType(genericType, context));
             fieldBuilder.oppositeName(getOppositeName(attributeDesc));
 
@@ -144,10 +156,15 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
                 }
             }
 
+            // if id field has been explicitly declared, then it must also exist
+            PreconditionUtil.verify(idAttribute != null || !hasIdNameReference, "idField %s not found for %s", idFieldName, attributeDesc);
+
             if (idAttribute != null && (hasIdNameReference || idAttribute.getAnnotation(JsonApiRelationId.class).isPresent())) {
                 fieldBuilder.idName(idFieldName);
                 fieldBuilder.idType(idAttribute.getImplementationClass());
             }
+
+            fieldBuilder.lookupIncludeBehavior(getLookupIncludeBehavior(attributeDesc, idAttribute != null));
         }
     }
 
@@ -160,6 +177,17 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
         }
         return getDefaultRelationshipRepositoryBehavior(attributeDesc);
+    }
+
+    protected Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
+        Optional<String> mappedBy = Optional.empty();
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<String> opt = fieldInformationProvider.getMappedBy(attributeDesc);
+            if (opt.isPresent() && (!mappedBy.isPresent() || mappedBy.get().isEmpty())) {
+                mappedBy = opt;
+            }
+        }
+        return mappedBy;
     }
 
     protected RelationshipRepositoryBehavior getDefaultRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
@@ -196,7 +224,17 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
         return resourceFieldType == ResourceFieldType.RELATIONSHIP ? SerializeType.LAZY : SerializeType.EAGER;
     }
 
-    protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
+    public JsonIncludeStrategy getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
+        for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
+            Optional<JsonIncludeStrategy> jsonIncludeStrategy = fieldInformationProvider.getJsonIncludeStrategy(attributeDesc);
+            if (jsonIncludeStrategy.isPresent()) {
+                return jsonIncludeStrategy.get();
+            }
+        }
+        return JsonIncludeStrategy.DEFAULT;
+    }
+
+    protected LookupIncludeBehavior getLookupIncludeBehavior(BeanAttributeInformation attributeDesc, boolean hasIdField) {
         LookupIncludeBehavior behavior = LookupIncludeBehavior.DEFAULT;
 
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
@@ -208,22 +246,24 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
             }
         }
 
-        // If the field-level behavior is DEFAULT, then look to the global setting
-        if (behavior == LookupIncludeBehavior.DEFAULT) {
-            behavior = globalLookupIncludeBehavior;
+        if (behavior != LookupIncludeBehavior.DEFAULT) {
+            LOGGER.debug("{}: using configured LookupIncludeBehavior.{}", attributeDesc, behavior);
+            return behavior;
         }
 
         // If the global behavior was also default, fall all they way back to the
         // information provider's default
-        if (behavior == LookupIncludeBehavior.DEFAULT) {
-            behavior = getDefaultLookupIncludeBehavior();
-        }
-
-        return behavior;
+        return getDefaultLookupIncludeBehavior(attributeDesc);
     }
 
-    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior() {
-        return LookupIncludeBehavior.NONE;
+    protected LookupIncludeBehavior getDefaultLookupIncludeBehavior(BeanAttributeInformation attributeDesc) {
+        // If the field-level behavior is DEFAULT, then look to the global setting
+        if (globalLookupIncludeBehavior != LookupIncludeBehavior.DEFAULT) {
+            LOGGER.debug("{}: using global/configured default LookupIncludeBehavior.{}", attributeDesc, globalLookupIncludeBehavior);
+            return globalLookupIncludeBehavior;
+        }
+
+        return LookupIncludeBehavior.DEFAULT;
     }
 
     private ResourceFieldAccess getAccess(BeanAttributeInformation attributeDesc, ResourceFieldType resourceFieldType) {
@@ -363,6 +403,11 @@ public abstract class ResourceInformationProviderBase implements ResourceInforma
     }
 
     private String getOppositeName(BeanAttributeInformation attributeDesc) {
+        Optional<String> mappedBy = getMappedBy(attributeDesc);
+        if (mappedBy.isPresent() && !mappedBy.get().isEmpty()) {
+            return mappedBy.get();
+        }
+
         for (ResourceFieldInformationProvider fieldInformationProvider : resourceFieldInformationProviders) {
             Optional<String> oppositeName = fieldInformationProvider.getOppositeName(attributeDesc);
             if (oppositeName.isPresent()) {

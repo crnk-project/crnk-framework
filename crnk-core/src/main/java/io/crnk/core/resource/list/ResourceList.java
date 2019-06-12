@@ -6,7 +6,7 @@ import io.crnk.core.resource.meta.MetaInformation;
 import java.util.List;
 
 /**
- * Holds links and meta information next to the actual list. Can be returned by findAll and findTargets repository operation.
+ * Holds links and meta information next to the actual list. Can be returned by findAll and findRelations repository operation.
  */
 public interface ResourceList<T> extends List<T> {
 

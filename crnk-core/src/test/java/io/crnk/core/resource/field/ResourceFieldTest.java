@@ -1,17 +1,18 @@
 package io.crnk.core.resource.field;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
-import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceFieldTest {
 
@@ -132,20 +133,19 @@ public class ResourceFieldTest {
 	private static class WithLazyFieldClass {
 
 		@JsonProperty("sth")
-		@JsonApiToMany
+		@JsonApiRelation
 		private String value;
 	}
 
 	private static class WithLazyFieldAndInclusionByDefaultClass {
 
-		@JsonApiIncludeByDefault
-		@JsonApiToMany
+		@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 		private String value;
 	}
 
 	private static class WithToManyEagerFieldClass {
 
-		@JsonApiToMany(lazy = false)
+		@JsonApiRelation(serialize = SerializeType.EAGER)
 		private String value;
 	}
 

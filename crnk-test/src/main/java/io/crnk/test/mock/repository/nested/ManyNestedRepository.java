@@ -1,12 +1,12 @@
 package io.crnk.test.mock.repository.nested;
 
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.test.mock.models.nested.ManyNestedResource;
-import io.crnk.test.mock.models.nested.NestedId;
+import io.crnk.test.mock.models.nested.PostComment;
+import io.crnk.test.mock.models.nested.PostCommentId;
 
-public class ManyNestedRepository extends InMemoryResourceRepository<ManyNestedResource, NestedId> {
+public class ManyNestedRepository extends InMemoryResourceRepository<PostComment, PostCommentId> {
 
 	public ManyNestedRepository() {
-		super(ManyNestedResource.class);
+		super(PostComment.class);
 	}
 }

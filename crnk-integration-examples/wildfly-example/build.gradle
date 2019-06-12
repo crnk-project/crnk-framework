@@ -9,7 +9,7 @@ dependencies {
 	compile project(':crnk-setup:crnk-setup-rs')
 	compile project(':crnk-setup:crnk-setup-cdi')
 	compile project(':crnk-home')
-	compile project(':crnk-jpa')
+	compile project(':crnk-data:crnk-data-jpa')
 
 	compileOnly 'javax:javaee-api:7.0'
 

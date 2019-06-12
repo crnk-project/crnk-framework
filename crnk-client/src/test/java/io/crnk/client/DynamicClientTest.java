@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.exception.InternalServerErrorException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class DynamicClientTest extends AbstractClientTest {
 
 	@Test
 	public void testResource() throws IOException {
-		ResourceRepositoryV2<Resource, String> repository = client.getRepositoryForPath("dynamic1");
+		ResourceRepository<Resource, String> repository = client.getRepositoryForPath("dynamic1");
 		ObjectMapper mapper = new ObjectMapper();
 
 		Resource resource = new Resource();
@@ -61,8 +61,8 @@ public class DynamicClientTest extends AbstractClientTest {
 
 	@Test
 	public void testRelationship() throws IOException {
-		ResourceRepositoryV2<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
-		RelationshipRepositoryV2<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
+		ResourceRepository<Resource, String> resourceRepository = client.getRepositoryForPath("dynamic1");
+		RelationshipRepository<Resource, String, Resource, String> repository = client.getRepositoryForPath("dynamic1", "tasks");
 		ObjectMapper mapper = new ObjectMapper();
 
 

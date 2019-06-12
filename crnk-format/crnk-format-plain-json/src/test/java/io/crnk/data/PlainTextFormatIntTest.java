@@ -9,7 +9,7 @@ import javax.ws.rs.core.Application;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.format.plainjson.PlainJsonFormatModule;
 import io.crnk.home.HomeModule;
 import io.crnk.rs.CrnkFeature;
@@ -60,7 +60,7 @@ public class PlainTextFormatIntTest extends JerseyTestBase {
 
 	@Test
 	public void checkGet() {
-		Response getResponse = RestAssured.get(getBaseUri() + "/tasks/12");
+		Response getResponse = RestAssured.get(getBaseUri() + "/tasks/12?include=project");
 		Assert.assertEquals(200, getResponse.getStatusCode());
 		getResponse.then().assertThat().body("data.id", Matchers.equalTo("12"));
 		getResponse.then().assertThat().body("data.type", Matchers.equalTo("tasks"));
@@ -74,7 +74,7 @@ public class PlainTextFormatIntTest extends JerseyTestBase {
 	@Test
 	public void checkJsonApiAccess() {
 		CrnkClient client = new CrnkClient(getBaseUri().toString());
-		ResourceRepositoryV2<Task, Serializable> repository = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Serializable> repository = client.getRepositoryForType(Task.class);
 		Task createdTask = repository.findOne(12L, new QuerySpec(Task.class));
 		Assert.assertEquals("someTask", createdTask.getName());
 	}
@@ -99,7 +99,7 @@ public class PlainTextFormatIntTest extends JerseyTestBase {
 
 
 		CrnkClient client = new CrnkClient(getBaseUri().toString());
-		ResourceRepositoryV2<Task, Serializable> repository = client.getRepositoryForType(Task.class);
+		ResourceRepository<Task, Serializable> repository = client.getRepositoryForType(Task.class);
 		Task createdTask = repository.findOne(13L, new QuerySpec(Task.class));
 		Assert.assertEquals("otherTask", createdTask.getName());
 	}

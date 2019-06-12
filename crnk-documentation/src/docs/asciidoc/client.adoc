@@ -12,14 +12,16 @@ communicating with JSON-API compliant servers.
 
 ## Setup
 
-The basic setup is as simple as:
+The basic setup is:
 
 [source]
 ----
   CrnkClient client = new CrnkClient("http://localhost:8080/api");
 ----
 
-Three underlying http client libraries are supported:
+Four underlying http client libraries are supported.
+Add one of those library to the classpath and Crnk will pick it up automatically.
+A custom `HttpAdapter` can also set passed to `CrnkClient.setHttpAdapter(...)`.
 
 * https://github.com/square/okhttp[OkHttp]
  that is popular for Java and Android development. Implemented by
@@ -33,8 +35,19 @@ Three underlying http client libraries are supported:
   the setup configuration setup. It is used by default if the presence of Spring is detected.
   Implemented by `io.crnk.spring.client.RestTemplateAdapter`.
 
-Add one of those library to the classpath and Crnk will pick it up automatically.
-A custom `HttpAdapter` can also set passed to `CrnkClient.setHttpAdapter(...)`.
+* `InMemoryHttpAdapter` to directly connect a client to a server without a TCP transport layer
+  or HTTP server. This *implementation is well suited for unit testing* as no server must be setup, making
+  unit tests simpler and faster to write, execute and debug. In contrast to invoking a repository directly
+  on the server, `InMemoryHttpAdapter` request still pass through the entire Crnk serialization layer
+  and are processed like any other HTTP request.
++
+[source]
+----
+  String url = "http://localhost:8080/api";
+  CrnkClient client = new CrnkClient(url);
+  client.setHttpAdapter(new InMemoryHttpAdapter(crnkBoot, url));
+----
+
 
 WARNING: For Spring a *reasonable HTTP client implementation must underlie `RestTemplate`*
 in order for `crnk-client` to work properly. For example, the default Java implementation does not
@@ -71,7 +84,7 @@ An example of the usage:
 [source]
 ----
   CrnkClient client = new CrnkClient("http://localhost:8080/api");
-  ResourceRepositoryV2<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
+  ResourceRepository<Task, Long> taskRepo = client.getRepositoryForType(Task.class);
   List<Task> tasks = taskRepo.findAll(new QuerySpec(Task.class));
 ----
 
@@ -79,7 +92,7 @@ Have a look at, for example, the QuerySpecClientTest to see more examples of how
 
 ## URL handling
 
-Crnk clienet and server share the URL handling. `QuerySpecUrlMapper` performs the mapping of HTTP request parameters to QuerySpec.
+Crnk client and server share the URL handling. `QuerySpecUrlMapper` performs the mapping of HTTP request parameters to QuerySpec.
 For more information see <<urlmapper,url mapping>>.
 
 ## Modules
@@ -98,6 +111,7 @@ Typical use cases include:
 - registering new types of resources (like JPA entities by the `JpaModule`)
 - intercepting requests for monitoring
 - adding security tokens to requests
+- setup the `PlainJsonFormatModule`
 
 Many modules allow a registration both on server and client side.
 The client part then typically makes use of a subset of the server features, like
@@ -141,6 +155,34 @@ include::../../../../crnk-client/src/test/java/io/crnk/client/suite/RepositoryAc
 
 anchor:client_jaxrs[]
 
+
+
+## HTTP customization
+
+`CrnkClient#getHttpAdapter()` gives access to the `HttpAdapter`.
+There are two ways to customize HTTP requests:
+
+- A `HttpAdapterListener` can be added with `addListener`
+  to  `HttpAdapter`. `HttpAdapterListener`  allows to intercept both requests and responses and perform changes.
+- The `HttpAdapter` interface can be cast to used implementation, which in turn gives access to the native
+  builder/listener mechanisms to perform any kind of advanced customization.
+
+Typical use cases to customize the HTTP requests and responses are:
+
+- add custom request headers (security, tracing, etc.)
+- collect statistics
+- ...
+
+Some examples:
+
+- https://github.com/crnk-project/crnk-framework/blob/master/crnk-monitor/crnk-monitor-brave4/src/main/java/io/crnk/monitor/brave/BraveClientModule.java[crnk-monitor-brave4] for
+ an advanced example.
+- https://stackoverflow.com/questions/32196424/how-to-add-headers-to-okhttp-request-interceptor?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa[How to add
+   headers to OkHttp request interceptor].
+
+
+
+
 ## JAX-RS interoperability
 
 The interface stubs from the previous section can also be used to make calls to JAX-RS. For example, the
@@ -180,24 +222,4 @@ include::../../../../crnk-client/src/test/java/io/crnk/client/action/JsonApiActi
 WARNING: Due to limited configurability of the Jersey Proxies it is currently not possible to reuse the same HTTP connections
 for both types of calls. We attempt to address that in the future. Be aware of this when you, for example, add further
 request headers (like security), as it has to be done in two places (unfortunately).
-
-
-
-## HTTP customization
-
-It is possible to hook into the HTTP implementation used by Crnk ( or Apache).
-Make use of `CrnkClient#getHttpAdapter()` and cast it to either
-`HttpAdapter`. Both implementations provide a
-`addListener` method, which in turn gives access to the native builder used to construct
-the respective HTTP client implementation. This allows to cover various use cases:
-
-- add custom request headers (security, tracing, etc.)
-- collect statistics
-- ...
-
-Some examples:
-
-- https://github.com/crnk-project/crnk-framework/blob/master/crnk-monitor-brave4/src/main/java/io/crnk/monitor/brave/BraveClientModule.java[crnk-monitor-brave4] for an advanced example.
-- https://stackoverflow.com/questions/32196424/how-to-add-headers-to-okhttp-request-interceptor?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa[How to add
-   headers to OkHttp request interceptor].
 

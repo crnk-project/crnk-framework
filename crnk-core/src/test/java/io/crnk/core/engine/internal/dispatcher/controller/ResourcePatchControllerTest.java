@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
@@ -8,10 +9,6 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
-import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourceGetController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
 import io.crnk.core.engine.properties.ResourceFieldImmutableWriteBehavior;
@@ -33,6 +30,7 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -463,6 +461,74 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
     }
 
     @Test
+    public void mergeEmptyListShouldSaveIt() throws Exception {
+        // GIVEN
+        Document newProjectBody = new Document();
+        Resource data = createProject();
+        newProjectBody.setData(Nullable.of(data));
+        JsonPath taskPath = pathBuilder.build("/projects");
+
+        // WHEN
+        ResourcePostController resourcePost = new ResourcePostController();
+        resourcePost.init(controllerContext);
+        Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, newProjectBody);
+        Resource savedProject = projectResponse.getDocument().getSingleData().get();
+
+        // GIVEN
+        data = new Resource();
+        data.setType("projects");
+        data.setId(savedProject.getId());
+        data.setAttribute("data", objectMapper.readTree("{\"keywords\" : []}"));
+
+        Document projectPatch = new Document();
+        projectPatch.setData(Nullable.of(data));
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+
+        // WHEN
+        Response response = sut.handle(jsonPath, emptyProjectQuery, projectPatch);
+
+        // THEN
+        Map<String, JsonNode> patchedAttributes = response.getDocument().getSingleData().get().getAttributes();
+        assertThat(patchedAttributes.get("data").get("keywords").size()).isEqualTo(0);
+    }
+
+    @Test
+    public void mergeNonEmptyListShouldSaveIt() throws Exception {
+        // GIVEN
+        Document newProjectBody = new Document();
+        Resource data = createProject();
+        newProjectBody.setData(Nullable.of(data));
+        JsonPath taskPath = pathBuilder.build("/projects");
+
+        // WHEN
+        ResourcePostController resourcePost = new ResourcePostController();
+        resourcePost.init(controllerContext);
+        Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, newProjectBody);
+        Resource savedProject = projectResponse.getDocument().getSingleData().get();
+
+        // GIVEN
+        data = new Resource();
+        data.setType("projects");
+        data.setId(savedProject.getId());
+        data.setAttribute("data", objectMapper.readTree("{\"keywords\" : [\"test\"]}"));
+
+        Document projectPatch = new Document();
+        projectPatch.setData(Nullable.of(data));
+        JsonPath jsonPath = pathBuilder.build("/projects/" + savedProject.getId());
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+
+        // WHEN
+        Response response = sut.handle(jsonPath, emptyProjectQuery, projectPatch);
+
+        // THEN
+        Map<String, JsonNode> patchedAttributes = response.getDocument().getSingleData().get().getAttributes();
+        assertThat(patchedAttributes.get("data").get("keywords").size()).isEqualTo(1);
+    }
+
+    @Test
     public void mergeNestedAttributeWithDefaultPatchStrategy() throws Exception {
         // GIVEN
         Document newProjectBody = new Document();
@@ -501,6 +567,51 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
                 + "project");
         assertThat(response.getDocument().getSingleData().get().getAttributes().get("data").get("data").asText())
                 .isEqualTo("updated data");
+
+    }
+
+    @Test
+    public void mergeDeeplyNestedAttributeWithDefaultPatchStrategy() throws Exception {
+        // GIVEN
+        Document newProjectBody = new Document();
+        Resource data = createProject();
+        newProjectBody.setData(Nullable.of(data));
+        JsonPath taskPath = pathBuilder.build("/projects");
+
+        // WHEN
+        ResourcePostController resourcePost = new ResourcePostController();
+        resourcePost.init(controllerContext);
+        Response projectResponse = resourcePost.handle(taskPath, emptyProjectQuery, newProjectBody);
+        Resource savedProject = projectResponse.getDocument().getSingleData().get();
+        assertThat(savedProject.getType()).isEqualTo("projects");
+        Map<String, JsonNode> createdAttributes = projectResponse.getDocument().getSingleData().get().getAttributes();
+        assertThat(createdAttributes.get("data")).isNotNull();
+        assertThat(createdAttributes.get("data").get("status").get("qualityStatus").asText()).isEqualTo("ok");
+        assertThat(createdAttributes.get("data").get("status").get("timelineStatus").asText()).isEqualTo("ok");
+        Long projectId = Long.parseLong(projectResponse.getDocument().getSingleData().get().getId());
+        assertThat(projectId).isNotNull();
+
+        // GIVEN
+        data = new Resource();
+        data.setType("projects");
+        data.setId(savedProject.getId());
+        data.setAttribute("data", objectMapper.readTree("{\"status\": { \"qualityStatus\": \"great\"}}"));
+
+        Document projectPatch = new Document();
+        projectPatch.setData(Nullable.of(data));
+        JsonPath jsonPath = pathBuilder.build("/projects/" + projectId);
+        ResourcePatchController sut = new ResourcePatchController();
+        sut.init(controllerContext);
+
+        // WHEN
+        Response response = sut.handle(jsonPath, emptyProjectQuery, projectPatch);
+
+        // THEN
+        Map<String, JsonNode> attributes = response.getDocument().getSingleData().get().getAttributes();
+        assertThat(attributes.get("name").asText()).isEqualTo("sample project");
+        assertThat(attributes.get("data").get("data").asText()).isEqualTo("asd");
+        assertThat(attributes.get("data").get("status").get("qualityStatus").asText()).isEqualTo("great");
+        assertThat(attributes.get("data").get("status").get("timelineStatus").asText()).isEqualTo("ok");
 
     }
 

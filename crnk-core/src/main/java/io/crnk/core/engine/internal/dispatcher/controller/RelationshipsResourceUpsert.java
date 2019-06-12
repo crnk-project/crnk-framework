@@ -21,6 +21,7 @@ import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.repository.response.JsonApiResponse;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 
 public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
@@ -43,7 +44,7 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
      * @param relationshipRepositoryForClass Relationship repository
      */
     protected abstract Result processToManyRelationship(Result<Object> resource, ResourceInformation targetResourceInformation,
-                                                        ResourceField resourceField, Iterable<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
+                                                        ResourceField resourceField, Collection<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
                                                         RelationshipRepositoryAdapter relationshipRepositoryForClass);
 
     /**
@@ -94,8 +95,8 @@ public abstract class RelationshipsResourceUpsert extends ResourceIncludeField {
         Result<Object> resource = resourceRepository.findOne(resourceId, queryAdapter).map(JsonApiResponse::getEntity);
 
         Result result;
-        if (Iterable.class.isAssignableFrom(relationshipField.getType())) {
-            Iterable<ResourceIdentifier> dataBodies = (Iterable<ResourceIdentifier>) (requestBody.isMultiple() ? requestBody.getData().get() : Collections.singletonList(requestBody.getData().get()));
+        if (Collection.class.isAssignableFrom(relationshipField.getType())) {
+            Collection<ResourceIdentifier> dataBodies = (Collection<ResourceIdentifier>) (requestBody.isMultiple() ? requestBody.getData().get() : Collections.singletonList(requestBody.getData().get()));
             result = processToManyRelationship(resource, targetInformation, relationshipField, dataBodies, queryAdapter,
                     relationshipRepositoryForClass);
         } else {

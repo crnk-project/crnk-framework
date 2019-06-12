@@ -2,7 +2,7 @@ package io.crnk.internal.boot.cdi;
 
 import io.crnk.cdi.internal.CdiServiceDiscovery;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory;
 import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.repository.Repository;
@@ -59,7 +59,7 @@ public class CdiServiceDiscoveryTest {
 		CrnkBoot boot = new CrnkBoot();
 		boot.boot();
 
-		Optional<JsonApiExceptionMapper> mapper = boot.getExceptionMapperRegistry().findMapperFor(IllegalStateException.class);
+		Optional<ExceptionMapper> mapper = boot.getExceptionMapperRegistry().findMapperFor(IllegalStateException.class);
 		Assert.assertTrue(mapper.isPresent());
 		Assert.assertTrue(mapper.get() instanceof CdiTestExceptionMapper);
 	}

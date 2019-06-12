@@ -6,7 +6,6 @@ import java.util.Set;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.exception.InternalServerErrorException;
 import org.slf4j.Logger;
@@ -26,9 +25,9 @@ public class ExceptionMapperRegistry {
 		return exceptionMappers;
 	}
 
-	public Optional<JsonApiExceptionMapper> findMapperFor(Class<? extends Throwable> exceptionClass) {
+	public Optional<ExceptionMapper> findMapperFor(Class<? extends Throwable> exceptionClass) {
 		int currentDistance = Integer.MAX_VALUE;
-		JsonApiExceptionMapper closestExceptionMapper = null;
+		ExceptionMapper closestExceptionMapper = null;
 		for (ExceptionMapperType mapperType : exceptionMappers) {
 			int tempDistance = getDistanceBetweenExceptions(exceptionClass, mapperType.getExceptionClass());
 			if (tempDistance < currentDistance) {
@@ -48,7 +47,7 @@ public class ExceptionMapperRegistry {
 		ExceptionMapper closestExceptionMapper = null;
 
 		for (ExceptionMapperType mapperType : exceptionMappers) {
-			JsonApiExceptionMapper mapperObj = mapperType.getExceptionMapper();
+			ExceptionMapper mapperObj = mapperType.getExceptionMapper();
 			if (mapperObj instanceof ExceptionMapper) {
 				ExceptionMapper mapper = (ExceptionMapper) mapperObj;
 				boolean accepted = mapper.accepts(errorResponse);
@@ -91,7 +90,7 @@ public class ExceptionMapperRegistry {
 	}
 
 	public Response toResponse(Throwable e) {
-		Optional<JsonApiExceptionMapper> exceptionMapper = findMapperFor(e.getClass());
+		Optional<ExceptionMapper> exceptionMapper = findMapperFor(e.getClass());
 		if (!exceptionMapper.isPresent()) {
 			LOGGER.error("failed to process operations request, unknown exception thrown", e);
 			e = new InternalServerErrorException(e.getMessage());

@@ -13,7 +13,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ReadOnlyResourceRepositoryBase;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.list.ResourceListBase;
@@ -99,7 +99,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 			String closedPackageName = null;
 			String closedResourceType = null;
-			for (RegistryEntry entry : resourceRegistry.getResources()) {
+			for (RegistryEntry entry : resourceRegistry.getEntries()) {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 				Class<?> resourceClass = resourceInformation.getResourceClass();
 				String resourcePackageName = resourceClass.getPackage().getName();
@@ -134,7 +134,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		ResourceRegistry resourceRegistry = context.getModuleContext().getResourceRegistry();
 
 		// enforce setup of meta data
-		Collection<RegistryEntry> entries = resourceRegistry.getResources();
+		Collection<RegistryEntry> entries = resourceRegistry.getEntries();
 		for (RegistryEntry entry : entries) {
 			ResourceInformation resourceInformation = entry.getResourceInformation();
 			MetaResource metaResource = discoverResource(resourceInformation);
@@ -175,6 +175,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		resource.setImplementationType(information.getResourceClass());
 		resource.setName(getName(information));
 		resource.setResourceType(resourceType);
+		resource.setResourcePath(information.getResourcePath());
 		if (superMeta != null) {
 			resource.setSuperType(superMeta);
 			if (superMeta != null) {
@@ -249,7 +250,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 
 		// TODO avoid use of ResourceRepositoryAdapter by enriching ResourceRepositoryInformation
 		Object repository = resourceRepository.getResourceRepository();
-		if (repository instanceof ResourceRepositoryV2) {
+		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}
 		return meta;

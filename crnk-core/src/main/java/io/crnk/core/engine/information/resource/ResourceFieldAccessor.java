@@ -14,4 +14,5 @@ public interface ResourceFieldAccessor {
 
 	void setValue(Object resource, Object fieldValue);
 
+	Class getImplementationClass();
 }

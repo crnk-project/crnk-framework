@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
@@ -25,6 +26,8 @@ import io.crnk.core.engine.internal.jackson.JacksonResourceFieldInformationProvi
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
+import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.MultipleJsonApiLinksInformationException;
 import io.crnk.core.exception.MultipleJsonApiMetaInformationException;
 import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
@@ -36,14 +39,17 @@ import io.crnk.core.mock.models.ShapeResource;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.UnAnnotatedTask;
 import io.crnk.core.mock.models.User;
+import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.TestResourceInformationProvider;
+import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
+import io.crnk.core.repository.InMemoryResourceRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.SerializeType;
@@ -337,12 +343,12 @@ public class DefaultResourceInformationProviderTest {
 	}
 
 	@Test
-	public void shouldHaveNoneForDefaultLookupBehavior() {
+	public void shouldHaveDefaultForDefaultLookupBehavior() {
 		ResourceInformation resourceInformation =
 				resourceInformationProvider.build(JsonResourceWithDefaultLookupBehaviorRelationship.class);
 
 		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-				.contains(LookupIncludeBehavior.NONE);
+				.contains(LookupIncludeBehavior.DEFAULT);
 	}
 
 	@Test
@@ -399,7 +405,7 @@ public class DefaultResourceInformationProviderTest {
 		assertThat(resourceInformation.getRelationshipFields()).extracting("serializeType")
 				.contains(SerializeType.LAZY, SerializeType.LAZY);
 		assertThat(resourceInformation.getRelationshipFields()).extracting("lookupIncludeBehavior")
-				.contains(LookupIncludeBehavior.NONE, LookupIncludeBehavior.NONE);
+				.contains(LookupIncludeBehavior.DEFAULT);
 		assertThat(resourceInformation.getRelationshipFields()).extracting("resourceFieldType")
 				.contains(ResourceFieldType.RELATIONSHIP, ResourceFieldType.RELATIONSHIP);
 	}
@@ -444,6 +450,135 @@ public class DefaultResourceInformationProviderTest {
 	@Test
 	public void checkGetNotSetResourcePathFromNonResourceFromInformationProvider() {
 		assertThat(resourceInformationProvider.getResourcePath(String.class)).isNull();
+	}
+
+
+	@Test
+	public void checkResourceAccessProperties() {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(AccessDeniedTestResource.class);
+		Assert.assertFalse(resourceInformation.getAccess().isPostable());
+		Assert.assertFalse(resourceInformation.getAccess().isReadable());
+		Assert.assertFalse(resourceInformation.getAccess().isPatchable());
+		Assert.assertFalse(resourceInformation.getAccess().isDeletable());
+		Assert.assertFalse(resourceInformation.getAccess().isFilterable());
+		Assert.assertFalse(resourceInformation.getAccess().isSortable());
+		for (ResourceField field : resourceInformation.getFields()) {
+			Assert.assertFalse(field.getAccess().isPostable());
+			Assert.assertFalse(field.getAccess().isReadable());
+			Assert.assertFalse(field.getAccess().isPatchable());
+			Assert.assertFalse(field.getAccess().isDeletable());
+			Assert.assertFalse(field.getAccess().isFilterable());
+			Assert.assertFalse(field.getAccess().isSortable());
+		}
+
+		SimpleModule module = new SimpleModule("test");
+		module.addRepository(new InMemoryResourceRepository<>(AccessDeniedTestResource.class));
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(module);
+		boot.boot();
+
+		RegistryEntry entry = boot.getResourceRegistry().getEntry(AccessDeniedTestResource.class);
+		ResourceRepository<AccessDeniedTestResource, Object> repository = entry.getResourceRepositoryFacade();
+
+		try {
+			repository.create(new AccessDeniedTestResource());
+		}
+		catch (MethodNotAllowedException e) {
+		}
+
+		try {
+			repository.save(new AccessDeniedTestResource());
+		}
+		catch (MethodNotAllowedException e) {
+		}
+
+		try {
+			repository.delete(12);
+		}
+		catch (MethodNotAllowedException e) {
+		}
+
+		try {
+			repository.findAll(new QuerySpec(AccessDeniedTestResource.class));
+		}
+		catch (MethodNotAllowedException e) {
+		}
+	}
+
+	@Test
+	public void checkResourcePartialAccessProperties() {
+		ResourceInformation resourceInformation = resourceInformationProvider.build(AccessPartialDeniedTestResource.class);
+		Assert.assertTrue(resourceInformation.getAccess().isPostable());
+		Assert.assertTrue(resourceInformation.getAccess().isReadable());
+		Assert.assertFalse(resourceInformation.getAccess().isPatchable());
+		Assert.assertFalse(resourceInformation.getAccess().isDeletable());
+		Assert.assertTrue(resourceInformation.getAccess().isFilterable());
+		Assert.assertFalse(resourceInformation.getAccess().isSortable());
+		for (ResourceField field : resourceInformation.getFields()) {
+			Assert.assertTrue(field.getAccess().isPostable());
+			Assert.assertTrue(field.getAccess().isReadable());
+			Assert.assertFalse(field.getAccess().isPatchable());
+			Assert.assertFalse(field.getAccess().isDeletable());
+			Assert.assertTrue(field.getAccess().isFilterable());
+			Assert.assertFalse(field.getAccess().isSortable());
+		}
+
+		SimpleModule module = new SimpleModule("test");
+		module.addRepository(new InMemoryResourceRepository<>(AccessPartialDeniedTestResource.class));
+
+		CrnkBoot boot = new CrnkBoot();
+		boot.addModule(module);
+		boot.boot();
+
+		RegistryEntry entry = boot.getResourceRegistry().getEntry(AccessPartialDeniedTestResource.class);
+		ResourceRepository<AccessPartialDeniedTestResource, Object> repository = entry.getResourceRepositoryFacade();
+
+		AccessPartialDeniedTestResource resource = new AccessPartialDeniedTestResource();
+		resource.id = "test";
+		repository.create(resource);
+
+		try {
+			repository.save(new AccessPartialDeniedTestResource());
+		}
+		catch (MethodNotAllowedException e) {
+		}
+
+		try {
+			repository.delete(12);
+		}
+		catch (MethodNotAllowedException e) {
+		}
+
+		repository.findAll(new QuerySpec(AccessPartialDeniedTestResource.class));
+	}
+
+	// tag::access[]
+	@JsonApiResource(type = "tasks",
+			postable = false, readable = false, patchable = false, deletable = false,
+			sortable = false, filterable = false
+	)
+	public static class AccessDeniedTestResource {
+
+		@JsonApiId
+		public String id;
+
+		public String value;
+
+	}
+	// end::access[]
+
+	@JsonApiResource(type = "tasks",
+			postable = true, readable = true, patchable = false, deletable = false,
+			sortable = false, filterable = true
+	)
+	public static class AccessPartialDeniedTestResource {
+
+		@JsonApiId
+		public String id;
+
+		public String value;
+
 	}
 
 	@JsonApiResource(type = "tasks")
@@ -571,7 +706,7 @@ public class DefaultResourceInformationProviderTest {
 		@JsonIgnore
 		private String field;
 
-		@JsonApiToOne
+		@JsonApiRelation
 		private String getField() {
 			return null;
 		}
@@ -611,7 +746,7 @@ public class DefaultResourceInformationProviderTest {
 		}
 	}
 
-	@JsonPropertyOrder({"b", "a", "c"})
+	@JsonPropertyOrder({ "b", "a", "c" })
 	@JsonApiResource(type = "orderedResource")
 	private static class OrderedResource {
 
@@ -673,7 +808,7 @@ public class DefaultResourceInformationProviderTest {
 		@JsonApiId
 		public Long id;
 
-		@JsonApiToOne
+		@JsonApiRelation
 		public String getField() {
 			return null;
 		}
@@ -682,7 +817,7 @@ public class DefaultResourceInformationProviderTest {
 	@JsonApiResource(type = "differentTypesv2")
 	private static class DifferentTypesv2 {
 
-		@JsonApiToOne
+		@JsonApiRelation
 		public Future<String> field;
 
 		@JsonApiId

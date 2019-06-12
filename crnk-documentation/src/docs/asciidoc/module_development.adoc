@@ -10,7 +10,7 @@ a default implementation provided by `SimpleModule`. A module has access to a `M
 that allows to register all kinds of extensions like new `ResourceInformationBuilder`,
 `ResourceLookup`, `Filter`, `ExceptionMapper` and Jackson modules. It also gives access to the
 `ResourceRegistry` holding information about all the repositories registered to crnk.
-The `JpaModule` in `crnk-jpa` provides a good, more advanced example of using the
+The `JpaModule` in `crnk-data-jpa` provides a good, more advanced example of using the
 module API.
 
 
@@ -100,7 +100,7 @@ not mandatory to make use of the Crnk annotations and conventions. Instead, it i
 into Crnk. For this purpose a module can provide custom implementations of
 `ResourceInformationBuilder` and `RepositoryInformationBuilder` trough
 `ModuleContext.addResourceInformationBuilder` and `ModuleContext.addRepositoryInformationBuilder`.
-For example, the JpaModule of  `crnk-jpa` makes use of that to read JPA instead of Crnk annotations.
+For example, the JpaModule of  `crnk-data-jpa` makes use of that to read JPA instead of Crnk annotations.
 Such a module can then register additional (usually dynamic) repositories with
 `ModuleContext.addRepository`.
 

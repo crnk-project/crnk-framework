@@ -86,6 +86,7 @@ public class Resource extends ResourceIdentifier implements MetaContainer, Links
 				&& Objects.equals(id, other.id) && Objects.equals(type, other.type);
 	}
 
+	@Override
 	public ResourceIdentifier toIdentifier() {
 		return new ResourceIdentifier(getId(), getType());
 	}

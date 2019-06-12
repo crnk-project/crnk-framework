@@ -3,6 +3,8 @@ package io.crnk.core.module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.internal.CoreModule;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
+import io.crnk.core.engine.internal.registry.ResourceRegistryImpl;
+import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,7 @@ public class ModuleExtensionTest {
 		optional = false;
 
 		moduleRegistry = new ModuleRegistry();
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(new CoreModule());
 		moduleRegistry.addModule(new JacksonModule(objectMapper, false));
 

@@ -12,7 +12,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.internal.jackson.JacksonModule;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
-import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.spring.app.BasicSpringBootApplication;
 import io.crnk.spring.mvc.SpringMvcModule;

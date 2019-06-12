@@ -21,7 +21,7 @@ dependencies {
 
 	compileOnly 'org.springframework:spring-orm'
 
-	testCompile project(':crnk-jpa')
+	testCompile project(':crnk-data:crnk-data-jpa')
 	testCompile project(':crnk-home')
 	testCompile project(':crnk-ui')
 	testCompile project(':crnk-client')

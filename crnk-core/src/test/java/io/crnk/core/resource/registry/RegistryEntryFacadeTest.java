@@ -9,7 +9,7 @@ import io.crnk.core.mock.repository.UserRepository;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +27,7 @@ public class RegistryEntryFacadeTest {
 
 	private RegistryEntry entry;
 
-	private ResourceRepositoryV2<User, Long> facade;
+	private ResourceRepository<User, Long> facade;
 
 	private User user1;
 

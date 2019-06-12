@@ -5,7 +5,6 @@ import java.util.Objects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.http.HttpStatus;
 
@@ -51,7 +50,7 @@ public class Response {
 		return Objects.equals(document, other.document) && Objects.equals(httpStatus, other.httpStatus);
 	}
 
-	public HttpResponse toHttpResponse(ObjectMapper objectMapper) {
+	public HttpResponse toHttpResponse(ObjectMapper objectMapper, String contentType) {
 		HttpResponse httpResponse = new HttpResponse();
 		httpResponse.setStatusCode(getHttpStatus());
 
@@ -64,7 +63,7 @@ public class Response {
 				throw new IllegalStateException(e);
 			}
 			httpResponse.setBody(responseBody);
-			httpResponse.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE_AND_CHARSET);
+			httpResponse.setContentType(contentType);
 		}
 		return httpResponse;
 	}

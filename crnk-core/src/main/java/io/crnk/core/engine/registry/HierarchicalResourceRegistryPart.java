@@ -105,10 +105,10 @@ public class HierarchicalResourceRegistryPart extends ResourceRegistryPartBase {
 	}
 
 	@Override
-	public Collection<RegistryEntry> getResources() {
+	public Collection<RegistryEntry> getEntries() {
 		List<RegistryEntry> list = new ArrayList<>();
 		for (ResourceRegistryPart part : partList) {
-			list.addAll(part.getResources());
+			list.addAll(part.getEntries());
 		}
 		return list;
 	}

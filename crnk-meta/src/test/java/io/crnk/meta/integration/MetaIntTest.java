@@ -2,7 +2,7 @@ package io.crnk.meta.integration;
 
 import io.crnk.client.internal.proxy.ObjectProxy;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MetaIntTest extends AbstractMetaJerseyTest {
 
-	private ResourceRepositoryV2<MetaElement, Serializable> repository;
+	private ResourceRepository<MetaElement, Serializable> repository;
 
 	@Before
 	@Override
@@ -184,7 +184,7 @@ public class MetaIntTest extends AbstractMetaJerseyTest {
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaElement$List", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaAttribute", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType", querySpec));
-		Assert.assertNotNull(repository.findOne("io.crnk.jpa.metaEmbeddableAttribute.laz", querySpec));
+		Assert.assertNotNull(repository.findOne("io.crnk.data.jpa.metaEmbeddableAttribute.laz", querySpec));
 		Assert.assertNotNull(repository.findOne("io.crnk.meta.metaType$primaryKey", querySpec));
 	}
 }

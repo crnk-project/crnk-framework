@@ -1,6 +1,6 @@
 package io.crnk.spring.boot;
 
-import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.data.jpa.JpaModuleConfig;
 
 public interface JpaModuleConfigurer {
 

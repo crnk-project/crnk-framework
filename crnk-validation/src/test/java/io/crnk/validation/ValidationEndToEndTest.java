@@ -1,6 +1,6 @@
 package io.crnk.validation;
 
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.validation.internal.ConstraintViolationImpl;
 import io.crnk.validation.mock.ComplexValidator;
 import io.crnk.validation.mock.models.Project;
@@ -235,7 +235,7 @@ public class ValidationEndToEndTest extends AbstractValidationTest {
 	@Test
 	public void testPropertyOnRelationId() {
 
-		ResourceRepositoryV2<Schedule, Serializable> scheduleRepo = client.getRepositoryForType(Schedule.class);
+		ResourceRepository<Schedule, Serializable> scheduleRepo = client.getRepositoryForType(Schedule.class);
 
 		Project project = new Project();
 		project.setId(2L);

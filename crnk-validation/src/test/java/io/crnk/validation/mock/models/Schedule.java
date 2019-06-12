@@ -1,13 +1,13 @@
 package io.crnk.validation.mock.models;
 
+import javax.validation.constraints.NotNull;
+
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.validation.mock.ComplexValid;
-
-import javax.validation.constraints.NotNull;
 
 @JsonApiResource(type = "schedules")
 @ComplexValid
@@ -23,8 +23,7 @@ public class Schedule {
 	@JsonApiRelationId
 	private Long projectId;
 
-	@JsonApiToOne
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER)
 	private Project project;
 
 	public Long getId() {

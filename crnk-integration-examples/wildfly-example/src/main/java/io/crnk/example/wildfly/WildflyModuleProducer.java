@@ -4,8 +4,8 @@ import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.example.wildfly.endpoints.ScheduleRepository;
 import io.crnk.example.wildfly.endpoints.UserRepository;
 import io.crnk.home.HomeModule;
-import io.crnk.jpa.JpaModule;
-import io.crnk.jpa.JpaModuleConfig;
+import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;

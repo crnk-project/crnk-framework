@@ -244,6 +244,15 @@ public class QuerySpec {
 		return Optional.empty();
 	}
 
+	public Optional<FilterSpec> findFilter(final PathSpec pathSpec, FilterOperator operator) {
+		for (FilterSpec filterSpec : filters) {
+			if (filterSpec.getPath().equals(pathSpec) && operator.equals(filterSpec.getOperator())) {
+				return Optional.of(filterSpec);
+			}
+		}
+		return Optional.empty();
+	}
+
 	/**
 	 * @deprecated use {@link #findFilter(PathSpec)}
 	 */

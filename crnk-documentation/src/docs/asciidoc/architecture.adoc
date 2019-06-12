@@ -34,7 +34,7 @@ relationship request.
 A benefit of Crnk is its flexibility how to set all this up:
 
 - Resources and relationships can be defined with simple Java Beans and annotations or programmatically. The later allows
-  virtually any kind of customization at runtime, like setting up repositories dynamically. One example is `crnk-jpa`
+  virtually any kind of customization at runtime, like setting up repositories dynamically. One example is `crnk-data-jpa`
   that is able to expose any JPA entity as JSON:API resource.
 - Resources and relationships can be entirely decoupled concerns. For example, an independent relationship repository `C` can
   introduce a relationship between a resource `a` and resource `b` implemented by resource repositories `A` and `B`.
@@ -47,7 +47,7 @@ A benefit of Crnk is its flexibility how to set all this up:
 To facilitate the setup, Crnk comes with a small module API. Independent functionality can be assembled as module and then just
 included into the application. Crnk comes with a number of modules on its own:
 
-- `crnk-jpa`
+- `crnk-data-jpa`
 - `crnk-validation`
 - `crnk-operations`
 - various Spring modules

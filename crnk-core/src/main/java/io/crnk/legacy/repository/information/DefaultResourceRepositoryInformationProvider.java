@@ -9,10 +9,10 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.information.repository.ResourceRepositoryInformationImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.UntypedResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiExposed;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 import net.jodah.typetools.TypeResolver;
 
 import java.util.HashMap;
@@ -30,8 +30,8 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 	@Override
 	public boolean accept(Class<?> repositoryClass) {
-		boolean legacyRepo = ResourceRepository.class.isAssignableFrom(repositoryClass);
-		boolean interfaceRepo = ResourceRepositoryV2.class.isAssignableFrom(repositoryClass);
+		boolean legacyRepo = LegacyResourceRepository.class.isAssignableFrom(repositoryClass);
+		boolean interfaceRepo = ResourceRepository.class.isAssignableFrom(repositoryClass);
 		boolean untypedRepo = UntypedResourceRepository.class.isAssignableFrom(repositoryClass);
 		return (legacyRepo || interfaceRepo) && !untypedRepo;
 	}
@@ -63,7 +63,6 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 				getAccess(repository), exposed);
 	}
 
-	// FIXME
 	protected RepositoryMethodAccess getAccess(Object repository) {
 		return new RepositoryMethodAccess(true, true, true, true);
 	}
@@ -83,21 +82,21 @@ public class DefaultResourceRepositoryInformationProvider implements RepositoryI
 
 
 	protected Class<?> getResourceClass(Object repository, Class<?> repositoryClass) {
-		if (repository instanceof ResourceRepository) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repository.getClass());
+		if (repository instanceof LegacyResourceRepository) {
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyResourceRepository.class, repository.getClass());
 			return typeArgs[0];
 		} else if (repository != null) {
-			ResourceRepositoryV2<?, ?> querySpecRepo = (ResourceRepositoryV2<?, ?>) repository;
+			ResourceRepository<?, ?> querySpecRepo = (ResourceRepository<?, ?>) repository;
 			Class<?> resourceClass = querySpecRepo.getResourceClass();
 			PreconditionUtil.verify(resourceClass != null, "().getResourceClass() must not return null", querySpecRepo);
 			return resourceClass;
+		} else if (LegacyResourceRepository.class.isAssignableFrom(repositoryClass)) {
+			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(LegacyResourceRepository.class, repositoryClass);
+			return typeArgs[0];
 		} else if (ResourceRepository.class.isAssignableFrom(repositoryClass)) {
 			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepository.class, repositoryClass);
 			return typeArgs[0];
-		} else if (ResourceRepositoryV2.class.isAssignableFrom(repositoryClass)) {
-			Class<?>[] typeArgs = TypeResolver.resolveRawArguments(ResourceRepositoryV2.class, repositoryClass);
-			return typeArgs[0];
 		}
-		throw new IllegalStateException("failed to get resource class from " + repositoryClass + ", does it implement ResourceRepositoryV2?");
+		throw new IllegalStateException("failed to get resource class from " + repositoryClass + ", does it implement ResourceRepository?");
 	}
 }

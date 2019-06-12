@@ -4,10 +4,11 @@ import io.crnk.core.engine.information.repository.RelationshipRepositoryInformat
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.module.ModuleRegistry;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
-import io.crnk.legacy.repository.RelationshipRepository;
-import io.crnk.legacy.repository.ResourceRepository;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
+import io.crnk.legacy.repository.LegacyRelationshipRepository;
+import io.crnk.legacy.repository.LegacyResourceRepository;
 
 import java.util.Objects;
 
@@ -22,8 +23,9 @@ public class DefaultRepositoryAdapterFactory implements RepositoryAdapterFactory
 	@Override
 	public boolean accepts(Object repository) {
 		Objects.requireNonNull(repository);
-		return repository instanceof ResourceRepository || repository instanceof ResourceRepositoryV2
-				|| repository instanceof RelationshipRepository || repository instanceof RelationshipRepositoryV2;
+		return repository instanceof LegacyResourceRepository || repository instanceof ResourceRepository
+				|| repository instanceof LegacyRelationshipRepository || repository instanceof ManyRelationshipRepository
+				|| repository instanceof OneRelationshipRepository;
 	}
 
 	@Override

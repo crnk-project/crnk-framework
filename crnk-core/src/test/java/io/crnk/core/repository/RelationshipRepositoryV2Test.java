@@ -8,11 +8,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 public class RelationshipRepositoryV2Test {
 
 
-	private RelationshipRepositoryV2 untypedRepo = new UntypedRelationshipRepository() {
+	private RelationshipRepository untypedRepo = new UntypedRelationshipRepository() {
 
 		@Override
 		public Class getSourceResourceClass() {
@@ -25,32 +26,32 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
@@ -65,7 +66,7 @@ public class RelationshipRepositoryV2Test {
 		}
 	};
 
-	private RelationshipRepositoryV2 nullRepo = new RelationshipRepositoryV2() {
+	private RelationshipRepository nullRepo = new RelationshipRepository() {
 
 		@Override
 		public Class getSourceResourceClass() {
@@ -78,32 +79,32 @@ public class RelationshipRepositoryV2Test {
 		}
 
 		@Override
-		public void setRelation(Object source, Serializable targetId, String fieldName) {
+		public void setRelation(Object source, Object targetId, String fieldName) {
 
 		}
 
 		@Override
-		public void setRelations(Object source, Iterable targetIds, String fieldName) {
+		public void setRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void addRelations(Object source, Iterable targetIds, String fieldName) {
+		public void addRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public void removeRelations(Object source, Iterable targetIds, String fieldName) {
+		public void removeRelations(Object source, Collection targetIds, String fieldName) {
 
 		}
 
 		@Override
-		public Object findOneTarget(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public Object findOneTarget(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 
 		@Override
-		public ResourceList findManyTargets(Serializable sourceId, String fieldName, QuerySpec querySpec) {
+		public ResourceList findManyTargets(Object sourceId, String fieldName, QuerySpec querySpec) {
 			return null;
 		}
 	};

@@ -1,25 +1,27 @@
 package io.crnk.core.module;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-class TestRelationshipRepository implements RelationshipRepositoryV2<TestResource, Integer, TestResource, Integer> {
+import java.util.Collection;
+
+class TestRelationshipRepository implements RelationshipRepository<TestResource, Integer, TestResource, Integer> {
 
 	@Override
 	public void setRelation(TestResource source, Integer targetId, String fieldName) {
 	}
 
 	@Override
-	public void setRelations(TestResource source, Iterable<Integer> targetIds, String fieldName) {
+	public void setRelations(TestResource source, Collection<Integer> targetIds, String fieldName) {
 	}
 
 	@Override
-	public void addRelations(TestResource source, Iterable<Integer> targetIds, String fieldName) {
+	public void addRelations(TestResource source, Collection<Integer> targetIds, String fieldName) {
 	}
 
 	@Override
-	public void removeRelations(TestResource source, Iterable<Integer> targetIds, String fieldName) {
+	public void removeRelations(TestResource source, Collection<Integer> targetIds, String fieldName) {
 	}
 
 	@Override

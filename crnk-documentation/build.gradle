@@ -12,6 +12,7 @@ asciidoctor {
 }
 
 tasks.assemble.dependsOn 'asciidoctor'
+tasks.assemble.dependsOn ':crnk-integration-examples:spring-boot-example:assemble'
 
 apply plugin: 'org.ajoberstar.git-publish'
 // see https://github.com/ajoberstar/gradle-git-publish

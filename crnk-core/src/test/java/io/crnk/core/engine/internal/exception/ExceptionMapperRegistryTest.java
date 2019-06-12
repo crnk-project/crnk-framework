@@ -3,7 +3,6 @@ package io.crnk.core.engine.internal.exception;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.http.HttpStatus;
 import org.junit.Test;
 
@@ -47,20 +46,20 @@ public class ExceptionMapperRegistryTest {
 
 	@Test
 	public void shouldNotFindMapperIfSuperClassIsNotMappedFromException() {
-		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(RuntimeException.class);
+		Optional<ExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(RuntimeException.class);
 		assertThat(mapper.isPresent()).isFalse();
 	}
 
 	@Test
 	public void shouldFindDirectExceptionMapperFromException() {
-		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(IllegalStateException.class);
+		Optional<ExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(IllegalStateException.class);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 	}
 
 	@Test
 	public void shouldFindDescendantExceptionMapperFromException() {
-		Optional<JsonApiExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(ClosedFileSystemException.class);
+		Optional<ExceptionMapper> mapper = exceptionMapperRegistry.findMapperFor(ClosedFileSystemException.class);
 		assertThat(mapper.isPresent()).isTrue();
 		assertThat(mapper.get()).isExactlyInstanceOf(IllegalStateExceptionMapper.class);
 	}

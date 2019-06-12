@@ -1,16 +1,17 @@
 package io.crnk.security.model;
 
+import java.util.List;
+import javax.validation.constraints.NotNull;
+
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @JsonApiResource(type = "tasks")
 public class Task {
@@ -21,8 +22,7 @@ public class Task {
 	@NotNull
 	private String name;
 
-	@JsonApiToOne(opposite = "tasks")
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(opposite = "tasks", serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
 	@JsonApiMetaInformation

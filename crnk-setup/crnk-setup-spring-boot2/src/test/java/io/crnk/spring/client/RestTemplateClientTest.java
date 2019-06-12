@@ -5,8 +5,8 @@ import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.spring.app.BasicSpringBoot2Application;
 import io.crnk.test.mock.TestModule;
 import io.crnk.test.mock.models.Project;
@@ -50,17 +50,17 @@ public class RestTemplateClientTest {
 	private CrnkClient client;
 
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected ResourceRepositoryV2<Schedule, Long> scheduleRepo;
+	protected ResourceRepository<Schedule, Long> scheduleRepo;
 
-	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+	protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
-	protected RelationshipRepositoryV2<Schedule, Long, Task, Long> scheduleTaskRepo;
+	protected RelationshipRepository<Schedule, Long, Task, Long> scheduleTaskRepo;
 
-	protected RelationshipRepositoryV2<Task, Long, Schedule, Long> taskScheduleRepo;
+	protected RelationshipRepository<Task, Long, Schedule, Long> taskScheduleRepo;
 
 	@Before
 	public void setupClient() {

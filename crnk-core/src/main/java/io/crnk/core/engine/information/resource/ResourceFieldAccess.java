@@ -86,6 +86,7 @@ public class ResourceFieldAccess {
         boolean readable = isReadable() && other.isReadable();
         boolean postable = isPostable() && other.isPostable();
         boolean patchable = isPatchable() && other.isPatchable();
+        boolean deletable = isDeletable() && other.isDeletable();
         boolean sortable = isSortable() && other.isSortable();
         boolean filterable = isFilterable() && other.isFilterable();
         return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);

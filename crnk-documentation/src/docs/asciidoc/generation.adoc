@@ -2,8 +2,41 @@ anchor:generation[]
 
 # Generation
 
-Crnk allows the generation of Typescript stubs for type-safe, client-side web development. Contributions for other
-languages like iOS would be very welcomed.
+Crnk allows the generation of:
+
+- Typescript stubs for type-safe, client-side web development.
+- Type-safe `QuerySpec` and `PathSpec` types.
+
+Contributions for other languages like iOS would be very welcomed.
+
+anchor:generation_java[]
+
+## Java Annotation Processor
+
+WARNING: This annotation processor is still experimental. Feedback welcomed.
+
+`crnk-gen-java` provides an annotation processor to generate a type-safe API for the construction of `QuerySpec`
+and `PathSpec` objects. The annotation processor is setup like any other annotation processor.
+In Gradle it looks like:
+
+[source]
+----
+dependencies{
+  annotationProcessor 'io.crnk:crnk-gen-java'
+  ...
+}
+----
+
+One may also has enable annotation processors in the IDE (most notable in IntelliJ IDEA). One can then make use of it like:
+
+[source,Java]
+----
+include::../../../../crnk-gen/crnk-gen-java/src/test/resources/TypedQuerySpecTest.java[]
+----
+
+More improvements to the generates types are thinkable in the future, such as limiting
+the set of fields depending on the use case (inclusions, field sets, sorting, filtering) depending on the
+capability of that particular field. Contributions welcomed.
 
 ## Typescript
 
@@ -14,109 +47,65 @@ The Typescript generator allows the generation of:
 - interfaces for links information.
 - interfaces for meta information.
 - methods to create empty object instances.
-- QueryDSL-like expression classes (see <expressions>)
 
-Currently the generator targets the http://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api] library.
+It can generate either plain Typescript interfaces or
+target http://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api].
 Support for other libraries/formats would be straightforward to add, contributions welcomed. A generated resource looks
-like:
+like in <<format_plain,plain-text format>>:
 
 [source]
 ----
-include::../../../../crnk-gen-typescript/src/test/resources/expected_schedule_without_expressions.ts[]
+include::../../../../crnk-gen/crnk-gen-typescript/src/test/resources/expected_schedule_plain_json.ts[]
+----
+
+and for http://github.com/abdulhaq-e/ngrx-json-api[ngrx-json-api]:
+
+[source]
+----
+include::../../../../crnk-gen/crnk-gen-typescript/src/test/resources/expected_schedule_without_expressions.ts[]
 ----
 
 For an example have a look at the Crnk example application, see https://github.com/crnk-project/crnk-example[crnk-project/crnk-example].
 
-
-### Setup
-
-Internally the generator supports multiple ways of looking up the set of available resources and repositories
-to generate.
-The simplest way is by scanning the classpath for @JsonApiResource-annotated classes. More elaborate setups
-can also launch an application (e.g. with Spring or CDI) and extract the information from the running application.
-While the former is simpler to setup, the later can deal with all border cases like a repository being backed
-by something different than a @JsonApiResource-annotated class.
-
-The configuration looks like:
-
+There is a Gradle plugin to run Typescript (and other) generation. The setup looks like:
 
 [source]
 ----
 buildscript {
 	dependencies {
-		classpath "io.crnk:crnk-gen-typescript:${version}"
-		classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
+		classpath "io.crnk:crnk-gen-gradle:${version}"
 	}
 }
 
-node {
-	version = '6.9.1'
-	download = true
+apply plugin: 'crnk-gen'
+crnkGen {
+    runtime {
+        configuration = 'typescriptGenRuntime'
+    }
+
+    // fork generation into new process to have clean environment
+    forked = true
+
+    // specify the package to look for resources
+    resourcePackages = ['io.crnk.test']
+
+    typescript {
+        // enable Typescript generation within Gradle plugin
+        enabled = true
+
+        // specify output format
+        format = 'PLAINJSON' // or 'JSONAPI'
+
+        // specify location of generated sources
+        genDir = file('src/resources')
+    }
 }
-
-apply plugin: 'crnk-gen-typescript'
-
-configurations {
-	typescriptGenRuntime
-}
-
-dependencies {
-	typescriptGenRuntime project(':project-to-generate-from')
-}
-
-typescriptGen{
-
-    // scan for resources on the classpath
-    resourcePackages = ['io.crnk.example']
-
-    // launch a Spring application to extract information about available resources
-	// runtime {
-	//	configuration = 'typescriptGenRuntime'
-    //    spring {
-    //    	profile = 'test'
-    //    	configuration = 'io.crnk.example.ExampleApplication'
-    //    	initializerMethod = 'someInitMethod' // optional
-    //    	defaultProperties['someKey'] = 'someValue'
-    //    }
-	// }
-
-	// format to generate
-	format = 'JSONAPI' // or 'PLAINJSON'
-
-	npm {
-		// map given Java package to a subdirectory of genDir
-		directoryMapping['io.myapp.types'] = '/types'
-
-		// map a given package to a third-party library
-		packageMapping['io.other.app'] = '@other/app'
-	}
-
-	// include/exclude elements from generation
-	includes = ['resources.task']
-	excludes = ['resources.project']
-
-	// fork generation into new process to have clean environment
-	forked = true
-
-	// generate QueryDSL-like expression objects
-	generateExpressions = true
-
-	// specify location of generated sources
-	genDir = ...
-
-}
-typescriptGen.init()
+crnkGen.init()
 ----
 
-An example is given in https://github.com/crnk-project/crnk-example/blob/master/crnk-example-frontend/build.gradle[crnk-example].
+Applying `crnk-gen` results in a new `generateTypescript` task to perform the generation.
 
-Applying `crnk-gen-typescript` results in a new `generateTypescript` task. Consumers may want to add
-that task to `assemble` as dependency. The sources are then generated to `genDir` as specified.
-
-`resourcePackages` specifies the package to scan for resources. Alternatively and commented out, it is shown
-how to launch a Spring application to extract the resource information. Typically by running the application
-with a test profile. CDI works equally well if Weld is found on the classpath (such as with Deltaspike).
-
+////
 The plugin strives for the generated sources to closely resemble the REST layer.
 As a consequence it makes use of the resource types and json names rather than Java names for the generated sources.
 Important to know is that each type is assigned a meta id: for resources it is `resources.<resourceType>` and
@@ -127,23 +116,119 @@ the generation:
 - `directoryMapping` allows to specify into which (sub)directory types are generated into. By default
    will be generated into the root directory.
 - `packageMapping` allows to specify that a given type is obtained from a third-party library.
-
-The plugin allows various further customization options:
-
-- `generateExpressions` specifies whether QueryDSL like classes should be generated (`false` as default).
-- by default the generation takes place in a forked process. Since the generator typically
-  runs the application and that may not properly cleanup, it is recommended to let the
-  generator fork a new process to avoid resource leakage in Gradle daemons and
-  have more stable builds.
+////
 
 
-### Error Handling
+## Gradle customizations
 
-Since the Typescript generator internally launches the application to extract information about its resources, the
-generator is in need of a consistent application/Crnk setup. For example, every resource must have a match
-repository serving it. Otherwise
-inconsistencies can arise that will break the generation. This means if the generation fails, it is usually
-best to verify the the application itself is working properly.
+Internally the Crnk Gradle plugin supports multiple ways of looking up the set of available resources and repositories
+to generate.
+The simplest way is by scanning the classpath for @JsonApiResource-annotated classes. More elaborate setups
+can also launch an application (e.g. with Spring or CDI) and extract the information from the running application.
+While the former is simpler to setup, the later can deal with all border cases like a repository being backed
+by something different than a @JsonApiResource-annotated class. For Spring this looks like:
 
-To track errors further down, a log file is written to `build/tmp/crnk.gen.typescript.log`. It runs with
-`io.crnk` on level `DEBUG` to output a large number of information.
+[source]
+----
+crnkGen{
+
+    // launch a Spring application to extract information about available resources
+	runtime {
+		configuration = 'typescriptGenRuntime'
+        spring {
+        	profile = 'test'
+        	configuration = 'io.crnk.example.ExampleApplication'
+        	initializerMethod = 'someInitMethod' // optional
+        	defaultProperties['someKey'] = 'someValue'
+        }
+	}
+
+	...
+}
+crnkGen.init()
+----
+
+Typically a test profile is used to bring the Spring application up in order to then extract the repositories for generation.
+
+
+
+
+
+
+## Documentation with AsciiDoc
+
+WARNING: This is still experimental. Feedback welcomed.
+
+Documentation of REST APIs has a long history of various tooling. Swagger/OpenAPI there is the classical choice,
+but comes with a variety of disadvantages:
+
+- Mechanisms used to extract information from an implementation often fail understand the full scope of it.
+- Annotations for descriptions lead to a large amount of boiler-plate.
+- Swagger UI is delivered as webapp and hard to enrich with custom information.
+
+This triggered, for example, the development of https://github.com/Swagger2Markup/swagger2markup[swagger2markup] to
+make is of AsciiDoc as output target. This in turn lets developers manually written and generated
+documentation and publish it as HTML and PDF in a potentially versioned manner.
+
+Further progress iad made by https://docs.spring.io/spring-restdocs/docs/1.2.6.RELEASE/reference/html5/[spring-restdocs].
+Instead of attempting to write a specification, request and responses are captured from unit tests and
+enriched with documentation to then save as AsciiDoc.  This ensures 100% accurate documentation at all time since.
+
+JSON:API enables developers to take a further leap. Since it provides a well-defined standard for many aspects
+of a REST endpoint, such as parameter handling, status codes and linking, it greatly simplifies the documentation task.
+Many things are covered by the standard and the documentation can focus on the essential aspects of the
+application. This in turn is realized by the AsciiDoc module of the Crnk generator.
+
+The setup looks like:
+
+[source]
+----
+crnkGen{
+    runtime {
+        configuration = 'typescriptGenRuntime'
+    }
+
+    // specify the package to look for resources
+    resourcePackages = ['io.crnk.test']
+
+    asciidoc {
+        // enable Typescript generation within Gradle plugin
+        enabled = true
+
+        // title of generated document
+        title = "Api Documentation"
+
+        // specify location of generated sources
+        genDir = file('build/generated/source/asciidoc')
+    }
+}
+crnkGen.init()
+----
+
+This results in a `generateAsciidoc` task to perform the generation.  The output directory then
+contains a collection of files that can either be included individually or together with the main `index.adoc`.
+
+Descriptions for resources and fields are extracted from JavaDoc.
+
+The generated documentation can be enriched with request/response examples from unit tests. An example looks like:
+
+[source]
+----
+include::../../../../crnk-gen/crnk-gen-asciidoc/src/test/java/io/crnk/gen/asciidoc/AsciiDocCaptureTest.java[]
+----
+
+The example sets up a Crnk client and server. They are directly connected through `InMemoryHttpAdapter` to
+by-pass the HTTP layer and forgo the setup of a web server. The `AsciidocCaptureModule` is add to the
+client to do the capturing. To then capture a request:
+
+[source]
+----
+asciidoc.capture("Create new Task").call(() -> repository.create(newTask));
+----
+
+If the output is matched with Crnk generator plugin, then the captured test cases will be picked up automatically.
+A full setup is available in the main https://github.com/crnk-project/crnk-example[crnk-example] application.
+
+
+
+

@@ -1,9 +1,9 @@
 package io.crnk.core.mock.models;
 
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToOne;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
 @JsonApiResource(type = "task-with-lookup")
 public class TaskWithLookup {
@@ -11,20 +11,16 @@ public class TaskWithLookup {
 	@JsonApiId
 	private String id;
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project projectNull;
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically(overwrite = true)
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private Project projectOverridden;
 
-	@JsonApiToOne
-	@JsonApiLookupIncludeAutomatically(overwrite = true)
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)
 	private Project projectOverriddenNull;
 
 	public String getId() {

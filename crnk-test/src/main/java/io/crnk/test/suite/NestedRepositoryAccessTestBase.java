@@ -2,12 +2,13 @@ package io.crnk.test.suite;
 
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
-import io.crnk.test.mock.models.nested.ManyNestedResource;
-import io.crnk.test.mock.models.nested.NestedId;
+import io.crnk.test.mock.models.nested.PostComment;
+import io.crnk.test.mock.models.nested.PostCommentId;
 import io.crnk.test.mock.models.nested.NestedRelatedResource;
-import io.crnk.test.mock.models.nested.ParentResource;
+import io.crnk.test.mock.models.nested.PostHeader;
+import io.crnk.test.mock.models.nested.Post;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,25 +18,28 @@ public abstract class NestedRepositoryAccessTestBase {
 
 	protected TestContainer testContainer;
 
-	protected ResourceRepositoryV2<ParentResource, String> parentRepo;
+	protected ResourceRepository<Post, String> parentRepo;
 
-	protected ResourceRepositoryV2<ManyNestedResource, NestedId> nestedRepo;
+	protected ResourceRepository<PostComment, PostCommentId> manyNestedRepo;
 
-	protected ResourceRepositoryV2<NestedRelatedResource, String> relatedRepo;
+	protected ResourceRepository<PostHeader, String> oneNestedRepo;
+
+	protected ResourceRepository<NestedRelatedResource, String> relatedRepo;
 
 	@Before
 	public void setup() {
 		testContainer.start();
 
-		parentRepo = testContainer.getRepositoryForType(ParentResource.class);
-		nestedRepo = testContainer.getRepositoryForType(ManyNestedResource.class);
+		parentRepo = testContainer.getRepositoryForType(Post.class);
+		manyNestedRepo = testContainer.getRepositoryForType(PostComment.class);
+		oneNestedRepo = testContainer.getRepositoryForType(PostHeader.class);
 		relatedRepo = testContainer.getRepositoryForType(NestedRelatedResource.class);
 
 		NestedRelatedResource relatedResource = new NestedRelatedResource();
 		relatedResource.setId("related");
 		relatedRepo.create(relatedResource);
 
-		ParentResource parentResource = new ParentResource();
+		Post parentResource = new Post();
 		parentResource.setId("a");
 		parentRepo.create(parentResource);
 	}
@@ -47,38 +51,75 @@ public abstract class NestedRepositoryAccessTestBase {
 
 
 	@Test
-	public void test() {
-		NestedId id = new NestedId("a", "b");
+	public void testMany() {
+		PostCommentId id = new PostCommentId("a", "b");
 
 		// perform create
-		ManyNestedResource resource = new ManyNestedResource();
+		PostComment resource = new PostComment();
 		resource.setId(id);
 		resource.setValue("nested");
-		resource = nestedRepo.create(resource);
+		resource = manyNestedRepo.create(resource);
 		Assert.assertEquals(id, resource.getId());
 		String selfUrl = resource.getLinks().getSelf();
-		Assert.assertTrue(selfUrl, selfUrl.contains("a/manyNested/b"));
+		Assert.assertTrue(selfUrl, selfUrl.contains("a/comments/b"));
 		Assert.assertEquals("nested", resource.getValue());
 
 		// perform update
 		resource.setValue("updated");
-		resource = nestedRepo.save(resource);
+		resource = manyNestedRepo.save(resource);
 		Assert.assertEquals("updated", resource.getValue());
 		selfUrl = resource.getLinks().getSelf();
-		Assert.assertTrue(selfUrl, selfUrl.contains("a/manyNested/b"));
+		Assert.assertTrue(selfUrl, selfUrl.contains("a/comments/b"));
 
 		// perform find over all nested resources
-		ResourceList<ManyNestedResource> list = nestedRepo.findAll(new QuerySpec(ManyNestedResource.class));
+		ResourceList<PostComment> list = manyNestedRepo.findAll(new QuerySpec(PostComment.class));
 		Assert.assertEquals(1, list.size());
 		resource = list.get(0);
 		Assert.assertEquals("updated", resource.getValue());
 
 		// perform delete
-		nestedRepo.delete(id);
+		manyNestedRepo.delete(id);
 		try {
-			nestedRepo.findOne(id, new QuerySpec(ManyNestedResource.class));
+			manyNestedRepo.findOne(id, new QuerySpec(PostComment.class));
 			Assert.fail("should no longer be available");
-		} catch (ResourceNotFoundException e) {
+		}
+		catch (ResourceNotFoundException e) {
+			// ok
+		}
+	}
+
+	@Test
+	public void testOne() {
+		// perform create
+		PostHeader resource = new PostHeader();
+		resource.setPostId("a");
+		resource.setValue("nested");
+		resource = oneNestedRepo.create(resource);
+		Assert.assertEquals("a", resource.getPostId());
+		String selfUrl = resource.getLinks().getSelf();
+		Assert.assertTrue(selfUrl, selfUrl.contains("a/header"));
+		Assert.assertEquals("nested", resource.getValue());
+
+		// perform update
+		resource.setValue("updated");
+		resource = oneNestedRepo.save(resource);
+		Assert.assertEquals("updated", resource.getValue());
+		selfUrl = resource.getLinks().getSelf();
+		Assert.assertTrue(selfUrl, selfUrl.contains("a/header"));
+
+		// perform find over all nested resources
+		ResourceList<PostHeader> list = oneNestedRepo.findAll(new QuerySpec(PostHeader.class));
+		Assert.assertEquals(1, list.size());
+		resource = list.get(0);
+		Assert.assertEquals("updated", resource.getValue());
+
+		// perform delete
+		oneNestedRepo.delete("a");
+		try {
+			oneNestedRepo.findOne("a", new QuerySpec(PostHeader.class));
+			Assert.fail("should no longer be available");
+		}
+		catch (ResourceNotFoundException e) {
 			// ok
 		}
 	}

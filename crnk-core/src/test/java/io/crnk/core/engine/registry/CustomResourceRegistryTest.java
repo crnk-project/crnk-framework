@@ -49,7 +49,7 @@ public class CustomResourceRegistryTest {
 		public void setupModule(ModuleContext context) {
 			RegistryEntryBuilder builder = context.newRegistryEntryBuilder();
 			builder.resourceRepository().instance(new DynamicResourceRepository());
-			InformationBuilder.Resource resource = builder.resource();
+			InformationBuilder.ResourceInformationBuilder resource = builder.resource();
 
 			resource.resourceType("somePrefix/custom");
 			resource.resourceClass(Resource.class);

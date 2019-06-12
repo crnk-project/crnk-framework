@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.Set;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -17,8 +19,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
 
-import java.util.Set;
-
 public class ResourcePostController extends ResourceUpsert {
 
 	@Override
@@ -28,12 +28,14 @@ public class ResourcePostController extends ResourceUpsert {
 
 	@Override
 	public boolean isAcceptable(JsonPath jsonPath, String method) {
-		return jsonPath.isCollection() && jsonPath instanceof ResourcePath && HttpMethod.POST.name().equals(method);
+		// singular nested resources can also be POSTed, sole exception next to typical collections
+		boolean nestedOne = jsonPath.getParentField() != null && !jsonPath.getParentField().isCollection();
+
+		return (jsonPath.isCollection() || nestedOne) && jsonPath instanceof ResourcePath && HttpMethod.POST.name().equals(method);
 	}
 
 	@Override
 	public Result<Response> handleAsync(JsonPath jsonPath, QueryAdapter queryAdapter, Document requestDocument) {
-
 		RegistryEntry endpointRegistryEntry = jsonPath.getRootEntry();
 		Resource requestResource = getRequestBody(requestDocument, jsonPath, HttpMethod.POST);
 		RegistryEntry registryEntry = getRegistryEntry(requestResource.getType());
@@ -49,7 +51,8 @@ public class ResourcePostController extends ResourceUpsert {
 		Result<JsonApiResponse> response;
 		if (Resource.class.equals(resourceInformation.getImplementationClass())) {
 			response = resourceRepository.create(requestResource, queryAdapter);
-		} else {
+		}
+		else {
 			Object entity = newEntity(resourceInformation, requestResource);
 			setId(requestResource, entity, resourceInformation);
 			setAttributes(requestResource, entity, resourceInformation, queryContext);

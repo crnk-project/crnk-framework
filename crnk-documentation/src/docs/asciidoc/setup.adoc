@@ -162,7 +162,7 @@ up automatically and do not manual registration.
 In many cases Crnk repositories are used along regular JAX-RS services. In such scenarios it can be worthwhile
 if Crnk repositories and JAX-RS services make use of the same exception handling and response format. To make
 use of the JSON:API resp. Crnk exception handling in JAX-RS services, one can add the
-*JsonapiExceptionMapperBridge* to the JAX-RS application. The constructor of `JsonapiExceptionMapperBridge`
+*ExceptionMapperBridge* to the JAX-RS application. The constructor of `ExceptionMapperBridge`
 takes `CrnkFeature` as parameter.
 
 For an example have a look at the next section which make use of it together with `JsonApiResponseFilter`.
@@ -170,7 +170,7 @@ For an example have a look at the next section which make use of it together wit
 
 ### Use JSON:API format with JAX-RS services
 
-Similar to `JsonapiExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
+Similar to `ExceptionMapperBridge` in the previous section, it is possible for JAX-RS services to return
 resources in JSON:API format with *JsonApiResponseFilter*. `JsonApiResponseFilter` wraps primitive
 responses with a `data` object; resource objects with `data` and `included` objects.
 The constructor of `JsonApiResponseFilter` takes `CrnkFeature` as parameter.

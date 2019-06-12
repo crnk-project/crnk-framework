@@ -29,7 +29,7 @@
 -dontoptimize
 
 
--keep class * implements io.crnk.core.engine.error.JsonApiExceptionMapper {
+-keep class * implements io.crnk.core.engine.error.ExceptionMapper {
 	*;
 }
 

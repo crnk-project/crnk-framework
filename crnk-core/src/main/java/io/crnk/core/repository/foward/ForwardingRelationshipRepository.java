@@ -8,7 +8,7 @@ import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.BulkRelationshipRepositoryV2;
+import io.crnk.core.repository.BulkRelationshipRepository;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.repository.foward.strategy.ForwardingGetStrategy;
 import io.crnk.core.repository.foward.strategy.ForwardingSetStrategy;
@@ -18,8 +18,10 @@ import io.crnk.core.repository.foward.strategy.GetFromOwnerStrategy;
 import io.crnk.core.repository.foward.strategy.SetOppositeStrategy;
 import io.crnk.core.repository.foward.strategy.SetOwnerStrategy;
 import io.crnk.core.resource.annotations.JsonApiRelationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Implements a RelationshipRepository for relationships making use of one or both adjacent resource repositories.
@@ -33,129 +35,135 @@ import java.io.Serializable;
  * <p>
  * This class provides the basis to implement {@link io.crnk.core.resource.annotations.RelationshipRepositoryBehavior}.
  */
-public class ForwardingRelationshipRepository<T, I extends Serializable, D, J extends Serializable>
-		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
+public class ForwardingRelationshipRepository<T, I, D, J>
+        implements BulkRelationshipRepository<T, I, D, J>, ResourceRegistryAware, HttpRequestContextAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForwardingRelationshipRepository.class);
+
+    private RelationshipMatcher matcher;
+
+    private ForwardingGetStrategy getStrategy;
+
+    private ForwardingSetStrategy setStrategy;
+
+    private Class<T> sourceClass;
+
+    private String sourceType;
+
+    private ForwardingStrategyContext context;
+
+    private HttpRequestContextProvider requestContextProvider;
+
+    /**
+     * default constructor for CDI an other DI libraries
+     */
+    protected ForwardingRelationshipRepository() {
+    }
+
+    public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingDirection getDirection,
+                                            ForwardingDirection setDirection) {
+        this(sourceClass, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
+    }
 
 
-	private RelationshipMatcher matcher;
+    public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
+            getStrategy,
+                                            ForwardingSetStrategy<T, I, D, J> setStrategy) {
+        this.sourceClass = sourceClass;
+        this.matcher = matcher;
+        this.getStrategy = getStrategy;
+        this.setStrategy = setStrategy;
+    }
 
-	private ForwardingGetStrategy getStrategy;
+    public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingDirection getDirection,
+                                            ForwardingDirection setDirection) {
+        this(sourceType, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
+    }
 
-	private ForwardingSetStrategy setStrategy;
+    private static ForwardingGetStrategy toGetStrategy(ForwardingDirection direction) {
+        return direction == ForwardingDirection.OWNER ? new GetFromOwnerStrategy() : new GetFromOppositeStrategy();
+    }
 
-	private Class<T> sourceClass;
+    private static ForwardingSetStrategy toSetStrategy(ForwardingDirection direction) {
+        return direction == ForwardingDirection.OWNER ? new SetOwnerStrategy() : new SetOppositeStrategy();
+    }
 
-	private String sourceType;
-
-	private ForwardingStrategyContext context;
-
-	private HttpRequestContextProvider requestContextProvider;
-
-	/**
-	 * default constructor for CDI an other DI libraries
-	 */
-	protected ForwardingRelationshipRepository() {
-	}
-
-	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingDirection getDirection,
-											ForwardingDirection setDirection) {
-		this(sourceClass, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
-	}
-
-
-	public ForwardingRelationshipRepository(Class<T> sourceClass, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
-			getStrategy,
-											ForwardingSetStrategy<T, I, D, J> setStrategy) {
-		this.sourceClass = sourceClass;
-		this.matcher = matcher;
-		this.getStrategy = getStrategy;
-		this.setStrategy = setStrategy;
-	}
-
-	public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingDirection getDirection,
-											ForwardingDirection setDirection) {
-		this(sourceType, matcher, toGetStrategy(getDirection), toSetStrategy(setDirection));
-	}
-
-	private static ForwardingGetStrategy toGetStrategy(ForwardingDirection direction) {
-		return direction == ForwardingDirection.OWNER ? new GetFromOwnerStrategy() : new GetFromOppositeStrategy();
-	}
-
-	private static ForwardingSetStrategy toSetStrategy(ForwardingDirection direction) {
-		return direction == ForwardingDirection.OWNER ? new SetOwnerStrategy() : new SetOppositeStrategy();
-	}
-
-	public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
-			getStrategy, ForwardingSetStrategy<T, I, D, J> setStrategy) {
-		this.sourceType = sourceType;
-		this.matcher = matcher;
-		this.getStrategy = getStrategy;
-		this.setStrategy = setStrategy;
-	}
+    public ForwardingRelationshipRepository(String sourceType, RelationshipMatcher matcher, ForwardingGetStrategy<T, I, D, J>
+            getStrategy, ForwardingSetStrategy<T, I, D, J> setStrategy) {
+        this.sourceType = sourceType;
+        this.matcher = matcher;
+        this.getStrategy = getStrategy;
+        this.setStrategy = setStrategy;
+    }
 
 
-	@Override
-	public void setResourceRegistry(ResourceRegistry resourceRegistry) {
-		if (context == null) {
-			// TODO prevent duplicate calls once legacy code is eliminated
-			context = new ForwardingStrategyContext(resourceRegistry, sourceType, sourceClass);
-			getStrategy.init(context);
-			setStrategy.init(context);
-		}
-	}
+    @Override
+    public void setResourceRegistry(ResourceRegistry resourceRegistry) {
+        if (context == null) {
+            // TODO prevent duplicate calls once legacy code is eliminated
+            context = new ForwardingStrategyContext(resourceRegistry, sourceType, sourceClass);
+            getStrategy.init(context);
+            setStrategy.init(context);
+        }
+    }
 
-	@Override
-	public RelationshipMatcher getMatcher() {
-		return matcher;
-	}
+    @Override
+    public RelationshipMatcher getMatcher() {
+        return matcher;
+    }
 
-	@Override
-	public Class<T> getSourceResourceClass() {
-		throw new UnsupportedOperationException("deprecated and no longer supported");
-	}
+    @Override
+    public Class<T> getSourceResourceClass() {
+        throw new UnsupportedOperationException("deprecated and no longer supported");
+    }
 
-	@Override
-	public Class<D> getTargetResourceClass() {
-		throw new UnsupportedOperationException("deprecated and no longer supported");
-	}
+    @Override
+    public Class<D> getTargetResourceClass() {
+        throw new UnsupportedOperationException("deprecated and no longer supported");
+    }
 
-	@Override
-	public void setRelation(T source, J targetId, String fieldName) {
-		QueryContext queryContext = getQueryContext();
-		setStrategy.setRelation(source, targetId, fieldName, queryContext);
-	}
+    @Override
+    public void setRelation(T source, J targetId, String fieldName) {
+        LOGGER.debug("set relation {}={} with {}", fieldName, targetId, setStrategy);
+        QueryContext queryContext = getQueryContext();
+        setStrategy.setRelation(source, targetId, fieldName, queryContext);
+    }
 
-	@Override
-	public void setRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = getQueryContext();
-		setStrategy.setRelations(source, targetIds, fieldName, queryContext);
-	}
+    @Override
+    public void setRelations(T source, Collection<J> targetIds, String fieldName) {
+        LOGGER.debug("set relations {}={} with {}", fieldName, targetIds, setStrategy);
+        QueryContext queryContext = getQueryContext();
+        setStrategy.setRelations(source, targetIds, fieldName, queryContext);
+    }
 
-	@Override
-	public void addRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = getQueryContext();
-		setStrategy.addRelations(source, targetIds, fieldName, queryContext);
-	}
+    @Override
+    public void addRelations(T source, Collection<J> targetIds, String fieldName) {
+        LOGGER.debug("add relations {}={} with {}", fieldName, targetIds, setStrategy);
+        QueryContext queryContext = getQueryContext();
+        setStrategy.addRelations(source, targetIds, fieldName, queryContext);
+    }
 
-	@Override
-	public void removeRelations(T source, Iterable<J> targetIds, String fieldName) {
-		QueryContext queryContext = getQueryContext();
-		setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
-	}
+    @Override
+    public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
+        LOGGER.debug("remove relations {}={} with {}", fieldName, targetIds, setStrategy);
+        QueryContext queryContext = getQueryContext();
+        setStrategy.removeRelations(source, targetIds, fieldName, queryContext);
+    }
 
-	@Override
-	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		QueryContext queryContext = getQueryContext();
-		return getStrategy.findTargets(sourceIds, fieldName, querySpec, queryContext);
-	}
+    @Override
+    public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
+        LOGGER.debug("findTargets {} for {} with {}", fieldName, querySpec, getStrategy);
+        QueryContext queryContext = getQueryContext();
+        return getStrategy.findTargets(sourceIds, fieldName, querySpec, queryContext);
+    }
 
-	protected QueryContext getQueryContext() {
-		HttpRequestContext requestContext = requestContextProvider.getRequestContext();
-		return requestContext != null ? requestContext.getQueryContext() : new QueryContext();
-	}
+    protected QueryContext getQueryContext() {
+        HttpRequestContext requestContext = requestContextProvider.getRequestContext();
+        return requestContext != null ? requestContext.getQueryContext() : new QueryContext();
+    }
 
-	@Override
-	public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
-		this.requestContextProvider = requestContextProvider;
-	}
+    @Override
+    public void setHttpRequestContextProvider(HttpRequestContextProvider requestContextProvider) {
+        this.requestContextProvider = requestContextProvider;
+    }
 }

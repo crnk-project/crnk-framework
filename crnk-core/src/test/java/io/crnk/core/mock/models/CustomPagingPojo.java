@@ -13,7 +13,6 @@ public class CustomPagingPojo {
 
 	private String description;
 
-	@JsonApiToOne
 	@JsonApiRelation(serialize = SerializeType.LAZY)
 	private Task task;
 

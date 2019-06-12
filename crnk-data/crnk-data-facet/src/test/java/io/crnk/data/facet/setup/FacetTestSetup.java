@@ -23,6 +23,7 @@ public class FacetTestSetup {
 		SimpleModule testModule = new SimpleModule("test");
 		projectRepository = new FacetedProjectRepository();
 		testModule.addRepository(projectRepository);
+		testModule.addRepository(new FacetedTaskRepository()); // => not exposed
 
 		boot = new CrnkBoot();
 		boot.addModule(testModule);

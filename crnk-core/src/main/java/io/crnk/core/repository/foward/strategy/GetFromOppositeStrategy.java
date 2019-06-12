@@ -37,12 +37,12 @@ import java.util.Set;
  * the other resource. To fetch all tasks of a project, this strategy will use a filter <i>project.id EQ xy</i> since
  * project is the opposite relationship to tasks.
  */
-public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Serializable>
+public class GetFromOppositeStrategy<T, I , D, J >
         extends ForwardingStrategyBase implements ForwardingGetStrategy<T, I, D, J> {
 
 
     @SuppressWarnings("unchecked")
-    public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec,
+    public MultivaluedMap<I, D> findTargets(Collection<I> sourceIds, String fieldName, QuerySpec querySpec,
                                             QueryContext queryContext) {
         RegistryEntry sourceEntry = context.getSourceEntry();
         ResourceInformation sourceInformation = sourceEntry.getResourceInformation();
@@ -182,7 +182,7 @@ public class GetFromOppositeStrategy<T, I extends Serializable, D, J extends Ser
                         + "on @JsonApiRelationId ");
             }
 
-            for (T potentialSource : (Iterable<T>) property) {
+            for (T potentialSource : (Collection<T>) property) {
                 I sourceId = (I) sourceInformation.getId(potentialSource);
                 if (sourceId == null) {
                     throw new IllegalStateException("id is null for " + potentialSource);

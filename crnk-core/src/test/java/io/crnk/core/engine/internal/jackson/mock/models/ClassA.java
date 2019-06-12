@@ -1,11 +1,12 @@
 package io.crnk.core.engine.internal.jackson.mock.models;
 
-import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
-
 import java.util.Collections;
 import java.util.List;
+
+import io.crnk.core.resource.annotations.JsonApiId;
+import io.crnk.core.resource.annotations.JsonApiRelation;
+import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.annotations.SerializeType;
 
 @JsonApiResource(type = "classAs")
 public class ClassA {
@@ -13,7 +14,7 @@ public class ClassA {
 	@JsonApiId
 	private long id;
 
-	@JsonApiToMany(lazy = false)
+	@JsonApiRelation(serialize = SerializeType.EAGER)
 	private List<ClassB> classBs;
 
 	public ClassA(ClassB classBs) {

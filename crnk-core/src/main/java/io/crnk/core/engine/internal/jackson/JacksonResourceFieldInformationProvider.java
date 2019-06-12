@@ -1,6 +1,14 @@
 package io.crnk.core.engine.internal.jackson;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -15,11 +23,7 @@ import io.crnk.core.engine.internal.information.resource.AnnotatedClassBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotatedFieldBuilder;
 import io.crnk.core.engine.internal.information.resource.AnnotatedMethodBuilder;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Optional;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 
 /**
  * A Jackson-backed implementation of the {@link ResourceFieldInformationProvider} interface.
@@ -36,6 +40,26 @@ public class JacksonResourceFieldInformationProvider extends ResourceFieldInform
 			return Optional.of(ignoreAnnotation.get().value());
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public Optional<JsonIncludeStrategy> getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
+		Optional<JsonInclude> includeAnnotation = attributeDesc.getAnnotation(JsonInclude.class);
+		if (includeAnnotation.isPresent()) {
+			JsonInclude.Include value = includeAnnotation.get().value();
+			JsonIncludeStrategy strategy;
+			if (NON_NULL.equals(value)) {
+				strategy = JsonIncludeStrategy.NOT_NULL;
+			}
+			else if (JsonInclude.Include.NON_EMPTY.equals(value)) {
+				strategy = JsonIncludeStrategy.NON_EMPTY;
+			}
+			else {
+				strategy = JsonIncludeStrategy.DEFAULT;
+			}
+			return Optional.of(strategy);
+		}
+		return Optional.of(JsonIncludeStrategy.DEFAULT);
 	}
 
 	@Override

@@ -4,11 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 import io.crnk.core.resource.annotations.JsonApiId;
-import io.crnk.core.resource.annotations.JsonApiIncludeByDefault;
 import io.crnk.core.resource.annotations.JsonApiLinksInformation;
 import io.crnk.core.resource.annotations.JsonApiMetaInformation;
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
-import io.crnk.core.resource.annotations.JsonApiToMany;
+import io.crnk.core.resource.annotations.LookupIncludeBehavior;
+import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
@@ -20,12 +21,10 @@ public class User {
 
 	private String name;
 
-	@JsonApiToMany(lazy = false)
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<Project> assignedProjects = Collections.emptyList();
 
-	@JsonApiToMany(lazy = false)
-	@JsonApiIncludeByDefault
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private List<Task> assignedTasks = Collections.emptyList();
 
 	@JsonApiMetaInformation

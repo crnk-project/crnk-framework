@@ -9,91 +9,92 @@ import io.crnk.core.resource.list.ResourceList;
 import org.junit.Assert;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class DynamicRelationshipRepository implements UntypedRelationshipRepository<Resource, String, Resource, String> {
 
-	private static Map<String, Resource> RESOURCES = new HashMap<>();
+    private static Map<String, Resource> RESOURCES = new HashMap<>();
 
-	private String resourceType;
+    private String resourceType;
 
-	public DynamicRelationshipRepository(String resourceType) {
-		this.resourceType = resourceType;
-	}
+    public DynamicRelationshipRepository(String resourceType) {
+        this.resourceType = resourceType;
+    }
 
-	public static void clear() {
-		RESOURCES.clear();
-	}
+    public static void clear() {
+        RESOURCES.clear();
+    }
 
-	@Override
-	public String getSourceResourceType() {
-		return resourceType;
-	}
+    @Override
+    public String getSourceResourceType() {
+        return resourceType;
+    }
 
-	@Override
-	public String getTargetResourceType() {
-		return resourceType;
-	}
+    @Override
+    public String getTargetResourceType() {
+        return resourceType;
+    }
 
-	@Override
-	public Class<Resource> getSourceResourceClass() {
-		return Resource.class;
-	}
+    @Override
+    public Class<Resource> getSourceResourceClass() {
+        return Resource.class;
+    }
 
-	@Override
-	public Class<Resource> getTargetResourceClass() {
-		return Resource.class;
-	}
+    @Override
+    public Class<Resource> getTargetResourceClass() {
+        return Resource.class;
+    }
 
-	@Override
-	public void setRelation(Resource source, String targetId, String fieldName) {
-		Assert.assertEquals(targetId, "12");
-	}
+    @Override
+    public void setRelation(Resource source, String targetId, String fieldName) {
+        Assert.assertEquals(targetId, "12");
+    }
 
-	@Override
-	public void setRelations(Resource source, Iterable<String> targetIds, String fieldName) {
-		String targetId = targetIds.iterator().next();
-		Assert.assertEquals(targetId, "12");
-	}
+    @Override
+    public void setRelations(Resource source, Collection<String> targetIds, String fieldName) {
+        String targetId = targetIds.iterator().next();
+        Assert.assertEquals(targetId, "12");
+    }
 
-	@Override
-	public void addRelations(Resource source, Iterable<String> targetIds, String fieldName) {
-		String targetId = targetIds.iterator().next();
-		Assert.assertEquals(targetId, "12");
-	}
+    @Override
+    public void addRelations(Resource source, Collection<String> targetIds, String fieldName) {
+        String targetId = targetIds.iterator().next();
+        Assert.assertEquals(targetId, "12");
+    }
 
-	@Override
-	public void removeRelations(Resource source, Iterable<String> targetIds, String fieldName) {
-		String targetId = targetIds.iterator().next();
-		Assert.assertEquals(targetId, "12");
-	}
+    @Override
+    public void removeRelations(Resource source, Collection<String> targetIds, String fieldName) {
+        String targetId = targetIds.iterator().next();
+        Assert.assertEquals(targetId, "12");
+    }
 
-	@Override
-	public Resource findOneTarget(String sourceId, String fieldName, QuerySpec querySpec) {
-		return createResource();
-	}
-
-
-	@Override
-	public ResourceList<Resource> findManyTargets(String sourceId, String fieldName, QuerySpec querySpec) {
-		DefaultResourceList<Resource> list = new DefaultResourceList<>();
-		list.add(createResource());
-		return list;
-	}
+    @Override
+    public Resource findOneTarget(String sourceId, String fieldName, QuerySpec querySpec) {
+        return createResource();
+    }
 
 
-	private Resource createResource() {
-		ObjectMapper mapper = new ObjectMapper();
-		Resource resource = new Resource();
-		resource.setId("john");
-		resource.setType(resourceType);
-		try {
-			resource.getAttributes().put("value", mapper.readTree("\"doe\""));
-		} catch (IOException e) {
-			throw new IllegalArgumentException();
-		}
-		return resource;
-	}
+    @Override
+    public ResourceList<Resource> findManyTargets(String sourceId, String fieldName, QuerySpec querySpec) {
+        DefaultResourceList<Resource> list = new DefaultResourceList<>();
+        list.add(createResource());
+        return list;
+    }
+
+
+    private Resource createResource() {
+        ObjectMapper mapper = new ObjectMapper();
+        Resource resource = new Resource();
+        resource.setId("john");
+        resource.setType(resourceType);
+        try {
+            resource.getAttributes().put("value", mapper.readTree("\"doe\""));
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
+        return resource;
+    }
 }

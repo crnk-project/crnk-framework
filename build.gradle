@@ -1,268 +1,265 @@
 // tag::versions[]
 buildscript {
-	dependencies {
-		apply from: "versions.gradle"
+    dependencies {
+        apply from: "versions.gradle"
 
-		def depMgmtVersion = versions['dependency.management.plugin.version']
+        def depMgmtVersion = versions['dependency.management.plugin.version']
 
-		classpath "io.spring.gradle:dependency-management-plugin:${depMgmtVersion}"
-		classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
-		classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
-		classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
-		classpath 'org.ajoberstar:gradle-git-publish:0.4.1'
-		classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
-		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
+        classpath "io.spring.gradle:dependency-management-plugin:${depMgmtVersion}"
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.9.2'
+        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
+        classpath 'com.moowork.gradle:gradle-node-plugin:1.1.1'
+        classpath 'org.ajoberstar:gradle-git-publish:0.4.1'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5-rc1'
+        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
 
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
 
-		classpath 'com.bmuschko:gradle-docker-plugin:3.2.8'
-	}
+        classpath 'com.bmuschko:gradle-docker-plugin:3.2.8'
+    }
 }
 
 wrapper {
-	gradleVersion = '4.10.1'
+    gradleVersion = '5.2.1'
 }
 
 // note that a production build creates javadoc, sources jars and signatures undesired during development
 // for performance reasons
 def isProductionBuild = System.env.NEXUS_DEPLOY_USER != null
 ext {
-	timestampedVersion = isProductionBuild
+    timestampedVersion = isProductionBuild
 }
 
 apply plugin: 'org.ajoberstar.grgit'
 
 if (ext.timestampedVersion) {
-	def gitCommitTimestamp = grgit.head().date.format("yyyyMMddHHmmss", TimeZone.getTimeZone('GMT'))
-	version =  BUILD_VERSION_PREFIX + "." + gitCommitTimestamp
+    def gitCommitTimestamp = grgit.head().date.format("yyyyMMddHHmmss", TimeZone.getTimeZone('GMT'))
+    version = BUILD_VERSION_PREFIX + "." + gitCommitTimestamp + "-BETA"
 } else {
-	version = '0.0.0-SNAPSHOT'
+    version = '10.0.0-SNAPSHOT'
 }
 group = GROUP_ID
 
 if (JavaVersion.current().isJava8Compatible()) {
-	allprojects {
-		tasks.withType(Javadoc) {
-			options.addStringOption('Xdoclint:none', '-quiet')
-		}
-	}
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
 }
 
 gradle.beforeProject { Project project ->
-	project.with {
-		apply plugin: "eclipse"
+    project.with {
+        apply plugin: "eclipse"
 
-		apply plugin: 'maven'
+        apply plugin: 'maven'
 
-		def docs = project.name == 'crnk-documentation'
-		def ui = project.name == 'crnk-ui'
-		def testProject = project.name == 'crnk-test'
-		def legacyBraveProject = project.name == 'crnk-brave'
-		def bom = project.name == 'crnk-bom'
-		def examples = project.name.contains('example')
+        def docs = project.name == 'crnk-documentation'
+        def ui = project.name == 'crnk-ui'
+        def testProject = project.name == 'crnk-test'
+        def legacyBraveProject = project.name == 'crnk-brave'
+        def bom = project.name == 'crnk-bom'
+        def examples = project.name.contains('example')
 
-		if (!docs) {
-			apply plugin: 'java'
+        if (!docs) {
+            apply plugin: 'java'
 
-			sourceCompatibility = 1.8
-			targetCompatibility = 1.8
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
 
-			if (!bom) {
+            if (!bom) {
+                dependencies {
+                    testCompile group: 'junit', name: 'junit', version: '4.12'
+                    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
+                    testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
+                }
 
+                test {
+                    useJUnitPlatform()
+                    maxParallelForks = 1
 
-				dependencies {
-					testCompile group: 'junit', name: 'junit', version: '4.12'
-					testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
-					testCompile group: 'org.assertj', name: 'assertj-core', version: '2.2.0'
-				}
+                    testLogging {
+                        exceptionFormat = 'full'
+                    }
+                }
 
-				test {
-					maxParallelForks = 1
+                configurations.all {
+                    exclude group: "org.slf4j", module: "slf4j-log4j12"
+                    exclude group: "log4j", module: "log4j"
+                }
 
-					testLogging {
-						exceptionFormat = 'full'
-					}
-				}
+                apply plugin: 'io.spring.dependency-management'
+                dependencyManagement {
+                    imports {
+                        mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
+                        mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
+                    }
+                    dependencies {
+                        dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+                        dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.6'
+                        dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.6'
+                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.6'
+                        dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.6'
+                        dependency 'com.fasterxml.jackson.core:jackson-core:2.9.6'
 
-				configurations.all {
-					exclude group: "org.slf4j", module: "slf4j-log4j12"
-					exclude group: "log4j", module: "log4j"
-				}
+                        dependency 'org.reflections:reflections:0.9.11'
+                    }
+                }
+            }
+        }
 
-				apply plugin: 'io.spring.dependency-management'
-				dependencyManagement {
-					imports {
-						mavenBom 'io.projectreactor:reactor-bom:Bismuth-RELEASE'
-						mavenBom 'org.glassfish.jersey:jersey-bom:2.26'
-					}
-					dependencies {
-						dependency 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
-						dependency 'com.fasterxml.jackson.core:jackson-annotations:2.9.6'
-						dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.6'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.6'
-						dependency 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.6'
-						dependency 'com.fasterxml.jackson.core:jackson-core:2.9.6'
+        if (!docs && !examples && !testProject && !legacyBraveProject) {
+            apply plugin: "jacoco"
+            jacoco {
+                toolVersion = "0.7.6.201602180812"
+            }
 
-						dependency 'org.reflections:reflections:0.9.11'
-					}
-				}
-			}
-		}
+            rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
+            rootProject.tasks.jacocoRootReport.additionalSourceDirs files(sourceSets.main.allSource.srcDirs)
 
-		if (!docs && !examples && !testProject && !legacyBraveProject) {
-			apply plugin: "jacoco"
-			jacoco {
-				toolVersion = "0.7.6.201602180812"
-			}
+            def sourceDirs = rootProject.tasks.jacocoRootReport.sourceDirectories
+            def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
 
-			rootProject.tasks.jacocoMerge.executionData tasks.withType(Test)
-			rootProject.tasks.jacocoRootReport.additionalSourceDirs files(sourceSets.main.allSource.srcDirs)
+            def mainOutput = files(files(sourceSets.main.output).collect {
+                fileTree(dir: it, exclude: '**/legacy/**')
+            })
 
-			def sourceDirs = rootProject.tasks.jacocoRootReport.sourceDirectories
-			def classDirs = rootProject.tasks.jacocoRootReport.classDirectories
+            if (sourceDirs == null) {
+                rootProject.tasks.jacocoRootReport.sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+                rootProject.tasks.jacocoRootReport.classDirectories = mainOutput
 
-			def mainOutput = files(files(sourceSets.main.output).collect {
-				fileTree(dir: it, exclude: '**/legacy/**')
-			})
+            } else {
+                rootProject.tasks.jacocoRootReport.sourceDirectories = sourceDirs.plus(files(sourceSets.main.allSource.srcDirs))
+                rootProject.tasks.jacocoRootReport.classDirectories = classDirs.plus(mainOutput)
+            }
+            rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
 
-			if (sourceDirs == null) {
-				rootProject.tasks.jacocoRootReport.sourceDirectories = files(sourceSets.main.allSource.srcDirs)
-				rootProject.tasks.jacocoRootReport.classDirectories = mainOutput
+            jacocoTestReport {
+                reports {
+                    xml.enabled = true // coveralls plugin depends on xml format report
+                    html.enabled = true
+                }
+            }
+        }
 
-			} else {
-				rootProject.tasks.jacocoRootReport.sourceDirectories = sourceDirs.plus(files(sourceSets.main.allSource.srcDirs))
-				rootProject.tasks.jacocoRootReport.classDirectories = classDirs.plus(mainOutput)
-			}
-			rootProject.coveralls.sourceDirs.addAll(sourceSets.main.allSource.srcDirs.flatten())
+        apply plugin: 'maven-publish'
 
+        if (!docs && !examples) {
 
+            task sourcesJar(type: Jar) {
+                from sourceSets.main.allSource
+                classifier = 'sources'
+            }
 
-			jacocoTestReport {
-				reports {
-					xml.enabled = true // coveralls plugin depends on xml format report
-					html.enabled = true
-				}
-			}
-		}
+            task javadocJar(type: Jar, dependsOn: 'javadoc') {
+                from javadoc.destinationDir
+                classifier = 'javadoc'
+            }
 
-		apply plugin: 'maven-publish'
+            apply plugin: 'com.jfrog.bintray'
 
-		if (!docs && !examples) {
+            // Create the pom configuration:
+            def pomConfig = {
+                licenses {
+                    license {
+                        name "The Apache Software License, Version 2.0"
+                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        distribution "repo"
+                    }
+                }
+                developers {
+                    developer {
+                        id 'crnk.io'
+                        name 'crnk.io'
+                        email 'info@crnk.io'
+                    }
+                }
 
-			task sourcesJar(type: Jar) {
-				from sourceSets.main.allSource
-				classifier = 'sources'
-			}
+                scm {
+                    url "https://github.com/crnk-project/crnk-framework"
+                }
+            }
 
-			task javadocJar(type: Jar, dependsOn: 'javadoc') {
-				from javadoc.destinationDir
-				classifier = 'javadoc'
-			}
+            if (!bom) {
+                publishing {
+                    publications {
+                        mavenJava(MavenPublication) {
+                            from components.java
 
-			apply plugin: 'com.jfrog.bintray'
+                            artifact sourcesJar {
+                                classifier "sources"
+                            }
 
-			// Create the pom configuration:
-			def pomConfig = {
-				licenses {
-					license {
-						name "The Apache Software License, Version 2.0"
-						url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-						distribution "repo"
-					}
-				}
-				developers {
-					developer {
-						id 'crnk.io'
-						name 'crnk.io'
-						email 'info@crnk.io'
-					}
-				}
+                            artifact javadocJar {
+                                classifier "javadoc"
+                            }
 
-				scm {
-					url "https://github.com/crnk-project/crnk-framework"
-				}
-			}
+                            groupId GROUP_ID
+                            artifactId project.name
+                            version project.version
 
-			if (!bom) {
-				publishing {
-					publications {
-						mavenJava(MavenPublication) {
-							from components.java
+                            pom.withXml {
+                                def root = asNode()
+                                root.appendNode('description', 'JSON API with Crnk')
+                                root.appendNode('name', 'Crnk')
+                                root.appendNode('url', 'https://www.crnk.io')
+                                root.children().last() + pomConfig
+                            }
+                        }
+                    }
+                }
+            }
 
-							artifact sourcesJar {
-								classifier "sources"
-							}
+            def releaseBuild = project.hasProperty('stable')
 
-							artifact javadocJar {
-								classifier "javadoc"
-							}
+            bintray {
+                user = System.env.BINTRAY_USER
+                key = System.env.BINTRAY_TOKEN
 
-							groupId GROUP_ID
-							artifactId project.name
-							version project.version
+                publications = ['mavenJava']
 
-							pom.withXml {
-								def root = asNode()
-								root.appendNode('description', 'JSON API with Crnk')
-								root.appendNode('name', 'Crnk')
-								root.appendNode('url', 'http://wwww.crnk.io')
-								root.children().last() + pomConfig
-							}
-						}
-					}
-				}
-			}
+                pkg {
+                    repo = releaseBuild ? 'maven' : 'mavenLatest'
+                    name = project.name
+                    userOrg = 'crnk-project'
+                    licenses = ['Apache-2.0']
+                    vcsUrl = 'https://github.com/crnk-project/crnk-framework.git'
+                    websiteUrl = 'http://www.crnk.io'
+                    desc = 'JSON API with Crnk'
+                    labels = ['JSONAPI', 'rest']
 
-			def releaseBuild =  project.hasProperty('stable')
+                    githubRepo = 'crnk-project/crnk-framework'
+                    githubReleaseNotesFile = 'README.md'
 
-			bintray {
-				user = System.env.BINTRAY_USER
-				key = System.env.BINTRAY_TOKEN
+                    publish = !releaseBuild
 
-				publications = ['mavenJava']
-
-				pkg {
-					repo = releaseBuild ? 'maven' : 'mavenLatest'
-					name = project.name
-					userOrg = 'crnk-project'
-					licenses = ['Apache-2.0']
-					vcsUrl = 'https://github.com/crnk-project/crnk-framework.git'
-					websiteUrl = 'http://www.crnk.io'
-					desc = 'JSON API with Crnk'
-					labels = ['JSONAPI', 'rest']
-
-					githubRepo = 'crnk-project/crnk-framework'
-					githubReleaseNotesFile = 'README.md'
-
-					publish = !releaseBuild
-
-					version {
-						name = project.version
-						desc = 'JSON API with Crnk'
-						released = new Date()
-						vcsTag = "v$project.version"
+                    version {
+                        name = project.version
+                        desc = 'JSON API with Crnk'
+                        released = new Date()
+                        vcsTag = "v$project.version"
 
 
-						mavenCentralSync {
-							sync = false //[Default: true] Determines whether to sync the version to Maven Central.
-							user = System.env.NEXUS_DEPLOY_USER
-							password = System.env.NEXUS_DEPLOY_PASS
-							close = '1'
-						}
-					}
+                        mavenCentralSync {
+                            sync = false //[Default: true] Determines whether to sync the version to Maven Central.
+                            user = System.env.NEXUS_DEPLOY_USER
+                            password = System.env.NEXUS_DEPLOY_PASS
+                            close = '1'
+                        }
+                    }
 
 
-				}
-			}
+                }
+            }
 
-			tasks.bintrayUpload.dependsOn assemble, sourcesJar, javadocJar, publishToMavenLocal
+            tasks.bintrayUpload.dependsOn assemble, sourcesJar, javadocJar, publishToMavenLocal
 
-			publish.dependsOn tasks.bintrayUpload
+            publish.dependsOn tasks.bintrayUpload
 
 
-		}
+        }
 
-	}
+    }
 }
 
 // coveralls setup
@@ -270,44 +267,44 @@ apply plugin: "jacoco"
 apply plugin: "com.github.kt3k.coveralls"
 
 def publishedProjects = subprojects.findAll {
-	it.name != 'crnk-documentation' && it.name != 'crnk-ui' && it.name != 'crnk-test' && !it.name.contains('example')
+    it.name != 'crnk-documentation' && it.name != 'crnk-ui' && it.name != 'crnk-test' && !it.name.contains('example')
 }
 
 task jacocoMerge(type: JacocoMerge) {
-	destinationFile = new File(project.buildDir, 'jacoco/test.exec')
-	doFirst {
-		executionData = files(executionData.findAll { it.exists() })
-	}
-	for (publishedProject in publishedProjects) {
-		dependsOn publishedProject.path + ":check"
-	}
+    destinationFile = new File(project.buildDir, 'jacoco/test.exec')
+    doFirst {
+        executionData = files(executionData.findAll { it.exists() })
+    }
+    for (publishedProject in publishedProjects) {
+        dependsOn publishedProject.path + ":check"
+    }
 }
 
 
 task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
-	description = 'Generates an aggregate report from all subprojects'
+    description = 'Generates an aggregate report from all subprojects'
 
-	dependsOn tasks.jacocoMerge
+    dependsOn tasks.jacocoMerge
 
-	executionData tasks.jacocoMerge.destinationFile
+    executionData tasks.jacocoMerge.destinationFile
 
-	reports {
-		html.enabled = true // human readable
-		xml.enabled = true // required by coveralls
-	}
+    reports {
+        html.enabled = true // human readable
+        xml.enabled = true // required by coveralls
+    }
 
 }
 
 
 coveralls {
-	jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+    jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
 }
 
 tasks.coveralls {
-	group = 'Coverage reports'
-	description = 'Uploads the aggregated coverage report to Coveralls'
+    group = 'Coverage reports'
+    description = 'Uploads the aggregated coverage report to Coveralls'
 
-	dependsOn jacocoRootReport
+    dependsOn jacocoRootReport
 }
 
 

@@ -1,11 +1,12 @@
 package io.crnk.core.module;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
@@ -58,10 +59,9 @@ import io.crnk.core.module.discovery.ServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.OffsetLimitPagingBehavior;
 import io.crnk.core.repository.InMemoryResourceRepository;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.decorate.RepositoryDecoratorFactoryBase;
 import io.crnk.core.resource.annotations.JsonApiId;
 import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -122,6 +122,7 @@ public class ModuleRegistryTest {
 		SimpleModule module = new SimpleModule("test");
 		module.addFilter(filter1);
 		module.addFilter(filter2);
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(module);
 		moduleRegistry.init(new ObjectMapper());
 
@@ -148,6 +149,7 @@ public class ModuleRegistryTest {
 		module.addResourceModificationFilter(filter1);
 		module.addResourceModificationFilter(filter2);
 		moduleRegistry.addModule(module);
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.init(new ObjectMapper());
 
 		List<ResourceModificationFilter> filters = moduleRegistry.getResourceModificationFilters();
@@ -159,6 +161,7 @@ public class ModuleRegistryTest {
 	public void checkNullResourcePath() {
 		ModuleRegistry moduleRegistry = new ModuleRegistry();
 		SimpleModule module = new SimpleModule("test");
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.addModule(module);
 		moduleRegistry.init(new ObjectMapper());
 		Assert.assertEquals(moduleRegistry.getResourceInformationBuilder().getResourcePath(TestResource2.class), null);
@@ -181,6 +184,7 @@ public class ModuleRegistryTest {
 		module.addRepositoryFilter(filter1);
 		module.addRepositoryFilter(filter2);
 		moduleRegistry.addModule(module);
+		moduleRegistry.setResourceRegistry(new ResourceRegistryImpl(new DefaultResourceRegistryPart(), moduleRegistry));
 		moduleRegistry.init(new ObjectMapper());
 
 		List<RepositoryFilter> filters = moduleRegistry.getRepositoryFilters();
@@ -292,9 +296,9 @@ public class ModuleRegistryTest {
 	@Test
 	public void testExceptionMappers() {
 		ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
-		Set<JsonApiExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
+		Set<ExceptionMapper> exceptionMappers = exceptionMapperLookup.getExceptionMappers();
 		Set<Class<?>> classes = new HashSet<>();
-		for (JsonApiExceptionMapper exceptionMapper : exceptionMappers) {
+		for (ExceptionMapper exceptionMapper : exceptionMappers) {
 			classes.add(exceptionMapper.getClass());
 		}
 		Assert.assertTrue(classes.contains(IllegalStateExceptionMapper.class));
@@ -359,7 +363,8 @@ public class ModuleRegistryTest {
 		try {
 			informationProvider.build(Object.class);
 			Assert.fail();
-		} catch (UnsupportedOperationException e) {
+		}
+		catch (UnsupportedOperationException e) {
 			// ok
 		}
 
@@ -406,7 +411,7 @@ public class ModuleRegistryTest {
 	@Test
 	public void testDecorators() {
 		List<RepositoryDecoratorFactory> decorators = moduleRegistry.getRepositoryDecoratorFactories();
-		Assert.assertEquals(2, decorators.size());
+		Assert.assertEquals(1, decorators.size());
 
 		RegistryEntry entry = this.resourceRegistry.getEntry(Schedule.class);
 		Object resourceRepository = entry.getResourceRepository().getResourceRepository();
@@ -498,15 +503,18 @@ public class ModuleRegistryTest {
 			});
 
 			context.addSecurityProvider(new SecurityProvider() {
-
 				@Override
 				public boolean isUserInRole(String role) {
 					return "testRole".equals(role);
 				}
+
+				@Override
+				public boolean isAuthenticated() {
+					return true;
+				}
 			});
 
 			context.addRepositoryDecoratorFactory(new TestRepositoryDecorator());
-			context.addRepositoryDecoratorFactory(new RepositoryDecoratorFactoryBase());
 			context.addFilter(new TestFilter());
 			context.addRepository(new ScheduleRepositoryImpl());
 			context.addRepository(new RelationIdTestRepository());
@@ -516,14 +524,10 @@ public class ModuleRegistryTest {
 			context.addRepository(new InMemoryResourceRepository<>(TestResource.class));
 
 			context.addExceptionMapper(new IllegalStateExceptionMapper());
-			context.addExceptionMapperLookup(new ExceptionMapperLookup() {
-
-				@Override
-				public Set<JsonApiExceptionMapper> getExceptionMappers() {
-					Set<JsonApiExceptionMapper> set = new HashSet<>();
-					set.add(new SomeIllegalStateExceptionMapper());
-					return set;
-				}
+			context.addExceptionMapperLookup(() -> {
+				Set<ExceptionMapper> set = new HashSet<>();
+				set.add(new SomeIllegalStateExceptionMapper());
+				return set;
 			});
 		}
 
@@ -533,22 +537,22 @@ public class ModuleRegistryTest {
 		}
 	}
 
-	class TestRelationshipRepository2 implements RelationshipRepositoryV2<TestResource2, Integer, TestResource2, Integer> {
+	class TestRelationshipRepository2 implements RelationshipRepository<TestResource2, Integer, TestResource2, Integer> {
 
 		@Override
 		public void setRelation(TestResource2 source, Integer targetId, String fieldName) {
 		}
 
 		@Override
-		public void setRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void setRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
-		public void addRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void addRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
-		public void removeRelations(TestResource2 source, Iterable<Integer> targetIds, String fieldName) {
+		public void removeRelations(TestResource2 source, Collection<Integer> targetIds, String fieldName) {
 		}
 
 		@Override
@@ -572,7 +576,7 @@ public class ModuleRegistryTest {
 		}
 	}
 
-	class TestRepository2 implements ResourceRepositoryV2<TestResource2, Integer> {
+	class TestRepository2 implements ResourceRepository<TestResource2, Integer> {
 
 		@Override
 		public <S extends TestResource2> S save(S entity) {
@@ -599,7 +603,7 @@ public class ModuleRegistryTest {
 		}
 
 		@Override
-		public ResourceList<TestResource2> findAll(Iterable<Integer> ids, QuerySpec querySpec) {
+		public ResourceList<TestResource2> findAll(Collection<Integer> ids, QuerySpec querySpec) {
 			return null;
 		}
 

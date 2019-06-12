@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
+import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
@@ -179,9 +179,12 @@ public class JsonApiRequestProcessor extends JsonApiRequestProcessorBase impleme
 
 	private Response toErrorResponse(Throwable e) {
 		ExceptionMapperRegistry exceptionMapperRegistry = moduleContext.getExceptionMapperRegistry();
-		Optional<JsonApiExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
+		Optional<ExceptionMapper> exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 		if (!exceptionMapper.isPresent()) {
 			LOGGER.error("failed to process request, unknown exception thrown", e);
+
+			// we do not propagate causes because we do not know the nature of the error.
+			// one could consider hiding the message as well
 			e = new InternalServerErrorException(e.getMessage());
 			exceptionMapper = exceptionMapperRegistry.findMapperFor(e.getClass());
 			PreconditionUtil

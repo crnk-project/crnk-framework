@@ -11,6 +11,7 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -20,114 +21,120 @@ import java.lang.reflect.Type;
 
 public interface InformationBuilder {
 
-	Field createResourceField();
+    FieldInformationBuilder createResourceField();
 
-	interface RelationshipRepository {
+    interface RelationshipRepositoryInformationBuilder {
 
-		void setAccess(RepositoryMethodAccess access);
+        void setAccess(RepositoryMethodAccess access);
 
-		RelationshipRepositoryInformation build();
+        RelationshipRepositoryInformation build();
 
-	}
+    }
 
-	interface ResourceRepository {
+    interface ResourceRepositoryInformationBuilder {
 
-		void from(ResourceRepositoryInformation information);
+        void from(ResourceRepositoryInformation information);
 
-		void setResourceInformation(ResourceInformation resourceInformation);
+        void setResourceInformation(ResourceInformation resourceInformation);
 
-		void setAccess(RepositoryMethodAccess access);
+        void setAccess(RepositoryMethodAccess access);
 
-		void setExposed(boolean exposed);
+        void setExposed(boolean exposed);
 
-		ResourceRepositoryInformation build();
+        ResourceRepositoryInformation build();
 
-	}
+    }
 
-	interface Resource {
+    interface ResourceInformationBuilder {
 
-		void from(ResourceInformation information);
+        void from(ResourceInformation information);
 
-		InformationBuilder.Field addField();
+        void setAccess(ResourceFieldAccess access);
 
-		InformationBuilder.Field addField(String name, ResourceFieldType id1, Class<?> clazz);
+        FieldInformationBuilder addField();
 
-		/**
-		 * @deprecated use {@link #implementationType(Type)}
-		 */
-		@Deprecated
-		Resource resourceClass(Class<?> resourceClass);
+        FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-		Resource implementationType(Type implementationType);
+        /**
+         * @deprecated use {@link #implementationType(Type)}
+         */
+        @Deprecated
+        ResourceInformationBuilder resourceClass(Class<?> resourceClass);
 
-		Resource resourceType(String resourceType);
+        ResourceInformationBuilder implementationType(Type implementationType);
 
-		Resource resourcePath(String resourcePath);
+        ResourceInformationBuilder resourceType(String resourceType);
 
-		Resource superResourceType(String superResourceType);
+        ResourceInformationBuilder resourcePath(String resourcePath);
 
-		/**
-		 * @deprecated use pagingSpecType
-		 */
-		@Deprecated
-		Resource pagingBehavior(PagingBehavior pagingBehavior);
+        ResourceInformationBuilder superResourceType(String superResourceType);
 
-		Resource pagingSpecType(Class<PagingSpec> pagingSpecType);
+        /**
+         * @deprecated use pagingSpecType
+         */
+        @Deprecated
+        ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
 
-		ResourceInformation build();
+        ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
 
-	}
+        ResourceInformation build();
 
-	interface Field {
+    }
 
-		ResourceField build();
+    interface FieldInformationBuilder {
 
-		void from(ResourceField field);
+        ResourceField build();
 
-		Field relationshipRepositoryBehavior(
-				RelationshipRepositoryBehavior relationshipRepositoryBehavior);
+        void from(ResourceField field);
 
-		Field jsonName(String jsonName);
+        FieldInformationBuilder relationshipRepositoryBehavior(
+                RelationshipRepositoryBehavior relationshipRepositoryBehavior);
 
-		Field underlyingName(String underlyingName);
+        FieldInformationBuilder jsonName(String jsonName);
 
-		Field name(String name);
+        FieldInformationBuilder underlyingName(String underlyingName);
 
-		Field type(Class<?> type);
+        FieldInformationBuilder name(String name);
 
-		Field genericType(Type genericType);
+        FieldInformationBuilder type(Class<?> type);
 
-		Field serializeType(SerializeType serializeType);
+        FieldInformationBuilder genericType(Type genericType);
 
-		Field oppositeResourceType(String oppositeResourceType);
+        FieldInformationBuilder serializeType(SerializeType serializeType);
 
-		Field lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
+        FieldInformationBuilder jsonIncludeStrategy(JsonIncludeStrategy jsonIncludeStrategy);
 
-		Field fieldType(ResourceFieldType fieldType);
+        FieldInformationBuilder oppositeResourceType(String oppositeResourceType);
 
-		Field oppositeName(String oppositeName);
+        FieldInformationBuilder lookupIncludeBehavior(LookupIncludeBehavior lookupIncludeBehavior);
 
-		Field accessor(ResourceFieldAccessor accessor);
+        FieldInformationBuilder fieldType(ResourceFieldType fieldType);
 
-		Field access(ResourceFieldAccess access);
+        FieldInformationBuilder oppositeName(String oppositeName);
 
-		Field idAccessor(ResourceFieldAccessor idAccessor);
+        FieldInformationBuilder accessor(ResourceFieldAccessor accessor);
 
-		Field idName(String idName);
+        FieldInformationBuilder access(ResourceFieldAccess access);
 
-		Field idType(Class idType);
+        FieldInformationBuilder idAccessor(ResourceFieldAccessor idAccessor);
 
-		Field patchStrategy(PatchStrategy patchStrategy);
-	}
+        FieldInformationBuilder idName(String idName);
 
-	RelationshipRepository createRelationshipRepository(String sourceResourceType, String targeResourceType);
+        FieldInformationBuilder idType(Class idType);
 
-	RelationshipRepository createRelationshipRepository(RelationshipMatcher matcher);
+        FieldInformationBuilder patchStrategy(PatchStrategy patchStrategy);
 
-	ResourceRepository createResourceRepository();
+        FieldInformationBuilder setMappedBy(boolean mappedBy);
+    }
 
-	Resource createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+    RelationshipRepositoryInformationBuilder createRelationshipRepository(String sourceResourceType, String targeResourceType);
 
-	Resource createResource(Class<?> resourceClass, String resourceType);
+    RelationshipRepositoryInformationBuilder createRelationshipRepository(RelationshipMatcher matcher);
+
+    ResourceRepositoryInformationBuilder createResourceRepository();
+
+    ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath);
+
+    ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType);
 
 }

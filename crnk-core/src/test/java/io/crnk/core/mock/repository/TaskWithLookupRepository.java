@@ -3,10 +3,12 @@ package io.crnk.core.mock.repository;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.TaskWithLookup;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 
-public class TaskWithLookupRepository implements ResourceRepositoryV2<TaskWithLookup, String> {
+import java.util.Collection;
+
+public class TaskWithLookupRepository implements ResourceRepository<TaskWithLookup, String> {
 
 	@Override
 	public Class<TaskWithLookup> getResourceClass() {
@@ -27,7 +29,7 @@ public class TaskWithLookupRepository implements ResourceRepositoryV2<TaskWithLo
 	}
 
 	@Override
-	public ResourceList<TaskWithLookup> findAll(Iterable<String> ids, QuerySpec querySpec) {
+	public ResourceList<TaskWithLookup> findAll(Collection<String> ids, QuerySpec querySpec) {
 		throw new UnsupportedOperationException();
 	}
 

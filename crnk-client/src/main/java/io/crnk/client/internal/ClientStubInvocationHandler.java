@@ -2,7 +2,7 @@ package io.crnk.client.internal;
 
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceListBase;
 import net.jodah.typetools.TypeResolver;
@@ -16,14 +16,14 @@ import java.util.Map;
 
 public class ClientStubInvocationHandler implements InvocationHandler {
 
-	private ResourceRepositoryV2<?, Serializable> repositoryStub;
+	private ResourceRepository<?, Serializable> repositoryStub;
 
 	private Object actionStub;
 
 	private Map<Method, Method> interfaceStubMethodMap = new HashMap<>();
 
 	public ClientStubInvocationHandler(Class<?> repositoryInterface,
-									   ResourceRepositoryV2<?, Serializable> repositoryStub, Object actionStub) {
+                                       ResourceRepository<?, Serializable> repositoryStub, Object actionStub) {
 		this.repositoryStub = repositoryStub;
 		this.actionStub = actionStub;
 		setupRepositoryMethods(repositoryInterface);
@@ -42,7 +42,7 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		try {
-			if (method.getDeclaringClass().isAssignableFrom(ResourceRepositoryV2.class)) {
+			if (method.getDeclaringClass().isAssignableFrom(ResourceRepository.class)) {
 				// execute document method
 				return method.invoke(repositoryStub, args);
 			} else if (interfaceStubMethodMap.containsKey(method)) {
@@ -98,7 +98,7 @@ public class ClientStubInvocationHandler implements InvocationHandler {
 	}
 
 	private void setupRepositoryMethods(Map<String, Method> stubMethods, Class<?> repositoryInterface) {
-		for (Method method : ResourceRepositoryV2.class.getMethods()) {
+		for (Method method : ResourceRepository.class.getMethods()) {
 			stubMethods.put(getMethodId(method), method);
 		}
 

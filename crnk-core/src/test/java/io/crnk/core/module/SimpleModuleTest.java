@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
 import io.crnk.core.engine.error.ExceptionMapper;
-import io.crnk.core.engine.error.JsonApiExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
 import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
@@ -226,8 +225,8 @@ public class SimpleModuleTest {
 
 		@SuppressWarnings("rawtypes")
 		@Override
-		public Set<JsonApiExceptionMapper> getExceptionMappers() {
-			return new HashSet<JsonApiExceptionMapper>(Arrays.asList(new CrnkExceptionMapper()));
+		public Set<ExceptionMapper> getExceptionMappers() {
+			return new HashSet<ExceptionMapper>(Arrays.asList(new CrnkExceptionMapper()));
 		}
 	}
 

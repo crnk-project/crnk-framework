@@ -1,18 +1,20 @@
 package io.crnk.core.engine.internal.information.resource;
 
-import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
-import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PropertyException;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
+import io.crnk.core.engine.internal.utils.PropertyException;
+import io.crnk.core.engine.internal.utils.PropertyUtils;
+
 public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 
 	private final Field privateField;
+
 	private Method getter;
 
 	private Method setter;
@@ -38,9 +40,14 @@ public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 		this.resourceType = resourceType;
 		this.fieldName = fieldName;
 		this.fieldType = fieldType;
-		this.getter = ClassUtils.findGetter(resourceType, fieldName);
-		this.setter = ClassUtils.findSetter(resourceType, fieldName, fieldType);
-		this.field = ClassUtils.findClassField(resourceType, fieldName);
+
+		BeanInformation beanInformation = BeanInformation.get(resourceType);
+		BeanAttributeInformation attribute = beanInformation.getAttribute(fieldName);
+		if (attribute != null) {
+			this.getter = attribute.getGetter();
+			this.setter = attribute.getSetter();
+			this.field = attribute.getField();
+		}
 		this.privateField = field;
 		if (field != null && !Modifier.isPublic(field.getModifiers())) {
 			this.field = null;
@@ -61,10 +68,12 @@ public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 		try {
 			if (field != null) {
 				return field.get(resource);
-			} else if (getter != null) {
+			}
+			else if (getter != null) {
 				return getter.invoke(resource);
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+		}
+		catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 			throw new PropertyException(e, resourceType, fieldName);
 		}
 
@@ -82,16 +91,24 @@ public class ReflectionFieldAccessor implements ResourceFieldAccessor {
 			Object mappedValue = PropertyUtils.prepareValue(fieldValue, fieldType);
 			if (field != null) {
 				field.set(resource, mappedValue);
-			} else if (setter != null) {
+			}
+			else if (setter != null) {
 				setter.invoke(resource, mappedValue);
-			} else {
+			}
+			else {
 				String message = String.format("Cannot find an setter for %s.%s", resourceType.getCanonicalName(), fieldName);
 				throw new PropertyException(message, resourceType, fieldName);
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+		}
+		catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 			throw new PropertyException(e, resourceType, fieldName);
 		}
 
+	}
+
+	@Override
+	public Class getImplementationClass() {
+		return fieldType;
 	}
 
 }

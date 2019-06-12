@@ -21,7 +21,7 @@ And there are various simpler example applications that show the integration of 
 
 available from https://github.com/crnk-project/crnk-framework/tree/master/crnk-integration-examples/[crnk-integration-examples].
 
-The impatient may also directly want to jump to <<resource_repository,ResourceRepositoryV2>>, but it is highly recommended to
+The impatient may also directly want to jump to <<resource_repository,ResourceRepository>>, but it is highly recommended to
 familiarize one self with the architecture and annotations as well. Unlike traditional REST libraries, Crnk comes with a lot of
 built-in semantics that allow to automate otherwise laborious tasks.
 

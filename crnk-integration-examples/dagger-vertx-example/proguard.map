@@ -12329,7 +12329,7 @@ io.crnk.core.engine.error.ExceptionMapper -> io.crnk.core.engine.error.Exception
     io.crnk.core.engine.error.ErrorResponse toErrorResponse(java.lang.Throwable) -> toErrorResponse
     java.lang.Throwable fromErrorResponse(io.crnk.core.engine.error.ErrorResponse) -> fromErrorResponse
     boolean accepts(io.crnk.core.engine.error.ErrorResponse) -> accepts
-io.crnk.core.engine.error.JsonApiExceptionMapper -> io.crnk.core.engine.error.JsonApiExceptionMapper:
+io.crnk.core.engine.error.ExceptionMapper -> io.crnk.core.engine.error.ExceptionMapper:
     io.crnk.core.engine.error.ErrorResponse toErrorResponse(java.lang.Throwable) -> toErrorResponse
 io.crnk.core.engine.filter.DocumentFilter -> io.crnk.core.engine.filter.DocumentFilter:
     io.crnk.core.engine.dispatcher.Response filter(io.crnk.core.engine.filter.DocumentFilterContext,io.crnk.core.engine.filter.DocumentFilterChain) -> filter
@@ -13157,15 +13157,15 @@ io.crnk.core.engine.internal.exception.ExceptionMapperRegistryBuilder -> io.crnk
     12:13:void <init>() -> <init>
     16:20:io.crnk.core.engine.internal.exception.ExceptionMapperRegistry build(io.crnk.core.engine.internal.exception.ExceptionMapperLookup) -> build
     24:26:void addDefaultMappers() -> addDefaultMappers
-    29:38:void registerExceptionMapper(io.crnk.core.engine.error.JsonApiExceptionMapper) -> registerExceptionMapper
+    29:38:void registerExceptionMapper(io.crnk.core.engine.error.ExceptionMapper) -> registerExceptionMapper
     41:42:boolean isProxy(java.lang.Class) -> isProxy
     47:67:java.lang.Class getGenericType(java.lang.Class) -> getGenericType
 io.crnk.core.engine.internal.exception.ExceptionMapperType -> io.crnk.core.engine.internal.exception.ExceptionMapperType:
-    io.crnk.core.engine.error.JsonApiExceptionMapper exceptionMapper -> exceptionMapper
+    io.crnk.core.engine.error.ExceptionMapper exceptionMapper -> exceptionMapper
     java.lang.Class exceptionClass -> exceptionClass
-    12:16:void <init>(java.lang.Class,io.crnk.core.engine.error.JsonApiExceptionMapper) -> <init>
+    12:16:void <init>(java.lang.Class,io.crnk.core.engine.error.ExceptionMapper) -> <init>
     19:19:java.lang.Class getExceptionClass() -> getExceptionClass
-    23:23:io.crnk.core.engine.error.JsonApiExceptionMapper getExceptionMapper() -> getExceptionMapper
+    23:23:io.crnk.core.engine.error.ExceptionMapper getExceptionMapper() -> getExceptionMapper
     28:36:boolean equals(java.lang.Object) -> equals
     41:41:int hashCode() -> hashCode
     46:47:java.lang.String toString() -> toString
@@ -14621,7 +14621,7 @@ io.crnk.core.module.SimpleModule -> io.crnk.core.module.SimpleModule:
     154:156:void addResourceInformationProvider(io.crnk.core.engine.information.resource.ResourceInformationProvider) -> addResourceInformationProvider
     164:166:void addRepositoryInformationBuilder(io.crnk.core.engine.information.repository.RepositoryInformationProvider) -> addRepositoryInformationBuilder
     169:171:void addExceptionMapperLookup(io.crnk.core.engine.internal.exception.ExceptionMapperLookup) -> addExceptionMapperLookup
-    174:177:void addExceptionMapper(io.crnk.core.engine.error.JsonApiExceptionMapper) -> addExceptionMapper
+    174:177:void addExceptionMapper(io.crnk.core.engine.error.ExceptionMapper) -> addExceptionMapper
     180:181:java.util.List getResourceInformationProviders() -> getResourceInformationProviders
     185:186:java.util.List getRepositoryInformationProviders() -> getRepositoryInformationProviders
     190:190:java.util.Map getRegistryParts() -> getRegistryParts
@@ -14661,7 +14661,7 @@ io.crnk.core.module.SimpleModule -> io.crnk.core.module.SimpleModule:
 io.crnk.core.module.SimpleModule$CollectionExceptionMapperLookup -> io.crnk.core.module.SimpleModule$CollectionExceptionMapperLookup:
     java.util.Set set -> set
     392:394:void <init>(java.util.Set) -> <init>
-    397:398:void <init>(io.crnk.core.engine.error.JsonApiExceptionMapper) -> <init>
+    397:398:void <init>(io.crnk.core.engine.error.ExceptionMapper) -> <init>
     402:402:java.util.Set getExceptionMappers() -> getExceptionMappers
 io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory -> io.crnk.core.module.discovery.DefaultServiceDiscoveryFactory:
     12:12:void <init>() -> <init>

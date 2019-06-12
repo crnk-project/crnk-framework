@@ -1,12 +1,14 @@
 package io.crnk.servlet.resource.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.servlet.resource.model.Task;
 
-public class TaskRepository implements ResourceRepositoryV2<Task, Long> {
+import java.util.Collection;
+
+public class TaskRepository implements ResourceRepository<Task, Long> {
 
 	public <S extends Task> S save(S entity) {
 		entity.setId(1L);
@@ -33,7 +35,7 @@ public class TaskRepository implements ResourceRepositoryV2<Task, Long> {
 	}
 
 	@Override
-	public ResourceList<Task> findAll(Iterable<Long> ids, QuerySpec querySpec) {
+	public ResourceList<Task> findAll(Collection<Long> ids, QuerySpec querySpec) {
 		DefaultResourceList list = new DefaultResourceList();
 		list.add(new Task(1L, "First task"));
 		return list;

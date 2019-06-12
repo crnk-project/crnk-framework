@@ -1,6 +1,7 @@
 package io.crnk.core.engine.information.resource;
 
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
+import io.crnk.core.resource.annotations.JsonIncludeStrategy;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
@@ -82,6 +83,11 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
         return Optional.empty();
     }
 
+	@Override
+	public Optional<JsonIncludeStrategy> getJsonIncludeStrategy(BeanAttributeInformation attributeDesc) {
+		return Optional.empty();
+	}
+
     @Override
     public Optional<RelationshipRepositoryBehavior> getRelationshipRepositoryBehavior(BeanAttributeInformation attributeDesc) {
         return Optional.empty();
@@ -89,6 +95,11 @@ public class ResourceFieldInformationProviderBase implements ResourceFieldInform
 
     @Override
     public Optional<PatchStrategy> getPatchStrategy(BeanAttributeInformation attributeDesc) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getMappedBy(BeanAttributeInformation attributeDesc) {
         return Optional.empty();
     }
 }

@@ -13,9 +13,9 @@ import java.util.Objects;
 @JsonSerialize(using = ToStringSerializer.class)
 public class PathSpec {
 
-    private List<String> elements;
+    protected List<String> elements;
 
-    private PathSpec() {
+    protected PathSpec() {
     }
 
     /**

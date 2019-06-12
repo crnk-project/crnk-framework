@@ -22,7 +22,7 @@ public class HierarchicalTask {
 	private HierarchicalTask parent;
 
 	@JsonProperty("another-parent")
-	@JsonApiRelation
+	@JsonApiRelation(lookUp = LookupIncludeBehavior.NONE)
 	private HierarchicalTask anotherParent;
 
 	@JsonApiRelation(opposite = "parent", lookUp = LookupIncludeBehavior.AUTOMATICALLY_ALWAYS)

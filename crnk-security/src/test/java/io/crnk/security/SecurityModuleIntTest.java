@@ -1,5 +1,11 @@
 package io.crnk.security;
 
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
@@ -7,8 +13,8 @@ import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.RelationshipRepositoryV2;
-import io.crnk.core.repository.ResourceRepositoryV2;
+import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.security.SecurityConfig.Builder;
@@ -36,39 +42,23 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-
 public class SecurityModuleIntTest extends JerseyTestBase {
 
 	private final InMemoryIdentityManager identityManager = new InMemoryIdentityManager();
 
 	protected CrnkClient client;
 
-	protected ResourceRepositoryV2<Task, Long> taskRepo;
+	protected ResourceRepository<Task, Long> taskRepo;
 
-	protected ResourceRepositoryV2<Project, Long> projectRepo;
+	protected ResourceRepository<Project, Long> projectRepo;
 
-	protected RelationshipRepositoryV2<Task, Long, Project, Long> relRepo;
+	protected RelationshipRepository<Task, Long, Project, Long> relRepo;
 
 	private SecurityModule module;
 
-	private static void setBasicAuthentication(CrnkClient client, final String userName, final String password) {
-		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
-		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+	private String userName;
 
-			@Override
-			public void onBuild(OkHttpClient.Builder builder) {
-				builder.authenticator(new TestAuthenticator(userName, password));
-			}
-
-		});
-
-	}
+	private String password;
 
 	private static int responseCount(Response response) {
 		Response priorResponse = response;
@@ -104,7 +94,8 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 						securityHandler.setHandler(handler);
 					}
 					server.setHandler(securityHandler);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
 				return container;
@@ -124,14 +115,26 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 
 		client = new CrnkClient(getBaseUri().toString());
 		client.addModule(SecurityModule.newClientModule());
-		client.setPushAlways(false);
 		client.getHttpAdapter().setReceiveTimeout(1000000, TimeUnit.MILLISECONDS);
 
 		taskRepo = client.getRepositoryForType(Task.class);
 		projectRepo = client.getRepositoryForType(Project.class);
 		relRepo = client.getRepositoryForType(Task.class, Project.class);
 
-		setBasicAuthentication(client, "doe", "doePass");
+		userName = "doe";
+		password = "doePass";
+
+		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
+		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
+
+			@Override
+			public void onBuild(OkHttpClient.Builder builder) {
+				if (userName != null) {
+					builder.authenticator(new TestAuthenticator(userName, password));
+				}
+			}
+
+		});
 
 		TaskRepository.clear();
 		ProjectRepository.clear();
@@ -185,10 +188,23 @@ public class SecurityModuleIntTest extends JerseyTestBase {
 		taskRepo.create(task);
 	}
 
+
+	@Test(expected = UnauthorizedException.class)
+	public void unauthorizedPost() {
+		userName = null; // do not authenticate
+
+		Task task = new Task();
+		task.setId(1L);
+		task.setName("test");
+		taskRepo.create(task);
+	}
+
 	@Test
 	public void disableSecurityModule() {
 		module.setEnabled(false);
 
+		Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("projects"));
+		Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("tasks"));
 		Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
 		Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
 		Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));
