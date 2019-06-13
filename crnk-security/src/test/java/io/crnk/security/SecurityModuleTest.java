@@ -34,9 +34,10 @@ public class SecurityModuleTest {
 
 	private SecurityModule securityModule;
 
-	private String allowedRule;
+	private String allowedRule = SecurityModule.ANY_ROLE;
 
 	private CrnkBoot boot;
+
 	private boolean authenticated;
 
 	@Before
@@ -89,7 +90,8 @@ public class SecurityModuleTest {
 		Set<String> roleNames = roles.stream().map(it -> it.getId()).collect(Collectors.toSet());
 		Assert.assertTrue(roleNames.contains("taskRole"));
 		Assert.assertTrue(roleNames.contains("projectRole"));
-		Assert.assertEquals(2, roleNames.size());
+		Assert.assertTrue(roleNames.contains(SecurityModule.ANY_ROLE));
+		Assert.assertEquals(3, roleNames.size());
 	}
 
 
@@ -118,18 +120,24 @@ public class SecurityModuleTest {
 		querySpec.addFilter(PathSpec.of("resourceType").filter(FilterOperator.EQ, "projects"));
 		ResourceList<RolePermission> permissions = repository.findAll(querySpec);
 
-		Assert.assertEquals(2, permissions.size());
+		Assert.assertEquals(3, permissions.size());
 
-		RolePermission projectRole = permissions.get(0);
+		RolePermission anyRole = permissions.get(0);
+		Assert.assertEquals("ANY", anyRole.getRole());
+		Assert.assertEquals("projects", anyRole.getResourceType());
+		Assert.assertEquals(ResourcePermission.GET, anyRole.getPermission());
+		Assert.assertNull(anyRole.getDataRoomFilter());
+
+		RolePermission projectRole = permissions.get(1);
 		Assert.assertEquals("projectRole", projectRole.getRole());
 		Assert.assertEquals("projects", projectRole.getResourceType());
-		Assert.assertEquals(ResourcePermission.POST, projectRole.getPermission());
+		Assert.assertEquals(ResourcePermission.POST.or(ResourcePermission.GET), projectRole.getPermission());
 		Assert.assertNull(projectRole.getDataRoomFilter());
 
-		RolePermission taskRole = permissions.get(1);
+		RolePermission taskRole = permissions.get(2);
 		Assert.assertEquals("taskRole", taskRole.getRole());
 		Assert.assertEquals("projects", taskRole.getResourceType());
-		Assert.assertEquals(ResourcePermission.EMPTY, taskRole.getPermission());
+		Assert.assertEquals(ResourcePermission.GET, taskRole.getPermission());
 		Assert.assertNull(taskRole.getDataRoomFilter());
 	}
 

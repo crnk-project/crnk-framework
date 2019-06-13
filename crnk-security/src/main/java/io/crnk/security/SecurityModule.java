@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class SecurityModule implements Module {
 
-	protected static final String ALL_ROLE = null;
+	protected static final String ANY_ROLE = "ANY";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityModule.class);
 
@@ -257,11 +257,11 @@ public class SecurityModule implements Module {
 	/**
 	 * @return permissions the caller is authorized to for the passed resourceType.
 	 */
-	public ResourcePermission getRolePermissions(String resourceType, String actualRole) {
+	public ResourcePermission getRolePermissions(String resourceType, String checkedRole) {
 		ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL, new SecurityProvider() {
 			@Override
 			public boolean isUserInRole(String role) {
-				return actualRole.equals(role);
+				return checkedRole.equals(role) || role.equals(ANY_ROLE);
 			}
 
 			@Override
@@ -338,7 +338,7 @@ public class SecurityModule implements Module {
 		}
 		checkInit();
 		SecurityProvider securityProvider = context.getSecurityProvider();
-		boolean contained = role == ALL_ROLE || securityProvider.isUserInRole(role);
+		boolean contained = role.equals(ANY_ROLE) || securityProvider.isUserInRole(role);
 		LOGGER.debug("isUserInRole returns {} for role {}", contained, role);
 		return contained;
 	}

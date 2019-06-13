@@ -83,7 +83,7 @@ public class SecurityConfig {
 
         public Builder permitAll(ResourcePermission... permissions) {
             for (ResourcePermission permission : permissions) {
-                rules.add(new SecurityRule(SecurityModule.ALL_ROLE, permission));
+                rules.add(new SecurityRule(SecurityModule.ANY_ROLE, permission));
             }
 
             return this;
@@ -91,7 +91,7 @@ public class SecurityConfig {
 
         public <T> Builder permitAll(Class<T> resourceClass, ResourcePermission... permissions) {
             for (ResourcePermission permission : permissions) {
-                permitRole(SecurityModule.ALL_ROLE, resourceClass, permission);
+                permitRole(SecurityModule.ANY_ROLE, resourceClass, permission);
             }
 
             return this;
@@ -99,7 +99,7 @@ public class SecurityConfig {
 
         public Builder permitAll(String resourceType, ResourcePermission... permissions) {
             for (ResourcePermission permission : permissions) {
-                rules.add(new SecurityRule(resourceType, SecurityModule.ALL_ROLE, permission));
+                rules.add(new SecurityRule(resourceType, SecurityModule.ANY_ROLE, permission));
             }
 
             return this;
