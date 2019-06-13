@@ -18,6 +18,16 @@ public class MetaResourceRepository extends MetaElement {
 	@JsonApiRelation(serialize = SerializeType.LAZY)
 	private MetaDataObject listLinksType;
 
+	private boolean exposed;
+
+	public boolean isExposed() {
+		return exposed;
+	}
+
+	public void setExposed(boolean exposed) {
+		this.exposed = exposed;
+	}
+
 	public MetaResource getResourceType() {
 		return resourceType;
 	}
