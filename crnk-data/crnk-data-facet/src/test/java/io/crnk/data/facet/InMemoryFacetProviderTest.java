@@ -217,7 +217,7 @@ public class InMemoryFacetProviderTest {
 	@Test
 	public void checkNotExposedNotFacetted() {
 		QuerySpec querySpec = new QuerySpec(FacetResource.class);
-		querySpec.addFilter(PathSpec.of("resourceType").filter(FilterOperator.EQ, FacetedTask.RESOURCE_TYPE));
+		querySpec.addFilter(PathSpec.of(FacetResource.ATTR_RESOURCE_TYPE).filter(FilterOperator.EQ, FacetedTask.RESOURCE_TYPE));
 		ResourceList<FacetResource> list = repository.findAll(querySpec);
 		Assert.assertTrue(list.isEmpty());
 	}

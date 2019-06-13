@@ -66,14 +66,14 @@ public class FacetRepositoryImpl extends ReadOnlyResourceRepositoryBase<FacetRes
 		List<String> groupNames = getGroupNames(querySpec);
 
 		for (FacetResourceInformation facetResourceInformation : config.getResources().values()) {
-			String resourceType = facetResourceInformation.getType();
+			String resourceType = facetResourceInformation.getResourceType();
 			if (!isFiltered(resourceType) && hasGroups(facetResourceInformation, groupNames)) {
 				List<FacetInformation> facetInformations = new ArrayList<>(facetResourceInformation.getFacets().values());
 				facetInformations = applyQuickFilter(facetInformations, querySpec, groupNames);
 				facetInformations = orderFacets(facetInformations, querySpec, groupNames);
 
 				// iterate over facets of current type
-				QuerySpec facetQuerySpec = new QuerySpec(facetResourceInformation.getType());
+				QuerySpec facetQuerySpec = new QuerySpec(facetResourceInformation.getResourceType());
 				List<FacetResource> results = new ArrayList<>();
 				if (!facetInformations.isEmpty()) {
 					computeFacet(results, facetQuerySpec, querySpec, facetInformations, 0, null, groupNames, resourceType);
@@ -178,7 +178,7 @@ public class FacetRepositoryImpl extends ReadOnlyResourceRepositoryBase<FacetRes
 	private FacetResource createFacetResource(FacetInformation facetInformation) {
 		FacetResourceInformation facetResourceInformation = facetInformation.getResource();
 		FacetResource facet = new FacetResource();
-		facet.setResourceType(facetResourceInformation.getType());
+		facet.setResourceType(facetResourceInformation.getResourceType());
 		facet.setName(facetInformation.getName());
 		facet.setId(facet.getResourceType() + "_" + facet.getName());
 		return facet;
@@ -284,7 +284,7 @@ public class FacetRepositoryImpl extends ReadOnlyResourceRepositoryBase<FacetRes
 	}
 
 	private List<FacetInformation> applyQuickFilter(List<FacetInformation> facetInformations, QuerySpec querySpec, List<String> groupNames) {
-		Optional<FilterSpec> typeFilter = querySpec.findFilter(PathSpec.of(FacetResource.ATTR_TYPE));
+		Optional<FilterSpec> typeFilter = querySpec.findFilter(PathSpec.of(FacetResource.ATTR_RESOURCE_TYPE));
 		Optional<FilterSpec> nameFilter = querySpec.findFilter(PathSpec.of(FacetResource.ATTR_NAME));
 
 		InMemoryEvaluator evaluator = new InMemoryEvaluator();
