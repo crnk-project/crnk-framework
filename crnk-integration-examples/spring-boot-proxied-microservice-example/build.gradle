@@ -1,0 +1,27 @@
+apply plugin: 'java'
+
+apply plugin: 'application'
+
+mainClassName = "io.crnk.example.springboot.proxied.microservice.MicroServiceApplication"
+
+dependencies {
+
+	compile project(':crnk-core')
+	compile project(':crnk-setup:crnk-setup-spring-boot2')
+	compile project(':crnk-home')
+	compile project(':crnk-client')
+	compile 'com.squareup.okhttp3:okhttp:3.4.1'
+
+	compile 'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'
+
+	testCompile "org.junit.jupiter:junit-jupiter-api:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-params:$JUNIT_VERSION"
+	testCompile "org.junit.jupiter:junit-jupiter-engine:$JUNIT_VERSION"
+	testCompile "org.junit.vintage:junit-vintage-engine:$JUNIT_VERSION"
+
+	testCompile 'com.jayway.restassured:rest-assured:2.9.0'
+	testCompile 'com.jayway.restassured:json-schema-validator:2.9.0'
+	testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.3.RELEASE'
+	testCompile 'commons-io:commons-io:1.3.2'
+
+}
