@@ -1,5 +1,7 @@
 package io.crnk.ui.presentation;
 
+import java.util.List;
+
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
@@ -11,8 +13,6 @@ import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
-
-import java.util.List;
 
 /**
  * Represents a service the crnk-ui is connected to. Can either be a local instance by providing
@@ -97,6 +97,7 @@ public class PresentationService {
             QuerySpec querySpec = new QuerySpec(MetaResource.class);
             querySpec.setLimit(1000L);
             querySpec.includeRelation(PathSpec.of("attributes"));
+			querySpec.includeRelation(PathSpec.of("repository"));
 
             QuerySpec typeSpec = new QuerySpec(MetaDataObject.class);
             typeSpec.includeRelation(PathSpec.of("attributes"));

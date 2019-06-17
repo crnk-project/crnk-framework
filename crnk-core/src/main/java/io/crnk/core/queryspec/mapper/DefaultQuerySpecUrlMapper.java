@@ -87,7 +87,7 @@ public class DefaultQuerySpecUrlMapper
 		this.context = ctx;
 		pathResolver.init(context);
 
-		jsonParser = new JsonFilterSpecMapper(ctx, supportedOperators, pathResolver);
+		jsonParser = new JsonFilterSpecMapper(ctx, supportedOperators, defaultOperator, pathResolver);
 	}
 
 	/**

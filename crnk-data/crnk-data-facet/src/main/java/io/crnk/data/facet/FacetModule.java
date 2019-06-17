@@ -139,7 +139,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 					LOGGER.debug("discovered facet for {}", resourceInformation.getResourceType());
 					FacetResourceInformation facetResourceInformation = new FacetResourceInformation();
 					informations.stream().forEach(it -> facetResourceInformation.addFacet(it));
-					facetResourceInformation.setType(resourceInformation.getResourceType());
+					facetResourceInformation.setResourceType(resourceInformation.getResourceType());
 					config.addResource(facetResourceInformation);
 				}
 			}
@@ -154,7 +154,7 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	}
 
 	private FacetResourceInformation setupDefaultProvider(FacetResourceInformation facetResourceInformation) {
-		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getType());
+		RegistryEntry entry = moduleContext.getResourceRegistry().getEntry(facetResourceInformation.getResourceType());
 
 		FacetProvider acceptedFacetProvider = null;
 		if (facetResourceInformation.getProvider() == null) {

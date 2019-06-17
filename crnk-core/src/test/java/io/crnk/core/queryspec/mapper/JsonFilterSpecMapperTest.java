@@ -56,7 +56,7 @@ public class JsonFilterSpecMapperTest {
 		pathResolver.init(urlContext);
 
 		objectMapper = container.getObjectMapper();
-		mapper = new JsonFilterSpecMapper(urlContext, supportedOperators, pathResolver);
+		mapper = new JsonFilterSpecMapper(urlContext, supportedOperators, FilterOperator.EQ, pathResolver);
 	}
 
 	@Test

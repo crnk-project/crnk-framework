@@ -80,7 +80,7 @@ public class DataroomFilterTest {
 		// tag::docs[]
 		Builder builder = SecurityConfig.builder();
 		builder.permitAll(ResourcePermission.ALL);
-		builder.setDataRoomFilter((querySpec, method) -> {
+		builder.setDataRoomFilter((querySpec, method, securityProvider) -> {
 			if (querySpec.getResourceClass() == Task.class) {
 				QuerySpec clone = querySpec.clone();
 				clone.addFilter(PathSpec.of("name").filter(FilterOperator.EQ, "foo"));
@@ -134,7 +134,7 @@ public class DataroomFilterTest {
 		DataRoomMatcher matcher = securityModule.getDataRoomMatcher();
 		Task task = new Task();
 		task.setName("foo");
-		boolean match = matcher.checkMatch(task, HttpMethod.GET);
+		boolean match = matcher.checkMatch(task, HttpMethod.GET, securityModule.getCallerSecurityProvider());
 		Assert.assertTrue(match);
 		// end::match[]
 	}
@@ -146,7 +146,7 @@ public class DataroomFilterTest {
 		DataRoomMatcher matcher = securityModule.getDataRoomMatcher();
 		Task task = new Task();
 		task.setName("base");
-		boolean match = matcher.checkMatch(task, HttpMethod.GET);
+		boolean match = matcher.checkMatch(task, HttpMethod.GET, securityModule.getCallerSecurityProvider());
 		Assert.assertFalse(match);
 		// end::match[]
 	}

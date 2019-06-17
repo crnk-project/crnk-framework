@@ -1,5 +1,6 @@
 package io.crnk.meta.model.resource;
 
+import io.crnk.core.resource.annotations.JsonApiRelation;
 import io.crnk.core.resource.annotations.JsonApiResource;
 
 /**
@@ -8,23 +9,34 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 @JsonApiResource(type = "meta/resource")
 public class MetaResource extends MetaResourceBase { // NOSONAR ignore exception hierarchy
 
-    private String resourceType;
+	private String resourceType;
 
-    private String resourcePath;
+	private String resourcePath;
 
-    public String getResourceType() {
-        return resourceType;
-    }
+	@JsonApiRelation
+	private MetaResourceRepository repository;
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
-    }
+	public String getResourceType() {
+		return resourceType;
+	}
 
-    public String getResourcePath() {
-        return resourcePath;
-    }
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
 
-    public void setResourcePath(String resourcePath) {
-        this.resourcePath = resourcePath;
-    }
+	public String getResourcePath() {
+		return resourcePath;
+	}
+
+	public void setResourcePath(String resourcePath) {
+		this.resourcePath = resourcePath;
+	}
+
+	public MetaResourceRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(MetaResourceRepository repository) {
+		this.repository = repository;
+	}
 }

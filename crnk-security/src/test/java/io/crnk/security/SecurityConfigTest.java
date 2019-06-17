@@ -1,11 +1,11 @@
 package io.crnk.security;
 
+import java.util.List;
+
 import io.crnk.security.SecurityConfig.Builder;
 import io.crnk.security.model.Task;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.List;
 
 public class SecurityConfigTest {
 
@@ -31,9 +31,9 @@ public class SecurityConfigTest {
 		Assert.assertEquals(ResourcePermission.DELETE, rules.get(4).getPermission());
 		Assert.assertEquals(ResourcePermission.PATCH, rules.get(5).getPermission());
 
-		Assert.assertNull(rules.get(0).getRole());
-		Assert.assertNull(rules.get(1).getRole());
-		Assert.assertNull(rules.get(2).getRole());
+		Assert.assertEquals("ANY", rules.get(0).getRole());
+		Assert.assertEquals("ANY", rules.get(1).getRole());
+		Assert.assertEquals("ANY", rules.get(2).getRole());
 		Assert.assertEquals("someRole", rules.get(3).getRole());
 		Assert.assertEquals("someRole", rules.get(4).getRole());
 		Assert.assertEquals("someRole", rules.get(5).getRole());
@@ -68,9 +68,9 @@ public class SecurityConfigTest {
 		Assert.assertEquals(ResourcePermission.DELETE, rules.get(4).getPermission());
 		Assert.assertEquals(ResourcePermission.PATCH, rules.get(5).getPermission());
 
-		Assert.assertNull(rules.get(0).getRole());
-		Assert.assertNull(rules.get(1).getRole());
-		Assert.assertNull(rules.get(2).getRole());
+		Assert.assertEquals("ANY", rules.get(0).getRole());
+		Assert.assertEquals("ANY", rules.get(1).getRole());
+		Assert.assertEquals("ANY", rules.get(2).getRole());
 		Assert.assertEquals("someRole", rules.get(3).getRole());
 		Assert.assertEquals("someRole", rules.get(4).getRole());
 		Assert.assertEquals("someRole", rules.get(5).getRole());
