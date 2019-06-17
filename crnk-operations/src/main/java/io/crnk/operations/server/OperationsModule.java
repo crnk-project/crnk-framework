@@ -46,6 +46,8 @@ public class OperationsModule implements Module {
 
 	private ModuleContext moduleContext;
 
+	private boolean resumeOnError = false;
+
 	public static OperationsModule create() {
 		return new OperationsModule();
 	}
@@ -181,11 +183,13 @@ public class OperationsModule implements Module {
 			int status = operationResponse.getStatus();
 			if (status >= 400) {
 				successful = false;
-				break;
+				if (!resumeOnError) {
+					break;
+				}
 			}
 		}
 
-		if (orderedOperations.size() > 1 && successful) {
+		if (orderedOperations.size() > 1 && (successful || resumeOnError)) {
 			fetchUpToDateResponses(orderedOperations, responses);
 		}
 
@@ -203,7 +207,8 @@ public class OperationsModule implements Module {
 
 			boolean isPost = operation.getOp().equalsIgnoreCase(HttpMethod.POST.toString());
 			boolean isPatch = operation.getOp().equalsIgnoreCase(HttpMethod.PATCH.toString());
-			if (isPost || isPatch) {
+			boolean success = operationResponse.getStatus() < 400;
+			if (success && (isPost || isPatch)) {
 				Resource resource = operationResponse.getSingleData().get();
 
 				String path = resource.getType() + "/" + resource.getId();
@@ -256,6 +261,14 @@ public class OperationsModule implements Module {
 			operationResponse.setErrors(document.getErrors());
 			operationResponse.setIncluded(document.getIncluded());
 		}
+	}
+
+	public boolean isResumeOnError() {
+		return resumeOnError;
+	}
+
+	public void setResumeOnError(boolean resumeOnError) {
+		this.resumeOnError = resumeOnError;
 	}
 
 	protected class DefaultOperationFilterContext implements OperationFilterContext {

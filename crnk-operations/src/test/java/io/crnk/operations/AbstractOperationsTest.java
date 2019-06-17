@@ -49,6 +49,8 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 
 	protected OperationsModule operationsModule;
 
+	protected boolean transactional = true;
+
 	public static void setNetworkTimeout(CrnkClient client, final int timeout, final TimeUnit timeUnit) {
 		OkHttpAdapter httpAdapter = (OkHttpAdapter) client.getHttpAdapter();
 		httpAdapter.addListener(new OkHttpAdapterListenerBase() {
@@ -187,7 +189,9 @@ public abstract class AbstractOperationsTest extends JerseyTestBase {
 			operationsModule = OperationsModule.create();
 
 			// tag::transaction[]
-			operationsModule.addFilter(new TransactionOperationFilter());
+			if (transactional) {
+				operationsModule.addFilter(new TransactionOperationFilter());
+			}
 			// end::transaction[]
 
 			feature.addModule(jpaModule);
