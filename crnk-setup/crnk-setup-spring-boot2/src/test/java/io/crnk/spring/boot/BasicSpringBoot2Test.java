@@ -1,5 +1,12 @@
 package io.crnk.spring.boot;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.io.Serializable;
+import javax.security.auth.message.config.AuthConfigFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.client.CrnkClient;
 import io.crnk.core.boot.CrnkBoot;
@@ -62,13 +69,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
-import javax.security.auth.message.config.AuthConfigFactory;
-import java.io.IOException;
-import java.io.Serializable;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = BasicSpringBoot2Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -219,7 +219,7 @@ public class BasicSpringBoot2Test {
         QuerySpec querySpec = new QuerySpec(FacetResource.class);
         querySpec.addFilter(PathSpec.of(FacetResource.ATTR_VALUES, "name").filter(FilterOperator.SELECT, "doe"));
         ResourceList<FacetResource> facets = repository.findAll(querySpec);
-        Assert.assertEquals(3, facets.size());
+        Assert.assertEquals(4, facets.size());
     }
 
     @Test
