@@ -35,6 +35,7 @@ import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.models.TaskStatus;
 import io.crnk.test.mock.models.TaskSubType;
+import io.crnk.test.mock.models.types.ProjectData;
 import io.crnk.test.mock.repository.ScheduleRepository;
 import org.junit.Assert;
 import org.junit.Before;
@@ -181,6 +182,22 @@ public class ResourceMetaProviderTest extends AbstractMetaTest {
 		Assert.assertEquals("status", attributes.get(6).getName());
 		Assert.assertEquals("delayed", attributes.get(7).getName());
 		Assert.assertEquals("customData", attributes.get(8).getName());
+	}
+
+	@Test
+	public void testUnderlyingNameForNestedObject() {
+		MetaDataObject meta = resourceProvider.getMeta(ProjectData.class);
+		MetaAttribute attribute = meta.getAttribute("due");
+		Assert.assertEquals("due", attribute.getName());
+		Assert.assertEquals("dueDate", attribute.getUnderlyingName());
+	}
+
+	@Test
+	public void testUnderlyingNameForResource() {
+		MetaResource meta = resourceProvider.getMeta(Schedule.class);
+		MetaAttribute attribute = meta.getAttribute("taskSet");
+		Assert.assertEquals("taskSet", attribute.getName());
+		Assert.assertEquals("tasks", attribute.getUnderlyingName());
 	}
 
 	@Test

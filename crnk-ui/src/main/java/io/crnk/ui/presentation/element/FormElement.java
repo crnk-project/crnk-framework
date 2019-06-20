@@ -1,25 +1,35 @@
 package io.crnk.ui.presentation.element;
 
 
-public class FormElement extends PresentationElement {
+public class FormElement extends SingularValueElement {
 
-    private PresentationElement component;
+	private PresentationElement component;
 
-    private String label;
+	private String label;
 
-    public PresentationElement getComponent() {
-        return component;
-    }
+	private boolean editable;
 
-    public void setComponent(PresentationElement component) {
-        this.component = component;
-    }
+	public PresentationElement getComponent() {
+		return component;
+	}
 
-    public String getLabel() {
-        return label;
-    }
+	public void setComponent(PresentationElement component) {
+		this.component = component;
+	}
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
 }

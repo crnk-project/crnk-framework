@@ -1,78 +1,105 @@
 package io.crnk.ui.presentation;
 
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.List;
+
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaType;
 import io.crnk.ui.presentation.element.PresentationElement;
 
-import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.List;
-
 public class PresentationEnvironment {
 
-    private MetaElement element;
+	private MetaElement element;
 
-    private MetaType type;
+	private MetaType type;
 
-    private ArrayDeque<MetaAttribute> attributePath;
+	private ArrayDeque<MetaAttribute> attributePath;
 
-    private boolean editable;
+	private boolean editable;
 
-    private List<PresentationType> acceptedTypes = Collections.emptyList();
+	private List<PresentationType> acceptedTypes = Collections.emptyList();
 
-    private PresentationManager factory;
+	private PresentationManager manager;
 
-    public PresentationElement createElement(PresentationEnvironment env) {
-        return factory.createElement(env);
-    }
+	private PresentationService service;
 
-    public MetaElement getElement() {
-        return element;
-    }
+	public PresentationElement createElement(PresentationEnvironment env) {
+		return manager.createElement(env);
+	}
 
-    public void setElement(MetaElement element) {
-        this.element = element;
-    }
+	public MetaElement getElement() {
+		return element;
+	}
 
-    public MetaType getType() {
-        return type;
-    }
+	public void setElement(MetaElement element) {
+		this.element = element;
+	}
 
-    public void setType(MetaType type) {
-        this.type = type;
-    }
+	public MetaType getType() {
+		return type;
+	}
 
-    public ArrayDeque<MetaAttribute> getAttributePath() {
-        return attributePath;
-    }
+	public void setType(MetaType type) {
+		this.type = type;
+	}
 
-    public void setAttributePath(ArrayDeque<MetaAttribute> attributePath) {
-        this.attributePath = attributePath;
-    }
+	public ArrayDeque<MetaAttribute> getAttributePath() {
+		return attributePath;
+	}
 
-    public boolean isEditable() {
-        return editable;
-    }
+	public PresentationEnvironment setAttributePath(ArrayDeque<MetaAttribute> attributePath) {
+		this.attributePath = attributePath;
+		return this;
+	}
 
-    public void setEditable(boolean editable) {
-        this.editable = editable;
-    }
+	public boolean isEditable() {
+		return editable;
+	}
 
-    public List<PresentationType> getAcceptedTypes() {
-        return acceptedTypes;
-    }
+	public PresentationEnvironment setEditable(boolean editable) {
+		this.editable = editable;
+		return this;
+	}
 
-    public void setAcceptedTypes(List<PresentationType> acceptedTypes) {
-        this.acceptedTypes = acceptedTypes;
-    }
+	public List<PresentationType> getAcceptedTypes() {
+		return acceptedTypes;
+	}
 
-    public PresentationManager getFactory() {
-        return factory;
-    }
+	public PresentationEnvironment setAcceptedTypes(List<PresentationType> acceptedTypes) {
+		this.acceptedTypes = acceptedTypes;
+		return this;
+	}
 
-    public void setFactory(PresentationManager factory) {
-        this.factory = factory;
-    }
+	public PresentationManager getManager() {
+		return manager;
+	}
+
+	public PresentationEnvironment setManager(PresentationManager manager) {
+		this.manager = manager;
+		return this;
+	}
+
+	public PresentationService getService() {
+		return service;
+	}
+
+	public PresentationEnvironment setService(PresentationService service) {
+		this.service = service;
+		return this;
+	}
+
+	public PresentationEnvironment clone() {
+		PresentationEnvironment duplicate = new PresentationEnvironment();
+		duplicate.setElement(element);
+		duplicate.setType(type);
+		duplicate.setAttributePath(attributePath);
+		duplicate.setEditable(editable);
+		duplicate.setAcceptedTypes(acceptedTypes);
+		duplicate.setManager(manager);
+		duplicate.setService(service);
+		return duplicate;
+	}
 }
 

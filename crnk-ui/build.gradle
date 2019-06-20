@@ -36,7 +36,9 @@ task npmRunBuild(type: NpmTask) {
 
     npmCommand = ['run', 'build']
     args = ['--', '--base-href', './'] + NG_BUILD_ARGS
-    inputs.dir 'src'
+    inputs.dir 'src/app'
+    inputs.dir 'src/assets'
+    inputs.dir 'src/environments'
     inputs.files 'angular-cli.json', 'package.json'
     outputs.dir 'build/npm/io/crnk/ui'
 }

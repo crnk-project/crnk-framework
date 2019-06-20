@@ -1,15 +1,14 @@
 package io.crnk.meta.internal.typed;
 
+import java.lang.reflect.Type;
+
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.engine.internal.utils.PropertyUtils;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaDataObject;
 import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.provider.MetaFilter;
-
-import java.lang.reflect.Type;
 
 public abstract class MetaDataObjectProvider extends MetaDataObjectProviderBase<MetaDataObject> implements MetaFilter {
 
