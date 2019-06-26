@@ -1,5 +1,13 @@
 package io.crnk.home;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,6 +21,7 @@ import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
+import io.crnk.core.engine.internal.utils.Predicate;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -24,14 +33,6 @@ import io.crnk.core.module.ModuleExtensionAware;
 import io.crnk.core.utils.Prioritizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Displays a list of available resources in the root directory.
@@ -54,6 +55,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 
 	private boolean potentialFilterIssues = false;
 
+	private List<Predicate<HttpRequestContext>> pathFilters = new ArrayList<>();
+
 	// protected for CDI
 	protected HomeModule() {
 	}
@@ -66,6 +69,14 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		HomeModule module = new HomeModule();
 		module.defaultFormat = defaultFormat;
 		return module;
+	}
+
+	/**
+	 * Allows to customize to which request paths the Home module should trigger. Useful when letting the home module
+	 * work next to non-Crnk endpoints.
+	 */
+	public void addPathFilter(Predicate<HttpRequestContext> pathFilter) {
+		pathFilters.add(pathFilter);
 	}
 
 	protected HttpRequestProcessor getRequestProcessor() {
@@ -95,6 +106,7 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		public boolean accepts(HttpRequestContext requestContext) {
 			String path = requestContext.getPath();
 			if (!path.endsWith("/") || !requestContext.getMethod().equalsIgnoreCase(HttpMethod.GET.toString())) {
+				LOGGER.debug("accepts return false due to accept header mismatch");
 				return false;
 			}
 
@@ -103,7 +115,15 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 			boolean acceptsJson = requestContext.accepts(HttpHeaders.JSON_CONTENT_TYPE);
 			boolean acceptsAny = requestContext.acceptsAny();
 			if (!(acceptsHome || acceptsAny || acceptsJson || acceptsJsonApi)) {
+				LOGGER.debug("accepts return false due to accept header mismatch");
 				return false;
+			}
+
+			for (Predicate<HttpRequestContext> pathFilter : pathFilters) {
+				if (!pathFilter.test(requestContext)) {
+					LOGGER.debug("accepts return false due to path filter: {}", pathFilter);
+					return false;
+				}
 			}
 
 			ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
@@ -136,16 +156,19 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 				response = writeJsonHome(requestContext, pathList);
 				if (acceptsHome) {
 					response.setContentType(JSON_HOME_CONTENT_TYPE);
-				} else {
+				}
+				else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
-			} else {
+			}
+			else {
 				boolean jsonapi = requestContext.accepts(HttpHeaders.JSONAPI_CONTENT_TYPE);
 				LOGGER.debug("using JSON API format");
 				response = getResponse(requestContext, pathList);
 				if (jsonapi) {
 					response.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
-				} else {
+				}
+				else {
 					response.setContentType(JSON_CONTENT_TYPE);
 				}
 			}
@@ -238,7 +261,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -262,7 +286,8 @@ public class HomeModule implements Module, ModuleExtensionAware<HomeModuleExtens
 		String json;
 		try {
 			json = objectMapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
+		}
+		catch (JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 
