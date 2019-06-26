@@ -1,5 +1,18 @@
 package io.crnk.client.http.inmemory;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterListener;
 import io.crnk.client.http.HttpAdapterRequest;
@@ -12,230 +25,224 @@ import io.crnk.core.engine.internal.http.HttpRequestDispatcherImpl;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Allows to connect a client to a server directly in memory without HTTP communication. Useful to write
  * performant unit tests.
  */
 public class InMemoryHttpAdapter implements HttpAdapter {
 
-    private final CrnkBoot boot;
+	private final CrnkBoot boot;
 
-    private final String baseUrl;
+	private final String baseUrl;
 
-    private CopyOnWriteArrayList<HttpAdapterListener> listeners = new CopyOnWriteArrayList<>();
+	private CopyOnWriteArrayList<HttpAdapterListener> listeners = new CopyOnWriteArrayList<>();
 
-    public InMemoryHttpAdapter(CrnkBoot boot, String baseUrl) {
-        this.boot = boot;
-        this.baseUrl = baseUrl;
-    }
+	public InMemoryHttpAdapter(CrnkBoot boot, String baseUrl) {
+		this.boot = boot;
+		this.baseUrl = baseUrl;
+	}
 
-    @Override
-    public void addListener(HttpAdapterListener listener) {
-        listeners.add(listener);
-    }
+	@Override
+	public void addListener(HttpAdapterListener listener) {
+		listeners.add(listener);
+	}
 
-    @Override
-    public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
-        return new InMemoryRequest(url, method, requestBody);
-    }
+	@Override
+	public HttpAdapterRequest newRequest(String url, HttpMethod method, String requestBody) {
+		return new InMemoryRequest(url, method, requestBody);
+	}
 
-    @Override
-    public void setReceiveTimeout(int timeout, TimeUnit unit) {
-    }
+	@Override
+	public void setReceiveTimeout(int timeout, TimeUnit unit) {
+	}
 
-    class InMemoryResponse implements HttpAdapterResponse {
+	class InMemoryResponse implements HttpAdapterResponse {
 
-        private final HttpResponse response;
+		private final HttpResponse response;
 
-        public InMemoryResponse(HttpResponse response) {
-            this.response = response;
-        }
+		public InMemoryResponse(HttpResponse response) {
+			this.response = response;
+		}
 
-        @Override
-        public boolean isSuccessful() {
-            return response.getStatusCode() >= 200 && response.getStatusCode() <= 299;
-        }
+		@Override
+		public boolean isSuccessful() {
+			return response.getStatusCode() >= 200 && response.getStatusCode() <= 299;
+		}
 
-        @Override
-        public String body() {
-            byte[] body = response.getBody();
-            return body != null ? new String(body, StandardCharsets.UTF_8) : null;
-        }
+		@Override
+		public String body() {
+			byte[] body = response.getBody();
+			return body != null ? new String(body, StandardCharsets.UTF_8) : null;
+		}
 
-        @Override
-        public int code() {
-            return response.getStatusCode();
-        }
+		@Override
+		public int code() {
+			return response.getStatusCode();
+		}
 
-        @Override
-        public String message() {
-            return response.getStatusMessage();
-        }
+		@Override
+		public String message() {
+			return response.getStatusMessage();
+		}
 
-        @Override
-        public String getResponseHeader(String name) {
-            return response.getHeader(name);
-        }
+		@Override
+		public String getResponseHeader(String name) {
+			return response.getHeader(name);
+		}
 
-        @Override
-        public Set<String> getHeaderNames() {
-            return response.getHeaders().keySet();
-        }
-    }
+		@Override
+		public Set<String> getHeaderNames() {
+			return response.getHeaders().keySet();
+		}
+	}
 
-    class ServerRequestContext implements HttpRequestContextBase {
+	class ServerRequestContext implements HttpRequestContextBase {
 
-        private final InMemoryRequest request;
+		private final InMemoryRequest request;
 
-        private HttpResponse response;
+		private HttpResponse response;
 
-        public ServerRequestContext(InMemoryRequest request) {
-            this.request = request;
-        }
+		public ServerRequestContext(InMemoryRequest request) {
+			this.request = request;
+		}
 
-        @Override
-        public String getRequestHeader(String name) {
-            return request.getHeaderValue(name);
-        }
+		@Override
+		public String getRequestHeader(String name) {
+			return request.getHeaderValue(name);
+		}
 
-        @Override
-        public Map<String, Set<String>> getRequestParameters() {
-            try {
-                URL url = new URL(request.getUrl());
-                Map<String, Set<String>> parameters = new LinkedHashMap<>();
-                String query = url.getQuery();
-                if (query != null) {
-                    String[] pairs = query.split("&");
-                    for (String pair : pairs) {
-                        int idx = pair.indexOf("=");
-                        String key = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
-                        String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
-                        Set<String> values = parameters.getOrDefault(key, new HashSet());
-                        values.add(value);
-                        parameters.put(key, values);
-                    }
-                }
-                return parameters;
-            } catch (Exception e) {
-                throw new IllegalStateException("failed to parse url: " + request.getUrl(), e);
-            }
-        }
+		@Override
+		public Map<String, Set<String>> getRequestParameters() {
+			try {
+				URL url = new URL(request.getUrl());
+				Map<String, Set<String>> parameters = new LinkedHashMap<>();
+				String query = url.getQuery();
+				if (query != null) {
+					String[] pairs = query.split("&");
+					for (String pair : pairs) {
+						int idx = pair.indexOf("=");
+						String key = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
+						String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
+						Set<String> values = parameters.getOrDefault(key, new HashSet());
+						values.add(value);
+						parameters.put(key, values);
+					}
+				}
+				return parameters;
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("failed to parse url: " + request.getUrl(), e);
+			}
+		}
 
-        @Override
-        public String getPath() {
-            String url = request.getUrl();
-            PreconditionUtil.verify(url.startsWith(baseUrl), "url " + url + " does not start with expected " + baseUrl);
-            String path = url.substring(baseUrl.length());
-            int sep = path.indexOf("?");
-            if (sep != -1) {
-                path = path.substring(0, sep);
-            }
-            return UrlUtils.removeLeadingSlash(path);
-        }
+		@Override
+		public String getPath() {
+			String url = request.getUrl();
+			PreconditionUtil.verify(url.startsWith(baseUrl), "url " + url + " does not start with expected " + baseUrl);
+			String path = url.substring(baseUrl.length());
+			int sep = path.indexOf("?");
+			if (sep != -1) {
+				path = path.substring(0, sep);
+			}
+			return UrlUtils.removeLeadingSlash(path);
+		}
 
-        @Override
-        public String getBaseUrl() {
-            return baseUrl;
-        }
+		@Override
+		public String getBaseUrl() {
+			return baseUrl;
+		}
 
-        @Override
-        public byte[] getRequestBody() {
-            String body = request.getBody();
-            return body != null ? body.getBytes(StandardCharsets.UTF_8) : null;
-        }
+		@Override
+		public byte[] getRequestBody() {
+			String body = request.getBody();
+			return body != null ? body.getBytes(StandardCharsets.UTF_8) : null;
+		}
 
-        @Override
-        public String getMethod() {
-            return request.getHttpMethod().toString();
-        }
+		@Override
+		public String getMethod() {
+			return request.getHttpMethod().toString();
+		}
 
-        @Override
-        public HttpResponse getResponse() {
-            return response;
-        }
+		@Override
+		public URI getRequestUri() {
+			return URI.create(request.getUrl());
+		}
 
-        @Override
-        public void setResponse(HttpResponse response) {
-            this.response = response;
-        }
-    }
+		@Override
+		public HttpResponse getResponse() {
+			return response;
+		}
 
-    class InMemoryRequest implements HttpAdapterRequest {
+		@Override
+		public void setResponse(HttpResponse response) {
+			this.response = response;
+		}
+	}
 
-        private final String url;
+	class InMemoryRequest implements HttpAdapterRequest {
 
-        private final HttpMethod method;
+		private final String url;
 
-        private final String requestBody;
+		private final HttpMethod method;
 
-        private Map<String, String> headers = new HashMap<>();
+		private final String requestBody;
 
-        public InMemoryRequest(String url, HttpMethod method, String requestBody) {
-            this.url = url;
-            this.method = method;
-            this.requestBody = requestBody;
-        }
+		private Map<String, String> headers = new HashMap<>();
 
-        @Override
-        public void header(String name, String value) {
-            headers.put(name, value);
-        }
+		public InMemoryRequest(String url, HttpMethod method, String requestBody) {
+			this.url = url;
+			this.method = method;
+			this.requestBody = requestBody;
+		}
 
-        @Override
-        public HttpAdapterResponse execute() throws IOException {
-            listeners.stream().forEach(it -> it.onRequest(this));
+		@Override
+		public void header(String name, String value) {
+			headers.put(name, value);
+		}
 
-            ServerRequestContext serverRequestContext = new ServerRequestContext(this);
+		@Override
+		public HttpAdapterResponse execute() throws IOException {
+			listeners.stream().forEach(it -> it.onRequest(this));
 
-            HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
-            requestDispatcher.process(serverRequestContext);
+			ServerRequestContext serverRequestContext = new ServerRequestContext(this);
 
-            if (serverRequestContext.response == null) {
-                HttpResponse notFoundResponse = new HttpResponse();
-                notFoundResponse.setStatusCode(404);
-                serverRequestContext.setResponse(notFoundResponse);
-            }
+			HttpRequestDispatcherImpl requestDispatcher = boot.getRequestDispatcher();
+			requestDispatcher.process(serverRequestContext);
 
-            InMemoryResponse adapterResponse = new InMemoryResponse(serverRequestContext.response);
-            listeners.stream().forEach(it -> it.onResponse(this, adapterResponse));
-            return adapterResponse;
-        }
+			if (serverRequestContext.response == null) {
+				HttpResponse notFoundResponse = new HttpResponse();
+				notFoundResponse.setStatusCode(404);
+				serverRequestContext.setResponse(notFoundResponse);
+			}
 
-        @Override
-        public String getBody() {
-            return requestBody;
-        }
+			InMemoryResponse adapterResponse = new InMemoryResponse(serverRequestContext.response);
+			listeners.stream().forEach(it -> it.onResponse(this, adapterResponse));
+			return adapterResponse;
+		}
 
-        @Override
-        public String getUrl() {
-            return url;
-        }
+		@Override
+		public String getBody() {
+			return requestBody;
+		}
 
-        @Override
-        public HttpMethod getHttpMethod() {
-            return method;
-        }
+		@Override
+		public String getUrl() {
+			return url;
+		}
 
-        @Override
-        public Set<String> getHeadersNames() {
-            return headers.keySet();
-        }
+		@Override
+		public HttpMethod getHttpMethod() {
+			return method;
+		}
 
-        @Override
-        public String getHeaderValue(String name) {
-            return headers.get(name);
-        }
-    }
+		@Override
+		public Set<String> getHeadersNames() {
+			return headers.keySet();
+		}
+
+		@Override
+		public String getHeaderValue(String name) {
+			return headers.get(name);
+		}
+	}
 }

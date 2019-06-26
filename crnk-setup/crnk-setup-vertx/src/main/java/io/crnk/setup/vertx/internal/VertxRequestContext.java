@@ -1,16 +1,17 @@
 package io.crnk.setup.vertx.internal;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.core.http.HttpServerRequest;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class VertxRequestContext implements HttpRequestContextBase {
 
@@ -80,8 +81,13 @@ public class VertxRequestContext implements HttpRequestContextBase {
         return serverRequest.rawMethod();
     }
 
+	@Override
+	public URI getRequestUri() {
+		return URI.create(serverRequest.uri());
+	}
 
-    @Override
+
+	@Override
     public HttpResponse getResponse() {
         return response;
     }

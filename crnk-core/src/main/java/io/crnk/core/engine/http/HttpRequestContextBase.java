@@ -1,23 +1,26 @@
 package io.crnk.core.engine.http;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
 public interface HttpRequestContextBase {
 
-    String getRequestHeader(String name);
+	String getRequestHeader(String name);
 
-    Map<String, Set<String>> getRequestParameters();
+	Map<String, Set<String>> getRequestParameters();
 
-    String getPath();
+	String getPath();
 
-    String getBaseUrl();
+	String getBaseUrl();
 
-    byte[] getRequestBody();
+	byte[] getRequestBody();
 
-    String getMethod();
+	String getMethod();
 
-    HttpResponse getResponse();
+	URI getRequestUri();
 
-    void setResponse(HttpResponse response);
+	HttpResponse getResponse();
+
+	void setResponse(HttpResponse response);
 }

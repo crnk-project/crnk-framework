@@ -1,5 +1,9 @@
 package io.crnk.servlet;
 
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.ServletContext;
+
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.servlet.internal.ServletRequestContext;
@@ -9,10 +13,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-
-import javax.servlet.ServletContext;
-import java.util.Map;
-import java.util.Set;
 
 public class ServletRequestContextTest {
 
@@ -42,6 +42,7 @@ public class ServletRequestContextTest {
 		Assert.assertEquals(request, context.getServletRequest());
 		Assert.assertEquals(response, context.getServletResponse());
 		Assert.assertEquals(servletContext, context.getServletContext());
+		Assert.assertEquals("/api/tasks/", context.getRequestUri().toString());
 	}
 
 	@Test
