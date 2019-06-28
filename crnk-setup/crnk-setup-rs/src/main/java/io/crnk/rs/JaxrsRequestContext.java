@@ -15,12 +15,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import io.crnk.core.engine.http.HttpRequestContextBase;
+import io.crnk.core.engine.http.DefaultHttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.utils.Nullable;
 
-public class JaxrsRequestContext implements HttpRequestContextBase {
+public class JaxrsRequestContext extends DefaultHttpRequestContextBase {
 
 	private final CrnkFeature feature;
 
@@ -101,7 +101,7 @@ public class JaxrsRequestContext implements HttpRequestContextBase {
 	}
 
 	@Override
-	public URI getRequestUri() {
+	public URI getNativeRequestUri() {
 		return requestContext.getUriInfo().getRequestUri();
 	}
 

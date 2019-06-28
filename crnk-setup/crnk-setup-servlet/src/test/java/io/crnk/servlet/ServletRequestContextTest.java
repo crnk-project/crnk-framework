@@ -42,7 +42,7 @@ public class ServletRequestContextTest {
 		Assert.assertEquals(request, context.getServletRequest());
 		Assert.assertEquals(response, context.getServletResponse());
 		Assert.assertEquals(servletContext, context.getServletContext());
-		Assert.assertEquals("/api/tasks/", context.getRequestUri().toString());
+		Assert.assertEquals("http://test:1234/api/tasks/", context.getRequestUri().toString());
 	}
 
 	@Test
@@ -63,6 +63,22 @@ public class ServletRequestContextTest {
 		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
 		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 		Assert.assertEquals("/tasks/", context.getPath());
+	}
+
+	@Test
+	public void testGetUrlWithServletPathWithFowardProto() {
+		request.setServletPath("/api");
+
+		request.addHeader(HttpHeaders.X_FORWARDED_PROTO_HEADER, "https");
+
+		ServletRequestContext context = new ServletRequestContext(servletContext, request, response, null);
+		Assert.assertEquals("https://test:1234/api", context.getBaseUrl());
+		Assert.assertEquals("/tasks/", context.getPath());
+		Assert.assertTrue(context.getReadForwardedHeader());
+
+		context = new ServletRequestContext(servletContext, request, response, null);
+		context.setReadForwardedHeader(false);
+		Assert.assertEquals("http://test:1234/api", context.getBaseUrl());
 	}
 
 	@Test

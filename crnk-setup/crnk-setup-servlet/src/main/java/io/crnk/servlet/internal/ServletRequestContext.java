@@ -14,17 +14,18 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.crnk.core.engine.http.DefaultHttpRequestContextBase;
 import io.crnk.core.engine.http.HttpHeaders;
-import io.crnk.core.engine.http.HttpRequestContextBase;
 import io.crnk.core.engine.http.HttpResponse;
 import io.crnk.core.engine.internal.utils.UrlUtils;
 import io.crnk.core.utils.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServletRequestContext implements HttpRequestContextBase {
+public class ServletRequestContext extends DefaultHttpRequestContextBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServletRequestContext.class);
+
 
 	private final HttpServletRequest servletRequest;
 
@@ -46,6 +47,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 	private HttpResponse response = new HttpResponse();
 
+
 	public ServletRequestContext(final ServletContext servletContext, final HttpServletRequest request,
 			final HttpServletResponse response, String pathPrefix) {
 		this(servletContext, request, response, pathPrefix, HttpHeaders.DEFAULT_CHARSET);
@@ -66,7 +68,7 @@ public class ServletRequestContext implements HttpRequestContextBase {
 
 		// Serving with Filter, pathInfo can be null.
 		if (path == null || path.isEmpty()) { // spring seems to return empty string
-			String requestUrl = servletRequest.getRequestURL().toString();
+			String requestUrl = getRequestUri().toString();
 			if (!requestUrl.startsWith(baseUrl)) {
 				throw new IllegalStateException("invalid base url: " + baseUrl + " for request " + requestUrl);
 			}
@@ -87,58 +89,34 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	}
 
 	private String computeBaseUrl() {
-		String requestUrl = UrlUtils.removeTrailingSlash(servletRequest.getRequestURL().toString());
+		final URI requestUri = getRequestUri();
 
 		String contextPath = UrlUtils.removeTrailingSlash(servletRequest.getContextPath());
-		String basePath = contextPath;
 		String servletPath = UrlUtils.removeTrailingSlash(servletRequest.getServletPath());
 
+		String basePath;
 		if (pathPrefix != null && pathPrefix.startsWith(contextPath)) {
 			basePath = pathPrefix;
 		}
 		else if (pathPrefix != null) {
-			basePath += pathPrefix;
+			basePath = contextPath + pathPrefix;
 		}
 		else if (servletPath != null) {
 			basePath = servletPath;
 		}
+		else {
+			basePath = contextPath;
+		}
 		basePath = UrlUtils.removeTrailingSlash(basePath);
+		basePath = UrlUtils.removeLeadingSlash(basePath);
 
 		LOGGER.debug("use basePath={} for contextPath={}, pathPrefix={}, servletPath={}, requestUrl=requestUrl", basePath,
-				contextPath, pathPrefix, servletPath, requestUrl);
+				contextPath, pathPrefix, servletPath, requestUri);
 
-		String serverName = servletRequest.getServerName();
-		int serverNameEndIndex = requestUrl.indexOf(serverName) + serverName.length();
-
-		String url;
-		if (basePath.isEmpty()) {
-			String requestUri = UrlUtils.removeTrailingSlash(servletRequest.getRequestURI());
-			if (requestUri.isEmpty()) {
-				url = requestUrl;
-			}
-			else {
-				int sep = requestUrl.indexOf(requestUri, serverNameEndIndex);
-				if (sep == -1) {
-					throw new IllegalStateException(
-							"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
-									+ servletRequest
-									.getContextPath() + ", servletPath=" + servletPath + ", pathPrefix=" + pathPrefix);
-				}
-				url = requestUrl.substring(0, sep);
-			}
-		}
-		else {
-			int sep = requestUrl.indexOf(basePath, serverNameEndIndex);
-			if (sep == -1) {
-				throw new IllegalStateException(
-						"invalid URL configuration, cannot extract baseUrl from requestUrl=" + requestUrl + ", contextPath="
-								+ servletRequest
-								.getContextPath() + ", servletPath=" + servletPath + ", pathPrefix=" + pathPrefix);
-			}
-			url = requestUrl.substring(0, sep + basePath.length());
-		}
-
-		return UrlUtils.removeTrailingSlash(url);
+		return requestUri.getScheme()
+				+ "://" + requestUri.getHost()
+				+ (requestUri.getPort() != -1 ? ":" + requestUri.getPort() : "")
+				+ (basePath.length() > 0 ? "/" + basePath : "");
 	}
 
 	private static String normalizePathPrefix(String pathPrefix) {
@@ -244,8 +222,8 @@ public class ServletRequestContext implements HttpRequestContextBase {
 	}
 
 	@Override
-	public URI getRequestUri() {
-		return URI.create(servletRequest.getRequestURI());
+	public URI getNativeRequestUri() {
+		return URI.create(servletRequest.getRequestURL().toString());
 	}
 
 	@Override

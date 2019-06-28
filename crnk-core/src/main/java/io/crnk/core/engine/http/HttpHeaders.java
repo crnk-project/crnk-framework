@@ -5,6 +5,8 @@ public class HttpHeaders {
 	private HttpHeaders() {
 	}
 
+	public static final String X_FORWARDED_PROTO_HEADER = "X-Forwarded-Proto";
+
 	public static final String HTTP_HEADER_ACCEPT = "Accept";
 
 	public static final String HTTP_HEADER_CRNK_COMPACT = "Crnk-Compact";
