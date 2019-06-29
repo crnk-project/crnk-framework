@@ -10,7 +10,7 @@ import io.crnk.core.engine.internal.information.resource.ReflectionFieldAccessor
  */
 public interface AnyResourceFieldAccessor {
 
-	Object getValue(Object resource, String name);
+	Object getValues(Object resource);
 
 	void setValue(Object resource, String name, Object fieldValue);
 

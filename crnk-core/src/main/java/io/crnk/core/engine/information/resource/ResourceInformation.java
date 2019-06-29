@@ -384,12 +384,12 @@ public class ResourceInformation {
             anyFieldAccessor = new AnyResourceFieldAccessor() {
 
                 @Override
-                public Object getValue(Object resource, String name) {
+                public Object getValues(Object resource) {
                     try {
-                        return jsonAnyGetter.invoke(resource, name);
+                        return jsonAnyGetter.invoke(resource);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new ResourceException(
-                                String.format("Exception while reading %s.%s due to %s", resource, name, e.getMessage()), e);
+                                String.format("Exception while reading %s due to %s", resource, e.getMessage()), e);
                     }
                 }
 
