@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+export PATH=$PATH:$PWD/.gradle/nodejs/node-v8.9.0-win-x64:$PWD/.gradle/yarn/yarn-v1.6.0
+yarn "$@"

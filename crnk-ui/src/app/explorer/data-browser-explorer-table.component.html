@@ -1,0 +1,22 @@
+<div class="" style="display: flex; width: 100%">
+
+    <div style="width:300px;" [style.display]="facetsHidden ? 'none' : 'block'">
+        <sb4b-facets [resourceType]="explorer.baseQuery.resourceType" [path]="explorer.servicePath"
+                     #facets="facets" (facetsLoaded)="facetsHidden = $event.length === 0"></sb4b-facets>
+    </div>
+
+    <div style="flex-grow: 8;overflow-x: auto; " class="sb4b-content-spacing">
+        <sb4b-binding [path]="explorer.path" #binding="binding" [filterChanges]="facets.filterChange" [sort]="sort">
+            <div *ngIf="binding.dataSource$ | async as dataSource" style="width:100%;overflow-x: auto">
+                <table mat-table [dataSource]="dataSource">
+                    <ng-container *ngFor="let column of columns" [matColumnDef]="column.id">
+                        <th mat-header-cell *matHeaderCellDef>{{column.label}}</th>
+                        <td mat-cell *matCellDef="let element"> {{getValue(element, column)}}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+        </sb4b-binding>
+    </div>
+</div>

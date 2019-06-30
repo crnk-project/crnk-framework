@@ -1,0 +1,19 @@
+<div class="sb4b-facet">
+
+    <div class="sb4b-facet-title">{{facet.name}}</div>
+
+
+    <mat-selection-list #list [ngModel]="values" (ngModelChange)="updateFacet($event)">
+        <mat-list-option *ngFor="let valueEntry of values" [value]="valueEntry.label"
+                         [selected]="selection && selection.indexOf(valueEntry.label) != -1" checkboxPosition="before">
+
+            <div>
+                <div class="sb4b-facet-label mat-cell">{{valueEntry.label}}</div>
+                <div class="sb4b-facet-count mat-cell">{{valueEntry.count}}</div>
+            </div>
+
+        </mat-list-option>
+    </mat-selection-list>
+
+
+</div>

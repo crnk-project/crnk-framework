@@ -1,0 +1,7 @@
+
+<div class="sb4b-facets mat-elevation-z8" *ngIf="facets$ | async as facets">
+	<sb4b-facet *ngFor="let facet of facets" [facet]="facet" [selection]="facetSelections[facet.name]"
+				(selectionChange)="updateFilter(facet, $event)"></sb4b-facet>
+</div>
+
+

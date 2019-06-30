@@ -1,0 +1,38 @@
+table {
+    width: 100%;
+}
+
+.sb4b-facet {
+    padding: 20px;
+}
+
+.sb4b-facet-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.sb4b-facet-table {
+
+}
+
+
+.sb4b-facet-selection {
+    width: 20px;
+    vertical-align: middle;
+}
+
+.sb4b-facet-label {
+    border: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    float: left;
+}
+
+
+.sb4b-facet-count {
+    width: 30px;
+    text-align: right;
+    border: none;
+    float: right;
+}
