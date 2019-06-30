@@ -1,12 +1,12 @@
-package io.crnk.core.queryspec.repository;
+package io.crnk.core.mock.repository;
 
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.repository.RelationshipRepositoryBase;
 
-public class TaskWithPagingBehaviorToProjectRelationshipRepository
+public class TaskWithPagingBehaviorToProjectRepository
 		extends RelationshipRepositoryBase<TaskWithPagingBehavior, String, Project, String> {
 
-	public TaskWithPagingBehaviorToProjectRelationshipRepository() {
+	public TaskWithPagingBehaviorToProjectRepository() {
 		super(TaskWithPagingBehavior.class, Project.class);
 	}
 }

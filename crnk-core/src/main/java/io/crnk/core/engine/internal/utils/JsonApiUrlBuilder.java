@@ -1,14 +1,11 @@
 package io.crnk.core.engine.internal.utils;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import io.crnk.legacy.queryParams.QueryParams;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -28,17 +25,8 @@ public class JsonApiUrlBuilder {
         this.moduleRegistry = moduleRegistry;
     }
 
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams) {
-        return buildUrl(resourceInformation, id, queryParams, null);
-    }
-
     public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec) {
         return buildUrl(resourceInformation, id, querySpec, null);
-    }
-
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryAdapter queryAdapter,
-                           String relationshipName) {
-        return buildUrl(resourceInformation, id, ((QuerySpecAdapter) queryAdapter).getQuerySpec(), relationshipName);
     }
 
     public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName) {
@@ -47,10 +35,6 @@ public class JsonApiUrlBuilder {
 
     public String buildUrl(ResourceInformation resourceInformation, Object id, QuerySpec querySpec, String relationshipName, boolean selfLink) {
         return buildUrlInternal(resourceInformation, id, querySpec, relationshipName, selfLink);
-    }
-
-    public String buildUrl(ResourceInformation resourceInformation, Object id, QueryParams queryParams, String relationshipName) {
-        return buildUrlInternal(resourceInformation, id, queryParams, relationshipName, true);
     }
 
     private String buildUrlInternal(ResourceInformation resourceInformation, Object id, Object query, String relationshipName, boolean selfLink) {

@@ -11,7 +11,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ServiceUrlProvider;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
-import io.crnk.legacy.locator.JsonServiceLocator;
 import io.crnk.rs.internal.JaxrsModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +21,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
 import java.util.Collection;
 
 /**
  * Basic Crnk feature that initializes core classes and provides a starting point to use the framework in
  * another projects.
- * <p>
- * This feature has NO {@link Provider} annotation, thus it require to provide an instance of  {@link ObjectMapper} and
- * {@link JsonServiceLocator} to provide instances of resources.
  */
 @ConstrainedTo(RuntimeType.SERVER)
 public class CrnkFeature implements Feature {

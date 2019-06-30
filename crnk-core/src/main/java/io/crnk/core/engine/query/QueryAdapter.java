@@ -2,70 +2,62 @@ package io.crnk.core.engine.query;
 
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.queryspec.PathSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.queryParams.params.IncludedFieldsParams;
-import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
-import io.crnk.legacy.queryParams.params.TypedParams;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface QueryAdapter {
 
-	TypedParams<IncludedRelationsParams> getIncludedRelations();
+    Map<String, Set<PathSpec>> getIncludedRelations();
 
-	TypedParams<IncludedFieldsParams> getIncludedFields();
+    Map<String, Set<PathSpec>> getIncludedFields();
 
-	ResourceInformation getResourceInformation();
+    ResourceInformation getResourceInformation();
 
-	ResourceRegistry getResourceRegistry();
+    ResourceRegistry getResourceRegistry();
 
-	QueryContext getQueryContext();
+    QueryContext getQueryContext();
 
-	/**
-	 * @return maximum number of resources to return or null for unbounded
-	 */
-	@Deprecated
-	Long getLimit();
+    /**
+     * @return maximum number of resources to return or null for unbounded
+     */
+    @Deprecated
+    Long getLimit();
 
-	@Deprecated
-	void setLimit(Long limit);
+    @Deprecated
+    void setLimit(Long limit);
 
-	/**
-	 * @return maximum number of resources to skip in the response.
-	 */
-	@Deprecated
-	long getOffset();
+    /**
+     * @return maximum number of resources to skip in the response.
+     */
+    @Deprecated
+    long getOffset();
 
-	@Deprecated
-	void setOffset(long offset);
+    @Deprecated
+    void setOffset(long offset);
 
-	/**
-	 * @return duplicate of this instance
-	 */
-	QueryAdapter duplicate();
+    /**
+     * @return duplicate of this instance
+     */
+    QueryAdapter duplicate();
 
-	/**
-	 * The {@link QueryParams} instance for this query adapter if possible.
-	 *
-	 * @return may return null if the implementation does not support QueryParams
-	 */
-	@Deprecated
-	QueryParams toQueryParams();
+    /**
+     * The {@link QuerySpec} instance for this query adapter if possible.
+     *
+     * @return may return null if the implementation does not support QueryParams
+     */
+    QuerySpec toQuerySpec();
 
-	/**
-	 * The {@link QuerySpec} instance for this query adapter if possible.
-	 *
-	 * @return may return null if the implementation does not support QueryParams
-	 */
-	QuerySpec toQuerySpec();
+    boolean getCompactMode();
 
-	boolean getCompactMode();
+    void setPagingSpec(PagingSpec pagingSpec);
 
-	void setPagingSpec(PagingSpec pagingSpec);
+    PagingSpec getPagingSpec();
 
-	PagingSpec getPagingSpec();
+    boolean isEmpty();
 
-	boolean isEmpty();
-
-	boolean isSelfLink();
+    boolean isSelfLink();
 }

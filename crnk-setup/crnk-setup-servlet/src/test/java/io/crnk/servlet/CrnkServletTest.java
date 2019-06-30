@@ -18,10 +18,11 @@ package io.crnk.servlet;
 
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.servlet.resource.model.Locale;
 import io.crnk.servlet.resource.model.Node;
 import io.crnk.servlet.resource.model.NodeComment;
-import io.crnk.servlet.resource.repository.NodeRepository;
+import io.crnk.servlet.resource.model.ServletTestModule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -74,28 +75,24 @@ public class CrnkServletTest {
 
     private CrnkServlet servlet;
 
-    private NodeRepository nodeRepository;
 
     @Before
     public void before() throws Exception {
         servlet = new CrnkServlet();
+        servlet.getBoot().addModule(new ServletTestModule());
 
         servletContext = new MockServletContext();
         ((MockServletContext) servletContext).setContextPath("");
         servletConfig = new MockServletConfig(servletContext);
         ((MockServletConfig) servletConfig)
-                .addInitParameter(CrnkProperties.RESOURCE_SEARCH_PACKAGE, RESOURCE_SEARCH_PACKAGE);
-        ((MockServletConfig) servletConfig)
                 .addInitParameter(CrnkProperties.RESOURCE_DEFAULT_DOMAIN, RESOURCE_DEFAULT_DOMAIN);
 
         servlet.init(servletConfig);
-        nodeRepository = new NodeRepository();
     }
 
     @After
     public void after() {
         servlet.destroy();
-        nodeRepository.clearRepo();
     }
 
     @Test
@@ -152,7 +149,7 @@ public class CrnkServletTest {
 
         assertJsonPartEquals("tasks", responseContent, "data.type");
         assertJsonPartEquals("\"1\"", responseContent, "data.id");
-        assertJsonPartEquals(SOME_TASK_ATTRIBUTES, responseContent, "data.attributes");
+        assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data.attributes");
         assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data.links");
         assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
     }
@@ -179,7 +176,7 @@ public class CrnkServletTest {
 
         assertJsonPartEquals("tasks", responseContent, "data.type");
         assertJsonPartEquals("\"1\"", responseContent, "data.id");
-        assertJsonPartEquals(SOME_TASK_ATTRIBUTES, responseContent, "data.attributes");
+        assertJsonPartEquals(FIRST_TASK_ATTRIBUTES, responseContent, "data.attributes");
         assertJsonPartEquals(FIRST_TASK_LINKS, responseContent, "data.links");
         assertJsonPartEquals(PROJECT1_RELATIONSHIP_LINKS, responseContent, "data.relationships.project.links");
     }
@@ -194,8 +191,8 @@ public class CrnkServletTest {
         request.setRequestURI("/api/tasks");
         request.setContentType(HttpHeaders.JSONAPI_CONTENT_TYPE);
         request.addHeader("Accept", "*/*");
-        request.addParameter("filter[name]", "John");
-        request.setQueryString(URLEncoder.encode("filter[name]", StandardCharsets.UTF_8.name()) + "=John");
+        request.addParameter("filter[name]", "First task");
+        request.setQueryString(URLEncoder.encode("filter[name]", StandardCharsets.UTF_8.name()) + "=First task");
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -258,6 +255,9 @@ public class CrnkServletTest {
         Node child1 = new Node(2L, root, Collections.emptySet());
         Node child2 = new Node(3L, root, Collections.emptySet());
         root.setChildren(new LinkedHashSet<>(Arrays.asList(child1, child2)));
+
+        ResourceRepository nodeRepository = (ResourceRepository) servlet.getBoot().getResourceRegistry()
+                .getEntry(Node.class).getResourceRepository().getResourceRepository();
         nodeRepository.save(root);
         nodeRepository.save(child1);
         nodeRepository.save(child2);
@@ -287,6 +287,9 @@ public class CrnkServletTest {
         child1.setNodeComments(new LinkedHashSet<>(Collections.singleton(child1Comment)));
         Node child2 = new Node(3L, root, Collections.emptySet(), Collections.emptySet());
         root.setChildren(new LinkedHashSet<>(Arrays.asList(child1, child2)));
+
+        ResourceRepository nodeRepository = (ResourceRepository) servlet.getBoot().getResourceRegistry()
+                .getEntry(Node.class).getResourceRepository().getResourceRepository();
         nodeRepository.save(root);
         nodeRepository.save(child1);
         nodeRepository.save(child2);

@@ -3,6 +3,7 @@ package io.crnk.core.engine.internal.dispatcher.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
@@ -20,7 +21,6 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.models.User;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.QuerySpec;
@@ -39,156 +39,154 @@ import java.util.Set;
 
 public abstract class ControllerTestBase {
 
-	protected static final long TASK_ID = 1;
+    protected static final long TASK_ID = 1;
 
-	protected static final long PROJECT_ID = 2;
+    protected static final long PROJECT_ID = 2;
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
-	protected ObjectMapper objectMapper;
+    protected ObjectMapper objectMapper;
 
-	protected PathBuilder pathBuilder;
+    protected PathBuilder pathBuilder;
 
-	protected ResourceRegistry resourceRegistry;
+    protected ResourceRegistry resourceRegistry;
 
-	protected TypeParser typeParser;
+    protected TypeParser typeParser;
 
-	protected DocumentMapper documentMapper;
+    protected DocumentMapper documentMapper;
 
-	protected ModuleRegistry moduleRegistry;
+    protected ModuleRegistry moduleRegistry;
 
-	protected QuerySpecAdapter emptyTaskQuery;
+    protected QuerySpecAdapter emptyTaskQuery;
 
-	protected QuerySpecAdapter emptyScheduleQuery;
+    protected QuerySpecAdapter emptyScheduleQuery;
 
-	protected QuerySpecAdapter emptyProjectQuery;
+    protected QuerySpecAdapter emptyProjectQuery;
 
-	protected QuerySpecAdapter emptyUserQuery;
+    protected QuerySpecAdapter emptyUserQuery;
 
-	protected QuerySpecAdapter emptyComplexPojoQuery;
+    protected QuerySpecAdapter emptyComplexPojoQuery;
 
-	protected QuerySpecAdapter emptyMemorandumQuery;
+    protected QuerySpecAdapter emptyMemorandumQuery;
 
-	protected ResourceModificationFilter modificationFilter;
+    protected ResourceModificationFilter modificationFilter;
 
-	protected List<ResourceModificationFilter> modificationFilters;
+    protected List<ResourceModificationFilter> modificationFilters;
 
-	protected ControllerContext controllerContext;
+    protected ControllerContext controllerContext;
 
-	protected PropertiesProvider propertiesProvider;
+    protected PropertiesProvider propertiesProvider;
 
-	protected CoreTestContainer container;
-	protected CrnkBoot boot;
-
-
-	@Before
-	public void prepare() {
-		propertiesProvider = Mockito.mock(PropertiesProvider.class);
-
-		modificationFilter = Mockito.spy(new ResourceModificationFilterBase());
-		modificationFilters = Arrays.asList(modificationFilter);
-
-		SimpleModule testModule = new SimpleModule("test");
-		testModule.addResourceModificationFilter(modificationFilter);
-
-		container = new CoreTestContainer();
-		container.setDefaultPackage();
-		container.addModule(testModule);
-		container.getBoot().setPropertiesProvider(propertiesProvider);
-		setup(container.getBoot());
-		container.boot();
-
-		boot = container.getBoot();
-		objectMapper = boot.getObjectMapper();
-		resourceRegistry = boot.getResourceRegistry();
-		moduleRegistry = boot.getModuleRegistry();
-		typeParser = moduleRegistry.getTypeParser();
-		pathBuilder = new PathBuilder(resourceRegistry, typeParser);
-		documentMapper = boot.getDocumentMapper();
-
-		controllerContext = new ControllerContext(moduleRegistry, () -> documentMapper);
-
-		MockRepositoryUtil.clear();
-
-		emptyTaskQuery = container.toQueryAdapter(new QuerySpec(Task.class));
-		emptyScheduleQuery = container.toQueryAdapter(new QuerySpec(Schedule.class));
-		emptyProjectQuery = container.toQueryAdapter(new QuerySpec(Project.class));
-		emptyUserQuery = container.toQueryAdapter(new QuerySpec(User.class));
-		emptyComplexPojoQuery = container.toQueryAdapter(new QuerySpec(ComplexPojo.class));
-		emptyMemorandumQuery = container.toQueryAdapter(new QuerySpec(Memorandum.class));
-	}
-
-	protected void setup(CrnkBoot boot) {
-	}
+    protected CoreTestContainer container;
+    protected CrnkBoot boot;
 
 
-	protected io.crnk.core.engine.document.Document toDocument(Object resource) {
-		DocumentMappingConfig config = new DocumentMappingConfig();
-		JsonApiResponse response = new JsonApiResponse();
-		response.setEntity(resource);
-		Result<io.crnk.core.engine.document.Document> document = boot.getDocumentMapper().toDocument(response, null, config);
-		return document.get();
-	}
+    @Before
+    public void prepare() {
+        propertiesProvider = Mockito.mock(PropertiesProvider.class);
+
+        modificationFilter = Mockito.spy(new ResourceModificationFilterBase());
+        modificationFilters = Arrays.asList(modificationFilter);
+
+        SimpleModule testModule = new SimpleModule("test");
+        testModule.addResourceModificationFilter(modificationFilter);
+
+        container = new CoreTestContainer();
+        container.addModule(new CoreTestModule());
+        container.addModule(testModule);
+        container.getBoot().setPropertiesProvider(propertiesProvider);
+        setup(container.getBoot());
+        container.boot();
+
+        boot = container.getBoot();
+        objectMapper = boot.getObjectMapper();
+        resourceRegistry = boot.getResourceRegistry();
+        moduleRegistry = boot.getModuleRegistry();
+        typeParser = moduleRegistry.getTypeParser();
+        pathBuilder = new PathBuilder(resourceRegistry, typeParser);
+        documentMapper = boot.getDocumentMapper();
+
+        controllerContext = new ControllerContext(moduleRegistry, () -> documentMapper);
+
+        emptyTaskQuery = container.toQueryAdapter(new QuerySpec(Task.class));
+        emptyScheduleQuery = container.toQueryAdapter(new QuerySpec(Schedule.class));
+        emptyProjectQuery = container.toQueryAdapter(new QuerySpec(Project.class));
+        emptyUserQuery = container.toQueryAdapter(new QuerySpec(User.class));
+        emptyComplexPojoQuery = container.toQueryAdapter(new QuerySpec(ComplexPojo.class));
+        emptyMemorandumQuery = container.toQueryAdapter(new QuerySpec(Memorandum.class));
+    }
+
+    protected void setup(CrnkBoot boot) {
+    }
 
 
-	public Resource createTask() {
-		Resource data = new Resource();
-		data.setType("tasks");
-		data.setId("1");
-		try {
-			data.setAttribute("name", objectMapper.readTree("\"sample task\""));
-			data.setAttribute("data", objectMapper.readTree("\"asd\""));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return data;
-	}
+    protected io.crnk.core.engine.document.Document toDocument(Object resource) {
+        DocumentMappingConfig config = new DocumentMappingConfig();
+        JsonApiResponse response = new JsonApiResponse();
+        response.setEntity(resource);
+        Result<io.crnk.core.engine.document.Document> document = boot.getDocumentMapper().toDocument(response, null, config);
+        return document.get();
+    }
 
-	protected JsonNode toJson(String value) {
-		try {
-			return objectMapper.readTree("\"" + value + "\"");
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
 
-	public Resource createUser() {
-		Resource data = new Resource();
-		data.setType("users");
-		data.setId("3");
+    public Resource createTask() {
+        Resource data = new Resource();
+        data.setType("tasks");
+        data.setId("1");
+        try {
+            data.setAttribute("name", objectMapper.readTree("\"sample task\""));
+            data.setAttribute("data", objectMapper.readTree("\"asd\""));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return data;
+    }
 
-		try {
-			data.setAttribute("name", objectMapper.readTree("\"sample user\""));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return data;
-	}
+    protected JsonNode toJson(String value) {
+        try {
+            return objectMapper.readTree("\"" + value + "\"");
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	public Resource createProject() {
-		return createProject(Long.toString(PROJECT_ID), "projects");
-	}
+    public Resource createUser() {
+        Resource data = new Resource();
+        data.setType("users");
+        data.setId("3");
 
-	public Resource createProject(String id) {
-		return createProject(id, "projects");
-	}
+        try {
+            data.setAttribute("name", objectMapper.readTree("\"sample user\""));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return data;
+    }
 
-	public Resource createProject(String id, String type) {
-		Resource data = new Resource();
-		data.setType(type);
-		data.setId(id);
+    public Resource createProject() {
+        return createProject(Long.toString(PROJECT_ID), "projects");
+    }
 
-		try {
-			data.setAttribute("name", objectMapper.readTree("\"sample project\""));
-			data.setAttribute("data", objectMapper.readTree("{\"keywords\" : [\"foo\", \"bar\"], \"data\" : \"asd\", \"status\": { \"qualityStatus\" : \"ok\", \"timelineStatus\" : \"ok\" }}"));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return data;
-	}
+    public Resource createProject(String id) {
+        return createProject(id, "projects");
+    }
 
-	protected void addParams(Map<String, Set<String>> params, String key, String value) {
-		params.put(key, new HashSet<>(Arrays.asList(value)));
-	}
+    public Resource createProject(String id, String type) {
+        Resource data = new Resource();
+        data.setType(type);
+        data.setId(id);
+
+        try {
+            data.setAttribute("name", objectMapper.readTree("\"sample project\""));
+            data.setAttribute("data", objectMapper.readTree("{\"keywords\" : [\"foo\", \"bar\"], \"data\" : \"asd\", \"status\": { \"qualityStatus\" : \"ok\", \"timelineStatus\" : \"ok\" }}"));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return data;
+    }
+
+    protected void addParams(Map<String, Set<String>> params, String key, String value) {
+        params.put(key, new HashSet<>(Arrays.asList(value)));
+    }
 }

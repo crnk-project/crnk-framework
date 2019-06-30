@@ -18,19 +18,19 @@ import io.crnk.core.engine.internal.utils.MultivaluedMap;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Task;
-import io.crnk.core.mock.repository.MockRepositoryUtil;
 import io.crnk.core.mock.repository.ProjectRepository;
 import io.crnk.core.mock.repository.ProjectToTaskRepository;
 import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.mock.repository.TaskToProjectRepository;
 import io.crnk.core.mock.repository.ThingRepository;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.module.discovery.TestServiceDiscovery;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.queryspec.repository.TaskToProjectRelationshipRepository;
+import io.crnk.core.repository.RelationshipMatcher;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,11 +72,6 @@ public class ResourceFieldContributorTest {
         container.boot();
     }
 
-    @After
-    public void teardown() {
-        MockRepositoryUtil.clear();
-    }
-
     @Test
     public void checkFieldAddedToResourceInformation() {
         RegistryEntry entry = container.getEntry(Task.class);
@@ -89,7 +84,7 @@ public class ResourceFieldContributorTest {
 
     @Test
     public void checkInclusionUponRequest() {
-        TaskRepository repo = new TaskRepository();
+        ResourceRepository<Task, Object> repo = container.getRepository(Task.class);
         Task task = new Task();
         task.setId(1L);
         task.setName("someTask");
@@ -122,7 +117,14 @@ public class ResourceFieldContributorTest {
     }
 
 
-    class ContributorRelationshipRepository extends TaskToProjectRelationshipRepository implements ResourceFieldContributor {
+    class ContributorRelationshipRepository extends TaskToProjectRepository implements ResourceFieldContributor {
+
+        @Override
+        public RelationshipMatcher getMatcher() {
+            RelationshipMatcher matcher = new RelationshipMatcher();
+            matcher.rule().source(Task.class).target(Project.class).add();
+            return matcher;
+        }
 
 
         @Override

@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.registry;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.internal.dispatcher.ControllerRegistry;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.PathBuilder;
@@ -21,7 +22,7 @@ public class ControllerRegistryTest {
 	@Before
 	public void prepare() {
 		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.boot();
 		resourceRegistry = container.getResourceRegistry();
 		pathBuilder = new PathBuilder(resourceRegistry, container.getModuleRegistry().getTypeParser());

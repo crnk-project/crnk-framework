@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.document.Relationship;
@@ -32,7 +33,7 @@ public class DocumentSerializerTest {
 	@Before
 	public void setup() {
 		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.boot();
 
 		objectMapper = container.getObjectMapper();

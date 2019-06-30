@@ -17,7 +17,6 @@ import io.crnk.core.engine.internal.information.resource.ResourceFieldImpl;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.parser.StringMapper;
 import io.crnk.core.engine.parser.TypeParser;
-import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
 import io.crnk.core.repository.RelationshipMatcher;
 import io.crnk.core.resource.annotations.JsonApiResource;
@@ -70,7 +69,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
     @Override
     public ResourceInformationBuilder createResource(Class<?> resourceClass, String resourceType, String resourcePath) {
         DefaultResource resource = new DefaultResource();
-        resource.resourceClass(resourceClass);
+        resource.implementationType(resourceClass);
         resource.resourceType(resourceType);
         resource.resourcePath(resourcePath);
         return resource;
@@ -195,12 +194,6 @@ public class DefaultInformationBuilder implements InformationBuilder {
         }
 
         @Override
-        public DefaultResource resourceClass(Class<?> resourceClass) {
-            this.implementationType = resourceClass;
-            return this;
-        }
-
-        @Override
         public DefaultResource implementationType(Type implementationType) {
             this.implementationType = implementationType;
             return this;
@@ -224,13 +217,7 @@ public class DefaultInformationBuilder implements InformationBuilder {
             return this;
         }
 
-        @Override
-        public ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior) {
-            this.pagingSpecType = pagingBehavior.createEmptyPagingSpec().getClass();
-            return this;
-        }
-
-        public ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType) {
+        public ResourceInformationBuilder pagingSpecType(Class<? extends PagingSpec> pagingSpecType) {
             this.pagingSpecType = pagingSpecType;
             return this;
         }

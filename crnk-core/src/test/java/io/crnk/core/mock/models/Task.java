@@ -1,5 +1,6 @@
 package io.crnk.core.mock.models;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,20 +38,20 @@ public class Task {
 	@JsonIgnore
 	private boolean ignoredField;
 
-	@JsonApiRelation(opposite = "tasks", serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	@JsonApiRelation(serialize = SerializeType.EAGER, lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
 	private Project project;
 
 	@JsonApiRelation
 	private List<Project> projectsInit = Collections.emptyList();
 
 	@JsonApiRelation(serialize = SerializeType.ONLY_ID)
-	private List<Project> projects = Collections.emptyList();
+	private List<Project> projects = new ArrayList<>();
 
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
+	@JsonApiRelation
 	private Project includedProject;
 
-	@JsonApiRelation(lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL)
-	private List<Project> includedProjects;
+	@JsonApiRelation
+	private List<Project> includedProjects = new ArrayList<>();
 
 	@JsonApiMetaInformation
 	private MetaInformation metaInformation;

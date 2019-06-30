@@ -11,7 +11,7 @@ import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonApiResource(type = "tasks", pagingSpec = OffsetLimitPagingSpec.class)
@@ -29,13 +29,13 @@ public class Task {
     private Schedule schedule;
 
     @JsonApiRelation
-    private List<Project> projects = Collections.emptyList();
+    private List<Project> projects = new ArrayList<>();
 
     @JsonApiRelation
     private Project includedProject;
 
     @JsonApiRelation
-    private List<Project> includedProjects;
+    private List<Project> includedProjects = new ArrayList<>();
 
     @JsonApiMetaInformation
     private TaskMeta metaInformation;

@@ -6,16 +6,11 @@ import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.http.HttpStatus;
-import io.crnk.core.engine.internal.dispatcher.controller.ControllerTestBase;
-import io.crnk.core.engine.internal.dispatcher.controller.RelationshipsPatchController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePatchController;
-import io.crnk.core.engine.internal.dispatcher.controller.ResourcePostController;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.mock.models.RelationIdTestResource;
 import io.crnk.core.mock.models.Schedule;
-import io.crnk.core.mock.repository.RelationIdTestRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
 import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,13 +35,13 @@ public class ResourceIdControllerTest extends ControllerTestBase {
 
 	private ResourceIdentifier schedule2Id;
 
-	private RelationIdTestRepository repository;
+	private ResourceRepository<RelationIdTestResource, Object> repository;
 
 	@Before
 	public void prepare() {
 		super.prepare();
 
-		ScheduleRepositoryImpl scheduleRepository = new ScheduleRepositoryImpl();
+		ResourceRepository<Schedule, Object> scheduleRepository = container.getRepository(Schedule.class);
 
 		schedule2 = new Schedule();
 		schedule2.setId(2L);
@@ -60,8 +55,7 @@ public class ResourceIdControllerTest extends ControllerTestBase {
 		scheduleRepository.save(schedule3);
 		schedule3Id = new ResourceIdentifier(schedule3.getId().toString(), "schedules");
 
-		repository = new RelationIdTestRepository();
-		repository.setResourceRegistry(resourceRegistry);
+		repository = container.getRepository(RelationIdTestResource.class);
 	}
 
 	public Resource createResource() throws IOException {

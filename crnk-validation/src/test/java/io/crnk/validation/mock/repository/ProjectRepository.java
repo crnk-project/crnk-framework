@@ -1,8 +1,9 @@
 package io.crnk.validation.mock.repository;
 
 import io.crnk.core.exception.ResourceNotFoundException;
-import io.crnk.legacy.queryParams.QueryParams;
-import io.crnk.legacy.repository.LegacyResourceRepository;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.validation.mock.models.Project;
 
 import javax.validation.ConstraintViolation;
@@ -11,72 +12,83 @@ import javax.validation.Validation;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectRepository implements LegacyResourceRepository<Project, Long> {
+public class ProjectRepository implements ResourceRepository<Project, Long> {
 
-	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
-	@Override
-	public <S extends Project> S save(S entity) {
+    @Override
+    public <S extends Project> S save(S entity) {
 
-		if (entity.getName() != null && entity.getName().equals(ValidationException.class.getSimpleName())) {
-			throw new ValidationException("messageKey");
-		}
+        if (entity.getName() != null && entity.getName().equals(ValidationException.class.getSimpleName())) {
+            throw new ValidationException("messageKey");
+        }
 
-		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-		Validator validator = factory.getValidator();
-		Set<ConstraintViolation<S>> violations = validator.validate(entity);
-		if (!violations.isEmpty()) {
-			throw new ConstraintViolationException(violations);
-		}
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<S>> violations = validator.validate(entity);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
 
-		entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
-		THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
+        entity.setId((long) (THREAD_LOCAL_REPOSITORY.size() + 1));
+        THREAD_LOCAL_REPOSITORY.put(entity.getId(), entity);
 
-		return entity;
-	}
+        return entity;
+    }
 
-	@Override
-	public Project findOne(Long aLong, QueryParams queryParams) {
-		Project project = THREAD_LOCAL_REPOSITORY.get(aLong);
-		if (project == null) {
-			throw new ResourceNotFoundException(Project.class.getCanonicalName());
-		}
-		return project;
-	}
+    @Override
+    public <S extends Project> S create(S resource) {
+        return save(resource);
+    }
 
-	@Override
-	public Iterable<Project> findAll(QueryParams queryParamss) {
-		return THREAD_LOCAL_REPOSITORY.values();
-	}
+    @Override
+    public Class<Project> getResourceClass() {
+        return Project.class;
+    }
 
-	@Override
-	public Iterable<Project> findAll(Iterable<Long> ids, QueryParams queryParams) {
-		List<Project> values = new LinkedList<>();
-		for (Project value : THREAD_LOCAL_REPOSITORY.values()) {
-			if (contains(value, ids)) {
-				values.add(value);
-			}
-		}
-		return values;
-	}
+    @Override
+    public Project findOne(Long aLong, QuerySpec querySpec) {
+        Project project = THREAD_LOCAL_REPOSITORY.get(aLong);
+        if (project == null) {
+            throw new ResourceNotFoundException(Project.class.getCanonicalName());
+        }
+        return project;
+    }
 
-	private boolean contains(Project value, Iterable<Long> ids) {
-		for (Long id : ids) {
-			if (value.getId().equals(id)) {
-				return true;
-			}
-		}
+    @Override
+    public ResourceList<Project> findAll(QuerySpec querySpecs) {
+        return querySpecs.apply(THREAD_LOCAL_REPOSITORY.values());
+    }
 
-		return false;
-	}
+    @Override
+    public ResourceList<Project> findAll(Collection<Long> ids, QuerySpec querySpec) {
+        List<Project> values = new LinkedList<>();
+        for (Project value : THREAD_LOCAL_REPOSITORY.values()) {
+            if (contains(value, ids)) {
+                values.add(value);
+            }
+        }
+        return querySpec.apply(values);
+    }
 
-	@Override
-	public void delete(Long aLong) {
-		THREAD_LOCAL_REPOSITORY.remove(aLong);
-	}
+    private boolean contains(Project value, Iterable<Long> ids) {
+        for (Long id : ids) {
+            if (value.getId().equals(id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void delete(Long aLong) {
+        THREAD_LOCAL_REPOSITORY.remove(aLong);
+    }
 }

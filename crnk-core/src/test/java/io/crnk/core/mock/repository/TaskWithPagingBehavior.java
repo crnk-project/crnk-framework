@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec.repository;
+package io.crnk.core.mock.repository;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.crnk.core.mock.models.Project;

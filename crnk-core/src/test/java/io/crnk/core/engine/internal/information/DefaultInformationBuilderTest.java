@@ -35,7 +35,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks");
 		ResourceInformation info = resource.build();
 		resource.superResourceType("superTask");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 		Assert.assertEquals("tasks", info.getResourceType());
 		Assert.assertEquals("tasks", info.getResourcePath());
 	}
@@ -45,7 +45,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 
 		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);
@@ -96,7 +96,7 @@ public class DefaultInformationBuilderTest {
 		InformationBuilder.ResourceInformationBuilder resource = builder.createResource(Task.class, "tasks", null);
 		resource.superResourceType("superTask");
 		resource.resourceType("changedTasks");
-		resource.resourceClass(Project.class);
+		resource.implementationType(Project.class);
 
 		InformationBuilder.FieldInformationBuilder idField = resource.addField("id", ResourceFieldType.ID, String.class);
 		idField.serializeType(SerializeType.EAGER);

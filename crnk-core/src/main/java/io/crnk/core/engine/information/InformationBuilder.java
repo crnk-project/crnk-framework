@@ -55,12 +55,6 @@ public interface InformationBuilder {
 
         FieldInformationBuilder addField(String name, ResourceFieldType id1, Class<?> clazz);
 
-        /**
-         * @deprecated use {@link #implementationType(Type)}
-         */
-        @Deprecated
-        ResourceInformationBuilder resourceClass(Class<?> resourceClass);
-
         ResourceInformationBuilder implementationType(Type implementationType);
 
         ResourceInformationBuilder resourceType(String resourceType);
@@ -69,13 +63,7 @@ public interface InformationBuilder {
 
         ResourceInformationBuilder superResourceType(String superResourceType);
 
-        /**
-         * @deprecated use pagingSpecType
-         */
-        @Deprecated
-        ResourceInformationBuilder pagingBehavior(PagingBehavior pagingBehavior);
-
-        ResourceInformationBuilder pagingSpecType(Class<PagingSpec> pagingSpecType);
+        ResourceInformationBuilder pagingSpecType(Class<? extends PagingSpec> pagingSpecType);
 
         ResourceInformation build();
 

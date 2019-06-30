@@ -1,6 +1,7 @@
 package io.crnk.core.engine.internal.repository;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.mock.models.RelationshipBehaviorTestResource;
@@ -16,7 +17,7 @@ public class RelationshipRepositoryBehaviorTest {
     @Before
     public void setup() {
         CoreTestContainer container = new CoreTestContainer();
-        container.setDefaultPackage();
+        container.addModule(new CoreTestModule());
         container.boot();
         resourceRegistry = container.getResourceRegistry();
     }

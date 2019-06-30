@@ -1,4 +1,4 @@
-package io.crnk.core.queryspec.repository;
+package io.crnk.core.mock.repository;
 
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
@@ -7,11 +7,11 @@ import io.crnk.core.resource.list.ResourceList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TaskWithPagingBehaviorQuerySpecRepository extends ResourceRepositoryBase<TaskWithPagingBehavior, String> {
+public class TaskWithPagingBehaviorRepository extends ResourceRepositoryBase<TaskWithPagingBehavior, String> {
 
 	private static Map<String, TaskWithPagingBehavior> taskWithPagingBehavior = new HashMap<>();
 
-	public TaskWithPagingBehaviorQuerySpecRepository() {
+	public TaskWithPagingBehaviorRepository() {
 		super(TaskWithPagingBehavior.class);
 	}
 
