@@ -111,6 +111,7 @@ public class ResourceMapper {
 		return info;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void setAttributes(Resource resource, Object entity, ResourceInformation resourceInformation,
 			QueryAdapter queryAdapter, ResourceMappingConfig mappingConfig) {
 		// fields legacy may further limit the number of fields

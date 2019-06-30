@@ -131,6 +131,7 @@ public class ResourceInformationTest {
 		ResourceWithAny resource = new ResourceWithAny();
 
 		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
+		Object o = accessor.getValues(resource);
 		Map<String, Object> map = accessor.getValues(resource);
 		Assert.assertNull(map.get("notAllowed"));
 	}
