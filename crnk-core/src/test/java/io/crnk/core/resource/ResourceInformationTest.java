@@ -114,13 +114,15 @@ public class ResourceInformationTest {
 		ResourceWithAny resource = new ResourceWithAny();
 
 		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
-		Assert.assertNull(accessor.getValue(resource, "test"));
+
+		Map<String, Object> map = accessor.getValues(resource);
+		Assert.assertNull(map.get("test"));
 		accessor.setValue(resource, "test", "testValue");
-		Assert.assertEquals("testValue", accessor.getValue(resource, "test"));
-		Assert.assertEquals("testValue", resource.getProperty("test"));
+		Assert.assertEquals("testValue", map.get( "test"));
+		Assert.assertEquals("testValue", resource.getProperties().get("test"));
 	}
 
-	@Test(expected = ResourceException.class)
+	@Test
 	public void checkGetAnyWithInvalidKey() {
 		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, Long.class, Long.class, null);
 		sut = new ResourceInformation(typeParser, ResourceWithAny.class, "tasks", null, Arrays.asList(idField),
@@ -129,7 +131,8 @@ public class ResourceInformationTest {
 		ResourceWithAny resource = new ResourceWithAny();
 
 		AnyResourceFieldAccessor accessor = sut.getAnyFieldAccessor();
-		accessor.getValue(resource, "notAllowed");
+		Map<String, Object> map = accessor.getValues(resource);
+		Assert.assertNull(map.get("notAllowed"));
 	}
 
 	@Test(expected = ResourceException.class)
@@ -160,11 +163,8 @@ public class ResourceInformationTest {
 		private Map<String, String> properties = new HashMap<>();
 
 		@JsonAnyGetter
-		public String getProperty(String key) {
-			if ("notAllowed".equals(key)) {
-				throw new IllegalStateException();
-			}
-			return properties.get(key);
+		public Map getProperties() {
+			return properties;
 		}
 
 		@JsonAnySetter

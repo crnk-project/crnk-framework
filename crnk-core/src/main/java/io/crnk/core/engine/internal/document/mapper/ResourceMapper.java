@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +15,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
+import io.crnk.core.engine.information.resource.AnyResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.utils.SerializerUtil;
@@ -113,7 +116,6 @@ public class ResourceMapper {
 		// fields legacy may further limit the number of fields
 		List<ResourceField> fields = DocumentMapperUtil
 				.getRequestedFields(resourceInformation, queryAdapter, resourceInformation.getAttributeFields(), false);
-
 		// serialize the individual attributes
 		QueryContext queryContext = queryAdapter.getQueryContext();
 		for (ResourceField field : fields) {
@@ -123,7 +125,17 @@ public class ResourceMapper {
 					setAttribute(resource, field, value);
 				}
 			}
+
 		}
+
+		if (resourceInformation.getAnyFieldAccessor() != null) {
+			AnyResourceFieldAccessor anyFieldAccessor = resourceInformation.getAnyFieldAccessor();
+			Map<String, Object> map = anyFieldAccessor.getValues(entity);
+			for (Map.Entry<String, Object> entry : map.entrySet()) {
+				setAnyAttribute(resource, entry.getKey(), entry.getValue());
+			}
+		}
+
 	}
 
 	private static Set<Object> defaultValues = new HashSet<>(Arrays.asList(
@@ -149,6 +161,11 @@ public class ResourceMapper {
 			JsonNode valueNode = objectMapper.valueToTree(value);
 			resource.getAttributes().put(field.getJsonName(), valueNode);
 		}
+	}
+
+	protected void setAnyAttribute(Resource resource, String field, Object value) {
+			JsonNode valueNode = objectMapper.valueToTree(value);
+			resource.getAttributes().put(field, valueNode);
 	}
 
 	private boolean isIncluded(ResourceField field, Object value) {
