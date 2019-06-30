@@ -44,7 +44,7 @@ public class Schedule {
     private ScheduleStatus status;
 
     @JsonIgnore
-    protected Map<String, Object> anyFields = new LinkedHashMap<>();
+    private Map<String, Object> anyFields = new LinkedHashMap<>();
 
     private boolean delayed;
 
