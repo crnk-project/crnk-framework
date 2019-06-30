@@ -6,12 +6,11 @@ import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.core.boot.CrnkBoot;
-import io.crnk.core.boot.CrnkProperties;
 import io.crnk.meta.MetaModule;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
-import io.crnk.test.mock.repository.ScheduleRepository;
+import io.crnk.test.mock.TestModule;
 import okhttp3.OkHttpClient.Builder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.Before;
@@ -59,11 +58,11 @@ public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
     private class TestApplication extends ResourceConfig {
 
         public TestApplication() {
-            property(CrnkProperties.RESOURCE_SEARCH_PACKAGE, ScheduleRepository.class.getPackage().getName());
             CrnkFeature feature = new CrnkFeature();
             ObjectMapper objectMapper = feature.getObjectMapper();
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             feature.addModule(createModule());
+            feature.addModule(new TestModule());
             boot = feature.getBoot();
             setupFeature(feature);
             register(feature);

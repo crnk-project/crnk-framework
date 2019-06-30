@@ -19,9 +19,8 @@ import io.crnk.core.mock.models.Project;
 import io.crnk.core.mock.models.Schedule;
 import io.crnk.core.mock.models.Task;
 import io.crnk.core.mock.repository.ProjectRepository;
-import io.crnk.core.mock.repository.ScheduleRepository;
-import io.crnk.core.mock.repository.ScheduleRepositoryImpl;
-import io.crnk.core.mock.repository.TaskRepository;
+import io.crnk.core.queryspec.QuerySpec;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.response.JsonApiResponse;
 import io.crnk.core.utils.Nullable;
 import org.junit.Assert;
@@ -122,7 +121,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
 
     @Test
     public void onRepositoryReturnNullStatusCode204MustBeReturned() {
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         Project project = new Project();
         project.setId(ProjectRepository.RETURN_NULL_ON_CREATE_ID);
         project.setName("returns null on update");
@@ -288,9 +287,9 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         task.setName("test");
         task.setProject(project);
 
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         projectRepository.save(project);
-        TaskRepository taskRepository = new TaskRepository();
+        ResourceRepository<Task, Object> taskRepository = container.getRepository(Task.class);
         taskRepository.save(task);
 
         JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId());
@@ -323,10 +322,10 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Response response = sut.handle(jsonPath, emptyTaskQuery, taskPatch);
 
         // verify attributes updated and relationship nulled
+        Task updatedTask = container.getRepository(Task.class).findOne(taskId, new QuerySpec(Task.class));
+        Assert.assertEquals(null, updatedTask.getProject());
+        Assert.assertEquals("task updated", updatedTask.getName());
         Assert.assertNotNull(response);
-        assertThat(response.getDocument().getSingleData().get().getType()).isEqualTo("tasks");
-        assertThat(response.getDocument().getSingleData().get().getAttributes().get("name").asText()).isEqualTo("task updated");
-        assertThat(response.getDocument().getSingleData().get().getRelationships().get("project").getData().get()).isNull();
     }
 
 
@@ -335,7 +334,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         // GIVEN
         Project project = new Project();
         project.setName("test");
-        ProjectRepository projectRepository = new ProjectRepository();
+        ResourceRepository<Project, Object> projectRepository = container.getRepository(Project.class);
         projectRepository.save(project);
         assertThat(project.getId()).isNotNull();
 
@@ -343,7 +342,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         schedule.setId(12L);
         schedule.setName("test");
         schedule.setProjectId(project.getId());
-        ScheduleRepository scheduleRepository = new ScheduleRepositoryImpl();
+        ResourceRepository<Schedule, Object> scheduleRepository = container.getRepository(Schedule.class);
         scheduleRepository.save(schedule);
         assertThat(schedule.getId()).isNotNull();
 
@@ -388,7 +387,7 @@ public class ResourcePatchControllerTest extends ControllerTestBase {
         Task task = new Task();
         task.setName("test");
         task.setStatusThingId(13L);
-        TaskRepository taskRepository = new TaskRepository();
+        ResourceRepository<Task, Object> taskRepository = container.getRepository(Task.class);
         taskRepository.save(task);
 
         JsonPath taskPath = pathBuilder.build("/tasks/" + task.getId());

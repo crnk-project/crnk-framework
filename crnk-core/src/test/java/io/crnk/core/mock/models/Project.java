@@ -24,7 +24,7 @@ public class Project {
 
 	private ProjectData data;
 
-	@JsonApiRelation(opposite = "project")
+	@JsonApiRelation(mappedBy = "project")
 	private List<Task> tasks = new ArrayList<>();
 
 	@JsonApiRelation

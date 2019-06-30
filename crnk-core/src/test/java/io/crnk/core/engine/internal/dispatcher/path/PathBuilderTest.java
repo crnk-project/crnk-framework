@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 
 import io.crnk.core.CoreTestContainer;
+import io.crnk.core.CoreTestModule;
 import io.crnk.core.engine.information.repository.RepositoryAction;
 import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
@@ -35,7 +36,7 @@ public class PathBuilderTest {
 		notExposedModule.addRepository(new NotExposedRepository());
 
 		CoreTestContainer container = new CoreTestContainer();
-		container.setDefaultPackage();
+		container.addModule(new CoreTestModule());
 		container.addModule(notExposedModule);
 		container.boot();
 

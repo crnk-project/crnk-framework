@@ -194,11 +194,8 @@ And the JAX-RS application setup looks like:
 include::../../../../crnk-setup/crnk-setup-rs/src/test/java/io/crnk/rs/JsonApiResponseFilterTestBase.java[tags=docs]
 ----
 
-Note that:
-
-- `CrnkProperties.NULL_DATA_RESPONSE_ENABLED` determines whether null responses should be wrapped
-   as JSON:API responses.
-- Make use of proper service discovery instead of `CrnkProperties.RESOURCE_SEARCH_PACKAGE` in real applications.
+Note that  `CrnkProperties.NULL_DATA_RESPONSE_ENABLED` determines whether null responses should be wrapped
+as JSON:API responses.
 
 
 ### JAX-RS service interoperability
@@ -424,43 +421,6 @@ application (https://github.com/crnk-project/crnk-framework/tree/master/crnk-int
 
 The Spring integration comes with a ``SpringServiceDiscovery`` that makes use of the Spring `ApplicationContext`
 to discover beans.
-
-
-## Discovery without a dependency injection framework
-
-WARNING: This mechanism is considered to be rather deprecated and a lightweight dependency injection framework like guice or
-the setup of manual modules is recommended instead.
-
-If no dependency injection framework is used, Crnk can also discover beans on its own. For this purpose,
-the `org.reflections:reflections` library has to be added to the classpath and the
-`CrnkProperties.RESOURCE_SEARCH_PACKAGE` be defined. In JAX-RS this may look like:
-
-[source]
-----
-@ApplicationPath("/")
-	public class MyApplication extends Application {
-
-		@Override
-        public Set<Object> getSingletons() {
-            CrnkFeature crnkFeature = new CrnkFeature();
-            crnkFeature.getBoot().setServiceLocator(...);
-            return Collections.singleton((Object)crnkFeature);
-        }
-
-		@Override
-        public Map<String, Object> getProperties() {
-            Map<String, Object> map = new HashMap<>();
-            map.put(CrnkProperties.RESOURCE_SEARCH_PACKAGE, "com.myapplication.model")
-            return map;
-        }
-	}
-----
-
-A `JsonServiceLocator` service locator can be provided to control the instatiation of object. By default the default
-constructor will be used. The `CrnkProperties.RESOURCE_SEARCH_PACKAGE` property is passed to define which package
-should be searched for beans. Multiple packages can be passed by specifying a comma separated string
-of packages i.e. com.company.service.dto,com.company.service.repository. It will pick up any public non-abstract
-class that makes use of Crnk interfaces, like repositories, exception mappers and modules.
 
 ## No Discovery
 

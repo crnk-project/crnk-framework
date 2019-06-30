@@ -1,6 +1,5 @@
 package io.crnk.core.queryspec.internal.typed;
 
-import com.google.common.base.Verify;
 import io.crnk.core.queryspec.AbstractPathSpec;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -27,7 +26,6 @@ public abstract class PathSpecBase extends PathSpec {
 
     public SortSpec sort(Direction dir) {
         if (boundSpec != null) {
-            Verify.verify(boundSpec instanceof SortSpec, "cannot set sorting for {}", boundSpec);
             SortSpec sortSpec = (SortSpec) boundSpec;
             sortSpec.setDirection(dir);
             return sortSpec;
@@ -37,7 +35,6 @@ public abstract class PathSpecBase extends PathSpec {
 
     public FilterSpec filter(FilterOperator operator, Object value) {
         if (boundSpec != null) {
-            Verify.verify(boundSpec instanceof FilterSpec, "cannot set filtering for {}", boundSpec);
             FilterSpec filterSpec = (FilterSpec) boundSpec;
             filterSpec.setOperator(operator);
             filterSpec.setValue(value);

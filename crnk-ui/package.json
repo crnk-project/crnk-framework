@@ -11,7 +11,6 @@
 		"lint": "ng lint",
 		"e2e": "ng e2e"
 	},
-	"private": true,
 	"dependencies": {
 		"@angular/common": "^4.3.2",
 		"@angular/animations": "^4.3.2",
