@@ -1,5 +1,11 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
@@ -10,12 +16,6 @@ import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.Result;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 public class RelationshipsPostController extends RelationshipsResourceUpsert {
 
 	@Override
@@ -24,8 +24,9 @@ public class RelationshipsPostController extends RelationshipsResourceUpsert {
 	}
 
 	@Override
-	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Collection<ResourceIdentifier> dataBodies, QueryAdapter queryAdapter,
-											RelationshipRepositoryAdapter relationshipRepositoryForClass) {
+	public Result processToManyRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, Collection<ResourceIdentifier> dataBodies,
+			QueryAdapter queryAdapter,
+			RelationshipRepositoryAdapter relationshipRepositoryForClass) {
 		return resourceResult.merge(resource -> {
 			List<ResourceIdentifier> resourceIds = new ArrayList<>();
 			for (ResourceIdentifier dataBody : dataBodies) {
@@ -49,8 +50,9 @@ public class RelationshipsPostController extends RelationshipsResourceUpsert {
 	}
 
 	@Override
-	protected Result processToOneRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, ResourceIdentifier resourceId, QueryAdapter queryAdapter,
-											  RelationshipRepositoryAdapter relationshipRepositoryForClass) {
+	protected Result processToOneRelationship(Result<Object> resourceResult, ResourceInformation targetResourceInformation, ResourceField relationshipField, ResourceIdentifier resourceId,
+			QueryAdapter queryAdapter,
+			RelationshipRepositoryAdapter relationshipRepositoryForClass) {
 		return resourceResult.merge(resource -> {
 			ResourceIdentifier filteredResourceId = resourceId;
 

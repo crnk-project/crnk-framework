@@ -22,6 +22,8 @@ import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
+import io.crnk.core.engine.http.HttpStatusContext;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
@@ -79,7 +81,6 @@ public class ModuleRegistry {
 	private ResultFactory resultFactory;
 
 	private Map<String, String> serverInfo;
-
 
 	enum InitializedState {
 		NOT_INITIALIZED,
@@ -1026,6 +1027,13 @@ public class ModuleRegistry {
 			return ModuleRegistry.this.getExceptionMapperRegistry();
 		}
 
+
+		@Override
+		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
+			aggregatedModule.addHttpStatusBehavior(httpStatusBehavior);
+		}
+
 		@Override
 		public RequestDispatcher getRequestDispatcher() {
 			checkState(InitializedState.INITIALIZING, InitializedState.INITIALIZED);
@@ -1125,5 +1133,23 @@ public class ModuleRegistry {
 		}
 		throw new IllegalStateException("no pagingBehavior implementation available for " + pagingSpecType);
 	}
+
+	public List<HttpStatusBehavior> getHttpStatusProviders() {
+		return aggregatedModule.getHttpStatusBehaviors();
+	}
+
+	public HttpStatusBehavior getHttpStatusProvider() {
+		List<HttpStatusBehavior> behaviors = Prioritizable.prioritze(aggregatedModule.getHttpStatusBehaviors());
+		return context -> {
+			for (HttpStatusBehavior behavior : behaviors) {
+				Integer status = behavior.getStatus(context);
+				if (status != null) {
+					return status;
+				}
+			}
+			throw new IllegalStateException("failed to compute HTTP status for " + context);
+		};
+	}
+
 
 }

@@ -1,5 +1,10 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
@@ -7,7 +12,6 @@ import io.crnk.core.engine.document.ResourceIdentifier;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.filter.ResourceRelationshipModificationType;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.FieldPath;
@@ -22,11 +26,6 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.repository.response.JsonApiResponse;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Creates a new post in a similar manner as in {@link ResourcePostController}, but additionally adds a relation to a field.
@@ -86,7 +85,8 @@ public class FieldResourcePost extends ResourceUpsert {
 		if (relationshipResourceInformation.isNested()) {
 			// nested resource repositories are assumed to handle attachment to parent by themeselves
 			return createdDocument.map(this::toResponse);
-		} else {
+		}
+		else {
 			Result<JsonApiResponse> parentResource = registryEntry.getResourceRepository().findOne(id, queryAdapter);
 			return createdDocument.zipWith(parentResource,
 					(created, parent) -> attachToParent(parent, registryEntry, relationshipField, created, queryAdapter))
@@ -97,7 +97,8 @@ public class FieldResourcePost extends ResourceUpsert {
 
 
 	public Response toResponse(Document document) {
-		return new Response(document, HttpStatus.CREATED_201);
+		int status = getStatus(document, HttpMethod.POST);
+		return new Response(document, status);
 	}
 
 	private Result<Document> attachToParent(JsonApiResponse parent, RegistryEntry endpointRegistryEntry, ResourceField relationshipField, Document createdDocument, QueryAdapter queryAdapter) {
@@ -124,7 +125,8 @@ public class FieldResourcePost extends ResourceUpsert {
 
 			//noinspection unchecked
 			result = relationshipRepositoryForClass.addRelations(parent.getEntity(), parsedIds, relationshipField, queryAdapter);
-		} else {
+		}
+		else {
 			//noinspection unchecked
 			for (ResourceModificationFilter filter : modificationFilters) {
 				resourceId1 = filter.modifyOneRelationship(parent.getEntity(), relationshipField, resourceId1);

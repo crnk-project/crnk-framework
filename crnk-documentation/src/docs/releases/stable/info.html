@@ -7,68 +7,68 @@ more simply, more quickly and  with fewer lines of code. A variety of new featur
 most notably the generation of Asciidoc documentation and a type-safe query API.
 While being a major release, changes required should be minimal (see below).
 <p>
-    A first BETA is available. Further BETA releases are going to finalize the new features
-    and providing more documentation and examples.
+	A first BETA is available. Further BETA releases are going to finalize the new features
+	and providing more documentation and examples.
 </p>
 
 
 <h4>Cleanup &amp; Migration</h4>
 
 <ul>
-    <li>
-        The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
-        to replace QueryParams-based repositories. QueryParams carry new &quot;Legacy&quot; prefix.
-    </li>
-    <li>
-        Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to
-        use
-        and not necessary for this particular use cases.
-    </li>
-    <li>
-        Resource identifier no longer must extend Serializable. There has been no requirements and complicated
-        their usage.
-    </li>
-    <li>
-        RelationshipRepositoryV2 and BulkRelationshipRepositoryV2 have been deprecated in favor
-        of OneRelationshipRepository and ManyRelationshipRepository. The new repositories
-        have a number of advantages. Finders of the new repositories follow
-        the concepts of BulkRelationshipRepositoryV2 to have efficiency by default. RelationshipMatch
-        is used by default to bind the repository to resources.
-        Repositories may still implement
-        both interfaces to gain the original RelationshipRepositoryV2 functionality.
-    </li>
-    <li>
-        JPA repositories with DTO mapping now behave exactly like regular resources. Make sure that
-        the DTOs are properly annotation with @JsonApiRelation and @JsonApiRelationId. No information is
-        inferred from the underlying entities.
-    </li>
-    <li>
-        RepositoryDecoratorFactory has been simplified to a single decorateRepository method and
-        WrappedResourceRepository, WrappedOneRelationshipRepository and WrappedManyRelationshipRepository.
-        There are no dedicated decoration repository interfaces anymore, just the regular interfaces.
-    </li>
-    <li>
-        Decorators have been removed form the JpaRepositoryConfig. The regular RepositoryDecoratorFactory can be
-        used instead.
-    </li>
-    <li>
-        @JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy.
-        See below for more information. Be aware of the changed semantics. The property must only be
-        set on one side.
-    </li>
-    <li>New defaults for @JsonApiRelation.lookup and @JsonApiRelation.repositoryBehavior should
-        allow to eliminate a large part of the custom configuration. For more information see below.
-    </li>
-    <li>
-        crnk-jpa has been renamed to crnk-data-jpa and the Java package updated accordingly.
-    </li>
-    <li>
-        crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
-    </li>
-    <li>
-        Let us know if you still continue to make use of QueryParams. Otherwise it is going to get dropped
-        in a subsequent Beta release.
-    </li>
+	<li>
+		The V2 suffixes have been removed from the repository interfaces. They have been in place for historic reasons
+		to replace QueryParams-based repositories. QueryParams carry new &quot;Legacy&quot; prefix.
+	</li>
+	<li>
+		Repository interface make us of the Collection type rather than Iterable. The later can be quite cumbersome to
+		use
+		and not necessary for this particular use cases.
+	</li>
+	<li>
+		Resource identifier no longer must extend Serializable. There has been no requirements and complicated
+		their usage.
+	</li>
+	<li>
+		RelationshipRepositoryV2 and BulkRelationshipRepositoryV2 have been deprecated in favor
+		of OneRelationshipRepository and ManyRelationshipRepository. The new repositories
+		have a number of advantages. Finders of the new repositories follow
+		the concepts of BulkRelationshipRepositoryV2 to have efficiency by default. RelationshipMatch
+		is used by default to bind the repository to resources.
+		Repositories may still implement
+		both interfaces to gain the original RelationshipRepositoryV2 functionality.
+	</li>
+	<li>
+		JPA repositories with DTO mapping now behave exactly like regular resources. Make sure that
+		the DTOs are properly annotation with @JsonApiRelation and @JsonApiRelationId. No information is
+		inferred from the underlying entities.
+	</li>
+	<li>
+		RepositoryDecoratorFactory has been simplified to a single decorateRepository method and
+		WrappedResourceRepository, WrappedOneRelationshipRepository and WrappedManyRelationshipRepository.
+		There are no dedicated decoration repository interfaces anymore, just the regular interfaces.
+	</li>
+	<li>
+		Decorators have been removed form the JpaRepositoryConfig. The regular RepositoryDecoratorFactory can be
+		used instead.
+	</li>
+	<li>
+		@JsonApiRelation.oppositeName has been deprecated in favor of @JsonApiRelation.mappedBy.
+		See below for more information. Be aware of the changed semantics. The property must only be
+		set on one side.
+	</li>
+	<li>New defaults for @JsonApiRelation.lookup and @JsonApiRelation.repositoryBehavior should
+		allow to eliminate a large part of the custom configuration. For more information see below.
+	</li>
+	<li>
+		crnk-jpa has been renamed to crnk-data-jpa and the Java package updated accordingly.
+	</li>
+	<li>
+		crnk-activiti has been renamed to crnk-data-activiti and the Java package updated accordingly.
+	</li>
+	<li>
+		Let us know if you still continue to make use of QueryParams. Otherwise it is going to get dropped
+		in a subsequent Beta release.
+	</li>
 </ul>
 
 <h4>Update Examples application</h4>
@@ -103,15 +103,15 @@ public class Task {
 </pre>
 
 <p>
-    The owning side is typically the single-valued field. This is because the single-valued field
-    is something like a column in a database table that can be accessed and updated. In contrast,
-    the multi-valued field can only be obtained by specifying issuing a query against the single-valued field
-    and as such not suitable to be the owner. The behavior matches with similar JPA-related annotations.
+	The owning side is typically the single-valued field. This is because the single-valued field
+	is something like a column in a database table that can be accessed and updated. In contrast,
+	the multi-valued field can only be obtained by specifying issuing a query against the single-valued field
+	and as such not suitable to be the owner. The behavior matches with similar JPA-related annotations.
 </p>
 <p>
-    Under the hood the mappedBy property will trigger a suitable default for @JsonApiRelation.repositoryBehavior
-    and @JsonApiRelation.lookup on both sides, simplifying the relationship setup for most use cases.
-    If no relationship repository can be setup, Crnk will no fail directly upon startup.
+	Under the hood the mappedBy property will trigger a suitable default for @JsonApiRelation.repositoryBehavior
+	and @JsonApiRelation.lookup on both sides, simplifying the relationship setup for most use cases.
+	If no relationship repository can be setup, Crnk will no fail directly upon startup.
 </p>
 
 <h4>Improved default values for @JsonApiRelation</h4>
@@ -123,7 +123,7 @@ made the conservative defaults less suited than in the past. With this release n
 that inspect the resources and repositories more closely to decide for a particular default value for
 @JsonApiRelation.lookUp and @JsonApiRelation.repositoryBehavior.
 <p>
-    In many cases it should no longer be necessary to specify those properties, for example:
+	In many cases it should no longer be necessary to specify those properties, for example:
 
 <pre class="prettyprint">
 @JsonApiResource(type = "task")
@@ -172,20 +172,10 @@ the updated documentation and the new example in the
 More information is available in the documentation. Please provide feedback in this area!
 
 
-<h4>Go Faster with Graal Native</h4>
-
-<p>
-    <i>This feature will be available in a subsequent BETA release</i>
-</p>
-
-Sub-100ms startup times and reduced memory requirements to reduce cost and open up new application fields
-like serverless computing.
-
-
 <h4>Type-safe QuerySpec construction with a Crnk Annotation Processor</h4>
 
 <p>
-    <i>Available as a preview in the first BETA</i>
+	<i>Available as a preview in the first BETA</i>
 </p>
 
 An annotation processor is introduced that allows the type-safe construction of QuerySpec and PathSpec.
@@ -245,11 +235,11 @@ can greatly help in writing consistent, documented REST endpoints.
 
 <p>
 <table>
-    <tr>
-        <td>
-            <img src="asciidoc_example.png" width="70%">
-        </td>
-    </tr>
+	<tr>
+		<td>
+			<img src="asciidoc_example.png" width="70%">
+		</td>
+	</tr>
 </table>
 </p>
 
@@ -326,7 +316,7 @@ that brings support for OpenTracing to Crnk. It can be used properly set the nam
 in the documentation.
 
 <p>
-    <img src="tracing.png" width="70%">
+	<img src="tracing.png" width="70%">
 </p>
 
 
@@ -336,7 +326,7 @@ Support for nested resources has been improved by introducing support singular n
 single-valued relationships. Urls then look like:
 
 <p>
-    http://example.com/posts/1/header
+	http://example.com/posts/1/header
 </p>
 
 
@@ -375,3 +365,11 @@ JpaModule.createServerModule(...) comes with a new flavor that allows to pass th
 as java.util.Supplier. Every time a repository makes use of the EntityManager, the supplier is called and must
 return an instance. The supplier together with the existing TransactionRunner
 allows for custom JPA setups and transaction handling.
+
+<h4>Customize HTTP status behavior (experimental)</h4>
+
+There is a new interface HttpStatusBehavior that can be registered through a module and allows to customize
+HTTP status codes. For example, a POST may return 201 for being created or 204 for being accepted for processing
+and to be created later.
+
+The feature is considered experimental.

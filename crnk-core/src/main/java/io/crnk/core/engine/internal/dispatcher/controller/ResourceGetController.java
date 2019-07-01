@@ -1,5 +1,7 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.io.Serializable;
+
 import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.http.HttpMethod;
@@ -12,8 +14,6 @@ import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.Result;
 import io.crnk.core.utils.Nullable;
-
-import java.io.Serializable;
 
 public class ResourceGetController extends ResourceIncludeField {
 
@@ -53,6 +53,7 @@ public class ResourceGetController extends ResourceIncludeField {
 		if (!document.getData().isPresent()) {
 			document.setData(Nullable.nullValue());
 		}
-		return new Response(document, 200);
+		int status = getStatus(document, HttpMethod.GET);
+		return new Response(document, status);
 	}
 }

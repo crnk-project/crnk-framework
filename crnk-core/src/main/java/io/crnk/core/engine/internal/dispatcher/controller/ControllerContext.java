@@ -1,8 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
+import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.properties.PropertiesProvider;
@@ -10,9 +14,6 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.module.ModuleRegistry;
 import io.crnk.core.utils.Supplier;
-
-import java.util.List;
-import java.util.Objects;
 
 public class ControllerContext {
 
@@ -58,4 +59,7 @@ public class ControllerContext {
 		return moduleRegistry.getContext().getResultFactory();
 	}
 
+	public HttpStatusBehavior getHttpStatusBehavior() {
+		return moduleRegistry.getHttpStatusProvider();
+	}
 }

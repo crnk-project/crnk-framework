@@ -15,6 +15,7 @@ import io.crnk.core.engine.filter.RepositoryFilter;
 import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -43,6 +44,8 @@ public class SimpleModule implements Module {
 	private List<RepositoryFilter> repositoryFilters = new ArrayList<>();
 
 	private List<ResourceFilter> resourceFilters = new ArrayList<>();
+
+	private List<HttpStatusBehavior> httpStatusBehaviors = new ArrayList<>();
 
 	private List<ResourceModificationFilter> resourceModificationFilters = new ArrayList<>();
 
@@ -103,6 +106,9 @@ public class SimpleModule implements Module {
 		}
 		for (ResourceFilter filter : resourceFilters) {
 			context.addResourceFilter(filter);
+		}
+		for (HttpStatusBehavior httpStatusBehavior : httpStatusBehaviors) {
+			context.addHttpStatusBehavior(httpStatusBehavior);
 		}
 		for (ResourceModificationFilter filter : resourceModificationFilters) {
 			context.addResourceModificationFilter(filter);
@@ -208,6 +214,12 @@ public class SimpleModule implements Module {
 	public void addResourceFilter(ResourceFilter filter) {
 		checkInitialized();
 		resourceFilters.add(filter);
+	}
+
+
+	public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+		checkInitialized();
+		httpStatusBehaviors.add(httpStatusBehavior);
 	}
 
 	public void addResourceFieldContributor(ResourceFieldContributor resourceFieldContributor) {
@@ -351,6 +363,10 @@ public class SimpleModule implements Module {
 
 	public List<SecurityProvider> getSecurityProviders() {
 		return Collections.unmodifiableList(securityProviders);
+	}
+
+	public List<HttpStatusBehavior> getHttpStatusBehaviors() {
+		return Collections.unmodifiableList(httpStatusBehaviors);
 	}
 
 	public void addHttpRequestProcessor(HttpRequestProcessor httpRequestProcessor) {

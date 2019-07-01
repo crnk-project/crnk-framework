@@ -6,7 +6,6 @@ import io.crnk.core.engine.dispatcher.Response;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.http.HttpMethod;
-import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.internal.dispatcher.path.JsonPath;
 import io.crnk.core.engine.internal.dispatcher.path.ResourcePath;
@@ -72,11 +71,11 @@ public class ResourcePostController extends ResourceUpsert {
 				.map(this::toResponse);
 	}
 
-	private Response toResponse(Document document) {
-		Response response = new Response(document, HttpStatus.CREATED_201);
+	private Response toResponse(Document responseDocument) {
+		int status = getStatus(responseDocument, HttpMethod.POST);
+		Response response = new Response(responseDocument, status);
 		logger.debug("set response {}", response);
 		return response;
 	}
-
 
 }

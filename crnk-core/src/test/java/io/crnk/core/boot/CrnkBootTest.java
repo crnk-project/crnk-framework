@@ -1,5 +1,11 @@
 package io.crnk.core.boot;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+
+import java.util.Arrays;
+import java.util.Properties;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -7,6 +13,7 @@ import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.error.ErrorResponse;
 import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.DocumentFilter;
+import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.document.mapper.DocumentMappingConfig;
@@ -38,12 +45,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.Properties;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 
@@ -143,6 +144,8 @@ public class CrnkBootTest {
         SecurityProvider securityProvider = mock(SecurityProvider.class);
         ExceptionMapper exceptionMapper = new TestExceptionMapper();
         Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
+		HttpStatusBehavior statusBehavior = mock(HttpStatusBehavior.class);
+		Mockito.when(serviceDiscovery.getInstancesByType(eq(HttpStatusBehavior.class))).thenReturn(Arrays.asList(statusBehavior));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(RepositoryDecoratorFactory.class)))
                 .thenReturn(Arrays.asList(decoratorFactory));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(ResourceFieldContributor.class)))
@@ -157,6 +160,7 @@ public class CrnkBootTest {
         Assert.assertTrue(moduleRegistry.getModules().contains(module));
         Assert.assertTrue(moduleRegistry.getFilters().contains(filter));
         Assert.assertTrue(moduleRegistry.getResourceFieldContributors().contains(resourceFieldContributor));
+        Assert.assertEquals(2, moduleRegistry.getHttpStatusProviders().size());
         Assert.assertTrue(moduleRegistry.getRepositoryDecoratorFactories().contains(decoratorFactory));
         Assert.assertTrue(moduleRegistry.getExceptionMapperLookup().getExceptionMappers().contains(exceptionMapper));
         Assert.assertTrue(moduleRegistry.getSecurityProviders().contains(securityProvider));

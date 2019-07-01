@@ -1,5 +1,10 @@
 package io.crnk.core.module;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.engine.dispatcher.RequestDispatcher;
@@ -10,6 +15,7 @@ import io.crnk.core.engine.filter.ResourceFilter;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.filter.ResourceModificationFilter;
 import io.crnk.core.engine.http.HttpRequestProcessor;
+import io.crnk.core.engine.http.HttpStatusBehavior;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformationProvider;
 import io.crnk.core.engine.information.resource.ResourceInformationProvider;
@@ -41,11 +47,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class SimpleModuleTest {
 
@@ -433,6 +434,10 @@ public class SimpleModuleTest {
 		@Override
 		public ModuleRegistry getModuleRegistry() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
 		}
 
 		@Override
