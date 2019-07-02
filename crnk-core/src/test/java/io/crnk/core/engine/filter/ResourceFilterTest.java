@@ -58,13 +58,13 @@ public class ResourceFilterTest {
         Document requestBody = null;
 
         // forbid resource
-        Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
+        Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
         HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
         Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
 
         // allow resource but cache prevents access
-        Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
+        Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
 
@@ -85,13 +85,13 @@ public class ResourceFilterTest {
         Document requestBody = null;
 
         // forbid resource
-        Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.UNAUTHORIZED);
+        Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.UNAUTHORIZED);
         HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
         Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.UNAUTHORIZED_401, response.getHttpStatus().intValue());
 
         // allow resource but cache prevents access
-        Mockito.when(filter.filterResource(Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
+        Mockito.when(filter.filterResource(Mockito.any(ResourceFilterContext.class), Mockito.eq(resourceInformation), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.UNAUTHORIZED_401, response.getHttpStatus().intValue());
 
@@ -127,7 +127,7 @@ public class ResourceFilterTest {
 
         // forbid field
         HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
-        Mockito.when(filter.filterField(Mockito.eq(projectField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(projectField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
         Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
         Resource taskResource = response.getDocument().getCollectionData().get().get(0);
@@ -137,7 +137,7 @@ public class ResourceFilterTest {
 
         // allow resource
         container.getQueryContext().getAttributes().clear();
-        Mockito.when(filter.filterField(Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
         taskResource = response.getDocument().getCollectionData().get().get(0);
@@ -170,13 +170,13 @@ public class ResourceFilterTest {
         QueryContext queryContext = container.getQueryContext();
         HttpRequestDispatcherImpl requestDispatcher = container.getBoot().getRequestDispatcher();
         queryContext.getAttributes().clear();
-        Mockito.when(filter.filterField(Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.FORBIDDEN);
         Response response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
 
         // try save with ok
         queryContext.getAttributes().clear();
-        Mockito.when(filter.filterField(Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(nameField), Mockito.any(HttpMethod.class))).thenReturn(FilterBehavior.NONE);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.CREATED_201, response.getHttpStatus().intValue());
 
@@ -184,12 +184,12 @@ public class ResourceFilterTest {
         queryContext.getAttributes().clear();
         path = "/tasks/" + task.getId();
         method = HttpMethod.PATCH.toString();
-        Mockito.when(filter.filterField(Mockito.eq(nameField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.FORBIDDEN);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(nameField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.FORBIDDEN);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.FORBIDDEN_403, response.getHttpStatus().intValue());
 
         queryContext.getAttributes().clear();
-        Mockito.when(filter.filterField(Mockito.eq(nameField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.NONE);
+        Mockito.when(filter.filterField(Mockito.any(ResourceFilterContext.class), Mockito.eq(nameField), Mockito.eq(HttpMethod.PATCH))).thenReturn(FilterBehavior.NONE);
         response = requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         Assert.assertEquals(HttpStatus.OK_200, response.getHttpStatus().intValue());
     }

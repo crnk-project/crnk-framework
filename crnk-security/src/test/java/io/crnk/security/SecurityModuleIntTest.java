@@ -3,6 +3,7 @@ package io.crnk.security;
 import io.crnk.client.CrnkClient;
 import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
+import io.crnk.core.engine.query.QueryContext;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.exception.UnauthorizedException;
 import io.crnk.core.module.SimpleModule;
@@ -36,6 +37,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -203,18 +205,20 @@ public class SecurityModuleIntTest extends JerseyTestBase {
     public void disableSecurityModule() {
         module.setEnabled(false);
 
-        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("projects"));
-        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions("tasks"));
-        Assert.assertTrue(module.isAllowed(Project.class, ResourcePermission.ALL));
-        Assert.assertTrue(module.isAllowed(Task.class, ResourcePermission.ALL));
-        Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(Task.class));
+        QueryContext queryContext = Mockito.mock(QueryContext.class);
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions(queryContext,"projects"));
+        Assert.assertEquals(ResourcePermission.ALL, module.getCallerPermissions(queryContext, "tasks"));
+        Assert.assertTrue(module.isAllowed(queryContext, Project.class, ResourcePermission.ALL));
+        Assert.assertTrue(module.isAllowed(queryContext, Task.class, ResourcePermission.ALL));
+        Assert.assertEquals(ResourcePermission.ALL, module.getResourcePermission(queryContext, Task.class));
     }
 
     @Test(expected = IllegalStateException.class)
     public void noIsRolesAllowedWhenDisabled() {
         module.setEnabled(false);
 
-        module.isUserInRole("whatever");
+        QueryContext queryContext = Mockito.mock(QueryContext.class);
+        module.isUserInRole(queryContext,"whatever");
     }
 
     @Test

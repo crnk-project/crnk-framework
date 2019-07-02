@@ -47,9 +47,9 @@ public class ServletModuleTest {
 		provider.onRequestStarted(new HttpRequestContextBaseAdapter(new ServletRequestContext(servletContext, request,
 				response, "api", HttpHeaders.DEFAULT_CHARSET)));
 
-		Assert.assertFalse(securityProvider.isAuthenticated());
-		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist"));
-		Assert.assertTrue(securityProvider.isUserInRole("guest"));
-		Assert.assertTrue(securityProvider.isUserInRole("admin"));
+		Assert.assertFalse(securityProvider.isAuthenticated(null));
+		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist", null));
+		Assert.assertTrue(securityProvider.isUserInRole("guest", null));
+		Assert.assertTrue(securityProvider.isUserInRole("admin", null));
 	}
 }
