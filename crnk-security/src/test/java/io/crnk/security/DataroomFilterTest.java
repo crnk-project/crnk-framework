@@ -7,6 +7,8 @@ import java.util.Map;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.registry.RegistryEntry;
+import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.ForbiddenException;
 import io.crnk.core.module.SimpleModule;
@@ -65,8 +67,8 @@ public class DataroomFilterTest {
 
 				context.addSecurityProvider(new SecurityProvider() {
 					@Override
-					public boolean isUserInRole(String role) {
-						return true;
+					public Result<Boolean> isUserInRole(String role) {
+						return new ImmediateResult<>(true);
 					}
 
 					@Override

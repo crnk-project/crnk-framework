@@ -32,6 +32,8 @@ import io.crnk.core.engine.parser.TypeParser;
 import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.ComplexPojo;
@@ -422,9 +424,9 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void testSecurityProvider() {
-		Assert.assertTrue(moduleRegistry.getSecurityProvider().isUserInRole("testRole"));
-		Assert.assertFalse(moduleRegistry.getSecurityProvider().isUserInRole("nonExistingRole"));
-		Assert.assertTrue(testModule.getContext().getSecurityProvider().isUserInRole("testRole"));
+		Assert.assertTrue(moduleRegistry.getSecurityProvider().isUserInRole("testRole").get());
+		Assert.assertFalse(moduleRegistry.getSecurityProvider().isUserInRole("nonExistingRole").get());
+		Assert.assertTrue(testModule.getContext().getSecurityProvider().isUserInRole("testRole").get());
 	}
 
 	@Test
@@ -504,8 +506,8 @@ public class ModuleRegistryTest {
 
 			context.addSecurityProvider(new SecurityProvider() {
 				@Override
-				public boolean isUserInRole(String role) {
-					return "testRole".equals(role);
+				public Result<Boolean> isUserInRole(String role) {
+					return new ImmediateResult<>("testRole".equals(role));
 				}
 
 				@Override

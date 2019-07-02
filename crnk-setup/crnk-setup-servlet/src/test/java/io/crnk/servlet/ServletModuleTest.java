@@ -48,8 +48,8 @@ public class ServletModuleTest {
 				response, "api", HttpHeaders.DEFAULT_CHARSET)));
 
 		Assert.assertFalse(securityProvider.isAuthenticated());
-		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist"));
-		Assert.assertTrue(securityProvider.isUserInRole("guest"));
-		Assert.assertTrue(securityProvider.isUserInRole("admin"));
+		Assert.assertFalse(securityProvider.isUserInRole("doesNotExist").get());
+		Assert.assertTrue(securityProvider.isUserInRole("guest").get());
+		Assert.assertTrue(securityProvider.isUserInRole("admin").get());
 	}
 }

@@ -51,7 +51,9 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.RegistryEntryBuilder;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
+import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.ImmediateResultFactory;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.module.Module.ModuleContext;
@@ -325,14 +327,14 @@ public class ModuleRegistry {
 		}
 
 		@Override
-		public boolean isUserInRole(String role) {
+		public Result<Boolean> isUserInRole(String role) {
 			PreconditionUtil.verify(securityProviders.size() != 0, "no SecurityProvider installed to check permissions");
 			for (SecurityProvider securityProvider : securityProviders) {
-				if (securityProvider.isUserInRole(role)) {
-					return true;
+				if (securityProvider.isUserInRole(role).get()) {
+					return new ImmediateResult<>(true);
 				}
 			}
-			return false;
+			return new ImmediateResult<>(false);
 		}
 
 		@Override

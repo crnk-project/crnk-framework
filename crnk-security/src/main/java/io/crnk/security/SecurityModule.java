@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
+import io.crnk.core.engine.result.ImmediateResult;
+import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.Module;
@@ -51,7 +53,7 @@ public class SecurityModule implements Module {
 
 	private SecurityProvider callerSecurityProvider = new SecurityProvider() {
 		@Override
-		public boolean isUserInRole(String role) {
+		public Result<Boolean> isUserInRole(String role) {
 			return SecurityModule.this.isUserInRole(role);
 		}
 
@@ -260,8 +262,8 @@ public class SecurityModule implements Module {
 	public ResourcePermission getRolePermissions(String resourceType, String checkedRole) {
 		ResourcePermission missingPermissions = getMissingPermissions(resourceType, ResourcePermission.ALL, new SecurityProvider() {
 			@Override
-			public boolean isUserInRole(String role) {
-				return checkedRole.equals(role) || role.equals(ANY_ROLE);
+			public Result<Boolean> isUserInRole(String role) {
+				return new ImmediateResult<>(checkedRole.equals(role) || role.equals(ANY_ROLE));
 			}
 
 			@Override
@@ -284,7 +286,7 @@ public class SecurityModule implements Module {
 				String role = entry.getKey();
 				ResourcePermission intersection = entry.getValue().and(requiredPermissions);
 				boolean hasMorePermissions = !intersection.isEmpty();
-				if (hasMorePermissions && securityProvider.isUserInRole(role)) {
+				if (hasMorePermissions && securityProvider.isUserInRole(role).get()) {
 					missingPermission = updateMissingPermissions(missingPermission, intersection);
 					if (missingPermission.isEmpty()) {
 						break;
@@ -318,7 +320,7 @@ public class SecurityModule implements Module {
 		if (map != null) {
 			for (Entry<String, ResourcePermission> entry : map.entrySet()) {
 				String role = entry.getKey();
-				if (isUserInRole(role)) {
+				if (isUserInRole(role).get()) {
 					result = result.or(entry.getValue());
 				}
 			}
@@ -332,15 +334,15 @@ public class SecurityModule implements Module {
 	 * @param role to check
 	 * @return true if in this role
 	 */
-	public boolean isUserInRole(String role) {
+	public Result<Boolean> isUserInRole(String role) {
 		if (!isEnabled()) {
 			throw new IllegalStateException("security module is disabled");
 		}
 		checkInit();
 		SecurityProvider securityProvider = context.getSecurityProvider();
-		boolean contained = role.equals(ANY_ROLE) || securityProvider.isUserInRole(role);
+		boolean contained = role.equals(ANY_ROLE) || securityProvider.isUserInRole(role).get();
 		LOGGER.debug("isUserInRole returns {} for role {}", contained, role);
-		return contained;
+		return new ImmediateResult<>(contained);
 	}
 
 	private <T> String toType(Class<T> resourceClass) {
