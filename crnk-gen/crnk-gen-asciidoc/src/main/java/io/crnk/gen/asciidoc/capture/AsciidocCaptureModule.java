@@ -12,10 +12,7 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ManyRelationshipRepository;
-import io.crnk.core.repository.OneRelationshipRepository;
-import io.crnk.core.repository.RelationshipRepository;
-import io.crnk.core.repository.ResourceRepository;
+import io.crnk.core.repository.*;
 import io.crnk.core.repository.decorate.*;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.gen.asciidoc.internal.AsciidocBuilder;
@@ -94,15 +91,29 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 				return new AsciidocResourceDecorator((ResourceRepository) repository, this);
 			}
 			if (repository instanceof RelationshipRepository) {
-				return new AsciidocRelationshipDecorator((RelationshipRepository) repository, this);
+				return getRelationshipRepositoryDecorator((RelationshipRepository) repository);
 			}
 			if (repository instanceof OneRelationshipRepository) {
-				return new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository, this);
+				return getOneRelationshipRepositoryDecorator((OneRelationshipRepository) repository);
 			}
 			if (repository instanceof ManyRelationshipRepository) {
-				return new AsciidocManyRelationshipDecorator((ManyRelationshipRepository) repository, this);
+				return getManyRelationshipRepositoryDecorator((ManyRelationshipRepository) repository);
 			}
 			return repository;
+		}
+
+		private <T, I, D, J> WrappedOneManyRelationshipRepository<T, I, D, J> getRelationshipRepositoryDecorator(RelationshipRepository<T, I, D, J> repository) {
+			return new WrappedOneManyRelationshipRepository<>(repository,
+					getOneRelationshipRepositoryDecorator(repository),
+					getManyRelationshipRepositoryDecorator(repository));
+		}
+
+		private <T, I, D, J> OneRelationshipRepository getOneRelationshipRepositoryDecorator(OneRelationshipRepository<T, I, D, J> repository) {
+			return new AsciidocOneRelationshipDecorator<>(repository, this);
+		}
+
+		private <T, I, D, J> ManyRelationshipRepository<T, I, D, J> getManyRelationshipRepositoryDecorator(ManyRelationshipRepository<T, I, D, J> repository) {
+			return new AsciidocManyRelationshipDecorator<>(repository, this);
 		}
 
 		private void finalizeDoc(Class resourceClass) {
@@ -289,58 +300,6 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 				factory.finalizeDoc(getResourceClass());
 			}
 		}
-	}
-
-	@Deprecated
-	class AsciidocRelationshipDecorator<T, I, D, J> extends WrappedRelationshipRepository<T, I, D, J> {
-
-		private final AsciidocOneRelationshipDecorator<T, I, D, J> oneRelationshipDecorator;
-		private final AsciidocManyRelationshipDecorator<T, I, D, J> manyRelationshipDecorator;
-
-		public AsciidocRelationshipDecorator(RelationshipRepository<T, I, D, J> wrappedRepository,
-											 AsciidocDecoratorFactory factory) {
-			super(wrappedRepository);
-			this.oneRelationshipDecorator = new AsciidocOneRelationshipDecorator<>(wrappedRepository, factory);
-			this.manyRelationshipDecorator = new AsciidocManyRelationshipDecorator<>(wrappedRepository, factory);
-		}
-
-		// region One Relationship Repository Methods
-
-		@Override
-		public void setRelation(T source, J targetId, String fieldName) {
-			oneRelationshipDecorator.setRelation(source, targetId, fieldName);
-		}
-
-		@Override
-		public Map<I, D> findOneRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
-			return oneRelationshipDecorator.findOneRelations(sourceIds, fieldName, querySpec);
-		}
-
-		// endregion
-
-		// region Many Relationship Repository Methods
-
-		@Override
-		public void setRelations(T source, Collection<J> targetIds, String fieldName) {
-			manyRelationshipDecorator.setRelations(source, targetIds, fieldName);
-		}
-
-		@Override
-		public void addRelations(T source, Collection<J> targetIds, String fieldName) {
-			manyRelationshipDecorator.addRelations(source, targetIds, fieldName);
-		}
-
-		@Override
-		public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
-			manyRelationshipDecorator.removeRelations(source, targetIds, fieldName);
-		}
-
-		@Override
-		public Map<I, ResourceList<D>> findManyRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
-			return manyRelationshipDecorator.findManyRelations(sourceIds, fieldName, querySpec);
-		}
-
-		// endregion
 	}
 
 	class AsciidocOneRelationshipDecorator<T, I, D, J> extends WrappedOneRelationshipRepository<T, I, D, J> {
