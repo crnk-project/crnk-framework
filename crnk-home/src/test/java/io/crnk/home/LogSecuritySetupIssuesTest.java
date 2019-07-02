@@ -3,6 +3,7 @@ package io.crnk.home;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilter;
+import io.crnk.core.engine.filter.ResourceFilterContext;
 import io.crnk.core.engine.http.HttpHeaders;
 import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.http.HttpRequestContextBase;
@@ -29,12 +30,12 @@ public class LogSecuritySetupIssuesTest {
 		SimpleModule filterModule = new SimpleModule("filter");
 		filterModule.addResourceFilter(new ResourceFilter() {
 			@Override
-			public FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method) {
+			public FilterBehavior filterResource(ResourceFilterContext context, ResourceInformation resourceInformation, HttpMethod method) {
 				return FilterBehavior.FORBIDDEN;
 			}
 
 			@Override
-			public FilterBehavior filterField(ResourceField field, HttpMethod method) {
+			public FilterBehavior filterField(ResourceFilterContext context, ResourceField field, HttpMethod method) {
 				return FilterBehavior.FORBIDDEN;
 			}
 		});

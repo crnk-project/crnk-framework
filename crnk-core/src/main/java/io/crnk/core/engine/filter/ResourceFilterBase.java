@@ -9,13 +9,13 @@ import io.crnk.core.engine.information.resource.ResourceInformation;
  */
 public class ResourceFilterBase implements ResourceFilter {
 
-	@Override
-	public FilterBehavior filterResource(ResourceInformation resourceInformation, HttpMethod method) {
-		return FilterBehavior.NONE;
-	}
+    @Override
+    public FilterBehavior filterResource(ResourceFilterContext context, ResourceInformation resourceInformation, HttpMethod method) {
+        return FilterBehavior.NONE;
+    }
 
-	@Override
-	public FilterBehavior filterField(ResourceField field, HttpMethod method) {
-		return FilterBehavior.NONE;
-	}
+    @Override
+    public FilterBehavior filterField(ResourceFilterContext context, ResourceField field, HttpMethod method) {
+        return FilterBehavior.NONE;
+    }
 }

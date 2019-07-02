@@ -94,8 +94,8 @@ public class JaxrsModuleTest {
 
 		Mockito.when(securityContext.isUserInRole("admin")).thenReturn(true);
 
-		Assert.assertTrue(securityProvider.isUserInRole("admin"));
-		Assert.assertFalse(securityProvider.isUserInRole("other"));
+		Assert.assertTrue(securityProvider.isUserInRole("admin", null));
+		Assert.assertFalse(securityProvider.isUserInRole("other", null));
 	}
 
 	@Test
