@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.result.ImmediateResult;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.module.SimpleModule;
 import io.crnk.core.queryspec.Direction;
@@ -54,8 +54,8 @@ public class SecurityModuleTest {
 				context.addSecurityProvider(new SecurityProvider() {
 
 					@Override
-					public Result<Boolean> isUserInRole(String role) {
-						return new ImmediateResult<>(role.equals(allowedRule));
+					public boolean isUserInRole(String role, SecurityProviderContext context) {
+						return role.equals(allowedRule);
 					}
 
 					@Override

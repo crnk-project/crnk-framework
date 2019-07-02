@@ -3,8 +3,8 @@ package io.crnk.rs.internal;
 import javax.ws.rs.core.SecurityContext;
 
 import io.crnk.core.engine.result.ImmediateResult;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 
 public class JaxrsSecurityProvider implements SecurityProvider {
 
@@ -15,8 +15,8 @@ public class JaxrsSecurityProvider implements SecurityProvider {
 	}
 
 	@Override
-	public Result<Boolean> isUserInRole(String role) {
-		return new ImmediateResult<>(context.isUserInRole(role));
+	public boolean isUserInRole(String role, SecurityProviderContext context) {
+		return this.context.isUserInRole(role);
 	}
 
 	@Override

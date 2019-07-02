@@ -33,8 +33,8 @@ import io.crnk.core.engine.registry.DefaultResourceRegistryPart;
 import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.result.ImmediateResult;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
 import io.crnk.core.mock.models.ComplexPojo;
 import io.crnk.core.mock.models.Document;
@@ -424,9 +424,9 @@ public class ModuleRegistryTest {
 
 	@Test
 	public void testSecurityProvider() {
-		Assert.assertTrue(moduleRegistry.getSecurityProvider().isUserInRole("testRole").get());
-		Assert.assertFalse(moduleRegistry.getSecurityProvider().isUserInRole("nonExistingRole").get());
-		Assert.assertTrue(testModule.getContext().getSecurityProvider().isUserInRole("testRole").get());
+		Assert.assertTrue(moduleRegistry.getSecurityProvider().isUserInRole("testRole", null));
+		Assert.assertFalse(moduleRegistry.getSecurityProvider().isUserInRole("nonExistingRole", null));
+		Assert.assertTrue(testModule.getContext().getSecurityProvider().isUserInRole("testRole", null));
 	}
 
 	@Test
@@ -506,8 +506,8 @@ public class ModuleRegistryTest {
 
 			context.addSecurityProvider(new SecurityProvider() {
 				@Override
-				public Result<Boolean> isUserInRole(String role) {
-					return new ImmediateResult<>("testRole".equals(role));
+				public boolean isUserInRole(String role, SecurityProviderContext context) {
+					return "testRole".equals(role);
 				}
 
 				@Override

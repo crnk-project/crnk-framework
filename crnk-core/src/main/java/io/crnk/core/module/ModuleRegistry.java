@@ -23,7 +23,6 @@ import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
-import io.crnk.core.engine.http.HttpStatusContext;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
@@ -53,9 +52,9 @@ import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryPart;
 import io.crnk.core.engine.result.ImmediateResult;
 import io.crnk.core.engine.result.ImmediateResultFactory;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.result.ResultFactory;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.module.Module.ModuleContext;
 import io.crnk.core.module.discovery.MultiResourceLookup;
 import io.crnk.core.module.discovery.ResourceLookup;
@@ -327,14 +326,14 @@ public class ModuleRegistry {
 		}
 
 		@Override
-		public Result<Boolean> isUserInRole(String role) {
+		public boolean isUserInRole(String role, SecurityProviderContext context) {
 			PreconditionUtil.verify(securityProviders.size() != 0, "no SecurityProvider installed to check permissions");
 			for (SecurityProvider securityProvider : securityProviders) {
-				if (securityProvider.isUserInRole(role).get()) {
-					return new ImmediateResult<>(true);
+				if (securityProvider.isUserInRole(role, context)) {
+					return true;
 				}
 			}
-			return new ImmediateResult<>(false);
+			return false;
 		}
 
 		@Override

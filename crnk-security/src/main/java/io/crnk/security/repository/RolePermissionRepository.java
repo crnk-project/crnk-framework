@@ -9,8 +9,8 @@ import io.crnk.core.engine.http.HttpMethod;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.registry.ResourceRegistryAware;
 import io.crnk.core.engine.result.ImmediateResult;
-import io.crnk.core.engine.result.Result;
 import io.crnk.core.engine.security.SecurityProvider;
+import io.crnk.core.engine.security.SecurityProviderContext;
 import io.crnk.core.queryspec.FilterSpec;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepositoryBase;
@@ -44,8 +44,8 @@ public class RolePermissionRepository extends ResourceRepositoryBase<RolePermiss
 					String resourceType = resourceInformation.getResourceType();
 					QuerySpec filterQuerySpec = module.getDataRoomMatcher().filter(new QuerySpec(resourceInformation), HttpMethod.GET, new SecurityProvider() {
 						@Override
-						public Result<Boolean> isUserInRole(String role) {
-							return new ImmediateResult<>(role.equals(role));
+						public boolean isUserInRole(String role, SecurityProviderContext context) {
+							return role.equals(role);
 						}
 
 						@Override
