@@ -4,6 +4,7 @@ import io.crnk.core.engine.document.ErrorData;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
+import io.crnk.core.engine.information.resource.AnyResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -48,6 +49,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 
 		ResourceRegistry resourceRegistry = ctx.getResourceRegistry();
 		Type valueType = resourceInformation.getResourceClass();
+		AnyResourceFieldAccessor anyFieldAccessor = resourceInformation.getAnyFieldAccessor();
 
 		SubTypeMap subTypeMap = null;
 
@@ -107,7 +109,7 @@ public class DefaultQueryPathResolver implements QueryPathResolver {
 				}
 			}
 
-			if (allowUnknownAttributes) {
+			if (allowUnknownAttributes || anyFieldAccessor != null) {
 				targetPath.add(sourceAttributePath);
 				valueType = Object.class;
 			} else {
