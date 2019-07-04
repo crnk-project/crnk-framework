@@ -83,6 +83,26 @@ public abstract class BasicRepositoryAccessTestBase {
     }
 
     @Test
+    public void testCreateAnyFields() {
+        Schedule schedule = new Schedule();
+        schedule.setName("mySchedule2");
+        schedule.setAnyFields("randomfield1", 1234);
+        schedule.setAnyFields("randomfield2", "test");
+
+        Schedule result = scheduleRepo.create(schedule);
+
+        QuerySpec querySpec = new QuerySpec(Schedule.class);
+        ResourceList<Schedule> list = scheduleRepo.findAll(querySpec);
+        Assert.assertEquals(1, list.size());
+
+        Assert.assertFalse(result.getAnyFields().isEmpty());
+        Assert.assertEquals(1234, result.getAnyFields().get("randomfield1"));
+        Assert.assertEquals("test", result.getAnyFields().get("randomfield2"));
+
+    }
+
+
+    @Test
     public void testJsonApiResponseContentTypeReceived() throws IOException {
         String url = testContainer.getBaseUrl() + "/schedules";
         OkHttpClient client = new OkHttpClient();
