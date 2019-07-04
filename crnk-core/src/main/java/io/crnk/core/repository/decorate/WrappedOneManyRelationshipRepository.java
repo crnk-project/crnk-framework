@@ -29,12 +29,10 @@ public class WrappedOneManyRelationshipRepository<T, I, D, J, K extends OneRelat
 	protected final OneRelationshipRepository<T, I, D, J> wrappedOneRelationshipRepository;
 	protected final ManyRelationshipRepository<T, I, D, J> wrappedManyRelationshipRepository;
 
-	/**
-	 */
-	public WrappedOneManyRelationshipRepository(
-			K originalRepository,
-			OneRelationshipRepository<T, I, D, J> wrappedOneRelationshipRepository,
-			ManyRelationshipRepository<T, I, D, J> wrappedManyRelationshipRepository) {
+
+	public WrappedOneManyRelationshipRepository(K originalRepository,
+												OneRelationshipRepository<T, I, D, J> wrappedOneRelationshipRepository,
+												ManyRelationshipRepository<T, I, D, J> wrappedManyRelationshipRepository) {
 		this.originalRepository = originalRepository;
 		this.wrappedOneRelationshipRepository = wrappedOneRelationshipRepository;
 		this.wrappedManyRelationshipRepository = wrappedManyRelationshipRepository;
