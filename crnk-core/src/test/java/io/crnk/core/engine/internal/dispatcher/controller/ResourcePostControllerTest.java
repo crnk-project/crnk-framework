@@ -1,5 +1,12 @@
 package io.crnk.core.engine.internal.dispatcher.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.dispatcher.Response;
@@ -30,13 +37,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourcePostControllerTest extends ControllerTestBase {
 
@@ -189,13 +189,37 @@ public class ResourcePostControllerTest extends ControllerTestBase {
 			// WHEN
 			sut.handle(projectPath, emptyProjectQuery, newProjectBody);
 			Assert.fail();
-		} catch (IllegalStateException e) {
+		}
+		catch (IllegalStateException e) {
 			// THEN
 			Assert.assertEquals(e.getMessage(),
-					"upon POST repository for type=projects must return created resource, not allowed to return null");
+					"upon POST with status 201 a resource must be returned");
 		}
 	}
 
+
+	@Test
+	public void onRepositoryReturnNoIdShouldThrowException() {
+		// GIVEN
+		Document newProjectBody = new Document();
+		Resource data = createProject();
+		data.setId(Long.toString(ProjectRepository.RETURN_NO_ID_ON_CREATE));
+		newProjectBody.setData(Nullable.of(data));
+
+		JsonPath projectPath = pathBuilder.build("/projects");
+		ResourcePostController sut = new ResourcePostController();
+		sut.init(controllerContext);
+
+		try {
+			// WHEN
+			sut.handle(projectPath, emptyProjectQuery, newProjectBody);
+			Assert.fail();
+		}
+		catch (IllegalStateException e) {
+			// THEN
+			Assert.assertEquals(e.getMessage(), "upon POST with status 201 the resource must have an ID, consider 202 otherwise");
+		}
+	}
 
 	@Test
 	public void onPostingReadOnlyFieldReturnBadRequestWithFailBehavior() throws Exception {
@@ -217,7 +241,8 @@ public class ResourcePostControllerTest extends ControllerTestBase {
 		try {
 			sut.handle(path, emptyTaskQuery, requestDocument);
 			Assert.fail("should not be allowed to update read-only field");
-		} catch (ForbiddenException e) {
+		}
+		catch (ForbiddenException e) {
 			Assert.assertEquals("field 'tasks.readOnlyValue' cannot be accessed for POST", e.getMessage());
 		}
 	}
@@ -352,7 +377,8 @@ public class ResourcePostControllerTest extends ControllerTestBase {
 		try {
 			sut.handle(taskPath, emptyUserQuery, newUserBody);
 			Assert.fail("should not be allowed to create a relationship with an invalid resource");
-		} catch (BadRequestException e) {
+		}
+		catch (BadRequestException e) {
 			Assert.assertEquals("Invalid resource type: notAResource", e.getMessage());
 		}
 	}

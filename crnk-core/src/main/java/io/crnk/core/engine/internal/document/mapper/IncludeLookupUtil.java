@@ -1,5 +1,14 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -17,15 +26,6 @@ import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.legacy.queryParams.include.Inclusion;
 import io.crnk.legacy.queryParams.params.IncludedRelationsParams;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class IncludeLookupUtil {
 
 	private ResourceRegistry resourceRegistry;
@@ -41,8 +41,10 @@ public class IncludeLookupUtil {
 	public static List<Serializable> getIds(Collection<Resource> resources, ResourceInformation resourceInformation) {
 		List<Serializable> ids = new ArrayList<>();
 		for (Resource resource : resources) {
-			Serializable id = resourceInformation.parseIdString(resource.getId());
-			ids.add(id);
+			if(resource.getId() != null) {
+				Serializable id = resourceInformation.parseIdString(resource.getId());
+				ids.add(id);
+			}
 		}
 		return ids;
 	}

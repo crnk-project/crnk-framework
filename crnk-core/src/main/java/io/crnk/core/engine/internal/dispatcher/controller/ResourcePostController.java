@@ -66,7 +66,7 @@ public class ResourcePostController extends ResourceUpsert {
 				.setFieldsWithEnforcedIdSerialization(loadedRelationshipNames);
 		DocumentMapper documentMapper = this.context.getDocumentMapper();
 
-		return response.doWork(it -> validateCreatedResponse(resourceInformation, it))
+		return response
 				.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig))
 				.map(this::toResponse);
 	}
@@ -74,6 +74,9 @@ public class ResourcePostController extends ResourceUpsert {
 	private Response toResponse(Document responseDocument) {
 		int status = getStatus(responseDocument, HttpMethod.POST);
 		Response response = new Response(responseDocument, status);
+
+		validateCreatedResponse(response);
+
 		logger.debug("set response {}", response);
 		return response;
 	}

@@ -78,7 +78,7 @@ public class FieldResourcePost extends ResourceUpsert {
 		setLinks(resourceBody, entity, relationshipResourceInformation);
 
 		Result<JsonApiResponse> createdResource = setRelationsAsync(entity, bodyRegistryEntry, resourceBody, queryAdapter, false)
-				.merge(it -> resourceRepository.create(entity, queryAdapter).doWork(created -> validateCreatedResponse(bodyResourceInformation, created)));
+				.merge(it -> resourceRepository.create(entity, queryAdapter));
 
 		Result<Document> createdDocument = createdResource.merge(it -> documentMapper.toDocument(it, queryAdapter, mappingConfig));
 
@@ -98,7 +98,9 @@ public class FieldResourcePost extends ResourceUpsert {
 
 	public Response toResponse(Document document) {
 		int status = getStatus(document, HttpMethod.POST);
-		return new Response(document, status);
+		Response response = new Response(document, status);
+		validateCreatedResponse(response);
+		return response;
 	}
 
 	private Result<Document> attachToParent(JsonApiResponse parent, RegistryEntry endpointRegistryEntry, ResourceField relationshipField, Document createdDocument, QueryAdapter queryAdapter) {

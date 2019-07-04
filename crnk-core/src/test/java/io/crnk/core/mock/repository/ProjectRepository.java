@@ -1,19 +1,21 @@
 package io.crnk.core.mock.repository;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.mock.models.Project;
 import io.crnk.legacy.queryParams.QueryParams;
 import io.crnk.legacy.repository.LegacyResourceRepository;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectRepository implements LegacyResourceRepository<Project, Long> {
 
 	private static final ConcurrentHashMap<Long, Project> THREAD_LOCAL_REPOSITORY = new ConcurrentHashMap<>();
 
 	public static final long RETURN_NULL_ON_CREATE_ID = 13412423;
+
+	public static final long RETURN_NO_ID_ON_CREATE = 13412424;
 
 	/**
 	 * That particular ID will be mapped to a fancy project to simulated inheritance
@@ -34,6 +36,12 @@ public class ProjectRepository implements LegacyResourceRepository<Project, Long
 		if (entity.getId() == RETURN_NULL_ON_CREATE_ID) {
 			return null;
 		}
+		if (entity.getId() == RETURN_NO_ID_ON_CREATE) {
+			Project project = new Project();
+			project.setId(null);
+			return (S) project;
+		}
+
 		return entity;
 	}
 
