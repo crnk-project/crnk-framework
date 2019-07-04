@@ -12,7 +12,9 @@ import io.crnk.core.engine.registry.RegistryEntry;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.module.Module;
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.*;
+import io.crnk.core.repository.ManyRelationshipRepository;
+import io.crnk.core.repository.OneRelationshipRepository;
+import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.*;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.gen.asciidoc.internal.AsciidocBuilder;
@@ -90,30 +92,18 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 			if (repository instanceof ResourceRepository) {
 				return new AsciidocResourceDecorator((ResourceRepository) repository, this);
 			}
-			if (repository instanceof RelationshipRepository) {
-				return getRelationshipRepositoryDecorator((RelationshipRepository) repository);
+			if (repository instanceof OneRelationshipRepository && repository instanceof ManyRelationshipRepository) {
+				return new WrappedOneManyRelationshipRepository((OneRelationshipRepository & ManyRelationshipRepository)repository,
+						new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository, this),
+						new AsciidocManyRelationshipDecorator((ManyRelationshipRepository) repository, this));
 			}
 			if (repository instanceof OneRelationshipRepository) {
-				return getOneRelationshipRepositoryDecorator((OneRelationshipRepository) repository);
+				return new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository, this);
 			}
 			if (repository instanceof ManyRelationshipRepository) {
-				return getManyRelationshipRepositoryDecorator((ManyRelationshipRepository) repository);
+				return new AsciidocManyRelationshipDecorator((ManyRelationshipRepository) repository, this);
 			}
 			return repository;
-		}
-
-		private <T, I, D, J> WrappedOneManyRelationshipRepository<T, I, D, J> getRelationshipRepositoryDecorator(RelationshipRepository<T, I, D, J> repository) {
-			return new WrappedOneManyRelationshipRepository<>(repository,
-					getOneRelationshipRepositoryDecorator(repository),
-					getManyRelationshipRepositoryDecorator(repository));
-		}
-
-		private <T, I, D, J> OneRelationshipRepository getOneRelationshipRepositoryDecorator(OneRelationshipRepository<T, I, D, J> repository) {
-			return new AsciidocOneRelationshipDecorator<>(repository, this);
-		}
-
-		private <T, I, D, J> ManyRelationshipRepository<T, I, D, J> getManyRelationshipRepositoryDecorator(ManyRelationshipRepository<T, I, D, J> repository) {
-			return new AsciidocManyRelationshipDecorator<>(repository, this);
 		}
 
 		private void finalizeDoc(Class resourceClass) {

@@ -1,45 +1,60 @@
 package io.crnk.core.repository.decorate;
 
 import io.crnk.core.queryspec.QuerySpec;
-import io.crnk.core.repository.ManyRelationshipRepository;
-import io.crnk.core.repository.OneRelationshipRepository;
-import io.crnk.core.repository.RelationshipRepository;
+import io.crnk.core.repository.*;
 import io.crnk.core.resource.list.ResourceList;
 
 import java.util.Collection;
 import java.util.Map;
 
 /**
- * Decorator combination of {@link OneRelationshipRepository} and {@link ManyRelationshipRepository} repositories.
+ * Decorator combination of {@link OneRelationshipRepository} and {@link OneRelationshipRepository} wrapped repositories.
  *
  * Can be used to combine implementations of {@link WrappedOneRelationshipRepository} and {@link WrappedOneRelationshipRepository}
- * repositories when decorating a {@link RelationshipRepository}.
+ * repositories when decorating an implementation of both {@link OneRelationshipRepository} and {@link OneRelationshipRepository} (like {@link RelationshipRepository}).
+ *
+ * @param <T> source class type
+ * @param <I> T class id type
+ * @param <D> target class type
+ * @param <J> D class id type
+ * @param <K> decorated original repository type
  *
  * @author Stas Melnichuk
  */
-public class WrappedOneManyRelationshipRepository<T, I, D, J> extends WrappedRelationshipRepository<T, I, D, J> {
+public class WrappedOneManyRelationshipRepository<T, I, D, J, K extends OneRelationshipRepository & ManyRelationshipRepository>
+		implements OneRelationshipRepository<T, I, D, J>, ManyRelationshipRepository<T, I, D, J>, Wrapper {
 
-	private final OneRelationshipRepository<T, I, D, J> oneRelationshipRepository;
-	private final ManyRelationshipRepository<T, I, D, J> manyRelationshipRepository;
+	protected final K originalRepository;
 
-	public WrappedOneManyRelationshipRepository(RelationshipRepository<T, I, D, J> wrappedRepository,
-												OneRelationshipRepository<T, I, D, J> oneRelationshipRepository,
-												ManyRelationshipRepository<T, I, D, J> manyRelationshipRepository) {
-		super(wrappedRepository);
-		this.oneRelationshipRepository = oneRelationshipRepository;
-		this.manyRelationshipRepository = manyRelationshipRepository;
+	protected final OneRelationshipRepository<T, I, D, J> wrappedOneRelationshipRepository;
+	protected final ManyRelationshipRepository<T, I, D, J> wrappedManyRelationshipRepository;
+
+	/**
+	 */
+	public WrappedOneManyRelationshipRepository(
+			K originalRepository,
+			OneRelationshipRepository<T, I, D, J> wrappedOneRelationshipRepository,
+			ManyRelationshipRepository<T, I, D, J> wrappedManyRelationshipRepository) {
+		this.originalRepository = originalRepository;
+		this.wrappedOneRelationshipRepository = wrappedOneRelationshipRepository;
+		this.wrappedManyRelationshipRepository = wrappedManyRelationshipRepository;
+	}
+
+	@Override
+	public RelationshipMatcher getMatcher() {
+		return originalRepository.getMatcher();
 	}
 
 	// region One Relationship Repository Methods
 
 	@Override
 	public void setRelation(T source, J targetId, String fieldName) {
-		oneRelationshipRepository.setRelation(source, targetId, fieldName);
+		wrappedOneRelationshipRepository.setRelation(source, targetId, fieldName);
 	}
 
 	@Override
 	public Map<I, D> findOneRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		return oneRelationshipRepository.findOneRelations(sourceIds, fieldName, querySpec);
+		return wrappedOneRelationshipRepository.findOneRelations(sourceIds, fieldName, querySpec);
 	}
 
 	// endregion
@@ -48,24 +63,29 @@ public class WrappedOneManyRelationshipRepository<T, I, D, J> extends WrappedRel
 
 	@Override
 	public void setRelations(T source, Collection<J> targetIds, String fieldName) {
-		manyRelationshipRepository.setRelations(source, targetIds, fieldName);
+		wrappedManyRelationshipRepository.setRelations(source, targetIds, fieldName);
 	}
 
 	@Override
 	public void addRelations(T source, Collection<J> targetIds, String fieldName) {
-		manyRelationshipRepository.addRelations(source, targetIds, fieldName);
+		wrappedManyRelationshipRepository.addRelations(source, targetIds, fieldName);
 	}
 
 	@Override
 	public void removeRelations(T source, Collection<J> targetIds, String fieldName) {
-		manyRelationshipRepository.removeRelations(source, targetIds, fieldName);
+		wrappedManyRelationshipRepository.removeRelations(source, targetIds, fieldName);
 	}
 
 	@Override
 	public Map<I, ResourceList<D>> findManyRelations(Collection<I> sourceIds, String fieldName, QuerySpec querySpec) {
-		return manyRelationshipRepository.findManyRelations(sourceIds, fieldName, querySpec);
+		return wrappedManyRelationshipRepository.findManyRelations(sourceIds, fieldName, querySpec);
 	}
 
 	// endregion
 
+
+	@Override
+	public Object getWrappedObject() {
+		return originalRepository;
+	}
 }
