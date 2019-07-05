@@ -3,12 +3,13 @@ package io.crnk.data.jpa.integration;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.VersionedEntity;
 import io.crnk.data.jpa.query.criteria.JpaCriteriaQueryFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import java.io.Serializable;
 
@@ -16,9 +17,9 @@ public class OptimisticLockingIntTest extends AbstractJpaJerseyTest {
 
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
 		if (server) {
-			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+			config.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
 		}
 	}
 

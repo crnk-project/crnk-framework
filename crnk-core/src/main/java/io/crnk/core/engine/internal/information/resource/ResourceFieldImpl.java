@@ -196,11 +196,6 @@ public class ResourceFieldImpl implements ResourceField {
         return ClassUtils.getRawType(ClassUtils.getElementType(genericType));
     }
 
-    @Deprecated
-    public ResourceInformation getParentResourceInformation() {
-        return getResourceInformation();
-    }
-
     @Override
     public ResourceInformation getResourceInformation() {
         return resourceInformation;

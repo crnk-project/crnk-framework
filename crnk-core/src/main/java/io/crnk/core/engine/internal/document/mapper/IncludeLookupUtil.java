@@ -1,14 +1,5 @@
 package io.crnk.core.engine.internal.document.mapper;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Relationship;
 import io.crnk.core.engine.document.Resource;
@@ -25,6 +16,15 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.internal.QuerySpecAdapter;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class IncludeLookupUtil {
 
     private ResourceRegistry resourceRegistry;
@@ -40,11 +40,11 @@ public class IncludeLookupUtil {
     public static List<Serializable> getIds(Collection<Resource> resources, ResourceInformation resourceInformation) {
         List<Serializable> ids = new ArrayList<>();
         for (Resource resource : resources) {
-			if(resource.getId() != null) {
-            Serializable id = resourceInformation.parseIdString(resource.getId());
-            ids.add(id);
+            if (resource.getId() != null) {
+                Serializable id = resourceInformation.parseIdString(resource.getId());
+                ids.add(id);
+            }
         }
-		}
         return ids;
     }
 
@@ -56,22 +56,6 @@ public class IncludeLookupUtil {
         String strDefaultLookupBehavior = propertiesProvider.getProperty(CrnkProperties.DEFAULT_LOOKUP_BEHAVIOR);
         if (strDefaultLookupBehavior != null) {
             return LookupIncludeBehavior.valueOf(strDefaultLookupBehavior);
-        }
-
-        // determine system property for include look up
-        String includeAutomaticallyString = propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY);
-        String includeAutomaticallyOverwriteString =
-                propertiesProvider.getProperty(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE);
-
-        if ((includeAutomaticallyString != null) || (includeAutomaticallyOverwriteString != null)) {
-            boolean includeAutomatically = Boolean.parseBoolean(includeAutomaticallyString);
-            boolean includeAutomaticallyOverwrite = Boolean.parseBoolean(includeAutomaticallyOverwriteString);
-
-            if (includeAutomaticallyOverwrite) {
-                return LookupIncludeBehavior.AUTOMATICALLY_ALWAYS;
-            } else if (includeAutomatically) {
-                return LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL;
-            }
         }
 
         return LookupIncludeBehavior.DEFAULT;
@@ -176,7 +160,7 @@ public class IncludeLookupUtil {
                 List<String> path = toPathList(fieldPath, i);
 
                 // TODO subtyping not properly supported
-                ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
+                ResourceInformation rootInformation = fieldPath.get(i).getResourceInformation();
                 QuerySpec rootQuerySpec = querySpec.getQuerySpec(rootInformation);
                 if (rootQuerySpec != null && contains(rootQuerySpec, path)) {
                     return true;
@@ -192,7 +176,7 @@ public class IncludeLookupUtil {
         // we have to possibilities for inclusion: by type or dot notation
         for (int i = fieldPath.size() - 1; i >= 0; i--) {
             String path = toPath(fieldPath, i);
-            ResourceInformation rootInformation = fieldPath.get(i).getParentResourceInformation();
+            ResourceInformation rootInformation = fieldPath.get(i).getResourceInformation();
             Set<PathSpec> includedRelationsParams = params.get(rootInformation.getResourceType());
             if (includedRelationsParams != null && contains(includedRelationsParams, path)) {
                 return true;

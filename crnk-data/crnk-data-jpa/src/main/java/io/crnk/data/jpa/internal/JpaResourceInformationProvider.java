@@ -27,7 +27,6 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.LookupIncludeBehavior;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.utils.Prioritizable;
-import io.crnk.data.jpa.annotations.JpaResource;
 import io.crnk.data.jpa.meta.JpaMetaProvider;
 import io.crnk.data.jpa.meta.MetaEntity;
 import io.crnk.data.jpa.meta.internal.JpaMetaUtils;
@@ -79,11 +78,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
     @Override
     public boolean accept(Class<?> resourceClass) {
-        // needs to be configured for being exposed
-        if (resourceClass.getAnnotation(JpaResource.class) != null) {
-            return true;
-        }
-
         if (JpaMetaUtils.isJpaType(resourceClass)) {
             // needs to be an entity
             MetaElement meta = metaProvider.discoverMeta(resourceClass);
@@ -161,10 +155,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
     @Override
     public String getResourceType(Class<?> entityClass) {
-        JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
-        if (annotation != null) {
-            return annotation.type();
-        }
         JsonApiResource annotation1 = entityClass.getAnnotation(JsonApiResource.class);
         if (annotation1 != null) {
             return annotation1.type();
@@ -182,11 +172,6 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
     @Override
     public String getResourcePath(Class<?> entityClass) {
-        JpaResource annotation = entityClass.getAnnotation(JpaResource.class);
-        if (annotation != null && !"".equals(annotation.resourcePath())) {
-            return annotation.resourcePath();
-        }
-
         JsonApiResource annotation1 = entityClass.getAnnotation(JsonApiResource.class);
         if (annotation1 != null && !"".equals(annotation1.resourcePath())) {
             return annotation1.resourcePath();

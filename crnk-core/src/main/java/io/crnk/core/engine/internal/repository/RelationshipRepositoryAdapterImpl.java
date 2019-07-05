@@ -273,7 +273,7 @@ public class RelationshipRepositoryAdapterImpl extends ResponseRepositoryAdapter
         return responseMap;
     }
 
-    public Object getRelationshipRepository() {
+    public Object getImplementation() {
         return relationshipRepository;
     }
 

@@ -110,7 +110,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 					closedResourceType = resourceInformation.getResourceType();
 				}
 
-				Object resourceRepository = entry.getResourceRepository().getResourceRepository();
+				Object resourceRepository = entry.getResourceRepository().getImplementation();
 				Package resourcePackage = resourceRepository.getClass().getPackage();
 				resourcePackageName = resourcePackage != null ? resourcePackage.getName() : resourceClass.getPackage().getName();
 				if (packageName.startsWith(resourcePackageName) && (closedPackageName == null
@@ -190,7 +190,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		RegistryEntry entry = resourceRegistry.getEntry(information.getResourceType());
 		if (entry != null) {
 			boolean readOnlyImpl =
-					entry.getResourceRepository().getResourceRepository() instanceof ReadOnlyResourceRepositoryBase;
+					entry.getResourceRepository().getImplementation() instanceof ReadOnlyResourceRepositoryBase;
 			resource.setUpdatable(resource.isUpdatable() && !readOnlyImpl);
 			resource.setInsertable(resource.isInsertable() && !readOnlyImpl);
 			resource.setDeletable(resource.isDeletable() && !readOnlyImpl);
@@ -255,7 +255,7 @@ public class ResourceMetaParitition extends TypedMetaPartitionBase {
 		}
 
 		// TODO avoid use of ResourceRepositoryAdapter by enriching ResourceRepositoryInformation
-		Object repository = resourceRepository.getResourceRepository();
+		Object repository = resourceRepository.getImplementation();
 		if (repository instanceof ResourceRepository) {
 			setListInformationTypes(repository, meta);
 		}

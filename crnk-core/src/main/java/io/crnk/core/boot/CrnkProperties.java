@@ -45,16 +45,6 @@ public class CrnkProperties {
     public static final String WEB_PATH_PREFIX = "crnk.config.web.path.prefix";
 
     /**
-     * Set a boolean whether crnk will always try to look up a relationship field that has been included in the request.
-     * Refer to {@link io.crnk.core.resource.annotations.JsonApiLookupIncludeAutomatically} for only adding it to a specific
-     * field.
-     *
-     * @deprecated use {@link #DEFAULT_LOOKUP_BEHAVIOR}
-     */
-    @Deprecated
-    public static final String INCLUDE_AUTOMATICALLY = "crnk.config.include.automatically";
-
-    /**
      * Specifies the default {@link LookupIncludeBehavior} to be used for all relationships. For more information see
      * {@link JsonApiRelation#lookUp()}.
      */
@@ -81,19 +71,7 @@ public class CrnkProperties {
     public static final String INCLUDE_BEHAVIOR = "crnk.config.include.behavior";
 
     /**
-     * Set a boolean whether crnk will try to overwrite a value previously assigned
-     * to a relationship field that has been included in the request.
-     * Refer to {@link io.crnk.resource.annotations.JsonApiLookupIncludeAutomatically}.overwrite for only adding it to a
-     * specific field.
-     *
-     * @deprecated use {@link #DEFAULT_LOOKUP_BEHAVIOR}
-     */
-    @Deprecated
-    public static final String INCLUDE_AUTOMATICALLY_OVERWRITE = "crnk.config.include.automatically.overwrite";
-
-    /**
-     * See {@link ResourceFieldImmutableWriteBehavior}. By default
-     * {@value ResourceFieldImmutableWriteBehavior#IGNORE} is used.
+     * See {@link ResourceFieldImmutableWriteBehavior}.
      */
     public static final String RESOURCE_FIELD_IMMUTABLE_WRITE_BEHAVIOR = "crnk.config.resource.immutableWrite";
 

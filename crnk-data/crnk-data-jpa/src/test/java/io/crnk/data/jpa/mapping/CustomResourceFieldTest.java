@@ -17,10 +17,10 @@ import io.crnk.core.resource.annotations.PatchStrategy;
 import io.crnk.core.resource.annotations.RelationshipRepositoryBehavior;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.CountryTranslationPK;
 import io.crnk.data.jpa.util.EntityManagerProducer;
 import io.crnk.data.jpa.util.SpringTransactionRunner;
-import io.crnk.data.jpa.JpaModule;
 import io.crnk.data.jpa.internal.JpaResourceInformationProvider;
 import io.crnk.data.jpa.model.CountryEntity;
 import io.crnk.data.jpa.model.CountryTranslationEntity;
@@ -90,11 +90,11 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(final JpaModule module, boolean server) {
-		super.setupModule(module, server);
+	protected void setupModule(final JpaModuleConfig config, boolean server, EntityManager em) {
+		super.setupModule(config, server, em);
 
 		if (server) {
-			module.setResourceInformationProvider(
+			config.setResourceInformationProvider(
 					new JpaResourceInformationProvider(new NullPropertiesProvider()) {
 
 						@Override
@@ -130,7 +130,6 @@ public class CustomResourceFieldTest extends AbstractJpaJerseyTest {
 											CountryTranslationEntity translation = getTranslation(translations, language);
 											if (translation == null) {
 
-												EntityManager em = module.getEntityManager();
 												LangEntity langEntity = em.find(LangEntity.class, language);
 												if (langEntity == null) {
 													throw new IllegalStateException("language not found: " + language);

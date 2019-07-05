@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 
 public class JpaFilterTest extends AbstractJpaJerseyTest {
@@ -27,11 +28,11 @@ public class JpaFilterTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
 		if (server) {
-			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+			config.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
 			filter = Mockito.spy(new JpaCriteriaRepositoryFilterBase());
-			module.addFilter(filter);
+			config.addFilter(filter);
 		}
 	}
 

@@ -61,7 +61,7 @@ public class JpaEntityRepositoryBase<T, I > extends JpaRepositoryBase<T> impleme
     @Override
     public T findOne(I id, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
-        QuerySpec idQuerySpec = querySpec.duplicate();
+        QuerySpec idQuerySpec = querySpec.clone();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, id));
         List<T> results = findAll(idQuerySpec);
         return getUnique(results, id);
@@ -70,7 +70,7 @@ public class JpaEntityRepositoryBase<T, I > extends JpaRepositoryBase<T> impleme
     @Override
     public ResourceList<T> findAll(Collection<I> ids, QuerySpec querySpec) {
         String idField = getIdField().getUnderlyingName();
-        QuerySpec idQuerySpec = querySpec.duplicate();
+        QuerySpec idQuerySpec = querySpec.clone();
         idQuerySpec.addFilter(new FilterSpec(Arrays.asList(idField), FilterOperator.EQ, ids));
         return findAll(idQuerySpec);
     }

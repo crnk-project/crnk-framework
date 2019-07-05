@@ -84,7 +84,7 @@ public class SecurityModuleTest {
 	@Test
 	public void testRolesRepository() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(Role.class);
-		RoleRepository repository = (RoleRepository) entry.getResourceRepository().getResourceRepository();
+		RoleRepository repository = (RoleRepository) entry.getResourceRepository().getImplementation();
 		ResourceList<Role> roles = repository.findAll(new QuerySpec(Role.class));
 
 		Set<String> roleNames = roles.stream().map(it -> it.getId()).collect(Collectors.toSet());
@@ -98,7 +98,7 @@ public class SecurityModuleTest {
 	@Test
 	public void testCallerPermissionRepository() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(CallerPermission.class);
-		CallerPermissionRepository repository = (CallerPermissionRepository) entry.getResourceRepository().getResourceRepository();
+		CallerPermissionRepository repository = (CallerPermissionRepository) entry.getResourceRepository().getImplementation();
 
 		QuerySpec querySpec = new QuerySpec(CallerPermission.class);
 		querySpec.addSort(PathSpec.of("resourceType").sort(Direction.ASC));
@@ -113,7 +113,7 @@ public class SecurityModuleTest {
 	@Test
 	public void testRolePermissionRepository() {
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(RolePermission.class);
-		RolePermissionRepository repository = (RolePermissionRepository) entry.getResourceRepository().getResourceRepository();
+		RolePermissionRepository repository = (RolePermissionRepository) entry.getResourceRepository().getImplementation();
 
 		QuerySpec querySpec = new QuerySpec(CallerPermission.class);
 		querySpec.addSort(PathSpec.of("role").sort(Direction.ASC));

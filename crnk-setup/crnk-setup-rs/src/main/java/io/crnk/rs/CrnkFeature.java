@@ -93,7 +93,7 @@ public class CrnkFeature implements Feature {
             ResourceRepositoryInformation repositoryInformation = registryEntry.getRepositoryInformation();
             if (repositoryInformation != null && !repositoryInformation.getActions().isEmpty()) {
                 ResourceRepositoryAdapter repositoryAdapter = registryEntry.getResourceRepository();
-                Object resourceRepository = repositoryAdapter.getResourceRepository();
+                Object resourceRepository = repositoryAdapter.getImplementation();
                 context.register(resourceRepository);
             }
         }

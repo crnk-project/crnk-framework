@@ -3,7 +3,7 @@ package io.crnk.data.jpa.repository;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.jpa.JpaEntityRepository;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.JpaRepositoryConfig;
 import io.crnk.data.jpa.JpaRepositoryFilterBase;
 import io.crnk.data.jpa.internal.JpaRepositoryUtils;
@@ -56,7 +56,7 @@ public class JpaRepositoryFilterTest extends AbstractJpaTest {
     }
 
     @Override
-    protected void setupModule(JpaModule module) {
+    protected void setupModule(JpaModuleConfig module) {
         filter = Mockito.spy(new JpaRepositoryFilterBase());
         module.addFilter(filter);
     }

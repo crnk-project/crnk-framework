@@ -94,7 +94,7 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		}
 
 		for (Object source : sources) {
-			Object sourceId = field.getParentResourceInformation().getId(source);
+			Object sourceId = field.getResourceInformation().getId(source);
 			Object targetId = field.getIdAccessor().getValue(source);
 			if (field.isCollection()) {
 				((Collection) targetId).retainAll(targetMap.keySet());
@@ -114,7 +114,7 @@ public class GetFromOwnerStrategy<T, I , D, J > extends ForwardingStrategyBase
 		Object target = targetMap.get(targetId);
 		if (target == null) {
 			throw new ResourceNotFoundException("targetId=" + targetId + " not found for sourceId=" + sourceId + ", field=" +
-					field.getUnderlyingName() + ", sourceType=" + field.getParentResourceInformation().getResourceType());
+					field.getUnderlyingName() + ", sourceType=" + field.getResourceInformation().getResourceType());
 		}
 		bulkResult.add(sourceId, target);
 	}

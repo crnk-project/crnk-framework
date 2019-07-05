@@ -161,7 +161,7 @@ public class IncludeRelationshipLoader {
 	private Result<Set<Resource>> lookupRelatedResourceWithRelationship(IncludeRequest request, Collection<Resource>
 			sourceResources, ResourceField relationshipField) {
 
-		ResourceInformation resourceInformation = relationshipField.getParentResourceInformation();
+		ResourceInformation resourceInformation = relationshipField.getResourceInformation();
 		RegistryEntry registyEntry = resourceRegistry.getEntry(resourceInformation.getResourceType());
 		List<Serializable> resourceIds = IncludeLookupUtil.getIds(sourceResources, resourceInformation);
 		boolean isMany = Iterable.class.isAssignableFrom(relationshipField.getType());

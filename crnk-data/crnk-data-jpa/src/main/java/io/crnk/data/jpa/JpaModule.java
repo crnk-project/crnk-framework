@@ -5,11 +5,8 @@ import io.crnk.core.engine.error.ExceptionMapper;
 import io.crnk.core.engine.filter.AbstractDocumentFilter;
 import io.crnk.core.engine.filter.DocumentFilterChain;
 import io.crnk.core.engine.filter.DocumentFilterContext;
-import io.crnk.core.engine.information.resource.ResourceInformationProvider;
 import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.engine.internal.utils.ExceptionUtil;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.transaction.TransactionRunner;
 import io.crnk.core.module.InitializingModule;
 import io.crnk.core.module.ModuleExtension;
@@ -26,16 +23,16 @@ import io.crnk.data.jpa.internal.OptimisticLockExceptionMapper;
 import io.crnk.data.jpa.internal.PersistenceExceptionMapper;
 import io.crnk.data.jpa.internal.PersistenceRollbackExceptionMapper;
 import io.crnk.data.jpa.internal.query.backend.querydsl.QuerydslQueryImpl;
+import io.crnk.data.jpa.meta.JpaMetaProvider;
+import io.crnk.data.jpa.meta.MetaEntity;
+import io.crnk.data.jpa.meta.internal.JpaMetaEnricher;
+import io.crnk.data.jpa.meta.internal.JpaMetaPartition;
 import io.crnk.data.jpa.query.JpaQueryFactory;
 import io.crnk.data.jpa.query.JpaQueryFactoryContext;
 import io.crnk.data.jpa.query.querydsl.QuerydslQueryFactory;
 import io.crnk.data.jpa.query.querydsl.QuerydslRepositoryFilter;
 import io.crnk.data.jpa.query.querydsl.QuerydslTranslationContext;
 import io.crnk.data.jpa.query.querydsl.QuerydslTranslationInterceptor;
-import io.crnk.data.jpa.meta.JpaMetaProvider;
-import io.crnk.data.jpa.meta.MetaEntity;
-import io.crnk.data.jpa.meta.internal.JpaMetaEnricher;
-import io.crnk.data.jpa.meta.internal.JpaMetaPartition;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.MetaLookupImpl;
 import io.crnk.meta.MetaModuleExtension;
@@ -96,8 +93,6 @@ public class JpaModule implements InitializingModule {
 
     private Supplier<EntityManager> emSupplier;
 
-    private ResourceInformationProvider resourceInformationProvider;
-
     private TransactionRunner transactionRunner;
 
     private ModuleContext context;
@@ -142,42 +137,7 @@ public class JpaModule implements InitializingModule {
 
     /**
      * Creates a new JpaModule for a Crnk server. No entities are by
-     * default exposed as JSON API resources. Make use of
-     * {@link #addRepository(JpaRepositoryConfig)} to add resources.
-     *
-     * @param em                to use
-     * @param transactionRunner to use
-     * @return created module
-     * @deprecated use with JpaModuleConfig
-     */
-    @Deprecated
-    public static JpaModule newServerModule(EntityManager em, TransactionRunner transactionRunner) {
-        return new JpaModule(new JpaModuleConfig(), null, () -> em, transactionRunner);
-    }
-
-    /**
-     * Creates a new JpaModule for a Crnk server. All entities managed by
-     * the provided EntityManagerFactory are registered to the module and
-     * exposed as JSON API resources if not later configured otherwise.
-     *
-     * @param emFactory         to retrieve the managed entities.
-     * @param em                to use
-     * @param transactionRunner to use
-     * @return created module
-     * @deprecated use with JpaModuleConfig
-     */
-    @Deprecated
-    public static JpaModule newServerModule(EntityManagerFactory emFactory, EntityManager em,
-                                            TransactionRunner transactionRunner) {
-        JpaModuleConfig config = new JpaModuleConfig();
-        config.exposeAllEntities(emFactory);
-        return new JpaModule(config, emFactory, () -> em, transactionRunner);
-    }
-
-    /**
-     * Creates a new JpaModule for a Crnk server. No entities are by
-     * default exposed as JSON API resources. Make use of
-     * {@link #addRepository(JpaRepositoryConfig)} to add resources.
+     * default exposed as JSON API resources.
      *
      * @param em                to use
      * @param transactionRunner to use
@@ -189,8 +149,7 @@ public class JpaModule implements InitializingModule {
 
     /**
      * Creates a new JpaModule for a Crnk server. No entities are by
-     * default exposed as JSON API resources. Make use of
-     * {@link #addRepository(JpaRepositoryConfig)} to add resources.
+     * default exposed as JSON API resources.
      *
      * @param em                to use
      * @param transactionRunner to use
@@ -200,90 +159,9 @@ public class JpaModule implements InitializingModule {
         return new JpaModule(config, null, em, transactionRunner);
     }
 
-    /**
-     * Adds the given filter to this module. Filter will be used by all
-     * repositories managed by this module.
-     *
-     * @param filter to add
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public void addFilter(JpaRepositoryFilter filter) {
-        checkNotInitialized();
-        config.addFilter(filter);
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public void removeFilter(JpaRepositoryFilter filter) {
-        checkNotInitialized();
-        config.removeFilter(filter);
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public List<JpaRepositoryFilter> getFilters() {
-        return config.getFilters();
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public void setRepositoryFactory(JpaRepositoryFactory repositoryFactory) {
-        checkNotInitialized();
-        this.config.setRepositoryFactory(repositoryFactory);
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public Set<Class<?>> getResourceClasses() {
-        return config.getResourceClasses();
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public <T> void addRepository(JpaRepositoryConfig<T> config) {
-        checkNotInitialized();
-        this.config.addRepository(config);
-    }
-
-    /**
-     * Removes the resource with the given type from this module.
-     *
-     * @param <T>           resourse class (entity or mapped dto)
-     * @param resourceClass to remove
-     */
-    public <T> void removeRepository(Class<T> resourceClass) {
-        checkNotInitialized();
-        config.removeRepository(resourceClass);
-    }
-
-    /**
-     * Removes all entity classes registered by default. Use
-     * {@link #addRepository(JpaRepositoryConfig)} (Class)} or
-     * classes manually.
-     */
-    public void removeRepositories() {
-        checkNotInitialized();
-        config.removeRepositories();
-    }
-
     @Override
     public String getModuleName() {
         return MODULE_NAME;
-    }
-
-    private void checkNotInitialized() {
-        PreconditionUtil.verify(context == null, "module is already initialized, no further changes can be performed");
     }
 
     @Override
@@ -304,10 +182,12 @@ public class JpaModule implements InitializingModule {
 
         if (config != null) {
             initQueryFactory();
+            context.addResourceInformationProvider(
+                    config.getResourceInformationProvider(context.getPropertiesProvider()));
+        }else{
+            context.addResourceInformationProvider(new JpaResourceInformationProvider());
         }
 
-        context.addResourceInformationBuilder(
-                getResourceInformationProvider(context.getPropertiesProvider()));
         context.addExceptionMapper(new OptimisticLockExceptionMapper());
         context.addExceptionMapper(new PersistenceExceptionMapper(context));
         context.addExceptionMapper(new PersistenceRollbackExceptionMapper(context));
@@ -448,7 +328,7 @@ public class JpaModule implements InitializingModule {
     }
 
     private void setupRepository(JpaRepositoryConfig<?> repositoryConfig) {
-        if (repositoryConfig.getListMetaClass() == DefaultPagedMetaInformation.class && !isTotalResourceCountUsed()) {
+        if (repositoryConfig.getListMetaClass() == DefaultPagedMetaInformation.class && !config.isTotalResourceCountUsed()) {
             // TODO not that nice...
             repositoryConfig.setListMetaClass(DefaultHasMoreResourcesMetaInformation.class);
         }
@@ -506,46 +386,6 @@ public class JpaModule implements InitializingModule {
         return true;
     }
 
-    /**
-     * @return ResourceInformationProvider used to describe JPA classes.
-     */
-    protected ResourceInformationProvider getResourceInformationProvider(PropertiesProvider propertiesProvider) {
-        if (resourceInformationProvider == null) {
-            resourceInformationProvider = new JpaResourceInformationProvider(propertiesProvider);
-        }
-        return resourceInformationProvider;
-    }
-
-    /**
-     * Sets the information builder to use to read JPA classes. See
-     * {@link JpaResourceInformationProvider}}
-     */
-    public void setResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
-        PreconditionUtil.verify(this.resourceInformationProvider == null, "already set");
-        this.resourceInformationProvider = resourceInformationProvider;
-    }
-
-    /**
-     * @return {@link JpaQueryFactory}} implementation used to create JPA
-     * queries.
-     * @deprecated use JpaModuleConfig
-     */
-    @Deprecated
-    public JpaQueryFactory getQueryFactory() {
-        return config.getQueryFactory();
-    }
-
-    /**
-     * @deprecated use JpaModuleConfig
-     */
-    @Deprecated
-    public void setQueryFactory(JpaQueryFactory queryFactory) {
-        checkNotInitialized();
-        config.setQueryFactory(queryFactory);
-        if (context != null) {
-            initQueryFactory();
-        }
-    }
 
     /**
      * @return {@link EntityManager}} in use.
@@ -561,33 +401,8 @@ public class JpaModule implements InitializingModule {
         return emFactory;
     }
 
-    /**
-     * @return config
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public <T> JpaRepositoryConfig<T> getRepositoryConfig(Class<T> resourceClass) {
-        return config.getRepository(resourceClass);
-    }
-
     public MetaLookup getJpaMetaLookup() {
         return jpaMetaLookup;
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    @Deprecated
-    public boolean isTotalResourceCountUsed() {
-        return config.isTotalResourceCountUsed();
-    }
-
-    /**
-     * @deprecated use {@link JpaModuleConfig}
-     */
-    public void setTotalResourceCountUsed(boolean totalResourceCountUsed) {
-        checkNotInitialized();
-        config.setTotalResourceCountUsed(totalResourceCountUsed);
     }
 
     /**

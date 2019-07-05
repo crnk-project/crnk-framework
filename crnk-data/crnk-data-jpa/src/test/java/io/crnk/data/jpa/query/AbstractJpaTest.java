@@ -3,6 +3,7 @@ package io.crnk.data.jpa.query;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.engine.registry.ResourceRegistry;
 import io.crnk.core.engine.url.ConstantServiceUrlProvider;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.JoinedTableBaseEntity;
 import io.crnk.data.jpa.model.OverrideIdTestEntity;
 import io.crnk.data.jpa.model.SingleTableBaseEntity;
@@ -123,11 +124,13 @@ public abstract class AbstractJpaTest {
 		CrnkBoot boot = new CrnkBoot();
 
 		boot.setServiceUrlProvider(new ConstantServiceUrlProvider("http://localhost:1234"));
-		module = JpaModule.newServerModule(emFactory, em, transactionRunner);
+		JpaModuleConfig config = new JpaModuleConfig();
+		config.exposeAllEntities(emFactory);
 		queryFactory = createQueryFactory(em);
-		module.setQueryFactory(queryFactory);
+		config.setQueryFactory(queryFactory);
+		setupModule(config);
+		module = JpaModule.createServerModule(config, em, transactionRunner);
 
-		setupModule(module);
 		boot.addModule(module);
 		boot.boot();
 		resourceRegistry = boot.getResourceRegistry();
@@ -213,7 +216,7 @@ public abstract class AbstractJpaTest {
 	 */
 	protected abstract JpaQueryFactory createQueryFactory(EntityManager em);
 
-	protected void setupModule(JpaModule module2) {
+	protected void setupModule(JpaModuleConfig config) {
 	}
 
 	private void clear() {

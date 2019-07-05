@@ -69,7 +69,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
         RegistryEntry entry = resourceRegistry.getEntry(RelationIdTestResource.class);
         relRepository =
                 (ForwardingRelationshipRepository) entry.getRelationshipRepository("testSerializeEager")
-                        .getRelationshipRepository();
+                        .getImplementation();
 
         RelationshipMatcher taskProjectMatcher = new RelationshipMatcher().rule().source(Task.class).target(Project.class).add();
         taskProjectRepository = new ForwardingRelationshipRepository(Task.class, taskProjectMatcher, ForwardingDirection.OWNER,
@@ -83,7 +83,7 @@ public class OwnerFowardingRelationshipRepositoryTest {
         projectTaskRepository.setResourceRegistry(resourceRegistry);
         projectTaskRepository.setHttpRequestContextProvider(container.getModuleRegistry().getHttpRequestContextProvider());
 
-        testRepository = (RelationIdTestRepository) entry.getResourceRepository().getResourceRepository();
+        testRepository = (RelationIdTestRepository) entry.getResourceRepository().getImplementation();
         testRepository.setResourceRegistry(resourceRegistry);
         resource = new RelationIdTestResource();
         resource.setId(2L);

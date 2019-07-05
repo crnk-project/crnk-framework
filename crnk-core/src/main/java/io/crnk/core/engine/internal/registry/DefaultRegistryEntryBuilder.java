@@ -323,7 +323,7 @@ public class DefaultRegistryEntryBuilder implements RegistryEntryBuilder {
     }
 
     private MatchedRelationship setupForwardingRepository(ResourceField relationshipField) {
-        ResourceInformation sourceInformation = relationshipField.getParentResourceInformation();
+        ResourceInformation sourceInformation = relationshipField.getResourceInformation();
 
         RelationshipRepositoryBehavior behavior = relationshipField.getRelationshipRepositoryBehavior();
         if (behavior == RelationshipRepositoryBehavior.DEFAULT) {

@@ -1,11 +1,5 @@
 package io.crnk.core.boot;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-
-import java.util.Arrays;
-import java.util.Properties;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.CoreTestModule;
@@ -43,6 +37,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Properties;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 
 public class CrnkBootTest {
 
@@ -90,7 +90,7 @@ public class CrnkBootTest {
     public void setServiceDiscoveryFactory() {
         CrnkBoot boot = new CrnkBoot();
         boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-        boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
+        boot.setServiceUrlProvider(mock(ServiceUrlProvider.class));
         boot.boot();
         Mockito.verify(serviceDiscoveryFactory, Mockito.times(1)).getInstance();
         Assert.assertNotNull(boot.getServiceDiscovery());
@@ -100,7 +100,7 @@ public class CrnkBootTest {
     public void getPropertiesProvider() {
         CrnkBoot boot = new CrnkBoot();
         boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-        boot.setDefaultServiceUrlProvider(mock(ServiceUrlProvider.class));
+        boot.setServiceUrlProvider(mock(ServiceUrlProvider.class));
         boot.boot();
         Assert.assertNotNull(boot.getPropertiesProvider());
     }
@@ -124,8 +124,8 @@ public class CrnkBootTest {
         ExceptionMapper exceptionMapper = new TestExceptionMapper();
 
         Mockito.when(serviceDiscovery.getInstancesByType(eq(DocumentFilter.class))).thenReturn(Arrays.asList(filter));
-		HttpStatusBehavior statusBehavior = mock(HttpStatusBehavior.class);
-		Mockito.when(serviceDiscovery.getInstancesByType(eq(HttpStatusBehavior.class))).thenReturn(Arrays.asList(statusBehavior));
+        HttpStatusBehavior statusBehavior = mock(HttpStatusBehavior.class);
+        Mockito.when(serviceDiscovery.getInstancesByType(eq(HttpStatusBehavior.class))).thenReturn(Arrays.asList(statusBehavior));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(RepositoryDecoratorFactory.class)))
                 .thenReturn(Arrays.asList(decoratorFactory));
         Mockito.when(serviceDiscovery.getInstancesByType(eq(ResourceFieldContributor.class)))
@@ -167,18 +167,6 @@ public class CrnkBootTest {
         public boolean accepts(ErrorResponse errorResponse) {
             return false;
         }
-    }
-
-    @Test
-    public void setDefaultServiceUrlProvider() {
-        CrnkBoot boot = new CrnkBoot();
-        boot.setServiceDiscoveryFactory(serviceDiscoveryFactory);
-        ServiceUrlProvider serviceUrlProvider = mock(ServiceUrlProvider.class);
-        boot.setDefaultServiceUrlProvider(serviceUrlProvider);
-        boot.boot();
-        Assert.assertEquals(serviceUrlProvider, boot.getDefaultServiceUrlProvider());
-        Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
-        Assert.assertEquals(serviceUrlProvider, boot.getServiceUrlProvider());
     }
 
     @Test
@@ -244,13 +232,7 @@ public class CrnkBootTest {
     @Test
     public void boot() {
         CrnkBoot boot = new CrnkBoot();
-        boot.setDefaultServiceUrlProvider(new ServiceUrlProvider() {
-
-            @Override
-            public String getUrl() {
-                return "http://127.0.0.1";
-            }
-        });
+        boot.setServiceUrlProvider(() -> "http://127.0.0.1");
         boot.addModule(new CoreTestModule());
         boot.addModule(new SimpleModule("test"));
         boot.boot();
@@ -263,7 +245,7 @@ public class CrnkBootTest {
         ResourceRegistry resourceRegistry = boot.getResourceRegistry();
         RegistryEntry taskEntry = resourceRegistry.getEntry(Task.class);
         ResourceRepositoryAdapter repositoryAdapter = taskEntry.getResourceRepository();
-        Assert.assertNotNull(repositoryAdapter.getResourceRepository());
+        Assert.assertNotNull(repositoryAdapter.getImplementation());
         JsonApiResponse response = repositoryAdapter.findAll(new QuerySpecAdapter(new QuerySpec(Task.class), resourceRegistry, queryContext)).get();
         Assert.assertNotNull(response);
 

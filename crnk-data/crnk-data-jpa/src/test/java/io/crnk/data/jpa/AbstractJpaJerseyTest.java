@@ -64,11 +64,11 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
         client.getObjectMapper().registerModule(new JavaTimeModule());
 
         JpaModule module = JpaModule.newClientModule();
-        setupModule(module, false);
         client.addModule(module);
 
-        MetaModule clientMetaModule = MetaModule.create();
-        clientMetaModule.addMetaProvider(new ResourceMetaProvider());
+        MetaModuleConfig config = new MetaModuleConfig();
+        config.addMetaProvider(new ResourceMetaProvider());
+        MetaModule clientMetaModule = MetaModule.createServerModule(config);
         client.addModule(clientMetaModule);
 
         ((MetaLookupImpl) metaModule.getLookup()).initialize();
@@ -76,7 +76,7 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
         setNetworkTimeout(client, 10000, TimeUnit.SECONDS);
     }
 
-    protected void setupModule(JpaModule module, boolean server) {
+    protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
 
     }
 
@@ -123,18 +123,19 @@ public abstract class AbstractJpaJerseyTest extends JerseyTestBase {
             feature.addModule(new FacetModule());
             feature.addModule(new TestModule());
 
-            JpaModule module = JpaModule.newServerModule(em, transactionRunner);
-            setupModule(module, true);
+            JpaModuleConfig config = new JpaModuleConfig();
 
             Set<ManagedType<?>> managedTypes = emFactory.getMetamodel().getManagedTypes();
             for (ManagedType<?> managedType : managedTypes) {
                 Class<?> managedJavaType = managedType.getJavaType();
                 if (managedJavaType.getAnnotation(Entity.class) != null && managedJavaType != CountryTranslationEntity.class) {
-                    if (!module.hasRepository(managedJavaType)) {
-                        module.addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
+                    if (!config.hasRepository(managedJavaType)) {
+                        config.addRepository(JpaRepositoryConfig.builder(managedJavaType).build());
                     }
                 }
             }
+            setupModule(config, true, em);
+            JpaModule module = JpaModule.createServerModule(config, em, transactionRunner);
 
             feature.addModule(module);
 

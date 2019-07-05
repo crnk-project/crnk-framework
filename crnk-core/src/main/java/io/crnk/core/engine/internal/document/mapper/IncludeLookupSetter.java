@@ -108,7 +108,7 @@ public class IncludeLookupSetter {
 	private Result populateField(IncludeRequest request, Collection<Resource> resourceList,
 								 ResourceField resourceField,
 								 List<ResourceField> fieldPath) {
-		ResourceInformation resourceInformation = resourceField.getParentResourceInformation();
+		ResourceInformation resourceInformation = resourceField.getResourceInformation();
 
 		boolean includeRelationship = request.isInclusionRequest(fieldPath, resourceField);
 		boolean serializeRelationId = request.isRelationIdSerialized(fieldPath);

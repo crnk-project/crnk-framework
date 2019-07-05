@@ -92,14 +92,6 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return moduleRegistry.getHttpRequestContextProvider().getServiceUrlProvider();
 	}
 
-	/**
-	 * @deprecated use {@link #getEntry(Class)}
-	 */
-	@Deprecated
-	public RegistryEntry getEntryForClass(Class<?> resourceClass) {
-		return getEntry(resourceClass);
-	}
-
 
 	public Optional<Class<?>> getResourceClass(Object resource) {
 		return getResourceClass(resource.getClass());

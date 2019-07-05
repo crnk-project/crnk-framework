@@ -7,13 +7,14 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.RelatedEntity;
 import io.crnk.data.jpa.model.TestEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -29,10 +30,10 @@ public class HasNextPagingIntTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
-		super.setupModule(module, server);
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
+		super.setupModule(config, server, em);
 		if (server) {
-			module.setTotalResourceCountUsed(false);
+			config.setTotalResourceCountUsed(false);
 		}
 	}
 

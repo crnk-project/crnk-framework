@@ -2,7 +2,6 @@ package io.crnk.core.resource.annotations;
 
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -42,11 +41,6 @@ public @interface JsonApiResource {
      */
     String resourcePath() default "";
 
-    /**
-     * @deprecated use pagingSpec
-     */
-    @Deprecated
-    Class<? extends PagingBehavior> pagingBehavior() default VoidPagingBehavior.class;
 
     /**
      * Defines paging behavior of the resource. By default it just makes use of the default/first paging behavior registered.

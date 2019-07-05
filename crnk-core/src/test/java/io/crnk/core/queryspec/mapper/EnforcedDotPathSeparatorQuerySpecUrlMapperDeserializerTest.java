@@ -39,7 +39,7 @@ public class EnforcedDotPathSeparatorQuerySpecUrlMapperDeserializerTest extends 
 		QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(Task.class, querySpec.getResourceClass());
 		Assert.assertEquals(0, querySpec.getFilters().size());
-		QuerySpec projectQuerySpec = querySpec.getRelatedSpecs().get(Project.class);
+		QuerySpec projectQuerySpec = querySpec.getQuerySpec(Project.class);
 		Assert.assertEquals(1, projectQuerySpec.getFilters().size());
 		Assert.assertEquals(Arrays.asList("name"), projectQuerySpec.getFilters().get(0).getAttributePath());
 	}
@@ -54,6 +54,6 @@ public class EnforcedDotPathSeparatorQuerySpecUrlMapperDeserializerTest extends 
 		QuerySpec querySpec = urlMapper.deserialize(taskInformation, params);
 		Assert.assertEquals(Task.class, querySpec.getResourceClass());
 		Assert.assertEquals(Arrays.asList("projects"), querySpec.getFilters().get(0).getAttributePath());
-		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));
+		Assert.assertNull(querySpec.getQuerySpec(Project.class));
 	}
 }

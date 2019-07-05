@@ -108,8 +108,8 @@ public class WorkerRepositoryAdapterTest {
 
 	@Test
 	public void getResourceRepository() {
-		workerAdapter.getResourceRepository();
-		Mockito.verify(adapter, Mockito.times(1)).getResourceRepository();
+		workerAdapter.getImplementation();
+		Mockito.verify(adapter, Mockito.times(1)).getImplementation();
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class WorkerRepositoryAdapterTest {
 
 	@Test
 	public void getRelationshipRepository() {
-		workerRelAdapter.getRelationshipRepository();
-		Mockito.verify(relAdapter, Mockito.times(1)).getRelationshipRepository();
+		workerRelAdapter.getImplementation();
+		Mockito.verify(relAdapter, Mockito.times(1)).getImplementation();
 	}
 
 	@Test

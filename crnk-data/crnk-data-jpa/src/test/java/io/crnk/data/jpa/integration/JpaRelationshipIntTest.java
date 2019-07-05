@@ -14,7 +14,7 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.data.jpa.AbstractJpaJerseyTest;
-import io.crnk.data.jpa.JpaModule;
+import io.crnk.data.jpa.JpaModuleConfig;
 import io.crnk.data.jpa.model.ManyToManyOppositeEntity;
 import io.crnk.data.jpa.model.ManyToManyTestEntity;
 import io.crnk.data.jpa.model.OneToOneOppositeEntity;
@@ -29,6 +29,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import javax.persistence.EntityManager;
 
 public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 
@@ -46,9 +48,9 @@ public class JpaRelationshipIntTest extends AbstractJpaJerseyTest {
 	}
 
 	@Override
-	protected void setupModule(JpaModule module, boolean server) {
+	protected void setupModule(JpaModuleConfig config, boolean server, EntityManager em) {
 		if (server) {
-			module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+			config.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
 		}
 	}
 

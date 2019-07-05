@@ -25,8 +25,7 @@ public interface ResourceRepositoryAdapter {
 
 	Result<JsonApiResponse> delete(Object id, QueryAdapter queryAdapter);
 
-	@Deprecated
-	Object getResourceRepository();
+	Object getImplementation();
 
 	ResourceRepositoryInformation getRepositoryInformation();
 }

@@ -22,24 +22,6 @@ public interface QueryAdapter {
     QueryContext getQueryContext();
 
     /**
-     * @return maximum number of resources to return or null for unbounded
-     */
-    @Deprecated
-    Long getLimit();
-
-    @Deprecated
-    void setLimit(Long limit);
-
-    /**
-     * @return maximum number of resources to skip in the response.
-     */
-    @Deprecated
-    long getOffset();
-
-    @Deprecated
-    void setOffset(long offset);
-
-    /**
      * @return duplicate of this instance
      */
     QueryAdapter duplicate();

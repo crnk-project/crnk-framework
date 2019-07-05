@@ -13,100 +13,92 @@ import java.util.LinkedList;
 
 public class ResourceListTest {
 
-	@Test
-	public void defaultConstructor() {
-		DefaultResourceList<Task> list = new DefaultResourceList<Task>();
-		Assert.assertNull(list.getMeta());
-		Assert.assertNull(list.getLinks());
-		Assert.assertNull(list.getMeta(TestMeta.class));
-		Assert.assertNull(list.getLinks(TestLinks.class));
-		Assert.assertNull(list.getMetaInformation(TestMeta.class));
-		Assert.assertNull(list.getLinksInformation(TestLinks.class));
-		Assert.assertNull(list.getMetaInformation());
-		Assert.assertNull(list.getLinksInformation());
-	}
+    @Test
+    public void defaultConstructor() {
+        DefaultResourceList<Task> list = new DefaultResourceList<Task>();
+        Assert.assertNull(list.getMeta());
+        Assert.assertNull(list.getLinks());
+        Assert.assertNull(list.getMeta(TestMeta.class));
+        Assert.assertNull(list.getLinks(TestLinks.class));
+    }
 
-	@Test
-	public void setters() {
-		ResourceListBase<Task, TestMeta, TestLinks> list = new ResourceListBase<Task, TestMeta, TestLinks>() {
+    @Test
+    public void setters() {
+        ResourceListBase<Task, TestMeta, TestLinks> list = new ResourceListBase<Task, TestMeta, TestLinks>() {
 
-		};
-		list.setLinks(new TestLinks());
-		list.setMeta(new TestMeta());
-		Assert.assertNotNull(list.getMeta());
-		Assert.assertNotNull(list.getLinks());
-	}
+        };
+        list.setLinks(new TestLinks());
+        list.setMeta(new TestMeta());
+        Assert.assertNotNull(list.getMeta());
+        Assert.assertNotNull(list.getLinks());
+    }
 
-	@Test
-	public void defaultInformationConstructor() {
-		DefaultResourceList<Task> list = new DefaultResourceList<Task>(new TestMeta(), new TestLinks());
-		Assert.assertNotNull(list.getMeta());
-		Assert.assertNotNull(list.getLinks());
-	}
+    @Test
+    public void defaultInformationConstructor() {
+        DefaultResourceList<Task> list = new DefaultResourceList<Task>(new TestMeta(), new TestLinks());
+        Assert.assertNotNull(list.getMeta());
+        Assert.assertNotNull(list.getLinks());
+    }
 
-	@Test
-	public void testListConstructor() {
-		LinkedList<Task> linkedList = new LinkedList<Task>();
-		DefaultResourceList<Task> list = new DefaultResourceList<Task>(linkedList, new TestMeta(), new TestLinks());
-		Assert.assertNotNull(list.getMeta());
-		Assert.assertNotNull(list.getLinks());
-		list.add(new Task());
-		Assert.assertEquals(1, list.size());
-		Assert.assertEquals(1, linkedList.size());
-	}
+    @Test
+    public void testListConstructor() {
+        LinkedList<Task> linkedList = new LinkedList<Task>();
+        DefaultResourceList<Task> list = new DefaultResourceList<Task>(linkedList, new TestMeta(), new TestLinks());
+        Assert.assertNotNull(list.getMeta());
+        Assert.assertNotNull(list.getLinks());
+        list.add(new Task());
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(1, linkedList.size());
+    }
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void casting() {
-		DefaultResourceList<Task> list = new DefaultResourceList<Task>(new TestMeta(), new TestLinks());
+    @SuppressWarnings("deprecation")
+    @Test
+    public void casting() {
+        DefaultResourceList<Task> list = new DefaultResourceList<Task>(new TestMeta(), new TestLinks());
 
-		TestMeta testMeta = list.getMeta(TestMeta.class);
-		Assert.assertNotNull(testMeta);
-		testMeta = list.getMetaInformation(TestMeta.class);
-		Assert.assertNotNull(testMeta);
-		OtherMeta otherMeta = list.getMeta(OtherMeta.class);
-		Assert.assertNotNull(otherMeta);
+        TestMeta testMeta = list.getMeta(TestMeta.class);
+        Assert.assertNotNull(testMeta);
+        OtherMeta otherMeta = list.getMeta(OtherMeta.class);
+        Assert.assertNotNull(otherMeta);
 
-		TestLinks testLinks = list.getLinks(TestLinks.class);
-		Assert.assertNotNull(testLinks);
-		testLinks = list.getLinksInformation(TestLinks.class);
-		Assert.assertNotNull(testLinks);
-		OtherLinks otherLinks = list.getLinks(OtherLinks.class);
-		Assert.assertNotNull(otherLinks);
-	}
+        TestLinks testLinks = list.getLinks(TestLinks.class);
+        Assert.assertNotNull(testLinks);
+        OtherLinks otherLinks = list.getLinks(OtherLinks.class);
+        Assert.assertNotNull(otherLinks);
+    }
 
-	class TestLinks implements LinksInformation, CastableInformation<LinksInformation> {
+    class TestLinks implements LinksInformation, CastableInformation<LinksInformation> {
 
-		public String name = "value";
+        public String name = "value";
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public <L extends LinksInformation> L as(Class<L> linksClass) {
-			return (L) new OtherLinks();
-		}
-	}
+        @SuppressWarnings("unchecked")
+        @Override
+        public <L extends LinksInformation> L as(Class<L> linksClass) {
+            return (L) new OtherLinks();
+        }
+    }
 
-	class TestMeta implements MetaInformation, CastableInformation<MetaInformation> {
+    class TestMeta implements MetaInformation, CastableInformation<MetaInformation> {
 
-		public String name = "value";
+        public String name = "value";
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public <L extends MetaInformation> L as(Class<L> linksClass) {
-			return (L) new OtherMeta();
-		}
+        @SuppressWarnings("unchecked")
+        @Override
+        public <L extends MetaInformation> L as(Class<L> linksClass) {
+            return (L) new OtherMeta();
+        }
 
-	}
+    }
 
-	class OtherLinks implements LinksInformation {
+    class OtherLinks implements LinksInformation {
 
-		public String name = "value";
-	}
+        public String name = "value";
+    }
 
-	class OtherMeta implements MetaInformation {
+    class OtherMeta implements MetaInformation {
 
-		public String name = "value";
+        public String name = "value";
 
-	}
+    }
 
 }

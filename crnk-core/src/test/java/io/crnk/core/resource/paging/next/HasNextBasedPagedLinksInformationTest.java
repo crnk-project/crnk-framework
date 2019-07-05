@@ -29,7 +29,7 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
         super.setup();
         RegistryEntry registryEntry = resourceRegistry.getEntry(HasNextPageResource.class);
         HasNextPageTestRepository repo = (HasNextPageTestRepository) registryEntry.getResourceRepository()
-                .getResourceRepository();
+                .getImplementation();
 
         repo = Mockito.spy(repo);
 
@@ -137,7 +137,7 @@ public class HasNextBasedPagedLinksInformationTest extends AbstractQuerySpecTest
     @Override
     protected QuerySpec querySpec(Long offset, Long limit) {
         QuerySpec querySpec = new QuerySpec(HasNextPageResource.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
+        querySpec.setPaging(new OffsetLimitPagingSpec(offset, limit));
         return querySpec;
     }
 }

@@ -72,7 +72,7 @@ public class SleuthUtil {
         if (relationshipField == null) {
             pathBuilder.append(request.getQueryAdapter().getResourceInformation().getResourceType());
         } else {
-            pathBuilder.append(relationshipField.getParentResourceInformation().getResourceType());
+            pathBuilder.append(relationshipField.getResourceInformation().getResourceType());
         }
 
         Iterable<Object> ids = request.getIds();

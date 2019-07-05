@@ -94,7 +94,7 @@ public abstract class AbstractQuerySpecTest {
 
 	protected QuerySpec querySpec(Long offset, Long limit) {
 		QuerySpec querySpec = new QuerySpec(Task.class);
-		querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
+		querySpec.setPaging(new OffsetLimitPagingSpec(offset, limit));
 		return querySpec;
 	}
 

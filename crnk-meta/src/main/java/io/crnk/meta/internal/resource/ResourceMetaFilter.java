@@ -147,7 +147,7 @@ public class ResourceMetaFilter implements MetaFilter {
                     ResourceInformation oppositeInformation = getResourceInformation(oppositeMeta, false);
                     ResourceField oppositeField = oppositeInformation.findFieldByUnderlyingName(field.getOppositeName());
                     PreconditionUtil.verify(oppositeField != null, "opposite field %s.%s not found",
-                            field.getParentResourceInformation().getResourceType(), field.getOppositeName());
+                            field.getResourceInformation().getResourceType(), field.getOppositeName());
                     try {
                         MetaAttribute oppositeAttr = oppositeMeta.getAttribute(oppositeField.getJsonName());
                         PreconditionUtil.assertNotNull(attr.getId() + " opposite not found", oppositeAttr);

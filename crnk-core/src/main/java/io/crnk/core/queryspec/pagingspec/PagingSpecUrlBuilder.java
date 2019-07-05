@@ -30,7 +30,7 @@ public class PagingSpecUrlBuilder {
 		if (relationshipField == null) {
 			rootInfo = queryAdapter.getResourceInformation();
 		} else {
-			rootInfo = relationshipField.getParentResourceInformation();
+			rootInfo = relationshipField.getResourceInformation();
 		}
 		return urlBuilder.buildUrl(rootInfo, relationshipSourceId, queryAdapter.toQuerySpec(),
 				relationshipField != null ? relationshipField.getJsonName() : null, queryAdapter.isSelfLink());

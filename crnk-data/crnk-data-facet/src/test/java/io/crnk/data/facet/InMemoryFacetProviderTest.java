@@ -194,7 +194,7 @@ public class InMemoryFacetProviderTest {
 	@Test
 	public void checkNull() {
 		RegistryEntry entry = setup.getBoot().getResourceRegistry().getEntry(FacetedProject.class);
-		FacetedProjectRepository projectRepository = (FacetedProjectRepository) entry.getResourceRepository().getResourceRepository();
+		FacetedProjectRepository projectRepository = (FacetedProjectRepository) entry.getResourceRepository().getImplementation();
 		projectRepository.clear();
 
 		FacetedProject project = new FacetedProject();

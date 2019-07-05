@@ -97,7 +97,7 @@ public class SetOppositeStrategy<T, I , D, J >
 
     private ResourceField getOppositeField(ResourceField field) {
         String oppositeName = field.getOppositeName();
-        PreconditionUtil.verify(oppositeName != null, "no opposite field set for %s.%s", field.getParentResourceInformation().getResourceType(), field.getUnderlyingName());
+        PreconditionUtil.verify(oppositeName != null, "no opposite field set for %s.%s", field.getResourceInformation().getResourceType(), field.getUnderlyingName());
         RegistryEntry targetEntry = context.getTargetEntry(field);
         return targetEntry.getResourceInformation().findFieldByUnderlyingName(oppositeName);
     }

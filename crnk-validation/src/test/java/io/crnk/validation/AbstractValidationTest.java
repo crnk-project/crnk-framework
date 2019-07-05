@@ -32,7 +32,7 @@ public abstract class AbstractValidationTest extends JerseyTestBase {
     @Before
     public void setup() {
         client = new CrnkClient(getBaseUri().toString());
-        client.addModule(ValidationModule.newInstance());
+        client.addModule(ValidationModule.create());
         taskRepo = client.getRepositoryForType(Task.class);
         projectRepo = client.getRepositoryForType(Project.class);
         relRepo = client.getRepositoryForType(Task.class, Project.class);

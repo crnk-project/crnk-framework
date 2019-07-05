@@ -65,7 +65,7 @@ public class QuerySpecAllowUnknownAttributeClientTest extends AbstractClientTest
         Map<String, Set<String>> parameterMap = new HashMap<>();
         parameterMap.put("filter[unknownAttr]", Collections.singleton("test"));
         parameterMap.put("sort", Collections.singleton("-unknownAttr"));
-        ResourceInformation taskInformation = client.getRegistry().getEntryForClass(Task.class).getResourceInformation();
+        ResourceInformation taskInformation = client.getRegistry().getEntry(Task.class).getResourceInformation();
         QuerySpecUrlMapper urlMapper = client.getUrlMapper();
         QuerySpec querySpec = urlMapper.deserialize(taskInformation, parameterMap);
         Assert.assertEquals(1, querySpec.getFilters().size());

@@ -414,7 +414,7 @@ public class ModuleRegistryTest {
 		Assert.assertEquals(1, decorators.size());
 
 		RegistryEntry entry = this.resourceRegistry.getEntry(Schedule.class);
-		Object resourceRepository = entry.getResourceRepository().getResourceRepository();
+		Object resourceRepository = entry.getResourceRepository().getImplementation();
 		Assert.assertNotNull(resourceRepository);
 		Assert.assertTrue(resourceRepository instanceof ScheduleRepository);
 		Assert.assertTrue(resourceRepository instanceof DecoratedScheduleRepository);
@@ -490,7 +490,7 @@ public class ModuleRegistryTest {
 		public void setupModule(ModuleContext context) {
 			this.context = context;
 			context.addResourceLookup(new TestResourceLookup());
-			context.addResourceInformationBuilder(new TestResourceInformationProvider());
+			context.addResourceInformationProvider(new TestResourceInformationProvider());
 
 			context.addJacksonModule(new com.fasterxml.jackson.databind.module.SimpleModule() {
 
@@ -518,8 +518,8 @@ public class ModuleRegistryTest {
 			context.addFilter(new TestFilter());
 			context.addRepository(new ScheduleRepositoryImpl());
 			context.addRepository(new RelationIdTestRepository());
-			context.addRepository(TestResource2.class, new TestRepository2());
-			context.addRepository(TestResource2.class, TestResource2.class, new TestRelationshipRepository2());
+			context.addRepository(new TestRepository2());
+			context.addRepository(new TestRelationshipRepository2());
 
 			context.addRepository(new InMemoryResourceRepository<>(TestResource.class));
 
