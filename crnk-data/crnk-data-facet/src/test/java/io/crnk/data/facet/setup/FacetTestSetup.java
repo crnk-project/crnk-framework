@@ -35,7 +35,7 @@ public class FacetTestSetup {
 		boot.boot();
 
 		RegistryEntry entry = boot.getResourceRegistry().getEntry(FacetResource.class);
-		repository = (FacetRepositoryImpl) entry.getResourceRepository().getResourceRepository();
+		repository = (FacetRepositoryImpl) entry.getResourceRepository().getImplementation();
 
 		for (int i = 0; i < 16; i++) {
 			String name = "project" + (int) Math.sqrt(i);

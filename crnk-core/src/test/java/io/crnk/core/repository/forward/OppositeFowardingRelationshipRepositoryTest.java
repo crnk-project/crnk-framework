@@ -45,7 +45,7 @@ public class OppositeFowardingRelationshipRepositoryTest {
 
 
         testRepository = (RelationIdTestRepository) container.getEntry(RelationIdTestResource.class)
-                .getResourceRepository().getResourceRepository();
+                .getResourceRepository().getImplementation();
         requestContextProvider = container.getModuleRegistry().getHttpRequestContextProvider();
 
         RelationshipMatcher relMatcher =

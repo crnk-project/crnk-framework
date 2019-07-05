@@ -110,28 +110,8 @@ public class QuerySpecAdapter implements QueryAdapter {
     }
 
     @Override
-    public Long getLimit() {
-        return querySpec.getLimit();
-    }
-
-    @Override
-    public void setLimit(Long limit) {
-        querySpec.setLimit(limit);
-    }
-
-    @Override
-    public long getOffset() {
-        return querySpec.getOffset();
-    }
-
-    @Override
-    public void setOffset(long offset) {
-        querySpec.setOffset(offset);
-    }
-
-    @Override
     public QueryAdapter duplicate() {
-        QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec != null ? querySpec.duplicate() : null, resourceRegistry, queryContext);
+        QuerySpecAdapter adapter = new QuerySpecAdapter(querySpec != null ? querySpec.clone() : null, resourceRegistry, queryContext);
         adapter.setCompactMode(compactMode);
         return adapter;
     }
@@ -148,12 +128,12 @@ public class QuerySpecAdapter implements QueryAdapter {
 
     @Override
     public void setPagingSpec(final PagingSpec pagingSpec) {
-        querySpec.setPagingSpec(pagingSpec);
+        querySpec.setPaging(pagingSpec);
     }
 
     @Override
     public PagingSpec getPagingSpec() {
-        return querySpec.getPagingSpec();
+        return querySpec.getPaging();
     }
 
     @Override

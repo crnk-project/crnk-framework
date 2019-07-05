@@ -90,7 +90,7 @@ public class SimpleModule implements Module {
 	public void setupModule(ModuleContext context) {
 		this.context = context;
 		for (ResourceInformationProvider resourceInformationProvider : resourceInformationProviders) {
-			context.addResourceInformationBuilder(resourceInformationProvider);
+			context.addResourceInformationProvider(resourceInformationProvider);
 		}
 		for (RepositoryInformationProvider resourceInformationBuilder : repositoryInformationProviders) {
 			context.addRepositoryInformationBuilder(resourceInformationBuilder);
@@ -331,24 +331,6 @@ public class SimpleModule implements Module {
 	}
 
 	public void addRepository(Object repository) {
-		checkInitialized();
-		repositories.add(repository);
-	}
-
-	/**
-	 * @deprecated use addRepository(repository)
-	 */
-	@Deprecated
-	public void addRepository(Class<?> resourceClass, Object repository) {
-		checkInitialized();
-		repositories.add(repository);
-	}
-
-	/**
-	 * @deprecated use addRepository(repository)
-	 */
-	@Deprecated
-	public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
 		checkInitialized();
 		repositories.add(repository);
 	}

@@ -183,7 +183,7 @@ public class ResourceRepositoryAdapterImpl extends ResponseRepositoryAdapter imp
         return new ImmediateResult<>(chain.doFilter(newRepositoryFilterContext(requestSpec)));
     }
 
-    public Object getResourceRepository() {
+    public Object getImplementation() {
         return resourceRepository;
     }
 

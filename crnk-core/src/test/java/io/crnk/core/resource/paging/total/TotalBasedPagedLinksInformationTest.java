@@ -101,7 +101,7 @@ public class TotalBasedPagedLinksInformationTest extends AbstractQuerySpecTest {
     @Override
     protected QuerySpec querySpec(Long offset, Long limit) {
         QuerySpec querySpec = new QuerySpec(TotalResourceCountResource.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec(offset, limit));
+        querySpec.setPaging(new OffsetLimitPagingSpec(offset, limit));
         return querySpec;
     }
 }

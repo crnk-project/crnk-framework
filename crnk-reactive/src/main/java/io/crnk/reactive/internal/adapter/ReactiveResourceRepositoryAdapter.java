@@ -87,7 +87,7 @@ public class ReactiveResourceRepositoryAdapter extends ReactiveRepositoryAdapter
 	}
 
 	@Override
-	public Object getResourceRepository() {
+	public Object getImplementation() {
 		return repository;
 	}
 

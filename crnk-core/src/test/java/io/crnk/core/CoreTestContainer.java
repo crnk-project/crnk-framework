@@ -96,12 +96,12 @@ public class CoreTestContainer {
     }
 
     public <T, I> ResourceRepository<T, I> getRepository(Class<T> resourceClass) {
-        return (ResourceRepository<T, I>) boot.getResourceRegistry().getEntry(resourceClass).getResourceRepository().getResourceRepository();
+        return (ResourceRepository<T, I>) boot.getResourceRegistry().getEntry(resourceClass).getResourceRepository().getImplementation();
     }
 
     public Object getRepository(Class sourceClass, String fieldName) {
         RegistryEntry entry = boot.getResourceRegistry().getEntry(sourceClass);
-        return entry.getRelationshipRepository(fieldName).getRelationshipRepository();
+        return entry.getRelationshipRepository(fieldName).getImplementation();
 
     }
 }

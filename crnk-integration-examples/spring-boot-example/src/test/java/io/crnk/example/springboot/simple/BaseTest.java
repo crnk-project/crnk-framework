@@ -44,7 +44,7 @@ public abstract class BaseTest {
 		loadJsonApiSchema();
 
 		client = new CrnkClient("http://localhost:" + port + "/api");
-		client.addModule(ValidationModule.newInstance());
+		client.addModule(ValidationModule.create());
 		client.addModule(JpaModule.newClientModule());
 	}
 

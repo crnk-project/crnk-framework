@@ -470,7 +470,7 @@ public class CrnkClient {
 
         RegistryEntry entry = resourceRegistry.findEntry(resourceClass);
         ResourceRepositoryAdapter repositoryAdapter = entry.getResourceRepository();
-        return (ResourceRepository<T, I>) repositoryAdapter.getResourceRepository();
+        return (ResourceRepository<T, I>) repositoryAdapter.getImplementation();
 
     }
 
@@ -524,7 +524,7 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (RelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**
@@ -538,7 +538,7 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (ManyRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (ManyRelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**
@@ -552,7 +552,7 @@ public class CrnkClient {
         init();
 
         RelationshipRepositoryAdapter repositoryAdapter = allocateRepositoryRelation(sourceClass, targetClass);
-        return (OneRelationshipRepository<T, I, D, J>) repositoryAdapter.getRelationshipRepository();
+        return (OneRelationshipRepository<T, I, D, J>) repositoryAdapter.getImplementation();
     }
 
     /**

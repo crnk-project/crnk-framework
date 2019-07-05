@@ -461,22 +461,6 @@ public class CrnkBoot {
 	}
 
 	/**
-	 * @deprecated use {@link #setServiceUrlProvider(ServiceUrlProvider)}
-	 */
-	@Deprecated
-	public ServiceUrlProvider getDefaultServiceUrlProvider() {
-		return getServiceUrlProvider();
-	}
-
-	/**
-	 * @deprecated use {@link #getServiceUrlProvider()}
-	 */
-	@Deprecated
-	public void setDefaultServiceUrlProvider(ServiceUrlProvider defaultServiceUrlProvider) {
-		setServiceUrlProvider(defaultServiceUrlProvider);
-	}
-
-	/**
 	 * @return prefix like /api where to provide the JSON API endpoint. Always starts with a leading slash, but no trailing
 	 * slash. Or null if not specified.
 	 */

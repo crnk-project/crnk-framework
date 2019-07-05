@@ -86,19 +86,18 @@ public class CrnkJpaAutoConfiguration {
             config.exposeAllEntities(emf);
         }
 
-        JpaModule module = JpaModule.createServerModule(config, em, transactionRunner());
         if (jpaProperties.getQueryFactory() != null) {
             switch (jpaProperties.getQueryFactory()) {
                 case CRITERIA:
-                    module.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
+                    config.setQueryFactory(JpaCriteriaQueryFactory.newInstance());
                     break;
                 case QUERYDSL:
-                    module.setQueryFactory(QuerydslQueryFactory.newInstance());
+                    config.setQueryFactory(QuerydslQueryFactory.newInstance());
                     break;
                 default:
                     throw new IllegalStateException("unknown query factory");
             }
         }
-        return module;
+        return JpaModule.createServerModule(config, em, transactionRunner());
     }
 }

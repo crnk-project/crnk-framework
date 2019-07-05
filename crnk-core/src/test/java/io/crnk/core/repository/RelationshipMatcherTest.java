@@ -25,7 +25,7 @@ public class RelationshipMatcherTest {
 		Mockito.when(field.getOppositeResourceType()).thenReturn("oppositeResourceType");
 		Mockito.when(field.getElementType()).thenReturn((Class) Integer.class);
 		Mockito.when(field.getElementType()).thenReturn((Class) Integer.class);
-		Mockito.when(field.getParentResourceInformation()).thenReturn(resource);
+		Mockito.when(field.getResourceInformation()).thenReturn(resource);
 	}
 
 	@Test

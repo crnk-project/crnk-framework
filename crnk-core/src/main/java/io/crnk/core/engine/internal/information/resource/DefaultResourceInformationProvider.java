@@ -13,7 +13,6 @@ import io.crnk.core.exception.RepositoryAnnotationNotFoundException;
 import io.crnk.core.exception.ResourceIdNotFoundException;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.queryspec.pagingspec.VoidPagingBehavior;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Prioritizable;
 
@@ -97,30 +96,6 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
         JsonApiResource annotation = ClassUtils.getAnnotation(resourceClass, JsonApiResource.class).get();
 
         Class<PagingSpec> pagingSpec = (Class<PagingSpec>) annotation.pagingSpec();
-        Class<? extends PagingBehavior> pagingBehaviorType = annotation.pagingBehavior();
-        if (pagingSpec == PagingSpec.class && pagingBehaviorType != VoidPagingBehavior.class) {
-            // TODO Remove in the feature, deprecated backward compatiblity to old annotation
-
-
-            // cross check if desired resource paging behavior is a registered behavior, error out if not.
-            // if no behavior is set for the resource, we pick the first from registered behaviors.
-            java.util.Optional<? extends PagingBehavior> optPagingBehavior;
-            if (!pagingBehaviorType.equals(VoidPagingBehavior.class)) {
-                optPagingBehavior = pagingBehaviors.stream()
-                        .filter(it -> pagingBehaviorType.isInstance(it))
-                        .findFirst();
-                if (!optPagingBehavior.isPresent()) {
-                    throw new IllegalStateException("no paging behavior registered for: " + pagingBehaviorType);
-                }
-            } else {
-                optPagingBehavior = pagingBehaviors.stream().findFirst();
-                if (!optPagingBehavior.isPresent()) {
-                    throw new IllegalStateException("no paging behavior registered");
-                }
-            }
-            pagingSpec = (Class<PagingSpec>) optPagingBehavior.get().createEmptyPagingSpec().getClass();
-        }
-
         ResourceInformation information = new ResourceInformation(context.getTypeParser(),
                 resourceClass, resourceType, resourcePath, superResourceType, instanceBuilder, resourceFields,
                 pagingSpec);

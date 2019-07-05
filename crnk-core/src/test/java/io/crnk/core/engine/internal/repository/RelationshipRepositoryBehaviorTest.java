@@ -26,7 +26,7 @@ public class RelationshipRepositoryBehaviorTest {
     public void checkRelationIdTriggersImplicitOwnerRepo() {
         RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
         Object relRepository = entry.getRelationshipRepository("testRelationId")
-                .getRelationshipRepository();
+                .getImplementation();
         Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
     }
 
@@ -34,7 +34,7 @@ public class RelationshipRepositoryBehaviorTest {
     public void checkNoLookupTriggersImplicitOwnerRepo() {
         RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
         Object relRepository = entry.getRelationshipRepository("testNoLookup")
-                .getRelationshipRepository();
+                .getImplementation();
         Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
     }
 
@@ -42,7 +42,7 @@ public class RelationshipRepositoryBehaviorTest {
     public void checkImplicitOwnerRepo() {
         RegistryEntry entry = resourceRegistry.getEntry(RelationshipBehaviorTestResource.class);
         Object relRepository = entry.getRelationshipRepository("testImplicityFromOwner")
-                .getRelationshipRepository();
+                .getImplementation();
         Assert.assertEquals(ForwardingRelationshipRepository.class, relRepository.getClass());
     }
 }

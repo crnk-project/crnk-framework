@@ -101,7 +101,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
         spec.queryAdapter = queryAdapter;
         spec.ids = ids;
         spec.relationshipField = relationshipField;
-        spec.owningResourceInformation = relationshipField.getParentResourceInformation();
+        spec.owningResourceInformation = relationshipField.getResourceInformation();
         spec.method = HttpMethod.GET;
         PreconditionUtil.verify(relationshipField != null, "relationshipField is null");
         return spec;
@@ -114,7 +114,7 @@ public class RepositoryRequestSpecImpl implements RepositoryRequestSpec {
         spec.queryAdapter = queryAdapter;
         spec.ids = ids;
         spec.relationshipField = relationshipField;
-        spec.owningResourceInformation = relationshipField.getParentResourceInformation();
+        spec.owningResourceInformation = relationshipField.getResourceInformation();
         spec.method = method;
         PreconditionUtil.verify(relationshipField != null, "relationshipField is null");
         return spec;

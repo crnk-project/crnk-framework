@@ -12,7 +12,6 @@ import io.crnk.core.engine.http.HttpRequestContextAware;
 import io.crnk.core.engine.http.HttpRequestContextProvider;
 import io.crnk.core.engine.http.HttpRequestProcessor;
 import io.crnk.core.engine.http.HttpStatusBehavior;
-import io.crnk.core.engine.http.HttpStatusContext;
 import io.crnk.core.engine.information.InformationBuilder;
 import io.crnk.core.engine.information.contributor.ResourceFieldContributor;
 import io.crnk.core.engine.information.repository.RepositoryInformation;
@@ -53,7 +52,6 @@ import io.crnk.core.queryspec.mapper.QuerySpecUrlContext;
 import io.crnk.core.queryspec.mapper.QuerySpecUrlMapper;
 import io.crnk.core.queryspec.pagingspec.PagingBehavior;
 import io.crnk.core.queryspec.pagingspec.PagingSpec;
-import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.utils.Prioritizable;
@@ -82,6 +80,24 @@ public class ModuleRegistry {
     private ResultFactory resultFactory;
 
     private Map<String, String> serverInfo;
+
+    public QueryAdapterBuilder getQueryAdapterBuilder() {
+        return queryAdapterBuilder;
+    }
+
+    @Deprecated
+    public void setControllerRegistry(ControllerRegistry controllerRegistry) {
+        this.controllerRegistry = controllerRegistry;
+    }
+
+    @Deprecated
+    public void setQueryAdapterBuilder(QueryAdapterBuilder queryAdapterBuilder) {
+        this.queryAdapterBuilder = queryAdapterBuilder;
+    }
+
+    public ControllerRegistry getControllerRegistry() {
+        return controllerRegistry;
+    }
 
     enum InitializedState {
         NOT_INITIALIZED,
@@ -132,26 +148,6 @@ public class ModuleRegistry {
 
     public ModuleRegistry(boolean isServer) {
         this.isServer = isServer;
-    }
-
-    @Deprecated
-    public QueryAdapterBuilder getQueryAdapterBuilder() {
-        return queryAdapterBuilder;
-    }
-
-    @Deprecated
-    public void setQueryAdapterBuilder(QueryAdapterBuilder queryAdapterBuilder) {
-        this.queryAdapterBuilder = queryAdapterBuilder;
-    }
-
-    @Deprecated // consider to move to a module with json api processor
-    public ControllerRegistry getControllerRegistry() {
-        return controllerRegistry;
-    }
-
-    @Deprecated
-    public void setControllerRegistry(ControllerRegistry controllerRegistry) {
-        this.controllerRegistry = controllerRegistry;
     }
 
     public DefaultInformationBuilder getInformationBuilder() {
@@ -848,7 +844,7 @@ public class ModuleRegistry {
         }
 
         @Override
-        public void addResourceInformationBuilder(ResourceInformationProvider resourceInformationProvider) {
+        public void addResourceInformationProvider(ResourceInformationProvider resourceInformationProvider) {
             LOGGER.debug("adding resource information provider {}", resourceInformationProvider);
             checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
             aggregatedModule.addResourceInformationProvider(resourceInformationProvider);
@@ -902,19 +898,6 @@ public class ModuleRegistry {
             LOGGER.debug("adding exception mapper {}", exceptionMapper);
             checkState(InitializedState.NOT_INITIALIZED, InitializedState.NOT_INITIALIZED);
             aggregatedModule.addExceptionMapper(exceptionMapper);
-        }
-
-        @Override
-        public void addRepository(Class<?> type, Object repository) {
-            LOGGER.debug("adding repository {}", repository);
-            checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
-            aggregatedModule.addRepository(repository);
-        }
-
-        @Override
-        public void addRepository(Class<?> sourceType, Class<?> targetType, Object repository) {
-            LOGGER.debug("adding repository {}", repository);
-            aggregatedModule.addRepository(repository);
         }
 
         @Override
@@ -1026,11 +1009,11 @@ public class ModuleRegistry {
         }
 
 
-		@Override
-		public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
-			checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
-			aggregatedModule.addHttpStatusBehavior(httpStatusBehavior);
-		}
+        @Override
+        public void addHttpStatusBehavior(HttpStatusBehavior httpStatusBehavior) {
+            checkState(InitializedState.NOT_INITIALIZED, InitializedState.INITIALIZING);
+            aggregatedModule.addHttpStatusBehavior(httpStatusBehavior);
+        }
 
         @Override
         public RequestDispatcher getRequestDispatcher() {
@@ -1132,22 +1115,22 @@ public class ModuleRegistry {
         throw new IllegalStateException("no pagingBehavior implementation available for " + pagingSpecType);
     }
 
-	public List<HttpStatusBehavior> getHttpStatusProviders() {
-		return aggregatedModule.getHttpStatusBehaviors();
-	}
+    public List<HttpStatusBehavior> getHttpStatusProviders() {
+        return aggregatedModule.getHttpStatusBehaviors();
+    }
 
-	public HttpStatusBehavior getHttpStatusProvider() {
-		List<HttpStatusBehavior> behaviors = Prioritizable.prioritze(aggregatedModule.getHttpStatusBehaviors());
-		return context -> {
-			for (HttpStatusBehavior behavior : behaviors) {
-				Integer status = behavior.getStatus(context);
-				if (status != null) {
-					return status;
-				}
-			}
-			throw new IllegalStateException("failed to compute HTTP status for " + context);
-		};
-	}
+    public HttpStatusBehavior getHttpStatusProvider() {
+        List<HttpStatusBehavior> behaviors = Prioritizable.prioritze(aggregatedModule.getHttpStatusBehaviors());
+        return context -> {
+            for (HttpStatusBehavior behavior : behaviors) {
+                Integer status = behavior.getStatus(context);
+                if (status != null) {
+                    return status;
+                }
+            }
+            throw new IllegalStateException("failed to compute HTTP status for " + context);
+        };
+    }
 
 
 }

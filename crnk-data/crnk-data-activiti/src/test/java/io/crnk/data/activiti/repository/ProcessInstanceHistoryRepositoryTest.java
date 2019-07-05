@@ -41,7 +41,7 @@ public class ProcessInstanceHistoryRepositoryTest extends ActivitiTestBase {
 
         processRepository =
                 (ProcessInstanceResourceRepository<ScheduleApprovalProcessInstance>) boot.getResourceRegistry().getEntry
-                        (ScheduleApprovalProcessInstance.class).getResourceRepository().getResourceRepository();
+                        (ScheduleApprovalProcessInstance.class).getResourceRepository().getImplementation();
 
 
         ActivitiModule activitiModule = boot.getModuleRegistry().getModule(ActivitiModule.class).get();

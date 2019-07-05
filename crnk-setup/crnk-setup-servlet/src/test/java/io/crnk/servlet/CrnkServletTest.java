@@ -257,7 +257,7 @@ public class CrnkServletTest {
         root.setChildren(new LinkedHashSet<>(Arrays.asList(child1, child2)));
 
         ResourceRepository nodeRepository = (ResourceRepository) servlet.getBoot().getResourceRegistry()
-                .getEntry(Node.class).getResourceRepository().getResourceRepository();
+                .getEntry(Node.class).getResourceRepository().getImplementation();
         nodeRepository.save(root);
         nodeRepository.save(child1);
         nodeRepository.save(child2);
@@ -289,7 +289,7 @@ public class CrnkServletTest {
         root.setChildren(new LinkedHashSet<>(Arrays.asList(child1, child2)));
 
         ResourceRepository nodeRepository = (ResourceRepository) servlet.getBoot().getResourceRegistry()
-                .getEntry(Node.class).getResourceRepository().getResourceRepository();
+                .getEntry(Node.class).getResourceRepository().getImplementation();
         nodeRepository.save(root);
         nodeRepository.save(child1);
         nodeRepository.save(child2);

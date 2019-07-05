@@ -7,6 +7,7 @@ import io.crnk.client.http.okhttp.OkHttpAdapter;
 import io.crnk.client.http.okhttp.OkHttpAdapterListenerBase;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.meta.MetaModule;
+import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.rs.CrnkFeature;
 import io.crnk.test.JerseyTestBase;
@@ -49,8 +50,9 @@ public abstract class AbstractMetaJerseyTest extends JerseyTestBase {
     }
 
     public MetaModule createModule() {
-        MetaModule module = MetaModule.create();
-        module.addMetaProvider(new ResourceMetaProvider());
+        MetaModuleConfig config = new MetaModuleConfig();
+        config.addMetaProvider(new ResourceMetaProvider());
+        MetaModule module = MetaModule.createServerModule(config);
         return module;
     }
 

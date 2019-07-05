@@ -68,7 +68,7 @@ public class RepositoryFilterTest {
         container.boot();
 
         querySpec = new QuerySpec(User.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec());
+        querySpec.setPaging(new OffsetLimitPagingSpec());
         queryAdapter = container.toQueryAdapter(querySpec);
 
         scheduleInfo = container.getEntry(Schedule.class).getResourceInformation();
@@ -78,7 +78,7 @@ public class RepositoryFilterTest {
         taskRelationAdapter = userEntry.getRelationshipRepository("assignedTasks");
         userInfo = userEntry.getResourceInformation();
 
-        UserRepository resourceRepository = (UserRepository) resourceAdapter.getResourceRepository();
+        UserRepository resourceRepository = (UserRepository) resourceAdapter.getImplementation();
         user1 = new User();
         user1.setLoginId(1L);
         resourceRepository.save(user1);
@@ -87,7 +87,7 @@ public class RepositoryFilterTest {
         resourceRepository.save(user2);
 
         UserToProjectRepository userProjectRepository =
-                (UserToProjectRepository) projectRelationAdapter.getRelationshipRepository();
+                (UserToProjectRepository) projectRelationAdapter.getImplementation();
         userProjectRepository.setRelation(user1, 11L, "assignedProjects");
 
         UserToTaskRepository userTaskRepository = new UserToTaskRepository();
@@ -106,7 +106,7 @@ public class RepositoryFilterTest {
         ResourceRepositoryAdapter scheduleResourceAdapter = scheduleRegistry.getResourceRepository();
 
         querySpec = new QuerySpec(Schedule.class);
-        querySpec.setPagingSpec(new OffsetLimitPagingSpec());
+        querySpec.setPaging(new OffsetLimitPagingSpec());
         queryAdapter = container.toQueryAdapter(querySpec);
         scheduleResourceAdapter.findAll(queryAdapter);
 

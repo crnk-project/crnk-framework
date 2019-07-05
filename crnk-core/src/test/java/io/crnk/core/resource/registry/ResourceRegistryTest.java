@@ -51,7 +51,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onExistingTypeShouldReturnEntry() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         RegistryEntry tasksEntry = resourceRegistry.getEntry("tasks");
         assertThat(tasksEntry).isNotNull();
     }
@@ -84,14 +84,14 @@ public class ResourceRegistryTest {
 
     @Test
     public void onExistingClassShouldReturnEntry() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         RegistryEntry tasksEntry = resourceRegistry.findEntry(Task.class);
         assertThat(tasksEntry).isNotNull();
     }
 
     @Test
     public void onExistingTypeShouldReturnUrl() {
-        RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         String resourceUrl = resourceRegistry.getResourceUrl(entry.getResourceInformation());
         assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks");
     }
@@ -102,7 +102,7 @@ public class ResourceRegistryTest {
         task.setId(12L);
         QueryContext queryContext = new QueryContext();
         queryContext.setBaseUrl("http://querycontext:1234");
-        RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         assertThat(resourceRegistry.getResourceUrl(queryContext, entry.getResourceInformation())).isEqualTo("http://querycontext:1234/tasks");
         assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class)).isEqualTo("http://querycontext:1234/tasks");
         assertThat(resourceRegistry.getResourceUrl(queryContext, Task.class, "12")).isEqualTo("http://querycontext:1234/tasks/12");
@@ -111,7 +111,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onExistingResourceShouldReturnUrl() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         Task task = new Task();
         task.setId(1L);
 
@@ -121,7 +121,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onExistingTypeAndIdentifierShouldReturnUrl() {
-        RegistryEntry entry = resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        RegistryEntry entry = resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         String resourceUrl = resourceRegistry.getResourceUrl(Task.class, "1");
         assertThat(resourceUrl).isEqualTo(TEST_MODELS_URL + "/tasks/1");
     }
@@ -135,7 +135,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void checkHasEntry() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         Assert.assertTrue(resourceRegistry.hasEntry(Task.class));
         Assert.assertFalse(resourceRegistry.hasEntry(String.class));
     }
@@ -154,7 +154,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onResourceClassReturnCorrectClass() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 
         // WHEN
         Class<?> clazz = resourceRegistry.findEntry(Task$Proxy.class).getResourceInformation().getResourceClass();
@@ -167,7 +167,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onResourceClassReturnCorrectParentInstanceClass() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         Task$Proxy resource = new Task$Proxy();
 
         // WHEN
@@ -179,7 +179,7 @@ public class ResourceRegistryTest {
 
     @Test
     public void onResourceClassReturnCorrectInstanceClass() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
         Task resource = new Task();
 
         // WHEN
@@ -191,7 +191,7 @@ public class ResourceRegistryTest {
 
     @Test(expected = RepositoryNotFoundException.class)
     public void onResourceClassReturnNoInstanceClass() {
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, "tasks"));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, "tasks"));
 
         // WHEN
         resourceRegistry.findEntry(Object.class);
@@ -200,7 +200,7 @@ public class ResourceRegistryTest {
     @Test
     public void onResourceGetEntryWithBackUp() {
         String taskType = Task.class.getAnnotation(JsonApiResource.class).type();
-        resourceRegistry.addEntry(Task.class, newRegistryEntry(Task.class, taskType));
+        resourceRegistry.addEntry(newRegistryEntry(Task.class, taskType));
 
         // WHEN
         RegistryEntry registryEntry = resourceRegistry.findEntry(Task.class);

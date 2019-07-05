@@ -28,14 +28,6 @@ public class ValidationModule implements Module {
 		this.validator = validator;
 	}
 
-	/**
-	 * @deprecated make use of {{@link #create()}}
-	 */
-	@Deprecated
-	public static ValidationModule newInstance() {
-		return create(true);
-	}
-
 	public static ValidationModule create() {
 		return create(true);
 	}

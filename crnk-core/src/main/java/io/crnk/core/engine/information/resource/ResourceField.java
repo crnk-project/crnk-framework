@@ -64,13 +64,6 @@ public interface ResourceField {
 
     /**
      * @return resourceInformation this field belongs to.
-     * @deprecated use {@link #getResourceInformation()}
-     */
-    @Deprecated
-    ResourceInformation getParentResourceInformation();
-
-    /**
-     * @return resourceInformation this field belongs to.
      */
     ResourceInformation getResourceInformation();
 

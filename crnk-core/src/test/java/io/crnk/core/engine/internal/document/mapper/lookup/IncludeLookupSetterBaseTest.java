@@ -11,7 +11,7 @@ import io.crnk.core.engine.internal.document.mapper.AbstractDocumentMapperTest;
 import io.crnk.core.engine.internal.document.mapper.DocumentMapper;
 import io.crnk.core.engine.internal.repository.RelationshipRepositoryAdapter;
 import io.crnk.core.engine.internal.repository.ResourceRepositoryAdapter;
-import io.crnk.core.engine.properties.EmptyPropertiesProvider;
+import io.crnk.core.engine.properties.NullPropertiesProvider;
 import io.crnk.core.engine.properties.PropertiesProvider;
 import io.crnk.core.engine.query.QueryAdapter;
 import io.crnk.core.engine.result.ImmediateResultFactory;
@@ -275,67 +275,6 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
     }
 
     @Test
-    public void includePropertiesProviderAllTrueRelationshipLookup() {
-        PropertiesProvider propertiesProvider = new PropertiesProvider() {
-
-            @Override
-            public String getProperty(String key) {
-                if (key.equalsIgnoreCase(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)) {
-                    return "true";
-                }
-                return null;
-            }
-        };
-        mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, propertiesProvider, resourceFilterDirectory,
-                new ImmediateResultFactory(), null);
-
-        QuerySpec querySpec = new QuerySpec(Task.class);
-        querySpec.includeRelation(Arrays.asList("project"));
-
-        Task task = new Task();
-        task.setId(1L);
-
-        Document document = mapper.toDocument(toResponse(task), toAdapter(querySpec), mappingConfig).get();
-        Resource taskResource = document.getSingleData().get();
-
-        assertNotNull(taskResource.getRelationships().get("project"));
-        assertNotNull(taskResource.getRelationships().get("project").getData());
-    }
-
-    @Test
-    public void includePropertiesProviderNonOverwriteRelationshipLookup() {
-        PropertiesProvider propertiesProvider = new PropertiesProvider() {
-
-            @Override
-            public String getProperty(String key) {
-                if (key.equalsIgnoreCase(CrnkProperties.INCLUDE_AUTOMATICALLY_OVERWRITE)) {
-                    return "false";
-                }
-                return null;
-            }
-        };
-        mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, propertiesProvider, resourceFilterDirectory,
-                new ImmediateResultFactory(), null);
-
-        QuerySpec querySpec = new QuerySpec(Task.class);
-        querySpec.includeRelation(Arrays.asList("project"));
-
-        Project project = new Project();
-        project.setId(12L);
-
-        Task task = new Task();
-        task.setId(1L);
-        task.setProject(project);
-
-        Document document = mapper.toDocument(toResponse(task), toAdapter(querySpec), mappingConfig).get();
-        Resource taskResource = document.getSingleData().get();
-
-        Relationship relationship = taskResource.getRelationships().get("project");
-        assertNotNull(relationship);
-        assertEquals(relationship.getSingleData().get().getId(), "12");
-    }
-
-    @Test
     public void includeByDefaultSerializeNLevels() {
         Project project = new Project();
         project.setId(1L);
@@ -346,7 +285,7 @@ public class IncludeLookupSetterBaseTest extends AbstractDocumentMapperTest {
         Project projectDefault = new Project().setId(3L);
         task.setProject(projectDefault);
 
-        mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, new EmptyPropertiesProvider(), resourceFilterDirectory,
+        mapper = new DocumentMapper(container.getResourceRegistry(), objectMapper, new NullPropertiesProvider(), resourceFilterDirectory,
                 new ImmediateResultFactory(), null);
 
         QuerySpec querySpec = new QuerySpec(Project.class);

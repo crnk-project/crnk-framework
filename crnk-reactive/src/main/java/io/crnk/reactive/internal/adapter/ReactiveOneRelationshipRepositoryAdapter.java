@@ -93,7 +93,7 @@ public class ReactiveOneRelationshipRepositoryAdapter extends ReactiveRepository
     }
 
     @Override
-    public Object getRelationshipRepository() {
+    public Object getImplementation() {
         return repository;
     }
 

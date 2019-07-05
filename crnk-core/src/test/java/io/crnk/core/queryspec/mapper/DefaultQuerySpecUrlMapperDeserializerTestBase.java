@@ -595,7 +595,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 	@Test
 	public void testPaging() {
 		QuerySpec expectedSpec = new QuerySpec(Task.class);
-		expectedSpec.setPagingSpec(new OffsetLimitPagingSpec(1L, 2L));
+		expectedSpec.setPaging(new OffsetLimitPagingSpec(1L, 2L));
 
 		Map<String, Set<String>> params = new HashMap<>();
 		add(params, "page[offset]", "1");
@@ -733,7 +733,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		add(params, "sort[task-with-lookup]", "id");
 
 		ResourceInformation taskWithLookUpInformation =
-				resourceRegistry.getEntryForClass(TaskWithLookup.class).getResourceInformation();
+				resourceRegistry.getEntry(TaskWithLookup.class).getResourceInformation();
 		QuerySpec actualSpec = urlMapper.deserialize(taskWithLookUpInformation, params);
 		Assert.assertEquals(expectedSpec, actualSpec);
 	}
@@ -747,7 +747,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals(Task.class, querySpec.getResourceClass());
 		Assert.assertEquals(Arrays.asList("id"), querySpec.getFilters().get(0).getAttributePath());
 		Assert.assertEquals("NotAnId", querySpec.getFilters().get(0).getValue());
-		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));
+		Assert.assertNull(querySpec.getQuerySpec(Project.class));
 	}
 
 	@Test
@@ -766,7 +766,7 @@ public abstract class DefaultQuerySpecUrlMapperDeserializerTestBase extends Abst
 		Assert.assertEquals("test", name);
 		Boolean completed = querySpec.getFilters().get(1).getValue();
 		Assert.assertEquals(Boolean.TRUE, completed);
-		Assert.assertNull(querySpec.getRelatedSpecs().get(Project.class));
+		Assert.assertNull(querySpec.getQuerySpec(Project.class));
 	}
 
 	@Test(expected = ParametersDeserializationException.class)

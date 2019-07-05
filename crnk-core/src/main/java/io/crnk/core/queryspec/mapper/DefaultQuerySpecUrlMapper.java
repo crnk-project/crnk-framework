@@ -202,7 +202,7 @@ public class DefaultQuerySpecUrlMapper
 
 		if (pagingBehavior != null) {
 			PagingSpec pagingSpec = pagingBehavior.deserialize(pageParameters);
-			rootQuerySpec.setPagingSpec(pagingSpec);
+			rootQuerySpec.setPaging(pagingSpec);
 		}
 
 		return rootQuerySpec;
@@ -283,13 +283,13 @@ public class DefaultQuerySpecUrlMapper
 				 * As a result, we must always check whether resource's paging equals to the one query-spec holds.
 				 * If yes, use it as it is, otherwise try to convert it.
 				 */
-				PagingSpec pagingSpec = pagingBehavior.createDefaultPagingSpec().getClass().isInstance(querySpec.getPagingSpec())
-						? querySpec.getPagingSpec()
+				PagingSpec pagingSpec = pagingBehavior.createDefaultPagingSpec().getClass().isInstance(querySpec.getPaging())
+						? querySpec.getPaging()
 						: querySpec.getPaging(rootEntry.getResourceInformation().getPagingSpecType());
 				map.putAll(pagingBehavior.serialize(pagingSpec, resourceType));
 			}
 
-			for (QuerySpec relatedSpec : querySpec.getRelatedSpecs().values()) {
+			for (QuerySpec relatedSpec : querySpec.getNestedSpecs()) {
 				serialize(relatedSpec, map, querySpec);
 			}
 		}

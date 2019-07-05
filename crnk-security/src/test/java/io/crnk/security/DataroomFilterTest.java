@@ -230,7 +230,7 @@ public class DataroomFilterTest {
 
 	@Test
 	public void checkFindRelationshipAuthorized() {
-		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		taskToProject.setRelation(taskFoo, project.getId(), "project");
 
 		List<Long> ids = Arrays.asList(taskFoo.getId());
@@ -242,19 +242,19 @@ public class DataroomFilterTest {
 
 	@Test
 	public void checkSetRelationshipAuthorized() {
-		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		taskToProject.setRelation(taskFoo, project.getId(), "project");
 	}
 
 	@Test(expected = ForbiddenException.class)
 	public void checkSetRelationshipNotAuthorized() {
-		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		OneRelationshipRepository taskToProject = (OneRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		taskToProject.setRelation(taskBar, project.getId(), "project");
 	}
 
 	@Test
 	public void checkFindRelationshipsAuthorized() {
-		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 
 		List<Long> ids = Arrays.asList(taskFoo.getId());
 		QuerySpec querySpec = new QuerySpec(Project.class);
@@ -263,7 +263,7 @@ public class DataroomFilterTest {
 
 	@Test
 	public void checkSetRelationshipsAuthorized() {
-		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		taskToProject.setRelations(taskFoo, Arrays.asList(project.getId()), "includedProjects");
 		taskToProject.removeRelations(taskFoo, Arrays.asList(project.getId()), "includedProjects");
 		taskToProject.addRelations(taskFoo, Arrays.asList(project.getId()), "includedProjects");
@@ -273,7 +273,7 @@ public class DataroomFilterTest {
 	@Test(expected = ForbiddenException.class)
 	@Ignore // assumed that opposite side is properly filtered
 	public void checkFindRelationshipsNotAuthorized() {
-		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		List<Long> ids = Arrays.asList(taskBar.getId());
 		QuerySpec querySpec = new QuerySpec(Project.class);
 		taskToProject.findManyRelations(ids, "includedProjects", querySpec);
@@ -282,7 +282,7 @@ public class DataroomFilterTest {
 	@Test(expected = ForbiddenException.class)
 	@Ignore // assumed that opposite side is properly filtered
 	public void checkSetRelationshipsNotAuthorized() {
-		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getRelationshipRepository();
+		ManyRelationshipRepository taskToProject = (ManyRelationshipRepository) entry.getRelationshipRepository("project").getImplementation();
 		taskToProject.setRelations(taskBar, Arrays.asList(project.getId()), "includedProjects");
 	}
 }

@@ -110,7 +110,7 @@ public class ReactiveManyRelationshipRepositoryAdapter extends ReactiveRepositor
 
 
 	@Override
-	public Object getRelationshipRepository() {
+	public Object getImplementation() {
 		return repository;
 	}
 
