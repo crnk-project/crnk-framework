@@ -1,10 +1,5 @@
 package io.crnk.gen.asciidoc.capture;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-
 import io.crnk.client.http.HttpAdapter;
 import io.crnk.client.http.HttpAdapterListener;
 import io.crnk.client.http.HttpAdapterRequest;
@@ -20,12 +15,14 @@ import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.ManyRelationshipRepository;
 import io.crnk.core.repository.OneRelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
-import io.crnk.core.repository.decorate.RepositoryDecoratorFactory;
-import io.crnk.core.repository.decorate.WrappedManyRelationshipRepository;
-import io.crnk.core.repository.decorate.WrappedOneRelationshipRepository;
-import io.crnk.core.repository.decorate.WrappedResourceRepository;
+import io.crnk.core.repository.decorate.*;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.gen.asciidoc.internal.AsciidocBuilder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 
@@ -94,6 +91,11 @@ public class AsciidocCaptureModule implements Module, HttpAdapterAware {
 		public Object decorateRepository(Object repository) {
 			if (repository instanceof ResourceRepository) {
 				return new AsciidocResourceDecorator((ResourceRepository) repository, this);
+			}
+			if (repository instanceof OneRelationshipRepository && repository instanceof ManyRelationshipRepository) {
+				return new WrappedOneManyRelationshipRepository((OneRelationshipRepository & ManyRelationshipRepository)repository,
+						new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository, this),
+						new AsciidocManyRelationshipDecorator((ManyRelationshipRepository) repository, this));
 			}
 			if (repository instanceof OneRelationshipRepository) {
 				return new AsciidocOneRelationshipDecorator((OneRelationshipRepository) repository, this);
