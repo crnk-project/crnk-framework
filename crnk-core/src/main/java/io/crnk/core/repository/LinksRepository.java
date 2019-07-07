@@ -19,7 +19,8 @@ public interface LinksRepository<T> {
      *
      * @param resources a list of found resource(s)
      * @param querySpec sent along with the request
+     * @param current   potential {@link LinksInformation} provided by {@link io.crnk.core.resource.list.ResourceList}
      * @return meta information object
      */
-    LinksInformation getLinksInformation(Collection<T> resources, QuerySpec querySpec);
+    LinksInformation getLinksInformation(Collection<T> resources, QuerySpec querySpec, LinksInformation current);
 }

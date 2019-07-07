@@ -1,6 +1,6 @@
 package io.crnk.data.jpa.integration;
 
-import io.crnk.client.response.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonLinksInformation;
 import io.crnk.core.boot.CrnkBoot;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.queryspec.pagingspec.NumberSizePagingBehavior;

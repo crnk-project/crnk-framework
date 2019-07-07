@@ -3,6 +3,8 @@ package io.crnk.meta.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.crnk.core.engine.internal.utils.PreconditionUtil;
 import io.crnk.core.resource.annotations.JsonApiResource;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.list.ResourceList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,13 +15,16 @@ import java.util.Set;
 @JsonApiResource(type = "meta/collectionType")
 public abstract class MetaCollectionType extends MetaType {
 
-	@JsonIgnore
-	public <T> Collection<T> newInstance() {
-		if (getImplementationClass() == Set.class) {
-			return new HashSet<>();
-		}
-		PreconditionUtil.assertEquals("expect Set or List type", List.class, getImplementationClass());
-		return new ArrayList<>();
-	}
+    @JsonIgnore
+    public <T> Collection<T> newInstance() {
+        if (getImplementationClass() == Set.class) {
+            return new HashSet<>();
+        }
+        if (getImplementationClass() == ResourceList.class) {
+            return new DefaultResourceList<>();
+        }
+        PreconditionUtil.assertEquals("expect Set or List type", List.class, getImplementationClass());
+        return new ArrayList<>();
+    }
 
 }

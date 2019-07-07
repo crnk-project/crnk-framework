@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -32,6 +33,9 @@ import io.crnk.core.exception.RepositoryNotFoundException;
 import io.crnk.core.exception.RequestBodyException;
 import io.crnk.core.exception.ResourceException;
 import io.crnk.core.repository.response.JsonApiResponse;
+import io.crnk.core.resource.list.DefaultResourceList;
+import io.crnk.core.resource.meta.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonMetaInformation;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -290,20 +294,31 @@ public abstract class ResourceUpsert extends ResourceIncludeField {
                     relatedResults.add(fetchRelated(entry, typedRelationshipId, queryAdapter));
                 }
 
+                DefaultResourceList relatedList = new DefaultResourceList();
+
+                ObjectMapper objectMapper = context.getObjectMapper();
+                ObjectNode metaNode = relationship.getMeta();
+                if (metaNode != null) {
+                    relatedList.setMeta(new JsonMetaInformation(metaNode, objectMapper));
+                }
+                ObjectNode linksNode = relationship.getLinks();
+                if (linksNode != null) {
+                    relatedList.setLinks(new JsonLinksInformation(linksNode, objectMapper));
+                }
+
                 if (relatedResults.isEmpty()) {
-                    List relatedList = new LinkedList<>();
+
                     logger.debug("set relationships {}={}", propertyName, relatedList);
                     relationshipField.getAccessor().setValue(newResource, relatedList);
                 } else {
                     return Optional.of(context.getResultFactory().zip(relatedResults).doWork(relatedObjects -> {
-                        List relatedList = new LinkedList<>();
                         relatedList.addAll(relatedObjects);
 
                         logger.debug("set relationships {}={}", propertyName, relatedList);
                         relationshipField.getAccessor().setValue(newResource, relatedList);
                     }));
                 }
-            }else{
+            } else {
                 logger.debug("decideSetRelationObjectsField skipped {}", propertyName, relationshipTypedIds);
             }
         }

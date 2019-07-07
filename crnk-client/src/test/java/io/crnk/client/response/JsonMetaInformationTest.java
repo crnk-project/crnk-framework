@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.crnk.core.resource.meta.JsonMetaInformation;
 import io.crnk.core.resource.meta.MetaInformation;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.repository.ScheduleRepository;

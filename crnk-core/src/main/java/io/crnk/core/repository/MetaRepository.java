@@ -18,7 +18,8 @@ public interface MetaRepository<T> {
      *
      * @param resources a list of found resource(s)
      * @param querySpec sent along with the request
+     * @param current   potential {@link MetaInformation} provided by {@link io.crnk.core.resource.list.ResourceList}
      * @return meta information object
      */
-    MetaInformation getMetaInformation(Collection<T> resources, QuerySpec querySpec);
+    MetaInformation getMetaInformation(Collection<T> resources, QuerySpec querySpec, MetaInformation current);
 }

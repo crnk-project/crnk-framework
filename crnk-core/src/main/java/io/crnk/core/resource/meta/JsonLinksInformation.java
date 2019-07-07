@@ -1,4 +1,4 @@
-package io.crnk.client.response;
+package io.crnk.core.resource.meta;
 
 import java.io.IOException;
 
