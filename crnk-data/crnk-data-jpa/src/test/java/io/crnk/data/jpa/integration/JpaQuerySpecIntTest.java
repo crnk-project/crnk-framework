@@ -1,7 +1,7 @@
 package io.crnk.data.jpa.integration;
 
-import io.crnk.client.response.JsonLinksInformation;
-import io.crnk.client.response.JsonMetaInformation;
+import io.crnk.core.resource.meta.JsonLinksInformation;
+import io.crnk.core.resource.meta.JsonMetaInformation;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.FilterOperator;
 import io.crnk.core.queryspec.FilterSpec;

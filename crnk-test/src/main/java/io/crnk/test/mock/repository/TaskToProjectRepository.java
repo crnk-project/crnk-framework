@@ -77,7 +77,7 @@ public class TaskToProjectRepository implements OneRelationshipRepository<Task, 
     @Override
     public Map<Long, Project> findOneRelations(Collection<Long> sourceIds, String fieldName, QuerySpec querySpec) {
         Map<Long, Project> map = new HashMap<>();
-        for(Long sourceId : sourceIds) {
+        for (Long sourceId : sourceIds) {
             map.put(sourceId, null);
             for (Relation<Task> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
                 if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
@@ -94,7 +94,7 @@ public class TaskToProjectRepository implements OneRelationshipRepository<Task, 
     @Override
     public Map<Long, ResourceList<Project>> findManyRelations(Collection<Long> sourceIds, String fieldName, QuerySpec querySpec) {
         Map<Long, ResourceList<Project>> map = new HashMap<>();
-        for(Long sourceId : sourceIds) {
+        for (Long sourceId : sourceIds) {
             DefaultResourceList<Project> projects = new DefaultResourceList<>();
             for (Relation<Task> relation : THREAD_LOCAL_REPOSITORY.keySet()) {
                 if (relation.getSource().getId().equals(sourceId) && relation.getFieldName().equals(fieldName)) {
@@ -103,6 +103,14 @@ public class TaskToProjectRepository implements OneRelationshipRepository<Task, 
                     projects.add(project);
                 }
             }
+            ProjectRepository.ProjectsLinksInformation links = new ProjectRepository.ProjectsLinksInformation();
+            links.setLinkValue("linkValue");
+            projects.setLinks(links);
+
+            ProjectRepository.ProjectsMetaInformation meta = new ProjectRepository.ProjectsMetaInformation();
+            meta.setMetaValue("metaValue");
+            projects.setMeta(meta);
+
             map.put(sourceId, projects);
         }
         return map;

@@ -1,5 +1,6 @@
 package io.crnk.core.engine.internal.document.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.crnk.core.boot.CrnkProperties;
 import io.crnk.core.engine.document.Document;
 import io.crnk.core.engine.document.Relationship;
@@ -29,219 +30,222 @@ import java.util.Set;
 
 public class IncludeLookupSetter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(IncludeLookupSetter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncludeLookupSetter.class);
 
-	private final ResourceRegistry resourceRegistry;
+    private final ResourceRegistry resourceRegistry;
 
-	private final ResultFactory resultFactory;
+    private final ResultFactory resultFactory;
 
-	private ResourceMapper resourceMapper;
+    private final ObjectMapper objectMapper;
 
-	private IncludeLookupUtil util;
+    private ResourceMapper resourceMapper;
 
-	private IncludeRelationshipLoader relationshipLoader;
+    private IncludeLookupUtil util;
 
-	// currently
-	private boolean allowPagination = false;
+    private IncludeRelationshipLoader relationshipLoader;
 
-	public IncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
-							   PropertiesProvider propertiesProvider, ResultFactory resultFactory) {
-		this.resourceMapper = resourceMapper;
-		this.resourceRegistry = resourceRegistry;
-		this.resultFactory = resultFactory;
+    // currently
+    private boolean allowPagination = false;
 
-		this.relationshipLoader = new IncludeRelationshipLoader(resourceRegistry, resultFactory, propertiesProvider);
+    public IncludeLookupSetter(ResourceRegistry resourceRegistry, ResourceMapper resourceMapper,
+                               PropertiesProvider propertiesProvider, ResultFactory resultFactory, ObjectMapper objectMapper) {
+        this.resourceMapper = resourceMapper;
+        this.resourceRegistry = resourceRegistry;
+        this.resultFactory = resultFactory;
+        this.objectMapper = objectMapper;
 
-		IncludeBehavior includeBehavior = IncludeLookupUtil.getIncludeBehavior(propertiesProvider);
-		this.util = new IncludeLookupUtil(resourceRegistry, includeBehavior);
-		this.allowPagination = propertiesProvider != null && Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties
-				.INCLUDE_PAGING_ENABLED));
-	}
+        this.relationshipLoader = new IncludeRelationshipLoader(resourceRegistry, resultFactory, propertiesProvider);
 
-	public Result<Document> processInclusions(Document document, Object entity, QueryAdapter queryAdapter, DocumentMappingConfig
-			mappingConfig) {
+        IncludeBehavior includeBehavior = IncludeLookupUtil.getIncludeBehavior(propertiesProvider);
+        this.util = new IncludeLookupUtil(resourceRegistry, includeBehavior);
+        this.allowPagination = propertiesProvider != null && Boolean.parseBoolean(propertiesProvider.getProperty(CrnkProperties
+                .INCLUDE_PAGING_ENABLED));
+    }
 
-		QueryAdapter inclusionQueryAdapter = queryAdapter;
-		if (!allowPagination && !queryAdapter.isEmpty()) {
-			// offset/limit cannot properly work for nested inclusions if becomes cyclic
-			inclusionQueryAdapter = queryAdapter.duplicate();
+    public Result<Document> processInclusions(Document document, Object entity, QueryAdapter queryAdapter, DocumentMappingConfig
+            mappingConfig) {
 
-			RegistryEntry entry = resourceRegistry.getEntry(queryAdapter.getResourceInformation().getResourceType());
-			PagingBehavior pagingBehavior = entry.getPagingBehavior();
-			if (pagingBehavior != null) {
-				inclusionQueryAdapter
-						.setPagingSpec(pagingBehavior.createEmptyPagingSpec());
-			}
-		}
+        QueryAdapter inclusionQueryAdapter = queryAdapter;
+        if (!allowPagination && !queryAdapter.isEmpty()) {
+            // offset/limit cannot properly work for nested inclusions if becomes cyclic
+            inclusionQueryAdapter = queryAdapter.duplicate();
 
-		IncludeRequest request = new IncludeRequest(entity, document, resourceRegistry, mappingConfig,
-				inclusionQueryAdapter, util, resourceMapper);
+            RegistryEntry entry = resourceRegistry.getEntry(queryAdapter.getResourceInformation().getResourceType());
+            PagingBehavior pagingBehavior = entry.getPagingBehavior();
+            if (pagingBehavior != null) {
+                inclusionQueryAdapter
+                        .setPagingSpec(pagingBehavior.createEmptyPagingSpec());
+            }
+        }
 
-		ArrayList<ResourceField> stack = new ArrayList<>();
+        IncludeRequest request = new IncludeRequest(entity, document, resourceRegistry, mappingConfig,
+                inclusionQueryAdapter, util, resourceMapper, objectMapper);
 
-		Result result = populate(request, request.getDataList(), stack);
-		return result.map(it -> {
-			request.removeDataFromIncluded();
+        ArrayList<ResourceField> stack = new ArrayList<>();
 
-			List<Resource> included = request.getIncluded();
-			LOGGER.debug("adding {} inclusions", included.size());
-			document.setIncluded(included);
-			return document;
-		});
-	}
+        Result result = populate(request, request.getDataList(), stack);
+        return result.map(it -> {
+            request.removeDataFromIncluded();
 
-	private Result populate(IncludeRequest request, Collection<Resource> resourceList,
-							List<ResourceField> fieldPath) {
-		Result result = resultFactory.just(request);
-		if (!resourceList.isEmpty()) {
-			checkNoRecursion(fieldPath);
-			Set<ResourceField> relationshipFields = util.getRelationshipFields(resourceList);
-			for (ResourceField resourceField : relationshipFields) {
-				List<ResourceField> nextFieldPath = new ArrayList(fieldPath);
-				nextFieldPath.add(resourceField);
-				result = result.merge(it -> populateField(request, resourceList, resourceField, nextFieldPath));
-			}
-		}
-		return result;
-	}
+            List<Resource> included = request.getIncluded();
+            LOGGER.debug("adding {} inclusions", included.size());
+            document.setIncluded(included);
+            return document;
+        });
+    }
 
-	private Result populateField(IncludeRequest request, Collection<Resource> resourceList,
-								 ResourceField resourceField,
-								 List<ResourceField> fieldPath) {
-		ResourceInformation resourceInformation = resourceField.getResourceInformation();
+    private Result populate(IncludeRequest request, Collection<Resource> resourceList,
+                            List<ResourceField> fieldPath) {
+        Result result = resultFactory.just(request);
+        if (!resourceList.isEmpty()) {
+            checkNoRecursion(fieldPath);
+            Set<ResourceField> relationshipFields = util.getRelationshipFields(resourceList);
+            for (ResourceField resourceField : relationshipFields) {
+                List<ResourceField> nextFieldPath = new ArrayList(fieldPath);
+                nextFieldPath.add(resourceField);
+                result = result.merge(it -> populateField(request, resourceList, resourceField, nextFieldPath));
+            }
+        }
+        return result;
+    }
 
-		boolean includeRelationship = request.isInclusionRequest(fieldPath, resourceField);
-		boolean serializeRelationId = request.isRelationIdSerialized(fieldPath);
-		boolean requiresRelationData = serializeRelationId || includeRelationship;
-		LOGGER.debug("populating field={} included={} serializeId={} ", resourceField.getUnderlyingName(), includeRelationship, serializeRelationId);
+    private Result populateField(IncludeRequest request, Collection<Resource> resourceList,
+                                 ResourceField resourceField,
+                                 List<ResourceField> fieldPath) {
+        ResourceInformation resourceInformation = resourceField.getResourceInformation();
 
-		if (requiresRelationData) {
+        boolean includeRelationship = request.isInclusionRequest(fieldPath, resourceField);
+        boolean serializeRelationId = request.isRelationIdSerialized(fieldPath);
+        boolean requiresRelationData = serializeRelationId || includeRelationship;
+        LOGGER.debug("populating field={} included={} serializeId={} ", resourceField.getUnderlyingName(), includeRelationship, serializeRelationId);
 
-			Collection<Resource> unpopulatedResourceList = request.filterProcessed(resourceList, resourceField);
-			if (!unpopulatedResourceList.isEmpty()) {
+        if (requiresRelationData) {
 
-				// only handle resources from the proper subtype where the
-				// relationship is desired to be loaded
-				List<Resource> resourcesByType = util.filterByType(unpopulatedResourceList, resourceInformation);
-				List<Resource> resourcesWithField = util.filterByLoadedRelationship(resourcesByType, resourceField);
+            Collection<Resource> unpopulatedResourceList = request.filterProcessed(resourceList, resourceField);
+            if (!unpopulatedResourceList.isEmpty()) {
 
-				// lookup resources by inspecting the POJOs in entityMap
-				LookupIncludeBehavior fieldLookupIncludeBehavior = resourceField.getLookupIncludeBehavior();
+                // only handle resources from the proper subtype where the
+                // relationship is desired to be loaded
+                List<Resource> resourcesByType = util.filterByType(unpopulatedResourceList, resourceInformation);
+                List<Resource> resourcesWithField = util.filterByLoadedRelationship(resourcesByType, resourceField);
 
-				Result<Set<Resource>> populatedResult;
-				if (!includeRelationship && resourceField.hasIdField()) {
-					// fill in @JsonApiRelationId into Relationship where possible
-					fetchRelationFromEntity(request, resourcesWithField, resourceField,
-							false, false, includeRelationship);
+                // lookup resources by inspecting the POJOs in entityMap
+                LookupIncludeBehavior fieldLookupIncludeBehavior = resourceField.getLookupIncludeBehavior();
 
-					// only ID is required and no lookup must take place
-					// nothing to do
-					populatedResult = resultFactory.just(Collections.emptySet());
-				} else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS) {
-					// fill in @JsonApiRelationId into Relationship where possible
-					fetchRelationFromEntity(request, resourcesWithField, resourceField,
-							false, false, includeRelationship);
+                Result<Set<Resource>> populatedResult;
+                if (!includeRelationship && resourceField.hasIdField()) {
+                    // fill in @JsonApiRelationId into Relationship where possible
+                    fetchRelationFromEntity(request, resourcesWithField, resourceField,
+                            false, false, includeRelationship);
 
-					// lookup resources by making repository calls
-					populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesWithField, resourceField);
-				} else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL) {
-					// try to populate from entities
-					Set<Resource> extractedResources =
-							fetchRelationFromEntity(request, resourcesWithField, resourceField, true, true, includeRelationship);
+                    // only ID is required and no lookup must take place
+                    // nothing to do
+                    populatedResult = resultFactory.just(Collections.emptySet());
+                } else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_ALWAYS) {
+                    // fill in @JsonApiRelationId into Relationship where possible
+                    fetchRelationFromEntity(request, resourcesWithField, resourceField,
+                            false, false, includeRelationship);
 
-					// do lookups where relationship data is null
-					Collection<Resource> resourcesForLookup =
-							util.findResourcesWithoutRelationshipToLoad(resourcesWithField, resourceField, request);
+                    // lookup resources by making repository calls
+                    populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesWithField, resourceField);
+                } else if (fieldLookupIncludeBehavior == LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL) {
+                    // try to populate from entities
+                    Set<Resource> extractedResources =
+                            fetchRelationFromEntity(request, resourcesWithField, resourceField, true, true, includeRelationship);
 
-					populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesForLookup, resourceField)
-							.map(lookedupResources -> util.union(lookedupResources, extractedResources));
-				} else {
-					// do not do any lookups
-					populatedResult = resultFactory.just(fetchRelationFromEntity(request, resourcesWithField, resourceField,
-							false, true, includeRelationship));
+                    // do lookups where relationship data is null
+                    Collection<Resource> resourcesForLookup =
+                            util.findResourcesWithoutRelationshipToLoad(resourcesWithField, resourceField, request);
 
-					// set relationship data to null for single-valued relation.
-					// fetchRelationFromEntity cannot differentiate between
-					// null and not loaded.
-					// It assume it is null and loaded. Otherwise an application
-					// can reconfigure the includeBehavior to make a lookup
-					// and be sure.
-					if (!Iterable.class.isAssignableFrom(resourceField.getType())) {
-						Nullable<Object> emptyData = Nullable.nullValue();
-						for (Resource resourceWithField : resourcesWithField) {
-							Relationship relationship = resourceWithField.getRelationships().get(resourceField.getJsonName
-									());
-							if (!relationship.getData().isPresent()) {
-								relationship.setData(emptyData);
-							}
-						}
-					}
-				}
+                    populatedResult = relationshipLoader.lookupRelatedResource(request, resourcesForLookup, resourceField)
+                            .map(lookedupResources -> util.union(lookedupResources, extractedResources));
+                } else {
+                    // do not do any lookups
+                    populatedResult = resultFactory.just(fetchRelationFromEntity(request, resourcesWithField, resourceField,
+                            false, true, includeRelationship));
 
-				return populatedResult.merge(populated -> {
-					// add inclusions and do nested population if requested as such
-					if (includeRelationship && !populated.isEmpty()) {
-						request.markForInclusion(populated);
-						return populate(request, populated, fieldPath);
-					}
-					return resultFactory.just(request);
-				});
-			}
-		}
-		return resultFactory.just(request);
-	}
+                    // set relationship data to null for single-valued relation.
+                    // fetchRelationFromEntity cannot differentiate between
+                    // null and not loaded.
+                    // It assume it is null and loaded. Otherwise an application
+                    // can reconfigure the includeBehavior to make a lookup
+                    // and be sure.
+                    if (!Iterable.class.isAssignableFrom(resourceField.getType())) {
+                        Nullable<Object> emptyData = Nullable.nullValue();
+                        for (Resource resourceWithField : resourcesWithField) {
+                            Relationship relationship = resourceWithField.getRelationships().get(resourceField.getJsonName
+                                    ());
+                            if (!relationship.getData().isPresent()) {
+                                relationship.setData(emptyData);
+                            }
+                        }
+                    }
+                }
 
-	private void checkNoRecursion(List<ResourceField> fieldPath) {
-		int index = fieldPath.size();
-		if (index >= 42) {
-			throw new IllegalStateException("42 nested inclusions reached, aborting");
-		}
-	}
+                return populatedResult.merge(populated -> {
+                    // add inclusions and do nested population if requested as such
+                    if (includeRelationship && !populated.isEmpty()) {
+                        request.markForInclusion(populated);
+                        return populate(request, populated, fieldPath);
+                    }
+                    return resultFactory.just(request);
+                });
+            }
+        }
+        return resultFactory.just(request);
+    }
 
-	/**
-	 * No lookup specified for the field. Attempt to load relationship from
-	 * original POJOs. Throw an InternalServerErrorException if the field is an
-	 * Iterable and null.
-	 */
-	private Set<Resource> fetchRelationFromEntity(IncludeRequest request, List<Resource> sourceResources, ResourceField
-			relationshipField, boolean allowLookup, boolean fetchRelatedEntity, boolean mustInclude) {
-		Set<Resource> loadedResources = new HashSet<>();
-		for (Resource sourceResource : sourceResources) {
-			ResourceIdentifier id = sourceResource.toIdentifier();
+    private void checkNoRecursion(List<ResourceField> fieldPath) {
+        int index = fieldPath.size();
+        if (index >= 42) {
+            throw new IllegalStateException("42 nested inclusions reached, aborting");
+        }
+    }
 
-			Object sourceEntity = request.getEntity(id);
-			if (sourceEntity != null && !(sourceEntity instanceof Resource)) {
+    /**
+     * No lookup specified for the field. Attempt to load relationship from
+     * original POJOs. Throw an InternalServerErrorException if the field is an
+     * Iterable and null.
+     */
+    private Set<Resource> fetchRelationFromEntity(IncludeRequest request, List<Resource> sourceResources, ResourceField
+            relationshipField, boolean allowLookup, boolean fetchRelatedEntity, boolean mustInclude) {
+        Set<Resource> loadedResources = new HashSet<>();
+        for (Resource sourceResource : sourceResources) {
+            ResourceIdentifier id = sourceResource.toIdentifier();
 
-				Object relatedEntity = null;
-				if (fetchRelatedEntity) {
-					relatedEntity = relationshipField.getAccessor().getValue(sourceEntity);
-					if (!allowLookup && Iterable.class.isAssignableFrom(relationshipField.getType()) && relatedEntity == null) {
-						// note that single-valued relations are allowed to be null
-						throw new InternalServerErrorException(
-								id + " relationship field collection '" + relationshipField.getJsonName()
-										+ "' can not be null. Either set the relationship as an empty "
-										+ Iterable.class.getCanonicalName() + " or use LookupIncludeBehavior.AUTOMATICALLY_ALWAYS");
-					}
-				}
+            Object sourceEntity = request.getEntity(id);
+            if (sourceEntity != null && !(sourceEntity instanceof Resource)) {
 
-				// attempt to work with full relationship and fallback to relationshipId where possible
-				if (relatedEntity != null) {
-					List<Resource> relatedResources =
-							request.setupRelation(sourceResource, relationshipField, relatedEntity);
-					loadedResources.addAll(relatedResources);
-				} else if (relationshipField.hasIdField()) {
-					Object relatedEntityID = relationshipField.getIdAccessor().getValue(sourceEntity);
-					request.setupRelationId(sourceResource, relationshipField, relatedEntityID);
-					if (fetchRelatedEntity && relatedEntityID != null && !allowLookup && mustInclude) {
-						throw new IllegalStateException("inconsistent relationship '" + relationshipField.getUnderlyingName()
-								+ "' for " + id + ", id "
-								+ "set to " + relatedEntityID + ", but related object is null and lookup disabled");
-					}
-				}
-			}
-		}
-		return loadedResources;
-	}
+                Object relatedEntity = null;
+                if (fetchRelatedEntity) {
+                    relatedEntity = relationshipField.getAccessor().getValue(sourceEntity);
+                    if (!allowLookup && Iterable.class.isAssignableFrom(relationshipField.getType()) && relatedEntity == null) {
+                        // note that single-valued relations are allowed to be null
+                        throw new InternalServerErrorException(
+                                id + " relationship field collection '" + relationshipField.getJsonName()
+                                        + "' can not be null. Either set the relationship as an empty "
+                                        + Iterable.class.getCanonicalName() + " or use LookupIncludeBehavior.AUTOMATICALLY_ALWAYS");
+                    }
+                }
+
+                // attempt to work with full relationship and fallback to relationshipId where possible
+                if (relatedEntity != null) {
+                    List<Resource> relatedResources =
+                            request.setupRelation(sourceResource, relationshipField, relatedEntity);
+                    loadedResources.addAll(relatedResources);
+                } else if (relationshipField.hasIdField()) {
+                    Object relatedEntityID = relationshipField.getIdAccessor().getValue(sourceEntity);
+                    request.setupRelationId(sourceResource, relationshipField, relatedEntityID);
+                    if (fetchRelatedEntity && relatedEntityID != null && !allowLookup && mustInclude) {
+                        throw new IllegalStateException("inconsistent relationship '" + relationshipField.getUnderlyingName()
+                                + "' for " + id + ", id "
+                                + "set to " + relatedEntityID + ", but related object is null and lookup disabled");
+                    }
+                }
+            }
+        }
+        return loadedResources;
+    }
 
 
 }

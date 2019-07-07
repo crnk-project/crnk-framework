@@ -28,7 +28,7 @@ public class TaskToProjectRepository extends RelationshipRepositoryBase<Task, Lo
 
 
     @Override
-    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec) {
+    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec, LinksInformation current) {
         return new LinksInformation() {
 
             public String name = "value";
@@ -36,7 +36,7 @@ public class TaskToProjectRepository extends RelationshipRepositoryBase<Task, Lo
     }
 
     @Override
-    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec) {
+    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec, MetaInformation current) {
         return new MetaInformation() {
 
             public String name = "value";

@@ -99,6 +99,10 @@ public class ModuleRegistry {
         return controllerRegistry;
     }
 
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
     enum InitializedState {
         NOT_INITIALIZED,
         INITIALIZING,

@@ -1,16 +1,15 @@
-package io.crnk.client.response;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+package io.crnk.core.resource.meta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import io.crnk.core.engine.internal.utils.CastableInformation;
 import io.crnk.core.engine.internal.utils.ClassUtils;
-import io.crnk.core.resource.meta.MetaInformation;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 public class JsonMetaInformation implements MetaInformation, CastableInformation<MetaInformation> {
 

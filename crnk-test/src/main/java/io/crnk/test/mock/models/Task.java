@@ -9,6 +9,7 @@ import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.annotations.SerializeType;
 import io.crnk.core.resource.links.LinksInformation;
 import io.crnk.core.resource.links.SelfLinksInformation;
+import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.MetaInformation;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Task {
     private Schedule schedule;
 
     @JsonApiRelation
-    private List<Project> projects = new ArrayList<>();
+    private ResourceList<Project> projects;
 
     @JsonApiRelation
     private Project includedProject;
@@ -120,11 +121,11 @@ public class Task {
         this.project = project;
     }
 
-    public List<Project> getProjects() {
+    public ResourceList<Project> getProjects() {
         return projects;
     }
 
-    public void setProjects(List<Project> projects) {
+    public void setProjects(ResourceList<Project> projects) {
         this.projects = projects;
     }
 

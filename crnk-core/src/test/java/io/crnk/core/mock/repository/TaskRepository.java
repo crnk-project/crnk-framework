@@ -73,7 +73,7 @@ public class TaskRepository extends ResourceRepositoryBase<Task, Long>
     }
 
     @Override
-    public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams) {
+    public LinksInformation getLinksInformation(Collection<Task> resources, QuerySpec queryParams, LinksInformation current) {
         return new LinksInformation() {
 
             public String name = "value";
@@ -81,7 +81,7 @@ public class TaskRepository extends ResourceRepositoryBase<Task, Long>
     }
 
     @Override
-    public MetaInformation getMetaInformation(Collection<Task> resources, QuerySpec queryParams) {
+    public MetaInformation getMetaInformation(Collection<Task> resources, QuerySpec queryParams, MetaInformation current) {
         return new MetaInformation() {
 
             public String name = "value";

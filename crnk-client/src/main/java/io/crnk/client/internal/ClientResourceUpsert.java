@@ -140,6 +140,7 @@ class ClientResourceUpsert extends ResourceUpsert {
 
         if (!relationship.getData().isPresent()) {
             ObjectNode links = relationship.getLinks();
+            ObjectNode meta = relationship.getMeta();
             if (links != null) {
                 // create proxy to lazy load relations
                 String fieldName = property.getKey();
@@ -159,7 +160,7 @@ class ClientResourceUpsert extends ResourceUpsert {
                     } else {
                         url = relatedNode.asText().trim();
                     }
-                    Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url);
+                    Object proxy = proxyFactory.createCollectionProxy(elementType, collectionClass, url, links, meta);
                     field.getAccessor().setValue(newResource, proxy);
                 }
             }

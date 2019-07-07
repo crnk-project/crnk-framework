@@ -14,6 +14,7 @@ import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
+import io.crnk.test.mock.repository.ProjectRepository;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -385,15 +386,17 @@ public abstract class BasicRepositoryAccessTestBase {
         taskRepo.create(task);
 
         relRepo.addRelations(task, Arrays.asList(project0.getId(), project1.getId()), "projects");
-        List<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
+        ResourceList<Project> relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
         Assert.assertEquals(2, relProjects.size());
-
         relRepo.setRelations(task, Arrays.asList(project1.getId()), "projects");
+
         relProjects = relRepo.findManyTargets(task.getId(), "projects", new QuerySpec(Task.class));
         Assert.assertEquals(1, relProjects.size());
         Assert.assertEquals(project1.getId(), relProjects.get(0).getId());
-
-
+        ProjectRepository.ProjectsLinksInformation projectLinks = relProjects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
+        ProjectRepository.ProjectsMetaInformation projecsMeta = relProjects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
+        Assert.assertEquals("linkValue", projectLinks.getLinkValue());
+        Assert.assertEquals("metaValue", projecsMeta.getMetaValue());
         // TODO HTTP DELETE method with payload not supported? at least in
         // Jersey
 		/*
@@ -403,6 +406,40 @@ public abstract class BasicRepositoryAccessTestBase {
 		Assert.assertEquals(0, relProjects.size());
 		*/
     }
+
+
+    @Test
+    public void testRelatedInformation() {
+        Project project0 = new Project();
+        project0.setId(1L);
+        project0.setName("project0");
+        projectRepo.create(project0);
+
+        Project project1 = new Project();
+        project1.setId(2L);
+        project1.setName("project1");
+        projectRepo.create(project1);
+
+        Task task = new Task();
+        task.setId(3L);
+        task.setName("test");
+        taskRepo.create(task);
+
+        relRepo.setRelations(task, Arrays.asList(project0.getId(), project1.getId()), "projects");
+
+        QuerySpec querySpec = new QuerySpec(Task.class);
+        querySpec.includeRelation(PathSpec.of("projects"));
+        Task queriedTask = taskRepo.findOne(task.getId(), querySpec);
+        ResourceList<Project> projects = queriedTask.getProjects();
+        Assert.assertEquals(2, projects.size());
+        ProjectRepository.ProjectsLinksInformation relationLinks = projects.getLinks(ProjectRepository.ProjectsLinksInformation.class);
+        Assert.assertEquals("linkValue", relationLinks.getLinkValue());
+        Assert.assertTrue(relationLinks.getSelf().endsWith("/tasks/3/relationships/projects"));
+        Assert.assertTrue(relationLinks.getRelated().endsWith("/tasks/3/projects"));
+        ProjectRepository.ProjectsMetaInformation relationMeta = projects.getMeta(ProjectRepository.ProjectsMetaInformation.class);
+        Assert.assertEquals("metaValue", relationMeta.getMetaValue());
+    }
+
 
     @Test
     public void testRenaming() {

@@ -1,5 +1,6 @@
 package io.crnk.test.mock.repository;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.QuerySpec;
 import io.crnk.core.repository.LinksRepository;
@@ -7,6 +8,8 @@ import io.crnk.core.repository.MetaRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.links.DefaultPagedLinksInformation;
 import io.crnk.core.resource.links.LinksInformation;
+import io.crnk.core.resource.links.RelatedLinksInformation;
+import io.crnk.core.resource.links.SelfLinksInformation;
 import io.crnk.core.resource.list.DefaultResourceList;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.core.resource.meta.DefaultPagedMetaInformation;
@@ -72,8 +75,8 @@ public class ProjectRepository implements ResourceRepository<Project, Long>, Met
     @Override
     public ResourceList<Project> findAll(QuerySpec querySpec) {
         DefaultResourceList<Project> list = new DefaultResourceList<>();
-        list.setMeta(getMetaInformation(list, querySpec));
-        list.setLinks(getLinksInformation(list, querySpec));
+        list.setMeta(getMetaInformation(list, querySpec, null));
+        list.setLinks(getLinksInformation(list, querySpec, null));
         querySpec.apply(THREAD_LOCAL_REPOSITORY.values(), list);
         return list;
     }
@@ -105,22 +108,28 @@ public class ProjectRepository implements ResourceRepository<Project, Long>, Met
     }
 
     @Override
-    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec) {
+    public LinksInformation getLinksInformation(Collection<Project> resources, QuerySpec querySpec, LinksInformation current) {
         ProjectsLinksInformation info = new ProjectsLinksInformation();
         info.setLinkValue("testLink");
         return info;
     }
 
     @Override
-    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec) {
+    public MetaInformation getMetaInformation(Collection<Project> resources, QuerySpec querySpec, MetaInformation current) {
         ProjectsMetaInformation info = new ProjectsMetaInformation();
         info.setMetaValue("testMeta");
         return info;
     }
 
-    public static class ProjectsLinksInformation extends DefaultPagedLinksInformation {
+    public static class ProjectsLinksInformation extends DefaultPagedLinksInformation implements SelfLinksInformation, RelatedLinksInformation {
 
         private String linkValue;
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private String self;
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private String related;
 
         public String getLinkValue() {
             return linkValue;
@@ -128,6 +137,26 @@ public class ProjectRepository implements ResourceRepository<Project, Long>, Met
 
         public void setLinkValue(String linkValue) {
             this.linkValue = linkValue;
+        }
+
+        @Override
+        public String getSelf() {
+            return self;
+        }
+
+        @Override
+        public void setSelf(String self) {
+            this.self = self;
+        }
+
+        @Override
+        public String getRelated() {
+            return related;
+        }
+
+        @Override
+        public void setRelated(String related) {
+            this.related = related;
         }
     }
 
