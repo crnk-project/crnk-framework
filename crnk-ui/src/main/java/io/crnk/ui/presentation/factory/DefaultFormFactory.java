@@ -67,6 +67,7 @@ public class DefaultFormFactory implements PresentationElementFactory {
 
 			FormElement formElement = new FormElement();
 			formElement.setId(id);
+			formElement.setComponentId("form");
 			formElement.setLabel(label);
 			formElement.setAttributePath(pathSpec);
 			formElement.setEditable(env.isEditable());

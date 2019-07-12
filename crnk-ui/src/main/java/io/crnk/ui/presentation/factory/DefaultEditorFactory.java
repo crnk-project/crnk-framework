@@ -29,15 +29,17 @@ public class DefaultEditorFactory implements PresentationElementFactory {
 		editorElement.setPath(service.getPath() + resource.getResourcePath());
 		editorElement.setServiceName(service.getServiceName());
 		editorElement.setServicePath(service.getPath());
+		editorElement.setComponentId("editor");
 
 		QueryElement query = editorElement.getBaseQuery();
 		query.setResourceType(resource.getResourceType());
-		query.setInclusions(PresentationBuilderUtils.computeIncludes(editorElement.getForm()));
+		query.setInclusions(PresentationBuilderUtils.computeIncludes(editorElement.getForm().getChildren()));
 		return editorElement;
 	}
 
-	private String toId(PresentationService service, MetaResource resource) {
-		return service.getServiceName() + "-" + resource.getId();
+
+	public static String toId(PresentationService service, MetaResource resource) {
+		return service.getServiceName() + "-" + resource.getResourceType();
 	}
 
 

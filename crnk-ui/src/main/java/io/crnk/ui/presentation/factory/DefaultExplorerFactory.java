@@ -1,11 +1,15 @@
 package io.crnk.ui.presentation.factory;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import io.crnk.core.engine.internal.utils.StringUtils;
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.meta.model.MetaAttribute;
+import io.crnk.meta.model.MetaType;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.ui.presentation.PresentationEnvironment;
 import io.crnk.ui.presentation.PresentationService;
@@ -15,35 +19,67 @@ import io.crnk.ui.presentation.element.ActionElement;
 import io.crnk.ui.presentation.element.DataTableElement;
 import io.crnk.ui.presentation.element.ExplorerElement;
 import io.crnk.ui.presentation.element.QueryElement;
+import io.crnk.ui.presentation.element.TableColumnElement;
 
 public class DefaultExplorerFactory implements PresentationElementFactory {
 
 	@Override
 	public boolean accepts(PresentationEnvironment env) {
-		return env.getAcceptedTypes().contains(PresentationType.EXPLORER);
+		// accept as root explorer or for nested many relationships
+		MetaType type = env.getType();
+		ArrayDeque<MetaAttribute> attributePath = env.getAttributePath();
+		return env.getAcceptedTypes().contains(PresentationType.EXPLORER) ||
+				attributePath != null && attributePath.getLast().isAssociation()
+						&& type != null && type.isCollection();
 	}
 
 	@Override
 	public ExplorerElement create(PresentationEnvironment env) {
-		MetaResource resource = (MetaResource) env.getElement();
+		MetaResource rootResource = (MetaResource) env.getElement();
+		MetaResource nestedResource = rootResource;
+
+		ArrayDeque<MetaAttribute> attributePath = env.getAttributePath();
+		PreconditionUtil.verify(attributePath == null || attributePath.size() < 2, "only relationships supported");
+		MetaAttribute relationshipAttribute = attributePath != null ? attributePath.getFirst() : null;
+		if (relationshipAttribute != null) {
+			nestedResource = (MetaResource) relationshipAttribute.getType().getElementType();
+		}
+
 		PresentationService service = env.getService();
 
+		DataTableElement table = createTable(env, nestedResource);
+
 		ExplorerElement explorerElement = new ExplorerElement();
-		explorerElement.setId(toId(service, resource));
-		explorerElement.setTable(createTable(env));
+		explorerElement.setId(toId(service, nestedResource));
+		explorerElement.setComponentId("explorer");
+		explorerElement.setTable(table);
 		explorerElement.addAction(createRefreshAction());
-		explorerElement.setPath(service.getPath() + resource.getResourcePath());
+		if (rootResource != nestedResource) {
+			explorerElement.setPath(StringUtils.nullToEmpty(service.getPath()) + rootResource.getResourcePath() + "/" + relationshipAttribute.getName());
+
+			// no need to show parent again when nested
+			MetaAttribute oppositeAttribute = relationshipAttribute.getOppositeAttribute();
+			if (oppositeAttribute != null) {
+				TableColumnElement oppositeColumn = table.getColumns().getElements().get(oppositeAttribute.getName());
+				if (oppositeColumn != null) {
+					table.getColumns().remove(oppositeColumn);
+				}
+			}
+		}
+		else {
+			explorerElement.setPath(service.getPath() + rootResource.getResourcePath());
+		}
 		explorerElement.setServiceName(service.getServiceName());
 		explorerElement.setServicePath(service.getPath());
-		explorerElement.setFullTextSearchPaths(getSearchPaths(resource));
+		explorerElement.setFullTextSearchPaths(getSearchPaths(nestedResource));
 
-		if (resource.isInsertable()) {
+		if (nestedResource.isInsertable()) {
 			explorerElement.addAction(createPostAction());
 		}
 
 		QueryElement query = explorerElement.getBaseQuery();
-		query.setResourceType(resource.getResourceType());
-		query.setInclusions(PresentationBuilderUtils.computeIncludes(explorerElement.getTable()));
+		query.setResourceType(nestedResource.getResourceType());
+		query.setInclusions(PresentationBuilderUtils.computeIncludes(explorerElement.getTable().getChildren()));
 		return explorerElement;
 	}
 
@@ -52,8 +88,10 @@ public class DefaultExplorerFactory implements PresentationElementFactory {
 	}
 
 
-	private DataTableElement createTable(PresentationEnvironment env) {
+	private DataTableElement createTable(PresentationEnvironment env, MetaResource tableType) {
 		PresentationEnvironment tableEnv = env.clone().setAcceptedTypes(Collections.singletonList(PresentationType.TABLE));
+		tableEnv.setType(tableType);
+		tableEnv.setElement(tableType);
 		return (DataTableElement) env.createElement(tableEnv);
 
 	}

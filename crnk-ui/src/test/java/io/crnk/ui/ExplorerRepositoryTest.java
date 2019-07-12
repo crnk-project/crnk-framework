@@ -91,6 +91,7 @@ public class ExplorerRepositoryTest {
 		List<PathSpec> labelAttributes = element.getLabelAttributes();
 		Assert.assertEquals(1, labelAttributes.size());
 		Assert.assertEquals(PathSpec.of("name"), labelAttributes.get(0));
+		Assert.assertEquals("local-presentationProject", element.getViewerId());
 	}
 
 	@Test

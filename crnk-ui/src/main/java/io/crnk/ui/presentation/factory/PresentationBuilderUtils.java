@@ -2,17 +2,9 @@ package io.crnk.ui.presentation.factory;
 
 import io.crnk.core.queryspec.PathSpec;
 import io.crnk.meta.model.MetaAttribute;
-import io.crnk.ui.presentation.element.ContainerElement;
-import io.crnk.ui.presentation.element.PresentationElement;
-import io.crnk.ui.presentation.element.SingularValueElement;
+import io.crnk.ui.presentation.element.*;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PresentationBuilderUtils {
@@ -22,7 +14,7 @@ public class PresentationBuilderUtils {
     }
 
     public static List<PathSpec> computeIncludes(PresentationElement element) {
-        return computeIncludes(Arrays.asList(element));
+        return computeIncludes(Collections.singletonList(element));
     }
 
     public static List<PathSpec> computeIncludes(List<PresentationElement> elements) {
@@ -33,7 +25,9 @@ public class PresentationBuilderUtils {
                 Optional<PathSpec> optInclude = toInclude(valueElement.getAttributePath());
                 if (optInclude.isPresent()) {
                     PathSpec include = optInclude.get();
-                    includes.add(include);
+					if (element instanceof WrapperElement && ((WrapperElement) element).getComponent() instanceof LabelElement) {
+						includes.add(include);
+					}
                     if (element instanceof ContainerElement) {
                         List<PresentationElement> childElements = ((ContainerElement) element).getChildren();
                         List<PathSpec> nestedIncludes = computeIncludes(childElements);

@@ -25,17 +25,15 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 
 	@Override
 	public DataTableElement create(PresentationEnvironment env) {
-		boolean displayAssociation = env.getAttributePath() != null;
-		boolean sortingEnabled = !displayAssociation;
-		boolean filtersEnabled = !displayAssociation;
-		boolean pagingEnabled = !displayAssociation;
+		boolean sortingEnabled = true;
+		boolean filtersEnabled = true;
 
 		MetaResource resource = (MetaResource) env.getElement();
-		String resourceType = resource.getResourceType();
 
 		DataTableElement table = new DataTableElement();
 		table.setEditable(env.isEditable());
 		table.getPagination().setEnabled(true);
+		table.setComponentId("table");
 
 		for (MetaAttribute attribute : resource.getAttributes()) {
 			buildColumn(env, table.getColumns(), resource, filtersEnabled, sortingEnabled, new ArrayDeque(Arrays.asList(attribute)));
@@ -47,6 +45,10 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 			ArrayDeque<MetaAttribute> attributePath) {
 		MetaAttribute lastAttribute = attributePath.getLast();
 		MetaType type = lastAttribute.getType();
+		if(type == null){
+			return; // TODO support e.g. from other services
+		}
+
 		if (isIgnored(attributePath) || type.isCollection()) {
 			return;
 		}
@@ -80,6 +82,7 @@ public class DefaultTableElementFactory implements PresentationElementFactory {
 
 			TableColumnElement column = new TableColumnElement();
 			column.setId(id);
+			column.setComponentId("column");
 			column.setLabel(label);
 			column.setAttributePath(pathSpec);
 			column.setEditable(env.isEditable());

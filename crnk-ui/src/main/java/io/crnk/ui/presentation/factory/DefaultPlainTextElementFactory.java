@@ -9,17 +9,20 @@ public class DefaultPlainTextElementFactory implements PresentationElementFactor
 
 	@Override
 	public boolean accepts(PresentationEnvironment env) {
-		return env.getType() != null;
+		return true;
 	}
 
 	@Override
 	public PlainTextElement create(PresentationEnvironment env) {
 		MetaType type = env.getType();
-		String id = type.getId();
-		boolean isNumber = MetaPrimitiveType.ID_SHORT.equals(id) ||
-				MetaPrimitiveType.ID_BYTE.equals(id) ||
-				MetaPrimitiveType.ID_INT.equals(id) ||
-				MetaPrimitiveType.ID_LONG.equals(id);
+		boolean isNumber = false;
+		if (type != null) {
+			String id = type.getId();
+			isNumber = MetaPrimitiveType.ID_SHORT.equals(id) ||
+					MetaPrimitiveType.ID_BYTE.equals(id) ||
+					MetaPrimitiveType.ID_INT.equals(id) ||
+					MetaPrimitiveType.ID_LONG.equals(id);
+		}
 		PlainTextElement element = createElement();
 		if (isNumber) {
 			element.setComponentId("number");

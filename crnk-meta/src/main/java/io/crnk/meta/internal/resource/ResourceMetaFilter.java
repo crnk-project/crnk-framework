@@ -1,5 +1,10 @@
 package io.crnk.meta.internal.resource;
 
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+
 import io.crnk.core.engine.filter.FilterBehavior;
 import io.crnk.core.engine.filter.ResourceFilterDirectory;
 import io.crnk.core.engine.http.HttpMethod;
@@ -27,13 +32,12 @@ import io.crnk.meta.model.resource.MetaResourceBase;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaProviderContext;
-
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceMetaFilter implements MetaFilter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMetaFilter.class);
 
     private final MetaProviderContext context;
 
@@ -194,33 +198,35 @@ public class ResourceMetaFilter implements MetaFilter {
                 String oppositeType = field.getOppositeResourceType();
                 String oppositeId = partition.getId(oppositeType);
                 Optional<MetaElement> optOppositeMeta = context.getMetaElement(oppositeId);
-                if (!optOppositeMeta.isPresent()) {
-                    throw new IllegalStateException(
-                            "opposite meta element '" + oppositeId + "' for element '" + element.getId() + "' not found");
-                }
+                if (optOppositeMeta.isPresent()) {
 
-                MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
+					MetaResource oppositeMeta = (MetaResource) optOppositeMeta.get();
 
-                if (field.isCollection()) {
-                    boolean isSet = Set.class.isAssignableFrom(field.getType());
-                    String suffix = (isSet ? "$set" : "$list");
-                    Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
-                    MetaCollectionType metaCollection;
-                    if (optMetaCollection.isPresent()) {
-                        metaCollection = (MetaCollectionType) optMetaCollection.get();
-                    } else {
-                        metaCollection = isSet ? new MetaSetType() : new MetaListType();
-                        metaCollection.setId(oppositeMeta.getId() + suffix);
-                        metaCollection.setName(oppositeMeta.getName() + suffix);
-                        metaCollection.setImplementationType(field.getGenericType());
-                        metaCollection.setElementType(oppositeMeta);
-                        partition.addElement(null, metaCollection);
-                    }
-                    attr.setType(metaCollection);
+					if (field.isCollection()) {
+						boolean isSet = Set.class.isAssignableFrom(field.getType());
+						String suffix = (isSet ? "$set" : "$list");
+						Optional<MetaElement> optMetaCollection = context.getMetaElement(oppositeId + suffix);
+						MetaCollectionType metaCollection;
+						if (optMetaCollection.isPresent()) {
+							metaCollection = (MetaCollectionType) optMetaCollection.get();
+						}
+						else {
+							metaCollection = isSet ? new MetaSetType() : new MetaListType();
+							metaCollection.setId(oppositeMeta.getId() + suffix);
+							metaCollection.setName(oppositeMeta.getName() + suffix);
+							metaCollection.setImplementationType(field.getGenericType());
+							metaCollection.setElementType(oppositeMeta);
+							partition.addElement(null, metaCollection);
+						}
+						attr.setType(metaCollection);
 
-                } else {
-                    attr.setType(oppositeMeta);
-                }
+					}
+					else {
+						attr.setType(oppositeMeta);
+					}
+				}else{
+					LOGGER.info("opposite meta element '{}' for element '{}' not found",oppositeId, element.getId());
+				}
             } else {
                 Type implementationType = field.getGenericType();
                 MetaElement metaType = partition.allocateMetaElement(implementationType).get();
