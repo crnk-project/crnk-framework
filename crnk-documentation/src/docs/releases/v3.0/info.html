@@ -264,10 +264,13 @@ of model-driven and test-driven documentation together with the standardization 
 can greatly help in writing consistent, documented REST endpoints.
 
 <p>
-<table>
+<table width="90%">
     <tr>
         <td>
-            <img src="asciidoc_example.png" width="70%">
+            <img src="asciidoc_graph.png" width="90%">
+        </td>
+        <td>
+            <img src="asciidoc_example.png" width="90%">
         </td>
     </tr>
 </table>
@@ -383,11 +386,6 @@ public class PostHeader {
 More information can be found <a href="documentation/#_nested_resources">here</a>.
 
 
-<h4>Enum support for Activiti</h4>
-
-crnk-data-jpa maps Enum types to Strings for Activiti. This to by-pass the regular Activiti serialization mechanism that
-treats the enum like a java.lang.Object by storing it is as serialized blob and not supporting filtering.
-
 
 <h4>More flexible EntityManager setup with JPA module</h4>
 
@@ -424,3 +422,97 @@ model for all its managed resources:
 
 In subsequent releases the presentation model will be refined and crnk-ui on the frontend side updated accordingly.
 But not only crnk-ui, any kind of  application can make use of it to build generic but still custom frontends.
+
+
+
+<h4>Singular Nested Resources</h4>
+
+Support for nested resources has been improved by introducing support singular nested resources. Thereby a parent can hold a single nested resource as
+single-valued relationships. Urls then look like:
+
+<p>
+    http://example.com/posts/1/header
+</p>
+
+
+<p>An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(type = "header", nested = true)
+public class PostHeader {
+
+	@JsonApiId
+	@JsonApiRelationId
+	private String postId;
+
+	private String value;
+
+	@JsonApiRelation(opposite = "header", lookUp = LookupIncludeBehavior.AUTOMATICALLY_WHEN_NULL,
+			repositoryBehavior = RelationshipRepositoryBehavior.FORWARD_OWNER)
+	private Post post;
+
+	...
+}
+</pre>
+
+More information can be found <a href="documentation/#_nested_resources">here</a>.
+
+<h4>Specify access mode with @JsonApiResource</h4>
+
+@JsonApiResource has new properties to configure the allowed access modes to a resource:
+sortable, filterable, postable, readable, patchable and deletable. An example looks like:
+
+<pre class="prettyprint">
+@JsonApiResource(
+    type = "tasks", sortable = false, filterable = true,
+    postable = false, readable = false, patchable = false, deletable = false
+)
+public class AccessDeniedTestResource {
+
+    ...
+
+}
+</pre>
+
+The new properties match the ones from @JsonApiField and provide the base line for it.
+For example, if a resource does not allow filtering, none of its fields will.
+
+
+
+<h4>New Security-related repositories</h4>
+
+With
+
+<pre class="prettyprint">
+SecurityConfig.setExposeRepositories(true)
+</pre>
+
+the SecurityModule sets up repositories to make its internal rules available from the REST API:
+
+<ul>
+    <li>&lt;contextPath&gt;/security/callerPermission</li>
+    <li>&lt;contextPath&gt;/security/role</li>
+</ul>
+
+
+<h4>Support for GROUP operator by facets</h4>
+
+The FacetModule gained support for the GROUP operator:
+
+<pre class="prettyprint">
+http://127.0.0.1:8080/api/facet?filter[values][GROUP]=priority,name
+</pre>
+
+It works equivalent to SQL GROUP BY queries. In the example a facet count is computed for
+every pair of priority and name attribute.
+
+
+<h4>Support for JsonInclude.Include.NON_EMPTY</h4>
+
+For example in the subsequent snippet the default <i>0</i> value will be omitted:
+
+<pre class="prettyprint">
+@JsonApiId
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+private long id;
+</pre>
