@@ -34,7 +34,7 @@ apply plugin: 'org.ajoberstar.grgit'
 
 if (ext.timestampedVersion) {
     def gitCommitTimestamp = grgit.head().date.format("yyyyMMddHHmmss", TimeZone.getTimeZone('GMT'))
-    version = BUILD_VERSION_PREFIX + "." + gitCommitTimestamp + "-BETA"
+    version = BUILD_VERSION_PREFIX + "." + gitCommitTimestamp
 } else {
     version = '10.0.0-SNAPSHOT'
 }
