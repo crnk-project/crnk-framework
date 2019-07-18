@@ -110,13 +110,13 @@ public class ActivitiQuerySpecMapper {
 		}
 	}
 
-
 	private static Method getGenericMethod(Class queryClass, Class resourceClass, FilterOperator operator) {
 		String prefix = "variable";
 		if (TaskResource.class.isAssignableFrom(resourceClass)) {
 			prefix = "taskVariable";
 		}
 
+		Class parameterType = Object.class;
 		try {
 			String methodName;
 			if (operator == FilterOperator.EQ) {
@@ -138,12 +138,14 @@ public class ActivitiQuerySpecMapper {
 				methodName = prefix + "ValueLessThan";
 			}
 			else if (operator == FilterOperator.LIKE) {
+				parameterType = String.class;
 				methodName = prefix + "ValueLikeIgnoreCase";
 			}
 			else {
 				throw new IllegalStateException("operator not support: " + operator);
 			}
-			return queryClass.getMethod(methodName, String.class, Object.class);
+
+			return queryClass.getMethod(methodName, String.class, parameterType);
 		}
 		catch (NoSuchMethodException e) {
 			throw new IllegalStateException(e);

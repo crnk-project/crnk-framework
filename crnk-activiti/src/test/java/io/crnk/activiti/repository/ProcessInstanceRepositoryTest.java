@@ -70,6 +70,18 @@ public class ProcessInstanceRepositoryTest extends ActivitiTestBase {
 		return processInstance;
 	}
 
+	@Test
+	public void checkFilterLike() {
+		QuerySpec querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.LIKE, "some%"));
+		ResourceList<ScheduleApprovalProcessInstance> results = processRepository.findAll(querySpec);
+		Assert.assertEquals(1, results.size());
+
+		querySpec = new QuerySpec(ScheduleApprovalProcessInstance.class);
+		querySpec.addFilter(new FilterSpec(Arrays.asList("stringValue"), FilterOperator.LIKE, "anotherValue"));
+		Assert.assertEquals(0, processRepository.findAll(querySpec).size());
+	}
+
 	@Override
 	protected Module createActivitiModule() {
 		return ApprovalTestApplication.createActivitiModule(processEngine);
