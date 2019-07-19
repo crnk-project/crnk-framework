@@ -7,7 +7,7 @@ One service serves projects, while the other tasks. A JSON:API relationship is i
 between task and project that spans over the two underlying services.
 
 The Task Service using a 'Proxy Resource' that enables it to report the linked Project. 
-Known properties as mapped. Not matching properties are added to the attributes map. 
+Known properties are mapped. Not matching properties are added to the attributes map. 
 
 
 
