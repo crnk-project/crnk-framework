@@ -5,25 +5,61 @@ anchor:architecture[]
 
 *Resources*, *relationships* and *repositories* are the central building blocks of Crnk:
 
-- Resources hold data as value fields, meta information and link information.
+- Resources hold data as value attributes, meta information and link information.
 - Relationships establish links between resources.
 - *resource repositories* and *relationship repositories* implement access to resources and relationships.
+  `GET`, `POST`, `PATCH`, `DELETE` requests allow to interact with the repositories.
 
-A Crnk application models its API as resources and relationships. It is not uncommon for applications to also have a few remaining
-service-oriented APIs. Later chapters will show how Crnk integrates with other libraries like JAX-RS or Spring MVC to achieve this.
-Based on such a model, an application implements repositories to provide access trough that model.
+A Crnk application models its API as resources and relationships. One may also call it a *graph* with one
+wants to throw in some current buzzword. For example, for a `person` resource holding an address, there
+are different possibilities to set it up in such a resource-oriented
+way:
 
-Currently implemented is the JSON:API specification to access that model as part of the `crnk-core` project. The JSON:API specification provide
+- A `person` resource holding address information as attribute. A `PATCH` request with the new address
+  will update the attribute on the person accordingly.
+- A `person` resource, an `address` resource and a relationship between the two. Then a `PATCH`
+  request of the relationship will trigger an update.
+- A dedicated `AddressChangeResource` that is in a relationship with the `person` resource. This is
+  the most elaborate setup, but it allows for example not just to trigger a change, but also do
+  model more complex workflows. Maybe the address change takes a longer amount of time, then `AddressChangeResource`
+  cannot just be used to trigger it, but also to query the current status or cancel it. It may also
+  give historic access, see how the address evolved over time.
+
+The opposite to this are RPC-style APIs, where one would implement a `changeAddress` service taking
+the person id and new address as input and performing the desired changes. Crnk
+focuses on resource-oriented APIs, but still works well together with the later, for which there are already many
+libraries out there such as JAX-RS and Spring MVC.
+
+The *benefits of resource-oriented APIs* are:
+
+- A clean, consistent model of your API. Seeing it means understanding it. The semantics of resource and relationships
+  are well established. Consumers can learn about the API by just browsing it through the provided linking.
+- Better evolution into the future. RPC-style APIs frequently suffer from many different, isolated services. Every
+  service can basically do whatever it pleases. Over time this can lead to difficulties understanding and changing a system.
+- Better testability and mocking: By using built-in in-memory repositories and providing test data for resources, a fully
+  running endpoint can be achieved within hours. After that can, for example, frontend and backend development
+  take place in parallel without uncertainty about API contracts.
+- The basic yet powerful model allows for a rich set of tooling and automation to reduce the amount of custom coding.
+  Crnk comes with support for JPA, JSR-303 validation, faceted search support, OpenTracing and more next to
+  handling lower-layer REST details, linking and relationships.
+- Symmetric API between server and client: server repository implementations and client stubs can implement
+
+Crnk is implemented as library rather than new framework. It almost no third-party dependencies, is
+lightweight in design and integrates well with many other libraries like Vert.X, JAX-RS and Spring Boot.
+
+Crnk follows, but is not limited by the https://jsonapi.org/[JSON:API] specification to built resource-oriented APIs.
+Its implementation is hosted in the `crnk-core` project. The JSON:API specification provides
 all the essential building blocks like sorting, filtering, paging, document formats, linking and error handling to access
-resources and relationships. But other implementations, such as GraphQL or different kinds of REST/JSON:APIs, are possible as
-well. With JSON:API, an incoming request is processed as follows:
+resources and relationships. If desired, also other protocols like GraphQL and custom REST API contract can be
+implemented by updating the serialization layer of `crnk-core`. To understand the inner working, it is
+important to know how requests are processed:
 
 - A Crnk interceptor is called from the underlying framework. This might be, for example, from a Servlet environment,
  JAX-RS or Spring MVC.
 - The request is deserialized to Crnk data structures like `Document`, `Resource`, `ResourceIdentifier` or `ErrorData`.
 - The type of request is determined: whether it is a `POST`, `PATCH`, `GET` or `DELETE` request and whether it is a resource or
 relationship request.
-- The request is forwarded to the appropriate repository.
+- The request is forwarded to the appropriate repository implementation.
 - `GET` requests can ask for inclusions of further, related resources. Result resources will then trigger further requests to
   other repositories. This can happen either manually from within the initially called repository or automatically
   by Crnk (explained in detail in later chapters).
@@ -34,13 +70,12 @@ relationship request.
 A benefit of Crnk is its flexibility how to set all this up:
 
 - Resources and relationships can be defined with simple Java Beans and annotations or programmatically. The later allows
-  virtually any kind of customization at runtime, like setting up repositories dynamically. One example is `crnk-data-jpa`
-  that is able to expose any JPA entity as JSON:API resource.
-- Resources and relationships can be entirely decoupled concerns. For example, an independent relationship repository `C` can
-  introduce a relationship between a resource `a` and resource `b` implemented by resource repositories `A` and `B`.
-  For example, an audit component could intercept and log any modifications. Access to it is provided by introducing a
-  new relationship `history` onto each resource.
-- Information about resources, relationships and repositories are available trough a Java API and JSON:API endpoint.
+  virtually any kind of customization at runtime. One example is `crnk-data-jpa`
+  that is able to expose any JPA entity as resource.
+- Resources and relationships can be entirely decoupled concerns. A new relationship repository can introduce
+  an additoinal relationship to existing resources. For example, an audit component could intercept and log any
+  modifications and introduce a new relationship `history` onto each resource to access it.
+- Information about resources, relationships and repositories are available trough a Java API and resource endpoint.
 - Filters and decorators allow to intercept and modify every step along the request chain. This can be used, for example,
   to enforce security, collect metrics or do tracing.
 
@@ -48,16 +83,16 @@ To facilitate the setup, Crnk comes with a small module API. Independent functio
 included into the application. Crnk comes with a number of modules on its own:
 
 - `crnk-data-jpa`
+- `crnk-data-facets`
 - `crnk-validation`
 - `crnk-operations`
-- various Spring modules
+- Spring modules
 - ...
 
 Such modules can make use of filters, decorators, decoupled resources and relationships and various other features.
 Everything together fosters the use of the *composite pattern* where larger applications can be assembled from smaller
-parts, some from third-party modules and others manually implemented.
+parts, some from third-party modules and others from manually implemented ones.
 
-The part of `crnk-core` taking care of all this is denoted as the `engine`. The subsequent chapters explain how to setup and use Crnk.
 
 
 

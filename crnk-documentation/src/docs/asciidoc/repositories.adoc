@@ -375,7 +375,7 @@ anchor:pagination[]
 ## Pagination
 
 
-#### Offset/Limit Paging
+### Offset/Limit Paging
 
 Crnk comes by default with support for offset/limit paging:
 
@@ -384,7 +384,7 @@ Crnk comes by default with support for offset/limit paging:
 The parameters are then available with `QuerySpec.getPaging(type)` or the shortcuts `QuerySpec.getLimit` and `QuerySpec.getOffset`.
 
 
-### Number/Size Paging
+## Number/Size Paging
 
 Support for number/size-based paging can be enabled by registering the `NumberSizePagingBehavior` in one of two ways:
 
