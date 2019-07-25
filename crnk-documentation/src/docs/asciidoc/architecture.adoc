@@ -15,15 +15,17 @@ wants to throw in some current buzzword. For example, for a `person` resource ho
 are different possibilities to set it up in such a resource-oriented
 way:
 
-- A `person` resource holding address information as attribute. A `PATCH` request with the new address
-  will update the attribute on the person accordingly.
+- A `person` resource holding address information as attribute. A `PATCH` request to `/api/person/{id}`
+  with the new address will update the attribute on the person accordingly.
 - A `person` resource, an `address` resource and a relationship between the two. Then a `PATCH`
-  request of the relationship will trigger an update.
-- A dedicated `AddressChangeResource` that is in a relationship with the `person` resource. This is
-  the most elaborate setup, but it allows for example not just to trigger a change, but also do
-  model more complex workflows. Maybe the address change takes a longer amount of time, then `AddressChangeResource`
-  cannot just be used to trigger it, but also to query the current status or cancel it. It may also
-  give historic access, see how the address evolved over time.
+  request to `/api/person/{id}/relationships/address` will trigger an update of the relationship.
+- A dedicated `AddressChangeResource` that is in a relationship with the `person` resource.
+  Then a `POST` request to `/api/addressChange` or `/api/person/{id}/addressChange` (depending on the setup)
+  will trigger a new address change. This is
+  the most elaborate setup and can complement the `address` relationship from before. It allows not just
+  to trigger a change, but also, for example, to query
+  the current status and get a history of changes. This in turn allows to model more complex workflows where
+  an address change may take a larger mount of time and may involve further manual steps.
 
 The opposite to this are RPC-style APIs, where one would implement a `changeAddress` service taking
 the person id and new address as input and performing the desired changes. Crnk
@@ -42,7 +44,6 @@ The *benefits of resource-oriented APIs* are:
 - The basic yet powerful model allows for a rich set of tooling and automation to reduce the amount of custom coding.
   Crnk comes with support for JPA, JSR-303 validation, faceted search support, OpenTracing and more next to
   handling lower-layer REST details, linking and relationships.
-- Symmetric API between server and client: server repository implementations and client stubs can implement
 
 Crnk is implemented as library rather than new framework. It almost no third-party dependencies, is
 lightweight in design and integrates well with many other libraries like Vert.X, JAX-RS and Spring Boot.
