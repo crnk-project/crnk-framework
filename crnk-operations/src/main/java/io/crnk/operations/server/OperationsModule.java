@@ -205,7 +205,7 @@ public class OperationsModule implements Module {
                 String method = HttpMethod.GET.toString();
 
                 Map<String, Set<String>> parameters = new HashMap<>();
-                if (includeAllRelationships == true) {
+                if (includeAllRelationships) {
                     parameters.put("include", getLoadedRelationshipNames(resource));  
                 }
 
@@ -233,7 +233,7 @@ public class OperationsModule implements Module {
 
         boolean success = response.getHttpStatus() < 400;
 
-        if (displayOperationResponseOnSuccess == true || !success) {
+        if (displayOperationResponseOnSuccess || !success) {
             copyDocument(operationResponse, response.getDocument());    
         }
         
