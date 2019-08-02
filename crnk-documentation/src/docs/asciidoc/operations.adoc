@@ -49,7 +49,7 @@ The operations module can be customized using one of the following properties:
 |*Property Name* |*Description* |*Default Value*
 |resumeOnError | If an error occurs during the operation execution, continue the other operations. | False
 |includeAllRelationships | Toggle to include all relationships in the request by default. | True
-|displayResultsOnSuccess | If false, it will only display the data responses if an error has occured. Status code are still shown either way. | True
+|displayOperationResponseOnSuccess | If true, the response will always be included. Otherwise, it only displays the status codes of the operation unless an error has occurred. | True
 |===
 
 Here is an example of how to set these properties:

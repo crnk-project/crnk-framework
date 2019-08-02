@@ -48,7 +48,7 @@ public class OperationsModule implements Module {
 
     private boolean includeAllRelationships = true;
 
-    private boolean displayResultsOnSuccess = true;
+    private boolean displayOperationResponseOnSuccess = true;
 
     public static OperationsModule create() {
         return new OperationsModule();
@@ -179,7 +179,7 @@ public class OperationsModule implements Module {
             }
         }
 
-        if (orderedOperations.size() > 1 && ((!successful && resumeOnError) || (successful && displayResultsOnSuccess))) {
+        if (orderedOperations.size() > 1 && ((!successful && resumeOnError) || (successful && displayOperationResponseOnSuccess))) {
             fetchUpToDateResponses(orderedOperations, responses);
         }
 
@@ -231,10 +231,12 @@ public class OperationsModule implements Module {
         OperationResponse operationResponse = new OperationResponse();
         operationResponse.setStatus(response.getHttpStatus());
 
-        if (displayResultsOnSuccess == true) {
+        boolean success = response.getHttpStatus() < 400;
+
+        if (displayOperationResponseOnSuccess == true || !success) {
             copyDocument(operationResponse, response.getDocument());    
         }
-
+        
         return operationResponse;
     }
 
@@ -274,12 +276,12 @@ public class OperationsModule implements Module {
         this.includeAllRelationships = includeAllRelationships;
     }
 
-    public boolean isDisplayResultsOnSuccess() {
-        return displayResultsOnSuccess;
+    public boolean isDisplayOperationResponseOnSuccess() {
+        return displayOperationResponseOnSuccess;
     }
 
-    public void setDisplayResultsOnSuccess(boolean displayResultsOnSuccess) {
-        this.displayResultsOnSuccess = displayResultsOnSuccess;
+    public void setDisplayOperationResponseOnSuccess(boolean displayOperationResponseOnSuccess) {
+        this.displayOperationResponseOnSuccess = displayOperationResponseOnSuccess;
     }
 
     protected class DefaultOperationFilterContext implements OperationFilterContext {
