@@ -40,6 +40,30 @@ There is further an operations client implementation that works along the regula
 include::../../../../crnk-operations/src/test/java/io/crnk/operations/OperationsPostTest.java[tags=client]
 ----
 
+## Operation Module Properties
+
+The operations module can be customized using one of the following properties:
+
+.Operation Module Properties
+|===
+|*Property Name* |*Description* |*Default Value*
+|resumeOnError | If an error occurs during the operation execution, continue the other operations. | False
+|includeAllRelationships | Toggle to include all relationships in the request by default. | True
+|displayResultsOnSuccess | If false, it will only display the data responses if an error has occured. Status code are still shown either way. | True
+|===
+
+Here is an example of how to set these properties:
+
+[source]
+----
+OperationsModule operationsModule = OperationsModule.create();
+operationsModule.setIncludeAllRelationships(false);
+operationsModule.resumeOnError(true);
+...
+----
+
+## Example Request and Response
+
 An example request in JSON looks like:
 
 [source]

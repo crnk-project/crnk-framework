@@ -46,6 +46,10 @@ public class OperationsModule implements Module {
 
     private boolean resumeOnError = false;
 
+    private boolean includeAllRelationships = true;
+
+    private boolean displayResultsOnSuccess = true;
+
     public static OperationsModule create() {
         return new OperationsModule();
     }
@@ -175,7 +179,7 @@ public class OperationsModule implements Module {
             }
         }
 
-        if (orderedOperations.size() > 1 && (successful || resumeOnError)) {
+        if (orderedOperations.size() > 1 && ((!successful && resumeOnError) || (successful && displayResultsOnSuccess))) {
             fetchUpToDateResponses(orderedOperations, responses);
         }
 
@@ -201,7 +205,9 @@ public class OperationsModule implements Module {
                 String method = HttpMethod.GET.toString();
 
                 Map<String, Set<String>> parameters = new HashMap<>();
-                parameters.put("include", getLoadedRelationshipNames(resource));
+                if (includeAllRelationships == true) {
+                    parameters.put("include", getLoadedRelationshipNames(resource));  
+                }
 
                 Response response =
                         requestDispatcher.dispatchRequest(path, method, parameters, null);
@@ -214,7 +220,6 @@ public class OperationsModule implements Module {
     protected OperationResponse executeOperation(Operation operation) {
         RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
 
-
         String path = OperationParameterUtils.parsePath(operation.getPath());
         Map<String, Set<String>> parameters = OperationParameterUtils.parseParameters(operation.getPath());
         String method = operation.getOp();
@@ -225,7 +230,11 @@ public class OperationsModule implements Module {
                 requestDispatcher.dispatchRequest(path, method, parameters, requestBody);
         OperationResponse operationResponse = new OperationResponse();
         operationResponse.setStatus(response.getHttpStatus());
-        copyDocument(operationResponse, response.getDocument());
+
+        if (displayResultsOnSuccess == true) {
+            copyDocument(operationResponse, response.getDocument());    
+        }
+
         return operationResponse;
     }
 
@@ -255,6 +264,22 @@ public class OperationsModule implements Module {
 
     public void setResumeOnError(boolean resumeOnError) {
         this.resumeOnError = resumeOnError;
+    }
+
+    public boolean isIncludeAllRelationships() {
+        return includeAllRelationships;
+    }
+
+    public void setIncludeAllRelationships(boolean includeAllRelationships) {
+        this.includeAllRelationships = includeAllRelationships;
+    }
+
+    public boolean isDisplayResultsOnSuccess() {
+        return displayResultsOnSuccess;
+    }
+
+    public void setDisplayResultsOnSuccess(boolean displayResultsOnSuccess) {
+        this.displayResultsOnSuccess = displayResultsOnSuccess;
     }
 
     protected class DefaultOperationFilterContext implements OperationFilterContext {
