@@ -48,7 +48,7 @@ The operations module can be customized using one of the following properties:
 |===
 |*Property Name* |*Description* |*Default Value*
 |resumeOnError | If an error occurs during the operation execution, continue the other operations. | False
-|includeAllRelationships | Toggle to include all relationships in the request by default. | True
+|includeChangedRelationships | Toggle to include all changed relationships in the request by default. This only applies for POST and PATCH operation requests. | True
 |displayOperationResponseOnSuccess | If true, the response will always be included. Otherwise, it only displays the status codes of the operation unless an error has occurred. | True
 |===
 
@@ -57,7 +57,7 @@ Here is an example of how to set these properties:
 [source]
 ----
 OperationsModule operationsModule = OperationsModule.create();
-operationsModule.setIncludeAllRelationships(false);
+operationsModule.setIncludeChangedRelationships(false);
 operationsModule.resumeOnError(true);
 ...
 ----

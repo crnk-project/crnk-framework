@@ -46,7 +46,7 @@ public class OperationsModule implements Module {
 
     private boolean resumeOnError = false;
 
-    private boolean includeAllRelationships = true;
+    private boolean includeChangedRelationships = true;
 
     private boolean displayOperationResponseOnSuccess = true;
 
@@ -205,7 +205,7 @@ public class OperationsModule implements Module {
                 String method = HttpMethod.GET.toString();
 
                 Map<String, Set<String>> parameters = new HashMap<>();
-                if (includeAllRelationships) {
+                if (includeChangedRelationships) {
                     parameters.put("include", getLoadedRelationshipNames(resource));  
                 }
 
@@ -268,12 +268,12 @@ public class OperationsModule implements Module {
         this.resumeOnError = resumeOnError;
     }
 
-    public boolean isIncludeAllRelationships() {
-        return includeAllRelationships;
+    public boolean isIncludeChangedRelationships() {
+        return includeChangedRelationships;
     }
 
-    public void setIncludeAllRelationships(boolean includeAllRelationships) {
-        this.includeAllRelationships = includeAllRelationships;
+    public void setIncludeChangedRelationships(boolean includeChangedRelationships) {
+        this.includeChangedRelationships = includeChangedRelationships;
     }
 
     public boolean isDisplayOperationResponseOnSuccess() {
