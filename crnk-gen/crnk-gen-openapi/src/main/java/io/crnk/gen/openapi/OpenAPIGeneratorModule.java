@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,8 +41,26 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	public void generate(Object meta) throws IOException {
 		LOGGER.info("performing openapi generation");
 		MetaLookup metaLookup = (MetaLookup) meta;
+		LOGGER.info(metaLookup.toString());
 		List<MetaResource> resources = getResources(metaLookup);
 		LOGGER.info(resources.toString());
+
+		for (MetaResource resource : resources) {
+			if (resource.getSuperType() == null) {
+				LOGGER.info(resource.getResourceType() + " : /" + resource.getResourcePath());
+
+				// write subtypes as nested entries
+				List<MetaResource> subTypes = resource.getSubTypes().stream()
+						.filter(it -> it instanceof MetaResource)
+						.map(it -> (MetaResource) it)
+						.sorted(Comparator.comparing(MetaResource::getResourceType)).collect(Collectors.toList());
+				for (MetaResource subType : subTypes) {
+					LOGGER.info("\t" + subType.getResourceType());
+				}
+			}
+
+//			builder.appendCell(builder.getDescription(resource));
+		}
 
 		OpenAPIConfiguration config = new SwaggerConfiguration()
 				.openAPI(new OpenAPI()
@@ -57,7 +76,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 					.init();
 			OpenAPI openApi = ctx.read();
 
-			LOGGER.info(Yaml.pretty(openApi));
+			write("openapi", Yaml.pretty(openApi));
 		} catch (OpenApiConfigurationException ignore) {
 		}
 	}
@@ -101,6 +120,16 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	@Override
 	public void setConfig(GeneratorModuleConfigBase config) {
 		this.config = (OpenAPIGeneratorConfig) config;
+	}
+
+
+	private File write(String fileName, String source) throws IOException {
+		File file = new File(config.getGenDir(), fileName + ".yaml");
+		file.getParentFile().mkdirs();
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(source);
+		}
+		return file;
 	}
 
 
