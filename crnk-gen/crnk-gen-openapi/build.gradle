@@ -1,0 +1,40 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':crnk-meta')
+    compile project(':crnk-client')
+    compile project(':crnk-gen:crnk-gen-base')
+
+    compile 'guru.nidi:graphviz-java:0.8.3'
+	compile 'io.swagger.core.v3:swagger-integration:2.0.8'
+	compile 'io.swagger.core.v3:swagger-core:2.0.8'
+	compile 'io.swagger.core.v3:swagger-models:2.0.8'
+
+
+    testCompile 'commons-io:commons-io:2.5'
+    testCompile project(':crnk-meta')
+    testCompile project(':crnk-test')
+    testCompile project(':crnk-format:crnk-format-plain-json')
+}
+
+test {
+    testLogging.showStandardStreams = true
+}
+
+//apply plugin: 'org.asciidoctor.convert'
+
+//openapidoctor {
+//    sourceDir = file('build/tmp/openapi/generated/source/openapi')
+//    backends = ['html5']
+//    attributes 'source-highlighter': 'coderay'
+//    sources {
+//        include 'index.adoc'
+//    }
+//}
+
+// compile generated openapi files
+tasks.test.doFirst {
+    delete 'build/tmp/openapi'
+}
+//check.dependsOn tasks.openapidoctor
+//tasks.openapidoctor.dependsOn test

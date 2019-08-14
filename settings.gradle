@@ -32,6 +32,7 @@ include ':crnk-operations'
 include ':crnk-documentation'
 include ':crnk-bom'
 
+include ':crnk-gen:crnk-gen-openapi'
 include ':crnk-gen:crnk-gen-typescript'
 include ':crnk-gen:crnk-gen-java'
 include ':crnk-gen:crnk-gen-base'
