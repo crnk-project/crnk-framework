@@ -91,6 +91,8 @@ public class CrnkClient {
 
     private static final String REST_TEMPLATE_PROVIDER_NAME = "io.crnk.spring.client.RestTemplateAdapterProvider";
 
+    private final ClientType clientType;
+
     private HttpAdapter httpAdapter;
 
     private ObjectMapper objectMapper;
@@ -125,6 +127,8 @@ public class CrnkClient {
 
     private ClientFormat format = ClientFormat.JSONAPI;
 
+    private ClientProxyFactory configuredProxyFactory;
+
     public enum ClientType {
         SIMPLE_lINKS,
         OBJECT_LINKS
@@ -139,6 +143,7 @@ public class CrnkClient {
     }
 
     public CrnkClient(ServiceUrlProvider serviceUrlProvider, ClientType clientType) {
+        this.clientType = clientType;
         if (ClassUtils.existsClass(REST_TEMPLATE_PROVIDER_NAME)) {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             Class providerClass = ClassUtils.loadClass(classLoader, REST_TEMPLATE_PROVIDER_NAME);
@@ -159,28 +164,6 @@ public class CrnkClient {
         resourceRegistry = new ClientResourceRegistry(moduleRegistry);
         queryContext.setBaseUrl(serviceUrlProvider.getUrl());
         urlBuilder = new JsonApiUrlBuilder(moduleRegistry, queryContext);
-
-
-        objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        switch (clientType) {
-            case OBJECT_LINKS:
-                initJacksonModule(true);
-                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new PropertiesProvider() {
-                    @Override
-                    public String getProperty(String key) {
-                        if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
-                            return "true";
-                        }
-                        return null;
-                    }
-                });
-                break;
-            default:
-                initJacksonModule(false);
-                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
-        }
 
         setProxyFactory(new BasicProxyFactory());
     }
@@ -248,6 +231,7 @@ public class CrnkClient {
      * Each module can register itself for lookup by registering a ClientModuleFactory.
      */
     public void findModules() {
+        initObjectMapper();
         ServiceLoader<ClientModuleFactory> loader = ServiceLoader.load(ClientModuleFactory.class);
 
         Iterator<ClientModuleFactory> iterator = loader.iterator();
@@ -279,7 +263,10 @@ public class CrnkClient {
 
             }
         });
-        documentMapper.setProxyFactory(proxyFactory);
+        this.configuredProxyFactory = proxyFactory;
+        if (documentMapper != null) {
+            documentMapper.setProxyFactory(proxyFactory);
+        }
     }
 
 
@@ -313,6 +300,7 @@ public class CrnkClient {
         initHttpAdapter();
 
         setupPagingBehavior();
+        initObjectMapper();
         initModuleRegistry();
         initExceptionMapperRegistry();
         initResources();
@@ -323,30 +311,63 @@ public class CrnkClient {
         }
     }
 
-    private void initHttpAdapter() {
+    protected void initObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = createDefaultObjectMapper();
+            configureObjectMapper();
+        }
+    }
+
+    protected ObjectMapper createDefaultObjectMapper() {
+        ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
+        return om;
+    }
+
+    protected void configureObjectMapper() {
+        switch (clientType) {
+            case OBJECT_LINKS:
+                initJacksonModule(true);
+                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, key -> {
+                    if (key.equals(CrnkProperties.SERIALIZE_LINKS_AS_OBJECTS)) {
+                        return "true";
+                    }
+                    return null;
+                });
+                break;
+            default:
+                initJacksonModule(false);
+                documentMapper = new ClientDocumentMapper(moduleRegistry, objectMapper, new NullPropertiesProvider());
+        }
+        if (configuredProxyFactory != null) {
+            documentMapper.setProxyFactory(configuredProxyFactory);
+        }
+    }
+
+    protected void initHttpAdapter() {
         if (httpAdapter == null) {
             httpAdapter = detectHttpAdapter();
         }
     }
 
-    private void initResources() {
+    protected void initResources() {
         ResourceLookup resourceLookup = moduleRegistry.getResourceLookup();
         for (Class<?> resourceClass : resourceLookup.getResourceClasses()) {
             getRepositoryForType(resourceClass);
         }
     }
 
-    private void initModuleRegistry() {
+    protected void initModuleRegistry() {
         moduleRegistry.init(objectMapper);
     }
 
-    private void initExceptionMapperRegistry() {
+    protected void initExceptionMapperRegistry() {
         ExceptionMapperLookup exceptionMapperLookup = moduleRegistry.getExceptionMapperLookup();
         exceptionMapperRegistry = new ExceptionMapperRegistryBuilder().build(exceptionMapperLookup);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private <T, I> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
+    protected <T, I> RegistryEntry allocateRepository(Class<T> resourceClass, RegistryEntry parentEntry) {
         RegistryEntry entry = resourceRegistry.getEntry(resourceClass);
         if (entry != null) {
             return entry;
@@ -559,7 +580,14 @@ public class CrnkClient {
      * @return objectMapper in use
      */
     public ObjectMapper getObjectMapper() {
+        initObjectMapper();
         return objectMapper;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        PreconditionUtil.verify(this.objectMapper == null, "ObjectMapper already configured, consider calling SetObjectMapper earlier or and avoid multiple calls");
+        this.objectMapper = objectMapper;
+        this.configureObjectMapper();
     }
 
     /**
@@ -643,6 +671,7 @@ public class CrnkClient {
     }
 
     public ClientDocumentMapper getDocumentMapper() {
+        initObjectMapper();
         return documentMapper;
     }
 
