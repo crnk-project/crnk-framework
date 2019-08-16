@@ -3,7 +3,11 @@ package io.crnk.gen.openapi;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.*;
+import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceBase;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.integration.GenericOpenApiContext;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
@@ -11,6 +15,9 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -40,45 +44,65 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	@Override
 	public void generate(Object meta) throws IOException {
 		LOGGER.info("performing openapi generation");
+		OpenAPI openApi = new OpenAPI()
+				.info(new Info()
+						.description("TEST INFO DESC")
+						.title("TEST INFO TITLE")
+						.version("0.1.0")
+				)
+				.paths(new Paths());
+
 		MetaLookup metaLookup = (MetaLookup) meta;
-		LOGGER.info(metaLookup.toString());
-		List<MetaResource> resources = getResources(metaLookup);
-		LOGGER.info(resources.toString());
+		List<MetaElement> elements = getElements(metaLookup);
+		for (MetaElement element : elements) {
+			if (element instanceof MetaResource) {
+				MetaResource metaResource = (MetaResource) element;
+				if (metaResource.toString().contains("[name=Meta")) {
+					continue;
+				}
 
-		for (MetaResource resource : resources) {
-			if (resource.getSuperType() == null) {
-				LOGGER.info(resource.getResourceType() + " : /" + resource.getResourcePath());
+				PathItem pathItem = new PathItem();
+				pathItem.setDescription(metaResource.toString());
 
-				// write subtypes as nested entries
-				List<MetaResource> subTypes = resource.getSubTypes().stream()
-						.filter(it -> it instanceof MetaResource)
-						.map(it -> (MetaResource) it)
-						.sorted(Comparator.comparing(MetaResource::getResourceType)).collect(Collectors.toList());
-				for (MetaResource subType : subTypes) {
-					LOGGER.info("\t" + subType.getResourceType());
+				if (metaResource.isInsertable()) {
+					Operation operation = new Operation();
+					operation.setDescription("Create a " + metaResource.getResourceType());
+					pathItem.setPost(operation);
+					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				}
+				if (metaResource.isReadable()) {
+					Operation operation = new Operation();
+					operation.setDescription("Read a " + metaResource.getResourceType());
+					pathItem.setGet(operation);
+					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				}
+				if (metaResource.isUpdatable()) {
+					Operation operation = new Operation();
+					operation.setDescription("Update a " + metaResource.getResourceType());
+					pathItem.setPatch(operation);
+					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				}
+				if (metaResource.isDeletable()) {
+					Operation operation = new Operation();
+					operation.setDescription("Delete a " + metaResource.getResourceType());
+					pathItem.setDelete(operation);
+					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
 				}
 			}
-
-//			builder.appendCell(builder.getDescription(resource));
 		}
 
-		OpenAPIConfiguration config = new SwaggerConfiguration()
-				.openAPI(new OpenAPI()
-						.info(new Info()
-								.description("TEST INFO DESC")
-								.title("TEST INFO TITLE")
-								.version("0.1.0")
-						));
+		write("openapi", Yaml.pretty(openApi));
+	}
 
-		try {
-			OpenApiContext ctx = new GenericOpenApiContext()
-					.openApiConfiguration(config)
-					.init();
-			OpenAPI openApi = ctx.read();
+	private String dumpResource(MetaResource resource) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(resource.toString() + "\n");
+		sb.append(resource.getId() + "\n");
+		sb.append(resource.getResourceType() + "\n");
+		sb.append(resource.getAttributes().toString() + "\n");
+//		sb.append(resource.getAttributes().toString() + "\n");
 
-			write("openapi", Yaml.pretty(openApi));
-		} catch (OpenApiConfigurationException ignore) {
-		}
+		return sb.toString();
 	}
 
 	private List<MetaResource> getResources(MetaLookup metaLookup) {
@@ -86,7 +110,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return metaLookup.findElements(MetaResource.class).stream()
 				.sorted(Comparator.comparing(MetaResource::getResourceType))
 				.collect(Collectors.toList());
-	}
+    }
+
+	private List<MetaElement> getElements(MetaLookup metaLookup) {
+		LOGGER.debug("find elements");
+		return metaLookup.findElements(MetaElement.class).stream()
+				.sorted(Comparator.comparing(MetaElement::getName))
+				.collect(Collectors.toList());
+    }
 
 	@Override
 	public ClassLoader getClassLoader() {
