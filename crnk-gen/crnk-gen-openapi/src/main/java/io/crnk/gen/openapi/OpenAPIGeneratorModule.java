@@ -3,17 +3,10 @@ package io.crnk.gen.openapi;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.*;
-import io.crnk.meta.model.resource.MetaJsonObject;
+import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
-import io.crnk.meta.model.resource.MetaResourceBase;
-import io.crnk.meta.model.resource.MetaResourceField;
+
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.integration.GenericOpenApiContext;
-import io.swagger.v3.oas.integration.OpenApiConfigurationException;
-import io.swagger.v3.oas.integration.SwaggerConfiguration;
-import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
-import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -25,7 +18,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
