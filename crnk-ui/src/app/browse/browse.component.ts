@@ -213,7 +213,7 @@ export class BrowseComponent {
 			}
 			url = url + 'meta/resource?sort=resourceType&page[limit]=1000';
 
-			this.http.get(url).subscribe(response => {
+			this.http.get(url, this.getOptions()).subscribe(response => {
 				let data = response.json()['data'] as Array<any>;
 				this.availableTypes = [];
 				this.availableTypes.push(...data.map(it => {
@@ -249,7 +249,7 @@ export class BrowseComponent {
 				url = url + "/";
 			}
 			url = url + 'meta/resource?include=' + includes + '&page[limit]=1000';
-			this.http.get(url).subscribe(response => {
+			this.http.get(url, this.getOptions()).subscribe(response => {
 				let document = response.json();
 
 				this.metaResources = {};
@@ -338,7 +338,10 @@ export class BrowseComponent {
 	}
 
 	private getOptions() {
-		let headers = new Headers({'Content-Type': 'application/vnd.api+json'});
+		const headers = new Headers({
+			'Content-Type': 'application/vnd.api+json',
+			'Accept': 'application/vnd.api+json',
+		});
 		return new RequestOptions({headers: headers});
 	}
 
@@ -385,7 +388,7 @@ export class BrowseComponent {
 				this.preferences.query = _.cloneDeep(newQuery);
 			}
 			let url = this.getUrl(this.preferences.query);
-			this.http.get(url).subscribe(response => {
+			this.http.get(url, this.getOptions()).subscribe(response => {
 				this.handleResponse(response);
 			}, response => {
 				this.handleResponse(response);
