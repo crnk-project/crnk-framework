@@ -3,15 +3,15 @@ package io.crnk.gen.openapi;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
 import io.crnk.meta.MetaLookup;
-import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
-
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,71 +49,324 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				.paths(new Paths());
 
 		MetaLookup metaLookup = (MetaLookup) meta;
-		List<MetaElement> elements = getElements(metaLookup);
-		for (MetaElement element : elements) {
-			if (element instanceof MetaResource) {
-				MetaResource metaResource = (MetaResource) element;
-				if (metaResource.toString().contains("[name=Meta")) {
-					continue;
-				}
+		List<MetaResource> metaResourceList = getResources(metaLookup);
+		for (MetaResource metaResource : metaResourceList) {
 
-				PathItem pathItem = new PathItem();
-				pathItem.setDescription(metaResource.toString());
+			PathItem pathItem = new PathItem();
+			pathItem.setDescription(metaResource.toString());
 
-				if (metaResource.isInsertable()) {
-					Operation operation = new Operation();
-					operation.setDescription("Create a " + metaResource.getResourceType());
-					pathItem.setPost(operation);
-					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
-				}
-				if (metaResource.isReadable()) {
-					Operation operation = new Operation();
-					operation.setDescription("Read a " + metaResource.getResourceType());
-					pathItem.setGet(operation);
-					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
-				}
-				if (metaResource.isUpdatable()) {
-					Operation operation = new Operation();
-					operation.setDescription("Update a " + metaResource.getResourceType());
-					pathItem.setPatch(operation);
-					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
-				}
-				if (metaResource.isDeletable()) {
-					Operation operation = new Operation();
-					operation.setDescription("Delete a " + metaResource.getResourceType());
-					pathItem.setDelete(operation);
-					openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
-				}
+			if (metaResource.isInsertable()) {
+				Operation operation = new Operation();
+				operation.setDescription("Create a " + metaResource.getResourceType());
+				pathItem.setPost(operation);
+				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+			}
+
+			if (metaResource.isReadable()) {
+				Operation operation = new Operation();
+				operation.setDescription("Read a " + metaResource.getResourceType());
+				pathItem.setGet(operation);
+				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+			}
+
+			if (metaResource.isUpdatable()) {
+				Operation operation = new Operation();
+				operation.setDescription("Update a " + metaResource.getResourceType());
+				pathItem.setPatch(operation);
+				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+			}
+
+			if (metaResource.isDeletable()) {
+				Operation operation = new Operation();
+				operation.setDescription("Delete a " + metaResource.getResourceType());
+				pathItem.setDelete(operation);
+				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
 			}
 		}
 
 		write("openapi", Yaml.pretty(openApi));
 	}
 
-	private String dumpResource(MetaResource resource) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(resource.toString() + "\n");
-		sb.append(resource.getId() + "\n");
-		sb.append(resource.getResourceType() + "\n");
-		sb.append(resource.getAttributes().toString() + "\n");
-//		sb.append(resource.getAttributes().toString() + "\n");
-
-		return sb.toString();
-	}
-
 	private List<MetaResource> getResources(MetaLookup metaLookup) {
-		LOGGER.debug("find resources");
 		return metaLookup.findElements(MetaResource.class).stream()
+				.filter(it -> isJsonApiResource(it))
 				.sorted(Comparator.comparing(MetaResource::getResourceType))
 				.collect(Collectors.toList());
-    }
+	}
 
-	private List<MetaElement> getElements(MetaLookup metaLookup) {
-		LOGGER.debug("find elements");
-		return metaLookup.findElements(MetaElement.class).stream()
-				.sorted(Comparator.comparing(MetaElement::getName))
-				.collect(Collectors.toList());
-    }
+	private boolean isJsonApiResource(MetaResource resource) {
+		return resource.getSuperType() == null
+				&& !resource.getResourceType().startsWith("meta/")
+				&& resource.getRepository() != null
+				&& resource.getRepository().isExposed();
+	}
+
+	protected Schema page(String resource) {
+		String name = getTypeFromRef(resource);
+		return new Schema()
+				.type("object")
+				.description("A page of " + name + " results")
+				.addProperties(
+						"jsonapi",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"version",
+										new Schema().type("string")))
+				.addProperties(
+						"errors",
+						new ArraySchema().items(jsonApiError()))
+				.addProperties(
+						"meta",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"total-pages",
+										new Schema()
+												.type("integer")
+												.description("The total number of pages available"))
+								.addProperties(
+										"total-count",
+										new Schema()
+												.type("integer")
+												.description("The total number of items available"))
+								.additionalProperties(true))
+				.addProperties(
+						"links",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"self",
+										new Schema()
+												.type("string")
+												.description("Link to this page of results"))
+								.addProperties(
+										"prev",
+										new Schema()
+												.type("string")
+												.description("Link to the previous page of results"))
+								.addProperties(
+										"next",
+										new Schema()
+												.type("string")
+												.description("Link to the next page of results"))
+								.addProperties(
+										"last",
+										new Schema()
+												.type("string")
+												.description("Link to the last page of results"))
+								.addProperties(
+										"first",
+										new Schema()
+												.type("string")
+												.description("Link to the first page of results")))
+				.addProperties(
+						"data",
+						new ArraySchema()
+								.items(new Schema()
+										.$ref(resource))
+								.description("Content with " + name + "objects"));
+	}
+
+	protected Schema jsonApiError() {
+		return new Schema()
+				.type("object")
+				.addProperties(
+						"id",
+						new Schema()
+								.type("string")
+								.description("a unique identifier for this particular occurrence of the problem"))
+				.addProperties("links",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"about",
+										new Schema()
+												.type("string")
+												.description("a link that leads to further details about this particular occurrence of the problem")))
+				.addProperties(
+						"status",
+						new Schema()
+								.type("string")
+								.description("the HTTP status code applicable to this problem, expressed as a string value"))
+				.addProperties(
+						"code",
+						new Schema()
+								.type("string")
+								.description("an application-specific error code, expressed as a string value"))
+				.addProperties(
+						"title",
+						new Schema()
+								.type("string")
+								.description("a short, human-readable summary of the problem that SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization"))
+				.addProperties(
+						"detail",
+						new Schema()
+								.type("string")
+								.description("a human-readable explanation specific to this occurrence of the problem. Like 'title', this field’s value can be localized."))
+				.addProperties(
+						"source",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"pointer",
+										new Schema()
+												.type("string")
+												.description("a JSON Pointer [RFC6901] to the associated entity in the request document"))
+								.addProperties(
+										"parameter",
+										new Schema()
+												.type("string")
+												.description("a string indicating which URI query parameter caused the error")))
+				.addProperties(
+						"meta",
+						new Schema()
+								.additionalProperties(true)
+								.description("a meta object containing non-standard meta-information about the error"));
+	}
+
+	protected Schema singleDocument(String name) {
+		return new Schema()
+				.type("object")
+				.description("A JSON-API document with a single " + name + " resource")
+				.addProperties(
+						"errors",
+						new ArraySchema().items(jsonApiError()))
+				.addProperties(
+						"jsonapi",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"version",
+										new Schema().type("string")))
+				.addProperties(
+						"links",
+						new Schema().addProperties(
+								"self",
+								new Schema()
+										.type("string")
+										.description("the link that generated the current response document")))
+				.addProperties(
+						"data",
+						new Schema().$ref("#/definitions/" + name))
+				.addProperties(
+						"included",
+						new ArraySchema()
+								.items(
+										new Schema()
+												.type("object")
+												.addProperties(
+														"type",
+														new Schema()
+																.type("string")
+																.description("The JSON:API resource type"))
+												.addProperties(
+														"id",
+														new Schema()
+																.type("string")
+																.description("The JSON:API resource ID")))
+								.description("Included resources"))
+				.required(Arrays.asList("data"));
+	}
+
+
+	protected Schema jsonApiResource() {
+		//Defines a schema for a JSON-API resource, without the enclosing top-level document.
+		return new Schema()
+				.type("object")
+				.addProperties(
+						"type",
+						new Schema()
+								.type("string")
+								.description("The JSON:API resource type"))
+				.addProperties(
+						"id",
+						new Schema()
+								.type("string")
+								.description("The JSON:API resource ID"))
+				.addProperties(
+						"relationships",
+						new Schema()
+								.type("object"))
+				.addProperties(
+						"links",
+						new Schema()
+								.type("object"))
+				.addProperties(
+						"attributes",
+						new Schema()
+								.type("object"));
+	}
+
+	protected Schema hasOneRelationshipData(String name) {
+		return new Schema()
+				.type("object")
+				.addProperties(
+						"id",
+						new Schema()
+								.type("string")
+								.description("Related " + name + " resource id"))
+				.addProperties(
+						"type",
+						new Schema()
+								.type("string")
+								.description("Type of related " + name + " resource"));
+	}
+
+	protected ArraySchema hasManyRelationshipData(String name) {
+		return (new ArraySchema())
+				.items(hasOneRelationshipData(name));
+	}
+
+	protected Schema getRelationshipSchema(String name, String relationshipType) {
+		if (relationshipType.equals("hasOne")) {
+			return hasOneRelationshipData(name);
+		} else if (relationshipType.equals("hasMany")) {
+			return hasManyRelationshipData(name);
+		}
+		return null;
+	}
+
+	protected Schema relationship(String name, String relationshipType, boolean nullable) {
+		Schema schema = new Schema()
+				.type("object")
+				.addProperties(
+						"links",
+						new Schema()
+								.type("object")
+								.addProperties(
+										"self",
+										new Schema()
+												.type("string")
+												.description("Relationship link for " + name))
+								.addProperties(
+										"related",
+										new Schema()
+												.type("object")
+												.description("Related " + name + " link")
+												.addProperties(
+														"href",
+														new Schema()
+																.type("string"))
+												.addProperties(
+														"meta",
+														new Schema()
+																.type("object")
+																.additionalProperties(true))));
+		if (nullable) {
+			return schema;
+		}
+		return schema.addProperties(
+				"data",
+				getRelationshipSchema(name, relationshipType));
+	}
+
+
+	protected String getTypeFromRef(String ref) {
+		int lastSlash = ref.lastIndexOf("/");
+		int lastHash = ref.lastIndexOf("#");
+		return ref.substring(Math.max(lastSlash, lastHash) + 1);
+	}
 
 	@Override
 	public ClassLoader getClassLoader() {
