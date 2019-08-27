@@ -53,19 +53,19 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		for (MetaResource metaResource : metaResourceList) {
 
 			PathItem pathItem = new PathItem();
-			pathItem.setDescription(metaResource.toString());
+			pathItem.setDescription(metaResource.getImplementationClass().getSimpleName());
 
 			if (metaResource.isInsertable()) {
 				Operation operation = new Operation();
 				operation.setOperationId("create" + metaResource.getImplementationClass().getSimpleName());
-				operation.setDescription("Create a " + metaResource.getResourceType());
+				operation.setDescription("Create a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setPost(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 			}
 
 			if (metaResource.isReadable()) {
 				Operation operation = new Operation();
-				operation.setOperationId("get" + metaResource.getName());
+				operation.setOperationId("get" + metaResource.getImplementationClass().getSimpleName());
 				operation.setDescription("Read a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setGet(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
@@ -73,7 +73,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isUpdatable()) {
 				Operation operation = new Operation();
-				operation.setOperationId("update" + metaResource.getName());
+				operation.setOperationId("update" + metaResource.getImplementationClass().getSimpleName());
 				operation.setDescription("Update a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setPatch(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
@@ -81,7 +81,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isDeletable()) {
 				Operation operation = new Operation();
-				operation.setOperationId("delete" + metaResource.getName());
+				operation.setOperationId("delete" + metaResource.getImplementationClass().getSimpleName());
 				operation.setDescription("Delete a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setDelete(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
