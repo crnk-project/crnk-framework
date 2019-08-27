@@ -42,9 +42,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		LOGGER.info("performing openapi generation");
 		OpenAPI openApi = new OpenAPI()
 				.info(new Info()
-						.description("TEST INFO DESC")
-						.title("TEST INFO TITLE")
-						.version("0.1.0")
+						.description("TEST INFO DESC") // TODO: Must be configurable
+						.title("TEST INFO TITLE") // TODO: Must be configurable
+						.version("0.1.0") // TODO: Must be configurable
 				)
 				.paths(new Paths());
 
@@ -57,30 +57,34 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isInsertable()) {
 				Operation operation = new Operation();
+				operation.setOperationId("create" + metaResource.getImplementationClass().getSimpleName());
 				operation.setDescription("Create a " + metaResource.getResourceType());
 				pathItem.setPost(operation);
-				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 			}
 
 			if (metaResource.isReadable()) {
 				Operation operation = new Operation();
-				operation.setDescription("Read a " + metaResource.getResourceType());
+				operation.setOperationId("get" + metaResource.getName());
+				operation.setDescription("Read a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setGet(operation);
-				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 			}
 
 			if (metaResource.isUpdatable()) {
 				Operation operation = new Operation();
-				operation.setDescription("Update a " + metaResource.getResourceType());
+				operation.setOperationId("update" + metaResource.getName());
+				operation.setDescription("Update a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setPatch(operation);
-				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 			}
 
 			if (metaResource.isDeletable()) {
 				Operation operation = new Operation();
-				operation.setDescription("Delete a " + metaResource.getResourceType());
+				operation.setOperationId("delete" + metaResource.getName());
+				operation.setDescription("Delete a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setDelete(operation);
-				openApi.getPaths().addPathItem(metaResource.getResourcePath(), pathItem);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 			}
 		}
 
@@ -94,11 +98,18 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				.collect(Collectors.toList());
 	}
 
-	private boolean isJsonApiResource(MetaResource resource) {
-		return resource.getSuperType() == null
-				&& !resource.getResourceType().startsWith("meta/")
-				&& resource.getRepository() != null
-				&& resource.getRepository().isExposed();
+	private boolean isJsonApiResource(MetaResource metaResource) {
+		return metaResource.getSuperType() == null
+				&& !metaResource.getResourceType().startsWith("meta/")
+				&& metaResource.getRepository() != null
+				&& metaResource.getRepository().isExposed();
+	}
+
+	private String getApiPath(MetaResource metaResource) {
+		//
+		// TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
+		//
+		return "/todo/" + metaResource.getResourcePath();
 	}
 
 	protected Schema page(String resource) {
