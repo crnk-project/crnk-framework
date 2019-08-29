@@ -1,34 +1,34 @@
 package io.crnk.gen.openapi;
 
+import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 
 public class OpenAPIGeneratorModule implements GeneratorModule {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIGeneratorModule.class);
-	public static final String NAME = "openapi";
+	private static final String NAME = "openapi";
 	private OpenAPIGeneratorConfig config = new OpenAPIGeneratorConfig();
 	private ClassLoader classloader;
 
@@ -48,8 +48,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				)
 				.paths(new Paths());
 
+		openApi.components(new Components());
+		openApi.getComponents().schemas(generateDefaultSchemas());
+		openApi.getComponents().responses(getStandardApiErrorResponses());
+
 		MetaLookup metaLookup = (MetaLookup) meta;
-		List<MetaResource> metaResourceList = getResources(metaLookup);
+		List<MetaResource> metaResourceList = getJsonApiResources(metaLookup);
 		for (MetaResource metaResource : metaResourceList) {
 
 			PathItem pathItem = new PathItem();
@@ -61,6 +65,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				operation.setDescription("Create a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setPost(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+
+				operation.setResponses(generateDefaultResponses(metaResource));
 			}
 
 			if (metaResource.isReadable()) {
@@ -69,6 +75,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				operation.setDescription("Read a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setGet(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+
+				operation.setResponses(generateDefaultResponses(metaResource));
 			}
 
 			if (metaResource.isUpdatable()) {
@@ -77,6 +85,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				operation.setDescription("Update a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setPatch(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+
+				operation.setResponses(generateDefaultResponses(metaResource));
 			}
 
 			if (metaResource.isDeletable()) {
@@ -85,17 +95,105 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				operation.setDescription("Delete a " + metaResource.getImplementationClass().getSimpleName());
 				pathItem.setDelete(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+
+				operation.setResponses(generateDefaultResponses(metaResource));
 			}
 		}
 
 		write("openapi", Yaml.pretty(openApi));
 	}
 
-	private List<MetaResource> getResources(MetaLookup metaLookup) {
-		return metaLookup.findElements(MetaResource.class).stream()
-				.filter(it -> isJsonApiResource(it))
-				.sorted(Comparator.comparing(MetaResource::getResourceType))
-				.collect(Collectors.toList());
+	/*
+		Generate default schemas that are common across the api.
+		For example, in JSON:API, the error response is common across all APIs
+	 */
+	private Map<String, Schema> generateDefaultSchemas() {
+		Map<String, Schema> schemas = new LinkedHashMap<>();
+
+		// Standard Error Schema
+		schemas.put("ApiError", jsonApiError());
+
+		// Todo: Standard wrapper responses for single & multiple records
+		// schemas.put(...);
+
+		return schemas;
+	}
+
+	/*
+		Generate a sensible, default ApiResponses that is populated with references
+		to all Error Responses for a metaResource
+	 */
+	private ApiResponses generateDefaultResponses(MetaResource metaResource) {
+		ApiResponses responses = new ApiResponses();
+
+		Map<String, ApiResponse> apiResponseCodes = getStandardApiErrorResponses();
+		for (Map.Entry<String, ApiResponse> entry : apiResponseCodes.entrySet()) {
+
+			// TODO: Check to see (somehow) if the metaResource returns this response code
+			// Add reference to error response stored in #/components/responses/<HttpCode>
+			responses.addApiResponse(entry.getKey(), new ApiResponse().$ref(entry.getKey()));
+		}
+
+		// Todo: Standard wrapper responses for single & multiple records
+		// responses...
+
+		return responses;
+	}
+
+	/*
+		Using Crnks list of HTTP status codes, generate standard responses
+		for all statuses in the error range. These ApiResponses will be shared
+		across all endpoints.
+
+		See "Reusing Responses" https://swagger.io/docs/specification/describing-responses/
+	 */
+	private Map<String, ApiResponse> getStandardApiErrorResponses() {
+		Map<String, ApiResponse> responses = new LinkedHashMap<>();
+
+		List<Integer> responseCodes = getStandardHttpStatusCodes();
+		for (Integer responseCode : responseCodes) {
+			if (responseCode >= 400 && responseCode <= 599) {
+				ApiResponse apiResponse = new ApiResponse();
+				apiResponse.description(HttpStatus.toMessage(responseCode));
+				apiResponse.content(new Content()
+						.addMediaType("application/json",
+								new MediaType().schema(new Schema().$ref("ApiError")))
+				);
+				responses.put(responseCode.toString(), apiResponse);
+			}
+		}
+
+		return responses;
+	}
+
+	/*
+		Crnk maintains a list of HTTP status codes in io.crnk.core.engine.http.HttpStatus
+		as static fields. Iterate through and collect them into a list for use elsewhere.
+	 */
+	private List<Integer> getStandardHttpStatusCodes() {
+		List<Integer> responseCodes = new ArrayList<>();
+
+		Field[] fields = HttpStatus.class.getDeclaredFields();
+		for (Field f : fields) {
+			if (Modifier.isStatic(f.getModifiers())) {
+				try {
+					responseCodes.add(f.getInt(null));
+				} catch (IllegalAccessException ignore) {
+				}
+			}
+		}
+		return responseCodes;
+	}
+
+	private List<MetaResource> getJsonApiResources(MetaLookup metaLookup) {
+		List<MetaResource> list = new ArrayList<>();
+		for (MetaResource it : metaLookup.findElements(MetaResource.class)) {
+			if (isJsonApiResource(it)) {
+				list.add(it);
+			}
+		}
+		list.sort(Comparator.comparing(MetaResource::getResourceType));
+		return list;
 	}
 
 	private boolean isJsonApiResource(MetaResource metaResource) {
@@ -179,7 +277,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("Content with " + name + "objects"));
 	}
 
-	protected Schema jsonApiError() {
+	private Schema jsonApiError() {
 		return new Schema()
 				.type("object")
 				.addProperties(
@@ -309,7 +407,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.type("object"));
 	}
 
-	protected Schema hasOneRelationshipData(String name) {
+	private Schema hasOneRelationshipData(String name) {
 		return new Schema()
 				.type("object")
 				.addProperties(
@@ -324,12 +422,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("Type of related " + name + " resource"));
 	}
 
-	protected ArraySchema hasManyRelationshipData(String name) {
+	private ArraySchema hasManyRelationshipData(String name) {
 		return (new ArraySchema())
 				.items(hasOneRelationshipData(name));
 	}
 
-	protected Schema getRelationshipSchema(String name, String relationshipType) {
+	private Schema getRelationshipSchema(String name, String relationshipType) {
 		if (relationshipType.equals("hasOne")) {
 			return hasOneRelationshipData(name);
 		} else if (relationshipType.equals("hasMany")) {
@@ -373,7 +471,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 
-	protected String getTypeFromRef(String ref) {
+	private String getTypeFromRef(String ref) {
 		int lastSlash = ref.lastIndexOf("/");
 		int lastHash = ref.lastIndexOf("#");
 		return ref.substring(Math.max(lastSlash, lastHash) + 1);
