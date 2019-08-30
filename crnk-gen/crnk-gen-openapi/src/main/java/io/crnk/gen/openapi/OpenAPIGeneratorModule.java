@@ -4,14 +4,14 @@ import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.gen.base.GeneratorModule;
 import io.crnk.gen.base.GeneratorModuleConfigBase;
 import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.*;
+import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
@@ -53,11 +53,41 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		openApi.getComponents().responses(getStandardApiErrorResponses());
 
 		MetaLookup metaLookup = (MetaLookup) meta;
-		List<MetaResource> metaResourceList = getJsonApiResources(metaLookup);
-		for (MetaResource metaResource : metaResourceList) {
-
+		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
+		for (MetaResource metaResource : metaResources) {
 			PathItem pathItem = new PathItem();
 			pathItem.setDescription(metaResource.getImplementationClass().getSimpleName());
+
+			// Create Component
+			Map<String, Schema> attributes = new HashMap<>();
+			for (MetaElement child : metaResource.getChildren()) {
+				if (child == null) {
+					continue;
+				} else if (child instanceof MetaPrimaryKey) {
+					continue;
+				} else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+					continue;
+				} else if (child instanceof MetaResourceField) {
+					MetaResourceField mrf = (MetaResourceField) child;
+					attributes.put(mrf.getName(), transformMetaResourceField(mrf.getType()));
+				}
+			}
+
+			// Add ReferenceType Schema
+			Schema resourceReference = resourceReference(metaResource.getImplementationClass().getSimpleName());
+			openApi.getComponents().addSchemas(metaResource.getImplementationClass().getSimpleName() + "Reference", resourceReference);
+
+			// Add Types Schema
+			Schema resource = resource(metaResource.getImplementationClass().getSimpleName(), attributes);
+			openApi.getComponents().addSchemas(metaResource.getImplementationClass().getSimpleName(), resource);
+
+			// Add Response Schema
+			Schema resourceResponse = resourceResponse(metaResource.getImplementationClass().getSimpleName());
+			openApi.getComponents().addSchemas(metaResource.getImplementationClass().getSimpleName() + "Response", resourceResponse);
+
+			// Add ListResponse Schema
+			Schema resourceListResponse = resourceListResponse(metaResource.getImplementationClass().getSimpleName());
+			openApi.getComponents().addSchemas(metaResource.getImplementationClass().getSimpleName() + "ListResponse", resourceListResponse);
 
 			if (metaResource.isInsertable()) {
 				Operation operation = new Operation();
@@ -113,8 +143,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// Standard Error Schema
 		schemas.put("ApiError", jsonApiError());
 
-		// Todo: Standard wrapper responses for single & multiple records
-		// schemas.put(...);
+		// Standard wrapper responses for single & multiple records
+		schemas.put("ResponseMixin", responseMixin());
+		schemas.put("ListResponseMixin", listResponseMixin());
 
 		return schemas;
 	}
@@ -206,15 +237,79 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	private String getApiPath(MetaResource metaResource) {
 		//
 		// TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
+		// TODO: alternatively, have a config setting for this generator that essentially duplicates the above
 		//
 		return "/todo/" + metaResource.getResourcePath();
 	}
 
-	protected Schema page(String resource) {
-		String name = getTypeFromRef(resource);
+	protected Schema transformMetaResourceField(MetaType metaType) {
+		if (metaType instanceof MetaResource){
+			return get$refSchema(((MetaResource)metaType).getResourceType() + "Reference");
+		}
+		else if (metaType instanceof MetaCollectionType){
+			return new ArraySchema()
+					.items(transformMetaResourceField(metaType.getElementType()))
+					.uniqueItems(metaType instanceof MetaSetType);
+		}
+		if (metaType instanceof MetaJsonObject){
+			return get$refSchema(((MetaJsonObject) metaType).getName());
+		}
+		else if (metaType.getName().equals("boolean")) {
+			return new BooleanSchema();
+		}
+		else if (metaType.getName().equals("byte")) {
+			return new ByteArraySchema();
+		}
+		else if (metaType.getName().equals("date")) {
+			return new DateSchema();
+		}
+		else if (metaType.getName().equals("double")) {
+			return new NumberSchema();
+		}
+		else if (metaType.getName().equals("float")) {
+			return new NumberSchema();
+		}
+		else if (metaType.getName().equals("integer")) {
+			return new IntegerSchema();
+		}
+		else if (metaType.getName().equals("json")) {
+			return new ObjectSchema();
+		}
+		else if (metaType.getName().equals("json.object")) {
+			return new ObjectSchema();
+		}
+		else if (metaType.getName().equals("json.array")) {
+			return new ArraySchema();
+		}
+		else if (metaType.getName().equals("long")) {
+			return new NumberSchema();
+		}
+		else if (metaType.getName().equals("object")) {
+			return new ObjectSchema();
+		}
+		else if (metaType.getName().equals("short")) {
+			return new NumberSchema();
+		}
+		else if (metaType.getName().equals("string")) {
+			return new StringSchema();
+		}
+		else if (metaType.getName().equals("uuid")) {
+			return new UUIDSchema();
+		}
+		else if (metaType instanceof MetaMapType) {
+
+			return transformMetaResourceField(metaType.getElementType());
+		}
+		else {
+			Schema schema = new Schema().type(metaType.getElementType().getName());
+			return schema;
+		}
+	}
+
+	protected Schema listResponseMixin() {
 		return new Schema()
 				.type("object")
-				.description("A page of " + name + " results")
+				.description("A page of results")
 				.addProperties(
 						"jsonapi",
 						new Schema()
@@ -224,7 +319,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										new Schema().type("string")))
 				.addProperties(
 						"errors",
-						new ArraySchema().items(jsonApiError()))
+						new ArraySchema().items(new Schema().$ref("ApiError")))
 				.addProperties(
 						"meta",
 						new Schema()
@@ -268,13 +363,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										"first",
 										new Schema()
 												.type("string")
-												.description("Link to the first page of results")))
-				.addProperties(
-						"data",
-						new ArraySchema()
-								.items(new Schema()
-										.$ref(resource))
-								.description("Content with " + name + "objects"));
+												.description("Link to the first page of results")));
 	}
 
 	private Schema jsonApiError() {
@@ -334,13 +423,17 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("a meta object containing non-standard meta-information about the error"));
 	}
 
-	protected Schema singleDocument(String name) {
+	protected Schema get$refSchema(String typeName) {
+		return new Schema().$ref("#/components/schemas/" + typeName);
+	}
+
+	protected Schema responseMixin() {
 		return new Schema()
 				.type("object")
-				.description("A JSON-API document with a single " + name + " resource")
+				.description("A JSON-API document with a single resource")
 				.addProperties(
 						"errors",
-						new ArraySchema().items(jsonApiError()))
+						new ArraySchema().items(new Schema().$ref("ApiError")))
 				.addProperties(
 						"jsonapi",
 						new Schema()
@@ -355,9 +448,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								new Schema()
 										.type("string")
 										.description("the link that generated the current response document")))
-				.addProperties(
-						"data",
-						new Schema().$ref("#/definitions/" + name))
 				.addProperties(
 						"included",
 						new ArraySchema()
@@ -374,40 +464,84 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 														new Schema()
 																.type("string")
 																.description("The JSON:API resource ID")))
-								.description("Included resources"))
-				.required(Arrays.asList("data"));
+								.description("Included resources"));
 	}
 
+	protected Schema getTypeSchema(String typeName) {
+		Schema typeSchema = new Schema()
+				.type("string")
+				.description("The JSON:API resource type (" + typeName + ")");
+		typeSchema.setEnum(Arrays.asList(typeName));
+		return typeSchema;
+	}
 
-	protected Schema jsonApiResource() {
-		//Defines a schema for a JSON-API resource, without the enclosing top-level document.
+	protected Schema resourceResponse(String typeName) {
+		return new ComposedSchema()
+				.allOf(
+						Arrays.asList(
+								get$refSchema("ResponseMixin"),
+								new Schema()
+										.addProperties(
+												"data",
+												new ArraySchema()
+														.items(
+																get$refSchema(typeName)))
+										.required(Arrays.asList("data"))));
+	}
+
+	protected Schema resourceListResponse(String typeName) {
+		return new ComposedSchema()
+				.allOf(
+						Arrays.asList(
+								get$refSchema("ListResponseMixin"),
+								new Schema()
+										.addProperties(
+												"data",
+												new ArraySchema()
+														.items(
+																get$refSchema(typeName)))
+										.required(Arrays.asList("data"))));
+	}
+
+	protected Schema resourceReference(String typeName) {
 		return new Schema()
 				.type("object")
 				.addProperties(
 						"type",
-						new Schema()
-								.type("string")
-								.description("The JSON:API resource type"))
+						getTypeSchema(typeName))
 				.addProperties(
 						"id",
 						new Schema()
 								.type("string")
 								.description("The JSON:API resource ID"))
-				.addProperties(
-						"relationships",
-						new Schema()
-								.type("object"))
-				.addProperties(
-						"links",
-						new Schema()
-								.type("object"))
-				.addProperties(
-						"attributes",
-						new Schema()
-								.type("object"));
+				.required(Arrays.asList("id", "type"));
 	}
 
-	private Schema hasOneRelationshipData(String name) {
+	protected Schema resource(String name, Map<String, Schema> attributes) {
+		//Defines a schema for a JSON-API resource, without the enclosing top-level document.
+		return new ComposedSchema()
+				.allOf(
+						Arrays.asList(
+								get$refSchema(name + "Reference"),
+								new Schema()
+										.type("object")
+										.addProperties(
+												"relationships",
+												new Schema()
+														.type("object"))
+										.addProperties(
+												"links",
+												new Schema()
+														.type("object"))
+										.addProperties(
+												"attributes",
+												new Schema()
+														.type("object")
+														.properties(attributes))
+										.required(Arrays.asList("attributes"))));
+	}
+
+	protected Schema hasOneRelationshipData(String name) {
 		return new Schema()
 				.type("object")
 				.addProperties(
@@ -422,12 +556,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("Type of related " + name + " resource"));
 	}
 
-	private ArraySchema hasManyRelationshipData(String name) {
+	protected ArraySchema hasManyRelationshipData(String name) {
 		return (new ArraySchema())
 				.items(hasOneRelationshipData(name));
 	}
 
-	private Schema getRelationshipSchema(String name, String relationshipType) {
+	protected Schema getRelationshipSchema(String name, String relationshipType) {
 		if (relationshipType.equals("hasOne")) {
 			return hasOneRelationshipData(name);
 		} else if (relationshipType.equals("hasMany")) {
@@ -471,7 +605,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 
-	private String getTypeFromRef(String ref) {
+	protected String getTypeFromRef(String ref) {
 		int lastSlash = ref.lastIndexOf("/");
 		int lastHash = ref.lastIndexOf("#");
 		return ref.substring(Math.max(lastSlash, lastHash) + 1);
