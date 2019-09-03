@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-public class OpenAPIGeneratorTest {
+public class OpenAPIGeneratorSimpleTest {
 
 	private CrnkBoot crnkBoot;
 	private MetaModule metaModule;
