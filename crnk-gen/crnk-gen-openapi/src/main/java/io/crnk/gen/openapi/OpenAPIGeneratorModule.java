@@ -69,7 +69,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 					continue;
 				} else if (child instanceof MetaResourceField) {
 					MetaResourceField mrf = (MetaResourceField) child;
-					attributes.put(mrf.getName(), transformMetaResourceField(mrf.getType()));
+					Schema attributeSchema = transformMetaResourceField(mrf.getType());
+					attributeSchema.nullable(mrf.isNullable());
+					attributes.put(mrf.getName(), attributeSchema);
 				}
 			}
 
@@ -251,8 +253,20 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 					.items(transformMetaResourceField(metaType.getElementType()))
 					.uniqueItems(metaType instanceof MetaSetType);
 		}
-		if (metaType instanceof MetaJsonObject){
-			return get$refSchema(((MetaJsonObject) metaType).getName());
+		else if (metaType instanceof MetaArrayType){
+			return new ArraySchema()
+					.items(transformMetaResourceField(metaType.getElementType()))
+					.uniqueItems(false);
+		}
+		else if (metaType instanceof MetaJsonObject){
+			ObjectSchema objectSchema = new ObjectSchema();
+			for (MetaElement child : metaType.getChildren()) {
+				if (child instanceof MetaAttribute) {
+					MetaAttribute metaAttribute = (MetaAttribute) child;
+					objectSchema.addProperties(child.getName(), transformMetaResourceField(metaAttribute.getType()));
+				}
+			}
+			return objectSchema;
 		}
 		else if (metaType.getName().equals("boolean")) {
 			return new BooleanSchema();
@@ -262,6 +276,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 		else if (metaType.getName().equals("date")) {
 			return new DateSchema();
+		}
+		else if (metaType.getName().equals("offsetDateTime")) {
+			return new DateTimeSchema();
 		}
 		else if (metaType.getName().equals("double")) {
 			return new NumberSchema();
@@ -279,7 +296,13 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			return new ObjectSchema();
 		}
 		else if (metaType.getName().equals("json.array")) {
-			return new ArraySchema();
+			// return new ArraySchema().items("{}");
+			// The desired value is
+			// arrayNodeValue:
+			//   type: array
+			//   items: {}
+			// But the OpenAPI SDK does not support it.
+			return new ObjectSchema();
 		}
 		else if (metaType.getName().equals("long")) {
 			return new NumberSchema();
@@ -299,6 +322,19 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		else if (metaType instanceof MetaMapType) {
 
 			return transformMetaResourceField(metaType.getElementType());
+		}
+		else if (metaType instanceof MetaEnumType) {
+			Schema enumSchema = new StringSchema();
+			for (MetaElement child :  metaType.getChildren())
+			{
+				if (child instanceof MetaLiteral) {
+					enumSchema.addEnumItemObject(child.getName());
+				}
+				else {
+					return new ObjectSchema();
+				}
+			}
+			return enumSchema;
 		}
 		else {
 			Schema schema = new Schema().type(metaType.getElementType().getName());
