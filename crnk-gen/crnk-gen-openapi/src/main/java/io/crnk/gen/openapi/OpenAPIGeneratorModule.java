@@ -75,10 +75,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			// Add ReferenceType Schema
 			Schema resourceReference = resourceReference(metaResource.getName());
-			openApi.getComponents().addSchemas(metaResource.getName() + "Reference", resourceReference);
+			openApi.getComponents().addSchemas(metaResource.getResourceType() + "Reference", resourceReference);
 
 			// Add Types Schema
-			Schema resource = resource(metaResource.getName(), attributes);
+			Schema resource = resource(metaResource.getResourceType(), attributes);
 			openApi.getComponents().addSchemas(metaResource.getName(), resource);
 
 			// Add Response Schema
@@ -517,12 +517,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				.required(Arrays.asList("id", "type"));
 	}
 
-	protected Schema resource(String name, Map<String, Schema> attributes) {
+	protected Schema resource(String resourceType, Map<String, Schema> attributes) {
 		//Defines a schema for a JSON-API resource, without the enclosing top-level document.
 		return new ComposedSchema()
 				.allOf(
 						Arrays.asList(
-								get$refSchema(name + "Reference"),
+								get$refSchema(resourceType + "Reference"),
 								new Schema()
 										.type("object")
 										.addProperties(
