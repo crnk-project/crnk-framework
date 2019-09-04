@@ -12,6 +12,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
@@ -102,9 +103,15 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			openApi.getComponents().addSchemas(metaResource.getName() + "ListResponse", resourceListResponse);
 			openApi.getComponents().addResponses(metaResource.getName() + "ListResponse", getListResponse(metaResource.getName()));
 
+			// TODO: Add relationships paths. Relationships can be accessed in 2 ways:
+			//  1.	/api/A/1/b  								The full related resource
+			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
+			// TODO: Bulk Responses
+			// TODO: Parameters
+			// TODO: Filters
 			if (metaResource.isReadable()) {
 				// List Response
-				Operation getListOperation = new Operation();
+				Operation getListOperation = generateDefaultListOperation(metaResource);
 				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
 				listPathItem.setGet(getListOperation);
 				ApiResponses getListResponses = generateDefaultResponses(metaResource);
@@ -113,7 +120,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
 				// Single Response
-				Operation getSingleOperation = new Operation();
+				Operation getSingleOperation = generateDefaultSingleOperation(metaResource);
 				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
 				singlePathItem.setGet(getSingleOperation);
 				ApiResponses getSingleResponses = generateDefaultResponses(metaResource);
@@ -124,7 +131,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isInsertable()) {
 				// List Response
-				Operation operation = new Operation();
+				Operation operation = generateDefaultListOperation(metaResource);
 				operation.setDescription("Create a " + metaResource.getName());
 				listPathItem.setPost(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
@@ -148,7 +155,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isUpdatable()) {
 				// Single Response
-				Operation operation = new Operation();
+				Operation operation = generateDefaultSingleOperation(metaResource);
 				operation.setDescription("Update a " + metaResource.getName());
 				singlePathItem.setPatch(operation);
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
@@ -171,7 +178,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			if (metaResource.isDeletable()) {
 				// Single Response
-				Operation operation = new Operation();
+				Operation operation = generateDefaultSingleOperation(metaResource);
 				operation.setOperationId("delete" + metaResource.getName());
 				operation.setDescription("Delete a " + metaResource.getName());
 				singlePathItem.setDelete(operation);
@@ -211,6 +218,57 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		schemas.put("ListResponseMixin", listResponseMixin());
 
 		return schemas;
+	}
+
+	private Operation generateDefaultSingleOperation(MetaResource metaResource) {
+		// TODO: Add includes
+		// TODO: Add fields
+		Operation operation = generateDefaultOperation();
+		for (MetaElement metaElement : metaResource.getChildren()) {
+			if (metaElement instanceof MetaAttribute){
+				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
+				if (metaAttribute.isPrimaryKeyAttribute()) {
+					operation.getParameters().add(
+							new Parameter()
+									.name(metaElement.getName())
+									.in("path")
+									.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()))
+					);
+				}
+			}
+		}
+		return operation;
+	}
+
+	private Operation generateDefaultListOperation(MetaResource metaResource) {
+		// TODO: Add includes
+		// TODO: Add fields
+		// TODO: Add page
+		// TODO: Add filter
+		// TODO: Add sort
+		return generateDefaultOperation();
+	}
+
+	private Operation generateDefaultOperation() {
+			return new Operation().parameters(generateDefaultParameters());
+	}
+
+	private List<Parameter> generateDefaultParameters() {
+		return new ArrayList<Parameter>(
+				Arrays.asList(
+						new Parameter()
+								.name("Content-Type")
+								.in("header")
+								.schema(generateContentTypeSchema())
+								.required(true)
+				));
+	}
+
+	private Schema generateContentTypeSchema() {
+		StringSchema schema = new StringSchema();
+		schema.setDefault("application/vnd.api+json");
+		schema.setEnum(Arrays.asList("application/vnd.api+json", "application/json"));
+		return schema;
 	}
 
 	/*
