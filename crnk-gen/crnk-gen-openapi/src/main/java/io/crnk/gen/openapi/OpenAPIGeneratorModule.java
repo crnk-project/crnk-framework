@@ -51,6 +51,13 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		openApi.components(new Components());
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(getStandardApiErrorResponses());
+		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
+				.description("Accepted")
+				.content(new Content()
+						.addMediaType("application/json",
+								new MediaType().schema(new Schema()
+										.$ref("Accepted"))))
+		);
 
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
@@ -99,6 +106,20 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
+				operation.getResponses().addApiResponse("201", new ApiResponse().
+						description("Created")
+						.content(new Content()
+								.addMediaType("application/json",
+										new MediaType().schema(new Schema()
+												.$ref(metaResource.getName() + "Response"))))
+				);
+
+				operation.getResponses().addApiResponse("202", new ApiResponse()
+						.$ref("AcceptedResponse"));
+
+				operation.getResponses().addApiResponse("204", new ApiResponse()
+						.description("No Content"));
+
 			}
 
 			if (metaResource.isReadable()) {
@@ -109,6 +130,13 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
+				operation.getResponses().addApiResponse("200", new ApiResponse().
+						description("Ok")
+						.content(new Content()
+								.addMediaType("application/json",
+										new MediaType().schema(new Schema()
+												.$ref(metaResource.getName() + "ListResponse"))))
+				);
 			}
 
 			if (metaResource.isUpdatable()) {
@@ -119,6 +147,19 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
+				operation.getResponses().addApiResponse("200", new ApiResponse().
+						description("Ok")
+						.content(new Content()
+								.addMediaType("application/json",
+										new MediaType().schema(new Schema()
+												.$ref(metaResource.getName() + "Response"))))
+				);
+
+				operation.getResponses().addApiResponse("202", new ApiResponse()
+						.$ref("AcceptedResponse"));
+
+				operation.getResponses().addApiResponse("204", new ApiResponse()
+						.description("No Content"));
 			}
 
 			if (metaResource.isDeletable()) {
@@ -129,6 +170,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
+				operation.getResponses().addApiResponse("204", new ApiResponse()
+						.description("The resource was deleted successfully"));
 			}
 		}
 
@@ -141,6 +184,16 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	 */
 	private Map<String, Schema> generateDefaultSchemas() {
 		Map<String, Schema> schemas = new LinkedHashMap<>();
+
+		// Standard "Accepted" job response schema
+		schemas.put("Accepted", new Schema()
+				.type("object")
+				.addProperties(
+						"id",
+						new Schema()
+								.type("string")
+								.description("a unique identifier for this pending action"))
+		);
 
 		// Standard Error Schema
 		schemas.put("ApiError", jsonApiError());
