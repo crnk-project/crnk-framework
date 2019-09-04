@@ -225,7 +225,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// TODO: Add fields
 		Operation operation = generateDefaultOperation();
 		for (MetaElement metaElement : metaResource.getChildren()) {
-			if (metaElement instanceof MetaAttribute){
+			if (metaElement instanceof MetaAttribute) {
 				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
 				if (metaAttribute.isPrimaryKeyAttribute()) {
 					operation.getParameters().add(
@@ -250,7 +250,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	private Operation generateDefaultOperation() {
-			return new Operation().parameters(generateDefaultParameters());
+		return new Operation().parameters(generateDefaultParameters());
 	}
 
 	private List<Parameter> generateDefaultParameters() {
@@ -447,8 +447,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			//   items: {}
 			// But the OpenAPI SDK does not support it using ArraySchema.
 			return new Schema().type("array");
-		}
-		else if (metaType.getName().equals("long")) {
+		} else if (metaType.getName().equals("long")) {
 			return new NumberSchema();
 		} else if (metaType.getName().equals("object")) {
 			return new ObjectSchema();
