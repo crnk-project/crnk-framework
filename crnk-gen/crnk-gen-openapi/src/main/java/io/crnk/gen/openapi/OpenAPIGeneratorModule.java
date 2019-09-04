@@ -245,20 +245,17 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	protected Schema transformMetaResourceField(MetaType metaType) {
-		if (metaType instanceof MetaResource){
-			return get$refSchema(((MetaResource)metaType).getResourceType() + "Reference");
-		}
-		else if (metaType instanceof MetaCollectionType){
+		if (metaType instanceof MetaResource) {
+			return get$refSchema(((MetaResource) metaType).getResourceType() + "Reference");
+		} else if (metaType instanceof MetaCollectionType) {
 			return new ArraySchema()
 					.items(transformMetaResourceField(metaType.getElementType()))
 					.uniqueItems(metaType instanceof MetaSetType);
-		}
-		else if (metaType instanceof MetaArrayType){
+		} else if (metaType instanceof MetaArrayType) {
 			return new ArraySchema()
 					.items(transformMetaResourceField(metaType.getElementType()))
 					.uniqueItems(false);
-		}
-		else if (metaType instanceof MetaJsonObject){
+		} else if (metaType instanceof MetaJsonObject) {
 			ObjectSchema objectSchema = new ObjectSchema();
 			for (MetaElement child : metaType.getChildren()) {
 				if (child instanceof MetaAttribute) {
@@ -267,35 +264,25 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				}
 			}
 			return objectSchema;
-		}
-		else if (metaType.getName().equals("boolean")) {
+		} else if (metaType.getName().equals("boolean")) {
 			return new BooleanSchema();
-		}
-		else if (metaType.getName().equals("byte")) {
+		} else if (metaType.getName().equals("byte")) {
 			return new ByteArraySchema();
-		}
-		else if (metaType.getName().equals("date")) {
+		} else if (metaType.getName().equals("date")) {
 			return new DateSchema();
-		}
-		else if (metaType.getName().equals("offsetDateTime")) {
+		} else if (metaType.getName().equals("offsetDateTime")) {
 			return new DateTimeSchema();
-		}
-		else if (metaType.getName().equals("double")) {
+		} else if (metaType.getName().equals("double")) {
 			return new NumberSchema();
-		}
-		else if (metaType.getName().equals("float")) {
+		} else if (metaType.getName().equals("float")) {
 			return new NumberSchema();
-		}
-		else if (metaType.getName().equals("integer")) {
+		} else if (metaType.getName().equals("integer")) {
 			return new IntegerSchema();
-		}
-		else if (metaType.getName().equals("json")) {
+		} else if (metaType.getName().equals("json")) {
 			return new ObjectSchema();
-		}
-		else if (metaType.getName().equals("json.object")) {
+		} else if (metaType.getName().equals("json.object")) {
 			return new ObjectSchema();
-		}
-		else if (metaType.getName().equals("json.array")) {
+		} else if (metaType.getName().equals("json.array")) {
 			// return new ArraySchema().items("{}");
 			// The desired value is
 			// arrayNodeValue:
@@ -303,40 +290,30 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			//   items: {}
 			// But the OpenAPI SDK does not support it.
 			return new ObjectSchema();
-		}
-		else if (metaType.getName().equals("long")) {
+		} else if (metaType.getName().equals("long")) {
 			return new NumberSchema();
-		}
-		else if (metaType.getName().equals("object")) {
+		} else if (metaType.getName().equals("object")) {
 			return new ObjectSchema();
-		}
-		else if (metaType.getName().equals("short")) {
+		} else if (metaType.getName().equals("short")) {
 			return new NumberSchema();
-		}
-		else if (metaType.getName().equals("string")) {
+		} else if (metaType.getName().equals("string")) {
 			return new StringSchema();
-		}
-		else if (metaType.getName().equals("uuid")) {
+		} else if (metaType.getName().equals("uuid")) {
 			return new UUIDSchema();
-		}
-		else if (metaType instanceof MetaMapType) {
+		} else if (metaType instanceof MetaMapType) {
 
 			return transformMetaResourceField(metaType.getElementType());
-		}
-		else if (metaType instanceof MetaEnumType) {
+		} else if (metaType instanceof MetaEnumType) {
 			Schema enumSchema = new StringSchema();
-			for (MetaElement child :  metaType.getChildren())
-			{
+			for (MetaElement child : metaType.getChildren()) {
 				if (child instanceof MetaLiteral) {
 					enumSchema.addEnumItemObject(child.getName());
-				}
-				else {
+				} else {
 					return new ObjectSchema();
 				}
 			}
 			return enumSchema;
-		}
-		else {
+		} else {
 			Schema schema = new Schema().type(metaType.getElementType().getName());
 			return schema;
 		}
