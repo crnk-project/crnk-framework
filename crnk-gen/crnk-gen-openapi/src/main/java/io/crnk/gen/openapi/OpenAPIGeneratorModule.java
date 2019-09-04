@@ -62,8 +62,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
 		for (MetaResource metaResource : metaResources) {
-			PathItem pathItem = new PathItem();
-			pathItem.setDescription(metaResource.getName());
+			PathItem listPathItem = new PathItem();
+			listPathItem.setDescription(metaResource.getName());
+			PathItem singlePathItem = new PathItem();
+			singlePathItem.setDescription(metaResource.getName());
 
 			// Create Component
 			Map<String, Schema> attributes = new HashMap<>();
@@ -93,17 +95,39 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			// Add Response Schema
 			Schema resourceResponse = resourceResponse(metaResource.getName());
 			openApi.getComponents().addSchemas(metaResource.getName() + "Response", resourceResponse);
+			openApi.getComponents().addResponses(metaResource.getName() + "Response", getSingleResponse(metaResource.getName()));
 
 			// Add ListResponse Schema
 			Schema resourceListResponse = resourceListResponse(metaResource.getName());
 			openApi.getComponents().addSchemas(metaResource.getName() + "ListResponse", resourceListResponse);
+			openApi.getComponents().addResponses(metaResource.getName() + "ListResponse", getListResponse(metaResource.getName()));
+
+			if (metaResource.isReadable()) {
+				// List Response
+				Operation getListOperation = new Operation();
+				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
+				listPathItem.setGet(getListOperation);
+				ApiResponses getListResponses = generateDefaultResponses(metaResource);
+				getListResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "ListResponse"));
+				getListOperation.setResponses(getListResponses);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
+
+				// Single Response
+				Operation getSingleOperation = new Operation();
+				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
+				singlePathItem.setGet(getSingleOperation);
+				ApiResponses getSingleResponses = generateDefaultResponses(metaResource);
+				getSingleResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
+				getSingleOperation.setResponses(getSingleResponses);
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
+			}
 
 			if (metaResource.isInsertable()) {
+				// List Response
 				Operation operation = new Operation();
-				operation.setOperationId("create" + metaResource.getName());
 				operation.setDescription("Create a " + metaResource.getName());
-				pathItem.setPost(operation);
-				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+				listPathItem.setPost(operation);
+				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
 				operation.getResponses().addApiResponse("201", new ApiResponse().
@@ -122,29 +146,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			}
 
-			if (metaResource.isReadable()) {
-				Operation operation = new Operation();
-				operation.setOperationId("get" + metaResource.getName());
-				operation.setDescription("Read a " + metaResource.getName());
-				pathItem.setGet(operation);
-				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
-
-				operation.setResponses(generateDefaultResponses(metaResource));
-				operation.getResponses().addApiResponse("200", new ApiResponse().
-						description("Ok")
-						.content(new Content()
-								.addMediaType("application/json",
-										new MediaType().schema(new Schema()
-												.$ref(metaResource.getName() + "ListResponse"))))
-				);
-			}
-
 			if (metaResource.isUpdatable()) {
+				// Single Response
 				Operation operation = new Operation();
-				operation.setOperationId("update" + metaResource.getName());
 				operation.setDescription("Update a " + metaResource.getName());
-				pathItem.setPatch(operation);
-				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+				singlePathItem.setPatch(operation);
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
 				operation.getResponses().addApiResponse("200", new ApiResponse().
@@ -163,11 +170,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			}
 
 			if (metaResource.isDeletable()) {
+				// Single Response
 				Operation operation = new Operation();
 				operation.setOperationId("delete" + metaResource.getName());
 				operation.setDescription("Delete a " + metaResource.getName());
-				pathItem.setDelete(operation);
-				openApi.getPaths().addPathItem(getApiPath(metaResource), pathItem);
+				singlePathItem.setDelete(operation);
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
 				operation.getResponses().addApiResponse("204", new ApiResponse()
@@ -225,6 +233,33 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 		return responses;
 	}
+
+	private ApiResponse getSingleResponse(String name) {
+		return new ApiResponse()
+				.description(HttpStatus.toMessage(200))
+				.content(
+						new Content()
+								.addMediaType(
+										"application/json",
+										new MediaType()
+												.schema(
+														new Schema()
+																.$ref(name + "Response"))));
+	}
+
+	private ApiResponse getListResponse(String name) {
+		return new ApiResponse()
+				.description(HttpStatus.toMessage(200))
+				.content(
+						new Content()
+								.addMediaType(
+										"application/json",
+										new MediaType()
+												.schema(
+														new Schema()
+																.$ref(name + "ListResponse"))));
+	}
+
 
 	/*
 		Using Crnks list of HTTP status codes, generate standard responses
@@ -289,6 +324,16 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				&& metaResource.getRepository().isExposed();
 	}
 
+	private String getPrimaryKeyPath(MetaResource metaResource) {
+		StringBuilder keyPath = new StringBuilder("/");
+		for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
+			keyPath.append("{");
+			keyPath.append(metaAttribute.getName());
+			keyPath.append("}");
+		}
+		return keyPath.toString();
+	}
+
 	private String getApiPath(MetaResource metaResource) {
 		//
 		// TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
@@ -323,7 +368,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			return new ByteArraySchema();
 		} else if (metaType.getName().equals("date")) {
 			return new DateSchema();
-		} else if (metaType.getName().equals("offsetDateTime")) {
+		}
+		// TODO: Exhaustively enumerate Date formats, or find another way to check
+		else if (metaType.getName().equals("offsetDateTime")) {
 			return new DateTimeSchema();
 		} else if (metaType.getName().equals("double")) {
 			return new NumberSchema();
@@ -336,14 +383,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		} else if (metaType.getName().equals("json.object")) {
 			return new ObjectSchema();
 		} else if (metaType.getName().equals("json.array")) {
-			// return new ArraySchema().items("{}");
 			// The desired value is
 			// arrayNodeValue:
 			//   type: array
 			//   items: {}
-			// But the OpenAPI SDK does not support it.
-			return new ObjectSchema();
-		} else if (metaType.getName().equals("long")) {
+			// But the OpenAPI SDK does not support it using ArraySchema.
+			return new Schema().type("array");
+		}
+		else if (metaType.getName().equals("long")) {
 			return new NumberSchema();
 		} else if (metaType.getName().equals("object")) {
 			return new ObjectSchema();

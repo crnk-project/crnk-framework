@@ -46,7 +46,6 @@ public class SimpleTask {
 
 	}
 
-
 	public Long getId() {
 		return id;
 	}

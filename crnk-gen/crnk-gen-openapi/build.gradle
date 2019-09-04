@@ -6,10 +6,10 @@ dependencies {
     compile project(':crnk-gen:crnk-gen-base')
 
     compile 'guru.nidi:graphviz-java:0.8.3'
-	compile 'io.swagger.core.v3:swagger-integration:2.0.8'
-	compile 'io.swagger.core.v3:swagger-core:2.0.8'
-	compile 'io.swagger.core.v3:swagger-models:2.0.8'
-
+    compile 'io.swagger.core.v3:swagger-integration:2.0.8'
+    compile 'io.swagger.core.v3:swagger-core:2.0.8'
+    compile 'io.swagger.core.v3:swagger-models:2.0.8'
+    compile 'io.swagger.parser.v3:swagger-parser:2.0.8'
 
     testCompile 'commons-io:commons-io:2.5'
     testCompile project(':crnk-meta')
