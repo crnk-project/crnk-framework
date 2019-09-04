@@ -296,13 +296,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			return new ObjectSchema();
 		}
 		else if (metaType.getName().equals("json.array")) {
-			// return new ArraySchema().items("{}");
 			// The desired value is
 			// arrayNodeValue:
 			//   type: array
 			//   items: {}
-			// But the OpenAPI SDK does not support it.
-			return new ObjectSchema();
+			// But the OpenAPI SDK does not support it using ArraySchema.
+			return new Schema().type("array");
 		}
 		else if (metaType.getName().equals("long")) {
 			return new NumberSchema();
