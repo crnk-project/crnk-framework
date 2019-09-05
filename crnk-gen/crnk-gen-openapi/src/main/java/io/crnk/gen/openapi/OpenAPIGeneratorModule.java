@@ -25,6 +25,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import static java.util.stream.Collectors.joining;
+
 
 public class OpenAPIGeneratorModule implements GeneratorModule {
 
@@ -84,6 +86,11 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 					attributes.put(mrf.getName(), attributeSchema);
 				}
 			}
+
+			// Add Fields Parameter
+			Parameter fieldsParameter = generateDefaultFieldsParameter(metaResource);
+			openApi.getComponents().addParameters(metaResource.getResourceType() + "Fields", fieldsParameter);
+
 
 			// Add ReferenceType Schema
 			Schema resourceReference = resourceReference(metaResource.getName());
@@ -220,6 +227,21 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return schemas;
 	}
 
+	private Parameter generateDefaultFieldsParameter(MetaResource metaResource) {
+		return new Parameter()
+				.name("fields[" + metaResource.getResourceType() + "]")
+				.description(metaResource.getResourceType() + " fields to include (csv)")
+				.in("query")
+				.schema(new StringSchema()
+						._default(
+								metaResource
+										.getAttributes()
+										.stream()
+										.map(e -> ((MetaAttribute) e)
+												.getName())
+										.collect(joining(","))));
+	}
+
 	private Operation generateDefaultSingleOperation(MetaResource metaResource) {
 		// TODO: Add includes
 		// TODO: Add fields
@@ -237,6 +259,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				}
 			}
 		}
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+
 		return operation;
 	}
 
@@ -246,7 +271,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// TODO: Add page
 		// TODO: Add filter
 		// TODO: Add sort
-		return generateDefaultOperation();
+		Operation operation = generateDefaultOperation();
+		
+		return operation;
 	}
 
 	private Operation generateDefaultOperation() {
