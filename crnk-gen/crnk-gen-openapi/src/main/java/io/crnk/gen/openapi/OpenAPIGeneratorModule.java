@@ -83,6 +83,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			Parameter fieldsParameter = generateDefaultFieldsParameter(metaResource);
 			openApi.getComponents().addParameters(metaResource.getResourceType() + "Fields", fieldsParameter);
 
+			// Add Include Parameter
+			Parameter includeParameter = generateDefaultIncludeParameter(metaResource);
+			openApi.getComponents().addParameters(metaResource.getResourceType() + "Include", includeParameter);
 
 			// Add ReferenceType Schema
 			Schema resourceReference = resourceReference(metaResource.getName());
@@ -228,14 +231,26 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								metaResource
 										.getAttributes()
 										.stream()
-										.map(e -> ((MetaAttribute) e)
-												.getName())
+										.map(e -> ((MetaAttribute) e).getName())
 										.collect(joining(","))));
 	}
 
+	private Parameter generateDefaultIncludeParameter(MetaResource metaResource) {
+			return new Parameter()
+					.name("include")
+					.description(metaResource.getResourceType() + " relationships to include (csv)")
+					.in("query")
+					.schema(new StringSchema()
+							._default(
+									metaResource
+											.getAttributes()
+											.stream()
+											.filter(e -> ((MetaAttribute) e).isAssociation())
+											.map(e -> ((MetaAttribute) e).getType().getElementType().getName())
+											.collect(joining(","))));
+		}
+
 	private Operation generateDefaultSingleOperation(MetaResource metaResource) {
-		// TODO: Add includes
-		// TODO: Add fields
 		Operation operation = generateDefaultOperation();
 		for (MetaElement metaElement : metaResource.getChildren()) {
 			if (metaElement instanceof MetaAttribute) {
@@ -252,18 +267,23 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 		// Add fields[resource] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+		// Add include parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
 
 		return operation;
 	}
 
 	private Operation generateDefaultListOperation(MetaResource metaResource) {
-		// TODO: Add includes
-		// TODO: Add fields
 		// TODO: Add page
 		// TODO: Add filter
 		// TODO: Add sort
 		Operation operation = generateDefaultOperation();
-		
+
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+		// Add include parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+
 		return operation;
 	}
 
