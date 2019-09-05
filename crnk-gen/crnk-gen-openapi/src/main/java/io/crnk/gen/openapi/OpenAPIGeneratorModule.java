@@ -58,9 +58,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
 		for (MetaResource metaResource : metaResources) {
 			PathItem listPathItem = new PathItem();
-			listPathItem.setDescription(metaResource.getName());
 			PathItem singlePathItem = new PathItem();
-			singlePathItem.setDescription(metaResource.getName());
 
 			// Create Component
 			Map<String, Schema> attributes = new HashMap<>();
