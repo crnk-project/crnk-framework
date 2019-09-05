@@ -9,8 +9,9 @@ import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.*;
-import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -43,15 +44,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	@Override
 	public void generate(Object meta) throws IOException {
 		LOGGER.info("performing openapi generation");
-		OpenAPI openApi = new OpenAPI()
-				.info(new Info()
-						.description("TEST INFO DESC") // TODO: Must be configurable
-						.title("TEST INFO TITLE") // TODO: Must be configurable
-						.version("0.1.0") // TODO: Must be configurable
-				)
-				.paths(new Paths());
+		OpenAPI openApi = config.getOpenAPI();
 
-		openApi.components(new Components());
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(getStandardApiErrorResponses());
 		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
@@ -65,10 +59,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
 		for (MetaResource metaResource : metaResources) {
-			PathItem listPathItem = new PathItem();
-			listPathItem.setDescription(metaResource.getName());
-			PathItem singlePathItem = new PathItem();
-			singlePathItem.setDescription(metaResource.getName());
+			PathItem listPathItem = openApi.getPaths().getOrDefault(getApiPath(metaResource), new PathItem());
+			PathItem singlePathItem = openApi.getPaths().getOrDefault(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), new PathItem());
 
 			// Create Component
 			Map<String, Schema> attributes = new HashMap<>();
@@ -120,7 +112,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				// List Response
 				Operation getListOperation = generateDefaultListOperation(metaResource);
 				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
-				listPathItem.setGet(getListOperation);
+				listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
 				ApiResponses getListResponses = generateDefaultResponses(metaResource);
 				getListResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "ListResponse"));
 				getListOperation.setResponses(getListResponses);
@@ -129,7 +121,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				// Single Response
 				Operation getSingleOperation = generateDefaultSingleOperation(metaResource);
 				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
-				singlePathItem.setGet(getSingleOperation);
+				singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
 				ApiResponses getSingleResponses = generateDefaultResponses(metaResource);
 				getSingleResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
 				getSingleOperation.setResponses(getSingleResponses);
@@ -140,7 +132,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				// List Response
 				Operation operation = generateDefaultListOperation(metaResource);
 				operation.setDescription("Create a " + metaResource.getName());
-				listPathItem.setPost(operation);
+				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
@@ -164,7 +156,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				// Single Response
 				Operation operation = generateDefaultSingleOperation(metaResource);
 				operation.setDescription("Update a " + metaResource.getName());
-				singlePathItem.setPatch(operation);
+				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
@@ -186,9 +178,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			if (metaResource.isDeletable()) {
 				// Single Response
 				Operation operation = generateDefaultSingleOperation(metaResource);
-				operation.setOperationId("delete" + metaResource.getName());
 				operation.setDescription("Delete a " + metaResource.getName());
-				singlePathItem.setDelete(operation);
+				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
@@ -278,6 +269,30 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 	private Operation generateDefaultOperation() {
 		return new Operation().parameters(generateDefaultParameters());
+	}
+
+	private Operation mergeOperations(Operation newOperation, Operation existingOperation) {
+		if (existingOperation == null) {
+			return newOperation;
+		}
+
+		if (existingOperation.getOperationId() != null) {
+			newOperation.setOperationId(existingOperation.getOperationId());
+		}
+
+		if (existingOperation.getSummary() != null) {
+			newOperation.setSummary(existingOperation.getSummary());
+		}
+
+		if (existingOperation.getDescription() != null) {
+			newOperation.setDescription(existingOperation.getDescription());
+		}
+
+		if (existingOperation.getExtensions() != null) {
+			newOperation.setExtensions(existingOperation.getExtensions());
+		}
+
+		return newOperation;
 	}
 
 	private List<Parameter> generateDefaultParameters() {
