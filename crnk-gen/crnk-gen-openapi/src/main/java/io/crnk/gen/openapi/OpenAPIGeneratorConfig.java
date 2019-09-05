@@ -1,15 +1,24 @@
 package io.crnk.gen.openapi;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.crnk.gen.base.GeneratorModuleConfigBase;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIGeneratorConfig.class);
+
 	private File genDir = null;
 	private File buildDir = null;
-	private String title = "OpenAPI Reference";
+
+	private String templateName = null;
+	private OpenAPI openAPI = null;
 
 	/**
 	 * @return location where the generated sources are placed.
@@ -20,6 +29,7 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 		}
 		return genDir;
 	}
+
 	public void setGenDir(File genDir) {
 		this.genDir = genDir;
 	}
@@ -27,14 +37,49 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
 	public File getBuildDir() {
 		return buildDir;
 	}
+
 	public void setBuildDir(File buildDir) {
 		this.buildDir = buildDir;
 	}
 
-	public String getTitle() {
-		return title;
+	public String getTemplateName() {
+		return templateName;
 	}
-	public void setTitle(String title) {
-		this.title = title;
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
+
+	public OpenAPI getOpenAPI() {
+		if (openAPI == null) {
+			if (this.getTemplateName() != null) {
+				File templateFile = new File(buildDir, this.getTemplateName());
+				OpenAPI openAPI = new OpenAPIV3Parser().read(templateFile.getAbsolutePath());
+
+				if (openAPI.getPaths() == null) {
+					openAPI.paths(new Paths());
+				}
+
+				if (openAPI.getComponents() == null) {
+					openAPI.components(new Components());
+				}
+
+				return openAPI;
+			}
+
+			return new OpenAPI()
+					.info(new Info()
+							.description("Generated Description")
+							.title("Generated Title")
+							.version("0.1.0")
+					)
+					.paths(new Paths())
+					.components(new Components());
+		}
+		return openAPI;
+	}
+
+	public void setOpenAPI(OpenAPI openAPI) {
+		this.openAPI = openAPI;
 	}
 }

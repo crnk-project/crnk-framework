@@ -9,8 +9,9 @@ import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.*;
-import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -41,15 +42,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	@Override
 	public void generate(Object meta) throws IOException {
 		LOGGER.info("performing openapi generation");
-		OpenAPI openApi = new OpenAPI()
-				.info(new Info()
-						.description("TEST INFO DESC") // TODO: Must be configurable
-						.title("TEST INFO TITLE") // TODO: Must be configurable
-						.version("0.1.0") // TODO: Must be configurable
-				)
-				.paths(new Paths());
+		OpenAPI openApi = config.getOpenAPI();
 
-		openApi.components(new Components());
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(getStandardApiErrorResponses());
 		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
