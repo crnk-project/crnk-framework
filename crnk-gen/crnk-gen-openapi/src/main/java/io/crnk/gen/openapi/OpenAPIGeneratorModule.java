@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.stream.Collectors.joining;
@@ -48,6 +49,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(getStandardApiErrorResponses());
+		openApi.getComponents().parameters(getStandardPagingParameters());
 		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
 				.description("Accepted")
 				.content(new Content()
@@ -293,7 +295,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	private Operation generateDefaultListOperation(MetaResource metaResource) {
-		// TODO: Add page
 		// TODO: Add filter
 		Operation operation = generateDefaultOperation();
 
@@ -303,6 +304,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
 		// Add sort parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Sort"));
+
+		// Add page[limit] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageLimit"));
+
+		// Add page[offset] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageOffset"));
 
 		return operation;
 	}
@@ -427,6 +434,54 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return responses;
 	}
 
+	private Map<String, Parameter> getStandardPagingParameters() {
+		boolean NumberSizePagingBehavior = false;
+		Map<String, Parameter> parameters = new LinkedHashMap<>();
+		parameters.put(
+				"pageLimit",
+				new Parameter().name("page[limit]")
+						.description("Max number of items")
+						.in("query")
+						.schema(
+								new IntegerSchema()
+										.format("int64")
+										._default(100)  // TODO: resolve from application.properties.crnk.default-page-limit=20
+										.maximum(BigDecimal.valueOf(1000))));  // TODO: resolve from application.properties.crnk.max-page-limit=1000
+		parameters.put(
+				"pageOffset",
+				new Parameter().name("page[offset]")
+						.description("Page offset")
+						.in("query")
+						.schema(
+								new IntegerSchema()
+										.format("int64")
+										._default(0)));
+
+		if (NumberSizePagingBehavior) {  // TODO: Figure out how to determine this
+			parameters.put(
+					"pageNumber",
+					new Parameter().name("page[number]")
+							.description("Page number")
+							.in("query")
+							.schema(
+									new IntegerSchema()
+											.format("int64")
+											._default(1)));
+
+			parameters.put(
+					"pageSize",
+					new Parameter().name("page[size]")
+							.description("Page size")
+							.in("query")
+							.schema(
+									new IntegerSchema()
+											.format("int64")
+											._default(0)));  // TODO: resolve from application.properties.crnk.default-page-limit=20
+		}
+
+		return parameters;
+	}
+
 	/*
 		Crnk maintains a list of HTTP status codes in io.crnk.core.engine.http.HttpStatus
 		as static fields. Iterate through and collect them into a list for use elsewhere.
@@ -513,11 +568,11 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		else if (metaType.getName().equals("offsetDateTime")) {
 			return new DateTimeSchema();
 		} else if (metaType.getName().equals("double")) {
-			return new NumberSchema();
+			return new NumberSchema().format("double");
 		} else if (metaType.getName().equals("float")) {
-			return new NumberSchema();
+			return new NumberSchema().format("float");
 		} else if (metaType.getName().equals("integer")) {
-			return new IntegerSchema();
+			return new IntegerSchema().format("int32");
 		} else if (metaType.getName().equals("json")) {
 			return new ObjectSchema();
 		} else if (metaType.getName().equals("json.object")) {
@@ -525,11 +580,11 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		} else if (metaType.getName().equals("json.array")) {
 			return new ArraySchema().items(new Schema());
 		} else if (metaType.getName().equals("long")) {
-			return new NumberSchema();
+			return new IntegerSchema().format("int64");
 		} else if (metaType.getName().equals("object")) {
 			return new ObjectSchema();
 		} else if (metaType.getName().equals("short")) {
-			return new NumberSchema();
+			return new IntegerSchema().minimum(BigDecimal.valueOf(Short.MIN_VALUE)).maximum(BigDecimal.valueOf(Short.MAX_VALUE));
 		} else if (metaType.getName().equals("string")) {
 			return new StringSchema();
 		} else if (metaType.getName().equals("uuid")) {
