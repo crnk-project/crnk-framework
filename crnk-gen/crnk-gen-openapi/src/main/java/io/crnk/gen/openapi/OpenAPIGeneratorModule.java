@@ -87,6 +87,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			Parameter includeParameter = generateDefaultIncludeParameter(metaResource);
 			openApi.getComponents().addParameters(metaResource.getResourceType() + "Include", includeParameter);
 
+			// Add Sort parameter
+			Parameter sortParameter = generateDefaultSortParameter(metaResource);
+			openApi.getComponents().addParameters(metaResource.getResourceType() + "Sort", sortParameter);
+
 			// Add ReferenceType Schema
 			Schema resourceReference = resourceReference(metaResource.getName());
 			openApi.getComponents().addSchemas(metaResource.getResourceType() + "Reference", resourceReference);
@@ -250,6 +254,21 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 											.collect(joining(","))));
 		}
 
+	private Parameter generateDefaultSortParameter(MetaResource metaResource) {
+		return new Parameter()
+				.name("sort")
+				.description(metaResource.getResourceType() + " sort order (csv)")
+				.in("query")
+				.schema(new StringSchema()
+						.example(
+								metaResource
+										.getAttributes()
+										.stream()
+										.filter(e -> (((MetaAttribute) e).isSortable()))
+										.map(e -> ((MetaAttribute) e).getName())
+										.collect(joining(","))));
+	}
+
 	private Operation generateDefaultSingleOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 		for (MetaElement metaElement : metaResource.getChildren()) {
@@ -276,13 +295,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	private Operation generateDefaultListOperation(MetaResource metaResource) {
 		// TODO: Add page
 		// TODO: Add filter
-		// TODO: Add sort
 		Operation operation = generateDefaultOperation();
 
 		// Add fields[resource] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
 		// Add include parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+		// Add sort parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Sort"));
 
 		return operation;
 	}
