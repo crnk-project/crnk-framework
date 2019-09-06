@@ -114,9 +114,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			// TODO: Add relationships paths. Relationships can be accessed in 2 ways:
 			//  1.	/api/A/1/b  								The full related resource
 			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
-			// TODO: Bulk Responses
-			// TODO: Parameters
-			// TODO: Filters
 			if (metaResource.isReadable()) {
 				// List Response
 				Operation getListOperation = generateDefaultListOperation(metaResource);
@@ -137,6 +134,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 			}
 
+			// TODO: Parameters
+			// TODO: Bulk Responses
 			if (metaResource.isInsertable()) {
 				// List Response
 				Operation operation = generateDefaultListOperation(metaResource);
@@ -161,6 +160,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			}
 
+			// TODO: Parameters
+			// TODO: Bulk Responses
 			if (metaResource.isUpdatable()) {
 				// Single Response
 				Operation operation = generateDefaultSingleOperation(metaResource);
@@ -184,6 +185,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 						.description("No Content"));
 			}
 
+			// TODO: Parameters
+			// TODO: Bulk Responses
 			if (metaResource.isDeletable()) {
 				// Single Response
 				Operation operation = generateDefaultSingleOperation(metaResource);
@@ -295,13 +298,34 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	private Operation generateDefaultListOperation(MetaResource metaResource) {
-		// TODO: Add filter
 		Operation operation = generateDefaultOperation();
 
 		// Add fields[resource] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+
+		// Add filter[<>] parameters
+		// Only the most basic filters are documented
+		for (MetaElement child : metaResource.getChildren()) {
+			if (child instanceof MetaResourceField) {
+				MetaResourceField metaResourceField = (MetaResourceField) child;
+				if (metaResourceField.isFilterable()) {
+					if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
+						continue;
+					}
+					operation.getParameters().add(
+							new Parameter()
+									.name("filter[" + child.getName() + "]")
+									.description("Filter by " + child.getName() + " (csv)")
+									.in("query")
+									.schema(new StringSchema())
+					);
+				}
+			}
+		}
+
 		// Add include parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+
 		// Add sort parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Sort"));
 
