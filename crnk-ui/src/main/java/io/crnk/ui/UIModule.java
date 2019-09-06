@@ -43,6 +43,8 @@ public class UIModule implements Module {
 
 	private ModuleContext context;
 
+	private PresentationManager presentationManager;
+
 	// protected for CDI
 	protected UIModule() {
 		config = null;
@@ -105,12 +107,12 @@ public class UIModule implements Module {
 				servicesSupplier = () -> Arrays.asList(new PresentationService("local", null, initMetaModule()));
 			}
 
-			PresentationManager manager = new PresentationManager(servicesSupplier);
-			config.getPresentationElementFactories().forEach(it -> manager.registerFactory(it));
+			presentationManager = new PresentationManager(servicesSupplier);
+			config.getPresentationElementFactories().forEach(it -> presentationManager.registerFactory(it));
 
-			explorerRepository = new ExplorerRepository(manager);
+			explorerRepository = new ExplorerRepository(presentationManager);
 			context.addRepository(explorerRepository);
-			editorRepository = new EditorRepository(manager);
+			editorRepository = new EditorRepository(presentationManager);
 			context.addRepository(editorRepository);
 
 
@@ -118,6 +120,10 @@ public class UIModule implements Module {
 			metaExtension.addProvider(presentationMetaProvider);
 			context.addExtension(metaExtension);
 		}
+	}
+
+	public PresentationManager getPresentationManager() {
+		return presentationManager;
 	}
 
 	class PresentationMetaFilter extends MetaFilterBase {

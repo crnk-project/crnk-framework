@@ -126,6 +126,10 @@ public class PresentationManager {
 		return (Map) getViewers(PresentationType.EXPLORER);
 	}
 
+	public List<PresentationService> getServices() {
+		return services.get();
+	}
+
 	public Map<String, PresentationElement> getViewers(PresentationType type) {
 		HashMap<String, PresentationElement> map = new HashMap<>();
 		for (PresentationService service : services.get()) {
