@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.slf4j.Logger;
@@ -66,6 +67,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			// Create Component
 			Map<String, Schema> attributes = new HashMap<>();
+			Map<String, Schema> patchAttributes = new HashMap<>();
+			Map<String, Schema> postAttributes = new HashMap<>();
 			for (MetaElement child : metaResource.getChildren()) {
 				if (child == null) {
 					continue;
@@ -78,6 +81,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 					Schema attributeSchema = transformMetaResourceField(mrf.getType());
 					attributeSchema.nullable(mrf.isNullable());
 					attributes.put(mrf.getName(), attributeSchema);
+					if (((MetaResourceField) child).isUpdatable()) {
+						patchAttributes.put(mrf.getName(), attributeSchema);
+					}
+					if (((MetaResourceField) child).isInsertable()) {
+						postAttributes.put(mrf.getName(), attributeSchema);
+					}
 				}
 			}
 
@@ -101,6 +110,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			Schema resource = resource(metaResource.getResourceType(), attributes);
 			openApi.getComponents().addSchemas(metaResource.getName(), resource);
 
+			// Add PATCH Resource Schema
+			Schema patchResourceBody = patchResourceBody(metaResource.getResourceType(), patchAttributes);
+			openApi.getComponents().addSchemas(metaResource.getName() + "Patch", patchResourceBody);
+
+			// Add POST Resource Schema
+			Schema postResourceBody = postResourceBody(metaResource.getResourceType(), postAttributes);
+			openApi.getComponents().addSchemas(metaResource.getName() + "Post", postResourceBody);
+
 			// Add Response Schema
 			Schema resourceResponse = resourceResponse(metaResource.getName());
 			openApi.getComponents().addSchemas(metaResource.getName() + "Response", resourceResponse);
@@ -116,7 +133,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
 			if (metaResource.isReadable()) {
 				// List Response
-				Operation getListOperation = generateDefaultListOperation(metaResource);
+				Operation getListOperation = generateDefaultGetListOperation(metaResource);
 				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
 				listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
 				ApiResponses getListResponses = generateDefaultResponses(metaResource);
@@ -125,7 +142,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
 				// Single Response
-				Operation getSingleOperation = generateDefaultSingleOperation(metaResource);
+				Operation getSingleOperation = generateDefaultGetSingleOperation(metaResource);
 				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
 				singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
 				ApiResponses getSingleResponses = generateDefaultResponses(metaResource);
@@ -138,7 +155,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			// TODO: Bulk Responses
 			if (metaResource.isInsertable()) {
 				// List Response
-				Operation operation = generateDefaultListOperation(metaResource);
+				Operation operation = generateDefaultPostListOperation(metaResource);
 				operation.setDescription("Create a " + metaResource.getName());
 				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
@@ -164,7 +181,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			// TODO: Bulk Responses
 			if (metaResource.isUpdatable()) {
 				// Single Response
-				Operation operation = generateDefaultSingleOperation(metaResource);
+				Operation operation = generateDefaultPatchSingleOperation(metaResource);
 				operation.setDescription("Update a " + metaResource.getName());
 				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
@@ -185,11 +202,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 						.description("No Content"));
 			}
 
-			// TODO: Parameters
 			// TODO: Bulk Responses
 			if (metaResource.isDeletable()) {
 				// Single Response
-				Operation operation = generateDefaultSingleOperation(metaResource);
+				Operation operation = generateDefaultDeleteSingleOperation(metaResource);
 				operation.setDescription("Delete a " + metaResource.getName());
 				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
@@ -274,7 +290,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										.collect(joining(","))));
 	}
 
-	private Operation generateDefaultSingleOperation(MetaResource metaResource) {
+	private Operation generateDefaultGetSingleOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 		for (MetaElement metaElement : metaResource.getChildren()) {
 			if (metaElement instanceof MetaAttribute) {
@@ -297,7 +313,54 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return operation;
 	}
 
-	private Operation generateDefaultListOperation(MetaResource metaResource) {
+	private Operation generateDefaultDeleteSingleOperation(MetaResource metaResource) {
+		Operation operation = generateDefaultOperation();
+		for (MetaElement metaElement : metaResource.getChildren()) {
+			if (metaElement instanceof MetaAttribute) {
+				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
+				if (metaAttribute.isPrimaryKeyAttribute()) {
+					operation.getParameters().add(
+							new Parameter()
+									.name(metaElement.getName())
+									.in("path")
+									.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()))
+					);
+				}
+			}
+		}
+		return operation;
+	}
+
+	private Operation generateDefaultPatchSingleOperation(MetaResource metaResource) {
+		Operation operation = generateDefaultOperation();
+		for (MetaElement metaElement : metaResource.getChildren()) {
+			if (metaElement instanceof MetaAttribute) {
+				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
+				if (metaAttribute.isPrimaryKeyAttribute()) {
+					operation.getParameters().add(
+							new Parameter()
+									.name(metaElement.getName())
+									.in("path")
+									.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()))
+					);
+				}
+			}
+		}
+		operation.setRequestBody(
+				new RequestBody()
+						.content(
+								new Content()
+										.addMediaType(
+												"application/json",
+												new MediaType()
+														.schema(
+																new Schema()
+																		.$ref(metaResource.getName() + "Patch")))));
+		return operation;
+	}
+
+
+	private Operation generateDefaultGetListOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 
 		// Add fields[resource] parameter
@@ -334,6 +397,23 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 		// Add page[offset] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageOffset"));
+
+		return operation;
+	}
+
+	private Operation generateDefaultPostListOperation(MetaResource metaResource) {
+		Operation operation = generateDefaultOperation();
+		operation.setRequestBody(
+				new RequestBody()
+						.content(
+								new Content()
+										.addMediaType(
+												"application/json",
+												new MediaType()
+														.schema(
+																new Schema()
+																		.$ref(metaResource.getName() + "Post")))));
+
 
 		return operation;
 	}
@@ -865,6 +945,36 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 														.type("object")
 														.properties(attributes))
 										.required(Arrays.asList("attributes"))));
+	}
+
+	protected Schema patchResourceBody(String resourceType, Map<String, Schema> attributes) {
+		//Defines a schema for the PATCH parameters of a JSON:API resource
+		return new ComposedSchema()
+				.allOf(
+						Arrays.asList(
+								get$refSchema(resourceType + "Reference"),
+								new Schema()
+										.type("object")
+										.addProperties(
+												"attributes",
+												new Schema()
+														.type("object")
+														.properties(attributes))));
+	}
+
+	protected Schema postResourceBody(String resourceType, Map<String, Schema> attributes) {
+		//Defines a schema for the POST parameters of a JSON:API resource
+		return new ComposedSchema()
+				.allOf(
+						Arrays.asList(
+								get$refSchema(resourceType + "Reference"),
+								new Schema()
+										.type("object")
+										.addProperties(
+												"attributes",
+												new Schema()
+														.type("object")
+														.properties(attributes))));
 	}
 
 	protected Schema hasOneRelationshipData(String name) {
