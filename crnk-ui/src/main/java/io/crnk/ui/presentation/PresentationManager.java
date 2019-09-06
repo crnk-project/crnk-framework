@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import io.crnk.core.exception.ResourceNotFoundException;
+import io.crnk.core.utils.Prioritizable;
 import io.crnk.meta.MetaLookup;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.resource.MetaResource;
@@ -45,6 +46,11 @@ public class PresentationManager {
 		this.factories.add(new DefaultFormFactory());
 		this.factories.add(new DefaultLabelElementFactory());
 		this.factories.add(new DefaultPlainTextElementFactory());
+	}
+
+	public void registerFactory(PresentationElementFactory factory) {
+		factories.add(factory);
+		factories = Prioritizable.prioritze(factories);
 	}
 
 	public ExplorerElement getExplorer(String id) {

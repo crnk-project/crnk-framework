@@ -106,6 +106,8 @@ public class UIModule implements Module {
 			}
 
 			PresentationManager manager = new PresentationManager(servicesSupplier);
+			config.getPresentationElementFactories().forEach(it -> manager.registerFactory(it));
+
 			explorerRepository = new ExplorerRepository(manager);
 			context.addRepository(explorerRepository);
 			editorRepository = new EditorRepository(manager);
