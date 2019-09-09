@@ -111,12 +111,20 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			openApi.getComponents().addSchemas(metaResource.getName(), resource);
 
 			// Add PATCH Resource Schema
-			Schema patchResourceBody = patchResourceBody(metaResource.getResourceType(), patchAttributes);
+			Schema patchResourceBody = resourceRequestBody(metaResource.getResourceType(), patchAttributes);
 			openApi.getComponents().addSchemas(metaResource.getName() + "Patch", patchResourceBody);
 
 			// Add POST Resource Schema
-			Schema postResourceBody = postResourceBody(metaResource.getResourceType(), postAttributes);
+			Schema postResourceBody = resourceRequestBody(metaResource.getResourceType(), postAttributes);
 			openApi.getComponents().addSchemas(metaResource.getName() + "Post", postResourceBody);
+
+			// Add relationship modification request body
+			Schema singleRelationshipBody = singleRelationshipBody(metaResource.getResourceType());
+			openApi.getComponents().addSchemas(metaResource.getName() + "Relationship", singleRelationshipBody);
+
+			// Add relationship modification request body
+			Schema multiRelationshipBody = multiRelationshipBody(metaResource.getResourceType());
+			openApi.getComponents().addSchemas(metaResource.getName() + "Relationships", multiRelationshipBody);
 
 			// Add Response Schema
 			Schema resourceResponse = resourceResponse(metaResource.getName());
@@ -167,19 +175,87 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 							MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
 							PathItem relationPathItem = openApi.getPaths().getOrDefault(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), new PathItem());
 							if (mrf.isReadable()) {
-								Operation getRelationshipOperation = mrf.getType().isCollection()
-										? generateDefaultGetRelationshipListOperation(metaResource, relatedMetaResource)
-										: generateDefaultGetRelationshipSingleOperation(metaResource, relatedMetaResource);
+								Operation getRelationshipOperation = mrf.getType().isCollection() || mrf.getType().isMap()
+										? generateDefaultGetRelationshipsOperation(metaResource, relatedMetaResource)
+										: generateDefaultGetRelationshipOperation(metaResource, relatedMetaResource);
 								getRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + metaResource.getResourceType() + " resource");
 								relationPathItem.setGet(mergeOperations(getRelationshipOperation, relationPathItem.getGet()));
 								ApiResponses getRelationshipResponses = generateDefaultResponses(relatedMetaResource);
-								String responsePostFix = mrf.getType().isCollection() ? "ListResponse" : "Response";
+								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "ListResponse" : "Response";
 								getRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
 								getRelationshipOperation.setResponses(getRelationshipResponses);
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 							}
-							if (mrf.isUpdatable()) {
+							if (mrf.isInsertable()) {
+								Operation postRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
+								postRelationshipOperation.setDescription("Create " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+								relationPathItem.setPost(mergeOperations(postRelationshipOperation, relationPathItem.getPost()));
+								ApiResponses postRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+								postRelationshipResponses.addApiResponse(
+										"200",
+										new ApiResponse()
+												.description("Created")
+												.content(
+														new Content()
+																.addMediaType(
+																		"application/json",
+																		new MediaType()
+																				.schema(
+																						new Schema()
+																								.$ref(relatedMetaResource.getName() + responsePostFix))))
+								);
+								postRelationshipOperation.setResponses(postRelationshipResponses);
+								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
+							}
+							if (mrf.isUpdatable()) {
+								Operation patchRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
+								patchRelationshipOperation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+								relationPathItem.setPatch(mergeOperations(patchRelationshipOperation, relationPathItem.getPatch()));
+								ApiResponses patchRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+								patchRelationshipResponses.addApiResponse(
+										"200",
+										new ApiResponse()
+												.description("Created")
+												.content(
+														new Content()
+																.addMediaType(
+																		"application/json",
+																		new MediaType()
+																				.schema(
+																						new Schema()
+																								.$ref(relatedMetaResource.getName() + responsePostFix))))
+								);
+								patchRelationshipOperation.setResponses(patchRelationshipResponses);
+								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
+
+
+								// If the relationship is updatable then we imply that it is deletable.
+
+								// TODO: Figure out how to handle the response body error in OpenAPI, which specifies that DELETE method's request body will be ignored.
+								Operation deleteRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
+								;
+								deleteRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+								relationPathItem.setDelete(mergeOperations(deleteRelationshipOperation, relationPathItem.getDelete()));
+								ApiResponses deleteRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+//								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+								deleteRelationshipResponses.addApiResponse(
+										"200",
+										new ApiResponse()
+												.description("Created")
+												.content(
+														new Content()
+																.addMediaType(
+																		"application/json",
+																		new MediaType()
+																				.schema(
+																						new Schema()
+																								.$ref(relatedMetaResource.getName() + responsePostFix))))
+								);
+								deleteRelationshipOperation.setResponses(deleteRelationshipResponses);
+								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 							}
 						}
 					}
@@ -351,7 +427,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return parameter;
 	}
 
-	private Operation generateDefaultGetRelationshipListOperation(MetaResource metaResource, MetaResource relatedMetaResource) {
+	private Operation generateDefaultGetRelationshipsOperation(MetaResource metaResource, MetaResource relatedMetaResource) {
 		Operation operation = generateDefaultOperation();
 		operation.getParameters().add(getPrimaryKeyParameter(metaResource));
 
@@ -383,8 +459,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return operation;
 	}
 
-
-	private Operation generateDefaultGetRelationshipSingleOperation(MetaResource metaResource, MetaResource relatedMetaResource) {
+	private Operation generateDefaultGetRelationshipOperation(MetaResource metaResource, MetaResource relatedMetaResource) {
 		Operation operation = generateDefaultOperation();
 		operation.getParameters().add(getPrimaryKeyParameter(metaResource));
 		// Add fields[resource] parameter
@@ -392,6 +467,26 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// Add include parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + relatedMetaResource.getResourceType() + "Include"));
 
+		return operation;
+	}
+
+	private Operation generateDefaultRelationshipOperation(MetaResource metaResource, MetaResource relatedMetaResource, boolean oneToMany, boolean includeBody) {
+		Operation operation = generateDefaultOperation();
+		operation.getParameters().add(getPrimaryKeyParameter(metaResource));
+		String postFix = oneToMany ? "Relationships" : "Relationship";
+		if (!includeBody) {
+			return operation;
+		}
+		operation.setRequestBody(
+				new RequestBody()
+						.content(
+								new Content()
+										.addMediaType(
+												"application/json",
+												new MediaType()
+														.schema(
+																new Schema()
+																		.$ref(relatedMetaResource.getName() + postFix)))));
 		return operation;
 	}
 
@@ -1007,7 +1102,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										.required(Arrays.asList("attributes"))));
 	}
 
-	protected Schema patchResourceBody(String resourceType, Map<String, Schema> attributes) {
+	protected Schema resourceRequestBody(String resourceType, Map<String, Schema> attributes) {
 		//Defines a schema for the PATCH parameters of a JSON:API resource
 		return new ComposedSchema()
 				.allOf(
@@ -1022,20 +1117,22 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 														.properties(attributes))));
 	}
 
-	protected Schema postResourceBody(String resourceType, Map<String, Schema> attributes) {
-		//Defines a schema for the POST parameters of a JSON:API resource
-		return new ComposedSchema()
-				.allOf(
-						Arrays.asList(
-								get$refSchema(resourceType + "Reference"),
-								new Schema()
-										.type("object")
-										.addProperties(
-												"attributes",
-												new Schema()
-														.type("object")
-														.properties(attributes))));
+	protected Schema singleRelationshipBody(String resourceType) {
+		//Defines a schema for the PATCH parameters of a JSON:API resource
+		return new ObjectSchema()
+				.addProperties(
+						"data",
+						get$refSchema(resourceType + "Reference"));
 	}
+
+	protected Schema multiRelationshipBody(String resourceType) {
+		//Defines a schema for the PATCH parameters of a JSON:API resource
+		return new ObjectSchema()
+				.addProperties(
+						"data",
+						new ArraySchema()
+								.items(get$refSchema(resourceType + "Reference")));
+	}		
 
 	protected Schema hasOneRelationshipData(String name) {
 		return new Schema()
@@ -1150,6 +1247,4 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 		return file;
 	}
-
-
 }
