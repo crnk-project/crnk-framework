@@ -58,7 +58,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								new MediaType().schema(new Schema()
 										.$ref("Accepted"))))
 		);
-
+		// TODO: Respect @JsonApiExposed(false)
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
 		for (MetaResource metaResource : metaResources) {
@@ -128,9 +128,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			openApi.getComponents().addSchemas(metaResource.getName() + "ListResponse", resourceListResponse);
 			openApi.getComponents().addResponses(metaResource.getName() + "ListResponse", getListResponse(metaResource.getName()));
 
-			// TODO: Add relationships paths. Relationships can be accessed in 2 ways:
+			// Relationships can be accessed in 2 ways:
 			//  1.	/api/A/1/b  								The full related resource
-			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
+			// TODO  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
 			if (metaResource.isReadable()) {
 				// List Response
 				Operation getListOperation = generateDefaultGetListOperation(metaResource);
@@ -149,10 +149,38 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				getSingleResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
 				getSingleOperation.setResponses(getSingleResponses);
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
+
+				// Generate GET Operations for /api/A/1/B relationship path
+				for (MetaElement child : metaResource.getChildren()) {
+					if (child == null) {
+						continue;
+					} else if (child instanceof MetaPrimaryKey) {
+						continue;
+					} else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+						continue;
+					} else if (child instanceof MetaResourceField) {
+						MetaResourceField mrf = (MetaResourceField) child;
+						Schema attributeSchema = transformMetaResourceField(mrf.getType());
+						attributeSchema.nullable(mrf.isNullable());
+						attributes.put(mrf.getName(), attributeSchema);
+						if (mrf.isReadable() && mrf.isAssociation()) {
+							MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
+							PathItem relationPathItem = openApi.getPaths().getOrDefault(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), new PathItem());
+							Operation getRelationshipOperation = mrf.getType().isCollection() ? generateDefaultGetRelationshipListOperation(relatedMetaResource) : generateDefaultGetRelationshipSingleOperation(relatedMetaResource);
+							getRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + metaResource.getResourceType() + " resource");
+							relationPathItem.setGet(mergeOperations(getRelationshipOperation, relationPathItem.getGet()));
+							ApiResponses getRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+							String responsePostFix = mrf.getType().isCollection() ? "ListResponse" : "Response";
+							getRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
+							getRelationshipOperation.setResponses(getRelationshipResponses);
+							openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
+						}
+					}
+				}
+
 			}
 
-			// TODO: Parameters
-			// TODO: Bulk Responses
+			// TODO: Add Support for Bulk Operations
 			if (metaResource.isInsertable()) {
 				// List Response
 				Operation operation = generateDefaultPostListOperation(metaResource);
@@ -177,8 +205,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 			}
 
-			// TODO: Parameters
-			// TODO: Bulk Responses
+			// TODO: Add Support for Bulk Operations
 			if (metaResource.isUpdatable()) {
 				// Single Response
 				Operation operation = generateDefaultPatchSingleOperation(metaResource);
@@ -202,7 +229,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 						.description("No Content"));
 			}
 
-			// TODO: Bulk Responses
+			// TODO: Add Support for Bulk Operations
 			if (metaResource.isDeletable()) {
 				// Single Response
 				Operation operation = generateDefaultDeleteSingleOperation(metaResource);
@@ -313,6 +340,76 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return operation;
 	}
 
+	private Operation generateDefaultGetRelationshipListOperation(MetaResource metaResource) {
+		Operation operation = generateDefaultOperation();
+		for (MetaElement metaElement : metaResource.getChildren()) {
+			if (metaElement instanceof MetaAttribute) {
+				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
+				if (metaAttribute.isPrimaryKeyAttribute()) {
+					operation.getParameters().add(
+							new Parameter()
+									.name(metaElement.getName())
+									.in("path")
+									.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()))
+					);
+				}
+			}
+		}
+
+		// TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
+		// Add filter[<>] parameters
+		// Only the most basic filters are documented
+		for (MetaElement child : metaResource.getChildren()) {
+			if (child instanceof MetaResourceField) {
+				MetaResourceField metaResourceField = (MetaResourceField) child;
+				if (metaResourceField.isFilterable()) {
+					if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
+						continue;
+					}
+					operation.getParameters().add(
+							new Parameter()
+									.name("filter[" + child.getName() + "]")
+									.description("Filter by " + child.getName() + " (csv)")
+									.in("query")
+									.schema(new StringSchema())
+					);
+				}
+			}
+		}
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+		// Add include parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+
+		return operation;
+	}
+
+
+	private Operation generateDefaultGetRelationshipSingleOperation(MetaResource metaResource) {
+		Operation operation = generateDefaultOperation();
+		for (MetaElement metaElement : metaResource.getChildren()) {
+			if (metaElement instanceof MetaAttribute) {
+				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
+				if (metaAttribute.isPrimaryKeyAttribute()) {
+					operation.getParameters().add(
+							new Parameter()
+									.name(metaElement.getName())
+									.in("path")
+									.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()))
+					);
+				}
+			}
+		}
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+		// Add include parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+
+		return operation;
+	}
+
+
+
 	private Operation generateDefaultDeleteSingleOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 		for (MetaElement metaElement : metaResource.getChildren()) {
@@ -366,6 +463,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// Add fields[resource] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
 
+		// TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
 		// Add filter[<>] parameters
 		// Only the most basic filters are documented
 		for (MetaElement child : metaResource.getChildren()) {
@@ -638,7 +736,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
 		// TODO: alternatively, have a config setting for this generator that essentially duplicates the above
 		//
-		return "/todo/" + metaResource.getResourcePath();
+		return "/" + metaResource.getResourcePath();
 	}
 
 	protected Schema transformMetaResourceField(MetaType metaType) {
