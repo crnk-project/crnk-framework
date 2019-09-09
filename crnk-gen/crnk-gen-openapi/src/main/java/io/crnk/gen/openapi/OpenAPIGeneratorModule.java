@@ -336,17 +336,19 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	private Parameter getPrimaryKeyParameter(MetaResource metaResource) {
+		Parameter parameter = new Parameter();
 		for (MetaElement metaElement : metaResource.getChildren()) {
 			if (metaElement instanceof MetaAttribute) {
 				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
 				if (metaAttribute.isPrimaryKeyAttribute()) {
-					return new Parameter()
+					parameter
 							.name(metaElement.getName())
 							.in("path")
 							.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()));
 				}
 			}
 		}
+		return parameter;
 	}
 
 	private Operation generateDefaultGetRelationshipListOperation(MetaResource metaResource, MetaResource relatedMetaResource) {
