@@ -795,7 +795,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return "/" + metaResource.getResourcePath();
 	}
 
-	protected Schema transformMetaResourceField(MetaType metaType) {
+	private Schema transformMetaResourceField(MetaType metaType) {
 		if (metaType instanceof MetaResource) {
 			return get$refSchema(((MetaResource) metaType).getResourceType() + "Reference");
 		} else if (metaType instanceof MetaCollectionType) {
@@ -866,7 +866,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 	}
 
-	protected Schema listResponseMixin() {
+	private Schema listResponseMixin() {
 		return new Schema()
 				.type("object")
 				.description("A page of results")
@@ -984,11 +984,11 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("a meta object containing non-standard meta-information about the error"));
 	}
 
-	protected Schema get$refSchema(String typeName) {
+	private Schema get$refSchema(String typeName) {
 		return new Schema().$ref("#/components/schemas/" + typeName);
 	}
 
-	protected Schema responseMixin() {
+	private Schema responseMixin() {
 		return new Schema()
 				.type("object")
 				.description("A JSON-API document with a single resource")
@@ -1028,7 +1028,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("Included resources"));
 	}
 
-	protected Schema getTypeSchema(String typeName) {
+	private Schema getTypeSchema(String typeName) {
 		Schema typeSchema = new Schema()
 				.type("string")
 				.description("The JSON:API resource type (" + typeName + ")");
@@ -1036,7 +1036,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return typeSchema;
 	}
 
-	protected Schema resourceResponse(String typeName) {
+	private Schema resourceResponse(String typeName) {
 		return new ComposedSchema()
 				.allOf(
 						Arrays.asList(
@@ -1050,7 +1050,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										.required(Arrays.asList("data"))));
 	}
 
-	protected Schema resourceListResponse(String typeName) {
+	private Schema resourceListResponse(String typeName) {
 		return new ComposedSchema()
 				.allOf(
 						Arrays.asList(
@@ -1064,7 +1064,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										.required(Arrays.asList("data"))));
 	}
 
-	protected Schema resourceReference(String typeName) {
+	private Schema resourceReference(String typeName) {
 		return new Schema()
 				.type("object")
 				.addProperties(
@@ -1078,7 +1078,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				.required(Arrays.asList("id", "type"));
 	}
 
-	protected Schema resource(String resourceType, Map<String, Schema> attributes) {
+	private Schema resource(String resourceType, Map<String, Schema> attributes) {
 		//Defines a schema for a JSON-API resource, without the enclosing top-level document.
 		return new ComposedSchema()
 				.allOf(
@@ -1102,7 +1102,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										.required(Arrays.asList("attributes"))));
 	}
 
-	protected Schema resourceRequestBody(String resourceType, Map<String, Schema> attributes) {
+	private Schema resourceRequestBody(String resourceType, Map<String, Schema> attributes) {
 		//Defines a schema for the PATCH parameters of a JSON:API resource
 		return new ComposedSchema()
 				.allOf(
@@ -1117,7 +1117,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 														.properties(attributes))));
 	}
 
-	protected Schema singleRelationshipBody(String resourceType) {
+	private Schema singleRelationshipBody(String resourceType) {
 		//Defines a schema for the PATCH parameters of a JSON:API resource
 		return new ObjectSchema()
 				.addProperties(
@@ -1125,7 +1125,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 						get$refSchema(resourceType + "Reference"));
 	}
 
-	protected Schema multiRelationshipBody(String resourceType) {
+	private Schema multiRelationshipBody(String resourceType) {
 		//Defines a schema for the PATCH parameters of a JSON:API resource
 		return new ObjectSchema()
 				.addProperties(
@@ -1134,7 +1134,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.items(get$refSchema(resourceType + "Reference")));
 	}		
 
-	protected Schema hasOneRelationshipData(String name) {
+	private Schema hasOneRelationshipData(String name) {
 		return new Schema()
 				.type("object")
 				.addProperties(
@@ -1149,12 +1149,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								.description("Type of related " + name + " resource"));
 	}
 
-	protected ArraySchema hasManyRelationshipData(String name) {
+	private ArraySchema hasManyRelationshipData(String name) {
 		return (new ArraySchema())
 				.items(hasOneRelationshipData(name));
 	}
 
-	protected Schema getRelationshipSchema(String name, String relationshipType) {
+	private Schema getRelationshipSchema(String name, String relationshipType) {
 		if (relationshipType.equals("hasOne")) {
 			return hasOneRelationshipData(name);
 		} else if (relationshipType.equals("hasMany")) {
@@ -1163,7 +1163,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return null;
 	}
 
-	protected Schema relationship(String name, String relationshipType, boolean nullable) {
+	private Schema relationship(String name, String relationshipType, boolean nullable) {
 		Schema schema = new Schema()
 				.type("object")
 				.addProperties(
@@ -1198,7 +1198,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 
-	protected String getTypeFromRef(String ref) {
+	private String getTypeFromRef(String ref) {
 		int lastSlash = ref.lastIndexOf("/");
 		int lastHash = ref.lastIndexOf("#");
 		return ref.substring(Math.max(lastSlash, lastHash) + 1);
