@@ -121,10 +121,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			// Add relationship modification request body
 			Schema singleRelationshipBody = singleRelationshipBody(metaResource.getResourceType());
 			openApi.getComponents().addSchemas(metaResource.getName() + "Relationship", singleRelationshipBody);
+			openApi.getComponents().addResponses(metaResource.getName() + "RelationshipResponse", getRelationshipResponse(metaResource.getName()));
 
-			// Add relationship modification request body
+			// Add relationships modification request body
 			Schema multiRelationshipBody = multiRelationshipBody(metaResource.getResourceType());
 			openApi.getComponents().addSchemas(metaResource.getName() + "Relationships", multiRelationshipBody);
+			openApi.getComponents().addResponses(metaResource.getName() + "RelationshipsResponse", getRelationshipsResponse(metaResource.getName()));
 
 			// Add Response Schema
 			Schema resourceResponse = resourceResponse(metaResource.getName());
@@ -192,19 +194,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								relationPathItem.setPost(mergeOperations(postRelationshipOperation, relationPathItem.getPost()));
 								ApiResponses postRelationshipResponses = generateDefaultResponses(relatedMetaResource);
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								postRelationshipResponses.addApiResponse(
-										"200",
-										new ApiResponse()
-												.description("Created")
-												.content(
-														new Content()
-																.addMediaType(
-																		"application/json",
-																		new MediaType()
-																				.schema(
-																						new Schema()
-																								.$ref(relatedMetaResource.getName() + responsePostFix))))
-								);
+								postRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								postRelationshipOperation.setResponses(postRelationshipResponses);
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
@@ -215,45 +205,20 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								relationPathItem.setPatch(mergeOperations(patchRelationshipOperation, relationPathItem.getPatch()));
 								ApiResponses patchRelationshipResponses = generateDefaultResponses(relatedMetaResource);
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								patchRelationshipResponses.addApiResponse(
-										"200",
-										new ApiResponse()
-												.description("Created")
-												.content(
-														new Content()
-																.addMediaType(
-																		"application/json",
-																		new MediaType()
-																				.schema(
-																						new Schema()
-																								.$ref(relatedMetaResource.getName() + responsePostFix))))
-								);
+								patchRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								patchRelationshipOperation.setResponses(patchRelationshipResponses);
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
 
 								// If the relationship is updatable then we imply that it is deletable.
 
-								// TODO: Figure out how to handle the response body error in OpenAPI, which specifies that DELETE method's request body will be ignored.
+								// TODO: OpenAPI does not allow DELETE methods to define a RequestBody (https://github.com/OAI/OpenAPI-Specification/issues/1801)
 								Operation deleteRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
-								;
 								deleteRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setDelete(mergeOperations(deleteRelationshipOperation, relationPathItem.getDelete()));
 								ApiResponses deleteRelationshipResponses = generateDefaultResponses(relatedMetaResource);
 //								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								deleteRelationshipResponses.addApiResponse(
-										"200",
-										new ApiResponse()
-												.description("Created")
-												.content(
-														new Content()
-																.addMediaType(
-																		"application/json",
-																		new MediaType()
-																				.schema(
-																						new Schema()
-																								.$ref(relatedMetaResource.getName() + responsePostFix))))
-								);
+								deleteRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								deleteRelationshipOperation.setResponses(deleteRelationshipResponses);
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 							}
@@ -417,7 +382,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			if (metaElement instanceof MetaAttribute) {
 				MetaAttribute metaAttribute = (MetaAttribute) metaElement;
 				if (metaAttribute.isPrimaryKeyAttribute()) {
-					parameter
+					parameter = parameter
 							.name(metaElement.getName())
 							.in("path")
 							.schema(transformMetaResourceField(((MetaAttribute) metaElement).getType()));
@@ -516,9 +481,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	private Operation generateDefaultGetListOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 
-		// Add fields[resource] parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
-
 		// TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
 		// Add filter[<>] parameters
 		// Only the most basic filters are documented
@@ -539,6 +501,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				}
 			}
 		}
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
 
 		// Add include parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
@@ -637,6 +601,32 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// responses...
 
 		return responses;
+	}
+
+	private ApiResponse getRelationshipResponse(String name) {
+		return new ApiResponse()
+				.description(HttpStatus.toMessage(200))
+				.content(
+						new Content()
+								.addMediaType(
+										"application/json",
+										new MediaType()
+												.schema(
+														new Schema()
+																.$ref(name + "Relationship"))));
+	}
+
+	private ApiResponse getRelationshipsResponse(String name) {
+		return new ApiResponse()
+				.description(HttpStatus.toMessage(200))
+				.content(
+						new Content()
+								.addMediaType(
+										"application/json",
+										new MediaType()
+												.schema(
+														new Schema()
+																.$ref(name + "Relationships"))));
 	}
 
 	private ApiResponse getSingleResponse(String name) {
@@ -1195,13 +1185,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return schema.addProperties(
 				"data",
 				getRelationshipSchema(name, relationshipType));
-	}
-
-
-	private String getTypeFromRef(String ref) {
-		int lastSlash = ref.lastIndexOf("/");
-		int lastHash = ref.lastIndexOf("#");
-		return ref.substring(Math.max(lastSlash, lastHash) + 1);
 	}
 
 	@Override
