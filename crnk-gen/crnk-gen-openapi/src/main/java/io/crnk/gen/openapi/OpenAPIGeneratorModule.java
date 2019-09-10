@@ -51,6 +51,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(getStandardApiErrorResponses());
 		openApi.getComponents().parameters(getStandardPagingParameters());
+		openApi.getComponents().addParameters("filter", generateStandardFilterParameter());
 		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
 				.description("Accepted")
 				.content(new Content()
@@ -225,7 +226,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 						}
 					}
 				}
-
 			}
 
 			// TODO: Add Support for Bulk Operations
@@ -399,23 +399,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
 		// Add filter[<>] parameters
 		// Only the most basic filters are documented
-		for (MetaElement child : relatedMetaResource.getChildren()) {
-			if (child instanceof MetaResourceField) {
-				MetaResourceField metaResourceField = (MetaResourceField) child;
-				if (metaResourceField.isFilterable()) {
-					if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
-						continue;
-					}
-					operation.getParameters().add(
-							new Parameter()
-									.name("filter[" + child.getName() + "]")
-									.description("Filter by " + child.getName() + " (csv)")
-									.in("query")
-									.schema(new StringSchema())
-					);
-				}
-			}
-		}
+		addFilters(relatedMetaResource, operation);
 		// Add fields[resource] parameter
 		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + relatedMetaResource.getResourceType() + "Fields"));
 		// Add include parameter
@@ -481,7 +465,31 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	private Operation generateDefaultGetListOperation(MetaResource metaResource) {
 		Operation operation = generateDefaultOperation();
 
+		// Add filters for resource
+		addFilters(metaResource, operation);
+
+		// Add fields[resource] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
+
+		// Add include parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
+
+		// Add sort parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Sort"));
+
+		// Add page[limit] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageLimit"));
+
+		// Add page[offset] parameter
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageOffset"));
+
+		return operation;
+	}
+
+	private Operation addFilters(MetaResource metaResource, Operation operation) {
 		// TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
+		operation.getParameters().add(new Parameter().$ref("#/components/parameters/filter"));
+
 		// Add filter[<>] parameters
 		// Only the most basic filters are documented
 		for (MetaElement child : metaResource.getChildren()) {
@@ -501,21 +509,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				}
 			}
 		}
-		// Add fields[resource] parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Fields"));
-
-		// Add include parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Include"));
-
-		// Add sort parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + metaResource.getResourceType() + "Sort"));
-
-		// Add page[limit] parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageLimit"));
-
-		// Add page[offset] parameter
-		operation.getParameters().add(new Parameter().$ref("#/components/parameters/pageOffset"));
-
 		return operation;
 	}
 
@@ -680,6 +673,18 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 
 		return responses;
+	}
+
+	private Parameter generateStandardFilterParameter() {
+		return new Parameter().name("filter")
+				.description("Customizable query (experimental)")
+				.in("query")
+				.schema(
+						new ObjectSchema()
+								.addProperties("AND", new ObjectSchema())
+								.addProperties("OR", new ObjectSchema())
+								.addProperties("NOT", new ObjectSchema())
+								.additionalProperties(true));
 	}
 
 	private Map<String, Parameter> getStandardPagingParameters() {
