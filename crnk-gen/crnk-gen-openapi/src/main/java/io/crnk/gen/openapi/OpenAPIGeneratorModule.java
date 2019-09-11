@@ -304,7 +304,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 				operation.setResponses(generateDefaultResponses(metaResource));
 				operation.getResponses().addApiResponse("200", new ApiResponse().
-						description("Ok")
+						description("OK")
 						.content(new Content()
 								.addMediaType("application/json",
 										new MediaType().schema(new Schema()
@@ -637,6 +637,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return responses;
 	}
 
+	// TODO: Refactor all standard 200 series responses
 	private ApiResponse getRelationshipResponse(String name) {
 		return new ApiResponse()
 				.description(HttpStatus.toMessage(200))

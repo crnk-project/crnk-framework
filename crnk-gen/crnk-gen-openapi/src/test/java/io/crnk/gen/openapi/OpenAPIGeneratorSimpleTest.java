@@ -6,7 +6,12 @@ import io.crnk.meta.MetaModule;
 import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.provider.resource.ResourceMetaProvider;
 import io.crnk.test.mock.SimpleTestModule;
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,10 +46,34 @@ public class OpenAPIGeneratorSimpleTest {
 	@Test
 	public void testGeneration() throws IOException {
 		File buildDir = new File("build/tmp/openapi");
+		String outputPath = buildDir.toString() + "/generated/source/openapi/openapi.yaml";
+		String templatePath = buildDir.toString() + "/openapi-template.yml";
 		generatorModule = new OpenAPIGeneratorModule();
 		generatorModule.getConfig().setBuildDir(buildDir);
 		generatorModule.getConfig().setTemplateName("openapi-template.yml");
 		generatorModule.initDefaults(buildDir);
 		generatorModule.generate(metaModule.getLookup());
+		OpenAPI openApi = new OpenAPIV3Parser().read(outputPath);
+		OpenAPI openApiTemplate = new OpenAPIV3Parser().read(outputPath);
+		Yaml.pretty(openApi);
+
+		// Gets values from Template
+		Assert.assertEquals(openApiTemplate.getOpenapi(), openApi.getOpenapi());
+		Assert.assertEquals(openApiTemplate.getInfo(), openApi.getInfo());
+		Assert.assertEquals(openApiTemplate.getServers(), openApi.getServers());
+
+		// Compare templated and generated GET /tasks
+		Operation templateGetTasks = openApiTemplate.getPaths().get("/tasks").getGet();
+		Operation generatedGetTasks = openApiTemplate.getPaths().get("/tasks").getGet();
+		Assert.assertEquals(templateGetTasks.getSummary(), generatedGetTasks.getSummary());
+		Assert.assertEquals(templateGetTasks.getDescription(), generatedGetTasks.getDescription());
+		Assert.assertEquals(templateGetTasks.getOperationId(), generatedGetTasks.getOperationId());
+		Assert.assertEquals(templateGetTasks.getExtensions(), generatedGetTasks.getExtensions());
+
+		// Compare templated and generated GET /tasks
+		Operation templateGetTaskById = openApiTemplate.getPaths().get("/tasks/{id}").getGet();
+		Operation generatedGetTaskById = openApiTemplate.getPaths().get("/tasks/{id}").getGet();
+		Assert.assertEquals(templateGetTaskById.getExtensions(), generatedGetTaskById.getExtensions());
+
 	}
 }
