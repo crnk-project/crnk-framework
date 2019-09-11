@@ -49,16 +49,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		OpenAPI openApi = config.getOpenAPI();
 
 		openApi.getComponents().schemas(generateDefaultSchemas());
-		openApi.getComponents().responses(getStandardApiErrorResponses());
+		openApi.getComponents().responses(generateStandardApiResponses());
 		openApi.getComponents().parameters(getStandardPagingParameters());
 		openApi.getComponents().addParameters("filter", generateStandardFilterParameter());
-		openApi.getComponents().getResponses().put("AcceptedResponse", new ApiResponse()
-				.description("Accepted")
-				.content(new Content()
-						.addMediaType("application/json",
-								new MediaType().schema(new Schema()
-										.$ref("Accepted"))))
-		);
+
 		// TODO: Respect @JsonApiExposed(false)
 		MetaLookup metaLookup = (MetaLookup) meta;
 		List<MetaResource> metaResources = getJsonApiResources(metaLookup);
@@ -285,13 +279,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										new MediaType().schema(new Schema()
 												.$ref(metaResource.getName() + "Response"))))
 				);
-
-				operation.getResponses().addApiResponse("202", new ApiResponse()
-						.$ref("AcceptedResponse"));
-
-				operation.getResponses().addApiResponse("204", new ApiResponse()
-						.description("No Content"));
-
 			}
 
 			// TODO: Add Support for Bulk Operations
@@ -310,12 +297,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										new MediaType().schema(new Schema()
 												.$ref(metaResource.getName() + "Response"))))
 				);
-
-				operation.getResponses().addApiResponse("202", new ApiResponse()
-						.$ref("AcceptedResponse"));
-
-				operation.getResponses().addApiResponse("204", new ApiResponse()
-						.description("No Content"));
 			}
 
 			// TODO: Add Support for Bulk Operations
@@ -327,8 +308,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				operation.setResponses(generateDefaultResponses(metaResource));
-				operation.getResponses().addApiResponse("204", new ApiResponse()
-						.description("The resource was deleted successfully"));
+				operation.getResponses().addApiResponse("200", new ApiResponse()
+						.description("OK"));
 			}
 		}
 
@@ -341,16 +322,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	 */
 	private Map<String, Schema> generateDefaultSchemas() {
 		Map<String, Schema> schemas = new LinkedHashMap<>();
-
-		// Standard "Accepted" job response schema
-		schemas.put("Accepted", new Schema()
-				.type("object")
-				.addProperties(
-						"id",
-						new Schema()
-								.type("string")
-								.description("a unique identifier for this pending action"))
-		);
 
 		// Standard Error Schema
 		schemas.put("ApiError", jsonApiError());
@@ -623,7 +594,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	private ApiResponses generateDefaultResponses(MetaResource metaResource) {
 		ApiResponses responses = new ApiResponses();
 
-		Map<String, ApiResponse> apiResponseCodes = getStandardApiErrorResponses();
+		responses.addApiResponse("202", new ApiResponse().$ref("202"));
+		responses.addApiResponse("204", new ApiResponse().$ref("204"));
+
+		Map<String, ApiResponse> apiResponseCodes = generateStandardApiErrorResponses();
 		for (Map.Entry<String, ApiResponse> entry : apiResponseCodes.entrySet()) {
 
 			// TODO: Check to see (somehow) if the metaResource returns this response code
@@ -698,7 +672,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 		See "Reusing Responses" https://swagger.io/docs/specification/describing-responses/
 	 */
-	private Map<String, ApiResponse> getStandardApiErrorResponses() {
+	private Map<String, ApiResponse> generateStandardApiErrorResponses() {
 		Map<String, ApiResponse> responses = new LinkedHashMap<>();
 
 		List<Integer> responseCodes = getStandardHttpStatusCodes();
@@ -715,6 +689,55 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		}
 
 		return responses;
+	}
+
+	private Map<String, ApiResponse> generateStandardApiSuccessResponses() {
+		Map<String, ApiResponse> responses = new LinkedHashMap<>();
+		// TODO: Add Content-Type, response headers, meta object on 200
+		responses.put(
+				"DEFAULT_DELETE_200",
+				new ApiResponse()
+						.description("OK")
+						.content(new Content()
+								.addMediaType("application/vnd.api+json",
+										new MediaType()
+												.schema(
+														new ObjectSchema()
+																.addProperties(
+																		"meta",
+																		new ObjectSchema()
+																				.description("meta"))))));
+		responses.put(
+				"202",
+				new ApiResponse()
+								.description("Accepted")
+								.content(new Content()
+										.addMediaType("application/vnd.api+json",
+												new MediaType()
+														.schema(
+																new ObjectSchema()
+																		.addProperties(
+																				"id",
+																				new StringSchema()
+																						.description("a unique identifier for this pending action"))))));
+		responses.put(
+				"204",
+				new ApiResponse()
+						.description("No Content"));
+
+		return responses;
+	}
+
+	private Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
+		Map<String, ApiResponse> merged = new TreeMap<>();
+		for (Map<String, ApiResponse> map : maps) {
+			merged.putAll(map);
+		}
+		return merged;
+	}
+
+	private Map<String, ApiResponse> generateStandardApiResponses() {
+		return mergeApiResponses(generateStandardApiSuccessResponses(), generateStandardApiErrorResponses());
 	}
 
 	private Parameter generateStandardFilterParameter() {
