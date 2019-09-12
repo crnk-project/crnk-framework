@@ -20,7 +20,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class OpenAPIGeneratorSimpleTest {
@@ -108,10 +110,10 @@ public class OpenAPIGeneratorSimpleTest {
 			for (Operation operation: pathItem.readOperationsMap().values()) {
 
 				// TODO: Ensure responses are sorted
-//				 List<String> responses = new ArrayList<>(operation.getResponses().keySet());
-//				 List<String> sorted = new ArrayList<>(responses);
-//				 Collections.sort(sorted);
-//				 Assert.assertEquals("Responses should be sorted.", sorted, responses);
+				 List<String> responses = new ArrayList<>(operation.getResponses().keySet());
+				 List<String> sorted = new ArrayList<>(responses);
+				 Collections.sort(sorted);
+				 Assert.assertEquals("Responses should be sorted.", sorted, responses);
 				
 			}
 		}

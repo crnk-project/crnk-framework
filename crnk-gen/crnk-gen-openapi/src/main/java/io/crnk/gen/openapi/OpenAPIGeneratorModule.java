@@ -51,6 +51,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		openApi.getComponents().schemas(generateDefaultSchemas());
 		openApi.getComponents().responses(generateStandardApiResponses());
 		openApi.getComponents().parameters(getStandardPagingParameters());
+		openApi.getComponents().addParameters("contentType", generateDefaultParameters());
 		openApi.getComponents().addParameters("filter", generateStandardFilterParameter());
 
 		// TODO: Respect @JsonApiExposed(false)
@@ -141,18 +142,18 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				Operation getListOperation = generateDefaultGetListOperation(metaResource);
 				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
 				listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
-				ApiResponses getListResponses = generateDefaultResponses(metaResource);
-				getListResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "ListResponse"));
-				getListOperation.setResponses(getListResponses);
+				Map<String, ApiResponse> getListResponses = generateDefaultResponsesMap(metaResource);
+				getListResponses.put("200", new ApiResponse().$ref(metaResource.getName() + "ListResponse"));
+				getListOperation.setResponses(apiResponsesFromMap(getListResponses));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
 				// Single Response
 				Operation getSingleOperation = generateDefaultGetSingleOperation(metaResource);
 				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
 				singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
-				ApiResponses getSingleResponses = generateDefaultResponses(metaResource);
-				getSingleResponses.addApiResponse("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
-				getSingleOperation.setResponses(getSingleResponses);
+        Map<String, ApiResponse> getSingleResponses = generateDefaultResponsesMap(metaResource);
+				getSingleResponses.put("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
+				getSingleOperation.setResponses(apiResponsesFromMap(getSingleResponses));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
 				// Generate GET Operations for /api/A/1/B relationship path
@@ -179,10 +180,10 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										: generateDefaultGetRelationshipOperation(metaResource, relatedMetaResource);
 								getRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + metaResource.getResourceType() + " resource");
 								relationPathItem.setGet(mergeOperations(getRelationshipOperation, relationPathItem.getGet()));
-								ApiResponses getRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+								Map<String, ApiResponse> getRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "ListResponse" : "Response";
-								getRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
-								getRelationshipOperation.setResponses(getRelationshipResponses);
+								getRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
+								getRelationshipOperation.setResponses(apiResponsesFromMap(getRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
 								// Add relationships/ path
@@ -191,50 +192,50 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										: generateDefaultGetRelationshipOperation(metaResource, relatedMetaResource);
 								getSparseRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " references related to a " + metaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setGet(mergeOperations(getSparseRelationshipOperation, sparseRelationshipPathItem.getGet()));
-								ApiResponses getSparseRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> getSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "RelationshipsResponse" : "RelationshipResponse";
-								getSparseRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix));
-								getSparseRelationshipOperation.setResponses(getSparseRelationshipResponses);
+								getSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix));
+								getSparseRelationshipOperation.setResponses(apiResponsesFromMap(getSparseRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + "/relationships" + getApiPath(relatedMetaResource), sparseRelationshipPathItem);
 							}
 							if (mrf.isInsertable()) {
 								Operation postRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								postRelationshipOperation.setDescription("Create " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setPost(mergeOperations(postRelationshipOperation, relationPathItem.getPost()));
-								ApiResponses postRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> postRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								postRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-								postRelationshipOperation.setResponses(postRelationshipResponses);
+								postRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
+								postRelationshipOperation.setResponses(apiResponsesFromMap(postRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
 								// Add relationships/ path
 								Operation postSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								postSparseRelationshipOperation.setDescription("Create " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setPost(mergeOperations(postSparseRelationshipOperation, sparseRelationshipPathItem.getPost()));
-								ApiResponses postSparseRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> postSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								postSparseRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
-								postSparseRelationshipOperation.setResponses(postSparseRelationshipResponses);
+								postSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
+								postSparseRelationshipOperation.setResponses(apiResponsesFromMap(postSparseRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + "/relationships" + getApiPath(relatedMetaResource), sparseRelationshipPathItem);
 							}
 							if (mrf.isUpdatable()) {
 								Operation patchRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								patchRelationshipOperation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setPatch(mergeOperations(patchRelationshipOperation, relationPathItem.getPatch()));
-								ApiResponses patchRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> patchRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								patchRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-								patchRelationshipOperation.setResponses(patchRelationshipResponses);
+								patchRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
+								patchRelationshipOperation.setResponses(apiResponsesFromMap(patchRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
 								// Add relationships/ path
 								Operation patchSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								patchSparseRelationshipOperation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setPatch(mergeOperations(patchSparseRelationshipOperation, sparseRelationshipPathItem.getPatch()));
-								ApiResponses patchSparseRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> patchSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								patchSparseRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
-								patchSparseRelationshipOperation.setResponses(patchSparseRelationshipResponses);
+								patchSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
+								patchSparseRelationshipOperation.setResponses(apiResponsesFromMap(patchSparseRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + "/relationships" + getApiPath(relatedMetaResource), sparseRelationshipPathItem);
 
 								// If the relationship is updatable then we imply that it is deletable.
@@ -243,19 +244,19 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation deleteRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
 								deleteRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setDelete(mergeOperations(deleteRelationshipOperation, relationPathItem.getDelete()));
-								ApiResponses deleteRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> deleteRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 //								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								deleteRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-								deleteRelationshipOperation.setResponses(deleteRelationshipResponses);
+								deleteRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
+								deleteRelationshipOperation.setResponses(apiResponsesFromMap(deleteRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + getApiPath(relatedMetaResource), relationPathItem);
 
 								Operation deleteSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
 								deleteSparseRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setDelete(mergeOperations(deleteSparseRelationshipOperation, sparseRelationshipPathItem.getDelete()));
-								ApiResponses deleteSparseRelationshipResponses = generateDefaultResponses(relatedMetaResource);
+                Map<String, ApiResponse> deleteSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
 //								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-								deleteSparseRelationshipResponses.addApiResponse("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-								deleteSparseRelationshipOperation.setResponses(deleteSparseRelationshipResponses);
+								deleteSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
+								deleteSparseRelationshipOperation.setResponses(apiResponsesFromMap(deleteSparseRelationshipResponses));
 								openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource) + "/relationships" + getApiPath(relatedMetaResource), sparseRelationshipPathItem);
 							}
 						}
@@ -271,14 +272,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
-				operation.setResponses(generateDefaultResponses(metaResource));
-				operation.getResponses().addApiResponse("201", new ApiResponse().
-						description("Created")
-						.content(new Content()
-								.addMediaType("application/json",
-										new MediaType().schema(new Schema()
-												.$ref(metaResource.getName() + "Response"))))
-				);
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        responses.put("201", new ApiResponse()
+            .description("Created")
+            .content(new Content()
+                .addMediaType("application/vnd.api+json",
+                    new MediaType().schema(new Schema()
+                        .$ref(metaResource.getName() + "Response")))));
+				operation.setResponses(apiResponsesFromMap(responses));
 			}
 
 			// TODO: Add Support for Bulk Operations
@@ -289,14 +290,14 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
-				operation.setResponses(generateDefaultResponses(metaResource));
-				operation.getResponses().addApiResponse("200", new ApiResponse().
-						description("OK")
-						.content(new Content()
-								.addMediaType("application/json",
-										new MediaType().schema(new Schema()
-												.$ref(metaResource.getName() + "Response"))))
-				);
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        responses.put("200", new ApiResponse()
+            .description("OK")
+            .content(new Content()
+                .addMediaType("application/vnd.api+json",
+                    new MediaType().schema(new Schema()
+                        .$ref(metaResource.getName() + "Response")))));
+        operation.setResponses(apiResponsesFromMap(responses));
 			}
 
 			// TODO: Add Support for Bulk Operations
@@ -307,9 +308,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
-				operation.setResponses(generateDefaultResponses(metaResource));
-				operation.getResponses().addApiResponse("200", new ApiResponse()
-						.description("OK"));
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        responses.put("200", new ApiResponse().description("OK"));
+        operation.setResponses(apiResponsesFromMap(responses));
 			}
 		}
 
@@ -542,7 +543,11 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	}
 
 	private Operation generateDefaultOperation() {
-		return new Operation().parameters(generateDefaultParameters());
+		return new Operation().parameters(
+		    new ArrayList<Parameter>(
+		        Arrays.asList(
+		            new Parameter()
+                    .$ref("#/components/parameters/contentType"))));
 	}
 
 	private Operation mergeOperations(Operation newOperation, Operation existingOperation) {
@@ -569,15 +574,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return newOperation;
 	}
 
-	private List<Parameter> generateDefaultParameters() {
-		return new ArrayList<Parameter>(
-				Arrays.asList(
-						new Parameter()
-								.name("Content-Type")
-								.in("header")
-								.schema(generateContentTypeSchema())
-								.required(true)
-				));
+	private Parameter generateDefaultParameters() {
+		return new Parameter()
+        .name("Content-Type")
+        .in("header")
+        .schema(generateContentTypeSchema())
+        .required(true);
 	}
 
 	private Schema generateContentTypeSchema() {
@@ -591,18 +593,18 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		Generate a sensible, default ApiResponses that is populated with references
 		to all Error Responses for a metaResource
 	 */
-	private ApiResponses generateDefaultResponses(MetaResource metaResource) {
-		ApiResponses responses = new ApiResponses();
+	private Map<String, ApiResponse> generateDefaultResponsesMap(MetaResource metaResource) {
+    Map<String, ApiResponse> responses = new TreeMap();
 
-		responses.addApiResponse("202", new ApiResponse().$ref("202"));
-		responses.addApiResponse("204", new ApiResponse().$ref("204"));
+		responses.put("202", new ApiResponse().$ref("202"));
+		responses.put("204", new ApiResponse().$ref("204"));
 
 		Map<String, ApiResponse> apiResponseCodes = generateStandardApiErrorResponses();
 		for (Map.Entry<String, ApiResponse> entry : apiResponseCodes.entrySet()) {
 
 			// TODO: Check to see (somehow) if the metaResource returns this response code
 			// Add reference to error response stored in #/components/responses/<HttpCode>
-			responses.addApiResponse(entry.getKey(), new ApiResponse().$ref(entry.getKey()));
+			responses.put(entry.getKey(), new ApiResponse().$ref(entry.getKey()));
 		}
 
 		// Todo: Standard wrapper responses for single & multiple records
@@ -610,6 +612,12 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 		return responses;
 	}
+
+	private ApiResponses apiResponsesFromMap(Map<String, ApiResponse> responseMap) {
+	  ApiResponses responses = new ApiResponses();
+    responseMap.forEach(responses::addApiResponse);
+    return responses;
+  }
 
 	// TODO: Refactor all standard 200 series responses
 	private ApiResponse getRelationshipResponse(String name) {
@@ -693,20 +701,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 	private Map<String, ApiResponse> generateStandardApiSuccessResponses() {
 		Map<String, ApiResponse> responses = new LinkedHashMap<>();
-		// TODO: Add Content-Type, response headers, meta object on 200
-		responses.put(
-				"DEFAULT_DELETE_200",
-				new ApiResponse()
-						.description("OK")
-						.content(new Content()
-								.addMediaType("application/vnd.api+json",
-										new MediaType()
-												.schema(
-														new ObjectSchema()
-																.addProperties(
-																		"meta",
-																		new ObjectSchema()
-																				.description("meta"))))));
 		responses.put(
 				"202",
 				new ApiResponse()
