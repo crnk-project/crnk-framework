@@ -43,7 +43,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 	@Override
 	public void generate(Object meta) throws IOException {
 		LOGGER.info("performing openapi generation");
-		OpenAPI openApi = new OASGenerator(config.getOpenAPI()).getOpenApi();
+		OASGenerator oasGenerator = new OASGenerator(config.getOpenAPI());
+		OpenAPI openApi = oasGenerator.getOpenApi();
 
 		// TODO: Respect @JsonApiExposed(false)
 		MetaLookup metaLookup = (MetaLookup) meta;
@@ -53,60 +54,48 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			PathItem singlePathItem = openApi.getPaths().getOrDefault(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), new PathItem());
 
       OASResource oasResource = new OASResource(metaResource);
+      oasGenerator.register(oasResource);
+      
+			if (metaResource.isReadable()) {
+				// List Response
+				Operation getListOperation = oasResource.generateDefaultGetListOperation(metaResource);
+				listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
+				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
-			// Add Fields Parameter
-			openApi.getComponents().addParameters(metaResource.getResourceType() + "Fields", oasResource.generateDefaultFieldsParameter());
+				// Single Response
+				Operation getSingleOperation = oasResource.generateDefaultGetSingleOperation(metaResource);
+				singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
+			}
+			// TODO: Add Support for Bulk Operations
+			if (metaResource.isInsertable()) {
+				// List Response
+				Operation operation = oasResource.generateDefaultPostListOperation();
+				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
+				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
+			}
 
-			// Add Include Parameter
-			openApi.getComponents().addParameters(metaResource.getResourceType() + "Include", oasResource.generateDefaultIncludeParameter());
+			// TODO: Add Support for Bulk Operations
+			if (metaResource.isUpdatable()) {
+				// Single Response
+				Operation operation = oasResource.generateDefaultPatchSingleOperation();
+				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
-			// Add Sort parameter
-			openApi.getComponents().addParameters(metaResource.getResourceType() + "Sort", oasResource.generateDefaultSortParameter());
+			}
 
-			// Add ReferenceType Schema
-			openApi.getComponents().addSchemas(metaResource.getResourceType() + "Reference", oasResource.resourceReference());
-
-			// Add Resource Schema
-			openApi.getComponents().addSchemas(metaResource.getName(), oasResource.resource());
-
-			// Add PATCH Resource Schema
-			openApi.getComponents().addSchemas(metaResource.getName() + "Patch", oasResource.patchResourceRequestBody());
-
-			// Add POST Resource Schema
-			openApi.getComponents().addSchemas(metaResource.getName() + "Post", oasResource.postResourceRequestBody());
-
-      // Add Response Schema
-      openApi.getComponents().addSchemas(metaResource.getName() + "Response", oasResource.resourceResponse());
-
-
-      // Add ListResponse Schema
-      openApi.getComponents().addSchemas(metaResource.getName() + "ListResponse", oasResource.resourceListResponse());
-
-			// Add relationship modification request body
-			openApi.getComponents().addSchemas(metaResource.getName() + "Relationship", oasResource.singleRelationshipBody());
-
-			// Add relationships modification request body
-			openApi.getComponents().addSchemas(metaResource.getName() + "Relationships", oasResource.multiRelationshipBody());
-
-      openApi.getComponents().addResponses(metaResource.getName() + "Response", oasResource.getSingleResponse());
-      openApi.getComponents().addResponses(metaResource.getName() + "ListResponse", oasResource.getListResponse());
-			openApi.getComponents().addResponses(metaResource.getName() + "RelationshipResponse", oasResource.getRelationshipResponse());
-			openApi.getComponents().addResponses(metaResource.getName() + "RelationshipsResponse", oasResource.getRelationshipsResponse());
+			// TODO: Add Support for Bulk Operations
+			if (metaResource.isDeletable()) {
+				// Single Response
+				Operation operation = oasResource.generateDefaultDeleteSingleOperation();
+				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
+				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
+			}
 
 			// Relationships can be accessed in 2 ways:
 			//  1.	/api/A/1/b  								The full related resource
 			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
 			if (metaResource.isReadable()) {
-				// List Response
-				Operation getListOperation = oasResource.generateDefaultGetListOperation(metaResource);
-        listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
-        openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
-
-				// Single Response
-				Operation getSingleOperation = oasResource.generateDefaultGetSingleOperation(metaResource);
-        singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
-				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
-
 				// Generate GET Operations for /api/A/1/B relationship path
 				for (MetaElement child : metaResource.getChildren()) {
 					if (child == null) {
@@ -211,30 +200,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				}
 			}
 
-			// TODO: Add Support for Bulk Operations
-			if (metaResource.isInsertable()) {
-				// List Response
-				Operation operation = oasResource.generateDefaultPostListOperation();
-				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
-				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
-			}
 
-			// TODO: Add Support for Bulk Operations
-			if (metaResource.isUpdatable()) {
-				// Single Response
-				Operation operation = oasResource.generateDefaultPatchSingleOperation();
-				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
-				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
-
-			}
-
-			// TODO: Add Support for Bulk Operations
-			if (metaResource.isDeletable()) {
-				// Single Response
-				Operation operation = oasResource.generateDefaultDeleteSingleOperation();
-				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
-				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
-			}
 		}
 
 		write("openapi", Yaml.pretty(openApi));
@@ -298,25 +264,6 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		// TODO: alternatively, have a config setting for this generator that essentially duplicates the above
 		//
 		return "/" + metaResource.getResourcePath();
-	}
-
-
-
-	private Schema singleRelationshipBody(String resourceType) {
-		//Defines a schema for the PATCH parameters of a JSON:API resource
-		return new ObjectSchema()
-				.addProperties(
-						"data",
-            OASUtils.get$refSchema(resourceType + "Reference"));
-	}
-
-	private Schema multiRelationshipBody(String resourceType) {
-		//Defines a schema for the PATCH parameters of a JSON:API resource
-		return new ObjectSchema()
-				.addProperties(
-						"data",
-						new ArraySchema()
-								.items(OASUtils.get$refSchema(resourceType + "Reference")));
 	}
 
 	private Schema hasOneRelationshipData(MetaResource metaResource) {

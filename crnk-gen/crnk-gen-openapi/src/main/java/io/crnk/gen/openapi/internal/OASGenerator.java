@@ -29,7 +29,15 @@ public class OASGenerator {
   public OpenAPI getOpenApi() {
     return openApi;
   }
-	// SCHEMAS
+
+  public OpenAPI register(OASResource oasResource) {
+		oasResource.getComponentParameters().forEach(openApi.getComponents()::addParameters);
+		oasResource.getComponentSchemas().forEach(openApi.getComponents()::addSchemas);
+		oasResource.getComponentResponses().forEach(openApi.getComponents()::addResponses);
+  	return openApi;
+	}
+
+  // SCHEMAS
 
 	/*
 		Generate default schemas that are common across the api.

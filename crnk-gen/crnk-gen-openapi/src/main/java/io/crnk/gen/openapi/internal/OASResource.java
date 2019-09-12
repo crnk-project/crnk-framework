@@ -25,36 +25,72 @@ public class OASResource {
   private Map<String, Schema> attributes;
   private Map<String, Schema> patchAttributes;
   private Map<String, Schema> postAttributes;
+	private Map<String, Parameter> componentParameters;
+	private Map<String, Schema> componentSchemas;
+	private Map<String, ApiResponse> componentResponses;
 
   public OASResource(MetaResource metaResource) {
     this.metaResource = metaResource;
     resourceName = metaResource.getName();
     resourceType = metaResource.getResourceType();
-    // Create Component
-    attributes = new HashMap<>();
-    patchAttributes = new HashMap<>();
-    postAttributes = new HashMap<>();
-    for (MetaElement child : metaResource.getChildren()) {
-      if (child == null) {
-        continue;
-      } else if (child instanceof MetaPrimaryKey) {
-        continue;
-      } else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
-        continue;
-      } else if (child instanceof MetaResourceField) {
-        MetaResourceField mrf = (MetaResourceField) child;
-        Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-        attributeSchema.nullable(mrf.isNullable());
-        attributes.put(mrf.getName(), attributeSchema);
-        if (((MetaResourceField) child).isUpdatable()) {
-          patchAttributes.put(mrf.getName(), attributeSchema);
-        }
-        if (((MetaResourceField) child).isInsertable()) {
-          postAttributes.put(mrf.getName(), attributeSchema);
-        }
-      }
-    }
+		initializeAttributes();
+		initializeComponentParameters();
+		initializeComponentSchemas();
+		initializeComponentResponses();
   }
+
+	private void initializeAttributes() {
+		attributes = new HashMap<>();
+		patchAttributes = new HashMap<>();
+		postAttributes = new HashMap<>();
+		for (MetaElement child : metaResource.getChildren()) {
+			if (child == null) {
+				continue;
+			} else if (child instanceof MetaPrimaryKey) {
+				continue;
+			} else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+				continue;
+			} else if (child instanceof MetaResourceField) {
+				MetaResourceField mrf = (MetaResourceField) child;
+				Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
+				attributeSchema.nullable(mrf.isNullable());
+				attributes.put(mrf.getName(), attributeSchema);
+				if (((MetaResourceField) child).isUpdatable()) {
+					patchAttributes.put(mrf.getName(), attributeSchema);
+				}
+				if (((MetaResourceField) child).isInsertable()) {
+					postAttributes.put(mrf.getName(), attributeSchema);
+				}
+			}
+		}
+	}
+
+	private void initializeComponentParameters() {
+  	componentParameters = new HashMap<>();
+  	componentParameters.put(resourceType + "Fields", generateDefaultFieldsParameter());
+		componentParameters.put(resourceType + "Include", generateDefaultIncludeParameter());
+		componentParameters.put(resourceType + "Sort", generateDefaultSortParameter());
+	}
+
+	private void initializeComponentSchemas() {
+		componentSchemas = new HashMap<>();
+		componentSchemas.put(resourceType + "Reference", resourceReference());
+		componentSchemas.put(resourceName, resource());
+		componentSchemas.put(resourceName + "Patch", patchResourceRequestBody());
+		componentSchemas.put(resourceName + "Post", postResourceRequestBody());
+		componentSchemas.put(resourceName + "Response", resourceResponse());
+		componentSchemas.put(resourceName + "ListResponse", resourceListResponse());
+		componentSchemas.put(resourceName + "Relationship", singleRelationshipBody());
+		componentSchemas.put(resourceName + "Relationships", multiRelationshipBody());
+	}
+
+	private void initializeComponentResponses() {
+		componentResponses = new HashMap<>();
+		componentResponses.put(resourceName + "Response", getSingleResponse());
+		componentResponses.put(resourceName + "ListResponse", getListResponse());
+		componentResponses.put(resourceName + "RelationshipResponse", getRelationshipResponse());
+		componentResponses.put(resourceName + "RelationshipsResponse", getRelationshipsResponse());
+	}
 
   public Map<String, Schema> getAttributes() {
     return attributes;
@@ -68,7 +104,19 @@ public class OASResource {
     return postAttributes;
   }
 
-  // SCHEMAS
+	public Map<String, Parameter> getComponentParameters() {
+		return componentParameters;
+	}
+
+	public Map<String, Schema> getComponentSchemas() {
+		return componentSchemas;
+	}
+
+	public Map<String, ApiResponse> getComponentResponses() {
+		return componentResponses;
+	}
+
+	// SCHEMAS
 
   public Schema resourceReference() {
  		return new Schema()
