@@ -142,7 +142,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				Operation getListOperation = generateDefaultGetListOperation(metaResource);
 				getListOperation.setDescription("Retrieve a List of " + metaResource.getResourceType() + " resources");
 				listPathItem.setGet(mergeOperations(getListOperation, listPathItem.getGet()));
-				Map<String, ApiResponse> getListResponses = generateDefaultResponsesMap(metaResource);
+				Map<String, ApiResponse> getListResponses = generateDefaultResponsesMap();
 				getListResponses.put("200", new ApiResponse().$ref(metaResource.getName() + "ListResponse"));
 				getListOperation.setResponses(apiResponsesFromMap(getListResponses));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
@@ -151,7 +151,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				Operation getSingleOperation = generateDefaultGetSingleOperation(metaResource);
 				getSingleOperation.setDescription("Retrieve a " + metaResource.getResourceType() + " resource");
 				singlePathItem.setGet(mergeOperations(getSingleOperation, singlePathItem.getGet()));
-        Map<String, ApiResponse> getSingleResponses = generateDefaultResponsesMap(metaResource);
+				Map<String, ApiResponse> getSingleResponses = generateDefaultResponsesMap();
 				getSingleResponses.put("200", new ApiResponse().$ref(metaResource.getName() + "Response"));
 				getSingleOperation.setResponses(apiResponsesFromMap(getSingleResponses));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
@@ -180,7 +180,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										: generateDefaultGetRelationshipOperation(metaResource, relatedMetaResource);
 								getRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + metaResource.getResourceType() + " resource");
 								relationPathItem.setGet(mergeOperations(getRelationshipOperation, relationPathItem.getGet()));
-								Map<String, ApiResponse> getRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> getRelationshipResponses = generateDefaultResponsesMap();
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "ListResponse" : "Response";
 								getRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
 								getRelationshipOperation.setResponses(apiResponsesFromMap(getRelationshipResponses));
@@ -192,7 +192,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 										: generateDefaultGetRelationshipOperation(metaResource, relatedMetaResource);
 								getSparseRelationshipOperation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " references related to a " + metaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setGet(mergeOperations(getSparseRelationshipOperation, sparseRelationshipPathItem.getGet()));
-                Map<String, ApiResponse> getSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> getSparseRelationshipResponses = generateDefaultResponsesMap();
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "RelationshipsResponse" : "RelationshipResponse";
 								getSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix));
 								getSparseRelationshipOperation.setResponses(apiResponsesFromMap(getSparseRelationshipResponses));
@@ -202,7 +202,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation postRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								postRelationshipOperation.setDescription("Create " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setPost(mergeOperations(postRelationshipOperation, relationPathItem.getPost()));
-                Map<String, ApiResponse> postRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> postRelationshipResponses = generateDefaultResponsesMap();
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								postRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								postRelationshipOperation.setResponses(apiResponsesFromMap(postRelationshipResponses));
@@ -212,7 +212,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation postSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								postSparseRelationshipOperation.setDescription("Create " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setPost(mergeOperations(postSparseRelationshipOperation, sparseRelationshipPathItem.getPost()));
-                Map<String, ApiResponse> postSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> postSparseRelationshipResponses = generateDefaultResponsesMap();
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								postSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
 								postSparseRelationshipOperation.setResponses(apiResponsesFromMap(postSparseRelationshipResponses));
@@ -222,7 +222,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation patchRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								patchRelationshipOperation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setPatch(mergeOperations(patchRelationshipOperation, relationPathItem.getPatch()));
-                Map<String, ApiResponse> patchRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> patchRelationshipResponses = generateDefaultResponsesMap();
 								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								patchRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								patchRelationshipOperation.setResponses(apiResponsesFromMap(patchRelationshipResponses));
@@ -232,7 +232,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation patchSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 								patchSparseRelationshipOperation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setPatch(mergeOperations(patchSparseRelationshipOperation, sparseRelationshipPathItem.getPatch()));
-                Map<String, ApiResponse> patchSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> patchSparseRelationshipResponses = generateDefaultResponsesMap();
 								String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								patchSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
 								patchSparseRelationshipOperation.setResponses(apiResponsesFromMap(patchSparseRelationshipResponses));
@@ -244,7 +244,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation deleteRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
 								deleteRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								relationPathItem.setDelete(mergeOperations(deleteRelationshipOperation, relationPathItem.getDelete()));
-                Map<String, ApiResponse> deleteRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> deleteRelationshipResponses = generateDefaultResponsesMap();
 //								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								deleteRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								deleteRelationshipOperation.setResponses(apiResponsesFromMap(deleteRelationshipResponses));
@@ -253,7 +253,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								Operation deleteSparseRelationshipOperation = generateDefaultRelationshipOperation(metaResource, relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
 								deleteSparseRelationshipOperation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
 								sparseRelationshipPathItem.setDelete(mergeOperations(deleteSparseRelationshipOperation, sparseRelationshipPathItem.getDelete()));
-                Map<String, ApiResponse> deleteSparseRelationshipResponses = generateDefaultResponsesMap(relatedMetaResource);
+								Map<String, ApiResponse> deleteSparseRelationshipResponses = generateDefaultResponsesMap();
 //								String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
 								deleteSparseRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
 								deleteSparseRelationshipOperation.setResponses(apiResponsesFromMap(deleteSparseRelationshipResponses));
@@ -272,7 +272,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource), listPathItem);
 
-        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap();
         responses.put("201", new ApiResponse()
             .description("Created")
             .content(new Content()
@@ -290,7 +290,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
-        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap();
         responses.put("200", new ApiResponse()
             .description("OK")
             .content(new Content()
@@ -308,7 +308,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
 				openApi.getPaths().addPathItem(getApiPath(metaResource) + getPrimaryKeyPath(metaResource), singlePathItem);
 
-        Map<String, ApiResponse> responses = generateDefaultResponsesMap(metaResource);
+        Map<String, ApiResponse> responses = generateDefaultResponsesMap();
         responses.put("200", new ApiResponse().description("OK"));
         operation.setResponses(apiResponsesFromMap(responses));
 			}
@@ -344,7 +344,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								metaResource
 										.getAttributes()
 										.stream()
-										.map(e -> ((MetaAttribute) e).getName())
+										.map(MetaElement::getName)
 										.collect(joining(","))));
 	}
 
@@ -358,8 +358,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 									metaResource
 											.getAttributes()
 											.stream()
-											.filter(e -> ((MetaAttribute) e).isAssociation())
-											.map(e -> ((MetaAttribute) e).getType().getElementType().getName())
+											.filter(MetaAttribute::isAssociation)
+											.map(e -> e.getType().getElementType().getName())
 											.collect(joining(","))));
 		}
 
@@ -373,8 +373,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 								metaResource
 										.getAttributes()
 										.stream()
-										.filter(e -> (((MetaAttribute) e).isSortable()))
-										.map(e -> ((MetaAttribute) e).getName())
+										.filter(MetaAttribute::isSortable)
+										.map(MetaElement::getName)
 										.collect(joining(","))));
 	}
 
@@ -544,9 +544,9 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 	private Operation generateDefaultOperation() {
 		return new Operation().parameters(
-		    new ArrayList<Parameter>(
-		        Arrays.asList(
-		            new Parameter()
+        new ArrayList<>(
+            Collections.singletonList(
+                new Parameter()
                     .$ref("#/components/parameters/contentType"))));
 	}
 
@@ -593,8 +593,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		Generate a sensible, default ApiResponses that is populated with references
 		to all Error Responses for a metaResource
 	 */
-	private Map<String, ApiResponse> generateDefaultResponsesMap(MetaResource metaResource) {
-    Map<String, ApiResponse> responses = new TreeMap();
+	private Map<String, ApiResponse> generateDefaultResponsesMap() {
+    Map<String, ApiResponse> responses = new TreeMap<String, ApiResponse>(){};
 
 		responses.put("202", new ApiResponse().$ref("202"));
 		responses.put("204", new ApiResponse().$ref("204"));
@@ -722,7 +722,8 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		return responses;
 	}
 
-	private Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
+	@SafeVarargs
+	private final Map<String, ApiResponse> mergeApiResponses(Map<String, ApiResponse>... maps) {
 		Map<String, ApiResponse> merged = new TreeMap<>();
 		for (Map<String, ApiResponse> map : maps) {
 			merged.putAll(map);
@@ -915,8 +916,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 			}
 			return enumSchema;
 		} else {
-			Schema schema = new Schema().type(metaType.getElementType().getName());
-			return schema;
+		  return new Schema().type(metaType.getElementType().getName());
 		}
 	}
 
@@ -1086,7 +1086,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 		Schema typeSchema = new Schema()
 				.type("string")
 				.description("The JSON:API resource type (" + typeName + ")");
-		typeSchema.setEnum(Arrays.asList(typeName));
+		typeSchema.setEnum(Collections.singletonList(typeName));
 		return typeSchema;
 	}
 
@@ -1101,7 +1101,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 												new ArraySchema()
 														.items(
 																get$refSchema(typeName)))
-										.required(Arrays.asList("data"))));
+										.required(Collections.singletonList("data"))));
 	}
 
 	private Schema resourceListResponse(String typeName) {
@@ -1115,7 +1115,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 												new ArraySchema()
 														.items(
 																get$refSchema(typeName)))
-										.required(Arrays.asList("data"))));
+										.required(Collections.singletonList("data"))));
 	}
 
 	private Schema resourceReference(String typeName) {
@@ -1153,7 +1153,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 												new Schema()
 														.type("object")
 														.properties(attributes))
-										.required(Arrays.asList("attributes"))));
+										.required(Collections.singletonList("attributes"))));
 	}
 
 	private Schema resourceRequestBody(String resourceType, Map<String, Schema> attributes) {
@@ -1259,7 +1259,7 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
 
 	@Override
 	public Collection<Class> getConfigClasses() {
-		return Arrays.asList(OpenAPIGeneratorConfig.class);
+		return Collections.singletonList(OpenAPIGeneratorConfig.class);
 	}
 
 	public OpenAPIGeneratorConfig getConfig() {
