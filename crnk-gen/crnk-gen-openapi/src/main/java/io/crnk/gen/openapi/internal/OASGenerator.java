@@ -1,7 +1,14 @@
 package io.crnk.gen.openapi.internal;
 
 import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.meta.MetaLookup;
+import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaPrimaryKey;
+import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -16,27 +23,191 @@ import java.util.*;
 public class OASGenerator {
   private static final Logger LOGGER = LoggerFactory.getLogger(OASGenerator.class);
   private OpenAPI openApi;
-
-  public OASGenerator(OpenAPI baseOpenAPI) {
+	private MetaLookup meta;
+	private Map<String, OASResource> oasResources = new HashMap<>();
+  
+  public OASGenerator(MetaLookup meta, OpenAPI baseOpenAPI) {
     openApi = baseOpenAPI;
+    this.meta = meta;
     openApi.getComponents().schemas(generateStandardSchemas());
     openApi.getComponents().parameters(getStandardPagingParameters());
     openApi.getComponents().addParameters("contentType", generateStandardContentTypeParameter());
     openApi.getComponents().addParameters("filter", generateStandardFilterParameter());
 		openApi.getComponents().responses(generateStandardApiResponses());
-  }
+		registerMetaResources();
+  }                        
 
   public OpenAPI getOpenApi() {
     return openApi;
   }
 
+  public OpenAPI registerMetaResources() {
+		// TODO: Respect @JsonApiExposed(false)
+  	List<MetaResource> metaResources = getJsonApiResources(meta);
+		metaResources.stream().map(OASResource::new).forEach(this::register);
+		return getOpenApi();
+	}
+  
   public OpenAPI register(OASResource oasResource) {
 		oasResource.getComponentParameters().forEach(openApi.getComponents()::addParameters);
 		oasResource.getComponentSchemas().forEach(openApi.getComponents()::addSchemas);
 		oasResource.getComponentResponses().forEach(openApi.getComponents()::addResponses);
-  	return openApi;
+		oasResources.put(oasResource.getResourceName(), oasResource);
+		return getOpenApi();
 	}
 
+	private List<MetaResource> getJsonApiResources(MetaLookup metaLookup) {
+		List<MetaResource> list = new ArrayList<>();
+		for (MetaResource it : metaLookup.findElements(MetaResource.class)) {
+			if (isJsonApiResource(it)) {
+				list.add(it);
+			}
+		}
+		list.sort(Comparator.comparing(MetaResource::getResourceType));
+		return list;
+	}
+
+	private boolean isJsonApiResource(MetaResource metaResource) {
+		return metaResource.getSuperType() == null
+				&& !metaResource.getResourceType().startsWith("meta/")
+				&& metaResource.getRepository() != null
+				&& metaResource.getRepository().isExposed();
+	}
+
+
+	public OpenAPI buildPaths() {
+
+		for (OASResource oasResource : oasResources.values()) {
+			PathItem listPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath(), new PathItem());
+			PathItem singlePathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), new PathItem());
+			Operation operation;
+
+			// List Response
+			operation = oasResource.generateGetResourcesOperation();
+			if (operation != null) {
+				listPathItem.setGet(mergeOperations(operation, listPathItem.getGet()));
+				openApi.getPaths().addPathItem(oasResource.getApiPath(), listPathItem);
+			}
+
+			// Single Response
+			operation = oasResource.generateGetResourceOperation();
+			if (operation != null) {
+				singlePathItem.setGet(mergeOperations(operation, singlePathItem.getGet()));
+				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+			}
+			// TODO: Add Support for Bulk Operations
+
+			// List Response
+			operation = oasResource.generatePostResourcesOperation();
+			if (operation != null) {
+				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
+				openApi.getPaths().addPathItem(oasResource.getApiPath(), listPathItem);
+			}
+
+			// TODO: Add Support for Bulk Operations
+			// Single Response
+			operation = oasResource.generatePatchResourceOperation();
+			if (operation != null) {
+				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
+				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+
+			}
+
+			// TODO: Add Support for Bulk Operations
+			// Single Response
+			operation = oasResource.generateDeleteResourceOperation();
+			if (operation != null) {
+				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
+				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+			}
+
+			// Relationships can be accessed in 2 ways:
+			//  1.	/api/A/1/b  								The full related resource
+			//  2.	/api/A/1/relationships/b		The "ids" as belong to the resource
+			// Generate GET Operations for /api/A/1/B relationship path
+			for (MetaElement child : oasResource.getChildren()) {
+				if (child == null) {
+					continue;
+				} else if (child instanceof MetaPrimaryKey) {
+					continue;
+				} else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+					continue;
+				} else if (child instanceof MetaResourceField) {
+					MetaResourceField mrf = (MetaResourceField) child;
+					Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
+					attributeSchema.nullable(mrf.isNullable());
+					oasResource.getAttributes().put(mrf.getName(), attributeSchema);
+					if (mrf.isAssociation()) {
+						MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
+						OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
+						PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + oasResource.getApiPath(), new PathItem());
+						PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), new PathItem());
+
+
+						// Add <field>/ path GET
+						fieldPathItem.setGet(mergeOperations(oasResource.generateGetFieldOperation(relatedMetaResource, mrf), fieldPathItem.getGet()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+
+						// Add relationships/ path GET
+						relationshipPathItem.setGet(mergeOperations(oasResource.generateGetRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getGet()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+
+						// Add <field>/ path POST
+						fieldPathItem.setPost(mergeOperations(oasResource.generatePostFieldOperation(relatedMetaResource, mrf), fieldPathItem.getPost()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+
+						// Add relationships/ path POST
+						relationshipPathItem.setPost(mergeOperations(oasResource.generatePostRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getPost()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+
+						// Add <field>/ path PATCH
+						fieldPathItem.setPatch(mergeOperations(oasResource.generatePatchFieldOperation(relatedMetaResource, mrf), fieldPathItem.getPatch()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+
+						// Add relationships/ path PATCH
+						relationshipPathItem.setPatch(mergeOperations(oasResource.generatePatchRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getPatch()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+
+						// If the relationship is updatable then we imply that it is deletable.
+
+						// TODO: OpenAPI does not allow DELETE methods to define a RequestBody (https://github.com/OAI/OpenAPI-Specification/issues/1801)
+						// Add <field>/ path DELETE
+						fieldPathItem.setDelete(mergeOperations(oasResource.generateDeleteFieldOperation(relatedMetaResource, mrf), fieldPathItem.getDelete()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+
+						// Add relationships/ path DELETE
+						relationshipPathItem.setDelete(mergeOperations(oasResource.generateDeleteRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getDelete()));
+						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+						}
+					}
+				}
+			}
+		return getOpenApi();
+	}
+
+	private Operation mergeOperations(Operation newOperation, Operation existingOperation) {
+		if (existingOperation == null) {
+			return newOperation;
+		}
+
+		if (existingOperation.getOperationId() != null) {
+			newOperation.setOperationId(existingOperation.getOperationId());
+		}
+
+		if (existingOperation.getSummary() != null) {
+			newOperation.setSummary(existingOperation.getSummary());
+		}
+
+		if (existingOperation.getDescription() != null) {
+			newOperation.setDescription(existingOperation.getDescription());
+		}
+
+		if (existingOperation.getExtensions() != null) {
+			newOperation.setExtensions(existingOperation.getExtensions());
+		}
+
+		return newOperation;
+	}
   // SCHEMAS
 
 	/*
