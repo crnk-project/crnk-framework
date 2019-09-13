@@ -128,7 +128,7 @@ public class OASResource {
   	return metaResource.getChildren();
 	}
 
-	public String getApiPath() {
+	public String getResourcesPath() {
 		//
 		// TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
 		// TODO: alternatively, have a config setting for this generator that essentially duplicates the above
@@ -136,7 +136,27 @@ public class OASResource {
 		return "/" + metaResource.getResourcePath();
 	}
 
-	public String getPrimaryKeyPath() {
+	public String getResourcePath() {
+		StringBuilder keyPath = new StringBuilder(getResourcesPath() + "/");
+		for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
+			keyPath.append("{");
+			keyPath.append(metaAttribute.getName());
+			keyPath.append("}");
+		}
+		return keyPath.toString();
+	}
+
+	public String getFieldPath() {
+		StringBuilder keyPath = new StringBuilder("/");
+		for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
+			keyPath.append("{");
+			keyPath.append(metaAttribute.getName());
+			keyPath.append("}");
+		}
+		return keyPath.toString();
+	}
+
+	public String getRelationshipsPath() {
 		StringBuilder keyPath = new StringBuilder("/");
 		for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
 			keyPath.append("{");
@@ -601,6 +621,7 @@ public class OASResource {
 		responses.put("200", new ApiResponse().description("OK"));
 		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
 		operation.getParameters().add(getPrimaryKeyParameter());
+
  		return operation;
  	}
 
@@ -610,10 +631,11 @@ public class OASResource {
 		}
  		Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap());
 		operation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + resourceType + " resource");
-		Map<String, ApiResponse> getFieldResponses = generateDefaultResponsesMap();
-		String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "ListResponse" : "Response";
-		getFieldResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix));
-		operation.setResponses(OASUtils.apiResponsesFromMap(getFieldResponses));
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "ListResponse" : "Response";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
 		return operation;
 	}
 
@@ -623,10 +645,11 @@ public class OASResource {
 		}
 		Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap());
 		operation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " references related to a " + resourceType + " resource");
-		Map<String, ApiResponse> getRelationshipResponses = generateDefaultResponsesMap();
-		String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "RelationshipsResponse" : "RelationshipResponse";
-		getRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix));
-		operation.setResponses(OASUtils.apiResponsesFromMap(getRelationshipResponses));
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "RelationshipsResponse" : "RelationshipResponse";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
 		return operation;
 	}
 
@@ -636,11 +659,12 @@ public class OASResource {
 		}
  		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 		operation.setDescription("Create " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> postFieldResponses = generateDefaultResponsesMap();
-		String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		postFieldResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(postFieldResponses));
- 		return operation;
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
+		return operation;
 	}
 
 	public Operation generatePostRelationshipsOperation(MetaResource relatedMetaResource, MetaResourceField mrf) {
@@ -649,11 +673,12 @@ public class OASResource {
 		}
 		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 		operation.setDescription("Create " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> postRelationshipResponses = generateDefaultResponsesMap();
-		String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		postRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(postRelationshipResponses));
- 		return operation;
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
+		return operation;
 	}
 
 	public Operation generatePatchFieldOperation(MetaResource relatedMetaResource, MetaResourceField mrf) {
@@ -662,11 +687,12 @@ public class OASResource {
 		}
 		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
 		operation.setDescription("Update " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> patchFieldResponses = generateDefaultResponsesMap();
-		String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		patchFieldResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(patchFieldResponses));
- 		return operation;
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
+		return operation;
 	}
 
 	public Operation generatePatchRelationshipsOperation(MetaResource relatedMetaResource, MetaResourceField mrf) {
@@ -674,12 +700,13 @@ public class OASResource {
 			return null;
 		}
 		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
-		operation.setDescription("Update " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> patchRelationshipResponses = generateDefaultResponsesMap();
-		String sparseResponsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		patchRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + sparseResponsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(patchRelationshipResponses));
- 		return operation;
+		operation.setDescription("Update " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
+
+		return operation;
 	}
 
 	public Operation generateDeleteFieldOperation(MetaResource relatedMetaResource, MetaResourceField mrf) {
@@ -687,11 +714,11 @@ public class OASResource {
 			return null;
 		}
  		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
-		operation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> deleteFieldResponses = generateDefaultResponsesMap();
-		String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		deleteFieldResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(deleteFieldResponses));
+		operation.setDescription("Delete " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
 
  		return operation;
 	}
@@ -701,11 +728,11 @@ public class OASResource {
 			return null;
 		}
  		Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
-		operation.setDescription("Delete " + metaResource.getResourceType() + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
-		Map<String, ApiResponse> deleteRelationshipResponses = generateDefaultResponsesMap();
-		String responsePostFix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
-		deleteRelationshipResponses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostFix + "Response"));
-		operation.setResponses(OASUtils.apiResponsesFromMap(deleteRelationshipResponses));
+		operation.setDescription("Delete " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
+		Map<String, ApiResponse> responses = generateDefaultResponsesMap();
+		String responsePostfix = mrf.getType().isCollection() || mrf.getType().isMap() ? "Relationships" : "Relationship";
+		responses.put("200", new ApiResponse().$ref(relatedMetaResource.getName() + responsePostfix + "Response"));
+		operation.setResponses(OASUtils.apiResponsesFromMap(responses));
 
  		return operation;
 	}

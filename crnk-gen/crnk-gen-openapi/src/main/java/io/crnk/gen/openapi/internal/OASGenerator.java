@@ -26,9 +26,9 @@ public class OASGenerator {
 	private MetaLookup meta;
 	private Map<String, OASResource> oasResources = new HashMap<>();
   
-  public OASGenerator(MetaLookup meta, OpenAPI baseOpenAPI) {
+  public OASGenerator(MetaLookup metaLookup, OpenAPI baseOpenAPI) {
     openApi = baseOpenAPI;
-    this.meta = meta;
+    meta = metaLookup;
     openApi.getComponents().schemas(generateStandardSchemas());
     openApi.getComponents().parameters(getStandardPagingParameters());
     openApi.getComponents().addParameters("contentType", generateStandardContentTypeParameter());
@@ -78,38 +78,38 @@ public class OASGenerator {
 	public OpenAPI buildPaths() {
 
 		for (OASResource oasResource : oasResources.values()) {
-			PathItem listPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath(), new PathItem());
-			PathItem singlePathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), new PathItem());
+			PathItem resourcesPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcesPath(), new PathItem());
+			PathItem resourcePathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath(), new PathItem());
 			Operation operation;
 
 			// List Response
 			operation = oasResource.generateGetResourcesOperation();
 			if (operation != null) {
-				listPathItem.setGet(mergeOperations(operation, listPathItem.getGet()));
-				openApi.getPaths().addPathItem(oasResource.getApiPath(), listPathItem);
+				resourcesPathItem.setGet(mergeOperations(operation, resourcesPathItem.getGet()));
+				openApi.getPaths().addPathItem(oasResource.getResourcesPath(), resourcesPathItem);
 			}
 
 			// Single Response
 			operation = oasResource.generateGetResourceOperation();
 			if (operation != null) {
-				singlePathItem.setGet(mergeOperations(operation, singlePathItem.getGet()));
-				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+				resourcePathItem.setGet(mergeOperations(operation, resourcePathItem.getGet()));
+				openApi.getPaths().addPathItem(oasResource.getResourcePath(), resourcePathItem);
 			}
 			// TODO: Add Support for Bulk Operations
 
 			// List Response
 			operation = oasResource.generatePostResourcesOperation();
 			if (operation != null) {
-				listPathItem.setPost(mergeOperations(operation, listPathItem.getPost()));
-				openApi.getPaths().addPathItem(oasResource.getApiPath(), listPathItem);
+				resourcesPathItem.setPost(mergeOperations(operation, resourcesPathItem.getPost()));
+				openApi.getPaths().addPathItem(oasResource.getResourcesPath(), resourcesPathItem);
 			}
 
 			// TODO: Add Support for Bulk Operations
 			// Single Response
 			operation = oasResource.generatePatchResourceOperation();
 			if (operation != null) {
-				singlePathItem.setPatch(mergeOperations(operation, singlePathItem.getPatch()));
-				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+				resourcePathItem.setPatch(mergeOperations(operation, resourcePathItem.getPatch()));
+				openApi.getPaths().addPathItem(oasResource.getResourcePath(), resourcePathItem);
 
 			}
 
@@ -117,8 +117,8 @@ public class OASGenerator {
 			// Single Response
 			operation = oasResource.generateDeleteResourceOperation();
 			if (operation != null) {
-				singlePathItem.setDelete(mergeOperations(operation, singlePathItem.getDelete()));
-				openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath(), singlePathItem);
+				resourcePathItem.setDelete(mergeOperations(operation, resourcePathItem.getDelete()));
+				openApi.getPaths().addPathItem(oasResource.getResourcePath(), resourcePathItem);
 			}
 
 			// Relationships can be accessed in 2 ways:
@@ -140,44 +140,44 @@ public class OASGenerator {
 					if (mrf.isAssociation()) {
 						MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
 						OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
-						PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + oasResource.getApiPath(), new PathItem());
-						PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), new PathItem());
+						PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
+						PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
 
 
 						// Add <field>/ path GET
 						fieldPathItem.setGet(mergeOperations(oasResource.generateGetFieldOperation(relatedMetaResource, mrf), fieldPathItem.getGet()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + relatedOasResource.getResourcesPath(), fieldPathItem);
 
 						// Add relationships/ path GET
 						relationshipPathItem.setGet(mergeOperations(oasResource.generateGetRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getGet()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), relationshipPathItem);
 
 						// Add <field>/ path POST
 						fieldPathItem.setPost(mergeOperations(oasResource.generatePostFieldOperation(relatedMetaResource, mrf), fieldPathItem.getPost()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + relatedOasResource.getResourcesPath(), fieldPathItem);
 
 						// Add relationships/ path POST
 						relationshipPathItem.setPost(mergeOperations(oasResource.generatePostRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getPost()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), relationshipPathItem);
 
 						// Add <field>/ path PATCH
 						fieldPathItem.setPatch(mergeOperations(oasResource.generatePatchFieldOperation(relatedMetaResource, mrf), fieldPathItem.getPatch()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + relatedOasResource.getResourcesPath(), fieldPathItem);
 
 						// Add relationships/ path PATCH
 						relationshipPathItem.setPatch(mergeOperations(oasResource.generatePatchRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getPatch()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), relationshipPathItem);
 
 						// If the relationship is updatable then we imply that it is deletable.
 
 						// TODO: OpenAPI does not allow DELETE methods to define a RequestBody (https://github.com/OAI/OpenAPI-Specification/issues/1801)
 						// Add <field>/ path DELETE
 						fieldPathItem.setDelete(mergeOperations(oasResource.generateDeleteFieldOperation(relatedMetaResource, mrf), fieldPathItem.getDelete()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + relatedOasResource.getApiPath(), fieldPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + relatedOasResource.getResourcesPath(), fieldPathItem);
 
 						// Add relationships/ path DELETE
 						relationshipPathItem.setDelete(mergeOperations(oasResource.generateDeleteRelationshipsOperation(relatedMetaResource, mrf), relationshipPathItem.getDelete()));
-						openApi.getPaths().addPathItem(oasResource.getApiPath() + oasResource.getPrimaryKeyPath() + "/relationships" + relatedOasResource.getApiPath(), relationshipPathItem);
+						openApi.getPaths().addPathItem(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), relationshipPathItem);
 						}
 					}
 				}
