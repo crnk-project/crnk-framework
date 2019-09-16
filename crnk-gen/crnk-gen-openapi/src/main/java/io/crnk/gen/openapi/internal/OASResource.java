@@ -27,7 +27,7 @@ public class OASResource {
   private Map<String, Schema> componentSchemas;
   private Map<String, ApiResponse> componentResponses;
 
-  public OASResource(MetaResource metaResource) {
+  OASResource(MetaResource metaResource) {
     this.metaResource = metaResource;
     resourceName = metaResource.getName();
     resourceType = metaResource.getResourceType();
@@ -90,7 +90,7 @@ public class OASResource {
     componentResponses.put(resourceName + "RelationshipsResponse", getRelationshipsResponse());
   }
 
-  public Map<String, Schema> getAttributes() {
+  Map<String, Schema> getAttributes() {
     return attributes;
   }
 
@@ -102,31 +102,31 @@ public class OASResource {
     return postAttributes;
   }
 
-  public Map<String, Parameter> getComponentParameters() {
+  Map<String, Parameter> getComponentParameters() {
     return componentParameters;
   }
 
-  public Map<String, Schema> getComponentSchemas() {
+  Map<String, Schema> getComponentSchemas() {
     return componentSchemas;
   }
 
-  public Map<String, ApiResponse> getComponentResponses() {
+  Map<String, ApiResponse> getComponentResponses() {
     return componentResponses;
   }
 
-  public String getResourceName() {
+  String getResourceName() {
     return resourceName;
   }
 
-  public String getResourceType() {
+  private String getResourceType() {
     return resourceType;
   }
 
-  public List<MetaElement> getChildren() {
+  List<MetaElement> getChildren() {
     return metaResource.getChildren();
   }
 
-  public String getResourcesPath() {
+  String getResourcesPath() {
     //
     // TODO: Requires access to CrnkBoot.getWebPathPrefix() and anything that might modify a path
     // TODO: alternatively, have a config setting for this generator that essentially duplicates the above
@@ -134,7 +134,7 @@ public class OASResource {
     return "/" + metaResource.getResourcePath();
   }
 
-  public String getResourcePath() {
+  String getResourcePath() {
     StringBuilder keyPath = new StringBuilder(getResourcesPath() + "/");
     for (MetaAttribute metaAttribute : metaResource.getPrimaryKey().getElements()) {
       keyPath.append("{");
@@ -144,17 +144,17 @@ public class OASResource {
     return keyPath.toString();
   }
 
-  public String getFieldPath(OASResource relatedOasResource) {
+  String getFieldPath(OASResource relatedOasResource) {
     return getResourcePath() + relatedOasResource.getResourcesPath();
   }
 
-  public String getRelationshipsPath(OASResource relatedOasResource) {
+  String getRelationshipsPath(OASResource relatedOasResource) {
     return getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath();
   }
 
   // SCHEMAS
 
-  public Schema resourceReference() {
+  private Schema resourceReference() {
     return new Schema()
         .type("object")
         .addProperties(
@@ -168,7 +168,7 @@ public class OASResource {
         .required(Arrays.asList("id", "type"));
   }
 
-  public Schema resource() {
+  private Schema resource() {
     //Defines a schema for a JSON-API resource, without the enclosing top-level document.
     return new ComposedSchema()
         .allOf(
@@ -192,7 +192,7 @@ public class OASResource {
                     .required(Collections.singletonList("attributes"))));
   }
 
-  public Schema resourceResponse() {
+  private Schema resourceResponse() {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
@@ -206,7 +206,7 @@ public class OASResource {
                     .required(Collections.singletonList("data"))));
   }
 
-  public Schema resourcesResponse() {
+  private Schema resourcesResponse() {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
@@ -222,7 +222,7 @@ public class OASResource {
 
   // SCHEMAS FOR RELATIONSHIPS
 
-  public Schema singleRelationshipBody() {
+  private Schema singleRelationshipBody() {
     //Defines a schema for the PATCH parameters of a JSON:API resource
     return new ObjectSchema()
         .addProperties(
@@ -230,7 +230,7 @@ public class OASResource {
             OASUtils.get$refSchema(resourceType + "Reference"));
   }
 
-  public Schema multiRelationshipBody() {
+  private Schema multiRelationshipBody() {
     //Defines a schema for the PATCH parameters of a JSON:API resource
     return new ObjectSchema()
         .addProperties(
@@ -248,7 +248,7 @@ public class OASResource {
 
   // PARAMETERS
 
-  public Parameter generateDefaultFieldsParameter() {
+  private Parameter generateDefaultFieldsParameter() {
     return new Parameter()
         .name("fields[" + resourceType + "]")
         .description(resourceType + " fields to include (csv)")
@@ -262,7 +262,7 @@ public class OASResource {
                     .collect(joining(","))));
   }
 
-  public Parameter generateDefaultIncludeParameter() {
+  private Parameter generateDefaultIncludeParameter() {
     return new Parameter()
         .name("include")
         .description(resourceType + " relationships to include (csv)")
@@ -277,7 +277,7 @@ public class OASResource {
                     .collect(joining(","))));
   }
 
-  public Parameter generateDefaultSortParameter() {
+  private Parameter generateDefaultSortParameter() {
     return new Parameter()
         .name("sort")
         .description(resourceType + " sort order (csv)")
@@ -336,11 +336,11 @@ public class OASResource {
 
   // REQUEST BODIES
 
-  public Schema patchResourceRequestBody() {
+  private Schema patchResourceRequestBody() {
     return resourceRequestBody(patchAttributes);
   }
 
-  public Schema postResourceRequestBody() {
+  private Schema postResourceRequestBody() {
     return resourceRequestBody(postAttributes);
   }
 
@@ -361,7 +361,7 @@ public class OASResource {
 
   // RESPONSES
 
-  public ApiResponse getResourceResponse() {
+  private ApiResponse getResourceResponse() {
     return new ApiResponse()
         .description(HttpStatus.toMessage(200))
         .content(
@@ -374,7 +374,7 @@ public class OASResource {
                                 .$ref(resourceName + "Response"))));
   }
 
-  public ApiResponse getResourcesResponse() {
+  private ApiResponse getResourcesResponse() {
     return new ApiResponse()
         .description(HttpStatus.toMessage(200))
         .content(
@@ -387,7 +387,7 @@ public class OASResource {
                                 .$ref(resourceName + "ListResponse"))));
   }
 
-  public Map<String, ApiResponse> generateDefaultResponsesMap() {
+  private Map<String, ApiResponse> generateDefaultResponsesMap() {
     Map<String, ApiResponse> responses = new TreeMap<String, ApiResponse>() {
     };
 
@@ -410,7 +410,7 @@ public class OASResource {
 
   // RESPONSES - RELATIONSHIPS
 
-  public ApiResponse getRelationshipResponse() {
+  private ApiResponse getRelationshipResponse() {
     return new ApiResponse()
         .description(HttpStatus.toMessage(200))
         .content(
@@ -423,7 +423,7 @@ public class OASResource {
                                 .$ref(resourceName + "Relationship"))));
   }
 
-  public ApiResponse getRelationshipsResponse() {
+  private ApiResponse getRelationshipsResponse() {
     return new ApiResponse()
         .description(HttpStatus.toMessage(200))
         .content(
@@ -446,7 +446,7 @@ public class OASResource {
                     .$ref("#/components/parameters/ContentType"))));
   }
 
-  public Map<OperationType, Operation> generateResourcesOperations() {
+  Map<OperationType, Operation> generateResourcesOperations() {
     Map<OperationType, Operation> operations = new HashMap<>();
     if (metaResource.isReadable()) {
       operations.put(OperationType.GET, generateGetResourcesOperation());
@@ -457,7 +457,7 @@ public class OASResource {
     return operations;
   }
 
-  public Operation generateGetResourcesOperation() {
+  private Operation generateGetResourcesOperation() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Retrieve a List of " + resourceType + " resources");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -485,7 +485,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generatePostResourcesOperation() {
+  private Operation generatePostResourcesOperation() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Create a " + resourceName);
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -511,7 +511,7 @@ public class OASResource {
     return operation;
   }
 
-  public Map<OperationType, Operation> generateResourceOperations() {
+  Map<OperationType, Operation> generateResourceOperations() {
     Map<OperationType, Operation> operations = new HashMap<>();
     if (metaResource.isReadable()) {
       operations.put(OperationType.GET, generateGetResourceOperation());
@@ -525,7 +525,7 @@ public class OASResource {
     return operations;
   }
 
-  public Operation generateGetResourceOperation() {
+  private Operation generateGetResourceOperation() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Retrieve a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -541,7 +541,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generatePatchResourceOperation() {
+  private Operation generatePatchResourceOperation() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Update a " + resourceName);
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -566,7 +566,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generateDeleteResourceOperation() {
+  private Operation generateDeleteResourceOperation() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Delete a " + resourceName);
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -577,7 +577,7 @@ public class OASResource {
     return operation;
   }
 
-  public Map<OperationType, Operation> generateFieldOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
+  Map<OperationType, Operation> generateFieldOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
     Map<OperationType, Operation> operations = new HashMap<>();
     if (metaResource.isReadable() && mrf.isReadable()) {
       operations.put(OperationType.GET, generateGetFieldOperation(relatedOasResource, mrf));
@@ -595,7 +595,7 @@ public class OASResource {
     return operations;
   }
 
-  public Operation generateGetFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
+  private Operation generateGetFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap());
     operation.setDescription("Retrieve " + relatedOasResource.getResourceType() + " related to a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -607,7 +607,7 @@ public class OASResource {
   }
 
 
-  public Operation generatePostFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
+  private Operation generatePostFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
     operation.setDescription("Create " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -618,7 +618,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generatePatchFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
+  private Operation generatePatchFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
     operation.setDescription("Update " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -629,7 +629,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generateDeleteFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
+  private Operation generateDeleteFieldOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
     operation.setDescription("Delete " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -641,7 +641,7 @@ public class OASResource {
     return operation;
   }
 
-  public Map<OperationType, Operation> generateRelationshipsOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
+  Map<OperationType, Operation> generateRelationshipsOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
     Map<OperationType, Operation> operations = new HashMap<>();
     if (metaResource.isReadable() && mrf.isReadable()) {
       operations.put(OperationType.GET, generateGetRelationshipsOperation(relatedOasResource, mrf));
@@ -659,10 +659,7 @@ public class OASResource {
     return operations;
   }
 
-  public Operation generateGetRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
-    if (!(metaResource.isReadable() && mrf.isReadable())) {
-      return null;
-    }
+  private Operation generateGetRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap());
     operation.setDescription("Retrieve " + relatedOasResource.getResourceType() + " references related to a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -673,10 +670,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generatePostRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
-    if (!(metaResource.isReadable() && mrf.isInsertable())) {
-      return null;
-    }
+  private Operation generatePostRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
     operation.setDescription("Create " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -687,10 +681,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generatePatchRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
-    if (!(metaResource.isReadable() && mrf.isUpdatable())) {
-      return null;
-    }
+  private Operation generatePatchRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), true);
     operation.setDescription("Update " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -701,10 +692,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generateDeleteRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
-    if (!(metaResource.isReadable() && mrf.isUpdatable())) {
-      return null;
-    }
+  private Operation generateDeleteRelationshipsOperation(OASResource relatedOasResource, MetaResourceField mrf) {
     Operation operation = generateDefaultRelationshipOperation(relatedOasResource, mrf.getType().isCollection() || mrf.getType().isMap(), false);
     operation.setDescription("Delete " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
@@ -716,7 +704,7 @@ public class OASResource {
   }
 
 
-  public Operation generateDefaultGetRelationshipsOrFieldsOperation(OASResource relatedOasResource, boolean oneToMany) {
+  private Operation generateDefaultGetRelationshipsOrFieldsOperation(OASResource relatedOasResource, boolean oneToMany) {
     Operation operation = generateDefaultOperation();
     operation.getParameters().add(getPrimaryKeyParameter());
 
@@ -734,7 +722,7 @@ public class OASResource {
     return operation;
   }
 
-  public Operation generateDefaultRelationshipOperation(OASResource relatedOasResource, boolean oneToMany, boolean includeBody) {
+  private Operation generateDefaultRelationshipOperation(OASResource relatedOasResource, boolean oneToMany, boolean includeBody) {
     Operation operation = generateDefaultOperation();
     operation.getParameters().add(getPrimaryKeyParameter());
     String postFix = oneToMany ? "Relationships" : "Relationship";
