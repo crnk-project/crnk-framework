@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.crnk.core.engine.information.repository.ResourceRepositoryInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
 import io.crnk.core.engine.information.resource.ResourceFieldAccessor;
 import io.crnk.core.engine.information.resource.ResourceInformation;
@@ -116,7 +117,8 @@ public class FacetModule implements ModuleExtensionAware<FacetModuleExtension> {
 	private void collectInformation() {
 		Collection<RegistryEntry> entries = moduleContext.getResourceRegistry().getEntries();
 		for (RegistryEntry entry : entries) {
-			if (entry.getRepositoryInformation().isExposed()) {
+			ResourceRepositoryInformation repoInfo = entry.getRepositoryInformation();
+			if (repoInfo != null && repoInfo.isExposed()) {
 				ResourceInformation resourceInformation = entry.getResourceInformation();
 
 				List<FacetInformation> informations = new ArrayList<>();

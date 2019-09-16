@@ -1,8 +1,11 @@
 package io.crnk.ui.presentation.element;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.crnk.core.engine.internal.utils.ClassUtils;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.data.facet.annotation.Facet;
+
+import java.lang.reflect.InvocationTargetException;
 
 
 @JsonApiResource(type = "uiEditor", resourcePath = "ui/editor")
@@ -24,6 +27,25 @@ public class EditorElement extends PresentationElement {
 	private ObjectNode newResourceTemplate;
 
 	private String path;
+
+	public EditorElement() {
+	}
+
+	public <T extends EditorElement> T toSubClass(Class<T> subClass) {
+		T element = ClassUtils.newInstance(subClass);
+		element.setId(getId());
+		element.setComponentId(getComponentId());
+		element.setServiceName(serviceName);
+		element.setServicePath(servicePath);
+		element.setHeader(header);
+		element.setBaseQuery(baseQuery);
+		element.setActions(actions);
+		element.setForm(form);
+		element.setNewResourceTemplate(newResourceTemplate);
+		element.setPath(path);
+
+		return element;
+	}
 
 	public String getServiceName() {
 		return serviceName;

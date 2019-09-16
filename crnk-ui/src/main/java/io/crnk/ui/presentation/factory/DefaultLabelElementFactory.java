@@ -43,7 +43,7 @@ public class DefaultLabelElementFactory extends DefaultPlainTextElementFactory {
 	private List<PathSpec> getLabels(MetaResource type) {
 		List<PathSpec> list = new ArrayList<>();
 		for (MetaAttribute attribute : type.getAttributes()) {
-			if (attribute.getNatures().contains(PresentationLabel.META_ELEMENT_NATURE)) {
+			if (attribute.getNatures().containsKey(PresentationLabel.META_ELEMENT_NATURE)) {
 				list.add(PathSpec.of(attribute.getName()));
 			}
 		}

@@ -20,6 +20,7 @@ import io.crnk.meta.MetaModuleConfig;
 import io.crnk.meta.MetaModuleExtension;
 import io.crnk.meta.model.MetaAttribute;
 import io.crnk.meta.model.MetaElement;
+import io.crnk.meta.model.MetaNature;
 import io.crnk.meta.provider.MetaFilter;
 import io.crnk.meta.provider.MetaFilterBase;
 import io.crnk.meta.provider.MetaProviderBase;
@@ -134,11 +135,11 @@ public class UIModule implements Module {
 				MetaAttribute attribute = (MetaAttribute) element;
 				PresentationFullTextSearchable annotation = attribute.getAnnotation(PresentationFullTextSearchable.class);
 				if (annotation != null) {
-					attribute.getNatures().add(PresentationFullTextSearchable.META_ELEMENT_NATURE);
+					attribute.getNatures().put(PresentationFullTextSearchable.META_ELEMENT_NATURE, new MetaNature());
 				}
 				PresentationLabel labelAnnotation = attribute.getAnnotation(PresentationLabel.class);
 				if (labelAnnotation != null) {
-					attribute.getNatures().add(PresentationLabel.META_ELEMENT_NATURE);
+					attribute.getNatures().put(PresentationLabel.META_ELEMENT_NATURE, new MetaNature());
 				}
 			}
 		}
