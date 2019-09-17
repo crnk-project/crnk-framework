@@ -1,37 +1,19 @@
 package io.crnk.gen.openapi.internal;
 
-import io.crnk.meta.model.MetaArrayType;
-import io.crnk.meta.model.MetaAttribute;
-import io.crnk.meta.model.MetaCollectionType;
-import io.crnk.meta.model.MetaElement;
-import io.crnk.meta.model.MetaEnumType;
-import io.crnk.meta.model.MetaLiteral;
-import io.crnk.meta.model.MetaMapType;
-import io.crnk.meta.model.MetaSetType;
-import io.crnk.meta.model.MetaType;
+import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
+import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.BooleanSchema;
-import io.swagger.v3.oas.models.media.ByteArraySchema;
-import io.swagger.v3.oas.models.media.DateSchema;
-import io.swagger.v3.oas.models.media.DateTimeSchema;
-import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
-import io.swagger.v3.oas.models.media.UUIDSchema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class OASUtils {
-  static Schema transformMetaResourceField(MetaType metaType) {
+  public static Schema transformMetaResourceField(MetaType metaType) {
     if (metaType instanceof MetaResource) {
       return get$refSchema(((MetaResource) metaType).getResourceType() + "Reference");
     } else if (metaType instanceof MetaCollectionType) {
@@ -114,16 +96,6 @@ public class OASUtils {
     return merged;
   }
 
-  /*
- 		Generate a sensible, default ApiResponses that is populated with references
- 		to all Error Responses for a metaResource
- 	 */
-
-  static ApiResponses apiResponsesFromMap(Map<String, ApiResponse> responseMap) {
-    ApiResponses responses = new ApiResponses();
-    responseMap.forEach(responses::addApiResponse);
-    return responses;
-  }
 
   static Operation mergeOperations(Operation newOperation, Operation existingOperation) {
     if (existingOperation == null) {
@@ -147,5 +119,9 @@ public class OASUtils {
     }
 
     return newOperation;
+  }
+
+  public static boolean oneToMany(MetaResourceField metaResourceField) {
+    return metaResourceField.getType().isCollection() || metaResourceField.getType().isMap();
   }
 }

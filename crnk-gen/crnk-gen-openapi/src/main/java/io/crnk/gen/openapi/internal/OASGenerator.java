@@ -40,7 +40,9 @@ public class OASGenerator {
   public OASGenerator(MetaLookup metaLookup, OpenAPI baseOpenAPI) {
     openApi = baseOpenAPI;
     meta = metaLookup;
-    openApi.getComponents().schemas(generateStandardSchemas());
+    openApi.getComponents().addSchemas(ApiError.class.getSimpleName(), ApiError.schema());
+    openApi.getComponents().addSchemas(ResponseMixin.class.getSimpleName(), ResponseMixin.schema());
+    openApi.getComponents().addSchemas(ListResponseMixin.class.getSimpleName(), ListResponseMixin.schema());
     openApi.getComponents().addParameters(PageLimit.class.getSimpleName(), PageLimit.parameter());
     openApi.getComponents().addParameters(PageOffset.class.getSimpleName(), PageOffset.parameter());
     boolean NumberSizePagingBehavior = false;
@@ -140,23 +142,6 @@ public class OASGenerator {
       }
     }
     return getOpenApi();
-  }
-
-  /*
-    Generate default schemas that are common across the api.
-    For example, in JSON:API, the error response is common across all APIs
-   */
-  private Map<String, Schema> generateStandardSchemas() {
-    Map<String, Schema> schemas = new LinkedHashMap<>();
-
-    // Standard Error Schema
-    schemas.put(ApiError.class.getSimpleName(), ApiError.schema());
-
-    // Standard wrapper responses for single & multiple records
-    schemas.put(ResponseMixin.class.getSimpleName(), ResponseMixin.schema());
-    schemas.put(ListResponseMixin.class.getSimpleName(), ListResponseMixin.schema());
-
-    return schemas;
   }
 
   // RESPONSES
