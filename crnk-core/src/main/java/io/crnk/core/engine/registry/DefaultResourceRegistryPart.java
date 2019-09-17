@@ -1,16 +1,16 @@
 package io.crnk.core.engine.registry;
 
-import io.crnk.core.engine.information.resource.ResourceInformation;
-import io.crnk.core.engine.internal.utils.PreconditionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import io.crnk.core.engine.information.resource.ResourceInformation;
+import io.crnk.core.engine.internal.utils.PreconditionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -38,7 +38,7 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 		Type implementationType = resourceInformation.getImplementationType();
 		String resourceType = resourceInformation.getResourceType();
 		String resourcePath = resourceInformation.getResourcePath();
-		PreconditionUtil.verify(resourceType != null, "no resourceType set for entry %d", entry);
+		PreconditionUtil.verify(resourceType != null, "no resourceType set for entry %s", entry);
 		PreconditionUtil
 				.verify(!resourcesByType.containsKey(resourceType), "resourceType '%s' already exists, cannot add entry %s",
 						resourceType, entry);
