@@ -12,74 +12,74 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIGeneratorConfig.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIGeneratorConfig.class);
 
-	private File genDir = null;
-	private File buildDir = null;
+  private File genDir = null;
+  private File buildDir = null;
 
-	private String templateName = null;
-	private OpenAPI openAPI = null;
+  private String templateName = null;
+  private OpenAPI openAPI = null;
 
-	/**
-	 * @return location where the generated sources are placed.
-	 */
-	public File getGenDir() {
-		if (genDir == null) {
-			return new File(buildDir, "generated/source/openapi/");
-		}
-		return genDir;
-	}
+  /**
+   * @return location where the generated sources are placed.
+   */
+  public File getGenDir() {
+    if (genDir == null) {
+      return new File(buildDir, "generated/source/openapi/");
+    }
+    return genDir;
+  }
 
-	public void setGenDir(File genDir) {
-		this.genDir = genDir;
-	}
+  public void setGenDir(File genDir) {
+    this.genDir = genDir;
+  }
 
-	public File getBuildDir() {
-		return buildDir;
-	}
+  public File getBuildDir() {
+    return buildDir;
+  }
 
-	public void setBuildDir(File buildDir) {
-		this.buildDir = buildDir;
-	}
+  public void setBuildDir(File buildDir) {
+    this.buildDir = buildDir;
+  }
 
-	public String getTemplateName() {
-		return templateName;
-	}
+  public String getTemplateName() {
+    return templateName;
+  }
 
-	public void setTemplateName(String templateName) {
-		this.templateName = templateName;
-	}
+  public void setTemplateName(String templateName) {
+    this.templateName = templateName;
+  }
 
-	public OpenAPI getOpenAPI() {
-		if (openAPI == null) {
-			if (this.getTemplateName() != null) {
-				File templateFile = new File(buildDir, this.getTemplateName());
-				OpenAPI openAPI = new OpenAPIV3Parser().read(templateFile.getAbsolutePath());
+  public OpenAPI getOpenAPI() {
+    if (openAPI == null) {
+      if (this.getTemplateName() != null) {
+        File templateFile = new File(buildDir, this.getTemplateName());
+        OpenAPI openAPI = new OpenAPIV3Parser().read(templateFile.getAbsolutePath());
 
-				if (openAPI.getPaths() == null) {
-					openAPI.paths(new Paths());
-				}
+        if (openAPI.getPaths() == null) {
+          openAPI.paths(new Paths());
+        }
 
-				if (openAPI.getComponents() == null) {
-					openAPI.components(new Components());
-				}
+        if (openAPI.getComponents() == null) {
+          openAPI.components(new Components());
+        }
 
-				return openAPI;
-			}
+        return openAPI;
+      }
 
-			return new OpenAPI()
-					.info(new Info()
-							.description("Generated Description")
-							.title("Generated Title")
-							.version("0.1.0")
-					)
-					.paths(new Paths())
-					.components(new Components());
-		}
-		return openAPI;
-	}
+      return new OpenAPI()
+          .info(new Info()
+              .description("Generated Description")
+              .title("Generated Title")
+              .version("0.1.0")
+          )
+          .paths(new Paths())
+          .components(new Components());
+    }
+    return openAPI;
+  }
 
-	public void setOpenAPI(OpenAPI openAPI) {
-		this.openAPI = openAPI;
-	}
+  public void setOpenAPI(OpenAPI openAPI) {
+    this.openAPI = openAPI;
+  }
 }

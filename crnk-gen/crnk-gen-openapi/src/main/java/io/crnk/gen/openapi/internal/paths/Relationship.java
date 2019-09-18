@@ -1,8 +1,8 @@
 package io.crnk.gen.openapi.internal.paths;
 
 import io.crnk.gen.openapi.internal.OASUtils;
-import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.Operation;

@@ -6,6 +6,7 @@ abstract class AbstractStaticResponseGenerator {
   public String getName() {
     return getClass().getSimpleName();
   }
+
   public ApiResponse $ref() {
     return new ApiResponse().$ref(getName());
   }

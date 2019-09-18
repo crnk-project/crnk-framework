@@ -24,6 +24,6 @@ public class ResourceResponseSchema extends AbstractResourceSchemaGenerator {
                         "data",
                         new ArraySchema()
                             .items(new ResourceSchema(metaResource).$ref()))
-                .required(Collections.singletonList("data"))));
+                    .required(Collections.singletonList("data"))));
   }
 }

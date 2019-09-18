@@ -13,10 +13,10 @@ public class PatchResource extends AbstractResourceSchemaGenerator {
   }
 
   public Schema schema() {
-      return new ComposedSchema()
-          .allOf(
-              Arrays.asList(
-                  new ResourceReference(metaResource).$ref(),
-                  new ResourcePatchAttributes(metaResource).$ref()));
-    }
+    return new ComposedSchema()
+        .allOf(
+            Arrays.asList(
+                new ResourceReference(metaResource).$ref(),
+                new ResourcePatchAttributes(metaResource).$ref()));
+  }
 }

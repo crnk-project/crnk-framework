@@ -5,8 +5,8 @@ import io.crnk.gen.openapi.internal.paths.Field;
 import io.crnk.gen.openapi.internal.paths.Relationship;
 import io.crnk.gen.openapi.internal.paths.Resource;
 import io.crnk.gen.openapi.internal.paths.Resources;
-import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
 import io.crnk.gen.openapi.internal.schemas.*;
@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 public class OASResource {
-  private MetaResource metaResource;
   public final String resourceName;
   public final String resourceType;
+  private MetaResource metaResource;
   private Map<String, Schema> attributes;
   private Map<String, Parameter> componentParameters;
   private Map<String, Schema> componentSchemas;
@@ -41,6 +41,26 @@ public class OASResource {
     initializeComponentParameters();
     initializeComponentSchemas();
     initializeComponentResponses();
+  }
+
+  public static Operation addFilters(MetaResource metaResource, Operation operation) {
+    // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
+    operation.getParameters().add(new Filter().$ref());
+
+    // Add filter[<>] parameters
+    // Only the most basic filters are documented
+    for (MetaElement child : metaResource.getChildren()) {
+      if (child instanceof MetaResourceField) {
+        MetaResourceField metaResourceField = (MetaResourceField) child;
+        if (metaResourceField.isFilterable()) {
+          if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
+            continue;
+          }
+          operation.getParameters().add(new FieldFilter(metaResourceField).parameter());
+        }
+      }
+    }
+    return operation;
   }
 
   private void initializeAttributes() {
@@ -142,30 +162,10 @@ public class OASResource {
     return getResourcePath() + relatedOasResource.getResourcesPath();
   }
 
-  String getRelationshipsPath(OASResource relatedOasResource) {
-    return getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath();
-  }
-
   // PARAMETERS
 
-  public static Operation addFilters(MetaResource metaResource, Operation operation) {
-    // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    operation.getParameters().add(new Filter().$ref());
-
-    // Add filter[<>] parameters
-    // Only the most basic filters are documented
-    for (MetaElement child : metaResource.getChildren()) {
-      if (child instanceof MetaResourceField) {
-        MetaResourceField metaResourceField = (MetaResourceField) child;
-        if (metaResourceField.isFilterable()) {
-          if (metaResourceField.isLinks() || metaResourceField.isMeta()) {
-            continue;
-          }
-          operation.getParameters().add(new FieldFilter(metaResourceField).parameter());
-        }
-      }
-    }
-    return operation;
+  String getRelationshipsPath(OASResource relatedOasResource) {
+    return getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath();
   }
 
   // OPERATIONS

@@ -8,8 +8,8 @@ import io.crnk.gen.openapi.internal.parameters.Include;
 import io.crnk.gen.openapi.internal.parameters.PrimaryKey;
 import io.crnk.gen.openapi.internal.responses.Accepted;
 import io.crnk.gen.openapi.internal.responses.NoContent;
-import io.crnk.gen.openapi.internal.schemas.ResourceReferencesResponseSchema;
 import io.crnk.gen.openapi.internal.schemas.ResourceReferenceResponseSchema;
+import io.crnk.gen.openapi.internal.schemas.ResourceReferencesResponseSchema;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -26,6 +26,16 @@ import java.util.TreeMap;
 
 public class BasePath {
   MetaResource metaResource;
+
+  /*
+ 		Generate a sensible, default ApiResponses that is populated with references
+ 		to all Error Responses for a metaResource
+ 	 */
+  static ApiResponses apiResponsesFromMap(Map<String, ApiResponse> responseMap) {
+    ApiResponses responses = new ApiResponses();
+    responseMap.forEach(responses::addApiResponse);
+    return responses;
+  }
 
   Operation generateDefaultOperation() {
     return new Operation().parameters(
@@ -69,16 +79,6 @@ public class BasePath {
     // Todo: Standard wrapper responses for single & multiple records
     // responses...
 
-    return responses;
-  }
-
-  /*
- 		Generate a sensible, default ApiResponses that is populated with references
- 		to all Error Responses for a metaResource
- 	 */
-  static ApiResponses apiResponsesFromMap(Map<String, ApiResponse> responseMap) {
-    ApiResponses responses = new ApiResponses();
-    responseMap.forEach(responses::addApiResponse);
     return responses;
   }
 

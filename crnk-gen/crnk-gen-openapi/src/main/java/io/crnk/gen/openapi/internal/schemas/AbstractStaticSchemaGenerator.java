@@ -6,6 +6,7 @@ abstract class AbstractStaticSchemaGenerator {
   public static String getName() {
     return Thread.currentThread().getStackTrace()[1].getClass().getSimpleName();
   }
+
   public static Schema $ref() {
     return new Schema().$ref(getName());
   }

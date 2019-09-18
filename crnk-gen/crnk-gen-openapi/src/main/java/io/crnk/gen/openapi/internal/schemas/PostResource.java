@@ -13,10 +13,10 @@ public class PostResource extends AbstractResourceSchemaGenerator {
   }
 
   public Schema schema() {
-      return new ComposedSchema()
-          .allOf(
-              Arrays.asList(
-                  new ResourceReference(metaResource).$ref(),
-                  new ResourcePostAttributes(metaResource).$ref()));
-    }
+    return new ComposedSchema()
+        .allOf(
+            Arrays.asList(
+                new ResourceReference(metaResource).$ref(),
+                new ResourcePostAttributes(metaResource).$ref()));
+  }
 }

@@ -4,7 +4,8 @@ package io.crnk.gen.openapi.internal.responses;
 import io.crnk.core.engine.http.HttpStatus;
 import io.crnk.gen.openapi.internal.schemas.ResourceReferencesResponseSchema;
 import io.crnk.meta.model.resource.MetaResource;
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class ResourceReferencesResponse extends AbstractResourceResponseGenerator {
