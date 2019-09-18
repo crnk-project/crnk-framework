@@ -21,20 +21,7 @@ test {
     testLogging.showStandardStreams = true
 }
 
-//apply plugin: 'org.asciidoctor.convert'
-
-//openapidoctor {
-//    sourceDir = file('build/tmp/openapi/generated/source/openapi')
-//    backends = ['html5']
-//    attributes 'source-highlighter': 'coderay'
-//    sources {
-//        include 'index.adoc'
-//    }
-//}
-
 // compile generated openapi files
 tasks.test.doFirst {
     delete 'build/tmp/openapi'
 }
-//check.dependsOn tasks.openapidoctor
-//tasks.openapidoctor.dependsOn test
