@@ -4,9 +4,9 @@ import org.junit.Test;
 
 public class OpenAPIGeneratorConfigTest {
 
-    @Test
-    public void test() {
-        OpenAPIGeneratorConfig config = new OpenAPIGeneratorConfig();
+  @Test
+  public void test() {
+    OpenAPIGeneratorConfig config = new OpenAPIGeneratorConfig();
 
-    }
+  }
 }
