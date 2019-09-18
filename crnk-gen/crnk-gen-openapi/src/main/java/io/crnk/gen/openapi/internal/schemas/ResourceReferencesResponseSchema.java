@@ -1,16 +1,14 @@
 package io.crnk.gen.openapi.internal.schemas;
 
-import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class RelationshipMultiResponseSchema {
-  private final MetaResource metaResource;
+public class ResourceReferencesResponseSchema extends AbstractResourceSchemaGenerator {
 
-  public RelationshipMultiResponseSchema(MetaResource metaResource) {
-    this.metaResource = metaResource;
+  public ResourceReferencesResponseSchema(MetaResource metaResource) {
+    super(metaResource);
   }
 
   public Schema schema() {
@@ -18,6 +16,6 @@ public class RelationshipMultiResponseSchema {
         .addProperties(
             "data",
             new ArraySchema()
-                .items(OASUtils.get$refSchema(metaResource.getResourceType() + "Reference")));
+                .items(new ResourceReference(metaResource).$ref()));
   }
 }

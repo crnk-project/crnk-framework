@@ -1,25 +1,22 @@
 package io.crnk.gen.openapi.internal.schemas;
 
-import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
 
-public class PatchResource {
-
-  private final MetaResource metaResource;
+public class PatchResource extends AbstractResourceSchemaGenerator {
 
   public PatchResource(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Schema schema() {
       return new ComposedSchema()
           .allOf(
               Arrays.asList(
-                  OASUtils.get$refSchema(metaResource.getResourceType() + "Reference"),
-                  OASUtils.get$refSchema(metaResource.getResourceType() + "PatchAttributes")));
+                  new ResourceReference(metaResource).$ref(),
+                  new ResourcePatchAttributes(metaResource).$ref()));
     }
 }

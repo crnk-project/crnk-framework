@@ -5,11 +5,10 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
 
-public class ResourceReference {
-  private final MetaResource metaResource;
+public class ResourceReference extends AbstractResourceSchemaGenerator {
 
   public ResourceReference(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Schema schema() {

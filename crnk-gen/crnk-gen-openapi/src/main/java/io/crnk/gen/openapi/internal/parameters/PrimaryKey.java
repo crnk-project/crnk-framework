@@ -6,11 +6,10 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-public class PrimaryKey {
-  private final MetaResource metaResource;
+public class PrimaryKey extends AbstractResourceParameterGenerator{
 
   public PrimaryKey(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Parameter parameter() {

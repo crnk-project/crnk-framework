@@ -1,39 +1,42 @@
 package io.crnk.gen.openapi.internal.paths;
 
-import io.crnk.gen.openapi.internal.OASResource;
+import io.crnk.gen.openapi.internal.parameters.Fields;
+import io.crnk.gen.openapi.internal.parameters.Include;
+import io.crnk.gen.openapi.internal.parameters.PrimaryKey;
+import io.crnk.gen.openapi.internal.responses.ResourceResponse;
+import io.crnk.gen.openapi.internal.schemas.PatchResource;
+import io.crnk.gen.openapi.internal.schemas.ResourceResponseSchema;
+import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.Map;
 
 public class Resource extends BasePath {
-  private final OASResource oasResource;
   private final String resourceName;
   private final String resourceType;
 
-  public Resource(OASResource oasResource) {
-    this.oasResource = oasResource;
-    resourceName = oasResource.resourceName;
-    resourceType = oasResource.resourceType;
+  public Resource(MetaResource metaResource) {
+    super.metaResource = metaResource;
+    resourceName = metaResource.getName();
+    resourceType = metaResource.getResourceType();
   }
 
   public Operation Get() {
     Operation operation = generateDefaultOperation();
     operation.setDescription("Retrieve a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    responses.put("200", new ApiResponse().$ref(resourceName + "Response"));
+    responses.put("200", new ResourceResponse(metaResource).$ref());
     operation.setResponses(apiResponsesFromMap(responses));
 
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + resourceType + "PrimaryKey"));
+    operation.getParameters().add(new PrimaryKey(metaResource).$ref());
     // Add fields[resource] parameter
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + resourceType + "Fields"));
+    operation.getParameters().add(new Fields(metaResource).$ref());
     // Add include parameter
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + resourceType + "Include"));
+    operation.getParameters().add(new Include(metaResource).$ref());
 
     return operation;
   }
@@ -46,19 +49,16 @@ public class Resource extends BasePath {
         .description("OK")
         .content(new Content()
             .addMediaType("application/vnd.api+json",
-                new MediaType().schema(new Schema()
-                    .$ref(resourceName + "Response")))));
+                new MediaType().schema(new ResourceResponseSchema(metaResource).$ref()))));
     operation.setResponses(apiResponsesFromMap(responses));
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + resourceType + "PrimaryKey"));
+    operation.getParameters().add(new PrimaryKey(metaResource).$ref());
     operation.setRequestBody(
         new RequestBody()
             .content(
                 new Content()
                     .addMediaType("application/vnd.api+json",
                         new MediaType()
-                            .schema(
-                                new Schema()
-                                    .$ref(resourceName + "Patch")))));
+                            .schema(new PatchResource(metaResource).$ref()))));
     return operation;
   }
 
@@ -68,7 +68,7 @@ public class Resource extends BasePath {
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
     responses.put("200", new ApiResponse().description("OK"));
     operation.setResponses(apiResponsesFromMap(responses));
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/" + resourceType + "PrimaryKey"));
+    operation.getParameters().add(new PrimaryKey(metaResource).$ref());
 
     return operation;
   }

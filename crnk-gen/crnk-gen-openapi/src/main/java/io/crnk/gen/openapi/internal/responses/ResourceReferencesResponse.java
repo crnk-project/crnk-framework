@@ -2,15 +2,15 @@ package io.crnk.gen.openapi.internal.responses;
 
 
 import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.gen.openapi.internal.schemas.ResourceReferencesResponseSchema;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
-public class RelationshipSingleResponse {
-  MetaResource metaResource;
+public class ResourceReferencesResponse extends AbstractResourceResponseGenerator {
 
-  public RelationshipSingleResponse(MetaResource metaResource) {
-    this.metaResource = metaResource;
+  public ResourceReferencesResponse(MetaResource metaResource) {
+    super(metaResource);
   }
 
   public ApiResponse response() {
@@ -21,8 +21,6 @@ public class RelationshipSingleResponse {
                 .addMediaType(
                     "application/vnd.api+json",
                     new MediaType()
-                        .schema(
-                            new Schema()
-                                .$ref(metaResource.getName() + "Relationship"))));
+                        .schema(new ResourceReferencesResponseSchema(metaResource).$ref())));
   }
 }

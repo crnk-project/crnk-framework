@@ -1,9 +1,9 @@
 package io.crnk.gen.openapi.internal;
 
 import io.crnk.core.engine.http.HttpStatus;
+import io.crnk.gen.openapi.internal.schemas.ApiError;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.lang.reflect.Field;
@@ -24,7 +24,7 @@ public class OASErrors {
         apiResponse.description(HttpStatus.toMessage(responseCode));
         apiResponse.content(new Content()
             .addMediaType("application/json",
-                new MediaType().schema(new Schema().$ref("ApiError")))
+                new MediaType().schema(ApiError.$ref()))
         );
         responses.put(responseCode.toString(), apiResponse);
       }

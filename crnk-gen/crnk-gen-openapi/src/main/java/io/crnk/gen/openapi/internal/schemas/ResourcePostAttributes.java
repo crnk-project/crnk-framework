@@ -11,13 +11,11 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourcePostAttributes {
-  private final MetaResource metaResource;
+public class ResourcePostAttributes extends AbstractResourceSchemaGenerator {
   private final Map<String, Schema> attributes;
 
-
   public ResourcePostAttributes(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
     attributes = new HashMap<>();
     for (MetaElement child : metaResource.getChildren()) {
       if (child == null) {

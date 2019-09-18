@@ -1,7 +1,9 @@
 package io.crnk.gen.openapi.internal.paths;
 
-import io.crnk.gen.openapi.internal.OASResource;
 import io.crnk.gen.openapi.internal.OASUtils;
+import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
+import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -9,60 +11,60 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.Map;
 
 public class Relationship extends BasePath {
-  private final OASResource oasResource;
-  private final OASResource relatedOasResource;
+  private final MetaResource metaResource;
+  private final MetaResource relatedMetaResource;
   private final MetaResourceField metaResourceField;
   private final String resourceName;
   private final String resourceType;
 
-  public Relationship(OASResource oasResource, OASResource relatedOasResource, MetaResourceField metaResourceField) {
-    super.oasResource = oasResource;
-    this.oasResource = oasResource;
-    this.relatedOasResource = relatedOasResource;
+  public Relationship(MetaResource metaResource, MetaResource relatedMetaResource, MetaResourceField metaResourceField) {
+    super.metaResource = metaResource;
+    this.metaResource = metaResource;
+    this.relatedMetaResource = relatedMetaResource;
     this.metaResourceField = metaResourceField;
-    resourceName = oasResource.resourceName;
-    resourceType = oasResource.resourceType;
+    resourceName = metaResource.getName();
+    resourceType = metaResource.getResourceType();
   }
 
   public Operation Get() {
-    Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedOasResource, OASUtils.oneToMany(metaResourceField));
-    operation.setDescription("Retrieve " + relatedOasResource.getResourceType() + " references related to a " + resourceType + " resource");
+    Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedMetaResource, OASUtils.oneToMany(metaResourceField));
+    operation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " references related to a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    String responsePostfix = OASUtils.oneToMany(metaResourceField) ? "RelationshipsResponse" : "RelationshipResponse";
-    responses.put("200", new ApiResponse().$ref(relatedOasResource.getResourceName() + responsePostfix));
+    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourceReferencesResponse(relatedMetaResource).$ref() : new ResourceReferenceResponse(relatedMetaResource).$ref();
+    responses.put("200", responseSchema);
     operation.setResponses(apiResponsesFromMap(responses));
 
     return operation;
   }
 
   public Operation Post() {
-    Operation operation = generateDefaultRelationshipOperation(relatedOasResource, OASUtils.oneToMany(metaResourceField), true);
-    operation.setDescription("Create " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
+    Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, OASUtils.oneToMany(metaResourceField), true);
+    operation.setDescription("Create " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    String responsePostfix = OASUtils.oneToMany(metaResourceField) ? "Relationships" : "Relationship";
-    responses.put("200", new ApiResponse().$ref(relatedOasResource.getResourceName() + responsePostfix + "Response"));
+    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourceReferencesResponse(relatedMetaResource).$ref() : new ResourceReferenceResponse(relatedMetaResource).$ref();
+    responses.put("200", responseSchema);
     operation.setResponses(apiResponsesFromMap(responses));
 
     return operation;
   }
 
   public Operation Patch() {
-    Operation operation = generateDefaultRelationshipOperation(relatedOasResource, OASUtils.oneToMany(metaResourceField), true);
-    operation.setDescription("Update " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
+    Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, OASUtils.oneToMany(metaResourceField), true);
+    operation.setDescription("Update " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    String responsePostfix = OASUtils.oneToMany(metaResourceField) ? "Relationships" : "Relationship";
-    responses.put("200", new ApiResponse().$ref(relatedOasResource.getResourceName() + responsePostfix + "Response"));
+    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourceReferencesResponse(relatedMetaResource).$ref() : new ResourceReferenceResponse(relatedMetaResource).$ref();
+    responses.put("200", responseSchema);
     operation.setResponses(apiResponsesFromMap(responses));
 
     return operation;
   }
 
   public Operation Delete() {
-    Operation operation = generateDefaultRelationshipOperation(relatedOasResource, OASUtils.oneToMany(metaResourceField), false);
-    operation.setDescription("Delete " + resourceType + " relationship to a " + relatedOasResource.getResourceType() + " resource");
+    Operation operation = generateDefaultRelationshipOperation(relatedMetaResource, OASUtils.oneToMany(metaResourceField), false);
+    operation.setDescription("Delete " + resourceType + " relationship to a " + relatedMetaResource.getResourceType() + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    String responsePostfix = OASUtils.oneToMany(metaResourceField) ? "Relationships" : "Relationship";
-    responses.put("200", new ApiResponse().$ref(relatedOasResource.getResourceName() + responsePostfix + "Response"));
+    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourceReferencesResponse(relatedMetaResource).$ref() : new ResourceReferenceResponse(relatedMetaResource).$ref();
+    responses.put("200", responseSchema);
     operation.setResponses(apiResponsesFromMap(responses));
 
     return operation;

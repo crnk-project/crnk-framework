@@ -3,7 +3,7 @@ package io.crnk.gen.openapi.internal.schemas;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ListResponseMixin {
+public class ListResponseMixin extends AbstractStaticSchemaGenerator {
   public static Schema schema() {
     return new Schema()
         .type("object")
@@ -17,7 +17,7 @@ public class ListResponseMixin {
                     new Schema().type("string")))
         .addProperties(
             "errors",
-            new ArraySchema().items(new Schema().$ref("ApiError")))
+            new ArraySchema().items(ApiError.$ref()))
         .addProperties(
             "meta",
             new Schema()

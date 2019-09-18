@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal;
 
+import io.crnk.gen.openapi.internal.schemas.ResourceReference;
 import io.crnk.meta.model.*;
 import io.crnk.meta.model.resource.MetaJsonObject;
 import io.crnk.meta.model.resource.MetaResource;
@@ -15,7 +16,7 @@ import java.util.TreeMap;
 public class OASUtils {
   public static Schema transformMetaResourceField(MetaType metaType) {
     if (metaType instanceof MetaResource) {
-      return get$refSchema(((MetaResource) metaType).getResourceType() + "Reference");
+      return new ResourceReference((MetaResource) metaType).$ref();
     } else if (metaType instanceof MetaCollectionType) {
       return new ArraySchema()
           .items(transformMetaResourceField(metaType.getElementType()))
@@ -81,10 +82,6 @@ public class OASUtils {
     } else {
       return new Schema().type(metaType.getElementType().getName());
     }
-  }
-
-  public static Schema get$refSchema(String typeName) {
-    return new Schema().$ref("#/components/schemas/" + typeName);
   }
 
   @SafeVarargs

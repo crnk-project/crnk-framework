@@ -2,7 +2,7 @@ package io.crnk.gen.openapi.internal.schemas;
 
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ApiError {
+public class ApiError extends AbstractStaticSchemaGenerator {
   public static Schema schema() {
   	return new Schema()
   			.type("object")

@@ -5,7 +5,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.Arrays;
 
-public class ContentType {
+public class ContentType extends AbstractStaticParameterGenerator {
+
   public static Parameter parameter() {
     return new Parameter()
         .name("Content-Type")

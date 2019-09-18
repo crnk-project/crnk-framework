@@ -1,6 +1,5 @@
 package io.crnk.gen.openapi.internal.schemas;
 
-import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -8,11 +7,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ResourceSchema {
-  private final MetaResource metaResource;
+public class ResourceSchema extends AbstractResourceSchemaGenerator {
 
   public ResourceSchema(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Schema schema() {
@@ -20,8 +18,8 @@ public class ResourceSchema {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
-                OASUtils.get$refSchema(metaResource.getResourceType() + "Reference"),
-                OASUtils.get$refSchema(metaResource.getResourceType() + "Attributes"),
+                new ResourceReference(metaResource).$ref(),
+                new ResourceAttributes(metaResource).$ref(),
                 new Schema()
                     .type("object")
                     .addProperties(

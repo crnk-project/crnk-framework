@@ -1,11 +1,6 @@
 package io.crnk.gen.openapi.internal;
 
-import io.crnk.gen.openapi.internal.parameters.ContentType;
-import io.crnk.gen.openapi.internal.parameters.Filter;
-import io.crnk.gen.openapi.internal.parameters.PageLimit;
-import io.crnk.gen.openapi.internal.parameters.PageNumber;
-import io.crnk.gen.openapi.internal.parameters.PageOffset;
-import io.crnk.gen.openapi.internal.parameters.PageSize;
+import io.crnk.gen.openapi.internal.parameters.*;
 import io.crnk.gen.openapi.internal.responses.Accepted;
 import io.crnk.gen.openapi.internal.responses.NoContent;
 import io.crnk.gen.openapi.internal.schemas.ApiError;
@@ -24,12 +19,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class OASGenerator {
   private static final Logger LOGGER = LoggerFactory.getLogger(OASGenerator.class);
@@ -40,18 +30,18 @@ public class OASGenerator {
   public OASGenerator(MetaLookup metaLookup, OpenAPI baseOpenAPI) {
     openApi = baseOpenAPI;
     meta = metaLookup;
-    openApi.getComponents().addSchemas(ApiError.class.getSimpleName(), ApiError.schema());
-    openApi.getComponents().addSchemas(ResponseMixin.class.getSimpleName(), ResponseMixin.schema());
-    openApi.getComponents().addSchemas(ListResponseMixin.class.getSimpleName(), ListResponseMixin.schema());
-    openApi.getComponents().addParameters(PageLimit.class.getSimpleName(), PageLimit.parameter());
-    openApi.getComponents().addParameters(PageOffset.class.getSimpleName(), PageOffset.parameter());
+    openApi.getComponents().addSchemas(ApiError.getName(), ApiError.schema());
+    openApi.getComponents().addSchemas(ResponseMixin.getName(), ResponseMixin.schema());
+    openApi.getComponents().addSchemas(ListResponseMixin.getName(), ListResponseMixin.schema());
+    openApi.getComponents().addParameters(new PageLimit().getName(), PageLimit.parameter());
+    openApi.getComponents().addParameters(new PageOffset().getName(), PageOffset.parameter());
     boolean NumberSizePagingBehavior = false;
     if (NumberSizePagingBehavior) {  // TODO: Figure out how to determine this
-      openApi.getComponents().addParameters(PageSize.class.getSimpleName(), PageNumber.parameter());
-      openApi.getComponents().addParameters(PageNumber.class.getSimpleName(), PageSize.parameter());
+      openApi.getComponents().addParameters(new PageSize().getName(), PageNumber.parameter());
+      openApi.getComponents().addParameters(new PageNumber().getName(), PageSize.parameter());
     }
-    openApi.getComponents().addParameters(ContentType.class.getSimpleName(), ContentType.parameter());
-    openApi.getComponents().addParameters(Filter.class.getSimpleName(), Filter.parameter());
+//    openApi.getComponents().addParameters(new ContentType().getName(), ContentType.parameter());
+    openApi.getComponents().addParameters(new Filter().getName(), Filter.parameter());
     openApi.getComponents().responses(generateStandardApiResponses());
     registerMetaResources();
   }
@@ -129,12 +119,12 @@ public class OASGenerator {
             OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
 
             PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
-            for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedOasResource, mrf).entrySet()) {
+            for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedMetaResource, mrf).entrySet()) {
               openApi.getPaths().addPathItem(oasResource.getFieldPath(relatedOasResource), entry.getKey().merge(fieldPathItem, entry.getValue()));
             }
 
             PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
-            for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedOasResource, mrf).entrySet()) {
+            for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedMetaResource, mrf).entrySet()) {
               openApi.getPaths().addPathItem(oasResource.getRelationshipsPath(relatedOasResource), entry.getKey().merge(relationshipPathItem, entry.getValue()));
             }
           }
@@ -152,8 +142,8 @@ public class OASGenerator {
 
   private Map<String, ApiResponse> generateStandardApiSuccessResponses() {
     Map<String, ApiResponse> responses = new LinkedHashMap<>();
-    responses.put("202", Accepted.response());
-    responses.put("204", NoContent.response());
+    responses.put(new Accepted().getName(), Accepted.response());
+    responses.put(new NoContent().getName(), NoContent.response());
 
     return responses;
   }

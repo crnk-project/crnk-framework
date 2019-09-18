@@ -5,8 +5,8 @@ import io.crnk.gen.openapi.internal.paths.Field;
 import io.crnk.gen.openapi.internal.paths.Relationship;
 import io.crnk.gen.openapi.internal.paths.Resource;
 import io.crnk.gen.openapi.internal.paths.Resources;
-import io.crnk.gen.openapi.internal.responses.RelationshipMultiResponse;
-import io.crnk.gen.openapi.internal.responses.RelationshipSingleResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
 import io.crnk.gen.openapi.internal.schemas.*;
@@ -29,8 +29,6 @@ public class OASResource {
   public final String resourceName;
   public final String resourceType;
   private Map<String, Schema> attributes;
-  private Map<String, Schema> patchAttributes;
-  private Map<String, Schema> postAttributes;
   private Map<String, Parameter> componentParameters;
   private Map<String, Schema> componentSchemas;
   private Map<String, ApiResponse> componentResponses;
@@ -47,8 +45,6 @@ public class OASResource {
 
   private void initializeAttributes() {
     attributes = new HashMap<>();
-    patchAttributes = new HashMap<>();
-    postAttributes = new HashMap<>();
     for (MetaElement child : metaResource.getChildren()) {
       if (child == null) {
         continue;
@@ -61,57 +57,43 @@ public class OASResource {
         Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
         attributeSchema.nullable(mrf.isNullable());
         attributes.put(mrf.getName(), attributeSchema);
-        if (((MetaResourceField) child).isUpdatable()) {
-          patchAttributes.put(mrf.getName(), attributeSchema);
-        }
-        if (((MetaResourceField) child).isInsertable()) {
-          postAttributes.put(mrf.getName(), attributeSchema);
-        }
       }
     }
   }
 
   private void initializeComponentParameters() {
     componentParameters = new HashMap<>();
-    componentParameters.put(resourceType + "PrimaryKey", new PrimaryKey(metaResource).parameter());
-    componentParameters.put(resourceType + "Fields", new Fields(metaResource).parameter());
-    componentParameters.put(resourceType + "Include", new Include(metaResource).parameter());
-    componentParameters.put(resourceType + "Sort", new Sort(metaResource).parameter());
+    componentParameters.put(new PrimaryKey(metaResource).getName(), new PrimaryKey(metaResource).parameter());
+    componentParameters.put(new Fields(metaResource).getName(), new Fields(metaResource).parameter());
+    componentParameters.put(new Include(metaResource).getName(), new Include(metaResource).parameter());
+    componentParameters.put(new Sort(metaResource).getName(), new Sort(metaResource).parameter());
   }
 
   private void initializeComponentSchemas() {
     componentSchemas = new HashMap<>();
-    componentSchemas.put(resourceType + "Reference", new ResourceReference(metaResource).schema());
-    componentSchemas.put(resourceType + "Attributes", new ResourceAttributes(metaResource).schema());
-    componentSchemas.put(resourceType + "PostAttributes", new ResourcePostAttributes(metaResource).schema());
-    componentSchemas.put(resourceType + "PatchAttributes", new ResourcePatchAttributes(metaResource).schema());
-    componentSchemas.put(resourceName, new ResourceSchema(metaResource).schema());
-    componentSchemas.put(resourceName + "Patch", new PatchResource(metaResource).schema());
-    componentSchemas.put(resourceName + "Post", new PostResource(metaResource).schema());
-    componentSchemas.put(resourceName + "Response", new ResourceResponseSchema(metaResource).schema());
-    componentSchemas.put(resourceName + "ListResponse", new ResourcesResponseSchema(metaResource).schema());
-    componentSchemas.put(resourceName + "Relationship", new RelationshipSingleResponseSchema(metaResource).schema());
-    componentSchemas.put(resourceName + "Relationships", new RelationshipMultiResponseSchema(metaResource).schema());
+    componentSchemas.put(new ResourceReference(metaResource).getName(), new ResourceReference(metaResource).schema());
+    componentSchemas.put(new ResourceAttributes(metaResource).getName(), new ResourceAttributes(metaResource).schema());
+    componentSchemas.put(new ResourcePostAttributes(metaResource).getName(), new ResourcePostAttributes(metaResource).schema());
+    componentSchemas.put(new ResourcePatchAttributes(metaResource).getName(), new ResourcePatchAttributes(metaResource).schema());
+    componentSchemas.put(new ResourceSchema(metaResource).getName(), new ResourceSchema(metaResource).schema());
+    componentSchemas.put(new PatchResource(metaResource).getName(), new PatchResource(metaResource).schema());
+    componentSchemas.put(new PostResource(metaResource).getName(), new PostResource(metaResource).schema());
+    componentSchemas.put(new ResourceResponseSchema(metaResource).getName(), new ResourceResponseSchema(metaResource).schema());
+    componentSchemas.put(new ResourcesResponseSchema(metaResource).getName(), new ResourcesResponseSchema(metaResource).schema());
+    componentSchemas.put(new ResourceReferenceResponseSchema(metaResource).getName(), new ResourceReferenceResponseSchema(metaResource).schema());
+    componentSchemas.put(new ResourceReferencesResponseSchema(metaResource).getName(), new ResourceReferencesResponseSchema(metaResource).schema());
   }
 
   private void initializeComponentResponses() {
     componentResponses = new HashMap<>();
-    componentResponses.put(resourceName + "Response", new ResourceResponse(metaResource).response());
-    componentResponses.put(resourceName + "ListResponse", new ResourcesResponse(metaResource).response());
-    componentResponses.put(resourceName + "RelationshipResponse", new RelationshipSingleResponse(metaResource).response());
-    componentResponses.put(resourceName + "RelationshipsResponse", new RelationshipMultiResponse(metaResource).response());
+    componentResponses.put(new ResourceResponse(metaResource).getName(), new ResourceResponse(metaResource).response());
+    componentResponses.put(new ResourcesResponse(metaResource).getName(), new ResourcesResponse(metaResource).response());
+    componentResponses.put(new ResourceReferenceResponse(metaResource).getName(), new ResourceReferenceResponse(metaResource).response());
+    componentResponses.put(new ResourceReferencesResponse(metaResource).getName(), new ResourceReferencesResponse(metaResource).response());
   }
 
   public Map<String, Schema> getAttributes() {
     return attributes;
-  }
-
-  public Map<String, Schema> getPatchAttributes() {
-    return patchAttributes;
-  }
-
-  public Map<String, Schema> getPostAttributes() {
-    return postAttributes;
   }
 
   Map<String, Parameter> getComponentParameters() {
@@ -166,9 +148,9 @@ public class OASResource {
 
   // PARAMETERS
 
-  public Operation addFilters(Operation operation) {
+  public static Operation addFilters(MetaResource metaResource, Operation operation) {
     // TODO: Pull these out into re-usable parameter groups when https://github.com/OAI/OpenAPI-Specification/issues/445 lands
-    operation.getParameters().add(new Parameter().$ref("#/components/parameters/Filter"));
+    operation.getParameters().add(new Filter().$ref());
 
     // Add filter[<>] parameters
     // Only the most basic filters are documented
@@ -190,7 +172,7 @@ public class OASResource {
 
   Map<OperationType, Operation> generateResourcesOperations() {
     Map<OperationType, Operation> operations = new HashMap<>();
-    Resources resourcesPath = new Resources(this);
+    Resources resourcesPath = new Resources(this.metaResource);
     if (metaResource.isReadable()) {
       operations.put(OperationType.GET, resourcesPath.Get());
     }
@@ -202,7 +184,7 @@ public class OASResource {
 
   Map<OperationType, Operation> generateResourceOperations() {
     Map<OperationType, Operation> operations = new HashMap<>();
-    Resource resourcePath = new Resource(this);
+    Resource resourcePath = new Resource(this.metaResource);
     if (metaResource.isReadable()) {
       operations.put(OperationType.GET, resourcePath.Get());
     }
@@ -215,9 +197,9 @@ public class OASResource {
     return operations;
   }
 
-  Map<OperationType, Operation> generateFieldOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
+  Map<OperationType, Operation> generateFieldOperationsForField(MetaResource relatedMetaResource, MetaResourceField mrf) {
     Map<OperationType, Operation> operations = new HashMap<>();
-    Field fieldPath = new Field(this, relatedOasResource, mrf);
+    Field fieldPath = new Field(this.metaResource, relatedMetaResource, mrf);
     if (metaResource.isReadable() && mrf.isReadable()) {
       operations.put(OperationType.GET, fieldPath.Get());
     }
@@ -234,9 +216,9 @@ public class OASResource {
     return operations;
   }
 
-  Map<OperationType, Operation> generateRelationshipsOperationsForField(OASResource relatedOasResource, MetaResourceField mrf) {
+  Map<OperationType, Operation> generateRelationshipsOperationsForField(MetaResource relatedMetaResource, MetaResourceField mrf) {
     Map<OperationType, Operation> operations = new HashMap<>();
-    Relationship relationshipPath = new Relationship(this, relatedOasResource, mrf);
+    Relationship relationshipPath = new Relationship(this.metaResource, relatedMetaResource, mrf);
     if (metaResource.isReadable() && mrf.isReadable()) {
       operations.put(OperationType.GET, relationshipPath.Get());
     }

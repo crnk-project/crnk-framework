@@ -7,11 +7,10 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import static java.util.stream.Collectors.joining;
 
-public class Fields {
-  private final MetaResource metaResource;
+public class Fields extends AbstractResourceParameterGenerator{
 
   public Fields(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Parameter parameter() {

@@ -8,11 +8,10 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import static java.util.stream.Collectors.joining;
 
-public class Sort {
-  private final MetaResource metaResource;
+public class Sort extends AbstractResourceParameterGenerator {
 
   public Sort(MetaResource metaResource) {
-    this.metaResource = metaResource;
+    super(metaResource);
   }
 
   public Parameter parameter() {
