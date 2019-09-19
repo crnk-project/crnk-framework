@@ -19,6 +19,7 @@ import io.crnk.core.engine.document.Resource;
 import io.crnk.core.engine.information.bean.BeanAttributeInformation;
 import io.crnk.core.engine.information.bean.BeanInformation;
 import io.crnk.core.engine.information.resource.ResourceField;
+import io.crnk.core.engine.information.resource.ResourceFieldAccess;
 import io.crnk.core.engine.information.resource.ResourceFieldType;
 import io.crnk.core.engine.information.resource.ResourceInformation;
 import io.crnk.core.engine.information.resource.ResourceInformationProviderContext;
@@ -103,7 +104,9 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 
 		BeanInformation beanInformation = BeanInformation.get(resourceClass);
 
-		List<ResourceField> fields = getResourceFields(resourceClass);
+		ResourceFieldAccess resourceAccess = getResourceAccess(resourceClass);
+
+		List<ResourceField> fields = getResourceFields(resourceClass, resourceAccess);
 		handleIdOverride(resourceClass, fields);
 
 		Class<?> superclass = resourceClass.getSuperclass();
@@ -112,19 +115,19 @@ public class JpaResourceInformationProvider extends ResourceInformationProviderB
 				: null;
 
 		TypeParser typeParser = context.getTypeParser();
-		ResourceInformation info =
+		ResourceInformation information =
 				new ResourceInformation(typeParser, resourceClass, resourceType, resourcePath, superResourceType,
 						instanceBuilder, fields, OffsetLimitPagingSpec.class);
-		info.setValidator(new JpaOptimisticLockingValidator(meta));
+		information.setValidator(new JpaOptimisticLockingValidator(meta));
+		information.setAccess(resourceAccess);
 
-
-		ResourceField idField = info.getIdField();
+		ResourceField idField = information.getIdField();
 		BeanAttributeInformation idAttr = beanInformation.getAttribute(idField.getUnderlyingName());
 		if (idAttr.getAnnotation(EmbeddedId.class).isPresent()) {
-			info.setIdStringMapper(new JpaIdMapper(meta));
+			information.setIdStringMapper(new JpaIdMapper(meta));
 		}
 
-		return info;
+		return information;
 	}
 
 	/**

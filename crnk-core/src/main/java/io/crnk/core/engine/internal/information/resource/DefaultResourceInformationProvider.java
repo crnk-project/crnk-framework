@@ -69,22 +69,10 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
     public ResourceInformation build(Class<?> resourceClass, boolean allowNonResourceBaseClass) {
         ResourceFieldAccess resourceAccess = getResourceAccess(resourceClass);
 
-        List<ResourceField> resourceFields = getResourceFields(resourceClass);
-
-        for (ResourceField resourceField : resourceFields) {
-            ResourceFieldImpl impl = (ResourceFieldImpl) resourceField;
-            impl.setAccess(impl.getAccess().and(resourceAccess));
-        }
+        List<ResourceField> resourceFields = getResourceFields(resourceClass, resourceAccess);
 
         String resourceType = getResourceType(resourceClass, allowNonResourceBaseClass);
         String resourcePath = getResourcePath(resourceClass, allowNonResourceBaseClass);
-
-        Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
-        if (propertyOrder.isPresent()) {
-            JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
-            Collections.sort(resourceFields,
-                    new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
-        }
 
         DefaultResourceInstanceBuilder<?> instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
@@ -106,24 +94,6 @@ public class DefaultResourceInformationProvider extends ResourceInformationProvi
         return information;
     }
 
-    private ResourceFieldAccess getResourceAccess(Class<?> resourceClass) {
-        boolean sortable = true;
-        boolean filterable = true;
-        boolean postable = true;
-        boolean deletable = true;
-        boolean patchable = true;
-        boolean readable = true;
-        JsonApiResource annotation = resourceClass.getAnnotation(JsonApiResource.class);
-        if (annotation != null) {
-            sortable = annotation.sortable();
-            filterable = annotation.filterable();
-            postable = annotation.postable();
-            deletable = annotation.deletable();
-            patchable = annotation.patchable();
-            readable = annotation.readable();
-        }
-        return new ResourceFieldAccess(readable, postable, patchable, deletable, sortable, filterable);
-    }
 
     @Override
     public String getResourceType(Class<?> resourceClass) {

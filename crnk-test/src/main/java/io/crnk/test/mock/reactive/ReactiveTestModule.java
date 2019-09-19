@@ -32,6 +32,7 @@ public class ReactiveTestModule implements Module {
         context.addRepository(projectRepository);
         context.addRepository(scheduleRepository);
         context.addRepository(relationIdTestRepository);
+        context.addRepository(new ReactiveReadOnlyTaskRepository());
 
         context.addRepository(new TaskSubtypeRepository());
 
@@ -41,6 +42,7 @@ public class ReactiveTestModule implements Module {
 
         context.addExceptionMapper(new TestExceptionMapper());
     }
+
 
     public InMemoryReactiveResourceRepository<Task, Object> getTaskRepository() {
         return taskRepository;

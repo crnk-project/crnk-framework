@@ -1,6 +1,7 @@
 package io.crnk.test.suite;
 
 import io.crnk.core.engine.http.HttpHeaders;
+import io.crnk.core.exception.MethodNotAllowedException;
 import io.crnk.core.exception.ResourceNotFoundException;
 import io.crnk.core.queryspec.Direction;
 import io.crnk.core.queryspec.FilterOperator;
@@ -12,6 +13,7 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.list.ResourceList;
 import io.crnk.test.mock.models.Project;
+import io.crnk.test.mock.models.ReadOnlyTask;
 import io.crnk.test.mock.models.Schedule;
 import io.crnk.test.mock.models.Task;
 import io.crnk.test.mock.repository.ProjectRepository;
@@ -81,6 +83,41 @@ public abstract class BasicRepositoryAccessTestBase {
         Assert.assertEquals(1, list.size());
         schedule = list.get(0);
         Assert.assertNotNull(schedule.getId());
+    }
+
+    @Test
+    public void testNonPostableResource() {
+        ReadOnlyTask readOnlyTask = new ReadOnlyTask();
+        readOnlyTask.setId(12L);
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.create(readOnlyTask);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
+    }
+
+
+    @Test
+    public void testNonPatchableResource() {
+        ReadOnlyTask readOnlyTask = new ReadOnlyTask();
+        readOnlyTask.setId(12L);
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.save(readOnlyTask);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testNonDeletableResource() {
+        ResourceRepository<ReadOnlyTask, Object> repository = testContainer.getRepositoryForType(ReadOnlyTask.class);
+        try {
+            repository.delete(12L);
+        } catch (MethodNotAllowedException e) {
+            // ok
+        }
     }
 
     @Test
