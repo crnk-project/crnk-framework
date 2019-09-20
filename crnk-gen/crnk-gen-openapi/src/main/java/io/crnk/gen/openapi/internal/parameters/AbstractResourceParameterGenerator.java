@@ -18,4 +18,6 @@ abstract class AbstractResourceParameterGenerator {
   public Parameter $ref() {
     return new Parameter().$ref(getName());
   }
+
+  abstract public Parameter parameter();
 }

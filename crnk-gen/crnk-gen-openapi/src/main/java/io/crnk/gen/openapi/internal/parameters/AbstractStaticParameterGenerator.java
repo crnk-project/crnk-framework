@@ -10,4 +10,6 @@ abstract class AbstractStaticParameterGenerator {
   public Parameter $ref() {
     return new Parameter().$ref(getName());
   }
+
+  public static Parameter parameter() { return new Parameter(); }
 }

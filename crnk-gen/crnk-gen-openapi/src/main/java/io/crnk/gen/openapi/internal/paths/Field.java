@@ -1,9 +1,9 @@
 package io.crnk.gen.openapi.internal.paths;
 
-
 import io.crnk.gen.openapi.internal.OASUtils;
 import io.crnk.gen.openapi.internal.responses.ResourceReferenceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourceReferencesResponse;
+import io.crnk.gen.openapi.internal.responses.ResourceResponse;
 import io.crnk.gen.openapi.internal.responses.ResourcesResponse;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
@@ -12,7 +12,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.Map;
 
-public class Field extends BasePath {
+public class Field extends AbstractFieldPath {
   private final MetaResource metaResource;
   private final MetaResource relatedMetaResource;
   private final MetaResourceField metaResourceField;
@@ -32,7 +32,7 @@ public class Field extends BasePath {
     Operation operation = generateDefaultGetRelationshipsOrFieldsOperation(relatedMetaResource, OASUtils.oneToMany(metaResourceField));
     operation.setDescription("Retrieve " + relatedMetaResource.getResourceType() + " related to a " + resourceType + " resource");
     Map<String, ApiResponse> responses = generateDefaultResponsesMap();
-    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourcesResponse(relatedMetaResource).$ref() : new ResourcesResponse(relatedMetaResource).$ref();
+    ApiResponse responseSchema = OASUtils.oneToMany(metaResourceField) ? new ResourcesResponse(relatedMetaResource).$ref() : new ResourceResponse(relatedMetaResource).$ref();
     responses.put("200", responseSchema);
     operation.setResponses(apiResponsesFromMap(responses));
 

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.Map;
 
-public class Resources extends BasePath {
+public class Resources extends AbstractResourcePath {
   private final MetaResource metaResource;
   private final String resourceName;
   private final String resourceType;

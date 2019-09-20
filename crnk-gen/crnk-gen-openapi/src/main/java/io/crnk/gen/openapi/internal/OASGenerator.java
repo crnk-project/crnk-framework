@@ -51,7 +51,6 @@ public class OASGenerator {
   }
 
   public OpenAPI registerMetaResources() {
-    // TODO: Respect @JsonApiExposed(false)
     List<MetaResource> metaResources = getJsonApiResources(meta);
     metaResources.stream().map(OASResource::new).forEach(this::register);
     return getOpenApi();

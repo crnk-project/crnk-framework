@@ -24,13 +24,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class BasePath {
+abstract class AbstractFieldPath {
   MetaResource metaResource;
 
   /*
- 		Generate a sensible, default ApiResponses that is populated with references
- 		to all Error Responses for a metaResource
- 	 */
+    Generate a sensible, default ApiResponses that is populated with references
+    to all Error Responses for a metaResource
+  */
   static ApiResponses apiResponsesFromMap(Map<String, ApiResponse> responseMap) {
     ApiResponses responses = new ApiResponses();
     responseMap.forEach(responses::addApiResponse);
@@ -51,12 +51,12 @@ public class BasePath {
     // Add filter[<>] parameters
     // Only the most basic filters are documented
     if (oneToMany) {
-      OASResource.addFilters(metaResource, operation);
+      OASResource.addFilters(relatedMetaResource, operation);
     }
     // Add fields[resource] parameter
-    operation.getParameters().add(new Fields(metaResource).$ref());
+    operation.getParameters().add(new Fields(relatedMetaResource).$ref());
     // Add include parameter
-    operation.getParameters().add(new Include(metaResource).$ref());
+    operation.getParameters().add(new Include(relatedMetaResource).$ref());
 
     return operation;
   }
@@ -85,7 +85,7 @@ public class BasePath {
   Operation generateDefaultRelationshipOperation(MetaResource relatedMetaResource, boolean oneToMany, boolean includeBody) {
     Operation operation = generateDefaultOperation();
     operation.getParameters().add(new PrimaryKey(metaResource).$ref());
-    Schema relationshipSchema = oneToMany ? new ResourceReferencesResponseSchema(metaResource).$ref() : new ResourceReferenceResponseSchema(metaResource).$ref();
+    Schema relationshipSchema = oneToMany ? new ResourceReferencesResponseSchema(relatedMetaResource).$ref() : new ResourceReferenceResponseSchema(relatedMetaResource).$ref();
     if (!includeBody) {
       return operation;
     }

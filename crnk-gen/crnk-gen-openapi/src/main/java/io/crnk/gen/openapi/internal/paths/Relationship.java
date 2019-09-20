@@ -10,7 +10,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.Map;
 
-public class Relationship extends BasePath {
+public class Relationship extends AbstractFieldPath {
   private final MetaResource metaResource;
   private final MetaResource relatedMetaResource;
   private final MetaResourceField metaResourceField;
