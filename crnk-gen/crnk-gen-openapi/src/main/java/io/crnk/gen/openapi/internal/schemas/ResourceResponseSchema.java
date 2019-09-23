@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ResourceResponseSchema extends AbstractResourceSchemaGenerator {
+public class ResourceResponseSchema extends AbstractSchemaGenerator {
 
   public ResourceResponseSchema(MetaResource metaResource) {
     super(metaResource);
@@ -18,7 +18,7 @@ public class ResourceResponseSchema extends AbstractResourceSchemaGenerator {
     return new ComposedSchema()
         .allOf(
             Arrays.asList(
-                ResponseMixin.$ref(),
+                new ResponseMixin().$ref(),
                 new Schema()
                     .addProperties(
                         "data",

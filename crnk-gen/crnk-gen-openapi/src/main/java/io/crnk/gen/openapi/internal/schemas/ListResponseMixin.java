@@ -3,8 +3,8 @@ package io.crnk.gen.openapi.internal.schemas;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ListResponseMixin extends AbstractStaticSchemaGenerator {
-  public static Schema schema() {
+public class ListResponseMixin extends AbstractSchemaGenerator {
+  public Schema schema() {
     return new Schema()
         .type("object")
         .description("A page of results")
@@ -17,7 +17,7 @@ public class ListResponseMixin extends AbstractStaticSchemaGenerator {
                     new Schema().type("string")))
         .addProperties(
             "errors",
-            new ArraySchema().items(ApiError.$ref()))
+            new ArraySchema().items(new ApiError().$ref()))
         .addProperties(
             "meta",
             new Schema()

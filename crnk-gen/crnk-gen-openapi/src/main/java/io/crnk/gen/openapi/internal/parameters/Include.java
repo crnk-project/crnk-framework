@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import static java.util.stream.Collectors.joining;
 
-public class Include extends AbstractResourceParameterGenerator {
+public class Include extends AbstractParameterGenerator {
 
   public Include(MetaResource metaResource) {
     super(metaResource);

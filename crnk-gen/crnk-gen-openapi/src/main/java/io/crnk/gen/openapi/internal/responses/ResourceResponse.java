@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
-public class ResourceResponse extends AbstractResourceResponseGenerator {
+public class ResourceResponse extends AbstractResponseGenerator {
 
   public ResourceResponse(MetaResource metaResource) {
     super(metaResource);

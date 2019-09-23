@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
 
-public class PatchResource extends AbstractResourceSchemaGenerator {
+public class PatchResource extends AbstractSchemaGenerator {
 
   public PatchResource(MetaResource metaResource) {
     super(metaResource);

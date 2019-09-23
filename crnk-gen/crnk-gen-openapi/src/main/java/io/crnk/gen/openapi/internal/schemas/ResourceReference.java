@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
 
-public class ResourceReference extends AbstractResourceSchemaGenerator {
+public class ResourceReference extends AbstractSchemaGenerator {
 
   public ResourceReference(MetaResource metaResource) {
     super(metaResource);

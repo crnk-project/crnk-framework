@@ -4,7 +4,7 @@ import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
-public class TypeSchema extends AbstractResourceSchemaGenerator {
+public class TypeSchema extends AbstractSchemaGenerator {
 
   protected TypeSchema(MetaResource metaResource) {
     super(metaResource);

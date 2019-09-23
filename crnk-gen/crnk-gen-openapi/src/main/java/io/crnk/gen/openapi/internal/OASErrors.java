@@ -24,7 +24,7 @@ public class OASErrors {
         apiResponse.description(HttpStatus.toMessage(responseCode));
         apiResponse.content(new Content()
             .addMediaType("application/json",
-                new MediaType().schema(ApiError.$ref()))
+                new MediaType().schema(new ApiError().$ref()))
         );
         responses.put(responseCode.toString(), apiResponse);
       }

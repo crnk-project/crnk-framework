@@ -40,7 +40,7 @@ abstract class AbstractFieldPath {
   Operation generateDefaultOperation() {
     return new Operation().parameters(
         new ArrayList<>(
-            Collections.singletonList(ContentType.parameter())));
+            Collections.singletonList(new ContentType().parameter())));
   }
 
   Operation generateDefaultGetRelationshipsOrFieldsOperation(MetaResource relatedMetaResource, boolean oneToMany) {

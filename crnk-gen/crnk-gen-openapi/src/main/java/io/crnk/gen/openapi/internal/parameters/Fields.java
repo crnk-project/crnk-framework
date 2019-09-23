@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import static java.util.stream.Collectors.joining;
 
-public class Fields extends AbstractResourceParameterGenerator {
+public class Fields extends AbstractParameterGenerator {
 
   public Fields(MetaResource metaResource) {
     super(metaResource);

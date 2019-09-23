@@ -30,7 +30,7 @@ abstract class AbstractResourcePath {
   Operation generateDefaultOperation() {
     return new Operation().parameters(
         new ArrayList<>(
-            Collections.singletonList(ContentType.parameter())));
+            Collections.singletonList(new ContentType().parameter())));
   }
 
   Map<String, ApiResponse> generateDefaultResponsesMap() {

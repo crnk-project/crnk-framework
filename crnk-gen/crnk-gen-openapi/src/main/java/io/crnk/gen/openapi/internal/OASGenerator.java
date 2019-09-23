@@ -30,18 +30,18 @@ public class OASGenerator {
   public OASGenerator(MetaLookup metaLookup, OpenAPI baseOpenAPI) {
     openApi = baseOpenAPI;
     meta = metaLookup;
-    openApi.getComponents().addSchemas(ApiError.getName(), ApiError.schema());
-    openApi.getComponents().addSchemas(ResponseMixin.getName(), ResponseMixin.schema());
-    openApi.getComponents().addSchemas(ListResponseMixin.getName(), ListResponseMixin.schema());
-    openApi.getComponents().addParameters(new PageLimit().getName(), PageLimit.parameter());
-    openApi.getComponents().addParameters(new PageOffset().getName(), PageOffset.parameter());
+    openApi.getComponents().addSchemas(new ApiError().getName(), new ApiError().schema());
+    openApi.getComponents().addSchemas(new ResponseMixin().getName(), new ResponseMixin().schema());
+    openApi.getComponents().addSchemas(new ListResponseMixin().getName(), new ListResponseMixin().schema());
+    openApi.getComponents().addParameters(new PageLimit().getName(), new PageLimit().parameter());
+    openApi.getComponents().addParameters(new PageOffset().getName(), new PageOffset().parameter());
     boolean NumberSizePagingBehavior = false;
     if (NumberSizePagingBehavior) {  // TODO: Figure out how to determine this
-      openApi.getComponents().addParameters(new PageSize().getName(), PageNumber.parameter());
-      openApi.getComponents().addParameters(new PageNumber().getName(), PageSize.parameter());
+      openApi.getComponents().addParameters(new PageSize().getName(), new PageNumber().parameter());
+      openApi.getComponents().addParameters(new PageNumber().getName(), new PageSize().parameter());
     }
 //    openApi.getComponents().addParameters(new ContentType().getName(), ContentType.parameter());
-    openApi.getComponents().addParameters(new Filter().getName(), Filter.parameter());
+    openApi.getComponents().addParameters(new Filter().getName(), new Filter().parameter());
     openApi.getComponents().responses(generateStandardApiResponses());
     registerMetaResources();
   }
@@ -141,8 +141,8 @@ public class OASGenerator {
 
   private Map<String, ApiResponse> generateStandardApiSuccessResponses() {
     Map<String, ApiResponse> responses = new LinkedHashMap<>();
-    responses.put(new Accepted().getName(), Accepted.response());
-    responses.put(new NoContent().getName(), NoContent.response());
+    responses.put(new Accepted().getName(), new Accepted().response());
+    responses.put(new NoContent().getName(), new NoContent().response());
 
     return responses;
   }

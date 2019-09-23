@@ -11,7 +11,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceAttributes extends AbstractResourceSchemaGenerator {
+public class ResourceAttributes extends AbstractSchemaGenerator {
   private final Map<String, Schema> attributes;
 
   public ResourceAttributes(MetaResource metaResource) {

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ResourceReferencesResponseSchema extends AbstractResourceSchemaGenerator {
+public class ResourceReferencesResponseSchema extends AbstractSchemaGenerator {
 
   public ResourceReferencesResponseSchema(MetaResource metaResource) {
     super(metaResource);

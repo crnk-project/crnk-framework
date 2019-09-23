@@ -3,14 +3,14 @@ package io.crnk.gen.openapi.internal.schemas;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ResponseMixin extends AbstractStaticSchemaGenerator {
-  public static Schema schema() {
+public class ResponseMixin extends AbstractSchemaGenerator {
+  public Schema schema() {
     return new Schema()
         .type("object")
         .description("A JSON-API document with a single resource")
         .addProperties(
             "errors",
-            new ArraySchema().items(ApiError.$ref()))
+            new ArraySchema().items(new ApiError().$ref()))
         .addProperties(
             "jsonapi",
             new Schema()

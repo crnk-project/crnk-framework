@@ -3,8 +3,8 @@ package io.crnk.gen.openapi.internal.parameters;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-public class PageSize extends AbstractStaticParameterGenerator {
-  public static Parameter parameter() {
+public class PageSize extends AbstractParameterGenerator {
+  public Parameter parameter() {
     return new Parameter().name("page[size]")
         .description("Page size")
         .in("query")

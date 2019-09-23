@@ -4,7 +4,7 @@ import io.crnk.meta.model.resource.MetaResourceField;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
-public class FieldFilter extends AbstractFieldParameterGenerator {
+public class FieldFilter extends AbstractParameterGenerator {
 
   public FieldFilter(MetaResourceField metaResourceField) {
     super(metaResourceField);

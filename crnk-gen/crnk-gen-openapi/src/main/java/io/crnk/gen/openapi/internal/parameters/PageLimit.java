@@ -5,8 +5,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.math.BigDecimal;
 
-public class PageLimit extends AbstractStaticParameterGenerator {
-  public static Parameter parameter() {
+public class PageLimit extends AbstractParameterGenerator {
+  public Parameter parameter() {
     return new Parameter().name("page[limit]")
         .description("Max number of items")
         .in("query")
