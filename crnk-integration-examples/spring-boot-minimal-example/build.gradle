@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 apply plugin: 'application'
 
-mainClassName = "io.crnk.example.springboot.minimal.MinimalSpringBootApplication"
+mainClassName = "io.crnk.example.springboot.microservice.MinimalSpringBootApplication"
 
 dependencies {
 
