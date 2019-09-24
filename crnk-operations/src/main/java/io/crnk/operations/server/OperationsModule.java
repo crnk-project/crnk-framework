@@ -189,6 +189,7 @@ public class OperationsModule implements Module {
 
     protected void fetchUpToDateResponses(List<OrderedOperation> orderedOperations, OperationResponse[] responses) {
         RequestDispatcher requestDispatcher = moduleContext.getRequestDispatcher();
+        ResourceRegistry resourceRegistry = moduleContext.getResourceRegistry();
 
         // get current set of resources after all the updates have been applied
         for (OrderedOperation orderedOperation : orderedOperations) {
@@ -201,7 +202,8 @@ public class OperationsModule implements Module {
             if (success && (isPost || isPatch)) {
                 Resource resource = operationResponse.getSingleData().get();
 
-                String path = resource.getType() + "/" + resource.getId();
+                ResourceInformation resourceInformation = resourceRegistry.getBaseResourceInformation(resource.getType());
+                String path = resourceRegistry.getResourcePath(resourceInformation, resource.getId());
                 String method = HttpMethod.GET.toString();
 
                 Map<String, Set<String>> parameters = new HashMap<>();
