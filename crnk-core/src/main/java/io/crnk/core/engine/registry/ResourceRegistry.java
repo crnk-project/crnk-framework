@@ -46,6 +46,15 @@ public interface ResourceRegistry extends ResourceRegistryPart {
 
 
     /**
+     * Retrieves the path of the type and identifier
+     *
+     * @param resourceInformation
+     * @param id    Identifier
+     * @return complete path of provided resource in case it's a registered resource
+     */
+    String getResourcePath(ResourceInformation resourceInformation, Object id);
+
+    /**
      * @param resourceInformation
      * @return url for the given resourceInformation. Depending on the ServiceUrlProvider setup, a request must be active
      * to invoke this method (to obtain domain/host information).
