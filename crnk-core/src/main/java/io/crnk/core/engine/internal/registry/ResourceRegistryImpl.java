@@ -97,6 +97,12 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return getResourceClass(resource.getClass());
 	}
 
+	protected String getBaseUrl(QueryContext queryContext) {
+		String baseUrl = queryContext != null ? queryContext.getBaseUrl() : getServiceUrlProvider().getUrl();
+		return UrlUtils.removeTrailingSlash(baseUrl);
+	}
+
+	@Override
 	public String getResourceUrl(ResourceInformation resourceInformation) {
 		String url = UrlUtils.removeTrailingSlash(getServiceUrlProvider().getUrl());
 		if (url == null) {
@@ -109,6 +115,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
+	@Override
 	public String getResourceUrl(final Class<?> clazz) {
 		RegistryEntry registryEntry = findEntry(clazz);
 
@@ -117,16 +124,15 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 
 	@Override
 	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation) {
-		String baseUrl = queryContext != null ? queryContext.getBaseUrl() : getServiceUrlProvider().getUrl();
-		String url = UrlUtils.removeTrailingSlash(baseUrl);
+		String url = getBaseUrl(queryContext);
 		String resourcePath = resourceInformation.getResourcePath();
 		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
-
+	@Override
 	public String getResourceUrl(final Object resource) {
 		return getResourceUrl(null, resource);
 	}
-
+	@Override
 	public String getResourceUrl(final Class<?> clazz, final String id) {
 		RegistryEntry registryEntry = findEntry(clazz);
 		String typeUrl = getResourceUrl(registryEntry.getResourceInformation());
@@ -145,7 +151,7 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 	}
 
 	@Override
-	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id) {
+	public String getResourcePath(ResourceInformation resourceInformation, Object id) {
 		if (resourceInformation.isNested()) {
 			ResourceField parentField = resourceInformation.getParentField();
 
@@ -154,22 +160,29 @@ public class ResourceRegistryImpl extends ResourceRegistryPartBase implements Re
 			ResourceField childrenField = parentInformation.findRelationshipFieldByName(parentField.getOppositeName());
 
 			if(resourceInformation.isSingularNesting()){
-				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(id);
-				return parentUrl + "/" + childrenField.getJsonName();
+				String parentPath = getResourcePath(parentInformation, id);
+				return parentPath + "/" + childrenField.getJsonName();
 			}else{
 				Object parentId = resourceInformation.getParentIdAccessor().getValue(id);
 				Object nestedId = resourceInformation.getChildIdAccessor().getValue(id);
 				PreconditionUtil.verify(parentId != null, "nested resources must have a parent, got null from " + parentField.getIdName());
 				PreconditionUtil.verify(nestedId != null, "nested resources must have a non-null identifier");
-				String parentUrl = getResourceUrl(queryContext, parentInformation) + "/" + parentInformation.toIdString(parentId);
+				String parentPath = getResourcePath(parentInformation, parentId);
 
 				TypeParser typeParser = moduleRegistry.getTypeParser();
-				return parentUrl + "/" + childrenField.getJsonName() + "/" + typeParser.toString(nestedId);
+				return parentPath + "/" + childrenField.getJsonName() + "/" + typeParser.toString(nestedId);
 			}
 		}
 
-		return String.format("%s/%s", getResourceUrl(queryContext, resourceInformation), resourceInformation.toIdString(id));
+		return resourceInformation.getResourcePath()+"/"+resourceInformation.toIdString(id);
 
+	}
+
+	@Override
+	public String getResourceUrl(QueryContext queryContext, ResourceInformation resourceInformation, Object id) {
+        String resourcePath = getResourcePath(resourceInformation, id);
+		String url = getBaseUrl(queryContext);
+		return url != null ? String.format("%s/%s", url, resourcePath) : null;
 	}
 
 
