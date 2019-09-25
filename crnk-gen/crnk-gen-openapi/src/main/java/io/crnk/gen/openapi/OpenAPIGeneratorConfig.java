@@ -42,6 +42,9 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
     this.buildDir = buildDir;
   }
 
+  /**
+   * @return the name of the template used as a base to merge generated openapi into.
+   */
   public String getTemplateName() {
     return templateName;
   }
@@ -50,6 +53,9 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
     this.templateName = templateName;
   }
 
+  /**
+   * @return a starter openapi object that includes templated objects if a template was specified.
+   */
   public OpenAPI getOpenAPI() {
     if (openAPI == null) {
       if (this.getTemplateName() != null) {

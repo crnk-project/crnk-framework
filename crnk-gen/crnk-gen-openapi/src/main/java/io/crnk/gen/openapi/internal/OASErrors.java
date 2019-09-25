@@ -23,7 +23,7 @@ public class OASErrors {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.description(HttpStatus.toMessage(responseCode));
         apiResponse.content(new Content()
-            .addMediaType("application/json",
+            .addMediaType("application/vnd.api+json",
                 new MediaType().schema(new ApiError().$ref()))
         );
         responses.put(responseCode.toString(), apiResponse);
@@ -34,9 +34,9 @@ public class OASErrors {
   }
 
   /*
- 		Crnk maintains a list of HTTP status codes in io.crnk.core.engine.http.HttpStatus
- 		as static fields. Iterate through and collect them into a list for use elsewhere.
- 	 */
+  Crnk maintains a list of HTTP status codes in io.crnk.core.engine.http.HttpStatus
+  as static fields. Iterate through and collect them into a list for use elsewhere.
+  */
   private static List<Integer> getStandardHttpStatusCodes() {
     List<Integer> responseCodes = new ArrayList<>();
 

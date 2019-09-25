@@ -68,7 +68,7 @@ public class Resources extends AbstractResourcePath {
             .content(
                 new Content()
                     .addMediaType(
-                        "application/json",
+                        "application/vnd.api+json",
                         new MediaType()
                             .schema(new PostResource(metaResource).$ref()))));
     return operation;

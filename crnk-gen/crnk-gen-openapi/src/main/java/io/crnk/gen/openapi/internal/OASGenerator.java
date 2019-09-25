@@ -1,5 +1,6 @@
 package io.crnk.gen.openapi.internal;
 
+import io.crnk.gen.openapi.OpenAPIGeneratorConfig;
 import io.crnk.gen.openapi.internal.parameters.*;
 import io.crnk.gen.openapi.internal.responses.Accepted;
 import io.crnk.gen.openapi.internal.responses.NoContent;
@@ -11,6 +12,7 @@ import io.crnk.meta.model.MetaElement;
 import io.crnk.meta.model.MetaPrimaryKey;
 import io.crnk.meta.model.resource.MetaResource;
 import io.crnk.meta.model.resource.MetaResourceField;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -19,20 +21,36 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class OASGenerator {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(OASGenerator.class);
+
+  private File outputDir;
+
+  private MetaLookup lookup;
+
+  private OpenAPIGeneratorConfig config;
+
   private OpenAPI openApi;
-  private MetaLookup meta;
+
   private Map<String, OASResource> oasResources = new HashMap<>();
 
-  public OASGenerator(MetaLookup metaLookup, OpenAPI baseOpenAPI) {
-    openApi = baseOpenAPI;
-    meta = metaLookup;
+  public OASGenerator(File outputDir, MetaLookup lookup, OpenAPIGeneratorConfig config) {
+    this.outputDir = outputDir;
+    this.lookup = lookup;
+    this.config = config;
+
+    openApi = config.getOpenAPI();
+    LOGGER.debug("Adding static schemas");
     openApi.getComponents().addSchemas(new ApiError().getName(), new ApiError().schema());
     openApi.getComponents().addSchemas(new ResponseMixin().getName(), new ResponseMixin().schema());
     openApi.getComponents().addSchemas(new ListResponseMixin().getName(), new ListResponseMixin().schema());
+    LOGGER.debug("Adding static parameters");
     openApi.getComponents().addParameters(new PageLimit().getName(), new PageLimit().parameter());
     openApi.getComponents().addParameters(new PageOffset().getName(), new PageOffset().parameter());
     boolean NumberSizePagingBehavior = false;
@@ -42,56 +60,27 @@ public class OASGenerator {
     }
 //    openApi.getComponents().addParameters(new ContentType().getName(), ContentType.parameter());
     openApi.getComponents().addParameters(new Filter().getName(), new Filter().parameter());
+    LOGGER.debug("Adding static responses");
     openApi.getComponents().responses(generateStandardApiResponses());
     registerMetaResources();
   }
 
-  public OpenAPI getOpenApi() {
-    return openApi;
+  public void run() throws IOException {
+    buildPaths();
+    writeSources();
   }
 
-  public OpenAPI registerMetaResources() {
-    List<MetaResource> metaResources = getJsonApiResources(meta);
-    metaResources.stream().map(OASResource::new).forEach(this::register);
-    return getOpenApi();
-  }
-
-  public OpenAPI register(OASResource oasResource) {
-    oasResource.getComponentParameters().forEach(openApi.getComponents()::addParameters);
-    oasResource.getComponentSchemas().forEach(openApi.getComponents()::addSchemas);
-    oasResource.getComponentResponses().forEach(openApi.getComponents()::addResponses);
-    oasResources.put(oasResource.getResourceName(), oasResource);
-    return getOpenApi();
-  }
-
-  private List<MetaResource> getJsonApiResources(MetaLookup metaLookup) {
-    List<MetaResource> list = new ArrayList<>();
-    for (MetaResource it : metaLookup.findElements(MetaResource.class)) {
-      if (isJsonApiResource(it)) {
-        list.add(it);
-      }
-    }
-    list.sort(Comparator.comparing(MetaResource::getResourceType));
-    return list;
-  }
-
-  private boolean isJsonApiResource(MetaResource metaResource) {
-    return metaResource.getSuperType() == null
-        && !metaResource.getResourceType().startsWith("meta/")
-        && metaResource.getRepository() != null
-        && metaResource.getRepository().isExposed();
-  }
-
-
-  public OpenAPI buildPaths() {
+  private OpenAPI buildPaths() {
 
     for (OASResource oasResource : oasResources.values()) {
 
+      LOGGER.debug("Adding resource list paths for {}", oasResource.getResourceName());
       PathItem resourcesPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcesPath(), new PathItem());
       for (Map.Entry<OperationType, Operation> entry : oasResource.generateResourcesOperations().entrySet()) {
         openApi.getPaths().addPathItem(oasResource.getResourcesPath(), entry.getKey().merge(resourcesPathItem, entry.getValue()));
       }
 
+      LOGGER.debug("Adding resource paths for {}", oasResource.getResourceName());
       PathItem resourcePathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath(), new PathItem());
       for (Map.Entry<OperationType, Operation> entry : oasResource.generateResourceOperations().entrySet()) {
         openApi.getPaths().addPathItem(oasResource.getResourcePath(), entry.getKey().merge(resourcePathItem, entry.getValue()));
@@ -117,11 +106,13 @@ public class OASGenerator {
             MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
             OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
 
+            LOGGER.debug("Adding field path /{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
             PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
             for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedMetaResource, mrf).entrySet()) {
               openApi.getPaths().addPathItem(oasResource.getFieldPath(relatedOasResource), entry.getKey().merge(fieldPathItem, entry.getValue()));
             }
 
+            LOGGER.debug("Adding field path relationships/{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
             PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
             for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedMetaResource, mrf).entrySet()) {
               openApi.getPaths().addPathItem(oasResource.getRelationshipsPath(relatedOasResource), entry.getKey().merge(relationshipPathItem, entry.getValue()));
@@ -130,7 +121,54 @@ public class OASGenerator {
         }
       }
     }
-    return getOpenApi();
+    return openApi;
+  }
+
+  private void writeSources() throws IOException {
+    File file = new File(outputDir, "openapi.yaml");
+    write(file, Yaml.pretty(openApi));
+  }
+
+  private static void write(File file, String source) throws IOException {
+    file.getParentFile().mkdirs();
+    try (FileWriter writer = new FileWriter(file)) {
+      writer.write(source);
+    }
+  }
+
+  private OpenAPI registerMetaResources() {
+    List<MetaResource> metaResources = getJsonApiResources(lookup);
+    metaResources.stream().map(OASResource::new).forEach(this::register);
+    return openApi;
+  }
+
+  private OpenAPI register(OASResource oasResource) {
+    LOGGER.debug("Adding generated parameters for {}", oasResource.getResourceName());
+    oasResource.getComponentParameters().forEach(openApi.getComponents()::addParameters);
+    LOGGER.debug("Adding generated schemas for {}", oasResource.getResourceName());
+    oasResource.getComponentSchemas().forEach(openApi.getComponents()::addSchemas);
+    LOGGER.debug("Adding generated responses for {}", oasResource.getResourceName());
+    oasResource.getComponentResponses().forEach(openApi.getComponents()::addResponses);
+    oasResources.put(oasResource.getResourceName(), oasResource);
+    return openApi;
+  }
+
+  private List<MetaResource> getJsonApiResources(MetaLookup metaLookup) {
+    List<MetaResource> list = new ArrayList<>();
+    for (MetaResource it : metaLookup.findElements(MetaResource.class)) {
+      if (isJsonApiResource(it)) {
+        list.add(it);
+      }
+    }
+    list.sort(Comparator.comparing(MetaResource::getResourceType));
+    return list;
+  }
+
+  private boolean isJsonApiResource(MetaResource metaResource) {
+    return metaResource.getSuperType() == null
+        && !metaResource.getResourceType().startsWith("meta/")
+        && metaResource.getRepository() != null
+        && metaResource.getRepository().isExposed();
   }
 
   // RESPONSES
