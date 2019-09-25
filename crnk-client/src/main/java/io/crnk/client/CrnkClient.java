@@ -1,5 +1,16 @@
 package io.crnk.client;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ServiceLoader;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.crnk.client.action.ActionStubFactory;
@@ -72,17 +83,6 @@ import io.crnk.core.repository.RelationshipRepository;
 import io.crnk.core.repository.ResourceRepository;
 import io.crnk.core.resource.annotations.JsonApiResource;
 import io.crnk.core.resource.list.DefaultResourceList;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
 
 /**
  * Client implementation giving access to JSON API repositories using stubs.
@@ -386,6 +386,8 @@ public class CrnkClient {
         }
 
         ResourceInformation resourceInformation = resourceInformationProvider.build(resourceClass);
+        DefaultRegistryEntryBuilder.contributeFields(moduleRegistry, resourceInformation);
+
         final ResourceRepository repositoryStub = (ResourceRepository)
                 decorate(new ResourceRepositoryStubImpl<T, I>(this, resourceClass, resourceInformation, urlBuilder));
 
