@@ -885,14 +885,14 @@ public class NestedResourceTest extends ControllerTestBase {
 
 	public static class TestRepository extends InMemoryResourceRepository<TestResource, String> {
 
-		protected TestRepository() {
+		public TestRepository() {
 			super(TestResource.class);
 		}
 	}
 
 	public static class ManyNestedRepository extends InMemoryResourceRepository<ManyNestedResource, ManyNestedId> {
 
-		protected ManyNestedRepository() {
+		public ManyNestedRepository() {
 			super(ManyNestedResource.class);
 		}
 	}
@@ -900,21 +900,21 @@ public class NestedResourceTest extends ControllerTestBase {
 
 	public static class OneNestedRepository extends InMemoryResourceRepository<OneNestedResource, String> {
 
-		protected OneNestedRepository() {
+		public OneNestedRepository() {
 			super(OneNestedResource.class);
 		}
 	}
 
 	public static class OneGrandchildRepository extends InMemoryResourceRepository<OneGrandchildResource, String> {
 
-		protected OneGrandchildRepository() {
+		public OneGrandchildRepository() {
 			super(OneGrandchildResource.class);
 		}
 	}
 
 	public static class ManyGrandchildrenRepository extends InMemoryResourceRepository<ManyGrandchildrenResource, ManyGrandchildrenId> {
 
-		protected ManyGrandchildrenRepository() {
+		public ManyGrandchildrenRepository() {
 			super(ManyGrandchildrenResource.class);
 		}
 	}
