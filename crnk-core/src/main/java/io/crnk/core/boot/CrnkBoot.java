@@ -199,6 +199,7 @@ public class CrnkBoot {
 		setupRepositories(rootPart);
 
 		requestDispatcher = createRequestDispatcher(moduleRegistry.getExceptionMapperRegistry());
+		moduleRegistry.setDocumentMapper(documentMapper);
 
 		logInfo();
 	}
