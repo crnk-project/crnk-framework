@@ -41,9 +41,11 @@ public class OASUtils {
       return new ByteArraySchema();
     } else if (metaType.getName().equals("date")) {
       return new DateSchema();
-    }
-    // TODO: Exhaustively enumerate Date formats, or find another way to check
-    else if (metaType.getName().equals("offsetDateTime")) {
+    } else if (metaType.getName().equals("offsetDateTime")) {
+      return new DateTimeSchema();
+    } else if (metaType.getName().equals("localDate")) {
+      return new DateSchema();
+    } else if (metaType.getName().equals("localDateTime")) {
       return new DateTimeSchema();
     } else if (metaType.getName().equals("double")) {
       return new NumberSchema().format("double");
