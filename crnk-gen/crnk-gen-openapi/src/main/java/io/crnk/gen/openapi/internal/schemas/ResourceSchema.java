@@ -2,6 +2,7 @@ package io.crnk.gen.openapi.internal.schemas;
 
 import io.crnk.meta.model.resource.MetaResource;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
@@ -20,16 +21,13 @@ public class ResourceSchema extends AbstractSchemaGenerator {
             Arrays.asList(
                 new ResourceReference(metaResource).$ref(),
                 new ResourceAttributes(metaResource).$ref(),
-                new Schema()
-                    .type("object")
+                new ObjectSchema()
                     .addProperties(
                         "relationships",
-                        new Schema()
-                            .type("object"))
+                        new ObjectSchema())
                     .addProperties(
                         "links",
-                        new Schema()
-                            .type("object"))
+                        new ObjectSchema())
                     .required(Collections.singletonList("attributes"))));
   }
 }

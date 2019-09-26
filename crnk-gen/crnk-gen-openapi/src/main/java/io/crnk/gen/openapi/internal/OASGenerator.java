@@ -93,30 +93,32 @@ public class OASGenerator {
       for (MetaElement child : oasResource.getChildren()) {
         if (child == null) {
           continue;
-        } else if (child instanceof MetaPrimaryKey) {
+        }
+        if (child instanceof MetaPrimaryKey) {
           continue;
-        } else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+        }
+        if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
           continue;
-        } else if (child instanceof MetaResourceField) {
-          MetaResourceField mrf = (MetaResourceField) child;
-          Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-          attributeSchema.nullable(mrf.isNullable());
-          oasResource.getAttributes().put(mrf.getName(), attributeSchema);
-          if (mrf.isAssociation()) {
-            MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
-            OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
+        }
 
-            LOGGER.debug("Adding field path /{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
-            PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
-            for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedMetaResource, mrf).entrySet()) {
-              openApi.getPaths().addPathItem(oasResource.getFieldPath(relatedOasResource), entry.getKey().merge(fieldPathItem, entry.getValue()));
-            }
+        MetaResourceField mrf = (MetaResourceField) child;
+        Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
+        attributeSchema.nullable(mrf.isNullable());
+        oasResource.getAttributes().put(mrf.getName(), attributeSchema);
+        if (mrf.isAssociation()) {
+          MetaResource relatedMetaResource = (MetaResource) mrf.getType().getElementType();
+          OASResource relatedOasResource = oasResources.get(relatedMetaResource.getName());
 
-            LOGGER.debug("Adding field path relationships/{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
-            PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
-            for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedMetaResource, mrf).entrySet()) {
-              openApi.getPaths().addPathItem(oasResource.getRelationshipsPath(relatedOasResource), entry.getKey().merge(relationshipPathItem, entry.getValue()));
-            }
+          LOGGER.debug("Adding field path /{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
+          PathItem fieldPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + oasResource.getResourcesPath(), new PathItem());
+          for (Map.Entry<OperationType, Operation> entry : oasResource.generateFieldOperationsForField(relatedMetaResource, mrf).entrySet()) {
+            openApi.getPaths().addPathItem(oasResource.getFieldPath(relatedOasResource), entry.getKey().merge(fieldPathItem, entry.getValue()));
+          }
+
+          LOGGER.debug("Adding field path relationships/{} of type {} for {}", mrf.getName(), relatedMetaResource.getResourceType(), oasResource.getResourceName());
+          PathItem relationshipPathItem = openApi.getPaths().getOrDefault(oasResource.getResourcePath() + "/relationships" + relatedOasResource.getResourcesPath(), new PathItem());
+          for (Map.Entry<OperationType, Operation> entry : oasResource.generateRelationshipsOperationsForField(relatedMetaResource, mrf).entrySet()) {
+            openApi.getPaths().addPathItem(oasResource.getRelationshipsPath(relatedOasResource), entry.getKey().merge(relationshipPathItem, entry.getValue()));
           }
         }
       }

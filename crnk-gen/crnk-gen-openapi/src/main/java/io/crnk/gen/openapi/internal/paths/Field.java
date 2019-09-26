@@ -13,10 +13,15 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import java.util.Map;
 
 public class Field extends AbstractFieldPath {
+
   private final MetaResource metaResource;
+
   private final MetaResource relatedMetaResource;
+
   private final MetaResourceField metaResourceField;
+
   private final String resourceName;
+
   private final String resourceType;
 
   public Field(MetaResource metaResource, MetaResource relatedMetaResource, MetaResourceField metaResourceField) {

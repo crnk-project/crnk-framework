@@ -6,9 +6,12 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 
 abstract class AbstractParameterGenerator {
+
   protected final MetaResource metaResource;
-  protected final MetaResourceField metaResourceField;
-  protected final String prefix;
+
+  final MetaResourceField metaResourceField;
+
+  private final String prefix;
 
   protected AbstractParameterGenerator() {
     metaResource = null;

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class OASUtils {
+
   public static Schema transformMetaResourceField(MetaType metaType) {
     if (metaType instanceof MetaResource) {
       return new ResourceReference((MetaResource) metaType).$ref();

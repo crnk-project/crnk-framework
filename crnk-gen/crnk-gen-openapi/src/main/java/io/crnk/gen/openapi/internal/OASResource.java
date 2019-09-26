@@ -25,12 +25,19 @@ import java.util.List;
 import java.util.Map;
 
 public class OASResource {
-  public final String resourceName;
-  public final String resourceType;
+
+  private final String resourceName;
+
+  private final String resourceType;
+
   private MetaResource metaResource;
+
   private Map<String, Schema> attributes;
+
   private Map<String, Parameter> componentParameters;
+
   private Map<String, Schema> componentSchemas;
+
   private Map<String, ApiResponse> componentResponses;
 
   OASResource(MetaResource metaResource) {
@@ -68,16 +75,18 @@ public class OASResource {
     for (MetaElement child : metaResource.getChildren()) {
       if (child == null) {
         continue;
-      } else if (child instanceof MetaPrimaryKey) {
-        continue;
-      } else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
-        continue;
-      } else if (child instanceof MetaResourceField) {
-        MetaResourceField mrf = (MetaResourceField) child;
-        Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-        attributeSchema.nullable(mrf.isNullable());
-        attributes.put(mrf.getName(), attributeSchema);
       }
+      if (child instanceof MetaPrimaryKey) {
+        continue;
+      }
+      if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+        continue;
+      }
+
+      MetaResourceField mrf = (MetaResourceField) child;
+      Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
+      attributeSchema.nullable(mrf.isNullable());
+      attributes.put(mrf.getName(), attributeSchema);
     }
   }
 
@@ -112,7 +121,7 @@ public class OASResource {
     componentResponses.put(new ResourceReferencesResponse(metaResource).getName(), new ResourceReferencesResponse(metaResource).response());
   }
 
-  public Map<String, Schema> getAttributes() {
+  Map<String, Schema> getAttributes() {
     return attributes;
   }
 
@@ -128,7 +137,7 @@ public class OASResource {
     return componentResponses;
   }
 
-  public String getResourceName() {
+  String getResourceName() {
     return resourceName;
   }
 

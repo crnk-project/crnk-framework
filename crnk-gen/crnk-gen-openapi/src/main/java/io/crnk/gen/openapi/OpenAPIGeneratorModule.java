@@ -63,5 +63,4 @@ public class OpenAPIGeneratorModule implements GeneratorModule {
   public void setConfig(GeneratorModuleConfigBase config) {
     this.config = (OpenAPIGeneratorConfig) config;
   }
-
 }

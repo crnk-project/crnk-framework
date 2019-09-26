@@ -6,18 +6,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
-  private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIGeneratorConfig.class);
 
   private File genDir = null;
+
   private File buildDir = null;
 
   private String templateName = null;
+
   private OpenAPI openAPI = null;
 
   /**
@@ -45,7 +44,7 @@ public class OpenAPIGeneratorConfig extends GeneratorModuleConfigBase {
   /**
    * @return the name of the template used as a base to merge generated openapi into.
    */
-  public String getTemplateName() {
+  private String getTemplateName() {
     return templateName;
   }
 

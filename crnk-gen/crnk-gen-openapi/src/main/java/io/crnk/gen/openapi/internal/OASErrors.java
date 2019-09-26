@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class OASErrors {
+
   public static Map<String, ApiResponse> generateStandardApiErrorResponses() {
     Map<String, ApiResponse> responses = new LinkedHashMap<>();
 

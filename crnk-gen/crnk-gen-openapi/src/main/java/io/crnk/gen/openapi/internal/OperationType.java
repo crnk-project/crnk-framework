@@ -4,6 +4,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
 public enum OperationType {
+
   GET {
     @Override
     public PathItem merge(PathItem pathItem, Operation operation) {

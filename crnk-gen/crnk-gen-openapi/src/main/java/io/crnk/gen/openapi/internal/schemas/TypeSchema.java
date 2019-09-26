@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 public class TypeSchema extends AbstractSchemaGenerator {
 
-  protected TypeSchema(MetaResource metaResource) {
+  TypeSchema(MetaResource metaResource) {
     super(metaResource);
   }
 

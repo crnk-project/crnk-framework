@@ -5,15 +5,17 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 
 abstract class AbstractResponseGenerator {
-  protected final MetaResource metaResource;
-  protected final String prefix;
 
-  protected AbstractResponseGenerator() {
+  protected final MetaResource metaResource;
+
+  private final String prefix;
+
+  AbstractResponseGenerator() {
     this.metaResource = null;
     prefix = "";
   }
 
-  protected AbstractResponseGenerator(MetaResource metaResource) {
+  AbstractResponseGenerator(MetaResource metaResource) {
     this.metaResource = metaResource;
     prefix = metaResource.getResourceType();
   }

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 abstract class AbstractFieldPath {
+
   MetaResource metaResource;
 
   /*
@@ -37,7 +38,7 @@ abstract class AbstractFieldPath {
     return responses;
   }
 
-  Operation generateDefaultOperation() {
+  private Operation generateDefaultOperation() {
     return new Operation().parameters(
         new ArrayList<>(
             Collections.singletonList(new ContentType().parameter())));

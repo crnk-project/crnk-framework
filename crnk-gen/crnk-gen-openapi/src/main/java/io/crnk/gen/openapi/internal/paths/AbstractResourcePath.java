@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 abstract class AbstractResourcePath {
+
   MetaResource metaResource;
 
   /*

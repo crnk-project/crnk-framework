@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResourcePostAttributes extends AbstractSchemaGenerator {
+
   private final Map<String, Schema> attributes;
 
   public ResourcePostAttributes(MetaResource metaResource) {
@@ -20,17 +21,18 @@ public class ResourcePostAttributes extends AbstractSchemaGenerator {
     for (MetaElement child : metaResource.getChildren()) {
       if (child == null) {
         continue;
-      } else if (child instanceof MetaPrimaryKey) {
+      }
+      if (child instanceof MetaPrimaryKey) {
         continue;
-      } else if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
+      }
+      if (((MetaResourceField) child).isPrimaryKeyAttribute()) {
         continue;
-      } else if (child instanceof MetaResourceField) {
-        MetaResourceField mrf = (MetaResourceField) child;
-        Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
-        attributeSchema.nullable(mrf.isNullable());
-        if (((MetaResourceField) child).isInsertable()) {
-          attributes.put(mrf.getName(), attributeSchema);
-        }
+      }
+      MetaResourceField mrf = (MetaResourceField) child;
+      Schema attributeSchema = OASUtils.transformMetaResourceField(mrf.getType());
+      attributeSchema.nullable(mrf.isNullable());
+      if (((MetaResourceField) child).isInsertable()) {
+        attributes.put(mrf.getName(), attributeSchema);
       }
     }
   }
