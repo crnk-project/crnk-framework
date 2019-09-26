@@ -67,7 +67,7 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 
 	@Override
 	public boolean hasEntry(String resourceType) {
-		return this.getEntry(resourceType) != null;
+		return resourcesByType.get(resourceType) != null;
 	}
 
 	@Override
@@ -98,7 +98,9 @@ public class DefaultResourceRegistryPart extends ResourceRegistryPartBase {
 	 * @return registry entry or <i>null</i>
 	 */
 	public RegistryEntry getEntry(String resourceType) {
-		return resourcesByType.get(resourceType);
+		RegistryEntry entry = resourcesByType.get(resourceType);
+		PreconditionUtil.verify(entry != null, "resource of type `%s` not found", resourceType);
+		return entry;
 	}
 
 	/**
